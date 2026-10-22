@@ -1,0 +1,19 @@
+// Package 0x35 (MAIN.CD entry 47, abil/ovl35.yaml): a slot-3 package
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_80016714 = 0x80016714; // type:func
+func_80017758 = 0x80017758; // type:func
+func_8001CD50 = 0x8001CD50; // type:func
+func_800233CC = 0x800233CC; // type:func
+D_800AE620 = 0x800AE620;
+D_8011D030 = 0x8011D030;
+D_8011F758 = 0x8011F758;
+D_8011F75C = 0x8011F75C;
+func_801465C0 = 0x801465C0; // type:func
+func_80146994 = 0x80146994; // type:func
+func_80146C3C = 0x80146C3C; // type:func
+func_80147324 = 0x80147324; // type:func
+func_80148534 = 0x80148534; // type:func
+func_80149350 = 0x80149350; // type:func
+func_801599A4 = 0x801599A4; // type:func
+func_80159B3C = 0x80159B3C; // type:func
+func_80165FA4 = 0x80165FA4; // type:func

@@ -1,0 +1,57 @@
+# Overlay 0x38: licence screen, the first overlay loaded after boot.
+# Payload of MAIN.CD entry 1 (tools/extract_overlays.py -> disc/overlays/main_01.bin),
+# loaded to the mode-overlay slot at 0x800CEDF8 by mode 1 and run by mode 2
+# via 0x800CEDFC (payload + 4).
+name: Overlay 0x38 (licence screen)
+sha1: f0a9e2488c5688300d7218ab734f4b0d116cbe9e
+options:
+  basename: ovl38
+  target_path: disc/overlays/main_01.bin
+  elf_path: build/ovl38/ovl38.elf
+  base_path: .
+  platform: psx
+  compiler: PSYQ
+
+  asm_path: asm/ovl38
+  src_path: src/ovl38
+  build_path: build
+  create_asm_dependencies: True
+
+  ld_script_path: build/ovl38/ovl38.ld
+  ld_dependencies: True
+  ld_bss_is_noload: True
+  ld_align_section_vram_end: False
+
+  find_file_boundaries: False
+
+  o_as_suffix: True
+  use_legacy_include_asm: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs_psyq.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  undefined_funcs_auto_path: build/ovl38/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/ovl38/undefined_syms_auto.txt
+
+  subalign: 2
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - name: ovl38
+    type: code
+    start: 0x0
+    vram: 0x800CEDF8
+    subsegments:
+      - [0x0, rodata, ovl38_id] # u32 overlay ID (0x38); rodata so it links before .text
+      - [0x4, c, ovl38]         # code; main function at 0x800CEDFC
+      - [0x5F0, data, ovl38_data]
+  - [0x5000]

@@ -1,0 +1,32 @@
+// Stage engine (shared by all stage images, base 0x80128158): names from the asset work
+SetScript = 0x8012A828; // type:func
+FaceHelper = 0x8012F214; // type:func
+BeginScene = 0x80147060; // type:func
+EndScene = 0x8014706C; // type:func
+StartFace = 0x80154A74; // type:func
+StartFaceAt = 0x80154AE0; // type:func
+StartFaceScript = 0x80154B4C; // type:func
+StartFaceScriptAt = 0x80154B98; // type:func
+FaceScriptStep = 0x80154C24; // type:func
+FaceSet = 0x80154ED8; // type:func
+FaceLoad = 0x801550FC; // type:func
+ShowAllParts = 0x801552F4; // type:func
+HideAllParts = 0x80155344; // type:func
+NextPhase = 0x80171A1C; // type:func
+SetPhase = 0x80171A34; // type:func
+BumpSub1 = 0x80171A44; // type:func
+BumpSub2 = 0x80171A58; // type:func
+ActionHelper_1AB0 = 0x80171AB0; // type:func
+StepToward = 0x80171CC4; // type:func
+ClearActionHandler = 0x80174650; // type:func
+SetActionHandler = 0x80174684; // type:func
+EngineReady = 0x80174754; // type:func
+AnimHelper = 0x80179D30; // type:func
+SetDisplayFlag20 = 0x80155394; // type:func
+ClearDisplayFlag20 = 0x801553A8; // type:func
+UpdateFlag10Part21 = 0x801553C0; // type:func
+ClearDisplayFlag10 = 0x80155440; // type:func
+RunStateHandler4E = 0x80155458; // type:func
+UpdateWeaponParts = 0x80155150; // type:func
+// SC03_001 only (stage-specific code, docs/draw_code.md):
+DrawChunkedMesh = 0x8017C710; // type:func

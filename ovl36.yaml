@@ -1,0 +1,57 @@
+# Overlay 0x36: the field (the mode while Musashi is in a map).
+# MAIN.CD entry 10, the code block of its PAC package (tools/extract_overlays.py ->
+# disc/overlays/code/ovl36.bin), copied to 0x800CEDF8 by mode 10 / 15 and run every frame by mode 11 through
+# 0x800CEDFC. Its data runs up to the stage image at 0x80128158.
+name: Overlay 0x36 (field)
+sha1: 8e17e02ff8954d07c979449198f7e1645046b353
+options:
+  basename: ovl36
+  target_path: disc/overlays/code/ovl36.bin
+  elf_path: build/ovl36/ovl36.elf
+  base_path: .
+  platform: psx
+  compiler: PSYQ
+
+  asm_path: asm/ovl36
+  src_path: src/ovl36
+  build_path: build
+  create_asm_dependencies: True
+
+  ld_script_path: build/ovl36/ovl36.ld
+  ld_dependencies: True
+  ld_bss_is_noload: True
+  ld_align_section_vram_end: False
+
+  find_file_boundaries: False
+
+  o_as_suffix: True
+  use_legacy_include_asm: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs_psyq.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  undefined_funcs_auto_path: build/ovl36/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/ovl36/undefined_syms_auto.txt
+
+  subalign: 2
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - name: ovl36
+    type: code
+    start: 0x0
+    vram: 0x800CEDF8
+    subsegments:
+      - [0x0, rodata, ovl36_id]     # u32 overlay ID (0x36)
+      - [0x4, c, ovl36]             # entry 0x800CEDFC
+      - [0x4610, data, ovl36_data]
+  - [0x5935C]

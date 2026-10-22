@@ -1,0 +1,5 @@
+// Package 0x1E (MAIN.CD entry 24, abil/ovl1e.yaml): ability 18, (18), the cut timed ability
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_800183E0 = 0x800183E0; // type:func
+func_801655E4 = 0x801655E4; // type:func
+func_80165910 = 0x80165910; // type:func

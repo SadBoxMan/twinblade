@@ -1,0 +1,24 @@
+// Package 0x17 (MAIN.CD entry 17, abil/ovl17.yaml): ability 17, Sleepy
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_800183E0 = 0x800183E0; // type:func
+func_8001CC3C = 0x8001CC3C; // type:func
+D_80078EA4 = 0x80078EA4;
+D_80078EC1 = 0x80078EC1;
+D_80078EC8 = 0x80078EC8;
+D_800AE620 = 0x800AE620;
+func_80128EA8 = 0x80128EA8; // type:func
+func_80128ED8 = 0x80128ED8; // type:func
+func_8012F14C = 0x8012F14C; // type:func
+func_801465C0 = 0x801465C0; // type:func
+func_80146994 = 0x80146994; // type:func
+func_80146A6C = 0x80146A6C; // type:func
+func_80146AB4 = 0x80146AB4; // type:func
+func_80146C3C = 0x80146C3C; // type:func
+func_80147324 = 0x80147324; // type:func
+func_80147364 = 0x80147364; // type:func
+func_801493D0 = 0x801493D0; // type:func
+func_801655E4 = 0x801655E4; // type:func
+func_801657A0 = 0x801657A0; // type:func
+func_80165840 = 0x80165840; // type:func
+func_80165910 = 0x80165910; // type:func
+func_80165A20 = 0x80165A20; // type:func

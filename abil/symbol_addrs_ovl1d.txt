@@ -1,0 +1,8 @@
+// Package 0x1D (MAIN.CD entry 23, abil/ovl1d.yaml): ability 6, (6), the cut heal
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_800183E0 = 0x800183E0; // type:func
+func_8014BB24 = 0x8014BB24; // type:func
+func_801599A4 = 0x801599A4; // type:func
+func_80159B3C = 0x80159B3C; // type:func
+func_80161104 = 0x80161104; // type:func
+func_801655E4 = 0x801655E4; // type:func

@@ -1,0 +1,124 @@
+# What tools/publish/publish_decomp.py may push to github.com/SadBoxMan/twinblade (r155, docs/publishing.md).
+#
+# The GitHub repository holds the DECOMP only. The recompiler, the PC port and every ripped asset stay local.
+# One rule per line: "+ <pattern>  # reason" allows, "- <pattern>  # reason" denies. A path goes out only when it
+# matches an allow rule and no deny rule (deny always wins); anything not allowed stays local.
+# Patterns are paths from the repository root: "dir/" is the whole folder, "*" matches within one path segment,
+# "**" across segments. Paths are compared case-insensitively.
+# To add something, add an allow rule here, run `publish_decomp.py --report` and read what changed before publishing.
+
+# ---- allowed: the matching build ----------------------------------------------------------------------------------
++ README.md                         # front page: the publisher copies tools/publish/README.md here
++ src/                              # matching C sources (EXE, overlays, ability packages, stage engine, stages)
++ include/                          # headers and asm macros the sources use
++ Makefile                          # the matching build
++ .gitignore                        # keeps disc/, asm/, build/ and the toolchains out
++ .gitattributes                    # LF endings GCC 2.7.2's cpp needs
++ slus_007.26.yaml                  # splat config: the main EXE
++ ovl3*.yaml                        # splat configs: overlays 36-3b
++ stage.yaml                        # splat config: the village stage image and the shared engine
++ symbol_addrs*.txt                 # symbol files (EXE, PsyQ, stage, ovl39)
++ reloc_addrs.txt                   # splat relocations
++ undefined_syms_extra.txt          # hand-kept data symbols for the link
++ stg/*.yaml                        # splat configs: the split stage images
++ stg/symbol_addrs_*.txt            # symbol files: the stage engine and each split stage
++ abil/*.yaml                       # splat configs: the 35 ability packages
++ abil/symbol_addrs_*.txt           # symbol files: the ability packages
+
+# ---- allowed: decomp tools (matching, splitting, cloning, census, regression, commit gate, backup) -----------------
++ tools/abil_bulk/*.py              # ability-package bulk pass
++ tools/abil_bulk/*.ps1             # ability-package bulk pass (PowerShell drivers)
++ tools/stage_bulk/*.py             # stage bulk pass
++ tools/stage_bulk/*.ps1            # stage bulk pass (PowerShell driver)
++ tools/hooks/pre-commit            # commit gate
++ tools/hooks/pre-merge-commit      # merge gate
++ tools/publish/*.py                # this publisher
++ tools/publish/manifest.txt        # this file
++ tools/publish/README.md           # the GitHub repository's front page (published as README.md too)
++ tools/abil_clone.py               # clone matched ability functions
++ tools/auto_match.py               # straight-line auto matcher
++ tools/build_old_gcc.sh            # builds the PSX GCC toolchain
++ tools/cmp_all.py                  # compare every function of a file
++ tools/cmp_func.py                 # compare one function
++ tools/code_refs.py                # address constants in stage code (decomp research)
++ tools/decomp_backup.py            # local F: drive backup
++ tools/diff_func.py                # one function's diff against the original
++ tools/draft.py                    # asm and m2c draft for hand work
++ tools/exe_syms.py                 # EXE symbols for linking overlays
++ tools/find_overlays.py            # overlay load addresses (decomp research)
++ tools/gen_ability_ovls.py         # writes abil/*.yaml
++ tools/gen_stage_cfgs.py           # writes stg/*.yaml
++ tools/jtbl_relabel.py             # build step: jump tables
++ tools/psyq_match.py               # PsyQ library signatures
++ tools/put_func.py                 # place matched C
++ tools/regdump.py                  # GCC register allocation dump
++ tools/regress.py                  # regression suite
++ tools/regress_baseline.txt        # SHA-1 and size of each original (hashes only, no game bytes)
++ tools/run_m2c.py                  # m2c driver
++ tools/stage_census.py             # stage code census
++ tools/stage_clone.py              # clone matched stage functions
++ tools/stage_progress.py           # stage status table
++ tools/tmp_commit.py               # temporary-index commits with the gate
++ tools/try.ps1                     # rebuild and diff one function
++ tools/variant_search.py           # source variant search
+
+# ---- allowed: disc set-up tools (code only; they read your own disc into disc/, which is never published) ---------
+# (LuciDin, 22 Oct: published so a clone can rebuild disc/overlays and disc/pac4; `make overlays` calls extract_overlays)
++ tools/extract_disc.py             # ISO9660 extraction of a MODE2/2352 track
++ tools/extract_overlays.py         # MAIN.CD code payloads -> disc/overlays
++ tools/lzss_pac4.py                # PAC type-4 decompression -> disc/pac4
++ tools/stage_chunks.py             # stage images that are not their entry's first chunk
++ tools/asset_scan.py               # LIST.CD archive index reader (lzss_pac4, stage_chunks import it)
++ tools/ability_art.py              # PAC block reader (extract_overlays imports it); holds the 35 ability names
+
+# ---- allowed: decomp docs ------------------------------------------------------------------------------------------
++ docs/decomp_recipes.md            # GCC 2.7.2 recipes
++ docs/decomp_pilot.md              # stage pilot and bulk sweep
++ docs/decomp_census.md             # census of the tail
++ docs/stage_status.md              # matched functions per stage (generated)
++ docs/stage_engine.md              # the shared stage engine split
++ docs/overlays.md                  # MAIN.CD overlays
++ docs/draw_code.md                 # draw routine notes
++ docs/animation_controller.md      # animation controller notes
++ docs/mode_dispatcher.md           # game mode dispatcher notes
++ docs/stage_loader.md              # stage loader notes
++ docs/test_infrastructure.md       # regression suite and commit gate
++ docs/publishing.md                # how this publishing works
+
+# ---- denied: never published, whatever an allow rule says ----------------------------------------------------------
+- pc/                               # PC port
+- Programs/                         # launchers and port programs
+- tools/recomp.py                   # static recompiler (port)
+- tools/launcher.py                 # PC build launcher (port)
+- tools/overlay_configs.py          # LuciDin's local work
+- tools/capture/                    # emulator capture scripts
+- asm/                              # splat output: the game's own code as assembly
+- assets/                           # extracted assets
+- disc/                             # the disc and everything ripped from it
+- build/                            # build output, holds game bytes
+- screens/                          # screenshots
+- Save States BACKUP/               # save states
+- Duckstation Save States/          # save states
+- docs/dialogue/                    # game text
+- docs/scripts/                     # stage scripts with game text
+- docs/debug_menu/                  # debug menu screenshots and scene lists
+- docs/map_review/                  # map screenshots
+- **.json                           # catalogue, progress and ripped tables
+- **.pdf                            # the game manual and generated PDFs
+- **.png                            # images
+- **.jpg                            # images
+- **.jpeg                           # images
+- **.gif                            # images
+- **.bmp                            # images
+- **.tim                            # PS1 images
+- **.wav                            # audio
+- **.vag                            # audio
+- **.sf2                            # audio
+- **.bin                            # binary images and dumps
+- **.exe                            # binaries
+- **.iso                            # disc images
+- **.cue                            # disc images
+- **.sav                            # save states
+- **.glb                            # models
+- **.obj                            # models
+- **.o                              # object files

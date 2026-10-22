@@ -1,0 +1,64 @@
+# Stage image SC03_001 (the village): loaded to 0x80128158 with each stage.
+# 0x80128158-0x8017BEA4 is the shared stage engine: byte-identical in all 134 stage images
+# apart from relocated addresses (tools: docs/stage_engine.md), so engine function addresses
+# hold for every stage. 0x8017BEA4-0x8018D220 is this stage's own code, the rest its data.
+name: Stage image SC03_001 (village) with the shared stage engine
+sha1: f8fd92f59c6871577c61cb626cb9ddb0db5ba884
+options:
+  basename: stage
+  target_path: disc/pac4/SC03_001.bin
+  elf_path: build/stage/stage.elf
+  base_path: .
+  platform: psx
+  compiler: PSYQ
+
+  asm_path: asm/stage
+  src_path: src/stage
+  build_path: build
+  create_asm_dependencies: True
+
+  ld_script_path: build/stage/stage.ld
+  ld_dependencies: True
+  ld_bss_is_noload: True
+  ld_align_section_vram_end: False
+
+  find_file_boundaries: False
+
+  o_as_suffix: True
+  use_legacy_include_asm: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs_psyq.txt
+    - symbol_addrs_stage.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  undefined_funcs_auto_path: build/stage/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/stage/undefined_syms_auto.txt
+
+  subalign: 2
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - name: stage
+    type: code
+    start: 0x0
+    vram: 0x80128158
+    subsegments:
+      - [0x0, c, engine]           # shared stage engine (all stages)
+      - [0x749C, c, engine_8012F5F4]  # its actor state machine onward: a separate source file (docs/stage_engine.md)
+      - [0x13410, c, engine_8013B568]  # -O0 (Makefile O0_FILES): fp frames, nothing in registers
+      - [0x14834, c, engine_8013C98C]  # -O2 again, between the two -O0 files
+      - [0x1CA44, c, engine_80144B9C]  # -O0
+      - [0x1D788, c, engine_801458E0]  # -O2 to the end of the engine
+      - [0x53D4C, c, sc03_001]     # the village's own code
+      - [0x650C8, data, sc03_001_data]
+      - [0xC730C, bin, sc03_001_tail]  # the image length is not a multiple of 4
+  - [0xC730F]

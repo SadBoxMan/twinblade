@@ -1,0 +1,30 @@
+// Stage SC03_012 (stg/sc03_012.yaml): names given by hand first
+// Outside symbols (the EXE and its bss: from the first splat pass, plain names)
+func_800167B8 = 0x800167B8; // type:func
+func_800167F0 = 0x800167F0; // type:func
+func_8001BFD0 = 0x8001BFD0; // type:func
+func_8001C214 = 0x8001C214; // type:func
+func_8001D0E8 = 0x8001D0E8; // type:func
+func_80029124 = 0x80029124; // type:func
+func_800291A0 = 0x800291A0; // type:func
+func_800291B4 = 0x800291B4; // type:func
+func_80029504 = 0x80029504; // type:func
+func_80029514 = 0x80029514; // type:func
+func_8002D4C8 = 0x8002D4C8; // type:func
+D_800A5E60 = 0x800A5E60;
+D_800A6610 = 0x800A6610;
+D_800B99D8 = 0x800B99D8;
+D_800B99DC = 0x800B99DC;
+D_800B9A02 = 0x800B9A02;
+func_800D1724 = 0x800D1724; // type:func
+func_800D1E28 = 0x800D1E28; // type:func
+func_800D1EBC = 0x800D1EBC; // type:func
+D_800D387C = 0x800D387C;
+D_800D3888 = 0x800D3888;
+D_80126950 = 0x80126950;
+D_80126984 = 0x80126984;
+D_80126988 = 0x80126988;
+D_8012698C = 0x8012698C;
+D_80126990 = 0x80126990;
+D_80126994 = 0x80126994;
+D_80126998 = 0x80126998;

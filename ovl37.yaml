@@ -1,0 +1,58 @@
+# Overlay 0x37: the developer debug menu (CHECK LIST).
+# MAIN.CD entry 11, the code block of its PAC package (tools/extract_overlays.py ->
+# disc/overlays/code/ovl37.bin), copied to 0x800CEDF8 by mode 7 and run by mode 8 through 0x800CEE74 (+0x7C).
+# All of its code is -O0 (Makefile O0_FILES).
+name: Overlay 0x37 (debug menu)
+sha1: 80731bac0ddd6b3e354f43b2c179582b12590752
+options:
+  basename: ovl37
+  target_path: disc/overlays/code/ovl37.bin
+  elf_path: build/ovl37/ovl37.elf
+  base_path: .
+  platform: psx
+  compiler: PSYQ
+
+  asm_path: asm/ovl37
+  src_path: src/ovl37
+  build_path: build
+  create_asm_dependencies: True
+
+  ld_script_path: build/ovl37/ovl37.ld
+  ld_dependencies: True
+  ld_bss_is_noload: True
+  ld_align_section_vram_end: False
+
+  find_file_boundaries: False
+
+  o_as_suffix: True
+  use_legacy_include_asm: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs_psyq.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  undefined_funcs_auto_path: build/ovl37/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/ovl37/undefined_syms_auto.txt
+
+  subalign: 2
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - name: ovl37
+    type: code
+    start: 0x0
+    vram: 0x800CEDF8
+    subsegments:
+      - [0x0, rodata, ovl37_id]     # u32 overlay ID (0x37)
+      - {start: 0x4, type: data, name: ovl37_rodata, linker_section_order: .rodata} # rodata: a jump table, strings (data type: spimdisasm names a rodata jump table's cases .L..., which as(1) drops)
+      - [0x7C, c, ovl37]            # entry 0x800CEE74
+      - [0x4400, data, ovl37_data]
+  - [0x5EB0]

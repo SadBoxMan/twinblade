@@ -1,0 +1,56 @@
+# Overlay 0x3B: the trial version's end screen.
+# MAIN.CD entry 8, the code block of its PAC package (tools/extract_overlays.py ->
+# disc/overlays/code/ovl3b.bin), copied to 0x800CEDF8 by mode 13 and run by mode 14 through 0x800CEDFC.
+name: Overlay 0x3B (trial version end screen)
+sha1: dbdee7461e104e01148b2e8ea341117bb9424db2
+options:
+  basename: ovl3b
+  target_path: disc/overlays/code/ovl3b.bin
+  elf_path: build/ovl3b/ovl3b.elf
+  base_path: .
+  platform: psx
+  compiler: PSYQ
+
+  asm_path: asm/ovl3b
+  src_path: src/ovl3b
+  build_path: build
+  create_asm_dependencies: True
+
+  ld_script_path: build/ovl3b/ovl3b.ld
+  ld_dependencies: True
+  ld_bss_is_noload: True
+  ld_align_section_vram_end: False
+
+  find_file_boundaries: False
+
+  o_as_suffix: True
+  use_legacy_include_asm: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs_psyq.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  undefined_funcs_auto_path: build/ovl3b/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/ovl3b/undefined_syms_auto.txt
+
+  subalign: 2
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - name: ovl3b
+    type: code
+    start: 0x0
+    vram: 0x800CEDF8
+    subsegments:
+      - [0x0, rodata, ovl3b_id]    # u32 overlay ID (0x3B)
+      - [0x4, c, ovl3b]            # entry 0x800CEDFC
+      - [0x304, data, ovl3b_data]
+  - [0x348]

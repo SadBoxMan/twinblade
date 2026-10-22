@@ -1,0 +1,3 @@
+// Overlay 0x39 (title, ovl39.yaml): PsyQ 4.0 LIBPRESS VLC.OBJ, identified by tools/psyq_match.py
+DecDCTvlcSize = 0x800D3204; // type:func
+DecDCTvlc = 0x800D3234; // type:func

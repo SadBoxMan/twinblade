@@ -1,0 +1,16 @@
+// Package 0x16 (MAIN.CD entry 16, abil/ovl16.yaml): ability 1, Depress
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_80017758 = 0x80017758; // type:func
+func_80017DC4 = 0x80017DC4; // type:func
+func_80017E68 = 0x80017E68; // type:func
+func_800183E0 = 0x800183E0; // type:func
+D_80078EC1 = 0x80078EC1;
+D_80078EC8 = 0x80078EC8;
+func_800D20C0 = 0x800D20C0; // type:func
+func_800D23D0 = 0x800D23D0; // type:func
+func_8012F14C = 0x8012F14C; // type:func
+func_80146A6C = 0x80146A6C; // type:func
+func_80146C3C = 0x80146C3C; // type:func
+func_801655E4 = 0x801655E4; // type:func
+func_80165910 = 0x80165910; // type:func
+func_80165A20 = 0x80165A20; // type:func

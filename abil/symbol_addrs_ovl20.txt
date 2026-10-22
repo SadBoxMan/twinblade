@@ -1,0 +1,26 @@
+// Package 0x20 (MAIN.CD entry 26, abil/ovl20.yaml): ability 22, Firefly
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_80012F74 = 0x80012F74; // type:func
+func_80013F3C = 0x80013F3C; // type:func
+func_80015978 = 0x80015978; // type:func
+func_800174DC = 0x800174DC; // type:func
+func_800183E0 = 0x800183E0; // type:func
+func_8001CD9C = 0x8001CD9C; // type:func
+func_800233CC = 0x800233CC; // type:func
+D_80078E78 = 0x80078E78;
+D_80078EC1 = 0x80078EC1;
+D_800B99DA = 0x800B99DA;
+func_8012EFB8 = 0x8012EFB8; // type:func
+func_80146578 = 0x80146578; // type:func
+func_801466F0 = 0x801466F0; // type:func
+func_80146CA0 = 0x80146CA0; // type:func
+func_80146E90 = 0x80146E90; // type:func
+func_80146E98 = 0x80146E98; // type:func
+func_80146EC0 = 0x80146EC0; // type:func
+func_80147324 = 0x80147324; // type:func
+func_8014C088 = 0x8014C088; // type:func
+func_8014C168 = 0x8014C168; // type:func
+func_80162CCC = 0x80162CCC; // type:func
+func_801655E4 = 0x801655E4; // type:func
+func_80165910 = 0x80165910; // type:func
+func_80165A20 = 0x80165A20; // type:func

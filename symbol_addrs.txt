@@ -1,0 +1,33 @@
+main = 0x80010178; // type:func
+
+// Disc file system (func_8001971C)
+g_FileTable = 0x80062C24; // size:0x420
+g_FileTableExtra = 0x80063044; // size:0x30
+g_ArchiveFileLoc = 0x800AE830;
+
+// Sound init (func_8002C8F4)
+g_SoundSlot = 0x800A4640; // size:0x78
+g_SoundChan = 0x800A46E8; // size:0x540
+g_SpuCommonAttr = 0x800A4EA4; // size:0x28
+
+// Boot sequence
+SetFrameCallbacks = 0x80010A98; // type:func
+DrawSyncHandler = 0x8001099C; // type:func
+InitGraph = 0x800141F0; // type:func
+InitPad = 0x80018918; // type:func
+InitCdFiles = 0x8001971C; // type:func
+InitSound = 0x8002C8F4; // type:func
+// stage overlay (not main EXE), addresses from the dump_10 stage: AnimStep = 0x8012AAAC, AnimAdvance = 0x8012AA80, AnimStartDefault = 0x8012ACA0, AnimScriptLength = 0x8012ACE0; see docs/animation_controller.md
+// field overlay main_10 (loaded at 0x800CEDF8) and game state, see docs/stage_loader.md: SetNextMap = 0x800D185C, MapStart = 0x800D1D24, CurrentMapId (u16) = 0x800B9A08, MapRecord (36 bytes) = 0x80078E50, MapIdTable = 0x800D34AC, CdReadQueue = 0x80019A24
+// mode dispatcher, see docs/mode_dispatcher.md: Work.mode (u16) = 0x800B99DE, Work.step = 0x800B99E4, Work.done = 0x800B99E6, ModeTable = 0x800629F4 (18 entries), SetMode = 0x80011818, NextMode = 0x80011778, SetState = 0x80011B7C, ModeDispatch = 0x80010B40
+
+// ---- stage code shared by all stages (identical addresses in the 134 stage images), decoded 2026-10-12, see docs/actor_parts_faces.md
+// SetState = 0x8012AD44; // obj->state(+2) = n; obj->counter(+0x34) = 0
+// NextState = 0x8012AD50; // counter = 0; state += 1
+// SetCounter = 0x8012AD64; // IncCounter = 0x8012AD6C;
+// MoveObject = 0x8012AD80; // velocity += acceleration; position += velocity
+// ShowAllParts = 0x801552F4; HideAllParts = 0x80155344; // edit the draw words at 0x800DE2A4
+// UpdateWeaponParts = 0x80155150; // shows or hides parts 21, 22, 24, 25
+// FaceLoad = 0x801550FC; FaceSet = 0x80154ED8; FaceScriptStep = 0x80154C24;
+// StartFace = 0x80154A74; StartFaceAt = 0x80154AE0; StartFaceScript = 0x80154B4C; StartFaceScriptAt = 0x80154B98;
+// main program: PartShow = 0x8001D130; PartHide = 0x8001D150; MoveImage = 0x80059A80; GetFlag = 0x80029178;

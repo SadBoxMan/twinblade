@@ -1,0 +1,6 @@
+/* data symbols the C sources reference that splat did not emit (byte fields of symbolised words); kept by hand */
+D_80078E7D = 0x80078E7D;
+D_80078E7E = 0x80078E7E;
+D_80078E7F = 0x80078E7F;
+
+g_CdStream = 0x800AE6F0;   /* the CD streamer state struct (src/code_800123F0.c: CdStream) */

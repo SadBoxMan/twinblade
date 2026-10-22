@@ -1,0 +1,24 @@
+// Package 0x26 (MAIN.CD entry 32, abil/ovl26.yaml): ability 9, D-Kick
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_800183E0 = 0x800183E0; // type:func
+func_8001C810 = 0x8001C810; // type:func
+D_80078EC1 = 0x80078EC1;
+D_800B99DA = 0x800B99DA;
+D_8011F9D0 = 0x8011F9D0;
+func_8014659C = 0x8014659C; // type:func
+func_801466F0 = 0x801466F0; // type:func
+func_80146CA0 = 0x80146CA0; // type:func
+func_80146DE8 = 0x80146DE8; // type:func
+func_801473EC = 0x801473EC; // type:func
+func_80147460 = 0x80147460; // type:func
+func_801477E8 = 0x801477E8; // type:func
+func_80147A84 = 0x80147A84; // type:func
+func_80148038 = 0x80148038; // type:func
+func_80149374 = 0x80149374; // type:func
+func_80154274 = 0x80154274; // type:func
+func_80155FD4 = 0x80155FD4; // type:func
+func_80156648 = 0x80156648; // type:func
+func_80161104 = 0x80161104; // type:func
+func_80161418 = 0x80161418; // type:func
+func_80162CCC = 0x80162CCC; // type:func
+func_801655E4 = 0x801655E4; // type:func

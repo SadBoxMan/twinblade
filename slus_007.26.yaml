@@ -1,0 +1,71 @@
+name: Brave Fencer Musashi (USA)
+sha1: 143dbb89f34491258bbc27810d0a12ec8b43a8dd
+options:
+  basename: slus_007.26
+  target_path: disc/files/SLUS_007.26
+  elf_path: build/slus_007.26.elf
+  base_path: .
+  platform: psx
+  compiler: PSYQ
+
+  asm_path: asm
+  src_path: src
+  build_path: build
+  create_asm_dependencies: True
+
+  ld_script_path: build/slus_007.26.ld
+  ld_dependencies: True
+
+  find_file_boundaries: True
+  gp_value: 0x80074750
+
+  o_as_suffix: True
+  use_legacy_include_asm: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs_psyq.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  undefined_funcs_auto_path: build/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/undefined_syms_auto.txt
+
+  subalign: 2
+  ld_bss_is_noload: True
+  ld_align_section_vram_end: False
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - name: header
+    type: header
+    start: 0x0
+
+  - name: main
+    type: code
+    start: 0x800
+    vram: 0x80010000
+    # Entry point clears 0x80074750..0x800C7F08
+    bss_size: 0x537B8
+    subsegments:
+      - [0x800, asm, start]   # PsyQ NOHEAP.OBJ startup (__SN_ENTRY_POINT, __main)
+      # Game code, 0x80010178-0x8003A443. Split where the optimisation level
+      # changes (-O0 functions use a frame pointer); real file boundaries
+      # inside the -O2 runs are not known yet.
+      - [0x978, c, main]              # -O0
+      - [0x2BF0, c, code_800123F0]    # -O2
+      - [0x1CC10, c, code_8002C410]   # -O0, single function
+      - [0x1D0BC, c, code_8002C8BC]   # -O2
+      - [0x2AC44, asm, psyq]  # PsyQ libraries from _SpuInit (0x8003A444) on
+      - [0x531DC, data, 531DC] # estimated
+      - { start: 0x64F50, type: bss, vram: 0x80074750 }
+  - name: padding
+    type: databin
+    start: 0x64F50
+  - [0x65000]

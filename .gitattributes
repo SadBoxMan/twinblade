@@ -1,0 +1,10 @@
+# Shell scripts and makefiles must keep LF endings to run under MSYS2 bash/make
+*.sh text eol=lf
+Makefile text eol=lf
+*.mk text eol=lf
+tools/hooks/* text eol=lf
+# GCC 2.7.2's cpp fails on CRLF: the matching build's sources stay LF in every checkout and worktree, whatever
+# core.autocrlf says (Git for Windows sets it true system-wide)
+src/** text eol=lf
+include/** text eol=lf
+*.yaml text eol=lf

@@ -1,0 +1,13 @@
+// Package 0x30 (MAIN.CD entry 42, abil/ovl30.yaml): a slot-3 package
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+D_80078E78 = 0x80078E78;
+D_800D5360 = 0x800D5360;
+func_80146994 = 0x80146994; // type:func
+func_80147324 = 0x80147324; // type:func
+func_80149020 = 0x80149020; // type:func
+func_80154274 = 0x80154274; // type:func
+func_80155FB0 = 0x80155FB0; // type:func
+func_80156648 = 0x80156648; // type:func
+func_801599A4 = 0x801599A4; // type:func
+func_80159B3C = 0x80159B3C; // type:func
+func_80161208 = 0x80161208; // type:func

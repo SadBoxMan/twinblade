@@ -1,0 +1,63 @@
+# Overlay 0x39: the title screen, its menu and the logo movie player.
+# MAIN.CD entry 3 (entry 4 is the same overlay), the code block of its PAC package
+# (tools/extract_overlays.py -> disc/overlays/code/ovl39.bin), copied to the mode-overlay slot 0x800CEDF8 by
+# mode 5 and run by mode 6 through 0x800CEEC8 (+0xD0). 0x1308-0x3020 is -O0 code (Makefile O0_FILES),
+# 0x4408-0x47A0 PsyQ 4.0 LIBPRESS VLC.OBJ (DecDCTvlcSize, DecDCTvlc; hand-written, kept as asm).
+name: Overlay 0x39 (title screen, menu, logo movie player)
+sha1: dd1b32ecf1103c6f7cf1943d25546a3046e17b14
+options:
+  basename: ovl39
+  target_path: disc/overlays/code/ovl39.bin
+  elf_path: build/ovl39/ovl39.elf
+  base_path: .
+  platform: psx
+  compiler: PSYQ
+
+  asm_path: asm/ovl39
+  src_path: src/ovl39
+  build_path: build
+  create_asm_dependencies: True
+
+  ld_script_path: build/ovl39/ovl39.ld
+  ld_dependencies: True
+  ld_bss_is_noload: True
+  ld_align_section_vram_end: False
+
+  find_file_boundaries: False
+
+  o_as_suffix: True
+  use_legacy_include_asm: False
+
+  section_order: [".rodata", ".text", ".data", ".bss"]
+
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs_psyq.txt
+    - symbol_addrs_ovl39.txt
+  reloc_addrs_path:
+    - reloc_addrs.txt
+
+  undefined_funcs_auto_path: build/ovl39/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/ovl39/undefined_syms_auto.txt
+
+  subalign: 2
+
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+segments:
+  - name: ovl39
+    type: code
+    start: 0x0
+    vram: 0x800CEDF8
+    subsegments:
+      - [0x0, rodata, ovl39_id]     # u32 overlay ID (0x39)
+      - [0x4, rodata, ovl39_rodata] # the logo movies' file names, the player's messages
+      - [0xD0, c, ovl39]            # entry 0x800CEEC8
+      - [0x1308, c, ovl39_800D0100] # -O0: fp frames (docs/decomp_recipes.md section 6)
+      - [0x3020, c, ovl39_800D1E18] # -O2 again
+      - [0x4408, asm, libpress_vlc] # PsyQ LIBPRESS VLC.OBJ
+      - [0x47A0, data, ovl39_data]  # from the step table at 0x800D3598
+  - [0x1DC1C]

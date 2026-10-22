@@ -1,0 +1,9 @@
+#!/bin/sh
+# Project Twinblade merge gate (r142): the same check as pre-commit for a merge that makes a merge commit (a stream
+# branch merged into main): tools/regress.py --staged sees every file the merge changes. A fast-forward merge makes no
+# commit and runs no hook: run `make regress` after it. Install and skip: see tools/hooks/pre-commit.
+[ -n "$TWINBLADE_SKIP_REGRESS" ] && { echo "pre-merge-commit: TWINBLADE_SKIP_REGRESS set, regression check skipped"; exit 0; }
+root=$(git rev-parse --show-toplevel) || exit 1
+py="$root/.venv/Scripts/python.exe"
+[ -x "$py" ] || py=python
+exec "$py" -I "$root/tools/regress.py" --staged </dev/null

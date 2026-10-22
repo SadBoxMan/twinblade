@@ -1,0 +1,22 @@
+// Package 0x29 (MAIN.CD entry 35, abil/ovl29.yaml): ability 10, Hurl
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_80015978 = 0x80015978; // type:func
+func_800183E0 = 0x800183E0; // type:func
+D_80078EC8 = 0x80078EC8;
+D_801151D4 = 0x801151D4;
+func_80146CA0 = 0x80146CA0; // type:func
+func_80147078 = 0x80147078; // type:func
+func_80147324 = 0x80147324; // type:func
+func_80149374 = 0x80149374; // type:func
+func_8014C1A0 = 0x8014C1A0; // type:func
+func_8014C4AC = 0x8014C4AC; // type:func
+func_80154150 = 0x80154150; // type:func
+func_80154A74 = 0x80154A74; // type:func
+func_801553A8 = 0x801553A8; // type:func
+func_80156370 = 0x80156370; // type:func
+func_801599A4 = 0x801599A4; // type:func
+func_80159B3C = 0x80159B3C; // type:func
+func_80161104 = 0x80161104; // type:func
+func_80161208 = 0x80161208; // type:func
+func_801655E4 = 0x801655E4; // type:func
+func_80171AB0 = 0x80171AB0; // type:func

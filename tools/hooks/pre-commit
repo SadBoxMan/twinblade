@@ -1,0 +1,15 @@
+#!/bin/sh
+# Project Twinblade commit gate (r142, docs/test_infrastructure.md): runs tools/regress.py --staged, which rebuilds
+# only the images the staged files can change and refuses the commit if any of them is no longer byte-identical.
+# A commit of docs, pc/, the launcher or analysis tools only is never blocked (it exits at once).
+#
+# Install once (every worktree, shared config; each worktree runs its own copy of this file):
+#     git config core.hooksPath tools/hooks
+# Uninstall: git config --unset core.hooksPath
+# Skip once: git commit --no-verify   (or TWINBLADE_SKIP_REGRESS=1); say so in the commit message.
+# The temporary-index commit routine: tools/tmp_commit.py runs this hook too (git commit-tree alone never does).
+[ -n "$TWINBLADE_SKIP_REGRESS" ] && { echo "pre-commit: TWINBLADE_SKIP_REGRESS set, regression check skipped"; exit 0; }
+root=$(git rev-parse --show-toplevel) || exit 1
+py="$root/.venv/Scripts/python.exe"
+[ -x "$py" ] || py=python
+exec "$py" -I "$root/tools/regress.py" --staged </dev/null

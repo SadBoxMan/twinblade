@@ -1,0 +1,37 @@
+// Package 0x33 (MAIN.CD entry 45, abil/ovl33.yaml): a slot-3 package
+// Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
+func_800123F0 = 0x800123F0; // type:func
+func_80012558 = 0x80012558; // type:func
+func_800126C4 = 0x800126C4; // type:func
+func_80012ABC = 0x80012ABC; // type:func
+func_80013694 = 0x80013694; // type:func
+func_800139C8 = 0x800139C8; // type:func
+func_80013F3C = 0x80013F3C; // type:func
+func_80015954 = 0x80015954; // type:func
+func_8001C810 = 0x8001C810; // type:func
+func_8001CC3C = 0x8001CC3C; // type:func
+func_80020F34 = 0x80020F34; // type:func
+func_8012A758 = 0x8012A758; // type:func
+func_80146578 = 0x80146578; // type:func
+func_8014659C = 0x8014659C; // type:func
+func_801466F0 = 0x801466F0; // type:func
+func_80146A6C = 0x80146A6C; // type:func
+func_80146CA0 = 0x80146CA0; // type:func
+func_80146DE8 = 0x80146DE8; // type:func
+func_80146E90 = 0x80146E90; // type:func
+func_80146E98 = 0x80146E98; // type:func
+func_80147324 = 0x80147324; // type:func
+func_80147364 = 0x80147364; // type:func
+func_80149020 = 0x80149020; // type:func
+func_80149374 = 0x80149374; // type:func
+func_8014ACC0 = 0x8014ACC0; // type:func
+func_8014C088 = 0x8014C088; // type:func
+func_801599A4 = 0x801599A4; // type:func
+func_80159B3C = 0x80159B3C; // type:func
+func_80161A00 = 0x80161A00; // type:func
+func_80162CCC = 0x80162CCC; // type:func
+func_80162FC0 = 0x80162FC0; // type:func
+func_80163194 = 0x80163194; // type:func
+func_801632F0 = 0x801632F0; // type:func
+func_80163328 = 0x80163328; // type:func
+func_80163408 = 0x80163408; // type:func
