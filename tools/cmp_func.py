@@ -18,7 +18,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CROSS = os.path.join(ROOT, 'tools', 'toolchain', 'bin', 'mipsel-none-elf-')
 PYTHON = sys.executable
 MASPSX = os.path.join(ROOT, 'tools', 'maspsx', 'maspsx.py')
-TMP = os.path.join('build', 'cmp')
+TMP = os.environ.get('CMP_TMP') or os.path.join('build', 'cmp')   # r144: CMP_TMP, one folder per agent
 
 
 def original_words(func):
@@ -48,8 +48,23 @@ def original_words(func):
 def compiled_words(cfile, func, version, flags):
     os.makedirs(TMP, exist_ok=True)
     cc = os.path.join('tools', 'compilers', f'gcc-{version}-psx')
-    base = os.path.join(TMP, func)
+    # r142: the intermediates carry the process id, so several compiles of the same function at once (parallel
+    # agents, streams sharing a checkout) cannot overwrite each other's; afterwards they are renamed to the plain
+    # build/cmp/<func>.* names for inspection (best effort: the last one wins)
+    plain = os.path.join(TMP, func)
+    base = f'{plain}.{os.getpid()}'
     run = lambda *a, **k: subprocess.run(*a, check=True, cwd=ROOT, **k)
+    try:
+        return _compiled_words(cfile, func, cc, flags, base, run)
+    finally:
+        for ext in ('.i', '.s', '.m.s', '.o'):
+            try:
+                os.replace(os.path.join(ROOT, base + ext), os.path.join(ROOT, plain + ext))
+            except OSError:
+                pass
+
+
+def _compiled_words(cfile, func, cc, flags, base, run):
     with open(os.path.join(ROOT, base + '.i'), 'w') as f:
         run([os.path.join(ROOT, cc, 'cpp.exe'), '-P', '-undef', '-Iinclude', os.path.relpath(cfile, ROOT)], stdout=f)
     run([os.path.join(ROOT, cc, 'cc1.exe'), '-quiet', '-G0', '-mips1', '-mcpu=3000',

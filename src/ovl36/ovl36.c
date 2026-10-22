@@ -546,7 +546,7 @@ extern u8 D_800C9158[], D_800C9310[], D_800C83A0[], D_800C8058[], D_800CADE8[], 
 extern u8 D_800C9140[];
 
 extern s16 func_800D128C(s32 k, s16 v);
-typedef struct { u8 pad0[0x34]; s16 unk34; } FieldStats;
+typedef struct { u8 pad0[0x34]; s16 unk34; u8 unk36; u8 unk37; } FieldStats;
 extern FieldStats D_80078E78;
 typedef struct { u8 unk0; u8 unk1; u8 pad2[10]; } FieldItemDef;
 extern FieldItemDef D_8010EDF0[];
@@ -585,6 +585,75 @@ typedef struct { u8 pad0[0x1C]; void (*fn)(void); } FieldDestFn;
 typedef struct { s32 (*fn[3])(FieldMapS *m); } FieldFn3S;
 extern FieldFn3S D_801141C8;
 extern u8 D_80126BA6;
+
+typedef struct { s32 w[9]; } FieldBlk24;
+typedef struct { s32 next, unk4, cur; u8 padC[0xA]; u8 unk16; u8 pad17[2]; u8 unk19; } FieldMapX;
+
+extern void func_80018FC8(void);
+extern u16 D_800B9A02;
+extern u16 D_80115114;
+extern s16 D_80115124;
+extern s16 D_8011512A;
+extern u8 *D_801151C8;
+extern u8 *D_801151CC;
+extern GsOT D_800A6518[];
+extern u8 D_8007BA70[];
+extern u8 D_800856B0[];
+typedef struct { s32 v; } S32R;
+extern S32R D_80115168[];
+
+extern s32 D_80072C78;
+/* the field's package table: the archive file and a word per package */
+typedef struct { s32 file; s32 unk4; } FieldPkg;
+extern FieldPkg D_800D3764[];
+
+extern OtInfo D_800AE7BC[];
+typedef struct { unsigned addr : 24; unsigned len : 8; } OtTag;
+typedef struct {
+    u32 tag;
+    u32 code;
+    s16 x, y;
+    u8 u, v;
+    u16 clut;
+    s16 w, h;
+} FieldSprt;
+
+typedef struct {
+    u32 tag;
+    u32 code;
+    s16 x0, y0;
+    u8 u0, v0;
+    u16 clut;
+    s16 x1, y1;
+    u8 u1, v1;
+    u16 tpage;
+    s16 x2, y2;
+    u8 u2, v2;
+    u16 pad1E;
+    s16 x3, y3;
+    u8 u3, v3;
+    u16 pad26;
+} FieldFt4;
+
+typedef struct {
+    u32 tag;
+    u32 c0;
+    s16 x0, y0;
+    u32 c1;
+    s16 x1, y1;
+    u32 c2;
+    s16 x2, y2;
+    u32 c3;
+    s16 x3, y3;
+} FieldG4;
+typedef struct { u32 tag; u32 code; } FieldTPage;
+#define ADDPRIM2(p) \
+    ((OtTag *)(p))->addr = ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr; \
+    ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr = (u32)(p)
+
+extern s32 D_800A2B70;
+extern u32 D_800BA0FC;
+extern s32 D_80114EA0;
 
 INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800CFAD0);
 
@@ -717,7 +786,57 @@ void func_800D02C0(s32 (*f)(s32)) {
     D_800D375C = f;
 }
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D02D0);
+/* a package number (1 to 30) to its slot and its archive file loaded; 1 when nothing is to load */
+s32 func_800D02D0(s32 n) {
+    s32 r;
+    s32 *p;
+    s32 t;
+    switch (n) {
+    case 5: n = 1; break;
+    case 1: n = 3; break;
+    case 8: n = 2; break;
+    case 7: n = 0; break;
+    case 13: n = 4; break;
+    case 17: n = 5; break;
+    case 12: n = 6; break;
+    case 3: n = 7; break;
+    case 2: n = 9; break;
+    case 4: n = 0xA; break;
+    case 6: n = 0xB; break;
+    case 18: n = 0xC; break;
+    case 15: n = 8; break;
+    case 22: n = 0xD; break;
+    case 24: n = 0xE; break;
+    case 21: n = 0xF; break;
+    case 20: n = 0x10; break;
+    case 19: n = 0x11; break;
+    case 26: n = 0x12; break;
+    case 9: n = 0x13; break;
+    case 11: n = 0x14; break;
+    case 16: n = 0x15; break;
+    case 10: n = 0x16; break;
+    case 23: n = 0x17; break;
+    case 25: n = 0x18; break;
+    case 27: n = 0x19; break;
+    case 28: n = 0x1A; break;
+    case 29: n = 0x1B; break;
+    case 30: n = 0x1C; break;
+    default: n = -1; break;
+    }
+    t = D_800D3764[n].unk4;
+    p = &D_800C7C60;
+    D_800C7C64[0] = &D_800A2E20;
+    *p = t;
+    if (n >= 0) {
+        r = func_8001ABBC(0, 0, g_ArchiveFileLoc[D_800D3764[n].file], D_80072C78, (s32)p);
+    } else {
+        r = 1;
+    }
+    if (r != 0) {
+        func_8001B384();
+    }
+    return r;
+}
 
 s32 func_800D0488(s32 a) {
     s32 *p;
@@ -801,7 +920,176 @@ void func_800D06CC(void) {
     D_80127500 = 3;
 }
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D06E8);
+/* a per-frame sound state pair. D_80127500: in maps 0x1010-0x1011, 0x1077-0x1078 and 0x1094-0x1095, unless
+   func_80029504() is in 0x460-0x491 or 0x64-0x81, sound 0x518 or 0x517 is started by D_80078E78.unk37 (1, or 3-4)
+   and stopped (0xD) after 0x97 frames; in maps 0x3014 / 0x301C, 0x683 starts or stops with unk37 4 / 0.
+   D_801151F8: picks the map's track id (D_80114EA0 when it differs from D_800A654C), waits 0x3C frames after
+   func_8002D4C8(1, 2), then starts it */
+void func_800D06E8(void) {
+    FieldStats *st = &D_80078E78;
+    s32 k;
+    u32 t;
+    s32 m;
+    u8 c;
+
+    switch (D_80127500) {
+    case 0:
+        switch (D_800B9A08) {
+        case 0x1010:
+        case 0x1011:
+        case 0x1077:
+        case 0x1078:
+        case 0x1094:
+        case 0x1095:
+            t = func_80029504();
+            if (t - 0x460 < 0x32) {
+                m = 0;
+            } else {
+                m = 1;
+                if (t - 0x64 < 0x1E) {
+                    m = 0;
+                }
+            }
+            if (!m) {
+                D_800A2B70 = 0;
+            }
+            k = 0;
+            c = st->unk37;
+            if (c == 1) {
+                k = 1;
+            } else if (c == 3 || c == 4) {
+                k = 2;
+            }
+            if (D_800A2B70 != 0) {
+                D_80127500++;
+            } else if (m && k != D_8011529C) {
+                D_8011529C = k;
+                if (D_80127050 != 0) {
+                    D_80127050 = 0;
+                } else {
+                    switch (k) {
+                    case 1:
+                        func_8002D4C8(0x518, 0);
+                        D_800A2B70 = k;
+                        D_800BA0FC = 0;
+                        D_80127500++;
+                        break;
+                    case 2:
+                        func_8002D4C8(0x517, 0);
+                        D_800A2B70 = k;
+                        D_800BA0FC = 0;
+                        D_80127500++;
+                        break;
+                    }
+                }
+            }
+            break;
+        case 0x3014:
+        case 0x301C:
+            if (st->unk37 != D_8011529C) {
+                D_8011529C = st->unk37;
+                if (st->unk37 == 4) {
+                    func_8002D4C8(0x683, 0);
+                } else if (st->unk37 == 0) {
+                    func_8002D4C8(0xD, 0x683);
+                }
+            }
+            break;
+        }
+        break;
+    case 1:
+        if (++D_800BA0FC >= 0x97) {
+            switch (D_800A2B70) {
+            case 1:
+                func_8002D4C8(0xD, 0x518);
+                break;
+            case 2:
+                func_8002D4C8(0xD, 0x517);
+                break;
+            }
+            D_800A2B70 = 0;
+            D_80127500 = 0;
+        }
+        break;
+    case 2:
+        if (--D_801201F0 == 0) {
+            func_8002D4C8(0xD, 0x683);
+            D_80127500 = 0;
+        }
+        break;
+    }
+    switch (D_801151F8) {
+    case 0:
+        switch (D_800B9A08) {
+        case 0x1052:
+        case 0x1053:
+            m = 0x27;
+            break;
+        case 0x1010:
+        case 0x1011:
+        case 0x1077:
+        case 0x1078:
+        case 0x1094:
+        case 0x1095:
+            t = func_80029504();
+            if (t - 0x460 < 0x32) {
+                m = 0x89;
+            } else if (t - 0x384 < 0x6E) {
+                m = 0x65;
+            } else if (t - 0x64 < 0x1E) {
+                m = 0x28;
+            } else if (st->unk36 == 1) {
+                m = 0xF;
+            } else {
+                m = 0x10;
+            }
+            break;
+        case 0x3014:
+        case 0x301C:
+        case 0x301E:
+        case 0x3023:
+            m = 0xA;
+            if (st->unk37 == 4) {
+                m = 0x3C;
+            }
+            break;
+        }
+        if (m != D_800A654C) {
+            D_80114EA0 = m;
+            D_80126AE8 = 0x3C;
+            D_800A654C = 0;
+            D_801151F8++;
+            func_8002D4C8(1, 2);
+        }
+        break;
+    case 1:
+        if (--D_80126AE8 == 0) {
+            D_801151F8++;
+        }
+        break;
+    case 2:
+        switch (D_80114EA0) {
+        case 0xF:
+            func_8001AAA0(0xF);
+            break;
+        case 0x10:
+            func_8001AAA0(0x10);
+            break;
+        case 0xA:
+            func_8002D4C8(0x10C, 0);
+            break;
+        case 0x3C:
+            func_8002D4C8(0x13B, 0);
+            break;
+        }
+        D_801151F8 = 0;
+        D_800A654C = D_80114EA0;
+        break;
+    case 3:
+    case 4:
+        break;
+    }
+}
 
 void func_800D0C48(u16 a) {
     func_8002D4C8(1, a);
@@ -966,7 +1254,18 @@ void func_800D1744(s32 a) {
     D_800AE6AC = a;
 }
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D1754);
+void func_800D1754(void) {
+    s32 t;
+    s32 *m = &D_800AE6A8.next;
+    if (func_800D17B8(D_800AE6B0) == 0) {
+        t = m[0];
+        if (t != 0) {
+            m[0] = 0;
+            D_800AE6B0 = t;
+            func_800D17B8(t);
+        }
+    }
+}
 
 s32 func_800D17B8(s32 a) {
     FieldDest *d = (FieldDest *)(a & 0x80FFFFFF);
@@ -987,7 +1286,16 @@ s32 func_800D17B8(s32 a) {
     return 0;
 }
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D185C);
+/* the map record copied to D_80078E50 and linked into the field map (r150: byte 3 read before the link store) */
+void func_800D185C(void *p) {
+    FieldMapX *m = (FieldMapX *)&D_800AE6A8;
+    u8 b3;
+    *(FieldBlk24 *)&D_80078E50 = *(FieldBlk24 *)p;
+    m->unk16 = ((u8 *)p)[2];
+    b3 = ((u8 *)p)[3];
+    m->cur = (s32)p | (m->cur & 0x1000000);
+    m->unk19 = b3;
+}
 
 void func_800D18DC(void) {
     FieldFn3 t = D_801141BC;
@@ -1222,7 +1530,15 @@ void func_800D2318(FieldDir *p) {
     p->unk1A = 0;
 }
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D23D0);
+void func_800D23D0(FieldAngle *v) {
+    s16 x = v->vx;
+    s32 z = v->vz;
+    s32 y; y = v->vy;
+
+    v->vx = -ratan2(y, SquareRoot0(x * x + z * z));
+    v->vy = ratan2(x, z);
+    v->vz = 0;
+}
 
 void func_800D2460(void) {
 }
@@ -1233,7 +1549,37 @@ void func_800D2468(void) {
     D_8011DB20 = 0;
 }
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D24A0);
+/* the stage mode block reset for a new map: the frame's OT descriptor copied from the other frame's, the mode fields
+   cleared, the two sound buffers picked by frame, the two word arrays at +0x58 and +0x78 zeroed */
+void func_800D24A0(s16 mode) {
+    s32 *src;
+    s32 *dst;
+    s16 j;
+    u8 *p;
+    func_80018FC8();
+    DrawSync(0);
+    j = 0;
+    src = (s32 *)&D_800A6518[D_800B9A02 ^ 1];
+    dst = (s32 *)&D_800A6518[D_800B9A02];
+    do {
+        *dst++ = *src++;
+        j++;
+    } while ((u16)j < 5);
+    j = 0;
+    *(s16 *)&D_80115110[2] = 0;
+    D_8011512A = 0;
+    D_80115124 = 0;
+    *(s16 *)D_80115110 = mode;
+    D_800B9A13 = mode + 1;
+    D_80115114 = D_800B9A02;
+    D_801151C8 = D_8007BA70 + D_800B9A02 * 0x13880;
+    D_801151CC = D_800856B0 + D_800B9A02 * 0x13880;
+    for (; j < 8; j++) {
+        p = D_80115110 + j * 4; *(s32 *)(p + 0x78) = 0;
+        D_80115168[j].v = 0;
+    }
+    func_8002D4C8(0x14, 0);
+}
 
 void func_800D25FC(void) {
     D_8011DB24();
@@ -1244,13 +1590,167 @@ void func_800D2624(void) {
     func_8002D4C8(0x15, 0);
 }
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D2650);
+/* the field's text line: one 8x8 sprite per glyph (two bytes: u, v) into OT slot 2 of the overlay OT; codes 0x3870-0x3872
+   are spaces (7, 4, 2 pixels), 0x1850 / 0x1858 are glyphs drawn 4 right and 7 up; a byte >= 0x80 ends the line */
+FieldSprt *func_800D2650(FieldSprt *p, u8 *s, s16 x, s16 y, s16 clut, s32 rgb) {
+    while (*s < 0x80) {
+        switch (*(s16 *)s) {
+        case 0x1850:
+        case 0x1858:
+            p->x = x + 4;
+            p->y = y - 7;
+            break;
+        case 0x3870:
+            x += 7;
+            s += 2;
+            continue;
+        case 0x3871:
+            x += 4;
+            s += 2;
+            continue;
+        case 0x3872:
+            x += 2;
+            s += 2;
+            continue;
+        default:
+            p->x = x;
+            x += 7;
+            p->y = y;
+            break;
+        }
+        p->tag = 0x04000000;
+        p->code = rgb | 0x64000000;
+        p->u = *s++;
+        p->v = *s++;
+        p->clut = ((clut + 0x100) << 6) | 0x16;
+        p->w = 8;
+        p->h = 8;
+        ((OtTag *)p)->addr = ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr;
+        ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr = (u32)p;
+        p++;
+    }
+    return p;
+}
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D27DC);
+/* a row of n textured quads from a u16 list (x, y, w, h, u, v, and with flags & 2 clut, tpage, du, dv; otherwise the\n   default page 0x4056 / 0x15 with 8x8 cells, one pixel narrower for i & 7 in 4..5 and shorter in 6..7); flags & 1 dims
+   them; each goes into OT slot 2 */
+FieldFt4 *func_800D27DC(u16 flags, FieldFt4 *p, u16 *d, s16 n, u16 dx) {
+    s32 code;
+    s16 i;
+    s16 x, y, w, h;
+    u16 u, v;
+    u16 du, dv;
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D29F8);
+    code = 0x2C808080;
+    if (flags & 1) {
+        code = 0x2C585858;
+    }
+    for (i = 0; i < n; i++) {
+        p->tag = 0x09000000;
+        p->code = code;
+        p->x0 = p->x2 = x = *d++ + dx;
+        p->y0 = p->y1 = y = *d++;
+        w = *d++;
+        h = *d++;
+        p->u0 = p->u2 = u = *d++;
+        p->v0 = p->v1 = v = *d++;
+        if (!(flags & 2)) {
+            dv = 8;
+            du = 8;
+            p->clut = 0x4056;
+            p->tpage = 0x15;
+            if ((i & 7) < 4) {
+            } else if ((i & 7) < 6) {
+                du = 7;
+            } else if ((i & 7) < 8) {
+                dv = 7;
+            }
+        } else {
+            p->clut = *d++;
+            p->tpage = *d++;
+            du = *d++;
+            dv = *d++;
+        }
+        p->x1 = p->x3 = x + w;
+        p->y2 = p->y3 = y + h;
+        p->u1 = p->u3 = u + du;
+        p->v2 = p->v3 = v + dv;
+        ((OtTag *)p)->addr = ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr;
+        ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr = (u32)p;
+        p++;
+    }
+    return p;
+}
 
-INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D2CA8);
+/* a list of bars: a DR_TPAGE, then for each of n records (two colours, x, y, w, h; 0x10 bytes) a gouraud quad whose
+   other two corners take the colours with the blue byte 0x28 lower / higher; the selected pair (i >> 1 == sel) and rows 8
+   on are opaque, the other odd rows semi-transparent, the other even rows skipped; a closing DR_TPAGE */
+u8 *func_800D29F8(s16 sel, u8 *p, u8 *d, s16 n, u16 dx) {
+    s16 i;
+    s32 semi;
+    u32 c;
+    u16 x;
+    u16 y;
+    u16 w, h;
+
+    ((OtTag *)p)->len = 1;
+    ((FieldTPage *)p)->code = 0xE1000000;
+    ADDPRIM2(p);
+    p += 8;
+    for (i = 0; i < n; i++) {
+        if ((i >> 1) == sel || i >= 8) {
+            semi = 0;
+        } else {
+            semi = 2;
+            if (!(i & 1)) {
+                d += 0x10;
+                continue;
+            }
+        }
+        ((FieldG4 *)p)->tag = 0x08000000;
+        ((FieldG4 *)p)->c0 = ((semi | 0x38) << 24) | *(u32 *)d;
+        d += 4;
+        ((FieldG4 *)p)->c1 = ((FieldG4 *)p)->c0 - 0x280000;
+        c = *(u32 *)d;
+        d += 4;
+        ((FieldG4 *)p)->c3 = c;
+        c += 0x280000;
+        ((FieldG4 *)p)->c2 = c;
+        x = *(u16 *)d + dx;
+        d += 2;
+        ((FieldG4 *)p)->x0 = ((FieldG4 *)p)->x2 = x;
+        y = *(u16 *)d;
+        d += 2;
+        ((FieldG4 *)p)->y0 = ((FieldG4 *)p)->y1 = y;
+        w = *(u16 *)d;
+        d += 2;
+        h = *(u16 *)d;
+        d += 2;
+        ((FieldG4 *)p)->x1 = ((FieldG4 *)p)->x3 = x + w;
+        ((FieldG4 *)p)->y2 = ((FieldG4 *)p)->y3 = y + h;
+        ADDPRIM2(p);
+        p += sizeof(FieldG4);
+    }
+    ((OtTag *)p)->len = 1;
+    ((FieldTPage *)p)->code = 0xE1000200;
+    ADDPRIM2(p);
+    return p + 8;
+}
+
+s32 func_800D2CA8(s32 n, s32 shift) {
+    s32 r = 0;
+    s32 s = 0;
+    s32 m = n;
+
+    while (m >= 10) {
+        n /= 10;
+        r |= (m - ((n << 1) + (n << 3))) << s;
+        m = n;
+        s += 4;
+    }
+    r = r | (m << s);
+    return r << shift;
+}
 
 INCLUDE_ASM("asm/ovl36/nonmatchings/ovl36", func_800D2D10);
 

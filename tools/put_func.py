@@ -55,6 +55,12 @@ def chunks(decl):
     """top-level declarations: text up to a ';' that is not inside braces (a struct typedef stays in one piece)"""
     out, cur, depth = [], '', 0
     for line in decl.splitlines():
+        if depth == 0 and line.lstrip().startswith('#'):   # a #define has no ';': its own chunk (r142: it used to
+            if cur.strip():                                # swallow the typedef after it, re-added as a duplicate)
+                out.append(cur.rstrip())
+                cur = ''
+            out.append(line.rstrip())
+            continue
         cur += line + '\n'
         code = re.sub(r'/\*.*?\*/', '', line).rstrip()   # a trailing comment after the ';' still ends the declaration
         depth += code.count('{') - code.count('}')
@@ -63,6 +69,90 @@ def chunks(decl):
             cur = ''
     if cur.strip():
         out.append(cur.rstrip())
+    return out
+
+
+INCLUDE = re.compile(r'^#include\s+["<][^">]+[">][^\n]*$', re.M)
+
+
+def includes(text):
+    """the draft's #include lines (split() leaves them out: GTE drafts need theirs, include/gte.h)"""
+    return INCLUDE.findall(text)
+
+
+def add_includes(t, incs):
+    """the file with the #include lines it lacks, after its last #include (r142)"""
+    have = {norm(x) for x in INCLUDE.findall(t)}
+    new = []
+    for x in incs:
+        if norm(x) not in have and x not in new:
+            new.append(x)
+    if not new:
+        return t
+    last = list(INCLUDE.finditer(t))
+    k = last[-1].end() if last else 0
+    return t[:k] + ('\n' if k else '') + '\n'.join(new) + ('' if k else '\n') + t[k:]
+
+
+def strip_comments(c):
+    c = re.sub(r'/\*.*?\*/', '', c, flags=re.S)
+    c = re.sub(r'//[^\n]*', '', c)
+    return '\n'.join(l.rstrip() for l in c.splitlines() if l.strip())
+
+
+def defined_names(c):
+    """the names a declaration chunk declares: typedef names, struct/union/enum tags, an extern's or a prototype's
+    symbol"""
+    c = strip_comments(c).strip()
+    m = re.match(r'#\s*define\s+(\w+)', c)
+    if m:
+        return {'#' + m[1]}
+    names = set(re.findall(r'\b(?:struct|union|enum)\s+(\w+)\s*\{', c))
+    if c.startswith('typedef'):
+        tail = c[c.rindex('}') + 1:] if '}' in c else re.sub(r'^typedef\s+', '', c)
+        fp = re.search(r'\(\s*\*\s*(\w+)\s*\)', tail)            # typedef void (*Fn)(...);
+        if fp:
+            names.add(fp[1])
+        elif '}' in c:
+            names |= set(re.findall(r'(\w+)\s*(?:\[[^\]]*\])*\s*[,;]', tail))
+        else:
+            m = re.search(r'(\w+)\s*(?:\[[^\]]*\])*\s*;$', tail)
+            if m:
+                names.add(m[1])
+    elif '{' not in c:
+        m = re.search(r'(\w+)\s*(?:\[[^\]]*\])*\s*(?:\([^;]*\))?\s*;$', c)
+        if m:
+            names.add(m[1])
+    return names
+
+
+def declared_in(name, t):
+    """does the file already declare or define this name (as a typedef, tag, variable or function)?"""
+    if name.startswith('#'):   # a macro
+        return bool(re.search(rf'^#\s*define\s+{re.escape(name[1:])}\b', t, re.M))
+    n = re.escape(name)
+    t = strip_comments(t)
+    return bool(re.search(rf'\btypedef\b[^;{{}}]*\b{n}\s*(?:\[[^\]]*\])*\s*;', t)
+                or re.search(rf'\}}\s*(?:\*?\s*\w+\s*,\s*)*\*?\s*{n}\s*[,;]', t)
+                or re.search(rf'\(\s*\*\s*{n}\s*\)', t)
+                or re.search(rf'\b(?:struct|union|enum)\s+{n}\s*\{{', t)
+                or re.search(rf'^[A-Za-z_][^\n;{{}}#]*\b{n}\s*(?:\[[^\]]*\])*\s*(?:\([^;{{}}]*\))?\s*(?:=[^;]*)?;', t, re.M)
+                or re.search(rf'^[A-Za-z_][^\n;{{}}]*\b{n}\s*\([^;{{}}]*\)\s*\{{', t, re.M))
+
+
+def missing_decls(cs, t):
+    """the declaration chunks the file lacks (r142): comments do not count, and a chunk whose names the file already
+    declares is skipped whole (no duplicate typedef, the file's own extern wins)"""
+    tn = norm(strip_comments(t))
+    out = []
+    for c in cs:
+        cc = strip_comments(c)
+        if not cc.strip() or norm(cc) in tn:
+            continue
+        names = defined_names(cc)
+        if names and all(declared_in(x, t) for x in names):
+            continue
+        out.append(cc)
     return out
 
 
@@ -95,14 +185,21 @@ def main():
     backup = dict(files)
     placed = []
     for path in sys.argv[1:]:
-        decl, funcs = split(open(path, encoding='utf-8').read())
+        text = open(path, encoding='utf-8').read()
+        decl, funcs = split(text)
         if not funcs:
             sys.exit(f'{path}: no func_XXXXXXXX function found')
+        # r142: a static helper of the draft with no INCLUDE_ASM anywhere goes in with the declarations
+        has_asm = lambda name: any(re.search(rf'INCLUDE_ASM\("[^"]+",\s*{name}\);', t) for t in files.values())
+        helpers = [b for name, b in funcs.items() if not has_asm(name) and b.lstrip().startswith('static')]
         for name, body in funcs.items():
+            if body in helpers:
+                continue
             pat = re.compile(rf'INCLUDE_ASM\("[^"]+",\s*{name}\);')
             for f, t in files.items():
                 if pat.search(t):
-                    new_decl = [c for c in chunks(decl) if norm(c) not in norm(t)]
+                    t = add_includes(t, includes(text))
+                    new_decl = missing_decls(chunks(decl), t) + [h for h in helpers if h not in t]
                     if new_decl:                               # before the first INCLUDE_ASM, which may be this function's own
                         t = t.replace('\nINCLUDE_ASM', '\n' + '\n'.join(new_decl) + '\n\nINCLUDE_ASM', 1)
                     t = pat.sub(lambda m: body, t, count=1)

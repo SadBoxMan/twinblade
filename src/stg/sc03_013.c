@@ -1,4 +1,5 @@
 #include "common.h"
+#include "gte.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 void func_sc03_013_8017BE9C(void) {
@@ -95,7 +96,7 @@ extern s16 D_8012697A;
 extern void func_8012A018();
 extern void func_8012A094();
 extern s32 func_sc03_013_8017ED9C();
-extern void func_sc03_013_8017ECD0();
+extern s32 func_sc03_013_8017ECD0();
 extern void (*D_sc03_013_80184F18[])();
 extern s32 func_sc03_013_8017F7E8();
 extern void func_8012C098();
@@ -112,7 +113,7 @@ extern u8 D_sc03_013_801A45A8;
 extern s32 func_8012C354();
 extern s32 func_80029504();
 extern void func_8012C218();
-extern void func_80143970();
+extern s32 func_80143970();
 extern void func_8012B23C();
 extern u8 D_sc03_013_80184FB0;
 extern void func_80178B18();
@@ -190,6 +191,38 @@ void func_sc03_013_8017C6F4(s32 arg0, s32 arg1);
 extern void func_801542A4();
 extern void func_80147324();
 extern void func_80171A80();
+
+extern s32 D_sc03_013_80184E84[];
+extern u8 D_sc03_013_80184E7C[];
+extern void func_80139A68();
+extern u8 D_sc03_013_80184D2C[];
+extern void func_sc03_013_8017E6F4();
+extern void func_8002D59C();
+extern u8 D_sc03_013_8019DFB8;
+extern u8 D_sc03_013_80184E90[];
+extern s32 func_8012C1B8();
+extern void func_8012CAE4();
+extern void func_8001C214();
+
+typedef struct { s16 vx, vy, vz, pad; } SV;
+typedef struct { u16 v[6]; } U12;
+typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
+typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
+typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
+typedef struct { u16 x, y, z, pad; } UV4;
+typedef struct { u8 r, g, b, cd; } CV4;
+typedef struct { UV4 p0; UV4 p1; CV4 c0; CV4 c1; s32 code; } LineArg;
+typedef struct { s16 m[3][3]; s32 t[3]; } WMtx;
+typedef struct { s16 x, y, z, pad; } SV4;
+typedef struct { SV4 p[4]; CV4 c[4]; s32 code; } QuadArg;
+typedef struct { u16 active; s16 y; s16 dy; s16 ang; s32 x; s32 z; } Pt16;
+typedef struct { s16 a, b, c, g; u8 d, e; s16 f; Pt16 pts[16]; } PtSys;
+extern s32 func_sc03_013_801803E8();
+extern s32 func_sc03_013_8018032C();
+
+typedef struct { s32 x, y, z, pad; } V4;
+extern s32 func_80012C6C();
+extern s32 func_80012ABC();
 
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017C004);
 
@@ -572,7 +605,35 @@ void func_sc03_013_8017E388(s32 arg0) {
 
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017E3C4);
 
-INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017E528);
+void func_sc03_013_8017E528(s32 arg0, s32 arg1, s32 arg2) {
+    WMtx m;
+    SV a;
+    u16 o[4];
+    SV r;
+
+    AF(arg0, s32, 8) = (s16) func_80012C6C(AF(arg0, s16, 8), AF(arg0, s16, 0xC), 4);
+    AF(arg0, s32, 0x10) = (s16) func_80012C6C(AF(arg0, s16, 0x10), AF(arg0, s16, 0x14), 4);
+    AF(arg0, s16, 0x18) = func_80012ABC(AF(arg0, s16, 0x18), AF(arg0, s16, 0x20), 4);
+    AF(arg0, s16, 0x1A) = func_80012ABC(AF(arg0, s16, 0x1A), AF(arg0, s16, 0x22), 4);
+    AF(arg0, s16, 0x1C) = func_80012ABC(AF(arg0, s16, 0x1C), AF(arg0, s16, 0x24), 4);
+    AF(arg0, s16, 0x28) = func_80012C6C(AF(arg0, s16, 0x28), AF(arg0, s16, 0x2E), 0x10);
+    AF(arg0, s16, 0x2A) = func_80012C6C(AF(arg0, s16, 0x2A), AF(arg0, s16, 0x30), 0x10);
+    AF(arg0, s16, 0x2C) = func_80012C6C(AF(arg0, s16, 0x2C), AF(arg0, s16, 0x32), 0x10);
+    AF(arg0, s32, 0x48) = AF(arg0, s16, 0x28) + AF(arg2, s16, 0);
+    AF(arg0, s32, 0x4C) = AF(arg0, s16, 0x2A) + AF(arg2, s16, 2);
+    AF(arg0, s32, 0x50) = AF(arg0, s16, 0x2C) + AF(arg2, s16, 4);
+    r.vx = AF(arg0, s16, 0x18);
+    r.vy = AF(arg0, s16, 0x1A) + arg1;
+    r.vz = AF(arg0, s16, 0x1C);
+    func_sc03_013_80180148(&r, &m);
+    a.vx = 0;
+    a.vy = 0;
+    a.vz = AF(arg0, s32, 0x10);
+    ApplyMatrixSV(&m, &a, o);
+    AF(arg0, s32, 0x3C) = ((s16) o[0] >> 3) + AF(arg0, s16, 0x28) + AF(arg2, s16, 0);
+    AF(arg0, s32, 0x40) = ((s16) o[1] >> 3) + AF(arg0, s16, 0x2A) + AF(arg2, s16, 2);
+    AF(arg0, s32, 0x44) = ((s16) o[2] >> 3) + AF(arg0, s16, 0x2C) + AF(arg2, s16, 4);
+}
 
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017E6F4);
 
@@ -586,7 +647,11 @@ INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017EAB0);
 
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017EBA0);
 
-INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017ECD0);
+s32 func_sc03_013_8017ECD0(s32 arg0) {
+    func_80139A68((s32) (*(s16 *)&D_sc03_013_80184E7C[(AF(arg0, s16, 0x70) * 2)]), 0);
+    func_80178B18(arg0, D_sc03_013_80184E84[AF(arg0, s16, 0x70)]);
+    return func_8012AD44(arg0, 2);
+}
 
 s32 func_sc03_013_8017ED40(s32 arg0) {
     return func_8012AD44(arg0, 3);
@@ -602,11 +667,31 @@ INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017EE28);
 
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017EEA4);
 
-INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017EF34);
+void func_sc03_013_8017EF34(u8 *arg0) {
+    s32 pad[2];
+    s16 temp_a2;
+
+    func_sc03_013_8017E6F4();
+    if ((AF(arg0, s16, 0x104) != 0) && (AF(arg0, s16, 0x102) == 0)) {
+        temp_a2 = AF(arg0, s16, 0x70);
+        func_8002D59C(4, (s32) (*(u16 *)&D_sc03_013_80184D2C[(temp_a2 * 2)]), temp_a2 & 0xFFFF);
+    }
+}
 
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017EF9C);
 
-INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017F0A0);
+void func_sc03_013_8017F0A0(u8 *arg0) {
+    s32 temp_v0;
+
+    if ((func_80029178((s32) (*(u16 *)&D_sc03_013_80184E90[(AF(arg0, s16, 0x70) * 2)])) & 0xFF) || (temp_v0 = func_8012C1B8(), AF(arg0, s32, 0x20) = temp_v0, (temp_v0 == 0))) {
+        func_8012CAE4((s32) arg0);
+        return;
+    }
+    func_8001C214(temp_v0, (s32) &D_sc03_013_8019DFB8);
+    AF(AF(arg0, s32, 0x20), s16, 0x14) = 0x400;
+    AF(arg0, s32, 0xCC) = func_80143970((s32) arg0);
+    func_8012AD50((s32) arg0);
+}
 
 void func_sc03_013_8017F140(s32 arg0) {
     void *temp_v1;
@@ -823,9 +908,66 @@ s32 func_sc03_013_8017FF6C(s32 arg0) {
 
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017FF84);
 
-INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017FFE8);
+void func_sc03_013_8017FFE8(s32 arg0, WMtx *m) {
+    WMtx r;
+    s32 a;
+    s16 c;
+    s16 s;
 
-INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_80180148);
+    a = arg0 & 0xFFF;
+    c = func_sc03_013_801803E8(a);
+    s = func_sc03_013_8018032C(a);
+    r.m[0][0] = c;
+    r.m[0][1] = 0;
+    r.m[0][2] = s;
+    r.m[1][0] = 0;
+    r.m[1][1] = 0x7FF8;
+    r.m[1][2] = 0;
+    r.m[2][0] = -s;
+    r.m[2][1] = 0;
+    r.m[2][2] = c;
+    gte_SetRotMatrix(m);
+    gte_ldclmv(&r.m[0][0]);
+    gte_rtir();
+    gte_stclmv(&m->m[0][0]);
+    gte_ldclmv(&r.m[0][1]);
+    gte_rtir();
+    gte_stclmv(&m->m[0][1]);
+    gte_ldclmv(&r.m[0][2]);
+    gte_rtir();
+    gte_stclmv(&m->m[0][2]);
+}
+
+void func_sc03_013_80180148(u16 *r, s16 *m) {
+    s16 sx;
+    s16 cx;
+    s16 sy;
+    s16 cy;
+    s16 sz;
+    s16 cz;
+    s32 a;
+    s32 b;
+    s32 c;
+
+    sx = func_sc03_013_801803E8(r[0] & 0xFFF);
+    cx = func_sc03_013_8018032C(r[0] & 0xFFF);
+    sy = func_sc03_013_801803E8(r[1] & 0xFFF);
+    cy = func_sc03_013_8018032C(r[1] & 0xFFF);
+    sz = func_sc03_013_801803E8(r[2] & 0xFFF);
+    cz = func_sc03_013_8018032C(r[2] & 0xFFF);
+    c = (sx * cz) >> 15;
+    b = (sx * sz) >> 15;
+    a = (cx * cy) >> 15;
+    m[0] = (sz * sy) >> 15;
+    m[1] = ((a * sz) >> 15) - c;
+    m[2] = ((b * cy) >> 15) + ((cx * cz) >> 15);
+    m[3] = (cz * sy) >> 15;
+    m[4] = ((a * cz) >> 15) + b;
+    m[5] = ((c * cy) >> 15) - ((cx * sz) >> 15);
+    m[6] = -cy;
+    m[7] = (sy * cx) >> 15;
+    m[8] = (sy * sx) >> 15;
+}
 
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8018032C);
 

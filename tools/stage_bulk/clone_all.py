@@ -5,15 +5,21 @@ after each group, so a stage is never left red). A pass that places nothing ends
 source of a shape (--alt), so a draft that failed from one source is retried from another.
 Appends one line per stage and pass to <root>/_log.csv. Run from PowerShell (Git Bash hangs in maspsx).
 --par N (r147): N stages at a time (each touches only its own src/stg file and build/stg folder).
-usage: clone_all.py <root> [jobs=16] [--par N] [STAGE ...]"""
+--stages SC01,SC02 (r142, 22 Oct): place only in stages whose name starts with one of these prefixes, so two streams
+can each clone inside their own stage groups (the drafts are still written for every stage; only placing is limited).
+jobs: compiles at a time per stage, default 4 (LuciDin's CPU cap with several streams building, 22 Oct; never above 8).
+usage: clone_all.py <root> [jobs=4] [--par N] [--stages PREFIX,...] [STAGE ...]"""
 import csv, glob, os, re, subprocess, sys, threading, time
 from concurrent.futures import ThreadPoolExecutor
 args = sys.argv[1:]
 par = 1
 if '--par' in args:
     i = args.index('--par'); par = int(args[i + 1]); del args[i:i + 2]
+prefixes = ()
+if '--stages' in args:
+    i = args.index('--stages'); prefixes = tuple(s.strip().lower() for s in args[i + 1].split(',') if s.strip()); del args[i:i + 2]
 root = args[0]
-jobs = args[1] if len(args) > 1 else '16'
+jobs = args[1] if len(args) > 1 else '4'
 only = {s.lower() for s in args[2:]}
 env = dict(os.environ, PATH='C:\\msys64\\usr\\bin;' + os.environ['PATH'])
 log = os.path.join(root, '_log.csv')
@@ -26,7 +32,7 @@ lock = threading.Lock()
 def one(p, d):
     st = os.path.basename(d)
     drafts = [x for x in glob.glob(os.path.join(d, '*.c')) if not os.path.basename(x).startswith('_')]
-    if not drafts or (only and st not in only):
+    if not drafts or (only and st not in only) or (prefixes and not st.lower().startswith(prefixes)):
         return 0
     t = time.time()
     c = subprocess.run([sys.executable, 'tools/stage_bulk/cmp_par.py', d, jobs], capture_output=True, text=True, env=env)

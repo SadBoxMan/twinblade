@@ -28,6 +28,11 @@ it is ordinary GCC output (0x210 frame, all saved registers) with PsyQ inline GT
    Each packet is linked into the OT with the `addPrim` mask pattern.
 
 ## Status
+**MATCHED and placed (r159, 22 Oct 2026)**: `src/stage/sc03_001.c` holds it in C, 952 / 952, `make check-stage` OK.
+The source is r144's `func_sc01_000_8017BEBC` (the 111-copy renderer) with `+ 0x20` instead of `+ 0x200` in the three
+odd-type depth adds (r152 found it). Its five clones (SC03_124; SC04_015, SC04_018, SC04_019, SC05_017) belong to the
+stage streams. The notes below are the history of the 15 Oct attempt; where they disagree with the placed C, the C wins.
+
 2026-10-15: a full C version, `build/work/dcm.c` (in the hourly backups), compiles to 950-952 instructions against
 952, with the same 0x210 frame, the same spill slots (0xE0, 0xE8, 0x1E0) and the same loop and switch structure.
 Parked (Fable, 15 Oct evening) at 8 instructions of structure and about 190 of register choice (`variant_search.py --shape` and a sequence

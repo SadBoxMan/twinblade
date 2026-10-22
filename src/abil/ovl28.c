@@ -14,7 +14,7 @@ extern void func_80147324();
 extern void func_801655E4();
 extern s32 D_80078EC8;
 extern void func_ovl28_800CC968();
-extern void func_ovl28_800CC9AC();
+extern s32 func_ovl28_800CC9AC();
 extern u8 D_80078EC1;
 extern AbilStep D_ovl28_800CCA24[];
 
@@ -60,13 +60,11 @@ extern s32 D_ovl28_800CC9F4;
 extern s32 D_ovl28_800CCB18;
 extern void func_ovl28_800CB00C();
 
-void func_ovl28_800CAE88(s32 *arg0, s32 arg1, s32 arg2) {
-    s32 x;      /* (r137) v0 on entry: the two words before this function (the end of jtbl_ovl28_800CAE0C in
-                   asm/abil/ovl28/data) are `lui v0,0x800C; lhu v0,0x99DA(v0)`, so x is most likely D_800B99DA
-                   and the function really starts at 0x800CAE80; the split puts its code start at the package's entry */
-    s32 t;
+void func_ovl28_800CAE80(s32 *arg0, s32 arg1, s32 arg2) {
+    s32 t;      /* (r149) the package's code starts at 0x800CAE80 (abil/ovl28.yaml, stream T): the first two
+                   instructions read D_800B99DA; r137 had them at the end of jtbl_ovl28_800CAE0C and an uninitialised v0 */
 
-    if (!(x & 1)) {
+    if (!(D_800B99DA & 1)) {
         if (D_ovl28_800CC9EC == 0) {
             D_ovl28_800CC9E8++;
             if (++D_ovl28_800CC9EA >= 0x200) {
@@ -462,7 +460,14 @@ u8 *func_ovl28_800CBE28(u8 *f, u8 *vert, u8 *norm, u8 *prim, s32 n, s32 arg5, s3
     return p;
 }
 
-INCLUDE_ASM("asm/abil/ovl28/nonmatchings/ovl28", func_ovl28_800CC0A0);
+s32 func_ovl28_800CC0A0(u8 *arg0) {
+    s32 b = AF(arg0, u8, 0xA);
+
+    if ((D_ovl28_800CC9E8 < b && b < D_ovl28_800CC9EA) || (D_ovl28_800CC9F0 < b && b < D_ovl28_800CC9F2)) {
+        return 1;
+    }
+    return 0;
+}
 
 void func_ovl28_800CC110(s32 arg0, s32 arg1, s32 arg2, s32 *arg3, s32 arg4) {
     s32 *temp_a0;
@@ -697,4 +702,20 @@ void func_ovl28_800CC968(u8 *arg0) {
     AF(arg0, s16, 0xE) = (s16) AF(AF(temp_v1, void *, 0x20), s32, 0x50);
 }
 
-INCLUDE_ASM("asm/abil/ovl28/nonmatchings/ovl28", func_ovl28_800CC9AC);
+extern s8 D_ovl28_800CCAD1;
+extern s8 D_ovl28_800CCAD2;
+
+s32 func_ovl28_800CC9AC() {
+    s32 v;
+
+    v = D_800B99DA & 1;
+    if (v) {
+        v = 0xFF;
+    } else {
+        v = 0xEF;
+    }
+    D_ovl28_800CCAD0 = v;
+    D_ovl28_800CCAD1 = v;
+    D_ovl28_800CCAD2 = v;
+    return v;
+}

@@ -253,6 +253,8 @@ void func_ovl19_800CB4C8(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(arg0, s16, 0x64) = (s16) (AF(arg0, s32, 0x50) << 0xA);
 }
 
+extern void func_ovl19_800CBF60();
+
 INCLUDE_ASM("asm/abil/ovl19/nonmatchings/ovl19", func_ovl19_800CB578);
 
 INCLUDE_ASM("asm/abil/ovl19/nonmatchings/ovl19", func_ovl19_800CB9F8);
@@ -311,7 +313,27 @@ void func_ovl19_800CBD68(u8 *arg0) {
 
 INCLUDE_ASM("asm/abil/ovl19/nonmatchings/ovl19", func_ovl19_800CBE38);
 
-INCLUDE_ASM("asm/abil/ovl19/nonmatchings/ovl19", func_ovl19_800CBEC0);
+void func_ovl19_800CBEC0(u8 *arg0) {
+    s32 t;
+    s16 v;
+    void *temp_s1;
+
+    temp_s1 = AF(arg0, void *, 0x20);
+    if (func_80146E98(arg0) != 0) {
+        func_ovl19_800CBF60(arg0);
+        return;
+    }
+    func_ovl19_800CBF80(arg0);
+    t = AF(arg0, u16, 0x60) - 0x100;
+    AF(arg0, s16, 0x60) = t;
+    if (D_800B99DA & 1) {
+        v = (s16) t / 2;
+    } else {
+        v = t;
+    }
+    AF(temp_s1, s16, 0x1A) = v;
+    AF(temp_s1, s16, 0x18) = v;
+}
 
 void func_ovl19_800CBF60(void) {
     func_80162CCC();

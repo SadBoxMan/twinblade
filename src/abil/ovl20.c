@@ -141,11 +141,55 @@ extern void func_800174DC();
 /* a textured triangle on the stack for func_800174DC: three points, three UV pairs, three colours, the code, the page */
 typedef struct { AVec p[3]; u16 uv[6]; s32 c[3]; s32 code; u8 tp; } AFT3;
 
-INCLUDE_ASM("asm/abil/ovl20/nonmatchings/ovl20", func_ovl20_800CB190);
+extern void func_ovl20_800CB5F4();
+
+extern void func_80146E90();
+
+void func_ovl20_800CB190(u8 *arg0) {
+    s32 temp_s0;
+    s32 t;
+
+    func_ovl20_800CB5F4();
+    if (AF(arg0, s32, 0x50) == 0) {
+        temp_s0 = (rand() & 0xF) << 8;
+        func_801466F0(0xC, arg0, 0, 0, 0, temp_s0, 0, 0);
+        t = temp_s0 + 0x555;
+        func_801466F0(0xC, arg0, 0, 0, 0, t, 0, 0);
+        t = temp_s0 + 0xAAA;
+        func_801466F0(0xC, arg0, 0, 0, 0, t, 0, 0);
+        func_80146E90(arg0, 8);
+    } else {
+        func_80146E90(arg0, 0);
+    }
+    func_80146CA0(arg0);
+}
 
 INCLUDE_ASM("asm/abil/ovl20/nonmatchings/ovl20", func_ovl20_800CB278);
 
-INCLUDE_ASM("asm/abil/ovl20/nonmatchings/ovl20", func_ovl20_800CB3C0);
+void func_ovl20_800CB3C0(u8 *arg0) {
+    s16 temp_v1;
+    u16 temp_v0;
+    void *temp_s0;
+    u8 *p;
+
+    temp_s0 = AF(arg0, void *, 0x20);
+    func_ovl20_800CB5F4(arg0);
+    if (AF(arg0, s32, 0x50) != 0) {
+        AF(temp_s0, u16, 0x1E) = (u16) (AF(temp_s0, u16, 0x1E) + 0x100);
+    }
+    temp_v0 = AF(arg0, u16, 0x60) + 0x40;
+    AF(arg0, u16, 0x60) = temp_v0;
+    temp_v1 = AF(temp_s0, u16, 0x1A) + temp_v0;
+    AF(temp_s0, u16, 0x1A) = (u16) temp_v1;
+    AF(temp_s0, s16, 0x18) = temp_v1;
+    if (temp_v1 >= 0x1001) {
+        AF(temp_s0, u16, 0x1A) = 0x1000U;
+        AF(temp_s0, s16, 0x18) = 0x1000;
+        p = arg0;
+        AF(AF(p, void *, 0x4C), u8, 0xBE) = 1;
+        func_80146CA0(p);
+    }
+}
 
 INCLUDE_ASM("asm/abil/ovl20/nonmatchings/ovl20", func_ovl20_800CB470);
 
@@ -165,7 +209,26 @@ void func_ovl20_800CB62C(u8 *arg0) {
     func_ovl20_800CB8A4();
 }
 
-INCLUDE_ASM("asm/abil/ovl20/nonmatchings/ovl20", func_ovl20_800CB688);
+void func_ovl20_800CB688(u8 *arg0) {
+    s32 t;
+
+    t = -0x100;
+    AF(arg0, s16, 0x12) = t;
+    AF(arg0, s16, 0x16) = t;
+    t = AF(arg0, s32, 0x50);
+    AF(arg0, s16, 0x14) = 8;
+    AF(arg0, s16, 0x10) = 0;
+    AF(arg0, u8, 0x58) = 0xFF;
+    AF(arg0, u8, 0x59) = 0xFF;
+    AF(arg0, u8, 0x5A) = 0xFF;
+    AF(arg0, u8, 0x5B) = 0;
+    AF(arg0, u8, 0x5C) = 0;
+    AF(arg0, u8, 0x5D) = 0;
+    AF(arg0, u8, 0x5E) = 0xFF;
+    AF(arg0, u8, 0x5F) = 0;
+    AF(arg0, s16, 0x18) = t;
+    func_80146CA0(arg0);
+}
 
 void func_ovl20_800CB6E8(u8 *arg0) {
     s32 sp20;

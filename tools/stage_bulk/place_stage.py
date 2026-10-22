@@ -3,7 +3,11 @@ put_func.py (make check-stage); a failing group is halved until the culprits are
 declarations clash with another draft's (or whose signature cannot follow the file's prototype) wait for the next
 round: m2c_stage.py then picks up the declarations placed meanwhile. Run from PowerShell.
 usage: place_stage.py <dir>     ($env:TWINBLADE_STG = "sc02_031": a split stage, src/stg/sc02_031.c and
-                                 check-sc02_031, r143)"""
+                                 check-sc02_031, r143)
+r142 (22 Oct): the drafts' #include lines go in too (GTE drafts had been deferred as "build differs" without gte.h),
+declarations are compared without comments and skipped when the file already declares their names (no duplicate
+typedef), and a draft's static helper the file lacks is inserted with the declarations.
+"""
 import glob, os, re, subprocess, sys
 sys.path.insert(0, 'tools')
 import put_func as P
@@ -22,13 +26,20 @@ def sym_of(x):
     return m[1] if m else None
 def norm(x): return re.sub(r'\s+', ' ', x).strip()
 groups = {}
+incs = {}   # r142: the drafts' #include lines (a GTE draft needs include/gte.h; split() drops them)
 for n in names:
     f = target(n)
     if f is None: continue
     text = open(os.path.join(d, n + '.c'), encoding='utf-8').read().replace(AF + '\n', '')
     decl, funcs = P.split(text)
     if n not in funcs: continue
-    groups.setdefault(f, []).append((n, [c for c in P.chunks(decl)], funcs[n]))
+    # declarations without their comments (a leading comment made a typedef look new: duplicate typedef), and a
+    # static helper the draft defines that the file lacks goes in with them (r142, from S1's insert_hand)
+    ds = [P.strip_comments(c) for c in P.chunks(decl) if P.strip_comments(c).strip()]
+    ds += [P.strip_comments(b) for k, b in funcs.items() if k != n and b.lstrip().startswith('static')
+           and not re.search(rf'\b{k}\s*\(', src[f])]
+    incs.setdefault(f, []).extend(x for x in P.includes(text) if x not in incs.get(f, []))
+    groups.setdefault(f, []).append((n, ds, funcs[n]))
 deferred, placed = [], []
 def why(n, s):
     with open(os.path.join(d, '_why.txt'), 'a') as w: w.write(f'{n}: {s}\n')
@@ -40,7 +51,9 @@ def insert(t, items):
     decls = []
     for i, (_, ds, _) in enumerate(items):
         for x in ds:
-            if P.norm(x) not in P.norm(t) and x not in [y for y, _ in decls]:
+            # only what the file lacks: a typedef, tag, extern or prototype it already has is not added again
+            # (put_func.missing_decls, r142)
+            if P.missing_decls([x], t) and x not in [y for y, _ in decls]:
                 decls.append((x, i))
     # an old-style guess left in the file by an earlier round (`extern void f();`) takes the return type of f's
     # definition now being placed (a call whose result is unused compiles the same either way; check-stage verifies)
@@ -148,6 +161,10 @@ for f, items in groups.items():
     if AF not in t:                       # the offset macro, once, after the includes
         last = list(re.finditer(r'^#include .*$', t, re.M))[-1]
         t = t[:last.end()] + '\n' + AF + t[last.end():]
+        open(f, 'w', encoding='utf-8', newline='\n').write(t); src[f] = t
+    t2 = P.add_includes(t, incs.get(f, []))   # the drafts' includes the file lacks (gte.h), checked with the group
+    if t2 != t:
+        t = t2
         open(f, 'w', encoding='utf-8', newline='\n').write(t); src[f] = t
     defs = {}
     for n, ds, b in items:

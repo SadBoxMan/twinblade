@@ -1074,6 +1074,26 @@ extern void func_80016ED4();
 extern s16 D_80078EA6;
 
 
+extern s32 func_801789AC();
+extern s16 D_801EE5D8;
+extern s32 D_80190E48[];
+typedef void (*VmHook)(s32 obj);
+extern VmHook D_801EE624[10];
+extern s32 *D_801151D4;
+
+extern s16 D_801EE5D0;
+extern s32 D_801EE5E0;
+extern s16 D_801EE5E4;
+extern s16 D_801EE5E8;
+extern s16 D_801EE5EC;
+extern s16 D_801EE5F0;
+extern s32 D_801EE5F8;
+extern s32 D_801EF2E0;
+extern u8 D_801EF3A8[];
+extern s16 D_801EE664;
+extern s16 D_801EE666;
+extern s16 D_801EE668;
+
 INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80145934);
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80145A2C);
@@ -10291,20 +10311,62 @@ INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80178840);
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_801788B8);
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80178970);
+/* "finished?": the driver is done and the scripted camera idle */
+s32 func_80178970(void) {
+    if (func_801789AC() != 0 && D_801EF3F0 == 0) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_801789AC);
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80178B18);
+/* reset, patch the built-in script's goto target (D_80190E48, the 4th word of the script at D_80190E3C) and run it;
+   clears Musashi's action handler first */
+void func_80178B18(s32 obj, s32 s) {
+    D_80190E48[0] = s;
+    func_80178BF8();
+    func_801746A4();
+    func_8017435C();
+    func_80178CBC(obj, &D_80190E48[-3]);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80178B70);
+/* reset, patch the built-in script's goto target and run it */
+void func_80178B70(s32 obj, s32 s) {
+    D_80190E48[0] = s;
+    func_80178BF8();
+    func_80178CBC(obj, &D_80190E48[-3]);
+}
 
 void func_80178BB8(s32 arg0, s32 arg1) {
     func_80178BF8();
     func_80178CBC(arg0, arg1);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80178BF8);
+/* reset all VM state: the window, the gosub slot, the hooks, the 512-halfword command ring, the actor-move block */
+void func_80178BF8(void) {
+    s32 i;
+
+    D_801EF464 = 0;
+    D_801EE5E0 = 0;
+    D_801EE5F0 = 0;
+    D_801EE5EC = 0;
+    D_801EE5E8 = 0;
+    D_801EE5E4 = 0;
+    D_801EF2E0 = 1;
+    D_801EE5F8 = 0;
+    D_801EE5D8 = 0;
+    for (i = 9; i >= 0; i--) {
+        D_801EE624[i] = NULL;
+    }
+    for (i = 0x1FF; i >= 0; i--) {
+        D_801EE1D0[i] = 0;
+    }
+    D_801EE5D0 = 0;
+    D_801EE5D4 = 0;
+    func_80016714(D_801EF3A8, 0x14);
+    func_8017B1D8();
+}
 
 s32 func_80178CBC(s32 arg0, s32 arg1) {
     D_801EE1C8 = arg1;
@@ -10389,9 +10451,23 @@ s32 func_80179B74(u16 *p) {
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", AnimHelper);
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179D78);
+/* scene command pushers: a kind and its halfword arguments on the stack, queued by func_80179B74 */
+s32 func_80179D78(u16 *p) {
+    s16 c[5];
+    c[0] = 0x1C;
+    c[1] = p[0];
+    c[2] = p[1];
+    c[3] = p[2];
+    c[4] = p[3];
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179DCC);
+s32 func_80179DCC(s16 a) {
+    s16 c[2];
+    c[1] = a;
+    c[0] = 2;
+    return func_80179B74((s32)c);
+}
 
 s32 func_80179DF8(void) {
     s16 sp10;
@@ -10400,17 +10476,50 @@ s32 func_80179DF8(void) {
     return func_80179B74((s32) &sp10);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179E1C);
+s32 func_80179E1C(s16 a) {
+    s16 c[2];
+    c[1] = a;
+    c[0] = 3;
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179E48);
+s32 func_80179E48(s16 a) {
+    s16 c[2];
+    c[1] = a;
+    c[0] = 0x1F;
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179E74);
+s32 func_80179E74(s16 a) {
+    s16 c[2];
+    c[1] = a;
+    c[0] = 4;
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179EA0);
+s32 func_80179EA0(u16 *p) {
+    s16 c[4];
+    c[0] = 5;
+    c[1] = p[0];
+    c[2] = p[1];
+    c[3] = p[2];
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179EE8);
+s32 func_80179EE8(s16 a) {
+    s16 c[2];
+    c[1] = a;
+    c[0] = 0x12;
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179F14);
+s32 func_80179F14(s16 a, s16 b) {
+    s16 c[3];
+    c[1] = a;
+    c[0] = 0x13;
+    c[2] = b;
+    return func_80179B74((s32)c);
+}
 
 s32 func_80179F44(void) {
     s16 sp10;
@@ -10419,13 +10528,42 @@ s32 func_80179F44(void) {
     return func_80179B74((s32) &sp10);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179F6C);
+s32 func_80179F6C(s16 a) {
+    s16 c[2];
+    c[1] = a;
+    c[0] = 0x14;
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179F98);
+s32 func_80179F98(u16 *p) {
+    s16 c[5];
+    c[0] = 0x17;
+    c[1] = p[0];
+    c[2] = p[1];
+    c[3] = p[2];
+    c[4] = p[3];
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_80179FEC);
+s32 func_80179FEC(u16 *p) {
+    s16 c[5];
+    c[0] = 0x20;
+    c[1] = p[0];
+    c[2] = p[1];
+    c[3] = p[2];
+    c[4] = p[3];
+    return func_80179B74((s32)c);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017A040);
+s32 func_8017A040(u16 *p) {
+    s16 c[5];
+    c[0] = 0x1D;
+    c[1] = p[0];
+    c[2] = p[1];
+    c[3] = p[2];
+    c[4] = p[3];
+    return func_80179B74((s32)c);
+}
 
 s32 func_8017A094(s32 arg0) {
     s16 sp10;
@@ -10565,7 +10703,17 @@ s32 func_8017A388(void) {
     return func_80179B74((s32) &sp10);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017A3B0);
+/* 0 while D_801EE5D8 is 1 (the switch keeps the original's beqz / bne tests) */
+s32 func_8017A3B0(void) {
+    switch (D_801EE5D8) {
+    case 0:
+        return 1;
+    case 1:
+        return 0;
+    }
+    return 1;
+
+}
 
 s32 func_8017A3D8(void) {
     s16 temp_v0;
@@ -10604,7 +10752,25 @@ s32 func_8017AE08(void) {
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017AE2C);
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017B0E4);
+/* the camera eases toward the stored targets (each word through func_80012C6C); a fresh `q = p + k` per field keeps
+   the stores plain references that conflict with the next target load, as in the original */
+void func_8017B0E4(s32 *p, s32 n) {
+    s32 *q;
+    s16 k = n;
+
+    q = p + 0x12;
+    *q = (s16)func_80012C6C((s16)*q, D_801EE654, k);
+    q = p + 0x13;
+    *q = (s16)func_80012C6C((s16)*q, D_801EE656, k);
+    q = p + 0x14;
+    *q = (s16)func_80012C6C((s16)*q, D_801EE658, k);
+    q = p + 0xF;
+    *q = (s16)func_80012C6C((s16)*q, D_801EE64C, k);
+    q = p + 0x10;
+    *q = (s16)func_80012C6C((s16)*q, D_801EE64E, k);
+    q = p + 0x11;
+    *q = (s16)func_80012C6C((s16)*q, D_801EE650, k);
+}
 
 s32 func_8017B1D8(s32 arg0, s32 arg1) {
     func_8012A418();
@@ -10635,7 +10801,18 @@ void func_8017B7A8(s32 arg0) {
     D_801EE650 = (s16) D_80114F2C;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017B824);
+/* saves two triples from the camera block (words 0x12-0x14, then 0xF-0x11); a walking pointer, as
+   `D_801151D4[k]` is an in-struct reference that sched1 hoists above the stores */
+void func_8017B824(void) {
+    s32 *p = D_801151D4 + 0x12;
+    D_801EE66C = *p++;
+    D_801EE66E = *p++;
+    D_801EE670 = *p;
+    p -= 5;
+    D_801EE674 = *p++;
+    D_801EE676 = *p++;
+    D_801EE678 = *p;
+}
 
 s32 func_8017B880(void) {
     D_80114F30 = (s32) D_801EE66C;
@@ -10652,13 +10829,39 @@ void func_8017B8E8(u8 *arg0) {
     AF(&D_801EE64C, SVECTOR, 0x0) = AF(arg0, SVECTOR, 0x8);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017B940);
+/* the camera offset from Musashi to the scripted point: targets for both triples, the step reset */
+void func_8017B940(void) {
+    VECTOR d;
+
+    D_8012694C = 2;
+    d.vx = (s16)D_80126B5E - (s16)D_801EE65C;
+    d.vy = (s16)D_80126B62 - (s16)D_801EE65E;
+    d.vz = (s16)D_80126B66 - (s16)D_801EE660;
+    D_801EE5DC = 0;
+    D_801EE664 = d.vx;
+    D_801EE666 = d.vy;
+    D_801EE668 = d.vz;
+    D_801EE654 = D_80114F30 + d.vx;
+    D_801EE656 = D_80114F34 + d.vy;
+    D_801EE658 = D_80114F38 + d.vz;
+    D_801EE64C = D_80114F24 + d.vx;
+    D_801EE64E = D_80114F28 + d.vy;
+    D_801EE650 = D_80114F2C + d.vz;
+}
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017BA3C);
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017BB34);
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017BC38);
+/* the ten script hooks, each called with the object */
+void func_8017BC38(s32 obj) {
+    s32 i;
+    for (i = 0; i < 10; i++) {
+        if (D_801EE624[i] != NULL) {
+            D_801EE624[i](obj);
+        }
+    }
+}
 
 void func_8017BCA0(s32 arg0) {
     u16 temp_v0;

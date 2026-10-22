@@ -3716,7 +3716,26 @@ void func_8013A250(Win *w) {
     func_80138B88(w);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_8013A2BC);
+/* the window closed once its cursor is (state 4); the one behind comes to the front */
+void func_8013A2BC(Win *w) {
+    Cursor *c = w->unk40;
+    Win **f;
+    if (c == NULL || w->unk18 == 0 || c->state == 4) {
+        f = &D_80127524;
+        if (*f == w) {
+            { Win *n; *f = n = D_80127528; D_80127528 = NULL; }
+            if (*f != NULL) {
+                D_80127524->unk1A = 1;
+                func_80138C30(*(Win * volatile *)f); /* r150: the volatile read keeps cse from reusing the value stored through f after the unk1A store; the original reloads *f here */
+            }
+        }
+        if (w->flags & 0x8000) {
+            w->state = 0xE;
+        } else {
+            w->state = 0xD;
+        }
+    }
+}
 
 void func_8013A378(void) {
 }
@@ -3813,7 +3832,10 @@ void func_8013A9B4(Win *w, Cursor *c) {
     func_8013A9F8(c, w->unk18);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_8013A9F8);
+void func_8013A9F8(Cursor *c, u16 n) {
+    s32 v;
+    if (n >= 2 && n < 7) { v = n; c->unkE = (v - 2) << 10; }
+}
 
 /* the cursor drawn at its window, scaled */
 void func_8013AA24(Win *w, Cursor *c) {

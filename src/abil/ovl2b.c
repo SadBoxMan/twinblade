@@ -236,4 +236,11 @@ void func_ovl2b_800CB424(u8 *arg0) {
 
 INCLUDE_ASM("asm/abil/ovl2b/nonmatchings/ovl2b", func_ovl2b_800CB480);
 
-INCLUDE_ASM("asm/abil/ovl2b/nonmatchings/ovl2b", func_ovl2b_800CB55C);
+void func_ovl2b_800CB55C(u8 *arg0) {
+    AF(arg0, s32, 4) += AF(arg0, s32, 0x10);
+    AF(arg0, s32, 0xC) += AF(arg0, s32, 0x18);
+    AF(arg0, s32, 8) += (AF(arg0, s32, 0x14) += 0xC000);
+    if (--AF(arg0, s32, 0x1C) == -1) {
+        func_80146C3C(arg0);
+    }
+}

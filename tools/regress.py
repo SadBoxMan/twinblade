@@ -11,13 +11,15 @@ C:\\msys64\\usr\\bin on PATH itself.
 Usage: python -I tools/regress.py [AREA|NAME ...] [-j N] [--no-build] [--staged | --paths FILE ...]
        python -I tools/regress.py --record-baseline
   AREA    main, ovl, abil or stg (default: all four); NAME one image (ovl38, stage, ovl2c, sc03_005, ...)
-  -j N    make jobs (default: the number of CPUs)
+  -j N    make jobs (default 4: the CPU cap while several streams build at once; at most 8)
   --no-build        compare the binaries already in build/ (no make)
   --staged          the commit gate: only the images the staged files can change (git diff --cached, so it follows
                     GIT_INDEX_FILE: the temporary-index commit routine works too); nothing to check -> exit 0
   --paths F ...     the same for an explicit list of changed files
   --record-baseline write tools/regress_baseline.txt from the disc files as they are now
-Results also go to build/regress/last.json; each area's make output to build/regress/<area>.log.
+Results also go to build/regress/last.json; each area's make output to build/regress/<area>.log. A full run (no area,
+no --staged) ends with tools/coverage.py: how much of the checked code is real C, stubs, asm and library, and the
+proof that every stage image's engine is the village's (a failure there fails the run too).
 """
 import hashlib
 import json
@@ -38,14 +40,24 @@ AREAS = ['main', 'ovl', 'abil', 'stg']
 # sources below cannot change a checked binary (docs, pc/, the launcher, analysis tools).
 GLOBAL_INPUTS = re.compile(r'^(include/|Makefile$|slus_007\.26\.yaml$|symbol_addrs[^/]*\.txt$|undefined_syms[^/]*\.txt$|'
                            r'reloc_addrs\.txt$|tools/(jtbl_relabel|exe_syms|gen_ability_ovls|gen_stage_cfgs|regress)\.py$|'
-                           r'tools/regress_baseline\.txt$|src/[^/]+\.c$|src/[^/]+\.h$)')
+                           r'tools/regress_baseline\.txt$|tools/coverage\.py$|src/[^/]+\.c$|src/[^/]+\.h$)')
 BUILD_INPUT = re.compile(GLOBAL_INPUTS.pattern + r'|^(src|abil|stg)/|^[^/]+\.yaml$')
 
 
 def env():
+    """MSYS2's tools first, and Git for Windows' own (its usr/bin and mingw64/bin) out: run from a Git hook or Git
+    Bash, Git's sed and find came first otherwise, and inside MSYS2's make they misbehave (two msys runtimes): sed
+    ignored \\U, find ignored `-not -path` (22 Oct: "disc/pac4/U1E.bin", nonmatchings assembled). Shell variables of
+    Git's msys go too."""
     e = dict(os.environ)
-    if os.path.isdir(MSYS) and MSYS.lower() not in e.get('PATH', '').lower():
-        e['PATH'] = MSYS + os.pathsep + e.get('PATH', '')
+    if os.path.isdir(MSYS):
+        def gits(p):
+            q = p.replace('/', '\\').lower().rstrip('\\')
+            return q.endswith(('\\git\\usr\\bin', '\\git\\mingw64\\bin', '\\git\\bin')) or q in ('\\usr\\bin', '\\bin', '\\mingw64\\bin')
+        rest = [p for p in e.get('PATH', '').split(os.pathsep) if p and not gits(p) and p.lower() != MSYS.lower()]
+        e['PATH'] = os.pathsep.join([MSYS] + rest)
+        for k in ('MSYSTEM', 'MSYSTEM_PREFIX', 'MINGW_PREFIX', 'MSYS', 'CHERE_INVOKING', 'SHELL'):
+            e.pop(k, None)
     return e
 
 
@@ -71,6 +83,8 @@ def targets():
     for line in out.splitlines():
         p = line.split()
         if len(p) == 4 and p[0] in AREAS:
+            if p[0] == 'stg':   # the disc's stage images have upper-case names (done here, not with sed's \U)
+                p[3] = p[3][:p[3].rindex('/') + 1] + p[1].upper() + '.bin'
             rows.append(tuple(p))
     return rows
 
@@ -127,7 +141,7 @@ def failure_lines(text, limit=12):
 
 def main():
     argv = sys.argv[1:]
-    jobs = os.cpu_count() or 4
+    jobs = 4   # LuciDin's CPU cap (22 Oct): several streams build at once; never more than -j8
     build = True
     paths = None
     picks = []
@@ -172,7 +186,10 @@ def main():
         bad = [p for p in picks if p not in AREAS and p not in {r[1] for r in rows}]
         if bad:
             sys.exit(f'regress: unknown area or image: {" ".join(bad)} (areas: {" ".join(AREAS)})')
-        rows = [r for r in rows if r[0] in picks or r[1] in picks]
+        # an area word takes the whole area unless image names of that area are given too (`stg sc01_005 sc02_000`
+        # means those two stages, not all 139)
+        named_areas = {r[0] for r in rows if r[1] in picks}
+        rows = [r for r in rows if r[1] in picks or (r[0] in picks and r[0] not in named_areas)]
 
     base = read_baseline()
     results = []          # (area, name, status, detail)
@@ -238,7 +255,14 @@ def main():
     with open(os.path.join(OUT_DIR, 'last.json'), 'w', encoding='utf-8') as f:
         json.dump({'time': time.strftime('%Y-%m-%d %H:%M:%S'), 'seconds': round(total, 1), 'timings': timings,
                    'results': results}, f, indent=1)
-    return 1 if fails else 0
+    engine_fail = 0
+    if paths is None and not picks and build:
+        # a full run: what it covers (tools/coverage.py: C / stub / asm / library bytes per area, and the engine proof)
+        print()
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import coverage
+        engine_fail = coverage.main()
+    return 1 if fails or engine_fail else 0
 
 
 if __name__ == '__main__':

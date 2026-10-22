@@ -152,7 +152,24 @@ void func_ovl1f_800CB180(void) {
     func_ovl1f_800CBBF8();
 }
 
-INCLUDE_ASM("asm/abil/ovl1f/nonmatchings/ovl1f", func_ovl1f_800CB1A0);
+extern AbilStep D_ovl1f_800CBEBC[];
+extern s32 func_ovl1f_800CB7B0();
+
+void func_ovl1f_800CB1A0(u8 *arg0) {
+    s32 pad[2];
+
+    if (D_80078EC1 != 0xF) {
+        func_ovl1f_800CB6CC(arg0);
+        return;
+    }
+    D_ovl1f_800CBEBC[AF(arg0, u16, 2)](arg0);
+    if ((AF(arg0, u16, 0) != 0) && (func_ovl1f_800CB7B0(arg0) != 0)) {
+        func_80147364(4, 0x649);
+    }
+    if (AF(arg0, s16, 0xA) > 0x400) {
+        func_ovl1f_800CB6CC(arg0);
+    }
+}
 
 void func_ovl1f_800CB23C(u8 *arg0) {
     void *temp_s1;
@@ -196,7 +213,14 @@ void func_ovl1f_800CB758(u8 *a) {
     *(s16 *)(a + 0x60) = 0;
 }
 
-INCLUDE_ASM("asm/abil/ovl1f/nonmatchings/ovl1f", func_ovl1f_800CB760);
+void func_ovl1f_800CB760(u8 *arg0, s32 arg1) {
+    s16 t = arg1;
+
+    if (AF(arg0, s16, 0x60) != t) {
+        func_80147324((u16) t);
+        AF(arg0, s16, 0x60) = t;
+    }
+}
 
 INCLUDE_ASM("asm/abil/ovl1f/nonmatchings/ovl1f", func_ovl1f_800CB7B0);
 

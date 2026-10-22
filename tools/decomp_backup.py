@@ -6,13 +6,21 @@ configs, symbol and linker files, Makefile, tools without the downloaded toolcha
 repository history (decomp_backups/repo.bundle, rewritten each time: `git clone repo.bundle` restores every commit).
 Keeps the last 48 zips. Prints one line.
 
+Several streams back up at once (22 Oct): each zip is named after the checkout it was made from
+(decomp_<date>_<time>_<tag>.zip: `main` for the main checkout, else the worktree's folder name, e.g. `regress` for
+C:\\tw\\regress) and reads that checkout only; the last 48 are kept per tag. The bundle holds every branch of the
+shared repository whichever checkout writes it; while another backup is writing it (repo.bundle.lock) this one waits
+up to 2 minutes, then leaves the bundle to that one. Never delete the lock by hand.
+
 Usage: decomp_backup.py [dest dir]
 """
 import datetime
 import glob
 import os
+import re
 import subprocess
 import sys
+import time
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,13 +33,39 @@ FILES = ['Makefile', 'slus_007.26.yaml', 'ovl38.yaml', 'symbol_addrs.txt', 'symb
          'undefined_syms_extra.txt']
 
 
+def checkout_tag():
+    """`main` for the main checkout, else the worktree's folder name"""
+    r = subprocess.run(['git', 'rev-parse', '--git-dir', '--git-common-dir'], cwd=ROOT, capture_output=True, text=True)
+    git_dir, common = (os.path.abspath(os.path.join(ROOT, p)) for p in r.stdout.split()[:2])
+    if r.returncode or os.path.normcase(git_dir) == os.path.normcase(common):
+        return 'main'
+    return re.sub(r'[^A-Za-z0-9_-]', '_', os.path.basename(ROOT)) or 'worktree'
+
+
+def write_bundle():
+    """(ok, note): waits up to 2 minutes while another backup holds repo.bundle.lock, then gives way to it"""
+    bundle = os.path.join(DEST, 'repo.bundle')
+    deadline = time.time() + 120
+    while True:
+        if not os.path.exists(bundle + '.lock'):
+            r = subprocess.run(['git', 'bundle', 'create', bundle, '--all'], cwd=ROOT, capture_output=True, text=True)
+            if r.returncode == 0:
+                return True, ''
+            if 'lock' not in r.stderr and 'File exists' not in r.stderr:
+                return False, f'; bundle FAILED: {r.stderr.strip()[:200]}'
+        if time.time() > deadline:
+            return False, '; bundle left to the other backup that was writing it'
+        time.sleep(5)
+
+
 def main():
     if not os.path.isdir(os.path.dirname(DEST)):
         print(f'backup skipped: {os.path.dirname(DEST)} is not available (drive not connected?)')
         return 1
     os.makedirs(DEST, exist_ok=True)
     stamp = datetime.datetime.now().strftime('%Y%m%d_%H%M')
-    out = os.path.join(DEST, f'decomp_{stamp}.zip')
+    tag = checkout_tag()
+    out = os.path.join(DEST, f'decomp_{stamp}_{tag}.zip')
     n = 0
     with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         for f in FILES:
@@ -52,14 +86,14 @@ def main():
                     p = os.path.join(dp, f)
                     z.write(p, os.path.relpath(p, ROOT))
                     n += 1
-    r = subprocess.run(['git', 'bundle', 'create', os.path.join(DEST, 'repo.bundle'), '--all'], cwd=ROOT,
-                       capture_output=True, text=True)
-    old = sorted(glob.glob(os.path.join(DEST, 'decomp_*.zip')))[:-48]
-    for p in old:
+    ok, note = write_bundle()
+    # the last 48 of this checkout's zips (the untagged ones from before 22 Oct count as main's)
+    mine = [p for p in glob.glob(os.path.join(DEST, 'decomp_*.zip'))
+            if (re.match(r'decomp_\d{8}_\d{4}_(.+)\.zip$', os.path.basename(p)) or [None, 'main'])[1] == tag]
+    for p in sorted(mine, key=lambda p: os.path.basename(p)[7:20])[:-48]:
         os.remove(p)
     head = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    print(f'backup {out}: {n} files, {os.path.getsize(out) // 1024} KB; repo.bundle at {head}'
-          + ('' if r.returncode == 0 else f'; bundle FAILED: {r.stderr.strip()[:200]}'))
+    print(f'backup {out}: {n} files, {os.path.getsize(out) // 1024} KB' + (f'; repo.bundle at {head}' if ok else '') + note)
     return 0
 
 

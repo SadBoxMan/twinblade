@@ -1,4 +1,5 @@
 #include "common.h"
+#include "gte.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 void func_sc02_004_8017BE9C(void) {
@@ -48,11 +49,106 @@ extern s16 D_80126B66;
 
 extern s32 func_8012913C();
 
-INCLUDE_ASM("asm/stg/sc02_004/nonmatchings/sc02_004", func_sc02_004_8017BEBC);
+typedef struct { s16 x, y, z, pad; } SV4;
+
+typedef struct { s32 x, y, z, pad; } V4;
+extern void func_sc02_004_8017C294();
+
+void func_sc02_004_8017BEBC(SV8 *r, SV8 *out, s32 arg2) {
+    SV8 v[4];
+    SV8 w4[4];
+    SV8 p[4];
+    SV8 c0;
+    SV8 c;
+    s32 x, y, x2, y2, z, d;
+    s16 w, h, m;
+    s32 i;
+    s16 a;
+    s16 x0, x1, x2_, x3, z0, z1, z2, z3, cx, cz;
+    s16 a1, b1, e1, a2, b2, e2, a3, b3, e3, a4, b4, e4;
+    s16 ex, ez, fx, fz;
+    s32 minx, miny, maxx, maxy;
+
+    x = r->x;
+    y = r->y;
+    w = r->z;
+    h = r->pad;
+    x2 = x + w;
+    y2 = y + h;
+    m = w < h ? h : w;
+    d = (s16)(m / 20);
+    z = ReadGeomScreen();
+    v[0].x = x;  v[0].y = y;  v[0].z = z;
+    v[1].x = x2; v[1].y = y;  v[1].z = z;
+    v[2].x = x;  v[2].y = y2; v[2].z = z;
+    v[3].x = x2; v[3].y = y2; v[3].z = z;
+    c0.x = 0;
+    c0.y = 0;
+    c0.z = 0;
+    func_sc02_004_8017C294(&c0, &c);
+    for (i = 0; i < 4; i++) {
+        func_sc02_004_8017C294(&v[i], &w4[i]);
+        if (func_sc02_004_8017C338(&c, &w4[i], &p[i], arg2) != 0) {
+            func_sc02_004_8017C530(&p[i], &v[i]);
+            v[i].x = v[i].x < x - d ? x - d : (v[i].x > x2 + d ? x2 + d : v[i].x);
+            v[i].y = v[i].y < y - d ? y - d : (v[i].y > y2 + d ? y2 + d : v[i].y);
+            func_sc02_004_8017C294(&v[i], &w4[i]);
+            func_sc02_004_8017C338(&c, &w4[i], &p[i], arg2);
+        }
+    }
+    ex = ((((p[0].x) < (p[1].x) ? (p[0].x) : (p[1].x))) < (((p[2].x) < (p[3].x) ? (p[2].x) : (p[3].x))) ? (((p[0].x) < (p[1].x) ? (p[0].x) : (p[1].x))) : (((p[2].x) < (p[3].x) ? (p[2].x) : (p[3].x))));
+    minx = ex; if (c.x < minx) minx = c.x;
+    ez = ((((p[0].z) < (p[1].z) ? (p[0].z) : (p[1].z))) < (((p[2].z) < (p[3].z) ? (p[2].z) : (p[3].z))) ? (((p[0].z) < (p[1].z) ? (p[0].z) : (p[1].z))) : (((p[2].z) < (p[3].z) ? (p[2].z) : (p[3].z))));
+    miny = ez; if (c.z < miny) miny = c.z;
+    fx = ((((p[0].x) > (p[1].x) ? (p[0].x) : (p[1].x))) > (((p[2].x) > (p[3].x) ? (p[2].x) : (p[3].x))) ? (((p[0].x) > (p[1].x) ? (p[0].x) : (p[1].x))) : (((p[2].x) > (p[3].x) ? (p[2].x) : (p[3].x))));
+    maxx = fx; if (c.x > maxx) maxx = c.x;
+    fz = ((((p[0].z) > (p[1].z) ? (p[0].z) : (p[1].z))) > (((p[2].z) > (p[3].z) ? (p[2].z) : (p[3].z))) ? (((p[0].z) > (p[1].z) ? (p[0].z) : (p[1].z))) : (((p[2].z) > (p[3].z) ? (p[2].z) : (p[3].z))));
+    maxy = fz; if (c.z > maxy) maxy = c.z;
+    out->z = maxx - minx;
+    out->x = minx;
+    out->y = miny;
+    out->pad = maxy - miny;
+}
 
 INCLUDE_ASM("asm/stg/sc02_004/nonmatchings/sc02_004", func_sc02_004_8017C294);
 
-INCLUDE_ASM("asm/stg/sc02_004/nonmatchings/sc02_004", func_sc02_004_8017C338);
+s32 func_sc02_004_8017C338(SV4 *a, SV4 *b, SV4 *o, s32 lim) {
+    s32 x;
+    s32 z;
+    s32 c;
+    s32 r;
+
+    r = 0;
+    if (b->y <= a->y) {
+        x = a->x - a->y * (b->x - a->x);
+        z = a->z - a->y * (b->z - a->z);
+    } else {
+        x = b->x + b->y * (b->x - a->x) / (a->y - b->y);
+        z = b->z + b->y * (b->z - a->z) / (a->y - b->y);
+    }
+    c = (x < -0x7FFF) ? -0x7FFF : (x > 0x7FFF) ? 0x7FFF : x;
+    o->x = c;
+    c = (z < -0x7FFF) ? -0x7FFF : (z > 0x7FFF) ? 0x7FFF : z;
+    o->z = c;
+    o->y = 0;
+    if (o->x < a->x - lim) {
+        r = -1;
+        o->x = a->x - lim;
+    }
+    if (o->x > a->x + lim) {
+        r = -1;
+        o->x = a->x + lim;
+    }
+    if (o->z < a->z - lim) {
+        r = -1;
+        o->z = a->z - lim;
+    }
+    if (o->z > a->z + lim) {
+        r = -1;
+        o->z = a->z + lim;
+    }
+    return r;
+}
 
 s32 func_sc02_004_8017C530(s32 arg0, s32 arg1) {
     s32 sp10;

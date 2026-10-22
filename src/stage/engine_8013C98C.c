@@ -83,7 +83,7 @@ extern s32 D_801ED44C;
 extern s32 D_801ED450;
 extern s32 D_801ED478;
 extern s32 D_801ED47C;
-void func_8013D9B0(void);
+void func_8013D9B0();
 extern s32 D_801ED458;
 extern u8 D_801EF2C8;
 extern u8 D_801EF2F1;
@@ -155,7 +155,7 @@ typedef struct {
 extern StageMode D_80115110;
 extern void (*D_8018E8C0[])(void);
 s16 func_80141C50(void);
-void func_8013F350(void);
+s16 func_8013F350(void);
 void func_8013FAF8(s32 a, s32 b);
 void func_8013E958(void);
 s32 func_80141CA4(void);
@@ -377,7 +377,27 @@ extern s32 func_8002A738();
 extern u8 D_801EF2E8[];
 extern u8 D_801EF398[];
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_8013CA14);
+void func_8013CA14(void) {
+    s8 **q = &D_801ED428;
+    s8 *e;
+    u8 n;
+    if (*q != NULL) {
+        if (D_801ED42D == 0) {
+            e = (s8 *)(D_801ED42C * 2 + (s32)D_801ED428);
+            D_801269C8 = D_801269D4 = e[0];
+            n = e[1];
+            D_801ED42C++;
+            D_801ED42D = n;
+            if (n == 0) {
+                D_801269C8 = D_801269D4 = 0;
+                D_801ED42C = 0;
+                *q = NULL;
+            }
+        } else {
+            D_801ED42D--;
+        }
+    }
+}
 
 void func_8013CABC(void) {
     D_801ED44C = 1;
@@ -410,11 +430,43 @@ void func_8013CB5C(void) {
     D_801ED44C = D_801ED47C;
 }
 
+extern u16 D_8011511A;
+s32 func_8014032C(s16 a, s16 b);
+s32 func_8014168C(s16 n);
+
+extern s32 D_801ED45C;
+
 INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_8013CB84);
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_8013CF68);
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_8013D064);
+/* a timer: state 1 counts to 0x23B, state 2 waits out D_801ED440 (the empty case 3 balances the compare tree to
+   test 2 first, as the original does) */
+void func_8013D064(void) {
+    s32 s = D_801ED458;
+    if (s == 0) {
+        return;
+    }
+    switch (s) {
+    case 1:
+        if (++D_801ED45C >= 0x23B) {
+            D_801ED440 = 1;
+            D_801ED458 = 2;
+        }
+        break;
+    case 2:
+        if (--D_801ED440 == 0) {
+            D_801ED440 = 2;
+            func_8013D9B0(2);
+            if (D_801ED44C == 0) {
+                D_801ED458++;
+            }
+        }
+        break;
+    case 3:
+        break;
+    }
+}
 
 s32 func_8013D13C(void) {
     func_8013D9B0();
@@ -868,7 +920,42 @@ void func_8013EA54(void) {
     }
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_8013EB7C);
+void func_8013EB7C(void) {
+    s16 r;
+    s32 w;
+    u16 k;
+    SVECTOR unused;
+    if (func_80141C50() == 0) {
+        D_801151D0 = D_801151C8[D_800AF630.frame];
+        r = func_8013F350();
+        k = D_80115110.unkA;
+        if (k >= 4) {
+            func_8013FAF8((s16)k, (s16)(k + 1));
+        }
+        func_8013FAF8(0, 5);
+        if (D_8011511A == 5) {
+            w = func_8014032C(2, func_8014168C(2));
+        } else {
+            w = func_8014032C((s16)D_8011511A, func_8014168C(D_8011511A));
+        }
+        if (w != 0 && w != D_80115110.unk20) {
+            D_80115110.unk20 = w;
+            func_80139954();
+            func_801376E8(w, D_8018E888);
+        }
+        func_80137B80();
+        if ((D_80115110.padPressed & 0x10) && D_80115110.unkA < 5 && r == 0) {
+            D_80115110.unk18 = 0;
+            func_8002D4C8(0x466, 0);
+            if (D_80115110.unkA != 4) {
+                func_801376E8(func_80141CA4(), D_8018E888);
+            }
+            D_80115110.mode--;
+        } else if ((D_80115110.padPressed & 0x800) || D_80115110.unk1A[0] != 0) {
+            func_8013E958();
+        }
+    }
+}
 
 void func_8013ED6C(void) {
     SVECTOR unused;
@@ -946,7 +1033,15 @@ void func_8013F138(void) {
     }
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_8013F1BC);
+void func_8013F1BC(void) {
+    if (D_80115110.fade != 0) D_80115110.fade -= 0x10; if (D_80115110.fade == 0) {
+        if (D_80115110.unk4 == (D_800AF630.frame ^ 1)) {
+            func_800D2624();
+        } else {
+            D_80115110.mode++;
+        }
+    }
+}
 
 void func_8013F244(void) {
     s16 n = 0;

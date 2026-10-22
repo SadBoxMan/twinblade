@@ -43,7 +43,9 @@ ABILITY_OF_ENTRY = {
     38: (27, '3-Way'), 39: (28, 'Homing'), 40: (29, 'Grenade'), 41: (30, 'Javelin'),
 }
 # packages whose code does not start right after the ID word: Bowl and Homing two data words, Steel a jump table
-TEXT_START = {0x1F: 0xC, 0x28: 0x80, 0x2D: 0xC}
+# (Steel's code starts 8 bytes before the table's apparent end: its last two words are the first instructions of
+# func_ovl28_800CAE80, r149)
+TEXT_START = {0x1F: 0xC, 0x28: 0x78, 0x2D: 0xC}
 
 
 def packages():

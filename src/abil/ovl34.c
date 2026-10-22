@@ -308,7 +308,14 @@ extern void func_8014C3A4();
 extern u8 D_ovl34_800CE0B8;
 extern s32 func_80015954();
 
-INCLUDE_ASM("asm/abil/ovl34/nonmatchings/ovl34", func_ovl34_800CD240);
+s32 func_ovl34_800CD240(u8 *arg0) {
+    if (AF(arg0, s16, 0x1C8) == 0) {
+        func_801599A4(arg0);
+        func_80159B3C(arg0);
+        return 1;
+    }
+    return 0;
+}
 
 void func_ovl34_800CD288(u8 *arg0) {
     s32 pad[8];

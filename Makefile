@@ -76,7 +76,7 @@ C_FILES := $(shell find src -name '*.c' $(NOT_OVL) 2>/dev/null)
 O_FILES := $(patsubst %.s,$(BUILD)/%.o,$(S_FILES)) $(patsubst %.c,$(BUILD)/%.o,$(C_FILES))
 
 .PHONY: all split split-abil split-stg stg-cfgs stage-progress check check-main check-abil check-stg clean progress overlays \
-        regress regress-targets
+        regress regress-targets coverage
 
 all: check
 
@@ -103,16 +103,19 @@ stg-cfgs:
 check: check-main $(addprefix check-,$(OVERLAYS)) check-abil check-stg
 
 # make regress: every check above in one PASS/FAIL table with timings, exit 1 on any failure (tools/regress.py,
-# docs/test_infrastructure.md). Quick mode: `make regress R="abil"` or `R="stg SC03_005"` (areas or image names).
+# docs/test_infrastructure.md). Quick mode: `make regress R="abil"` or `R="sc03_005 sc02_031"` (areas or image names;
+# names given with their area word take only those images).
 regress:
 	$(PYTHON) tools/regress.py $(R)
 
 # one line per checked image, "<area> <name> <built binary> <original>": what tools/regress.py builds and compares
+# (a stage's original is disc/pac4/<NAME>.bin in upper case: regress.py makes it so, rather than a sed that not every
+# sed on a Windows PATH honours)
 regress-targets:
 	@echo "main main $(EXE) $(TARGET)"
 	@$(foreach o,$(OVERLAYS),echo "ovl $(o) $(BUILD)/$(o)/$(o).bin $($(o)_TARGET)";) true
 	@for n in $(ABIL); do echo "abil $$n $(BUILD)/abil/$$n/$$n.bin disc/overlays/code/$$n.bin"; done
-	@for n in $(STG); do echo "stg $$n $(BUILD)/stg/$$n/$$n.bin disc/pac4/$$n.bin"; done | sed -E 's|pac4/(.*)\.bin$$|pac4/\U\1\E.bin|'
+	@for n in $(STG); do echo "stg $$n $(BUILD)/stg/$$n/$$n.bin disc/pac4/$$n.bin"; done
 
 check-abil: $(addprefix check-,$(ABIL))
 
@@ -210,18 +213,15 @@ check-$(1): $(BUILD)/stg/$(1)/$(1).bin
 endef
 $(foreach o,$(STG),$(eval $(call STG_RULES,$(o))))
 
-# Game functions in src/ that are real C rather than INCLUDE_ASM (main EXE, then each overlay).
-# Overlays count C definitions (a line starting a function body) against INCLUDE_ASM stubs; the regex lives in
-# a variable because its ')' would end the $(foreach ...) below.
-FUNCDEF_RE := ^[A-Za-z_][^;=]*[)] *[{]?$$
-progress: $(patsubst %.c,$(BUILD)/%.o,$(C_FILES)) $(foreach o,$(OVERLAYS),$(patsubst %.c,$(BUILD)/%.o,$($(o)_C)))
-	@total=$$(for o in $(patsubst %.c,$(BUILD)/%.o,$(C_FILES)); do $(CROSS)nm $$o; done | grep ' T ' | grep -vc NON_MATCHING); \
-	asm=$$(cat $(C_FILES) | grep -c '^INCLUDE_ASM'); \
-	echo "game code: $$((total - asm)) / $$total functions decompiled"
-	@$(foreach o,$(OVERLAYS),c=$$(cat $($(o)_C) | grep -cE '$(FUNCDEF_RE)'); \
-	  asm=$$(cat $($(o)_C) | grep -c '^INCLUDE_ASM'); echo "$(o): $$c / $$((c + asm)) functions decompiled";)
-	@c=$$(cat src/abil/*.c | grep -cE '$(FUNCDEF_RE)'); asm=$$(cat src/abil/*.c | grep -c '^INCLUDE_ASM'); 	echo "ability packages: $$c / $$((c + asm)) functions decompiled"
-	@$(PYTHON) tools/stage_progress.py --total
+# Game functions in src/ that are real C rather than INCLUDE_ASM, per unit, with splat's empty stubs counted apart
+# (r142: they used to count as decompiled). Reads the sources only; tools/coverage.py --progress.
+progress:
+	@$(PYTHON) tools/coverage.py --progress
+
+# what `make regress` covers, in bytes per area: real C, stubs, asm, PsyQ library; and the proof that every stage
+# image's engine is the village's (needs a built tree)
+coverage:
+	@$(PYTHON) tools/coverage.py
 
 # matched / total for every split stage image (tools/stage_progress.py; --md rewrites docs/stage_status.md)
 stage-progress:

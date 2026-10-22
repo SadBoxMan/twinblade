@@ -57,6 +57,6 @@ segments:
     subsegments:
       - [0x0, rodata, ovl28_id]     # u32 overlay ID (0x28)
       - {start: 0x4, type: data, name: ovl28_rodata, linker_section_order: .rodata} # data in front of the code (as data: a rodata jump table's cases would be .L labels, docs/decomp_recipes.md 7)
-      - [0x80, c, ovl28]            # entry 0x800CAE88
+      - [0x78, c, ovl28]            # entry 0x800CAE80
       - [0x1BE0, data, ovl28_data]
   - [0x1D14]

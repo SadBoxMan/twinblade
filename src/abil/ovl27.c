@@ -111,6 +111,16 @@ extern u8 D_ovl27_800CB8CC[];
 extern s32 func_80146E98();
 extern s32 func_ovl27_800CB3D8();
 
+extern u8 D_ovl27_800CBA88;
+extern u8 D_ovl27_800CBA89;
+extern u8 D_ovl27_800CBA8A;
+extern u8 D_ovl27_800CBA8C;
+extern u8 D_ovl27_800CBA8D;
+extern u8 D_ovl27_800CBA8E;
+extern s32 func_801465C0();
+extern void func_8001CD50();
+extern void func_800233CC();
+
 INCLUDE_ASM("asm/abil/ovl27/nonmatchings/ovl27", func_ovl27_800CB058);
 
 void func_ovl27_800CB190(u8 *arg0) {
@@ -222,7 +232,35 @@ void func_ovl27_800CB580(u8 *arg0) {
     func_80146C3C();
 }
 
-INCLUDE_ASM("asm/abil/ovl27/nonmatchings/ovl27", func_ovl27_800CB5DC);
+void func_ovl27_800CB5DC(u8 *arg0) {
+    void *temp_v0;
+    void *temp_s3;
+    u8 *p;
+    u16 h;
+
+    temp_s3 = AF(arg0, void *, 0x34);
+    temp_v0 = func_801465C0();
+    AF(arg0, void *, 0x20) = temp_v0;
+    if (temp_v0 != 0) {
+        p = &D_ovl27_800CBA88;
+        func_8001CD50(temp_v0, p);
+        func_800233CC(p, 0x20);
+        *p = 0x20;
+        D_ovl27_800CBA89 = 0x40;
+        D_ovl27_800CBA8A = 0x80;
+        D_ovl27_800CBA8E = 0;
+        D_ovl27_800CBA8D = 0;
+        D_ovl27_800CBA8C = 0;
+        AF(temp_v0, s32, 4) |= 0x50000000;
+        h = AF(AF(temp_s3, void *, 0x20), u16, 0x12);
+        AF(temp_v0, s16, 0x10) = 0x400;
+        AF(temp_v0, void *, 0x34) = arg0 + 0x38;
+        AF(temp_v0, u16, 0x12) = h;
+        AF(arg0, u16, 2)++;
+        return;
+    }
+    func_80146C3C(arg0);
+}
 
 void func_ovl27_800CB6D4(u8 *arg0) {
     if (*AF(arg0, u16 *, 0x34) == 0) {

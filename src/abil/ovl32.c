@@ -61,7 +61,7 @@ extern void func_80149374();
 extern void func_ovl32_800CD5EC();
 extern void func_ovl32_800CD834();
 extern void func_80146DB8();
-extern s32 func_ovl32_800CD494();
+extern void func_ovl32_800CD494();
 
 extern u8 D_ovl32_800CE240;
 extern s32 func_800D21C4();
@@ -380,7 +380,28 @@ extern void func_ovl32_800CDDA8();
 extern void RotMatrixYXZ();
 extern void ApplyMatrixSV();
 
-INCLUDE_ASM("asm/abil/ovl32/nonmatchings/ovl32", func_ovl32_800CD494);
+extern s16 D_ovl32_800CE210[];
+extern u16 D_ovl32_800CE212[];
+
+void func_ovl32_800CD494(u8 *arg0) {
+    s16 i;
+    s16 v;
+    u16 t;
+    void *m;
+
+    i = AF(arg0, s16, 0x5E);
+    m = AF(arg0, void *, 0x20);
+    v = D_ovl32_800CE210[i * 2];
+    if (v != 0) {
+        AF(arg0, s16, 0x5E) = i + 1;
+        t = D_ovl32_800CE212[i * 2];
+        AF(m, s16, 0x28) = v;
+        AF(m, u16, 0x18) = AF(m, u16, 0x1A) += 0x555;
+        AF(m, u16, 0x2A) = t;
+        return;
+    }
+    func_80162CCC(arg0, m);
+}
 
 void func_ovl32_800CD508(u8 *arg0) {
     s32 pad[8];
