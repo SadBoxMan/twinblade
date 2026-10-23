@@ -136,6 +136,10 @@ extern u16 D_ovl25_800CBFFC[][4];
 /* a textured stack primitive for func_80016ED4: four vertices, four UV pairs, a colour, the code, the page */
 typedef struct { AVec v[4]; u16 uv[8]; ACol c; s32 code; u8 tp; } ATPrim;
 
+extern s32 func_80146E98();
+extern void func_80165A78();
+extern void func_80159B3C();
+
 INCLUDE_ASM("asm/abil/ovl25/nonmatchings/ovl25", func_ovl25_800CB0B0);
 
 void func_ovl25_800CB1CC(u8 *arg0) {
@@ -158,7 +162,46 @@ void func_ovl25_800CB1CC(u8 *arg0) {
     func_ovl25_800CB964(arg0, &a, &b);
 }
 
-INCLUDE_ASM("asm/abil/ovl25/nonmatchings/ovl25", func_ovl25_800CB288);
+void func_ovl25_800CB288(u8 *arg0) {
+    AVec v;
+    AVec b;
+    u16 t;
+    u16 u;
+
+    if (func_80146E98(arg0) == 0 || !(func_80148800(arg0) & 0x20)) {
+        v.vx = 0;
+        v.vy = 0;
+        v.vz = 0;
+        b.vx = AF(arg0, s16, 0x234);
+        b.vy = b.vz = AF(arg0, s16, 0x236);
+        func_ovl25_800CB428(arg0, &v, &b);
+        func_ovl25_800CB6A0(arg0, &v, &b, 1);
+        func_ovl25_800CB6A0(arg0, &v, &b, 0);
+        func_ovl25_800CB964(arg0, &v, &b);
+        if (AF(arg0, s16, 0x236) != 0x10) {
+            t = AF(arg0, u16, 0x23A) + 0x100;
+            AF(arg0, s16, 0x23A) = t;
+            u = AF(arg0, u16, 0x236) - t;
+            AF(arg0, s16, 0x236) = u;
+            if ((s16) u < 0x10) {
+                AF(arg0, s16, 0x236) = 0x10;
+            }
+        } else {
+            t = AF(arg0, u16, 0x238) + 0x200;
+            AF(arg0, s16, 0x238) = t;
+            u = AF(arg0, u16, 0x234) - t;
+            AF(arg0, s16, 0x234) = u;
+            if ((s16) u < 0) {
+                AF(arg0, s16, 0x234) = 0;
+                goto end;
+            }
+        }
+    } else {
+end:
+        func_80165A78(arg0);
+        func_80159B3C(arg0);
+    }
+}
 
 void func_ovl25_800CB3B4(void) {
     s32 i;

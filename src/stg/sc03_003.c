@@ -109,9 +109,63 @@ typedef struct { s16 x, y, z, pad; } SV4;
 typedef struct { s32 x, y, z, pad; } V4;
 extern void func_sc03_003_8017C3EC();
 
+typedef struct { s16 vx, vy, vz, pad; } SV;
+typedef struct { u16 v[6]; } U12;
+typedef struct { u16 x, y, z, pad; } UV4;
+typedef struct { u8 r, g, b, cd; } CV4;
+typedef struct { UV4 p0; UV4 p1; CV4 c0; CV4 c1; s32 code; } LineArg;
+typedef struct { s16 m[3][3]; s32 t[3]; } WMtx;
+typedef struct { SV4 p[4]; CV4 c[4]; s32 code; } QuadArg;
+typedef struct { u16 active; s16 y; s16 dy; s16 ang; s32 x; s32 z; } Pt16;
+typedef struct { s16 a, b, c, g; u8 d, e; s16 f; Pt16 pts[16]; } PtSys;
+typedef struct { u32 *ot; u8 pad[0x10]; } OtRef;
+typedef struct { u8 b[0x14]; } Ot14;
+typedef struct { unsigned addr : 24; unsigned len : 8; } PTag;
+typedef struct { U12 e[9]; } U12x9;
+typedef struct { s32 vx, vy, vz, pad; } V4F20;
+typedef struct { s16 x, y, z, pad; } SV_8E8A0;
+typedef struct { s32 x, y, z, pad; } VEC_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT_8E8A0;
+typedef struct { u8 r, g, b, cd; } CV_8E8A0;
+typedef struct { SV_8E8A0 pt[4]; CV_8E8A0 col[4]; s32 code; } PRIM_8E8A0;
+typedef struct { s32 x, y, z; } POS_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } SMtx;
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef union { s32 w; XY s; } UXY;
+typedef void (*VoidFn)();
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+extern s32 func_80012C6C();
+extern s32 func_80012ABC();
+extern void func_8012F14C();
+extern s16 D_80126940[];
+
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+extern s32 func_80146C3C();
+extern s32 func_80146E98();
+
 INCLUDE_ASM("asm/stg/sc03_003/nonmatchings/sc03_003", func_sc03_003_8017BEF8);
 
-INCLUDE_ASM("asm/stg/sc03_003/nonmatchings/sc03_003", func_sc03_003_8017BFA4);
+void func_sc03_003_8017BFA4(u8 *arg0) {
+    void *o;
+
+    o = AF(arg0, void *, 0x20);
+    if (AF(arg0, s32, 0x1C) & 1) {
+        AF(o, s32, 4) |= 0x80000000;
+    } else {
+        AF(o, s32, 4) &= 0x7FFFFFFF;
+    }
+    if (func_80146E98((s32) arg0) != 0) {
+        func_80146C3C((s32) arg0);
+    }
+}
 
 void func_sc03_003_8017C014(SV8 *r, SV8 *out, s32 arg2) {
     SV8 v[4];
@@ -740,7 +794,34 @@ void func_sc03_003_8017EFB8(void) {
     func_sc03_003_8017EFEC();
 }
 
-INCLUDE_ASM("asm/stg/sc03_003/nonmatchings/sc03_003", func_sc03_003_8017EFEC);
+void func_sc03_003_8017EFEC(u8 *p) {
+    WMtx m;
+    SV4 v;
+    SV4 o;
+
+    AF(p, s32, 8) = (s16) func_80012C6C(AF(p, s16, 8), AF(p, s16, 0xC), 4);
+    AF(p, s32, 0x10) = (s16) func_80012C6C(AF(p, s16, 0x10), AF(p, s16, 0x14), 4);
+    AF(p, s16, 0x18) = func_80012ABC(AF(p, s16, 0x18), AF(p, s16, 0x20), 4);
+    AF(p, s16, 0x1A) = func_80012ABC(AF(p, s16, 0x1A), AF(p, s16, 0x22), 4);
+    AF(p, s16, 0x1C) = func_80012ABC(AF(p, s16, 0x1C), AF(p, s16, 0x24), 4);
+    AF(p, s16, 0x28) = func_80012C6C(AF(p, s16, 0x28), AF(p, s16, 0x2E), 0x10);
+    AF(p, s16, 0x2A) = func_80012C6C(AF(p, s16, 0x2A), AF(p, s16, 0x30), 0x10);
+    AF(p, s16, 0x2C) = func_80012C6C(AF(p, s16, 0x2C), AF(p, s16, 0x32), 0x10);
+    AF(p, s32, 0x48) = AF(p, s16, 0x28) + D_80126940[0];
+    AF(p, s32, 0x4C) = AF(p, s16, 0x2A) + D_80126942;
+    AF(p, s32, 0x50) = AF(p, s16, 0x2C) + D_80126944;
+    RotMatrixZYX(p + 0x18, &m);
+    m.t[0] = AF(p, s16, 0x28) + D_80126940[0];
+    m.t[1] = AF(p, s16, 0x2A) + D_80126942;
+    m.t[2] = AF(p, s16, 0x2C) + D_80126944;
+    v.x = 0;
+    v.y = 0;
+    v.z = AF(p, s32, 0x10);
+    func_8012F14C(&m, &v, &o);
+    AF(p, s32, 0x3C) = o.x;
+    AF(p, s32, 0x40) = o.y;
+    AF(p, s32, 0x44) = o.z;
+}
 
 s32 func_sc03_003_8017F198(void) {
     return 0x87;

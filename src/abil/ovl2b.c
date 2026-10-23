@@ -234,7 +234,34 @@ void func_ovl2b_800CB424(u8 *arg0) {
     func_80146C3C();
 }
 
-INCLUDE_ASM("asm/abil/ovl2b/nonmatchings/ovl2b", func_ovl2b_800CB480);
+extern u8 D_ovl2b_800CB648;
+extern s32 D_ovl2b_800CB65C[];
+extern s32 D_ovl2b_800CB660[];
+extern s32 D_ovl2b_800CB664[];
+extern s32 func_801465C0();
+extern void func_8001CC3C();
+
+void func_ovl2b_800CB480(s32 arg0) {
+    s32 temp_v0;
+    u16 st;
+
+    temp_v0 = func_801465C0();
+    if (temp_v0 == 0) {
+        func_80146C3C(arg0);
+        return;
+    }
+    AF(arg0, s32, 0x20) = temp_v0;
+    func_8001CC3C(temp_v0, (s32) &D_ovl2b_800CB648, 0x1B8, 0x100);
+    AF(temp_v0, u8, 0x27) = 0x1A;
+    AF(temp_v0, s16, 0x1A) = 0x2000;
+    AF(temp_v0, s16, 0x18) = 0x2000;
+    AF(arg0, s32, 0x10) = D_ovl2b_800CB65C[AF(arg0, s32, 0x2C) * 4];
+    AF(arg0, s32, 0x14) = D_ovl2b_800CB660[AF(arg0, s32, 0x2C) * 4];
+    AF(arg0, s32, 0x18) = D_ovl2b_800CB664[AF(arg0, s32, 0x2C) * 4];
+    AF(arg0, s32, 0x1C) = 0x10;
+    st = AF(arg0, u16, 2) + 1;
+    AF(arg0, u16, 2) = st;
+}
 
 void func_ovl2b_800CB55C(u8 *arg0) {
     AF(arg0, s32, 4) += AF(arg0, s32, 0x10);

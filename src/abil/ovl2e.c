@@ -225,7 +225,53 @@ void func_ovl2e_800CB488(u8 *arg0) {
     func_80146C3C();
 }
 
-INCLUDE_ASM("asm/abil/ovl2e/nonmatchings/ovl2e", func_ovl2e_800CB4E4);
+typedef struct { s32 vx, vy, vz, pad; } ALVec;
+extern u8 D_ovl2e_800CB8EC;
+extern u8 D_ovl2e_800CB8F8;
+extern AVec D_ovl2e_800CB954[];
+extern ALVec D_ovl2e_800CB984;
+extern s32 func_801465C0();
+extern void func_8001CC3C();
+extern void func_80128EA8();
+
+void func_ovl2e_800CB4E4(u8 *arg0) {
+    AVec r;
+    AMtx m;
+    ALVec w;
+    u8 *o;
+    s32 q;
+
+    o = (u8 *) func_801465C0();
+    AF(arg0, u8 *, 0x20) = o;
+    if (o == NULL) {
+        goto fail;
+    }
+    func_8001CC3C(o, &D_ovl2e_800CB8EC, 0, 0);
+    AF(o, u8, 0x27) = 0x90;
+    AF(o, s16, 0x18) = AF(o, s16, 0x1A) = 0x3000;
+    AF(o, s32, 4) |= 0x50000000;
+    func_80128EA8(o, arg0 + 0x24, &D_ovl2e_800CB8F8);
+    w = D_ovl2e_800CB984;
+    r = D_ovl2e_800CB954[AF(arg0, s32, 0x2C)];
+    if (AF(arg0, s32, 0x30) != 0) {
+        r.vx += ((rand() & 0x3F) << 4) - 0x200;
+        r.vy += ((rand() & 0x3F) << 4) - 0x200;
+        r.vz += ((rand() & 0x3F) << 4) - 0x200;
+        w.vx = ((rand() & 0x1F) - 0x10) * 0x18000;
+        w.vy = ((rand() & 0x1F) - 0x10) * 0x18000;
+        w.vz = ((rand() & 0x1F) - 0x10) * 0x18000;
+    }
+    RotMatrixZYX(&r, &m);
+    ApplyMatrixLV(&m, &w, &w);
+    AF(arg0, s32, 0x10) = w.vx;
+    AF(arg0, s32, 0x14) = w.vy;
+    AF(arg0, s32, 0x18) = w.vz;
+    func_80146E90(arg0, 4);
+    AF(arg0, u16, 2)++;
+    return;
+fail:
+    func_80146C3C(arg0);
+}
 
 void func_ovl2e_800CB710(u8 *arg0) {
     u8 *o;
@@ -265,7 +311,18 @@ void func_ovl2e_800CB840(u8 *a) {
     *(s32 *)(a + 0xc) = (*(s32 *)(a + 0xc) + *(s32 *)(a + 0x18));
 }
 
-INCLUDE_ASM("asm/abil/ovl2e/nonmatchings/ovl2e", func_ovl2e_800CB874);
+void func_ovl2e_800CB874(u8 *arg0) {
+    u8 *m;
+    s16 v;
+
+    m = AF(arg0, u8 *, 0x20);
+    v = AF(m, u8, 0x24);
+    v -= 4;
+    if (v < 0) {
+        v = 0;
+    }
+    AF(m, u8, 0x24) = AF(m, u8, 0x25) = AF(m, u8, 0x26) = v;
+}
 
 void func_ovl2e_800CB8A8(u8 *arg0, s32 arg1) {
     u16 temp_v0;

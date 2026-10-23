@@ -555,6 +555,45 @@ extern u8 D_sc04_006_80183710;
 extern s32 func_801290DC();
 extern void func_80149350();
 
+typedef struct { U12 e[9]; } U12x9;
+typedef struct { s32 vx, vy, vz, pad; } V4F20;
+typedef struct { s16 x, y, z, pad; } SV_8E8A0;
+typedef struct { s32 x, y, z, pad; } VEC_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT_8E8A0;
+typedef struct { u8 r, g, b, cd; } CV_8E8A0;
+typedef struct { SV_8E8A0 pt[4]; CV_8E8A0 col[4]; s32 code; } PRIM_8E8A0;
+typedef struct { s32 x, y, z; } POS_8E8A0;
+extern WMtx D_800AE620;
+extern u8 D_80078EAE;
+extern u8 D_80078E78[];
+extern s32 func_8012B864();
+extern s32 func_8012B70C();
+extern u8 D_800D3918;
+extern u8 D_801152B0;
+
+extern s32 func_80012C6C();
+extern s32 func_80012ABC();
+extern void ApplyMatrixSV();
+
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef union { s32 w; XY s; } UXY;
+typedef void (*VoidFn)();
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
+extern s32 func_8012CBA4();
+extern void func_80131E00();
+extern void func_8012ADE4();
+extern s32 func_8012AF0C();
+extern s16 D_80126B5E;
+extern s16 D_80126B66;
+extern s16 D_80126B62;
+extern s32 func_8012F568();
+
 INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017D268);
 
 void func_sc04_006_8017D344(u8 *arg0) {
@@ -570,7 +609,30 @@ void func_sc04_006_8017D344(u8 *arg0) {
     func_sc04_006_8017D3E4((s32) arg0, (s32) &v);
 }
 
-INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017D3E4);
+void func_sc04_006_8017D3E4(u8 *o, s16 *p) {
+    WMtx m;
+    SV8 v;
+    UV4 r;
+    AF(o, s32, 0x8) = (s16)func_80012C6C(AF(o, s16, 0x8), AF(o, s16, 0xC), 4);
+    AF(o, s32, 0x10) = (s16)func_80012C6C(AF(o, s16, 0x10), AF(o, s16, 0x14), 4);
+    AF(o, s16, 0x18) = func_80012ABC(AF(o, s16, 0x18), AF(o, s16, 0x20), 4);
+    AF(o, s16, 0x1A) = func_80012ABC(AF(o, s16, 0x1A), AF(o, s16, 0x22), 4);
+    AF(o, s16, 0x1C) = func_80012ABC(AF(o, s16, 0x1C), AF(o, s16, 0x24), 4);
+    AF(o, s16, 0x28) = func_80012C6C(AF(o, s16, 0x28), AF(o, s16, 0x2E), 0x10);
+    AF(o, s16, 0x2A) = func_80012C6C(AF(o, s16, 0x2A), AF(o, s16, 0x30), 0x10);
+    AF(o, s16, 0x2C) = func_80012C6C(AF(o, s16, 0x2C), AF(o, s16, 0x32), 0x10);
+    AF(o, s32, 0x48) = AF(o, s16, 0x28) + p[0];
+    AF(o, s32, 0x4C) = AF(o, s16, 0x2A) + p[1];
+    AF(o, s32, 0x50) = AF(o, s16, 0x2C) + p[2];
+    func_sc04_006_8017DD28(o + 0x18, &m);
+    v.x = 0;
+    v.y = 0;
+    v.z = AF(o, s32, 0x10);
+    ApplyMatrixSV(&m, &v, &r);
+    AF(o, s32, 0x3C) = ((s16)r.x >> 3) + AF(o, s16, 0x28) + p[0];
+    AF(o, s32, 0x40) = ((s16)r.y >> 3) + AF(o, s16, 0x2A) + p[1];
+    AF(o, s32, 0x44) = ((s16)r.z >> 3) + AF(o, s16, 0x2C) + p[2];
+}
 
 s32 func_sc04_006_8017D584(s32 arg0) {
     return func_8013B7F4(D_sc04_006_801836F0[arg0], 0);
@@ -1090,13 +1152,126 @@ void func_sc04_006_8017EDEC(void) {
 
 INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017EDF4);
 
-INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017EE34);
+s32 func_sc04_006_8017EE34(u8 *o) {
+    s32 r;
+    s32 v;
+    u8 *q;
+    s32 i;
+
+    r = 1;
+    v = func_8012CBA4();
+    if (v == 0) {
+        func_8012ADE4(o);
+        func_sc04_006_8017F180(o, 2);
+        r = 0;
+    } else if ((v & 0xFF) == 2) {
+        func_80131E00(o, 0x12);
+        return -1;
+    } else if ((v & 0xFF) == 0x1A) {
+        func_sc04_006_8017F354(o);
+        return -1;
+    } else if (v & 0x8000) {
+        if (!(v & 0x2000)) {
+            func_8012ADE4(o);
+        }
+        func_sc04_006_8017F180(o, 5);
+        r = 0;
+    } else if (v & 0x4000) {
+        func_8012ADE4(o);
+        func_sc04_006_8017F180(o, 2);
+        r = 0;
+    }
+    q = (u8 *)&D_801202A0;
+    for (i = 0; i < 0x60; i++) {
+        if (AF(q, u16, 0) != 0 && AF(o, u16, 0) == AF(q, u16, 0) && o != q && func_8012AF0C(o, q) != 0) {
+            if (r != 0) {
+                func_sc04_006_8017F180(o, 2);
+            }
+            return r;
+        }
+        q += 0x10C;
+    }
+    return r;
+}
 
 INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017EF74);
 
-INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017EFF4);
+s32 func_sc04_006_8017EFF4(u8 *o) {
+    SV8 a;
+    SV8 b;
+    SV8 d;
+    u8 *p;
 
-INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017F180);
+    a.x = D_80126B5E;
+    a.y = D_80126B62;
+    a.z = D_80126B66;
+    b.x = AF(o, s16, 6);
+    b.y = AF(o, s16, 0xA);
+    b.z = AF(o, s16, 0xE);
+    a.y -= 0x2A;
+    p = (u8 *)((AF(o, u32, 0x58) & 0x0FFFFFFF) | 0x80000000);
+    if (AF(p, s16, 4) + b.x > a.x || AF(p, s16, 6) + b.x < a.x) {
+        return 0;
+    }
+    if (AF(p, s16, 0xC) + b.z > a.z || AF(p, s16, 0xE) + b.z < a.z) {
+        return 0;
+    }
+    if (AF(p, s16, 8) + b.y > a.y || AF(p, s16, 0xA) + b.y < a.y) {
+        return 0;
+    }
+    d.x = a.x - b.x;
+    d.y = a.y - b.y;
+    d.z = a.z - b.z;
+    VectorNormalSS(&d, &d);
+    func_8012F568(1, 0x2001, AF(o, s16, 0xDC), 0xE, &a, &d);
+    return 1;
+}
+
+void func_sc04_006_8017F180(u8 *o, s32 mode) {
+    V3 v;
+    SV8 s;
+    WMtx m;
+    u8 *g;
+    s32 a;
+    s32 b;
+
+    g = D_80078E78;
+    v.x = v.y = 0;
+    if (D_80078EAE) {
+        v.z = -0x60000;
+    } else {
+        v.z = -0x80000;
+    }
+    switch (mode) {
+    case 0:
+        if (g[0x36] != 0 && (rand() & 1)) {
+            break;
+        }
+    case 1:
+        AF(o, s16, 0xDC) = func_8012B864(o);
+        break;
+    case 2:
+        AF(o, s16, 0xDC) += 0x800;
+        break;
+    case 3:
+        while (AF(o, s16, 0xDC) == (s16)(rand() % 4096)) {
+        }
+        break;
+    case 4:
+        AF(o, s16, 0xDC) = (func_8012B864(o) + 0x800) & 0xFFF;
+        break;
+    case 5:
+        s.x = AF(o, s32, 0x10) >> 8;
+        s.z = AF(o, s32, 0x18) >> 8;
+        a = func_8012B70C(&D_800D3918, &D_801152B0);
+        b = func_8012B70C(&s, &D_800D3918);
+        AF(o, s16, 0xDC) = (a * 2 - b) & 0xFFF;
+        break;
+    }
+    m = D_800AE620;
+    RotMatrixY(AF(o, s16, 0xDC), &m);
+    ApplyMatrixLV(&m, &v, o + 0x10);
+}
 
 INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017F354);
 

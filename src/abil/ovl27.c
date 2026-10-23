@@ -121,7 +121,43 @@ extern s32 func_801465C0();
 extern void func_8001CD50();
 extern void func_800233CC();
 
-INCLUDE_ASM("asm/abil/ovl27/nonmatchings/ovl27", func_ovl27_800CB058);
+extern u8 D_ovl27_800CB8B0;
+extern s32 D_ovl27_800CB984;
+extern u8 D_ovl27_800CB988;
+extern s32 func_80146578();
+extern void func_8001CB6C();
+extern void func_80149374();
+extern void func_80146DE8();
+extern void func_80146E90();
+
+void func_ovl27_800CB058(u8 *arg0) {
+    u8 *s2;
+    u8 *o;
+    s32 n;
+    u32 h;
+
+    s2 = AF(arg0, u8 *, 0x4C);
+    o = (u8 *) func_80146578();
+    AF(arg0, u8 *, 0x20) = o;
+    if (o != 0) {
+        func_8001CB6C(o, &D_ovl27_800CB8B0, 0x1A0, 0x100);
+        AF(o, u8, 0x27) = 0x19;
+        AF(o, s32, 4) = (AF(o, s32, 4) | 0x50001000) & ~0x40;
+        n = D_ovl27_800CB984++;
+        h = AF(((u8 **) s2)[8], u16, 0x12);
+        AF(o, s16, 0x10) = 0x400;
+        AF(o, u8 *, 0x34) = &D_ovl27_800CB988 + ((n & 7) << 5);
+        AF(o, u16, 0x12) = h;
+        func_80149374(s2, arg0 + 4, h);
+        func_80146DE8(arg0, 0, 0, -0x100000);
+        func_80146E90(arg0, 0x3C);
+        func_80146CA0(arg0);
+        func_80146A6C(0x4A, arg0, AF(arg0, s16, 6), AF(arg0, s16, 0xA), AF(arg0, s16, 0xE), 0, 0);
+        func_80147324(0x8EF);
+        return;
+    }
+    func_ovl27_800CB384(arg0);
+}
 
 void func_ovl27_800CB190(u8 *arg0) {
     s32 v[3];
@@ -172,7 +208,30 @@ void func_ovl27_800CB190(u8 *arg0) {
     func_80146CA0(arg0);
 }
 
-INCLUDE_ASM("asm/abil/ovl27/nonmatchings/ovl27", func_ovl27_800CB2C8);
+void func_ovl27_800CB2C8(u8 *arg0) {
+    s32 sp10[3];
+    s16 temp_v0_2;
+    s16 v;
+    void *temp_s1;
+    void *o;
+
+    temp_s1 = AF(arg0, void *, 0x20);
+    o = AF(arg0, void *, 0x4C);
+    v = AF(temp_s1, u8, 0x24);
+    v -= 0x10;
+    if (v < 0) {
+        func_80146CA0(arg0);
+        return;
+    }
+    AF(temp_s1, u8, 0x24) = AF(temp_s1, u8, 0x25) = AF(temp_s1, u8, 0x26) = v;
+    temp_v0_2 = func_80012ABC(AF(temp_s1, s16, 0x12), AF(AF(o, void *, 0x20), s16, 0x12), 0x10);
+    AF(temp_s1, s16, 0x12) = temp_v0_2;
+    func_8001382C(temp_v0_2, arg0 + 0x24, sp10);
+    AF(arg0, s32, 0x10) = sp10[0];
+    AF(arg0, s32, 0x14) = sp10[1];
+    AF(arg0, s32, 0x18) = sp10[2];
+    func_80162FC0(arg0);
+}
 
 void func_ovl27_800CB384(void) {
     func_80162CCC();

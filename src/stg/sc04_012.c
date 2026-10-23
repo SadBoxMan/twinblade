@@ -1,5 +1,6 @@
 #include "common.h"
 #include "gte.h"
+#include "psyq.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 void func_sc04_012_8017BE9C(void) {
@@ -483,6 +484,69 @@ extern u8 D_sc04_012_801822CC;
 extern s32 func_801290DC();
 extern void func_80149350();
 
+extern s32 func_8012C354();
+extern void func_8001C214();
+extern u32 func_80029504();
+extern u8 D_sc04_012_8018224C;
+extern u8 D_sc04_012_8018F198;
+extern u8 D_sc04_012_8018F210;
+extern u8 D_sc04_012_8018F288;
+extern u8 D_sc04_012_8018222C;
+extern u8 D_sc04_012_8018223C;
+
+typedef struct { U12 e[9]; } U12x9;
+typedef struct { s32 vx, vy, vz, pad; } V4F20;
+typedef struct { s16 x, y, z, pad; } SV_8E8A0;
+typedef struct { s32 x, y, z, pad; } VEC_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT_8E8A0;
+typedef struct { u8 r, g, b, cd; } CV_8E8A0;
+typedef struct { SV_8E8A0 pt[4]; CV_8E8A0 col[4]; s32 code; } PRIM_8E8A0;
+typedef struct { s32 x, y, z; } POS_8E8A0;
+typedef void (*VoidFn)();
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+typedef struct { u8 pad[0x10]; XY pt[12]; } Pts80182FD4;
+typedef struct {
+    u32 tag;
+    u8 r0, g0, b0, code;
+    s16 x0, y0;
+    u8 u0, v0;
+    u16 clut;
+    s16 x1, y1;
+    u8 u1, v1;
+    u16 tpage;
+    s16 x2, y2;
+    u8 u2, v2;
+    u16 pad1;
+    s16 x3, y3;
+    u8 u3, v3;
+    u16 pad2;
+} PFT4;
+typedef struct { u32 tag; u32 code; } PMODE;
+typedef struct { u8 pad[0x10]; XY t[13]; } FANUV;
+extern u8 D_80126B5C;
+extern u8 D_sc04_012_80182290;
+extern u8 D_sc04_012_80182298;
+extern s8 D_sc04_012_80191CBF;
+extern s32 D_sc04_012_801930C0;
+extern s16 D_sc04_012_801930C4;
+extern u8 D_sc04_012_80191C70[];
+extern void func_80015978();
+extern void *D_sc04_012_801930C8;
+
+typedef union { s32 w; XY s; } UXY;
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+extern void func_800139C8();
+static inline void clamp_DCB4(s16 *p, s16 x, s16 lim) {
+    if (x > lim) {
+        *p = x - lim;
+    } else if (-lim > x) {
+        *p = x + lim;
+    }
+}
+
 INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017D190);
 
 void func_sc04_012_8017D248(u8 *arg0, u8 *arg1) {
@@ -516,7 +580,43 @@ void func_sc04_012_8017D248(u8 *arg0, u8 *arg1) {
 
 INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017D3E0);
 
-INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017D4CC);
+void func_sc04_012_8017D4CC(u8 *o) {
+    if (func_8012C354(o, &D_sc04_012_8018224C) == 0) return;
+    switch (AF(o, s16, 0x70)) {
+    case 0:
+        break;
+    case 1:
+        func_8001C214(AF(o, s32, 0x20), &D_sc04_012_8018F198);
+        AF(o, u32, 0x58) = (u32)&D_sc04_012_8018222C | 0x40000000 | 0x20000000;
+        break;
+    case 2:
+        func_8001C214(AF(o, s32, 0x20), &D_sc04_012_8018F210);
+        AF(o, u32, 0x58) = (u32)&D_sc04_012_8018223C | 0x40000000 | 0x20000000;
+        break;
+    case 3:
+        func_8001C214(AF(o, s32, 0x20), &D_sc04_012_8018F288);
+        AF(o, u32, 0x58) = (u32)&D_sc04_012_8018223C | 0x40000000 | 0x20000000;
+        break;
+    }
+    AF(o, u8, 0xC0) = 1;
+    AF(o, u8, 0x75) = 2;
+    AF(o, s16, 0xAE) = -1;
+    AF(o, s16, 0x2) = 1;
+    if (func_80029504() >= 0x2F0) {
+        if (AF(o, s16, 0x70) == 0) AF(AF(o, u8 *, 0x20), s16, 0x12) = 0xD00;
+        if (AF(o, s16, 0x70) == 1) AF(AF(o, u8 *, 0x20), s16, 0x12) = 0xD00;
+        if (AF(o, s16, 0x70) == 2) AF(AF(o, u8 *, 0x20), s16, 0x12) = 0x300;
+        if (AF(o, s16, 0x70) == 3) AF(AF(o, u8 *, 0x20), s16, 0x12) = 0x300;
+    } else {
+        if (AF(o, u16, 0x70) < 2) {
+            AF(o, s16, 0x2) = 2;
+        } else {
+            if (AF(o, s16, 0x70) == 2) AF(AF(o, u8 *, 0x20), s16, 0x12) = 0x100;
+            if (AF(o, s16, 0x70) == 3) AF(AF(o, u8 *, 0x20), s16, 0x12) = 0x100;
+            AF(o, s16, 0x2) = 3;
+        }
+    }
+}
 
 void func_sc04_012_8017D698(u8 *arg0) {
     D_sc04_012_80182280[AF(arg0, u16, 2)]();
@@ -585,7 +685,37 @@ void func_sc04_012_8017D960(u8 *arg0) {
     D_sc04_012_801822B0[AF(arg0, u16, 2)]();
 }
 
-INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017D99C);
+void func_sc04_012_8017D99C(u8 *o) {
+    typedef struct { u8 p0[0x70]; s16 f70; u8 p1[0xDC - 0x72]; s32 fDC; u8 p2[0xFC - 0xE0]; s16 fFC; } ObjS;
+    SV8 v;
+    s32 i;
+    u8 *e;
+    s8 *p;
+
+    D_sc04_012_801930C0 = ((ObjS *) o)->fFC;
+    D_sc04_012_801930C4 = ((ObjS *) o)->fDC;
+    D_sc04_012_801930C8 = &D_sc04_012_80182290 + ((ObjS *) o)->f70 * 4;
+    D_sc04_012_801930CC = &D_sc04_012_80182298 + ((ObjS *) o)->f70 * 8;
+    func_80015978(&D_80126B5C, &v);
+    i = 0x4F;
+    v.y = AF(o, s16, 0xA);
+    p = &D_sc04_012_80191CBF;
+    do {
+        *p = 0;
+        i--;
+        p--;
+    } while (i >= 0);
+    for (i = 0; i < D_sc04_012_801930C0; i++) {
+        e = (u8 *) func_801290DC(0x61, &v);
+        if (e != 0) {
+            D_sc04_012_80191C70[i] = 1;
+            AF(e, s32, 0x34) = i;
+            func_sc04_012_8017DED4(e);
+            AF(e, s16, 0xA) += (rand() & 0xF) * 0x30;
+        }
+    }
+    func_8012AD50(o);
+}
 
 INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017DAE4);
 
@@ -638,7 +768,50 @@ INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017DD84);
 
 INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017DE74);
 
-INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017DED4);
+void func_sc04_012_8017DED4(u8 *o) {
+    SV8 v;
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 e;
+    s32 f;
+    s32 g;
+    s32 h;
+    s32 x;
+    s32 lim;
+
+    a = rand();
+    b = rand();
+    c = rand();
+    a &= 1;
+    a <<= 8;
+    b &= 0x1F;
+    b <<= 3;
+    a += b;
+    a += c & 0x1F;
+    v.x = a;
+    v.z = 0;
+    v.y = 0;
+    e = rand();
+    f = rand();
+    g = rand();
+    h = rand();
+    e &= 3;
+    e <<= 10;
+    f &= 0x1F;
+    f <<= 5;
+    e += f;
+    g &= 3;
+    g <<= 8;
+    e += g;
+    func_800139C8(e + (h & 0xFF), &v, &v);
+    clamp_DCB4(&v.x, v.x, ((s16 *) D_sc04_012_801930C8)[0]);
+    clamp_DCB4(&v.z, v.z, ((s16 *) D_sc04_012_801930C8)[1]);
+    AF(o, s16, 6) += v.x;
+    AF(o, s16, 0xA) += v.y;
+    AF(o, s16, 0xE) += v.z;
+    AF(o, s16, 0x16) = (rand() & 7) + 8;
+}
 
 INCLUDE_ASM("asm/stg/sc04_012/nonmatchings/sc04_012", func_sc04_012_8017E060);
 

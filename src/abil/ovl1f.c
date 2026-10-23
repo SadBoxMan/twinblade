@@ -193,6 +193,9 @@ void func_ovl1f_800CB23C(u8 *arg0) {
     func_ovl1f_800CB6CC(arg0);
 }
 
+extern void func_80015978();
+extern s32 func_8012EFB8();
+
 INCLUDE_ASM("asm/abil/ovl1f/nonmatchings/ovl1f", func_ovl1f_800CB300);
 
 void func_ovl1f_800CB6CC(s32 arg0) {
@@ -222,7 +225,35 @@ void func_ovl1f_800CB760(u8 *arg0, s32 arg1) {
     }
 }
 
-INCLUDE_ASM("asm/abil/ovl1f/nonmatchings/ovl1f", func_ovl1f_800CB7B0);
+s32 func_ovl1f_800CB7B0(u8 *arg0) {
+    s16 v[4];
+    s32 x;
+
+    func_80015978(arg0 + 4, v);
+    if (func_8012EFB8(v, v) & ~0x1000) {
+        return 1;
+    }
+    x = v[0];
+    if (x < 0) {
+        x = -x;
+    }
+    if (x > 200) {
+        return 1;
+    }
+    x = v[1];
+    if (x >= 0) {
+        if (x > 160) {
+            x = 1;
+            return x;
+        }
+        return 0;
+    }
+    if (-x < 161) {
+        return 0;
+    }
+    x = 1;
+    return x;
+}
 
 void func_ovl1f_800CB848(u8 *arg0) {
     if (D_80078EC1 != 0xF) {

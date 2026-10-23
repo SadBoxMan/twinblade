@@ -509,9 +509,64 @@ extern u8 D_sc04_010_80181D7C;
 extern s32 func_801290DC();
 extern void func_80149350();
 
+typedef struct { U12 e[9]; } U12x9;
+typedef struct { s32 vx, vy, vz, pad; } V4F20;
+typedef struct { s16 x, y, z, pad; } SV_8E8A0;
+typedef struct { s32 x, y, z, pad; } VEC_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT_8E8A0;
+typedef struct { u8 r, g, b, cd; } CV_8E8A0;
+typedef struct { SV_8E8A0 pt[4]; CV_8E8A0 col[4]; s32 code; } PRIM_8E8A0;
+typedef struct { s32 x, y, z; } POS_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } SMtx;
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef union { s32 w; XY s; } UXY;
+typedef void (*VoidFn)();
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
+extern s32 func_80012C6C();
+extern s32 func_80012ABC();
+extern void func_8012F14C();
+
+
 INCLUDE_ASM("asm/stg/sc04_010/nonmatchings/sc04_010", func_sc04_010_8017D210);
 
-INCLUDE_ASM("asm/stg/sc04_010/nonmatchings/sc04_010", func_sc04_010_8017D2D4);
+void func_sc04_010_8017D2D4(u8 *arg0, u8 *arg1, u8 *arg2) {
+    FeMtx m;
+    FeSv v;
+    FeSv o;
+
+    AF(arg0, s32, 8) = (s16) func_80012C6C(AF(arg0, s16, 8), AF(arg0, s16, 0xC), 4);
+    AF(arg0, s32, 0x10) = (s16) func_80012C6C(AF(arg0, s16, 0x10), AF(arg0, s16, 0x14), 4);
+    AF(arg0, s16, 0x18) = func_80012ABC(AF(arg0, s16, 0x18), AF(arg0, s16, 0x20), 4);
+    AF(arg0, s16, 0x1A) = func_80012ABC(AF(arg0, s16, 0x1A), AF(arg0, s16, 0x22), 4);
+    AF(arg0, s16, 0x1C) = func_80012ABC(AF(arg0, s16, 0x1C), AF(arg0, s16, 0x24), 4);
+    AF(arg0, s16, 0x28) = func_80012C6C(AF(arg0, s16, 0x28), AF(arg0, s16, 0x2E), 0x10);
+    AF(arg0, s16, 0x2A) = func_80012C6C(AF(arg0, s16, 0x2A), AF(arg0, s16, 0x30), 0x10);
+    AF(arg0, s16, 0x2C) = func_80012C6C(AF(arg0, s16, 0x2C), AF(arg0, s16, 0x32), 0x10);
+    AF(arg0, s32, 0x48) = AF(arg0, s16, 0x28) + AF(arg2, s16, 0);
+    AF(arg0, s32, 0x4C) = AF(arg0, s16, 0x2A) + AF(arg2, s16, 2);
+    AF(arg0, s32, 0x50) = AF(arg0, s16, 0x2C) + AF(arg2, s16, 4);
+    RotMatrixZYX(arg0 + 0x18, &m);
+    m.t[0] = AF(arg0, s16, 0x28) + AF(arg1, s16, 0);
+    m.t[1] = AF(arg0, s16, 0x2A) + AF(arg1, s16, 2);
+    m.t[2] = AF(arg0, s16, 0x2C) + AF(arg1, s16, 4);
+    v.x = 0;
+    v.y = 0;
+    v.z = AF(arg0, s32, 0x10);
+    func_8012F14C(&m, &v, &o);
+    AF(arg0, s32, 0x3C) = o.x;
+    AF(arg0, s32, 0x40) = o.y;
+    AF(arg0, s32, 0x44) = o.z;
+}
 
 s32 func_sc04_010_8017D478(s32 arg0) {
     return func_8013B7F4(D_sc04_010_80181C90[arg0], 0);
@@ -602,7 +657,31 @@ void func_sc04_010_8017D844(u8 *arg0) {
     func_8012AD50((s32) arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc04_010/nonmatchings/sc04_010", func_sc04_010_8017D904);
+void func_sc04_010_8017D904(u8 *o) {
+    switch (AF(o, u16, 0x34)) {
+    case 0:
+        AF(AF(o, u8 *, 0x20), s16, 0x18) += 0x400;
+        AF(AF(o, u8 *, 0x20), s16, 0x1A) += 0x333;
+        AF(AF(o, u8 *, 0x20), s16, 0x1C) += 0x400;
+        if (AF(AF(o, u8 *, 0x20), s16, 0x18) >= 0x1400) {
+            AF(o, s32, 0x1C) = 0x60;
+            AF(o, u16, 0x34)++;
+        }
+        break;
+    case 1:
+        if (func_8012BEE8(o) != 0) {
+            AF(AF(o, u8 *, 0x20), s16, 0x18) -= 0x400;
+            AF(AF(o, u8 *, 0x20), s16, 0x1A) -= 0x333;
+            AF(AF(o, u8 *, 0x20), s16, 0x1C) -= 0x400;
+            if (AF(AF(o, u8 *, 0x20), s16, 0x18) <= 0) {
+                func_8012C218(o);
+                return;
+            }
+        }
+        break;
+    }
+    AF(AF(o, u8 *, 0x20), s16, 0x12) += 0x10;
+}
 
 void func_sc04_010_8017DA58(s32 arg0) {
     AF(arg0, s32, 0xD0) = func_8012C588(0x288, arg0);

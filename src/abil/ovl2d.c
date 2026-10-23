@@ -294,6 +294,12 @@ void func_ovl2d_800CB61C(u8 *arg0, u16 *arg1) {
     AF(m, s16, 0x10) = func_80012DBC(AF(m, s16, 0x10), (s16) func_8014C5FC(arg0, arg1, &v), 0x10, 1);
 }
 
+typedef struct { s32 vx, vy, vz, pad; } ALVec;
+extern u8 D_ovl2d_800CBE50;
+extern u8 D_ovl2d_800CBE5C;
+extern AVec D_ovl2d_800CBEB8[];
+extern ALVec D_ovl2d_800CBEE8;
+
 INCLUDE_ASM("asm/abil/ovl2d/nonmatchings/ovl2d", func_ovl2d_800CB6F4);
 
 void func_ovl2d_800CB804(u8 *arg0) {
@@ -304,7 +310,49 @@ void func_ovl2d_800CB804(u8 *arg0) {
     func_80146C3C();
 }
 
-INCLUDE_ASM("asm/abil/ovl2d/nonmatchings/ovl2d", func_ovl2d_800CB860);
+void func_ovl2d_800CB860(u8 *arg0) {
+    AVec r;
+    AMtx m;
+    ALVec w;
+    u8 *o;
+    u8 *o2;
+
+    o = (u8 *) func_801465C0();
+    o2 = o;
+    AF(arg0, u8 *, 0x20) = o;
+    if (o == NULL) {
+        goto fail;
+    }
+
+    func_8001CC3C(o, &D_ovl2d_800CBE50, 0, 0);
+    AF(o, u8, 0x27) = 0x90;
+    AF(o, s16, 0x18) = AF(o, s16, 0x1A) = 0x2000;
+    AF(o, s32, 4) |= 0x50000000;
+    func_80128EA8(o, arg0 + 0x24, &D_ovl2d_800CBE5C);
+    w = D_ovl2d_800CBEE8;
+    r = D_ovl2d_800CBEB8[AF(arg0, s32, 0x2C)];
+    if (AF(arg0, s32, 0x30) != 0) {
+        r.vx += ((rand() & 0x3F) << 4) - 0x200;
+        r.vy += ((rand() & 0x3F) << 4) - 0x200;
+        r.vz += ((rand() & 0x3F) << 4) - 0x200;
+        w.vx = ((rand() & 0x1F) - 0x10) * 0x18000;
+        w.vy = ((rand() & 0x1F) - 0x10) * 0x18000;
+        w.vz = ((rand() & 0x1F) - 0x10) * 0x18000;
+    }
+    RotMatrixZYX(&r, &m);
+    ApplyMatrixLV(&m, &w, &w);
+    AF(arg0, s32, 0x10) = w.vx;
+    AF(arg0, s32, 0x14) = w.vy;
+    AF(arg0, s32, 0x18) = w.vz;
+    AF(o2, u8, 0x24) = 0xC0;
+    AF(o2, u8, 0x25) = 0xC0;
+    AF(o2, u8, 0x26) = 0x40;
+    func_80146E90(arg0, 4);
+    AF(arg0, u16, 2)++;
+    return;
+fail:
+    func_80146C3C(arg0);
+}
 
 void func_ovl2d_800CBAAC(u8 *arg0) {
     u8 *o;

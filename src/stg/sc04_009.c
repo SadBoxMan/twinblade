@@ -82,7 +82,7 @@ extern void func_800D1E28();
 extern s32 D_sc04_009_80182588[];
 extern s32 func_8013B7F4();
 extern u8 D_sc04_009_80194F24;
-extern void func_sc04_009_8017E950();
+extern s32 * func_sc04_009_8017E950();
 extern s32 D_sc04_009_80198114;
 extern void func_800296F8();
 
@@ -525,6 +525,31 @@ extern u16 D_801202A0;
 extern u8 D_sc04_009_8018279C;
 extern s32 func_801290DC();
 extern void func_80149350();
+
+typedef struct { U12 e[9]; } U12x9;
+typedef struct { s32 vx, vy, vz, pad; } V4F20;
+typedef struct { s16 x, y, z, pad; } SV_8E8A0;
+typedef struct { s32 x, y, z, pad; } VEC_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT_8E8A0;
+typedef struct { u8 r, g, b, cd; } CV_8E8A0;
+typedef struct { SV_8E8A0 pt[4]; CV_8E8A0 col[4]; s32 code; } PRIM_8E8A0;
+typedef struct { s32 x, y, z; } POS_8E8A0;
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef union { s32 w; XY s; } UXY;
+typedef void (*VoidFn)();
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+extern void func_80172710();
+extern void func_80178BF8();
+extern SV8 D_sc04_009_80195040[];
+extern s32 func_80135888();
+extern s32 func_8012BDBC();
 
 INCLUDE_ASM("asm/stg/sc04_009/nonmatchings/sc04_009", func_sc04_009_8017D1AC);
 
@@ -1012,4 +1037,24 @@ void func_sc04_009_8017E92C(u8 *arg0) {
     func_800296F8(AF(arg0, s32, 0xDC));
 }
 
-INCLUDE_ASM("asm/stg/sc04_009/nonmatchings/sc04_009", func_sc04_009_8017E950);
+s32 *func_sc04_009_8017E950(u8 *o) {
+    WMtx m;
+    SV8 a;
+    SV8 b;
+    s32 flag;
+    u8 *q;
+
+    q = AF(o, u8 *, 0x64);
+    m = AF(D_80126B78, WMtx, 0x34);
+    gte_SetRotMatrix(&m);
+    gte_SetTransMatrix(&m);
+    RotTransSV(&D_sc04_009_80195040[0], &a, &flag);
+    RotTransSV(&D_sc04_009_80195040[1], &b, &flag);
+    if (func_80135888(AF(AF(o, u8 *, 0x64), s32, 0x20), AF(AF(o, u8 *, 0x64), s32, 0x58), &a, &b) != 0
+        && func_8012BDBC(q, 0x300) != 0) {
+        AF(q, s16, 2) = 3;
+        func_80178BF8();
+        return (s32 *)&func_80172710;
+    }
+    return 0;
+}

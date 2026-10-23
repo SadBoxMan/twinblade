@@ -1,4 +1,5 @@
 // Stage SC03_111 (stg/sc03_111.yaml): names given by hand first
+D_sc03_111_801B82AC = 0x801B82AC;
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
 func_80012ABC = 0x80012ABC; // type:func
 func_80012C6C = 0x80012C6C; // type:func

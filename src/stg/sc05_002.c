@@ -433,6 +433,16 @@ extern s32 func_80012C6C();
 extern s32 func_80012ABC();
 extern void func_8012F14C();
 
+typedef struct { u16 a, b, c, d; } U16x4;
+typedef struct { s32 a; s32 b; } P8;
+typedef struct { u16 x, y, z, pad; } uV4;
+typedef struct { s16 m[3][3]; s32 t[3]; } wMtx;
+typedef struct { u8 pad[0x18]; wMtx wsm; } workHead;
+typedef struct { u16 v[6]; } u12;
+typedef struct { u16 a, b, c, pad; } Rec801AC2F0;
+extern s32 func_8012B8E4();
+extern u8 D_sc05_002_80199FA4;
+
 INCLUDE_ASM("asm/stg/sc05_002/nonmatchings/sc05_002", func_sc05_002_8017CD9C);
 
 void func_sc05_002_8017DA00(u8 *arg0) {
@@ -852,7 +862,59 @@ void func_sc05_002_8017EC7C(u8 *arg0) {
     AF(arg0, s16, 0x34) = 0;
 }
 
-INCLUDE_ASM("asm/stg/sc05_002/nonmatchings/sc05_002", func_sc05_002_8017ED88);
+void func_sc05_002_8017ED88(u8 *arg0) {
+    s32 sp10;
+    s32 one;
+    s32 w;
+    s16 h;
+    u8 *q;
+
+    one = 1;
+    switch (AF(arg0, u16, 0x34)) {
+    case 0:
+        if (func_8012CBF4(arg0) != 0) {
+            AF(arg0, s32, 0x1C) = 0x1E;
+            AF(AF(arg0, u8 *, 0x20), s16, 0x10) = 0;
+            AF(arg0, u16, 0x34)++;
+            return;
+        }
+        h = AF(arg0, s16, 0x100);
+        if (h < AF(arg0, s16, 0xA)) {
+            AF(arg0, s16, 0xA) = h;
+            AF(arg0, s32, 0x1C) = 0x1E;
+            AF(AF(arg0, u8 *, 0x20), s16, 0x10) = 0;
+            AF(arg0, u16, 0x34)++;
+        }
+        return;
+    case 1:
+        h = func_8012B8E4(arg0, 6);
+        q = AF(arg0, u8 *, 0x20);
+        AF(q, u16, 0x12) += h;
+        if (func_8012BEE8(arg0, q) == 0) {
+            return;
+        }
+        if (!(rand() & 1)) {
+            AF(arg0, u16, 0x34)++;
+            func_8012B200(arg0);
+            AF(arg0, s32, 0x1C) = 0x20;
+            func_8002D4C8(0x6FF, 0);
+            return;
+        }
+        break;
+    case 2:
+        func_sc05_002_8017F0D0(&sp10, arg0, &D_sc05_002_80199FA4);
+        w = sp10;
+        AF(AF(arg0, u8 *, 0x20), s16, 0x10) = w;
+        AF(AF(arg0, u8 *, 0x20), s16, 0x12) = w >> 16;
+        func_8012B178(arg0, AF(arg0, s32, 0xE4) + 0xFFF80000);
+        func_8012CBF4(arg0);
+        if (func_sc05_002_8017F0A4(arg0) != one && func_8012BEE8(arg0) == 0) {
+            return;
+        }
+        break;
+    }
+    AF(arg0, s16, 2) = 1;
+}
 
 INCLUDE_ASM("asm/stg/sc05_002/nonmatchings/sc05_002", func_sc05_002_8017EF24);
 

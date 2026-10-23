@@ -201,6 +201,37 @@ void func_sc01_080_8017BEBC(SV8 *r, SV8 *out, s32 arg2) {
     out->pad = maxy - miny;
 }
 
+typedef struct { s16 m[3][3]; s32 t[3]; } WMtx;
+typedef union { s32 w; XY s; } UXY;
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s16 m[3][3]; s32 t[3]; } SMtx;
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
+typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
+typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
+typedef struct { s16 vx, vy, vz, pad; } SV;
+typedef struct { u16 v[6]; } U12;
+typedef struct { u16 x, y, z, pad; } UV4;
+typedef struct { u8 r, g, b, cd; } CV4;
+typedef struct { UV4 p0; UV4 p1; CV4 c0; CV4 c1; s32 code; } LineArg;
+typedef struct { SV4 p[4]; CV4 c[4]; s32 code; } QuadArg;
+typedef struct { u16 active; s16 y; s16 dy; s16 ang; s32 x; s32 z; } Pt16;
+typedef struct { s16 a, b, c, g; u8 d, e; s16 f; Pt16 pts[16]; } PtSys;
+typedef struct { u32 *ot; u8 pad[0x10]; } OtRef;
+typedef struct { u8 b[0x14]; } Ot14;
+typedef struct { unsigned addr : 24; unsigned len : 8; } PTag;
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+typedef struct { s32 w[4]; } W16;
+extern void func_8012B0B4();
+extern u16 D_800B9A02;
+extern u8 D_800A651C[];
+extern u8 *func_80010A08();
+extern void func_8012E32C();
+extern void func_8012E28C();
+extern s32 D_sc01_080_80186FF8[];
+
 INCLUDE_ASM("asm/stg/sc01_080/nonmatchings/sc01_080", func_sc01_080_8017C294);
 
 s32 func_sc01_080_8017C338(SV4 *a, SV4 *b, SV4 *o, s32 lim) {
@@ -255,7 +286,62 @@ s32 func_sc01_080_8017C530(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/stg/sc01_080/nonmatchings/sc01_080", func_sc01_080_8017C59C);
 
-INCLUDE_ASM("asm/stg/sc01_080/nonmatchings/sc01_080", func_sc01_080_8017D468);
+void func_sc01_080_8017D468(u8 *o) {
+    SV8 v[4];
+    SV8 c;
+    SV8 w;
+    s32 pp;
+    s32 flag;
+    UXY x;
+    s32 r;
+    s32 h;
+    s32 a;
+    s32 b;
+    s32 i;
+    s32 z;
+    u8 *p;
+
+    func_8012E32C();
+    i = 0;
+    r = rsin((AF(o, s32, 0x1C) << 11) / 30);
+    h = (r << 8) >> 12;
+    c.x = AF(o, u16, 6);
+    c.y = AF(o, u16, 0xA);
+    c.z = AF(o, u16, 0xE);
+    a = AF(o, s32, 0x1C) << 4;
+    for (; i < 6; i++, a = b) {
+        func_8012B0B4(&w, a, 0x20);
+        x = *(UXY *)&w;
+        b = a + 0x2AA;
+        v[0].x = c.x + x.s.x;
+        v[0].y = c.y;
+        v[0].z = c.z + x.s.y;
+        v[2].x = c.x + ((x.s.x * (r * 3 + 0x1000)) >> 12);
+        v[2].y = c.y - h;
+        v[2].z = c.z + ((x.s.y * (r * 3 + 0x1000)) >> 12);
+        func_8012B0B4(&w, b, 0x20);
+        x = *(UXY *)&w;
+        v[1].x = c.x + x.s.x;
+        v[1].y = c.y;
+        v[1].z = c.z + x.s.y;
+        v[3].x = c.x + ((x.s.x * (r * 3 + 0x1000)) >> 12);
+        v[3].y = c.y - h;
+        v[3].z = c.z + ((x.s.y * (r * 3 + 0x1000)) >> 12);
+        p = func_80010A08(0x24);
+        AF(p, s32, 4) = D_sc01_080_80186FF8[i];
+        AF(p, s32, 0xC) = D_sc01_080_80186FF8[i + 1];
+        p[7] = 0x3A;
+        AF(p, s32, 0x1C) = 0;
+        AF(p, s32, 0x14) = 0;
+        AF(p, u32, 0) = 0x08000000;
+        z = RotTransPers(&v[0], p + 8, &pp, &flag);
+        RotTransPers(&v[1], p + 0x10, &pp, &flag);
+        RotTransPers(&v[2], p + 0x18, &pp, &flag);
+        RotTransPers(&v[3], p + 0x20, &pp, &flag);
+        AddPrim(*(u8 **)(D_800A651C + D_800B9A02 * 0x14) + z * 4, p);
+        func_8012E28C(z, 1);
+    }
+}
 
 INCLUDE_ASM("asm/stg/sc01_080/nonmatchings/sc01_080", func_sc01_080_8017D72C);
 

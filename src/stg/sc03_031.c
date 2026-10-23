@@ -294,6 +294,35 @@ extern u8 D_sc03_031_801C5EEE;
 extern u8 D_sc03_031_801C5EF4;
 extern u8 D_sc03_031_801C5F68;
 
+extern s32 func_80012C6C();
+extern s32 func_80012ABC();
+extern void func_8012F14C();
+extern s32 func_80148800();
+extern s16 D_sc03_031_80185FBC[];
+
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef union { s32 w; XY s; } UXY;
+typedef void (*VoidFn)();
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+extern s32 D_sc03_031_801C5EBC;
+extern s32 D_sc03_031_801C5EC0;
+extern s32 D_sc03_031_801C5EC8;
+extern s32 D_sc03_031_801C5ECC;
+extern s32 D_sc03_031_801C5ED0;
+extern s32 D_sc03_031_801C5ED8;
+extern s32 D_sc03_031_801C5EDC;
+extern s32 D_sc03_031_801C5EE0;
+
 INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017BEBC);
 
 void func_sc03_031_8017BF88(u8 *arg0) {
@@ -358,7 +387,45 @@ void func_sc03_031_8017C120(u8 *arg0) {
     func_80146C3C((s32) arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017C180);
+void func_sc03_031_8017C180(u8 *arg0, s32 arg1_0) {
+    SV v;
+    WMtx m;
+    s16 arg1 = arg1_0;
+    s16 s;
+    s32 k;
+    s32 x;
+    s32 t;
+    u8 *t0;
+    u8 *a3;
+
+    t0 = AF(arg0, u8 *, 0xCC);
+    a3 = AF(arg0, u8 *, 0x20);
+    if (arg1 != 0) {
+        k = 0x40000000;
+        s = 0x1000;
+    } else {
+        k = 0x50000000;
+        s = 0x1333;
+    }
+    x = AF(a3, s32, 4) & 0xCFFFFFFF;
+    t = k | 0x40000000;
+    AF(a3, s32, 4) = x | t;
+    if (AF(AF(arg0, u8 *, 0xCC), u16, 0) != 0) {
+        AF(t0, s16, 0x1A) = s;
+        AF(t0, s16, 0x18) = s;
+    }
+    v.vx = AF(arg0, u16, 0xFC) += 0x80;
+    v.vy = AF(arg0, u16, 0xFE) += 0x100;
+    v.vz = 0;
+    RotMatrixYXZ(&v, &m);
+    v.vy = 0;
+    v.vx = 0;
+    v.vz = 0x100;
+    ApplyMatrixSV(&m, &v, &v);
+    *(s32 *)&D_sc03_031_801C5EB8 = D_sc03_031_801C5EC8 = D_sc03_031_801C5ED8 = v.vx;
+    D_sc03_031_801C5EBC = D_sc03_031_801C5ECC = D_sc03_031_801C5EDC = v.vy;
+    D_sc03_031_801C5EC0 = D_sc03_031_801C5ED0 = D_sc03_031_801C5EE0 = v.vz;
+}
 
 void func_sc03_031_8017C2B0(u8 *arg0) {
     u8 *o;
@@ -1370,7 +1437,40 @@ void func_sc03_031_8017EDBC(s32 arg0) {
 
 INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017EDF8);
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017EE98);
+void func_sc03_031_8017EE98(u8 *p, s16 *q) {
+    WMtx m;
+    SV4 v;
+    SV4 o;
+    u8 t;
+
+    if (func_80148800(&D_80126B58) & 3) {
+        t = (AF(p, u8, 5) + 1) & 1;
+        AF(p, u8, 5) = t;
+        AF(p, s32, 0x14) = D_sc03_031_80185FBC[t];
+    }
+    AF(p, s32, 8) = (s16) func_80012C6C(AF(p, s16, 8), AF(p, s16, 0xC), 4);
+    AF(p, s32, 0x10) = (s16) func_80012C6C(AF(p, s16, 0x10), AF(p, s16, 0x14), 4);
+    AF(p, s16, 0x18) = func_80012ABC(AF(p, s16, 0x18), AF(p, s16, 0x20), 4);
+    AF(p, s16, 0x1A) = func_80012ABC(AF(p, s16, 0x1A), AF(p, s16, 0x22), 4);
+    AF(p, s16, 0x1C) = func_80012ABC(AF(p, s16, 0x1C), AF(p, s16, 0x24), 4);
+    AF(p, s16, 0x28) = func_80012C6C(AF(p, s16, 0x28), AF(p, s16, 0x2E), 0x10);
+    AF(p, s16, 0x2A) = func_80012C6C(AF(p, s16, 0x2A), AF(p, s16, 0x30), 0x10);
+    AF(p, s16, 0x2C) = func_80012C6C(AF(p, s16, 0x2C), AF(p, s16, 0x32), 0x10);
+    AF(p, s32, 0x48) = AF(p, s16, 0x28) + q[0];
+    AF(p, s32, 0x4C) = AF(p, s16, 0x2A) + q[1];
+    AF(p, s32, 0x50) = AF(p, s16, 0x2C) + q[2];
+    RotMatrixZYX(p + 0x18, &m);
+    m.t[0] = AF(p, s16, 0x28) + q[0];
+    m.t[1] = AF(p, s16, 0x2A) + q[1];
+    m.t[2] = AF(p, s16, 0x2C) + q[2];
+    v.x = 0;
+    v.y = 0;
+    v.z = AF(p, s32, 0x10);
+    func_8012F14C(&m, &v, &o);
+    AF(p, s32, 0x3C) = o.x;
+    AF(p, s32, 0x40) = o.y;
+    AF(p, s32, 0x44) = o.z;
+}
 
 void func_sc03_031_8017F074(u8 *arg0) {
     D_sc03_031_80186150[AF(arg0, u16, 2)]();

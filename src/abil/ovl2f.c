@@ -198,7 +198,79 @@ void func_ovl2f_800CB358(u8 *arg0) {
 
 extern s32 func_ovl2f_800CB3BC();
 
-INCLUDE_ASM("asm/abil/ovl2f/nonmatchings/ovl2f", func_ovl2f_800CB3BC);
+extern s8 D_ovl2f_800CB820[];
+extern s16 D_ovl2f_800CB7FC[];
+extern void func_80149350();
+extern void func_800D20C0();
+extern void func_80017E68();
+extern void func_800D23D0();
+extern void func_80017758();
+
+s32 func_ovl2f_800CB3BC(u8 *arg0, s32 x, s32 y, s32 z) {
+    AVec pos;
+    AVec ang;
+    s32 pad[4];
+    APrim s;
+    AMtx m;
+    s32 pad2[8];
+    s8 *p;
+    s16 *q;
+    s16 i;
+    u8 t;
+    u8 *o;
+    s16 w;
+
+    o = AF(arg0, u8 *, 0x34);
+    s.v[1].vx = s.v[1].vy = s.v[1].vz = 0;
+    s.v[0].vz = s.v[2].vz = s.v[3].vz = 0;
+    s.c[1].b = 0x70;
+    t = AF(arg0, u8, 0x12);
+    pos.vx = x;
+    pos.vy = y;
+    s.c[0].r = s.c[0].g = s.c[0].b = 0;
+    s.c[2].r = s.c[2].g = s.c[2].b = 0;
+    s.c[3].r = s.c[3].g = s.c[3].b = 0;
+    s.code = 0x50000000;
+    pos.vz = z;
+    s.c[1].r = s.c[1].g = t;
+    func_80149350(o, &pos, &pos);
+    AF(arg0, s16, 6) = w = pos.vx;
+    AF(arg0, s32, 0x4C) = w;
+    AF(arg0, s16, 0xA) = w = pos.vy;
+    AF(arg0, s32, 0x50) = w;
+    AF(arg0, s16, 0xE) = w = pos.vz;
+    AF(arg0, s32, 0x54) = w;
+    func_800D20C0(&pos, &ang, 8);
+    func_80017E68(&pos, &m);
+    func_800D23D0(&ang);
+    RotMatrixYXZ(&ang, &m);
+    p = D_ovl2f_800CB820;
+    i = 0;
+    do {
+        s.v[0].vx = *p++;
+        s.v[0].vy = *p++;
+        s.v[2].vx = *p++;
+        s.v[2].vy = *p++;
+        s.v[3].vx = *p++;
+        s.v[3].vy = *p--;
+        func_80017758(&s, &m);
+    } while (++i < 4);
+    s.v[1].vz = 0x50;
+    s.c[1].b = 0xA0;
+    s.v[0].vy = s.v[2].vy = s.v[3].vy = 0;
+    s.c[1].r = s.c[1].g = 0x10;
+    q = D_ovl2f_800CB7FC;
+    i = 0;
+    do {
+        s.v[0].vx = *q++;
+        s.v[0].vz = *q++;
+        s.v[2].vx = *q++;
+        s.v[2].vz = *q++;
+        s.v[3].vx = *q++;
+        s.v[3].vz = *q--;
+        func_80017758(&s, arg0 + 0x38);
+    } while (++i < 4);
+}
 
 void func_ovl2f_800CB634(u8 *a) {
     *(s32 *)(a + 0x1c) = 0x20;

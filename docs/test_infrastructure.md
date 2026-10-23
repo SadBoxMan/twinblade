@@ -253,6 +253,61 @@ error (found, charged to the right instruction). Making a real trace: see the do
 console's load delay slot (the interpreter has none; `load_delay` marks the cases, GCC's code never relies on it);
 cop0.
 
+**Result (r169, 22 Oct 2026, one real trace): the interpreter's CPU is trustworthy; no interpreter bug found.** LuciDin
+traced one frame from the slot 8 save state in the field (DuckStation, 22 Oct 16:09: 248,163 trace lines, 19.6 MB;
+the trace and the state stay in build/difftest/replay/input/, not in the repo). The unmodified harness compared only
+12,408 steps (5%): the first BIOS call that switches threads (a B0 call that leaves through `rfe` to a different
+thread's pc, trace line 17,356) made `skip_to` wait for a pc the trace never returns to, and it ate the other 230,000
+lines. That is a harness limit. With a local variant (build/difftest/replay2/mk.py: `skip_to` also stops at the first
+runnable pc after an `rfe`, the interpreter is moved to it and its registers are marked unknown; the error cap raised;
+tools/ untouched) the replay covers **214,700 interpreter steps and 296,464 register values (86.5% of the trace; the
+rest is BIOS and interrupt entry)** and finds 3,909 differences: alu 1,260, link 0, load 604, load_io 152, load_delay
+37, gte 1,854, cop0 0, hilo 0, unknown 2. Every one is accounted for and none is an interpreter bug:
+
+* **Hardware registers (alu 1,236 of 1,260, load_io 152, load 420 of 604):** the interpreter reads zero where the console
+  reads the interrupt controller (I_STAT 1F801070, I_MASK 1F801074), the SIO status poll (1F801044: the
+  `andi v0, 2` loops at 8005DDB8, 8005DEE0, 8005E150 account for 926 alu rows alone), the root counters
+  (1F801120/24) and the SPU. The alu rows are the polling loops' own `andi`/`sltu` blamed for the value the load
+  left behind. Not an interpreter fault: the port's pc/ hardware path serves these reads, which this harness does not.
+* **GTE state the trace does not show (gte 1,854, load 184 of 604):** the replay starts with the GTE registers at zero. Only
+  RT, TR, LLM and H are written by `ctc2` inside this frame (2,012 ctc2 lines); ZSF3/ZSF4, DQA/DQB, OFX/OFY, LCM and BK
+  were set earlier and live only in the save state. Every GTE mismatch is a read of a value those feed: FLAG bit 12
+  (IR0 saturated, DQA/DQB; `cfc2 flag`, 1,137 + 205 rows), OTZ (ZSF3; `mfc2 otz`, 463 rows) and MAC0. The 184 `load`
+  rows from 800A6xxx are the ordering table: the wrong OTZ picks a different slot (line 172,213: slot 800A6AB4). No
+  SXY or SZ difference was found in the RTPS/RTPT results. Not yet checked by seeding the GTE registers from the
+  state (see below).
+* **Load-delay display (37):** `lwl`/`lwr` pairs (36) and one `lw`/`lw`. The trace shows the register before the pending
+  load; the interpreter has no delay slot. The results after each `lwr` matched.
+* **Thread switches (about 14 alu rows after lines 17,356, 19,760, 19,994):** s0-s7, sp and gp are assumed preserved
+  across a skipped BIOS stretch, which a context switch breaks. Harness limit.
+* **Unknown (2):** `host_fault` at 00000DE0 and 00000DF8: the interrupt dispatcher's callback loop returns into kernel
+  RAM, which the interpreter does not run. The harness restarts at the trace's next runnable pc.
+
+What this proves: over 296,000 register values of one frame of field code (library, main-EXE and stage code, GTE
+transform sequences, `lwl`/`lwr` pairs, mult/div: the hilo category is clean) the interpreter's ALU, branch, load and
+store semantics are identical to DuckStation's wherever hardware state is not involved. What it does not: one frame, one
+state, in the field; no GTE flag or OTZ verdict until the GTE registers are seeded; nothing about the title, menus, battle
+or cutscenes; hardware reads unmodelled. Follow-ups: seed the GTE data/control registers from the .sav (the CPU block
+precedes the RAM in the decompressed state; a 0x155, probably ZSF3, appears there) and expect the 1,854 gte rows to vanish; move
+the `rfe` resync into tools/difftest/replay.c (a tools change, not made here).
+
+**Second trace (r169, slot 1, mid-field gameplay, 4+ frames, 1,254,753 lines, 99.6 MB).** The stock harness again compared only
+12,300 steps / 16,467 values (it sits in the same library polling code and stops at the first thread switch; its
+mismatches are the same list as slot 8's). The local rfe-resync variant compared **1,032,080 steps and 1,336,059
+register values (82% of the trace)**: 33,578 differences: alu 1,281 (the same polling loops at 8005DDB8/DEE0/E150 plus about 40
+rows at thread switches), link 0, hilo 0, cop0 0, load_io 176, load_delay 97 (`lwl`/`lwr` display), gte 6,317 (again only
+`cfc2 flag`, `mfc2 otz` and 122 `mfc2 mac0` from `nclip`: unseeded ZSF3, DQA/DQB, OFX/OFY), load 25,705, of which 24,398 are
+one busy-wait on the VSync counter at 8006CBB8 (`lw` at 8004255C inside the loop at 8004250C, 14 trace lines per
+turn; the interpreter's copy of the counter is one interrupt behind the console's, the interrupt handler being skipped
+code), plus ordering-table slots chosen by the wrong OTZ. No difference is an interpreter instruction bug. Same verdict as
+slot 8, now over about 1.3 million values of game, library and stage code.
+
+**Recommendations for a tools card (tools/ and pc/ are held):** (a) the harness should take the trace's value for `load_io`
+reads and for the loop-counter reads of interrupt-updated words, as it already does for code words, so the derived
+alu rows go away and library code is compared too; (b) apply the `rfe` resync in `tools/difftest/replay.c`; (c) seed
+the GTE registers from the .sav; (d) a trace from a stretch with fewer waits (a cutscene or a battle) would put more
+game code under the comparison.
+
 ### What the differential tests cannot prove
 
 * Coverage is what the frame loop reaches from the captured states: 117 of 298 translated and 208 of 594 matched

@@ -306,6 +306,14 @@ void func_ovl2a_800CB634(u8 *arg0) {
     func_ovl2a_800CB774((s32) arg0);
 }
 
+typedef struct { s32 vx, vy, vz, pad; } ALVec;
+extern AVec D_ovl2a_800CC028[];
+extern ALVec D_ovl2a_800CC058;
+extern u16 D_ovl2a_800CC068[];
+extern s32 func_801465C0();
+extern void func_8001CF00();
+extern void func_80015954();
+
 INCLUDE_ASM("asm/abil/ovl2a/nonmatchings/ovl2a", func_ovl2a_800CB708);
 
 void func_ovl2a_800CB774(void) {
@@ -339,7 +347,65 @@ void func_ovl2a_800CB8B4(u8 *arg0) {
     func_80146C3C();
 }
 
-INCLUDE_ASM("asm/abil/ovl2a/nonmatchings/ovl2a", func_ovl2a_800CB910);
+void func_ovl2a_800CB910(u8 *arg0) {
+    AVec p;
+    AVec r;
+    AMtx m;
+    ALVec w;
+    u8 *o;
+    u8 *o2;
+    u8 *t;
+    s16 *q;
+    s32 i;
+
+    t = AF(arg0, u8 *, 0x34);
+    o = (u8 *) func_801465C0();
+    o2 = o;
+    AF(arg0, u8 *, 0x20) = o;
+    if (o == NULL) {
+        goto fail;
+    }
+    func_8001CF00(o);
+    AF(o, s32, 4) |= 0x80000000;
+    func_80015978(t + 4, &p);
+    p.vy -= 0x40;
+    func_80015954(&p, arg0 + 4);
+    if (AF(arg0, s32, 0x2C) == 0) {
+        func_ovl2a_800CBF24();
+    }
+    AF(o2, u16, 0x18) = AF(o2, u16, 0x1A) = AF(o2, u16, 0x1C) = D_ovl2a_800CC068[AF(arg0, s32, 0x30)];
+    w = D_ovl2a_800CC058;
+    r = D_ovl2a_800CC028[AF(arg0, s32, 0x2C)];
+    if (AF(arg0, s32, 0x30) != 0) {
+        r.vx += ((rand() & 0x3F) << 4) - 0x200;
+        r.vy += ((rand() & 0x3F) << 4) - 0x200;
+        r.vz += ((rand() & 0x3F) << 4) - 0x200;
+        w.vx = ((rand() & 0x1F) - 0x10) << 18;
+        w.vy = ((rand() & 0x1F) - 0x10) << 18;
+        w.vz = ((rand() & 0x1F) - 0x10) << 18;
+    }
+    RotMatrixZYX(&r, &m);
+    ApplyMatrixLV(&m, &w, &w);
+    AF(arg0, s32, 0x10) = w.vx;
+    AF(arg0, s32, 0x14) = w.vy;
+    AF(arg0, s32, 0x18) = w.vz;
+    AF(arg0, s32, 0x4C) = ((rand() & 0x1F) - 0x10) * 0xB;
+    AF(arg0, s32, 0x50) = ((rand() & 0x1F) - 0x10) * 0xB;
+    AF(arg0, s32, 0x54) = ((rand() & 0x1F) - 0x10) * 0xB;
+    q = (s16 *) (arg0 + 0x38);
+    i = 0;
+    do {
+        i++;
+        *q++ = (rand() & 0x7F) - 0x40;
+        *q++ = (rand() & 0x7F) - 0x40;
+        *q++ = (rand() & 0x7F) - 0x40;
+    } while (i < 3);
+    func_80146E90(arg0, 2);
+    AF(arg0, u16, 2)++;
+    return;
+fail:
+    func_80146C3C(arg0);
+}
 
 void func_ovl2a_800CBC14(s32 arg0) {
     func_ovl2a_800CBD2C(arg0);

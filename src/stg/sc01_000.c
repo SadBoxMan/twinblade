@@ -1,5 +1,6 @@
 #include "common.h"
 #include "gte.h"
+#include "psyq.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 void func_sc01_000_8017BE9C(void) {
@@ -412,6 +413,57 @@ void func_sc01_000_8017D024(void) {
     func_sc01_000_8017D1B4((s32) &D_80126948);
 }
 
+typedef struct { s16 m[3][3]; s32 t[3]; } SMtx;
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { s16 vx, vy, vz, pad; } SV;
+typedef struct { u16 v[6]; } U12;
+typedef struct { u16 x, y, z, pad; } UV4;
+typedef struct { u8 r, g, b, cd; } CV4;
+typedef struct { UV4 p0; UV4 p1; CV4 c0; CV4 c1; s32 code; } LineArg;
+typedef struct { s16 m[3][3]; s32 t[3]; } WMtx;
+typedef struct { s16 x, y, z, pad; } SV4;
+typedef struct { SV4 p[4]; CV4 c[4]; s32 code; } QuadArg;
+typedef struct { s32 x, y, z, pad; } V4;
+typedef struct { u16 active; s16 y; s16 dy; s16 ang; s32 x; s32 z; } Pt16;
+typedef struct { s16 a, b, c, g; u8 d, e; s16 f; Pt16 pts[16]; } PtSys;
+typedef struct { u32 *ot; u8 pad[0x10]; } OtRef;
+typedef struct { u8 b[0x14]; } Ot14;
+typedef struct { unsigned addr : 24; unsigned len : 8; } PTag;
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+extern u8 D_80126B58;
+extern u8 D_80126940;
+extern u8 D_sc01_000_801826B0[];
+extern s32 func_80148800();
+extern void func_sc01_000_8017D290();
+extern s32 func_80012C6C();
+extern s32 func_80012ABC();
+extern void func_8012F14C();
+
+extern u8 D_sc01_000_801826EC;
+extern u16 D_sc01_000_801826F0;
+extern u16 D_sc01_000_801826F2;
+extern u16 D_sc01_000_801826F8;
+extern u16 D_sc01_000_801826FA;
+extern u16 D_sc01_000_80182700;
+extern u16 D_sc01_000_80182702;
+extern u16 D_sc01_000_80182708;
+extern u16 D_sc01_000_8018270A;
+extern u16 D_sc01_000_80182710;
+extern u16 D_sc01_000_80182712;
+extern u16 D_sc01_000_80182718;
+extern u16 D_sc01_000_8018271A;
+extern u16 D_sc01_000_80182720;
+extern u16 D_sc01_000_80182722;
+extern u16 D_sc01_000_80182728;
+extern u16 D_sc01_000_8018272A;
+extern u16 D_sc01_000_80182730;
+extern u16 D_sc01_000_80182732;
+extern s32 D_sc01_000_801A5734;
+extern u32 D_800AA60C[][0x1000];
+extern void func_sc01_000_8017E1A8();
+
 INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017D0BC);
 
 INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017D164);
@@ -420,9 +472,47 @@ void func_sc01_000_8017D1B4(s32 arg0) {
     D_sc01_000_801826A8[AF(arg0, u8, 4)]();
 }
 
-INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017D1F0);
+void func_sc01_000_8017D1F0(u8 *arg0) {
+    B8 v;
+    u8 t;
 
-INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017D290);
+    if (func_80148800((s32) &D_80126B58) & 3) {
+        t = (AF(arg0, u8, 5) + 1) & 1;
+        AF(arg0, u8, 5) = t;
+        AF(arg0, s32, 0x14) = ((s16 *)&D_sc01_000_801826B0)[t];
+    }
+    v = *(B8 *)&D_80126940;
+    func_sc01_000_8017D290((s32) arg0, (s32) &v);
+}
+
+void func_sc01_000_8017D290(u8 *arg0, u8 *arg1) {
+    FeMtx m;
+    FeSv v;
+    FeSv o;
+
+    AF(arg0, s32, 8) = (s16) func_80012C6C(AF(arg0, s16, 8), AF(arg0, s16, 0xC), 4);
+    AF(arg0, s32, 0x10) = (s16) func_80012C6C(AF(arg0, s16, 0x10), AF(arg0, s16, 0x14), 4);
+    AF(arg0, s16, 0x18) = func_80012ABC(AF(arg0, s16, 0x18), AF(arg0, s16, 0x20), 4);
+    AF(arg0, s16, 0x1A) = func_80012ABC(AF(arg0, s16, 0x1A), AF(arg0, s16, 0x22), 4);
+    AF(arg0, s16, 0x1C) = func_80012ABC(AF(arg0, s16, 0x1C), AF(arg0, s16, 0x24), 4);
+    AF(arg0, s16, 0x28) = func_80012C6C(AF(arg0, s16, 0x28), AF(arg0, s16, 0x2E), 0x10);
+    AF(arg0, s16, 0x2A) = func_80012C6C(AF(arg0, s16, 0x2A), AF(arg0, s16, 0x30), 0x10);
+    AF(arg0, s16, 0x2C) = func_80012C6C(AF(arg0, s16, 0x2C), AF(arg0, s16, 0x32), 0x10);
+    AF(arg0, s32, 0x48) = AF(arg0, s16, 0x28) + AF(arg1, s16, 0);
+    AF(arg0, s32, 0x4C) = AF(arg0, s16, 0x2A) + AF(arg1, s16, 2);
+    AF(arg0, s32, 0x50) = AF(arg0, s16, 0x2C) + AF(arg1, s16, 4);
+    RotMatrixZYX(arg0 + 0x18, &m);
+    m.t[0] = AF(arg0, s16, 0x28) + AF(arg1, s16, 0);
+    m.t[1] = AF(arg0, s16, 0x2A) + AF(arg1, s16, 2);
+    m.t[2] = AF(arg0, s16, 0x2C) + AF(arg1, s16, 4);
+    v.x = 0;
+    v.y = 0;
+    v.z = AF(arg0, s32, 0x10);
+    func_8012F14C(&m, &v, &o);
+    AF(arg0, s32, 0x3C) = o.x;
+    AF(arg0, s32, 0x40) = o.y;
+    AF(arg0, s32, 0x44) = o.z;
+}
 
 void func_sc01_000_8017D428(u8 *arg0) {
     AF(arg0, s32, 0x3C) = (s32) D_sc01_000_80182698;
@@ -439,7 +529,109 @@ s32 func_sc01_000_8017D488(void) {
 
 INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017D490);
 
-INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017DD04);
+void func_sc01_000_8017DD04(s32 arg0, s32 arg1) {
+    u8 *p;
+
+    func_sc01_000_8017E1A8(&D_sc01_000_801826EC, arg0, arg1, D_sc01_000_801A5734);
+    p = D_800A5E60;
+    AF(p, u8, 3) = 9;
+    AF(p, u8, 7) = 0x2C;
+    AF(p, s16, 0x16) = 0x8E;
+    AF(p, s16, 0xE) = 0x7DC0;
+    AF(p, u8, 4) = AF(p, u8, 5) = AF(p, u8, 6) = 0x80;
+    AF(p, u8, 0xC) = 0x0;
+    AF(p, u8, 0xD) = 0x0;
+    AF(p, u8, 0x14) = 0xFF;
+    AF(p, u8, 0x15) = 0x0;
+    AF(p, u8, 0x1C) = 0x0;
+    AF(p, u8, 0x1D) = 0xFF;
+    AF(p, u8, 0x24) = 0xFF;
+    AF(p, u8, 0x25) = 0xFF;
+    AF(p, s16, 0x8) = D_sc01_000_801826F0;
+    AF(p, s16, 0xA) = D_sc01_000_801826F2;
+    AF(p, s16, 0x10) = D_sc01_000_801826F8;
+    AF(p, s16, 0x12) = D_sc01_000_801826FA;
+    AF(p, s16, 0x18) = D_sc01_000_80182708;
+    AF(p, s16, 0x1A) = D_sc01_000_8018270A;
+    AF(p, s16, 0x20) = D_sc01_000_80182710;
+    AF(p, s16, 0x22) = D_sc01_000_80182712;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(D_800AA60C[D_800B9A02]) & 0xFFFFFF);
+    setaddr(D_800AA60C[D_800B9A02], p);
+    p += 0x28;
+    AF(p, u8, 3) = 9;
+    AF(p, u8, 7) = 0x2C;
+    AF(p, s16, 0x16) = 0x9F;
+    AF(p, s16, 0xE) = 0x7DC0;
+    AF(p, u8, 4) = AF(p, u8, 5) = AF(p, u8, 6) = 0x80;
+    AF(p, u8, 0xC) = 0x40;
+    AF(p, u8, 0xD) = 0x0;
+    AF(p, u8, 0x14) = 0x7F;
+    AF(p, u8, 0x15) = 0x0;
+    AF(p, u8, 0x1C) = 0x40;
+    AF(p, u8, 0x1D) = 0xFF;
+    AF(p, u8, 0x24) = 0x7F;
+    AF(p, u8, 0x25) = 0xFF;
+    AF(p, s16, 0x8) = D_sc01_000_801826F8;
+    AF(p, s16, 0xA) = D_sc01_000_801826FA;
+    AF(p, s16, 0x10) = D_sc01_000_80182700;
+    AF(p, s16, 0x12) = D_sc01_000_80182702;
+    AF(p, s16, 0x18) = D_sc01_000_80182710;
+    AF(p, s16, 0x1A) = D_sc01_000_80182712;
+    AF(p, s16, 0x20) = D_sc01_000_80182718;
+    AF(p, s16, 0x22) = D_sc01_000_8018271A;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(D_800AA60C[D_800B9A02]) & 0xFFFFFF);
+    setaddr(D_800AA60C[D_800B9A02], p);
+    p += 0x28;
+    AF(p, u8, 3) = 9;
+    AF(p, u8, 7) = 0x2C;
+    AF(p, s16, 0x16) = 0x8C;
+    AF(p, s16, 0xE) = 0x7DC0;
+    AF(p, u8, 4) = AF(p, u8, 5) = AF(p, u8, 6) = 0x80;
+    AF(p, u8, 0xC) = 0x0;
+    AF(p, u8, 0xD) = 0x0;
+    AF(p, u8, 0x14) = 0xFF;
+    AF(p, u8, 0x15) = 0x0;
+    AF(p, u8, 0x1C) = 0x0;
+    AF(p, u8, 0x1D) = 0xDF;
+    AF(p, u8, 0x24) = 0xFF;
+    AF(p, u8, 0x25) = 0xDF;
+    AF(p, s16, 0x8) = D_sc01_000_80182708;
+    AF(p, s16, 0xA) = D_sc01_000_8018270A;
+    AF(p, s16, 0x10) = D_sc01_000_80182710;
+    AF(p, s16, 0x12) = D_sc01_000_80182712;
+    AF(p, s16, 0x18) = D_sc01_000_80182720;
+    AF(p, s16, 0x1A) = D_sc01_000_80182722;
+    AF(p, s16, 0x20) = D_sc01_000_80182728;
+    AF(p, s16, 0x22) = D_sc01_000_8018272A;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(D_800AA60C[D_800B9A02]) & 0xFFFFFF);
+    setaddr(D_800AA60C[D_800B9A02], p);
+    p += 0x28;
+    AF(p, u8, 3) = 9;
+    AF(p, u8, 7) = 0x2C;
+    AF(p, s16, 0x16) = 0x9F;
+    AF(p, s16, 0xE) = 0x7DC0;
+    AF(p, u8, 4) = AF(p, u8, 5) = AF(p, u8, 6) = 0x80;
+    AF(p, u8, 0xC) = 0x0;
+    AF(p, u8, 0xD) = 0x0;
+    AF(p, u8, 0x14) = 0x3F;
+    AF(p, u8, 0x15) = 0x0;
+    AF(p, u8, 0x1C) = 0x0;
+    AF(p, u8, 0x1D) = 0xDF;
+    AF(p, u8, 0x24) = 0x3F;
+    AF(p, u8, 0x25) = 0xDF;
+    AF(p, s16, 0x8) = D_sc01_000_80182710;
+    AF(p, s16, 0xA) = D_sc01_000_80182712;
+    AF(p, s16, 0x10) = D_sc01_000_80182718;
+    AF(p, s16, 0x12) = D_sc01_000_8018271A;
+    AF(p, s16, 0x18) = D_sc01_000_80182728;
+    AF(p, s16, 0x1A) = D_sc01_000_8018272A;
+    AF(p, s16, 0x20) = D_sc01_000_80182730;
+    AF(p, s16, 0x22) = D_sc01_000_80182732;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(D_800AA60C[D_800B9A02]) & 0xFFFFFF);
+    setaddr(D_800AA60C[D_800B9A02], p);
+    p += 0x28;
+    D_800A5E60 = p;
+}
 
 INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017E1A8);
 
@@ -449,7 +641,156 @@ INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017E3A0);
 
 INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017E4A0);
 
-INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017E594);
+void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    u8 *p;
+
+    p = D_800A5E60;
+    AF(p, u8, 3) = 5;
+    AF(p, u32, 4) = 0xE100003E;
+    AF(p, u8, 0xB) = 0x64;
+    AF(p, u8, 8) = AF(p, u8, 9) = AF(p, u8, 0xA) = arg3;
+    AF(p, s16, 0xC) = -0x80;
+    AF(p, s16, 0xE) = 0;
+    AF(p, u8, 0x10) = 0;
+    AF(p, u8, 0x11) = 0x40;
+    AF(p, u16, 0x12) = 0x4097;
+    AF(p, s16, 0x14) = 0xA0;
+    AF(p, s16, 0x16) = 0x20;
+    AF(p, u8, 0xB) = 0x66;
+    AF(p, s16, 0xE) = arg1 - arg0;
+    AF(p, s16, 0x14) = 0x100;
+    AF(p, s16, 0x16) = arg0;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    p += 0x18;
+    AF(p, u8, 3) = 5;
+    AF(p, u32, 4) = 0xE100005E;
+    AF(p, u8, 0xB) = 0x64;
+    AF(p, u8, 8) = AF(p, u8, 9) = AF(p, u8, 0xA) = arg3;
+    AF(p, s16, 0xC) = -0x80;
+    AF(p, s16, 0xE) = 0;
+    AF(p, u8, 0x10) = 0;
+    AF(p, u8, 0x11) = 0x90;
+    AF(p, u16, 0x12) = 0x4117;
+    AF(p, s16, 0x14) = 0xA0;
+    AF(p, s16, 0x16) = 0x20;
+    AF(p, u8, 0xB) = 0x66;
+    AF(p, s16, 0xE) = arg1 - arg0;
+    AF(p, s16, 0x14) = 0x100;
+    AF(p, s16, 0x16) = arg0;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    p += 0x18;
+    AF(p, u8, 3) = 5;
+    AF(p, u32, 4) = 0xE100003E;
+    AF(p, u8, 0xB) = 0x64;
+    AF(p, u8, 8) = AF(p, u8, 9) = AF(p, u8, 0xA) = arg3;
+    AF(p, s16, 0xC) = -0x80;
+    AF(p, s16, 0xE) = 0;
+    AF(p, u8, 0x10) = 0;
+    AF(p, u8, 0x11) = 0x5F - arg0;
+    AF(p, u16, 0x12) = 0x4097;
+    AF(p, s16, 0x14) = 0xA0;
+    AF(p, s16, 0x16) = 0x20;
+    AF(p, u8, 0xB) = 0x66;
+    AF(p, s16, 0xE) = arg1;
+    AF(p, s16, 0x14) = 0x100;
+    AF(p, s16, 0x16) = arg0 + 1;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    p += 0x18;
+    AF(p, u8, 3) = 5;
+    AF(p, u32, 4) = 0xE100005E;
+    AF(p, u8, 0xB) = 0x64;
+    AF(p, u8, 8) = AF(p, u8, 9) = AF(p, u8, 0xA) = arg3;
+    AF(p, s16, 0xC) = -0x80;
+    AF(p, s16, 0xE) = 0;
+    AF(p, u8, 0x10) = 0;
+    AF(p, u8, 0x11) = 0xAF - arg0;
+    AF(p, u16, 0x12) = 0x4117;
+    AF(p, s16, 0x14) = 0xA0;
+    AF(p, s16, 0x16) = 0x20;
+    AF(p, u8, 0xB) = 0x66;
+    AF(p, s16, 0xE) = arg1;
+    AF(p, s16, 0x14) = 0x100;
+    AF(p, s16, 0x16) = arg0 + 1;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    p += 0x18;
+    AF(p, u8, 3) = 5;
+    AF(p, u32, 4) = 0xE100003E;
+    AF(p, u8, 0xB) = 0x64;
+    AF(p, u8, 8) = AF(p, u8, 9) = AF(p, u8, 0xA) = arg3;
+    AF(p, s16, 0xC) = -0x80;
+    AF(p, s16, 0xE) = 0;
+    AF(p, u8, 0x10) = 0;
+    AF(p, u8, 0x11) = 0x60;
+    AF(p, u16, 0x12) = 0x4097;
+    AF(p, s16, 0x14) = 0xA0;
+    AF(p, s16, 0x16) = 0x20;
+    AF(p, u8, 0xB) = 0x66;
+    AF(p, s16, 0xE) = arg2 - arg0;
+    AF(p, s16, 0x14) = 0x100;
+    AF(p, s16, 0x16) = arg0;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    p += 0x18;
+    AF(p, u8, 3) = 5;
+    AF(p, u32, 4) = 0xE100005E;
+    AF(p, u8, 0xB) = 0x64;
+    AF(p, u8, 8) = AF(p, u8, 9) = AF(p, u8, 0xA) = arg3;
+    AF(p, s16, 0xC) = -0x80;
+    AF(p, s16, 0xE) = 0;
+    AF(p, u8, 0x10) = 0;
+    AF(p, u8, 0x11) = 0xB0;
+    AF(p, u16, 0x12) = 0x4117;
+    AF(p, s16, 0x14) = 0xA0;
+    AF(p, s16, 0x16) = 0x20;
+    AF(p, u8, 0xB) = 0x66;
+    AF(p, s16, 0xE) = arg2 - arg0;
+    AF(p, s16, 0x14) = 0x100;
+    AF(p, s16, 0x16) = arg0;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    p += 0x18;
+    AF(p, u8, 3) = 5;
+    AF(p, u32, 4) = 0xE100003E;
+    AF(p, u8, 0xB) = 0x64;
+    AF(p, u8, 8) = AF(p, u8, 9) = AF(p, u8, 0xA) = arg3;
+    AF(p, s16, 0xC) = -0x80;
+    AF(p, s16, 0xE) = 0;
+    AF(p, u8, 0x10) = 0;
+    AF(p, u8, 0x11) = 0x7F - arg0;
+    AF(p, u16, 0x12) = 0x4097;
+    AF(p, s16, 0x14) = 0xA0;
+    AF(p, s16, 0x16) = 0x20;
+    AF(p, u8, 0xB) = 0x66;
+    AF(p, s16, 0xE) = arg2;
+    AF(p, s16, 0x14) = 0x100;
+    AF(p, s16, 0x16) = arg0 + 1;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    p += 0x18;
+    AF(p, u8, 3) = 5;
+    AF(p, u32, 4) = 0xE100005E;
+    AF(p, u8, 0xB) = 0x64;
+    AF(p, u8, 8) = AF(p, u8, 9) = AF(p, u8, 0xA) = arg3;
+    AF(p, s16, 0xC) = -0x80;
+    AF(p, s16, 0xE) = 0;
+    AF(p, u8, 0x10) = 0;
+    AF(p, u8, 0x11) = 0xCF - arg0;
+    AF(p, u16, 0x12) = 0x4117;
+    AF(p, s16, 0x14) = 0xA0;
+    AF(p, s16, 0x16) = 0x20;
+    AF(p, u8, 0xB) = 0x66;
+    AF(p, s16, 0xE) = arg2;
+    AF(p, s16, 0x14) = 0x100;
+    AF(p, s16, 0x16) = arg0 + 1;
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    p += 0x18;
+    D_800A5E60 = p;
+}
 
 s32 func_sc01_000_8017EB28(s32 arg0) {
     D_800AF7CE = 0;

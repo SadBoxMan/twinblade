@@ -30,3 +30,5 @@ RunStateHandler4E = 0x80155458; // type:func
 UpdateWeaponParts = 0x80155150; // type:func
 // SC03_001 only (stage-specific code, docs/draw_code.md):
 DrawChunkedMesh = 0x8017C710; // type:func
+// r175: the S3 record at 0x8018FDC8 whose field D_8018FDD0 func_8015D1B8 addresses as base - 8
+D_8018FDC8 = 0x8018FDC8;

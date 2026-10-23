@@ -135,7 +135,23 @@ extern void func_8001CD50();
 extern void func_80017758();
 extern void MulMatrix2();
 
-INCLUDE_ASM("asm/abil/ovl1c/nonmatchings/ovl1c", func_ovl1c_800CB03C);
+extern s32 func_8014C088();
+
+void func_ovl1c_800CB03C(s32 arg0) {
+    s32 var_s0;
+
+    var_s0 = 0;
+    if (func_8014C088(arg0, 0x1C) != 0) {
+        var_s0 = 1;
+    } else if (func_8014C050(arg0, 0x3E) != 0) {
+        var_s0 = 1;
+    }
+    if (var_s0 == 0) {
+        func_80146994(0x41, arg0, 0, 0);
+        func_80147324(0x836);
+        func_80146CA0(arg0);
+    }
+}
 
 void func_ovl1c_800CB0B8(s32 arg0) {
     if (func_8014C050(arg0, 0x41) == 0) {

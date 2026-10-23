@@ -331,7 +331,31 @@ void func_ovl22_800CBBA0(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/abil/ovl22/nonmatchings/ovl22", func_ovl22_800CBC7C);
+void func_ovl22_800CBC7C(u8 *arg0) {
+    s32 r;
+    s32 t;
+
+    if (AF(arg0, s16, 0x28) > AF(arg0, s16, 0x2A)) {
+        if (AF(arg0, s32, 0x1C) > 0) {
+            AF(arg0, s16, 0x2A) = (rand() & 0x180) + 0x500;
+            AF(arg0, s32, 0x1C) = -0xA0;
+        }
+    } else if (AF(arg0, s32, 0x1C) < 0) {
+        AF(arg0, s16, 0x2A) = (rand() & 0x180) + 0x800;
+        AF(arg0, s32, 0x1C) = 0xA0;
+    }
+    AF(arg0, s16, 0x28) += AF(arg0, s32, 0x1C);
+    r = AF(arg0, s16, 0x12);
+    AF(arg0, s32, 0x4C) += r;
+    AF(arg0, s32, 0x50) -= 3;
+    AF(arg0, s32, 0x54) += AF(arg0, s16, 0x1A);
+    func_ovl22_800CB8A0(arg0, r);
+    t = AF(arg0, s32, 0x30);
+    AF(arg0, s32, 0x30) = t - 1;
+    if (t == 0) {
+        AF(arg0, u16, 2)++;
+    }
+}
 
 void func_ovl22_800CBD78(u8 *arg0) {
     u16 temp_v0;

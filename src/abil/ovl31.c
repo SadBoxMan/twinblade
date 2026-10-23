@@ -355,7 +355,29 @@ void func_ovl31_800CD404(u8 *arg0) {
     func_ovl31_800CD650(arg0);
 }
 
-INCLUDE_ASM("asm/abil/ovl31/nonmatchings/ovl31", func_ovl31_800CD57C);
+void func_ovl31_800CD57C(u8 *arg0) {
+    s32 t;
+    s32 sum;
+    s32 d;
+    s32 var_v1;
+    void *temp_s0;
+
+    temp_s0 = AF(arg0, void *, 0x20);
+    func_ovl31_800CD6D4(arg0, &D_ovl31_800CD764[AF(arg0, s32, 0x50) << 6]);
+    sum = AF(temp_s0, u16, 0x1A) + func_80012FC8(AF(temp_s0, s16, 0x1A), 0x5000, 0xA, 1);
+    AF(temp_s0, s16, 0x1A) = sum;
+    AF(temp_s0, s16, 0x18) = sum;
+    d = (s16) sum;
+    t = rsin(d / 10) * 2;
+    var_v1 = AF(arg0, s16, 0x62) * t;
+    if (var_v1 < 0) {
+        var_v1 += 0xFFF;
+    }
+    AF(arg0, s16, 0xA) = AF(arg0, u16, 0x60) - (var_v1 >> 0xC);
+    if (func_80146E98(arg0) != 0) {
+        func_80146CA0(arg0);
+    }
+}
 
 void func_ovl31_800CD650(void) {
     func_80162CCC();

@@ -700,7 +700,10 @@ void func_80139954(void);
 void func_8014AA28(void);
 extern u8 D_800B9A15;
 
-extern s16 D_80126720[], D_80126722[], D_80126724[];
+extern s16 D_80126720, D_80126722, D_80126724;
+/* one halfword as a struct member: an in-struct store through a register (what an array element gives), for
+   the box centres of func_80136334 / 801365B8 / 80136824; func_80136A94 reads the three as plain scalars */
+typedef struct { s16 v; } S16Cell;
 extern s16 D_801152A8, D_801152AA, D_801152AC;
 typedef struct {
     /* 0x00 */ s16 pad[2];
@@ -737,6 +740,36 @@ extern SVECTOR D_801152B0;
 
 extern u16 D_800B9A02;
 extern u8 D_800A651C[];
+
+extern void ApplyMatrixSV(MATRIX *m, SVECTOR *v0, SVECTOR *v1);
+
+typedef struct {
+    s16 x, y;
+} Pos16;
+typedef struct {
+    u16 x, y;
+} UPos16;
+extern Pos16 D_8018DB54[];
+extern UPos16 D_8018DB98[];
+extern void GsSortSprite(GsSPRITE *s, GsOT *ot, u16 pri);
+
+typedef struct {
+     u32 tag;
+     u8 r0, g0, b0, code;
+     s16 x0, y0;
+     u8 u0, v0;
+     u16 clut;
+     s16 x1, y1;
+     u8 u1, v1;
+     u16 tpage;
+     s16 x2, y2;
+     u8 u2, v2;
+     u16 pad1;
+     s16 x3, y3;
+     u8 u3, v3;
+     u16 pad2;
+} POLY_FT4;
+extern s16 D_8018DC54[6];
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_8012F968);
 
@@ -2753,9 +2786,9 @@ s32 func_80136334(Box *b, s16 f, s16 z) {
         ((s16 *)&D_801152AC)[0] = -0xFFF;
         D_8018DAA4->vz = z - 2;
     }
-    D_80126720[0] = (b->x0 + b->x1) >> 1;
-    D_80126722[0] = (b->y0 + b->y1) >> 1;
-    D_80126724[0] = (b->z0 + b->z1) >> 1;
+    ((S16Cell *)&D_80126720)->v = (b->x0 + b->x1) >> 1;
+    ((S16Cell *)&D_80126722)->v = (b->y0 + b->y1) >> 1;
+    ((S16Cell *)&D_80126724)->v = (b->z0 + b->z1) >> 1;
     return 1;
 }
 
@@ -2797,9 +2830,9 @@ s32 func_801365B8(Box *b, s16 f, s16 x) {
         D_801152A8 = -0xFFF;
         D_8018DAA4->vx = x - 2;
     }
-    D_80126720[0] = (b->x0 + b->x1) >> 1;
-    D_80126722[0] = (b->y0 + b->y1) >> 1;
-    D_80126724[0] = (b->z0 + b->z1) >> 1;
+    ((S16Cell *)&D_80126720)->v = (b->x0 + b->x1) >> 1;
+    ((S16Cell *)&D_80126722)->v = (b->y0 + b->y1) >> 1;
+    ((S16Cell *)&D_80126724)->v = (b->z0 + b->z1) >> 1;
     return 1;
 }
 
@@ -2839,13 +2872,41 @@ s32 func_80136824(Box *b, s16 f, s16 y) {
         D_801152AA = -0xFFF;
         D_8018DAA4->vy = y - 2;
     }
-    D_80126720[0] = (b->x0 + b->x1) >> 1;
-    D_80126722[0] = (b->y0 + b->y1) >> 1;
-    D_80126724[0] = (b->z0 + b->z1) >> 1;
+    ((S16Cell *)&D_80126720)->v = (b->x0 + b->x1) >> 1;
+    ((S16Cell *)&D_80126722)->v = (b->y0 + b->y1) >> 1;
+    ((S16Cell *)&D_80126724)->v = (b->z0 + b->z1) >> 1;
     return 1;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80136A94);
+/* turns D_8018DAA4's vector and D_80126720 by m (and D_801152A8 by the GTE's rotation) when asked, then out is
+   D_8018DAA4 + o->t and D_80126720 moves by o->t */
+void func_80136A94(s32 turn, Off48 *o, SVECTOR *out, MATRIX *m) {
+    VECTOR r;
+    if (turn != 0) {
+        ApplyMatrixSV(m, D_8018DAA4, D_8018DAA4);
+        ApplyMatrixSV(m, (SVECTOR *)&D_80126720, (SVECTOR *)&D_80126720);
+        {
+            s16 *p = &D_801152A8;
+            ApplyRotMatrix((SVECTOR *)p, &r);
+            *p = r.vx;
+            D_801152AA = r.vy;
+            D_801152AC = r.vz;
+        }
+    }
+    out->vx = D_8018DAA4->vx + o->t[0];
+    out->vy = D_8018DAA4->vy + o->t[1];
+    out->vz = D_8018DAA4->vz + o->t[2];
+    {
+        s16 *q = &D_80126720;
+        *q += o->t[0];
+    }
+    {
+        s32 *t = &o->t[1];      /* a plain pointer: its loads stay behind the stores before them */
+        D_80126722 += *t;
+        t++;
+        D_80126724 += *t;
+    } 
+}
 
 void func_80136BC4(void *p) {
     RelocHead *h = p;
@@ -3159,7 +3220,66 @@ void func_80137FD8(Win *w, u8 *col, PolyG4 *p, s16 y) {
 
 INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_801380E0);
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_801387B8);
+/* the window's text run until it waits: characters, then the control codes below 0x20 */
+void func_801387B8(Win *w) {
+    u16 *p;
+    u8 *s;
+    u8 c;
+    u8 arg;
+    s32 r;
+loop:
+    r = 0;
+    if (w->flags & 0x400) {
+        s = (u8 *)D_80127530[w->unk4A];
+        p = &w->unk44;
+    } else {
+        p = &w->unk10;
+        s = (u8 *)w->id;
+    }
+    {
+        u8 *t = s + *p;
+        c = t[0];
+        arg = t[1];
+    }
+    if (c >= 0x20) {
+        r = func_80138DE0(w, c, arg);
+        if (!(w->flags & 0x80220)) {
+            r = 0;
+        }
+        goto next;
+    }
+    if (c == 0) {
+        goto stop;
+    }
+    switch (c) {
+    case 10:
+        func_80139220(w);
+        *p += 1;
+        goto next;
+    case 1:
+        w->unk23 = arg;
+        *p += 2;
+        r = 1;
+        goto next;
+    case 7:
+        if (!(w->flags & 0x20000)) {
+            w->flags &= ~0x20;
+        }
+        break;
+    case 23:
+        w->flags |= 2;
+    default:
+        *p += 1;
+        r = 1;
+        goto next;
+    }
+stop:
+    func_80138948(w);
+next:
+    if (r != 0) goto loop;
+    func_80139A8C(w);
+    func_80139B18(w);
+}
 
 void func_80138948(Win *w) {
     w->state = 7;
@@ -3808,8 +3928,8 @@ void func_8013A8B0(Cursor *c) {
     c->owner = NULL;
 }
 
-/* a free cursor */
-Cursor *func_8013A8BC(void) {
+/* a free cursor (inline: func_8013A8FC has it inlined) */
+inline Cursor *func_8013A8BC(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
         if (D_8011DA80[i].state == 0) {
@@ -3819,7 +3939,24 @@ Cursor *func_8013A8BC(void) {
     return NULL;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_8013A8FC);
+/* a free window gets a cursor; the cursor search (func_8013A8BC) is inline, and the unk40 test is an && chain
+   with it (no barrier there, so jump.c moves the search's found block up behind the first test's return) */
+s32 func_8013A8FC(Win *w) {
+    Cursor *c;
+    s32 n;
+
+    if (w->unk18 == 0) {
+        return 1;
+    }
+    if (w->unk40 == NULL && (c = func_8013A8BC()) != NULL) {
+        n = w->unk18;
+        if (n < 7 && n != 0) {
+            func_8013A9B4(w, c);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /* a cursor given to a window */
 void func_8013A9B4(Win *w, Cursor *c) {
@@ -3987,4 +4124,76 @@ void func_8013B204(Win *arg0, Cursor *arg1) {
     }
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_8013B274);
+/* the cursor's arrow: a 16 x 16 sprite quadrangle at n / scale along x, held inside one of three bands */
+void func_8013B274(u32 *ot, s16 n, s16 *scale) {
+    SVECTOR sv;
+    VECTOR v;
+    VECTOR w;
+    MATRIX m;                   /* unused: the original's frame has these 0x20 bytes (0x68) */
+    POLY_FT4 *p;
+    s32 q;
+    s16 x;
+    s16 lim;
+    s32 e;
+    p = (POLY_FT4 *)func_80010A08(0x28);
+    setlen(p, 9);
+    p->code = 0x2C;
+    p->r0 = 0x80;
+    p->g0 = 0x80;
+    p->b0 = 0x80;
+    p->tpage = 0x37;
+    p->clut = 0x6FD6;
+    p->u0 = 0xE0;
+    p->v0 = 0;
+    p->u1 = 0xEF;
+    p->v1 = 0;
+    p->u2 = 0xE0;
+    p->v2 = 0xF;
+    p->u3 = 0xEF;
+    p->v3 = 0xF;
+    if (n == 0) {
+        sv.vx = 0;
+    } else {
+        x = (n << 12) / scale[0];
+        q = x;
+        if (D_8018DC54[1] < q && q < D_8018DC54[4]) {
+            lim = e = D_8018DC54[2];
+            if (q < lim) goto clamp;
+            lim = e = D_8018DC54[3];
+            if (lim < q) goto clamp;
+            sv.vx = x;
+        } else if (q <= D_8018DC54[1]) {
+            lim = e = D_8018DC54[0];
+            if (q < lim) goto clamp;
+            sv.vx = x;
+        } else {
+            lim = e = D_8018DC54[5];
+            if (lim < q) {
+            clamp:
+                sv.vx = lim;
+            } else {
+                sv.vx = x;
+            }
+        }
+    }
+    sv.vy = D_800D45F4[1];
+    gte_ldv0(&sv);
+    gte_rtv0tr();
+    gte_stlvnl(&v);
+    if (scale[1] > 0) v.vy -= 1;
+    else v.vy += 2;
+    sv.vx = 9;
+    sv.vy = 9;
+    gte_ldv0(&sv);
+    gte_rtv0();
+    gte_stlvnl(&w);
+    p->x0 = v.vx;
+    p->y0 = v.vy;
+    p->x1 = v.vx + w.vx;
+    p->y1 = v.vy;
+    p->x2 = v.vx;
+    p->y2 = v.vy + w.vy;
+    p->x3 = v.vx + w.vx;
+    p->y3 = v.vy + w.vy;
+    addPrim(ot, p);
+}

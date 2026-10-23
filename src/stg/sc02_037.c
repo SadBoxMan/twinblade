@@ -328,7 +328,63 @@ extern void func_8001C810();
 extern u8 D_sc02_037_801AFD68;
 extern void func_80143B6C();
 
-INCLUDE_ASM("asm/stg/sc02_037/nonmatchings/sc02_037", func_sc02_037_8017BEBC);
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef union { s32 w; XY s; } UXY;
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+extern s32 D_sc02_037_801C96EC;
+extern s32 D_sc02_037_801C96F0;
+extern s32 D_sc02_037_801C96F8;
+extern s32 D_sc02_037_801C96FC;
+extern s32 D_sc02_037_801C9700;
+extern s32 D_sc02_037_801C9708;
+extern s32 D_sc02_037_801C970C;
+extern s32 D_sc02_037_801C9710;
+
+void func_sc02_037_8017BEBC(u8 *arg0, s32 arg1_0) {
+    SV v;
+    WMtx m;
+    s16 arg1 = arg1_0;
+    s16 s;
+    s32 k;
+    s32 x;
+    s32 t;
+    u8 *t0;
+    u8 *a3;
+
+    t0 = AF(arg0, u8 *, 0xCC);
+    a3 = AF(arg0, u8 *, 0x20);
+    if (arg1 != 0) {
+        k = 0x40000000;
+        s = 0x1000;
+    } else {
+        k = 0x50000000;
+        s = 0x1333;
+    }
+    x = AF(a3, s32, 4) & 0xCFFFFFFF;
+    t = k | 0x40000000;
+    AF(a3, s32, 4) = x | t;
+    if (AF(AF(arg0, u8 *, 0xCC), u16, 0) != 0) {
+        AF(t0, s16, 0x1A) = s;
+        AF(t0, s16, 0x18) = s;
+    }
+    v.vx = AF(arg0, u16, 0xFC) += 0x80;
+    v.vy = AF(arg0, u16, 0xFE) += 0x100;
+    v.vz = 0;
+    RotMatrixYXZ(&v, &m);
+    v.vy = 0;
+    v.vx = 0;
+    v.vz = 0x100;
+    ApplyMatrixSV(&m, &v, &v);
+    *(s32 *)&D_sc02_037_801C96E8 = D_sc02_037_801C96F8 = D_sc02_037_801C9708 = v.vx;
+    D_sc02_037_801C96EC = D_sc02_037_801C96FC = D_sc02_037_801C970C = v.vy;
+    D_sc02_037_801C96F0 = D_sc02_037_801C9700 = D_sc02_037_801C9710 = v.vz;
+}
 
 void func_sc02_037_8017BFEC(u8 *arg0) {
     u8 *o;
