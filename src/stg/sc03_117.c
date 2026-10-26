@@ -1295,6 +1295,8 @@ s32 func_sc03_117_8017E99C(s32 arg0);
 
 typedef struct { u32 wx, wy, wz, count; u32 *faces; } Rec;
 
+extern void func_8012C098();
+
 INCLUDE_ASM("asm/stg/sc03_117/nonmatchings/sc03_117", func_sc03_117_8017E218);
 
 void func_sc03_117_8017E300(u8 *arg0, u8 *arg1) {
@@ -1650,11 +1652,38 @@ void func_sc03_117_8017F298(s32 p, s32 x, s32 y) {
     StoreImage(&r, p);
 }
 
-INCLUDE_ASM("asm/stg/sc03_117/nonmatchings/sc03_117", func_sc03_117_8017F2D8);
+void func_sc03_117_8017F2D8(u32 *o, s32 x, s32 y) {
+    RECT r;
+    s32 i;
+    u32 t;
+
+    t = o[7];
+    for (i = 7; i > 0; i--) {
+        o[i] = o[i - 1];
+    }
+    o[i] = t;
+    r.x = x;
+    r.y = y;
+    r.w = 16;
+    r.h = 1;
+    LoadImage(&r, o);
+}
 
 INCLUDE_ASM("asm/stg/sc03_117/nonmatchings/sc03_117", func_sc03_117_8017F344);
 
-INCLUDE_ASM("asm/stg/sc03_117/nonmatchings/sc03_117", func_sc03_117_8017F410);
+void func_sc03_117_8017F410(u8 *o) {
+    u8 *p;
+    s32 d;
+
+    p = AF(o, u8 *, 0xD0);
+    if (p != 0) {
+        AF(p, s16, 8) = AF(o, s16, 6);
+        d = (AF(o, s16, 0x52) >> 1) - 0x1C0;
+        AF(p, s16, 0xA) = AF(o, s16, 0xA) + d;
+        AF(p, s16, 0xC) = AF(o, s16, 0xE);
+        AF(p, s16, 0x1A) = (0x380 - AF(o, s16, 0x52)) * 8 + 0x1000;
+    }
+}
 
 s32 func_sc03_117_8017F474(s32 arg0) {
     s16 temp_v0;
@@ -2088,7 +2117,11 @@ s32 func_sc03_117_801809C8(s32 arg0) {
     return temp_v0;
 }
 
-INCLUDE_ASM("asm/stg/sc03_117/nonmatchings/sc03_117", func_sc03_117_80180A70);
+void func_sc03_117_80180A70(u8 *o) {
+    func_80016714(AF(o, s32, 0xCC), 0x38);
+    func_80016714(AF(o, s32, 0xD0), 0x38);
+    func_8012C098(o);
+}
 
 INCLUDE_ASM("asm/stg/sc03_117/nonmatchings/sc03_117", func_sc03_117_80180AB4);
 

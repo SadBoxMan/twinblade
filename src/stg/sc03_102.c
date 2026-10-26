@@ -644,6 +644,7 @@ extern void ApplyMatrixLV();
 extern u8 D_sc03_102_80189BF0;
 extern u8 D_sc03_102_80189C20;
 
+
 INCLUDE_ASM("asm/stg/sc03_102/nonmatchings/sc03_102", func_sc03_102_8017CD9C);
 
 void func_sc03_102_801801C4(void) {
@@ -952,7 +953,18 @@ INCLUDE_ASM("asm/stg/sc03_102/nonmatchings/sc03_102", func_sc03_102_80181030);
 
 INCLUDE_ASM("asm/stg/sc03_102/nonmatchings/sc03_102", func_sc03_102_8018110C);
 
-INCLUDE_ASM("asm/stg/sc03_102/nonmatchings/sc03_102", func_sc03_102_801811F0);
+s32 func_sc03_102_801811F0(u8 *arg0) {
+    if (AF(AF(arg0, u8 *, 0x20), s32, 4) & 0x80000000) {
+        AF(AF(arg0, u8 *, 0x20), s32, 4) &= 0x7FFFFFFF;
+    } else {
+        AF(AF(arg0, u8 *, 0x20), s32, 4) |= 0x80000000;
+    }
+    if (--AF(arg0, s32, 0x1C) == 0) {
+        func_801292C8(arg0);
+        return 1;
+    }
+    return 0;
+}
 
 u8 *func_sc03_102_80181260(SV8 *pos, s32 ang) {
     V3 v;

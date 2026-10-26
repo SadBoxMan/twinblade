@@ -754,6 +754,7 @@ extern V16 D_sc03_103_801C205C;
 extern s32 D_800A5E90;
 
 
+
 INCLUDE_ASM("asm/stg/sc03_103/nonmatchings/sc03_103", func_sc03_103_8017D174);
 
 void func_sc03_103_8017DDD8(void) {
@@ -1015,7 +1016,12 @@ void func_sc03_103_8017E8F4(u16 *arg0, s32 arg1) {
     MoveImage(&r, arg0[arg1 + 4], arg0[arg1 + 5]);
 }
 
-INCLUDE_ASM("asm/stg/sc03_103/nonmatchings/sc03_103", func_sc03_103_8017E954);
+s32 func_sc03_103_8017E954(void) {
+    if (D_8012704C == 0) {
+        return 0x48;
+    }
+    return 0x4B;
+}
 
 void func_sc03_103_8017E974(u8 *arg0) {
     UV4 a;

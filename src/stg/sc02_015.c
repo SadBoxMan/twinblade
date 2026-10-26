@@ -612,7 +612,36 @@ extern s16 D_sc02_015_80181DA0;
 extern s16 D_sc02_015_80181DA8;
 extern s16 D_sc02_015_80181DB0;
 
-INCLUDE_ASM("asm/stg/sc02_015/nonmatchings/sc02_015", func_sc02_015_8017D53C);
+extern void func_80178B18();
+extern u8 D_sc02_015_80181DD4;
+
+extern u16 D_80126940;
+extern s16 D_80126942;
+extern s16 D_80126944;
+void func_sc02_015_8017D5C8(u8 *p, s16 *q);
+
+void func_sc02_015_8017D53C(u8 *o) {
+    SV8 v;
+    s16 y;
+    s16 z;
+
+    v.x = D_80126940;
+    y = D_80126942;
+    if (y < -0x570) {
+        v.y = -0x570;
+    } else if (y > -0x3C0) {
+        v.y = -0x3C0;
+    } else {
+        v.y = y;
+    }
+    z = D_80126944;
+    if (z < -0x60) {
+        v.z = -0x60;
+    } else {
+        v.z = z;
+    }
+    func_sc02_015_8017D5C8(o, &v.x);
+}
 
 void func_sc02_015_8017D5C8(u8 *p, s16 *q) {
     WMtx m;
@@ -740,7 +769,31 @@ void func_sc02_015_8017DB48(u8 *arg0) {
     AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
 }
 
-INCLUDE_ASM("asm/stg/sc02_015/nonmatchings/sc02_015", func_sc02_015_8017DB60);
+void func_sc02_015_8017DC24(u8 *o);
+extern void func_8012931C();
+extern s32 D_sc02_015_80181D90;
+
+void func_sc02_015_8017DB60(u8 *o) {
+    SV8 v;
+    u8 *p;
+
+    func_sc02_015_8017DC24(o);
+    /* a velocity add with zero x / z (the original reloads and stores 0x10 and 0x18) */
+    AF(o, s32, 0x10) += 0;
+    AF(o, s32, 0x14) += 0xC000;
+    AF(o, s32, 0x18) += 0;
+    func_8012931C(o);
+    if (AF(o, s16, 0x2E) < AF(o, s16, 0xA)) {
+        AF(o, s16, 0xA) = AF(o, s16, 0x2E);
+        func_80015978(o + 4, &v);
+        p = (u8 *)func_801290DC(0x28, &v);
+        if (p != 0) {
+            AF(p, s32, 0x2C) = D_sc02_015_80181D90++ & 7;
+        }
+        func_8002D4C8(0x572, 0);
+        func_801292C8(o);
+    }
+}
 
 void func_sc02_015_8017DC24(u8 *o) {
     TriArg t;
@@ -859,7 +912,12 @@ void func_sc02_015_8017DFF8(void) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc02_015/nonmatchings/sc02_015", func_sc02_015_8017E034);
+void func_sc02_015_8017E034(arg0)
+    u8 *arg0;
+{
+    AF(arg0, u16, 2) = 2;
+    func_80178B18((s32) arg0, (s32) &D_sc02_015_80181DD4);
+}
 
 void func_sc02_015_8017E060(u8 *arg0) {
     D_sc02_015_80181E64[AF(arg0, u16, 2)]();

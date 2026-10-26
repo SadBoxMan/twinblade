@@ -2215,3 +2215,77 @@ draft with a `static inline` helper (sc02_000 801888F4; handput_inl.py placed it
 reconcile one table declared differently by two drafts of the same batch (sc03_094: SV8[] vs s16[], "incompatible types";
 fixed by a cast at the use); a draft that needs a file global retyped scalar -> array (sc03_023 D_801270C8) needs a hand
 edit; clone_all copies a source placed under a pending ruling (r200's identical-arms forms) with nothing to flag it.
+
+### r201 rows (S1 batch 12, 26 Oct; helper agents k1-k98; new census list build/work/r201/batches.txt; merges c5b85f2 and 1c82644)
+
+| Symptom | Source that matched | Where |
+|---|---|---|
+| (r201) Two-constant return, the ==0 value in the beqz delay slot, the !=0 one falling through; ternary / result variable adds `move v0,v1` | `if (D == 0) return A; return B;` (testing != 0 first gives bnez) | sc03_103 8017E954 family (k2) |
+| (r201) srl, not sra, before `andi 0xFF` of a signed call result (rsin) | `((u32)rsin(x) >> 5) & 0xFF` | sc03_093 8018164C |
+| (r201) lh global, `bne 1 / j / beq 2`, returns 6/7/5 | two plain `if (G == 1) return 6; if (G == 2) return 7; return 5;` (a switch flips the order, a local adds a move) | sc03_010 8017F01C |
+| (r201) Clone deferred "conflicting types" for a same-file callee | the draft guessed the callee's prototype: copy the target file's definition prototype (cast args to s32) or its `extern T f();` | sc03_006 80183D18 / 801840E0 (k1) |
+| (r201) Clone of a source that calls a `static inline` helper drafts a call to an undefined function | copy the helper into the target too (clone_all copies only the body) | sc03_031 80180F0C <- sc06_011 8017F7D4 |
+| (r201) Leaf frame bigger than its locals, nothing stored | `u8 unused[N];` with N = the frame size | sc03_002 8018317C (parked for other reasons) |
+| (r201) Branch over an early `return 1/0` comes out inverted (orig bnez + j to the tail, value in the delay slot) | the work-first arm: `if (x != 0) { work; return A; } return B;` | sc01_005 8018078C, sc02_000 801821E8 |
+| (r201) A callee defined later as (s32,s32), whose a1 the asm never sets (orig nop where ours has `li a1,K`) | call through `((s32 (*)())f)(o)` / declare `extern s32 f();` before the definition | sc02_016 80180FE0, sc02_000 80182D84 / 80189750 |
+| (r201) 3-entry function-pointer table copied to the stack, then `jalr` on tbl[o->u16 at 2] | a struct typedef of VoidFn[3] inside the body: `Fn3 t = *(Fn3 *)D_tbl; t.f[AF(o,u16,2)]();` | sc02_000 80183D80 |
+| (r201) A second global pointer loaded before the last store through the first (fills the lh delay slot) | read the last field into a local, reload the pointer from the second global, then store the local | sc03_118 801842DC, sc02_000 8018537C |
+| (r201) A global's address reused as store base and call argument (`addiu v0,%lo(D)`, `sw v1,0(v0)`, `sw v0,0x10(sp)`) | `s32 *p = &D; *p = k; ... f(..., (s32) p);` | sc01_005 8017D9A0 |
+| (r201) Range test on a u8 global (`addiu -7`, `sltiu 0xC`) | `if (D >= 7 && D < 0x13) x = A; else x = B;` (`D - 7 < 12u` as a ternary inverts) | sc02_011 801895CC |
+| (r201) return 0 in the delay slot of both early-exit branches | two early `return 0;` guards, then `|= 1; return 1;` | sc02_017 80185AF0 |
+| (r201) Two arms with the same `|= 0x20`, a third `&= ~0x20` | `if (f(o)) {..} else if (rand() & 1) {..} else {..}` (same body, different conditions: natural source) | sc02_017 80185CA4 |
+| (r201) `(f() & 0x2000) != 0` gives srl/andi; orig andi + `sltu v0,zero,v0` | `if (f() & 0x2000) return 1; return 0;` or `r = f() & 0x2000; return r != 0;` | sc03_006 80188C18 |
+| (r201) s16 index of two terms with the sll16/sra14 truncation in the right place | two statements into an s16 local (`i = ((r>>8)-1)*5 - 1; i += r & 7;`) plus an early `return 0` | sc01_008 8017F2DC |
+| (r201) Three byte globals at consecutive addresses, only the first through `la a0` + 0(a0) | `AF(&D_first, u8, 0/1/2)` for all three (keep the file's declaration) | sc03_014 8018973C, sc03_118 80182F44 |
+| (r201) `return 0` from three early bnez exits with v0=0 in every delay slot, final compare falling into jr ra | `if (A || B || C) return 0; return D;` | sc02_026 8017DA5C family (k8) |
+| (r201) Indexed table address `base + e*16 + h*8` loads the fields in the wrong order | the term to load first written first: `&D + (A & 0xF) * 16 + (B & 0xF) * 8` | sc03_118 80184B18 |
+| (r201) In a switch arm the table pointer `lui/addiu s0` is scheduled before `li a0,1`, orig the other way | write `&D` directly in both calls instead of a pointer local (cse still keeps it in s0) | sc03_090 80181F00 |
+| (r201) Zeroed stack fields stored in an unexpected order ahead of a constant store | write the zero stores in exactly the asm's order (GCC keeps source order; chained `a = b = 0` does not help) | sc01_005 80180A38, sc02_011 80186B1C |
+| (r201) `bnez v0,end` with `li v0,1` in its slot, then `sltu v0,zero,v0` (an `||` of two calls) | `if (f()) return 1; ...; if (g()) return 1; return 0;` | k13 (sc03_006 801888A8) |
+| (r201) Compare tree `beq x,1; slti x,2; ...` (pivot at 1) where ours tests cases in sequence | list an empty extra case (`case 2:` into default, or `case 0: default:`) so GCC builds the balanced tree | sc02_000 801869CC, sc01_005 8017FF74 |
+| (r201) Object and a spawn result have swapped s-registers with `if (t == 0 || g() != 0) { kill(o); return; }` | two separate ifs, each with its own `kill(o); return;`, and `AF(o,u8*,0x20) = t = f();` | sc02_000 80189750 |
+| (r201) Loop read `lhu %lo(D)(at+s0)` with s0 = i*K separate from a pointer register for the call (ours merges them) | `j = i * 0x10C; t = AF(&D, u16, j); f((u8 *)&D + j);` | sc02_000 80185E00 |
+| (r201) A scalar-global store hoisted above two indexed table loads | read the tables through `AF(D_tbl, u16, i * 4)` instead of `D_tbl[i * 2]` | sc01_005 8017D9F4 |
+| (r201) A symbol's address in an s-reg, a neighbour passed as `addiu aN,sK,-2` (cse related_value) | reach the second symbol through the first: `((s16 *)&D_lowsym)[1] = x;` (file declarations unchanged) | sc02_000 80189958 |
+| (r201) Clamp-or-colour puts c in v1, a ternary flips the branch | `c = s; if (s >= 0x20) c |= K; else c |= (s << 16) | (s << 8);` | sc02_000 80189C6C family (k16) |
+
+Placement (r201): void function the file declares `extern s32 f();` whose caller returns its value -> extern void and a cast
+at the caller (26 Oct ruling), build/work/r201/voidput.py: sc02_028 80183AF8, sc03_014 / sc03_015 80189160, sc03_118 /
+sc03_119 8018295C. A function returning a value that the file declares `extern void` -> extern retyped (with the twin file's):
+sc02_000 / sc02_003 80185E88, sc02_017 80185AF0 / sc03_006 80189C68, sc03_014 / sc03_015 801859B0 (`s32 *`), sc03_006
+801888A8 / sc03_029 80186ECC.
+| (r201) `lh` of a global declared u16 (a `(s16)D` cast still gives lhu) | `*(s16 *)&D_x` | sc02_005 801883C4 |
+| (r201) Leaf with an empty 0x10 frame (`u8 unused[8]` gives 0x18) | `u8 c[0];` (marked MATCH-TRICK) | sc03_014 801898BC |
+| (r201) A constant kept in an s-register across a call inside an if-arm | `s32 one = 1;` at the function top, not inside the arm | sc03_006 80188978 |
+| (r201) A global pointer reloaded after its own null test (`lw; beqz; lw` again) | `if (D != 0) { p = ((struct { u8 *p; } *) &D)->p; ... }` | sc03_024 80181230 family (k91) |
+| (r201) A scalar global pointer reloaded with lui/lw before every AF store through it | only `extern void *D[];` with D[0] works (a cast at the use shares one address register) | sc03_028 80186234 (not placed: needs the file retype) |
+| (r201) A fixed-address store the original schedules between `lw 4(p)` and the `or` of `p->4 |= K` | write the field as an array element `((s32 *) p)[1] |= K` (in-struct lets sched1 move it) | k91 |
+| (r201) `addiu v0,v1,0xFF` for a u8 field decrement with the old value tested | `u8 c = AF(o,u8,off); AF(o,u8,off) = c + 0xFF; if (c == 0)` | sc02_005 family (k71) |
+| (r201) 4-byte global copy via lwl/lwr through a base register | the align-1 struct `typedef struct { u8 b[4]; } B4;` | sc02_005 8018BDD0, sc02_016 8017F9F4 |
+| (r201) `ori v0,zero,0xC020` (ours `li v0,-16352`) for a halfword store | store through a u16 field, not s16 | sc02_011 80185AAC family, sc01_084 8018500C |
+| (r201) An unused 4-byte stack local stored before the first test, `sw ra` scheduled ahead of a global load | an initialised declaration `XY v = { 0, -0x40 };` | sc02_005 8017F898, 8017F7CC |
+| (r201) `(rand() >> 4) & 0x3F` needs srl | hold rand() in a `u32` local | k66 |
+| (r201) A switch tree pivoting at 1 (`beq 1; slti 2`) | an empty `case 0: break;` (or `case 2: break;`) | many (k14, k21, k37, k79, k83) |
+| (r201) `x == C` 0/1 flag built with a branch then andi | a static inline u8 helper `if (..) return 1; return 0;` | sc03_023 8017E614 |
+| (r201) Clamp constant held in a register for slt | `lim = K; if (v < lim)` | sc03_028 80186FA4, sc02_027 (k81) |
+| (r201) `xori/sltiu` on each value then `or` (no short-circuit) | `if ((k == 9) | (k == 0x11))` | sc03_007 (k85) |
+
+Parked by r201 (best attempts in C:/tw/stage-sweep/build/work/r179/ spec_<tag>_<n>.txt): sc02_000 80188680 (18 lines, && result kept in v0; spec_k8_1 block 2), sc03_002 8018317C (14, the original narrows u8 params in place; spec_k4_4 block 1), sc02_026 8017F5DC (2, sched1 tie on li a0; spec_k12_5 block 3), sc03_118 80184E78 (8, sh after the 0xFC lhu; spec_k15_3), sc02_000 80187738 (15, sh n,2 too early; spec_k24_4 block 3), sc01_001 80182A48 (1, loop-1 counter not eliminated; spec_k57_3 block 2), sc01_009 8017FED8 (10, a1/a2 swap; spec_k59_4 block 4), sc01_000 8017E4A0 (33, v1/a0 swap in a sprite build; spec_k56_8 block 2), sc01_008 8017F470 (1, slti on the copy; spec_k58_5), sc02_005 80186A04 (8, k/table pointer t0/a3; spec_k73_4 block 1), sc02_005 8018C84C (22, the o+0x34 reload and a folded constant; spec_k73_2), sc03_006 80183EF0 (3, else-arm sum in v1; spec_k84_7 block 1), sc03_028 80180A08 (D reload after the 0x5C store; spec_k92_2 v0), sc03_092 8017E60C (3, andi in a3 / copy in v1; spec_k97_3 block 4), sc03_030 8017EEE0 (14, block-move addresses computed before the call; spec_k95_1). -O0 beyond the known runs: sc03_118 80183178 / 801831D0 / 80183228 / 80183830 / 801837B0 and sc03_119 80183280 (and their twins).
+
+Placement gaps met by r201 (tools card; workarounds in C:/tw/stage-sweep/build/work/r201/): (1) tools/stage_clone.py
+`Image.matched()` counts a C body as a clone source only when its `.s` file exists in asm/stg/<stage>/nonmatchings, so
+shapes whose only C copies were split after matching (sc01_077 8017BEF8, sc01_005 8017BE9C, sc02_000's twins of sc02_003,
+sc02_011 8018A9F8, sc03_007 80180388) are never drafted (24 functions hand-cloned by k25 / k26); (2) stage_clone drops a
+source's `static inline` helper (sc03_031 80180F0C, sc02_003 801888F4); (3) place_stage puts a draft's new extern lines
+above the first INCLUDE_ASM, which can be after the function ("undeclared": function-pointer tables, about 12 times;
+r201/handput2.py puts them directly above the function); (4) place_stage treats an empty-parens `extern T f();` as a
+zero-parameter prototype and defers any definition with parameters (sc03_002 801821B4); (5) put_func's missing_decls
+inserts a later definition's full header as a prototype, which breaks earlier calls with fewer arguments (sc02_005
+80186CA8: "too few arguments"); (6) non-extern forward prototypes in a draft are not carried (sc03_030 8017E430, sc01_080
+80182F64; inserted by hand); (7) cmp_func masks relocations, so a draft with a symbol the asm does not use (sc03_030
+8017E430 read D_80126940 for the asm's D_80126942 / 44) or splat's +0x1000000 alias (sc01_005 8018203C) compares MATCH but
+fails to link or reads an alias; a check that every %hi/%lo symbol of the draft is in the function's .s would catch both.
+Void / value placements (26 Oct ruling): a void function whose file says `extern s32 f();` with a caller that uses the value
+goes in with `extern void` and a cast at the caller (r201/voidput.py: sc02_028 80183AF8, sc03_014 / sc03_015 80189160,
+sc03_118 / sc03_119 8018295C, sc01_080 80183278, sc02_011 80186790, sc03_024 80182884, sc03_105 80184604); a function
+that returns a value but is `extern void` in its file had the extern retyped (16 functions, see the commit messages).

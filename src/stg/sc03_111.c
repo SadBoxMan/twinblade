@@ -817,7 +817,55 @@ extern s32 func_80174774();
 extern u8 D_sc03_111_80188AB8;
 extern u8 D_sc03_111_80188AF8;
 
-INCLUDE_ASM("asm/stg/sc03_111/nonmatchings/sc03_111", func_sc03_111_8017CEE0);
+extern u8 D_sc03_111_80188604;
+
+void func_sc03_111_8017CEE0(u8 *a) {
+    SV8 p;
+    SV8 r;
+    u8 unused[0x20];
+    SV8 *rp;
+    u8 *t;
+    s16 i;
+    s32 o;
+    s32 m;
+
+    t = AF(a, u8 *, 0x34);
+    func_80146A6C(0x11, a, AF(a, s16, 6), (s16)(AF(a, u16, 0xA) - 0x10), AF(a, s16, 0xE), 0, 0);
+    p.x = AF(a, s16, 6);
+    p.y = AF(a, s16, 0xA);
+    p.z = AF(a, s16, 0xE);
+    rp = &r;
+    func_800D20C0(&p, rp, 0xA);
+    AF(a, s16, 6) = p.x;
+    AF(a, s16, 0xE) = p.z;
+    r.y = 0;
+    func_800D23D0(rp);
+    for (i = 0; i < 3; i++) {
+        m = ((s32 (*)())func_80146A6C)(0x12, a, AF(t, s16, 6), AF(t, s16, 0xA), AF(t, s16, 0xE), i, 0);
+        if (m != 0) {
+            AF(m, s16, 0x12) = r.x;
+            AF(m, s16, 0x16) = r.y;
+            AF(m, s16, 0x1A) = 0;
+        }
+    }
+    o = func_800D222C(a, &D_sc03_111_80188604, 0xFD);
+    if (o != 0) {
+        AF(a, s32, 0x20) = o;
+        AF(o, s32, 4) |= 0x5D000100;
+        func_8001CF30(o);
+        AF(o, s16, 0x18) = 0x4000;
+        AF(o, s16, 0x1A) = 0x200;
+        AF(a, s16, 0x16) = 0x200;
+        AF(a, s16, 0x14) = 0x1000;
+        AF(o, s16, 0x28) = 0x240;
+        AF(o, s16, 0x2A) = 0x180;
+        AF(o, s16, 0x10) = r.x;
+        AF(o, s16, 0x12) = r.y;
+        AF(a, u16, 2)++;
+    } else {
+        func_80146C3C(a);
+    }
+}
 
 void func_sc03_111_8017D0A4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     s32 temp_v0_2;
@@ -1879,6 +1927,7 @@ void func_sc03_111_8017EC58(u8 *obj) {
     D_800A5E60 = pk;
 }
 
+
 INCLUDE_ASM("asm/stg/sc03_111/nonmatchings/sc03_111", func_sc03_111_8017FB38);
 
 void func_sc03_111_80180730(u8 *arg0) {
@@ -2089,7 +2138,19 @@ void func_sc03_111_80181178(s32 arg0) {
 
 INCLUDE_ASM("asm/stg/sc03_111/nonmatchings/sc03_111", func_sc03_111_801811E0);
 
-INCLUDE_ASM("asm/stg/sc03_111/nonmatchings/sc03_111", func_sc03_111_801812B4);
+s32 *func_sc03_111_801812B4(u8 *o) {
+    u8 *p;
+
+    if (func_8012BD14(AF(o, s32, 0x64)) <= 0x14400) {
+        p = AF(o, u8 *, 0x64);
+        if (AF(p, u16, 2) == 1) {
+            AF(p, s16, 0xFE) = 1;
+            func_80178BF8();
+            return (s32 *) &func_80172710;
+        }
+    }
+    return NULL;
+}
 
 void func_sc03_111_80181324(s32 arg0) {
     func_sc03_111_80181344(arg0);

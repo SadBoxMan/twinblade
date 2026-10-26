@@ -1233,7 +1233,23 @@ extern void func_800139C8();
 extern void func_8001CB6C();
 extern u8 D_sc02_041_801A3DF0;
 
-INCLUDE_ASM("asm/stg/sc02_041/nonmatchings/sc02_041", func_sc02_041_8017E2B8);
+extern s16 D_sc02_041_80188C80[];
+
+void func_sc02_041_8017E2B8(u8 *o) {
+    SV8 v;
+
+    if (func_80148800(&D_80126B58) & 3) {
+        AF(o, u8, 5) = (AF(o, u8, 5) + 1) & 1;
+        AF(o, s32, 0x14) = D_sc02_041_80188C80[AF(o, u8, 5)];
+    }
+    v = *(SV8 *)&D_80126940;
+    if (v.x < -0xC38) {
+        AF(o, s16, 0x22) = 0xA00;
+    } else {
+        AF(o, s16, 0x22) = 0x600;
+    }
+    func_sc02_041_8017E414(o, &v);
+}
 
 void func_sc02_041_8017E374(u8 *arg0) {
     B8 v;

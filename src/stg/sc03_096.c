@@ -1595,7 +1595,18 @@ void func_sc03_096_8017F744(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_096/nonmatchings/sc03_096", func_sc03_096_8017F794);
+
+void func_sc03_096_8017F794(u8 *o) {
+    s16 v;
+    v = ((u32)rsin(AF(o, s32, 0x1C) << 4) >> 5) & 0xFF;
+    AF(o, s16, 0xFC) = AF(o, s16, 0xFE) = AF(o, s16, 0x100) = v;
+    if (++AF(o, s32, 0x1C) > 0x40) {
+        AF(o, s16, 2) = 3;
+        AF(o, s16, 0x5C) = AF(AF(o, u8 *, 0x78), u16, 2);
+        AF(o, s32, 0x1C) = rand();
+        func_sc03_096_8018026C(AF(o, s32, 0xD4));
+    }
+}
 
 void func_sc03_096_8017F810(u8 *arg0) {
     s32 temp_v0;

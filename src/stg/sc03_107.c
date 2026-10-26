@@ -300,6 +300,40 @@ extern void func_8012A018();
 extern void func_8012A094();
 
 
+typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MT20;
+typedef struct { s16 x, y; s32 pad; } SXY8;
+typedef struct { s32 a; s32 b; } P8;
+typedef struct { u16 x, y, z, pad; } uV4;
+typedef struct { s16 m[3][3]; s32 t[3]; } wMtx;
+typedef struct { u8 pad[0x18]; wMtx wsm; } workHead;
+typedef struct { u16 v[6]; } u12;
+typedef struct { u16 a, b, c, pad; } Rec801AC2F0;
+typedef struct { s16 x, y, z, a, b, c, d, e; s32 w; } Arg8C51C;
+typedef struct { u8 b[4]; } B4;
+typedef struct { s16 v; } S16R;
+typedef struct { s16 x, y; u16 c; s16 pad; } Rec8;
+typedef struct { s32 a; s32 c4; s32 c8; s16 ang; s16 e; s32 pad10[2]; s32 t18; s32 done; s32 f20; } Fx24;
+typedef struct { s16 x, y, z, w; s16 a, b, c, d; s32 e; } BF70S;
+typedef struct { SV8 v[4]; s32 a, b, c, d, e, f; } Q;
+typedef struct { s16 v; s16 pad[5]; } E12s;
+typedef struct { u8 v; u8 pad[11]; } E12b;
+typedef struct { u32 tag; u32 code; s16 x, y; u8 u, v; u16 clut; s16 w, h; } Sprt;
+typedef struct { s8 lo; u8 hi; } S8P;
+typedef struct { u16 v; } U16R;
+typedef struct { u32 tag; u8 r0, g0, b0, code; s16 x0, y0; u8 r1, g1, b1, p1; s16 x1, y1; u8 r2, g2, b2, p2; s16 x2, y2; u8 r3, g3, b3, p3; s16 x3, y3; } PolyG4;
+typedef struct { s32 v; } S32R;
+typedef struct { s32 v; u8 pad[8]; } E12w;
+typedef struct { s32 v; s32 pad; } E8w;
+typedef struct { SV4 p[4]; s32 c[4]; s32 col; s32 code; u8 flag; } Q74;
+
+extern s32 func_8012E544();
+extern s32 func_80013328();
+
+
+extern void func_80178CBC();
+extern u8 D_sc03_107_80186134;
+extern u8 D_sc03_107_8018611C;
+
 INCLUDE_ASM("asm/stg/sc03_107/nonmatchings/sc03_107", func_sc03_107_8017BEBC);
 
 void func_sc03_107_8017CA50(u8 *arg0) {
@@ -512,11 +546,28 @@ void func_sc03_107_8017D280(u8 *arg0, u8 *arg1) {
     AF(arg0, s32, 0x44) = o.z;
 }
 
-INCLUDE_ASM("asm/stg/sc03_107/nonmatchings/sc03_107", func_sc03_107_8017D418);
+s32 func_sc03_107_8017D418(SV8 *a, SV8 *b) {
+    if (a->x < b->x || b->y < a->x || a->z < b->z) {
+        return 0;
+    }
+    return a->z <= b->pad;
+}
 
-INCLUDE_ASM("asm/stg/sc03_107/nonmatchings/sc03_107", func_sc03_107_8017D474);
+void func_sc03_107_8017D474(u8 *o, SV8 *v, u8 *b) {
+    s32 unused;
 
-INCLUDE_ASM("asm/stg/sc03_107/nonmatchings/sc03_107", func_sc03_107_8017D4C8);
+    AF(o, u16, 0xA0) = AF(b, u16, 8);
+    AF(o, u16, 0xA2) = AF(b, u16, 0xA);
+    AF(o, s32, 0x14) = AF(b, s32, 0xC);
+    v->x = AF(b, s16, 0) + (AF(b, s16, 2) - AF(b, s16, 0)) / 2;
+}
+
+void func_sc03_107_8017D4C8(u8 *o, u8 *v, u8 *p) {
+    AF(o, u16, 0xA0) = AF(p, u16, 8);
+    AF(o, u16, 0xA2) = AF(p, u16, 0xA);
+    AF(o, s32, 0x14) = AF(p, s32, 0xC);
+    AF(v, s16, 4) = AF(p, s16, 4) + (AF(p, s16, 6) - AF(p, s16, 4)) / 2;
+}
 
 s32 func_sc03_107_8017D51C(s32 arg0, s32 arg1, s32 arg2) {
     s32 temp_v0;
@@ -615,7 +666,14 @@ void func_sc03_107_8017D76C(s32 arg0) {
 void func_sc03_107_8017D7D0(void) {
 }
 
-INCLUDE_ASM("asm/stg/sc03_107/nonmatchings/sc03_107", func_sc03_107_8017D7D8);
+void func_sc03_107_8017D7D8(u8 *o) {
+    if (AF(o, s16, 0x70) != 0) {
+        func_80178CBC(o, &D_sc03_107_80186134);
+    } else {
+        func_80178CBC(o, &D_sc03_107_8018611C);
+    }
+    AF(o, s16, 2) = 3;
+}
 
 void func_sc03_107_8017D838(s32 arg0) {
     if (func_80178970(arg0) != 0) {
@@ -2252,7 +2310,26 @@ void func_sc03_107_80181A70(s32 arg0) {
     AF(AF(arg0, void *, 0x68), s16, 0xC) = 0x7FFF;
 }
 
-INCLUDE_ASM("asm/stg/sc03_107/nonmatchings/sc03_107", func_sc03_107_80181AB8);
+void func_sc03_107_80181AB8(u8 *o) {
+    u8 *p;
+    s32 d;
+
+    p = (u8 *)func_8012E544(0x17E);
+    switch (AF(o, u16, 0x34)) {
+    case 0:
+        break;
+    case 1:
+        if (p != 0 && func_80013328(p + 4, o + 4) >= 0x60) {
+            func_8012B0B4(&d, func_8012B6D4(o + 4, p + 4), 0x60);
+            AF(o, u16, 6) = AF(p, u16, 6) + d;
+            AF(o, u16, 0xE) = AF(p, u16, 0xE) + (d >> 16);
+        }
+        break;
+    case 2:
+        func_8012C218(o);
+        break;
+    }
+}
 
 void func_sc03_107_80181B94(u8 *arg0) {
     AF(arg0, u16, 0x5C) = 0x8E10;

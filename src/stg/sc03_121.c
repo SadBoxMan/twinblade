@@ -1203,6 +1203,7 @@ extern OtRef D_800A651C[];
 extern u8 D_800AF648;
 extern u8 *func_80010A08();
 
+
 INCLUDE_ASM("asm/stg/sc03_121/nonmatchings/sc03_121", func_sc03_121_8017E880);
 
 void func_sc03_121_8017EFFC(u8 *o) {
@@ -1548,7 +1549,14 @@ void func_sc03_121_8017FE6C(u8 *arg0) {
 
 INCLUDE_ASM("asm/stg/sc03_121/nonmatchings/sc03_121", func_sc03_121_8017FF8C);
 
-INCLUDE_ASM("asm/stg/sc03_121/nonmatchings/sc03_121", func_sc03_121_80180038);
+void func_sc03_121_80180038(u8 *o) {
+    AF(o, s16, 6) += AF(o, s16, 0x12);
+    if (--AF(o, s16, 0xFC) == 0) {
+        AF(AF(o, u8 *, 0x20), s16, 0x12) = 0;
+        SetScript(o, &D_sc03_121_801AAF54);
+        AF(o, s16, 2)++;
+    }
+}
 
 void func_sc03_121_801800A8(void) {
 }
