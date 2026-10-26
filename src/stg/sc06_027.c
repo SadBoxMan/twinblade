@@ -480,7 +480,23 @@ extern s16 D_sc06_027_8019A0DC[];
 extern OtRef D_800A651C[];
 extern u8 *func_80010A08();
 
-INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017D104);
+extern SV8 D_80126940;
+extern s32 ratan2();
+extern void func_sc06_027_8017D1C0(u8 *o, SV8 *a, SV8 *b, s32 d);
+void func_sc06_027_8017D104(u8 *o) {
+    SV8 unused; /* MATCH-TRICK: unused 8-byte local fills the frame's 0x10-0x17 slot */
+    SV8 a;
+    SV8 b;
+    s32 ang;
+
+    a = D_80126940;
+    b = D_80126940;
+    ang = ratan2(a.x, a.z) & 0xFFF;
+    if (a.y > -0x500) {
+        a.y = -0x500;
+    }
+    func_sc06_027_8017D1C0(o, &a, &b, ang);
+}
 
 void func_sc06_027_8017D1C0(u8 *o, SV8 *a, SV8 *b, s32 d) {
     typedef struct { s16 m[3][3]; s32 t[3]; } MX;
@@ -592,7 +608,24 @@ void func_sc06_027_8017D5BC(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017D688);
+extern void func_8014708C();
+extern void func_801472C8();
+void func_sc06_027_8017D688(u8 *o) {
+    u8 *s = &D_80126B58;
+
+    switch (AF(o, u16, 2)) {
+    case 0:
+        AF(o, s32, 0x1C) = 0x7F;
+        AF(o, s16, 2) = 1;
+        EndScene(s);
+        func_8014708C(s);
+        func_801472C8(s);
+        break;
+    case 1:
+        func_sc06_027_8017D3A0(o);
+        break;
+    }
+}
 
 void func_sc06_027_8017D708(u8 *o) {
     u8 *c;
@@ -625,7 +658,24 @@ void func_sc06_027_8017D708(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017D824);
+void func_sc06_027_8017D824(u8 *o) {
+    u8 *c;
+
+    AF(o, s16, 0xA) -= 2;
+    c = AF(o, u8 *, 0xCC);
+    if (c != 0) {
+        AF(c, s16, 0xA) = AF(o, s16, 0xA) - 0x40;
+    }
+    c = AF(o, u8 *, 0xD0);
+    if (c != 0) {
+        AF(c, s16, 0xA) = AF(o, s16, 0xA) - 0x40;
+    }
+    if (AF(o, s16, 0xA) < -0xD00) {
+        func_8012C218(AF(o, u8 *, 0xCC));
+        func_8012C218(AF(o, u8 *, 0xD0));
+        func_8012C218(o);
+    }
+}
 
 void func_sc06_027_8017D8B8(u8 *arg0) {
     s32 temp_v0;
@@ -662,7 +712,22 @@ void func_sc06_027_8017D96C(u8 *arg0) {
 void func_sc06_027_8017D9D8(void) {
 }
 
-INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017D9E0);
+extern u8 D_801202A0;
+extern s16 D_sc06_027_80181AA2;
+void func_sc06_027_8017D9E0(void) {
+    u8 *p;
+    s32 i;
+
+    D_sc06_027_8019D2B8 = 1;
+    p = &D_801202A0;
+    for (i = 0; i < 0x60; i++) {
+        if (AF(p, u16, 0) == 0x392) {
+            s16 *d = &D_sc06_027_80181AA2;
+            *d = AF(p, u16, 0xA) - 0x100;
+        }
+        p += 0x10C;
+    }
+}
 
 s32 func_sc06_027_8017DA3C(s32 arg0) {
     s32 temp_v0;

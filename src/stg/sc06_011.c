@@ -1060,7 +1060,20 @@ extern void func_80143970();
 extern void func_8012B030();
 extern void func_8012E8A8();
 
-INCLUDE_ASM("asm/stg/sc06_011/nonmatchings/sc06_011", func_sc06_011_8017E3F8);
+void func_sc06_011_8017E3F8(u8 *o) {
+    s16 v = AF(o, s16, 0xFE) + 0x80;
+    AF(o, s16, 0xFE) = v;
+    AF(o, s16, 0xA) = AF(o, s16, 0x8A) - ((rcos(v) * 80) >> 12);
+    if (AF(o, s16, 0xFE) >= 0x400) {
+        if (--AF(o, s16, 0xFC) == 0) {
+            AF(AF(o, u8 *, 0x6C), s16, 2)++;
+            func_8002D4C8(0xA66, 0);
+            AF(o, s16, 2) = 3;
+        } else {
+            AF(o, s16, 2) = 1;
+        }
+    }
+}
 
 void func_sc06_011_8017E4A8(void) {
 }
@@ -1087,7 +1100,27 @@ s32 func_sc06_011_8017E4EC(u8 *arg0, s32 *t) {
     return t[1];
 }
 
-INCLUDE_ASM("asm/stg/sc06_011/nonmatchings/sc06_011", func_sc06_011_8017E534);
+extern s32 func_8012C1B8();
+extern void func_8012CAE4();
+extern u8 D_sc06_011_80184278;
+extern s32 D_sc06_011_80184268[];
+void func_sc06_011_8017E534(u8 *o) {
+    s32 v = func_8012C1B8();
+    s32 g;
+    AF(o, s32, 0x20) = v;
+    if (v == 0) {
+        func_8012CAE4(o);
+        return;
+    }
+    func_8001C214(v, 0);
+    AF(o, u8 *, 0x58) = &D_sc06_011_80184278;
+    AF(o, s16, 0x5C) = 0x80;
+    g = D_sc06_011_801ABBF4;
+    AF(o, s16, 2)++;
+    if (g == 0) {
+        AF(o, s32, 0xDC) = func_sc06_011_8017E4EC(o, D_sc06_011_80184268);
+    }
+}
 
 void func_sc06_011_8017E5C0(void) {
 }
@@ -1450,7 +1483,33 @@ void func_sc06_011_8017F510(u8 *o) {
     func_80171928(o);
 }
 
-INCLUDE_ASM("asm/stg/sc06_011/nonmatchings/sc06_011", func_sc06_011_8017F5F0);
+extern void func_80015978();
+extern void func_8012F2E8();
+void func_sc06_011_8017F5F0(u8 *o) {
+    typedef struct { u8 b[0x10C]; } O10C;
+    SV8 v;
+    s32 i;
+    s32 best;
+    u8 *p;
+    s16 d;
+    best = 0x7FFFFFFF;
+    D_sc06_011_801ABBD8 = 0;
+    for (i = 0; i < 0x60; i++) {
+        p = (u8 *)&((O10C *)&D_801202A0)[i];
+        if (AF(p, u16, 0) == 0x26E) {
+            d = func_80013328(o + 4, p + 4);
+            if (d < best) {
+                best = d;
+                D_sc06_011_801ABBD8 = p;
+            }
+        }
+    }
+    AF(o, s16, 0x208) = 0;
+    func_80015978(o + 4, &v);
+    func_8012F2E8(D_sc06_011_801ABBD8, &v, o + 0x20C);
+    AF(o, u8 *, 0x204) = D_sc06_011_801ABBD8;
+    func_8002D4C8(0x8B0, 0);
+}
 
 s32 func_sc06_011_8017F6CC(u8 *o) {
     SV8 v;

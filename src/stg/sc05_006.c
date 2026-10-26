@@ -1340,7 +1340,22 @@ extern void RotMatrixY();
 extern void SetTransMatrix();
 extern void RotTransSV();
 
-INCLUDE_ASM("asm/stg/sc05_006/nonmatchings/sc05_006", func_sc05_006_8017EB74);
+extern s32 func_80148800();
+extern s16 D_sc05_006_8018308C[];
+extern SV8 D_80126940;
+void func_sc05_006_8017EB74(u8 *o) {
+    SV8 v;
+    if (func_80148800(&D_80126B58) & 3) {
+        o[5] = (o[5] + 1) & 1;
+        AF(o, s32, 0x14) = D_sc05_006_8018308C[o[5]];
+    }
+    v = D_80126940;
+    if (v.x > 0x100) v.x = 0x100;
+    if (v.x < -0x100) v.x = -0x100;
+    if (v.z > 0x100) v.z = 0x100;
+    if (v.z < -0x100) v.z = -0x100;
+    func_sc05_006_8017EC74(o, (u8 *)&v);
+}
 
 void func_sc05_006_8017EC74(u8 *arg0, u8 *arg1) {
     FeMtx m;

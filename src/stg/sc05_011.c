@@ -499,7 +499,32 @@ extern u8 D_sc05_011_801920E0;
 extern u8 D_sc05_011_801922F0;
 extern u8 D_sc05_011_80192500;
 
-INCLUDE_ASM("asm/stg/sc05_011/nonmatchings/sc05_011", func_sc05_011_8017D174);
+extern s32 MoveImage();
+void func_sc05_011_8017D174(void) {
+    SV8 r1;
+    SV8 r2;
+    s32 n = *(u8 *)&D_sc05_011_8019D068;
+
+    if (n == 0) {
+        r1.x = 0x300;
+        r1.y = 0x180;
+        r1.z = 0x100;
+        r1.pad = 0x80;
+        MoveImage(&r1, 0x300, 0x100);
+    } else {
+        r1.x = n + 0x300;
+        r1.y = 0x180;
+        r1.z = 0x100 - n;
+        r1.pad = 0x80;
+        MoveImage(&r1, 0x300, 0x100);
+        r2.x = 0x300;
+        r2.y = 0x180;
+        r2.z = n;
+        r2.pad = 0x80;
+        MoveImage(&r2, 0x400 - n, 0x100);
+    }
+    D_sc05_011_8019D068--;
+}
 
 void func_sc05_011_8017D25C(u8 *o) {
     struct { s16 a, b, c, d, e, f, g, h; s32 i; } s;

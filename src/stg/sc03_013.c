@@ -586,6 +586,12 @@ extern void func_801439C0();
 extern void func_8001CB6C();
 extern u8 D_sc03_013_80184F24;
 
+extern void func_800D0F4C();
+extern s32 func_8013767C();
+extern u8 D_sc03_013_8019BE48;
+extern u8 D_sc03_013_8019BE8C;
+extern u8 D_sc03_013_8019BED0;
+
 INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017C730);
 
 void func_sc03_013_8017D7C4(u8 *arg0) {
@@ -755,7 +761,34 @@ void func_sc03_013_8017DD5C(u8 *arg0) {
     D_sc03_013_80184C64[AF(arg0, u8, 0x216)]();
 }
 
-INCLUDE_ASM("asm/stg/sc03_013/nonmatchings/sc03_013", func_sc03_013_8017DD98);
+/* PORT NOTE: reads a variable never set, as the original (undefined under cl) */
+void func_sc03_013_8017DD98(u8 *o) {
+    u8 k;
+    u8 *p;
+    s32 id;
+
+    switch (AF(o, u8, 0x218) + 1) {
+    case 1:
+        id = 0xC1;
+        k = 0x5B;
+        p = &D_sc03_013_8019BE48;
+        break;
+    case 4:
+        id = 0xC2;
+        k = 0x5C;
+        p = &D_sc03_013_8019BE8C;
+        break;
+    case 8:
+        id = 0xC3;
+        k = 0x5D;
+        p = &D_sc03_013_8019BED0;
+        break;
+    }
+    func_80029124(id, 1);
+    func_800D0F4C(k);
+    AF(o, s32, 0x198) = func_8013767C(p);
+    func_80171990(o);
+}
 
 void func_sc03_013_8017DE70(u8 *arg0) {
     if (func_801399F0(AF(arg0, s32, 0x198)) != 0) {

@@ -187,7 +187,7 @@ extern void func_sc04_020_8017EDB0();
 extern u8 D_sc04_020_801871F8;
 extern u8 D_sc04_020_80187238;
 extern u8 D_sc04_020_80187208;
-extern void func_sc04_020_8017F24C();
+extern s32 *func_sc04_020_8017F24C();
 extern u8 D_sc04_020_801872B0;
 extern u8 D_sc04_020_801873B0;
 extern u8 D_sc04_020_801B2938;
@@ -1676,7 +1676,35 @@ void func_sc04_020_8017F1D4(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc04_020/nonmatchings/sc04_020", func_sc04_020_8017F24C);
+s32 func_sc04_020_801810B8(u8 *arg0);
+s32 *func_sc04_020_8017F24C(u8 *o) {
+    u8 *p = AF(o, u8 *, 0x64);
+
+    switch (AF(p, u16, 2)) {
+    case 2:
+        if (func_sc04_020_801810B8(o) == 0) {
+            return NULL;
+        }
+        if (AF(AF(o, u8 *, 0x64), u16, 0x34) != 0) {
+            return NULL;
+        }
+        AF(AF(o, u8 *, 0x64), u16, 0x34)++;
+        break;
+    case 3:
+        if (func_8012BD14(p) > 0x4000) {
+            return NULL;
+        }
+        if (AF(AF(o, u8 *, 0x64), u16, 0x34) != 2) {
+            return NULL;
+        }
+        AF(AF(o, u8 *, 0x64), u16, 0x34) = 5;
+        break;
+    default:
+        return NULL;
+    }
+    func_80178BF8();
+    return (s32 *)&func_80172710;
+}
 
 s32 func_sc04_020_8017F320(void) {
     s32 r;

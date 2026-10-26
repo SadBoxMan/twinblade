@@ -52,7 +52,7 @@ extern void (*D_sc06_015_80191E4C[])();
 extern u8 D_sc06_015_80191E54;
 extern void (*D_sc06_015_80191E60[])();
 
-extern void func_8002D4C8();
+extern s32 func_8002D4C8();
 extern void func_8001BFD0();
 extern void func_800D0C48();
 extern void func_800D1E28();
@@ -1071,7 +1071,51 @@ void func_sc06_015_8017E7EC(u8 *o) {
     func_80171928(o);
 }
 
-INCLUDE_ASM("asm/stg/sc06_015/nonmatchings/sc06_015", func_sc06_015_8017E8CC);
+typedef struct { U12 e[9]; } U12x9;
+typedef struct { s32 vx, vy, vz, pad; } V4F20;
+typedef struct { s16 x, y, z, pad; } SV_8E8A0;
+typedef struct { s32 x, y, z, pad; } VEC_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT_8E8A0;
+typedef struct { u8 r, g, b, cd; } CV_8E8A0;
+typedef struct { SV_8E8A0 pt[4]; CV_8E8A0 col[4]; s32 code; } PRIM_8E8A0;
+typedef struct { s32 x, y, z; } POS_8E8A0;
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef void (*VoidFn)();
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
+extern void func_80015978();
+extern void func_8012F2E8();
+
+void func_sc06_015_8017E8CC(u8 *o) {
+    typedef struct { u8 b[0x10C]; } O10C;
+    SV8 v;
+    s32 i;
+    s32 best;
+    u8 *p;
+    s16 d;
+    best = 0x7FFFFFFF;
+    D_sc06_015_80194888 = 0;
+    for (i = 0; i < 0x60; i++) {
+        p = (u8 *)&((O10C *)&D_801202A0)[i];
+        if (AF(p, u16, 0) == 0x26E) {
+            d = func_80013328(o + 4, p + 4);
+            if (d < best) {
+                best = d;
+                D_sc06_015_80194888 = p;
+            }
+        }
+    }
+    AF(o, s16, 0x208) = 0;
+    func_80015978(o + 4, &v);
+    func_8012F2E8(D_sc06_015_80194888, &v, o + 0x20C);
+    AF(o, u8 *, 0x204) = D_sc06_015_80194888;
+    func_8002D4C8(0x8B0, 0);
+}
 
 s32 func_sc06_015_8017E9A8(u8 *o) {
     SV8 v;

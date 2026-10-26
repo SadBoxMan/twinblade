@@ -4963,7 +4963,39 @@ s32 func_sc06_032_801874E8(void) {
     return var_v0;
 }
 
-INCLUDE_ASM("asm/stg/sc06_032/nonmatchings/sc06_032", func_sc06_032_8018750C);
+typedef struct { u8 a, b; } B2;
+typedef struct { u8 type; u8 kind; s16 a[2]; s16 b[2]; s16 x; s16 z; } E14;
+typedef struct { s16 h; u8 a, b, c; u8 pad[11]; } Col16;
+typedef struct { s32 a; s32 c4; s32 c8; s16 ang; s16 e; s32 pad10[2]; s32 t18; s32 done; s32 f20; } Fx24;
+typedef struct { s16 x, y, z, w; s16 a, b, c, d; s32 e; } BF70S;
+typedef struct { SV8 v[4]; s32 a, b, c, d, e, f; } Q;
+typedef struct { s16 v; s16 pad[5]; } E12s;
+typedef struct { u8 v; u8 pad[11]; } E12b;
+typedef struct { u32 tag; u32 code; s16 x, y; u8 u, v; u16 clut; s16 w, h; } Sprt;
+typedef struct { s8 lo; u8 hi; } S8P;
+typedef struct { u16 v; } U16R;
+typedef struct { u32 tag; u8 r0, g0, b0, code; s16 x0, y0; u8 r1, g1, b1, p1; s16 x1, y1; u8 r2, g2, b2, p2; s16 x2, y2; u8 r3, g3, b3, p3; s16 x3, y3; } PolyG4;
+typedef struct { s32 v; } S32R;
+typedef struct { s32 v; u8 pad[8]; } E12w;
+typedef struct { s32 v; s32 pad; } E8w;
+typedef struct { SV4 p[4]; s32 c[4]; s32 col; s32 code; u8 flag; } Q74;
+
+void func_sc06_032_8018750C(u8 *pos, s32 col) {
+    u8 *e;
+    s32 i;
+
+    e = &D_sc06_032_801D0B80;
+    for (i = 0; i < 0x20; i++, e += 0x10) {
+        if (AF(e, s16, 0xE) == 0) {
+            AF(e, SV8, 8) = *(SV8 *)pos;
+            AF(e, CV4, 0) = *(CV4 *)&col;
+            if ((e[4] = e[0] >> 3) == 0) e[4] = 1;
+            if ((e[5] = e[1] >> 3) == 0) e[5] = 1;
+            if ((e[6] = e[2] >> 3) == 0) e[6] = 1;
+            return;
+        }
+    }
+}
 
 void func_sc06_032_801875D0(void) {
     XY sxy;

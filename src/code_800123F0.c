@@ -916,6 +916,21 @@ typedef struct {
 
 extern s16 D_800C7C74;
 
+typedef struct {
+     u8 pad0[2];
+     s16 unk2;
+     s16 unk4;
+     u8 pad6[0xA];
+     u8 unk10;
+     u8 pad11[3];
+     s32 spuAddr;
+} SoundSlot;
+extern SoundSlot g_SoundSlot[5];
+extern s16 func_8003836C(s32 a);
+
+typedef struct { s16 active; s16 pad2; s32 val; u8 pad8[5]; u8 unkD; u8 padE[2]; } Slot183E0;
+typedef struct { u8 pad[0xA1A8]; Slot183E0 slot[32]; } Work183E0;
+
 INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_80013154);
 
 s32 func_80013200(void *a, void *b) {
@@ -2227,7 +2242,21 @@ void func_80018384(u32 *ot, u32 *prim) {
     *ot = (*ot & 0xFF000000) | ((u32)prim & 0xFFFFFF);
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_800183E0);
+s32 func_800183E0(s32 a) {
+    register Work183E0 *w = (Work183E0 *)&D_800AF630;
+    s32 r = 0;
+    s32 i;
+    for (i = 0; i < 32; i++) {
+        if (w->slot[i].active == 0) {
+            w->slot[i].active = 1;
+            w->slot[i].val = a;
+            w->slot[i].unkD = 0;
+            r = 1;
+            break;
+        }
+    }
+    return r;
+}
 
 INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_80018450);
 
@@ -2394,7 +2423,18 @@ void func_800191BC(s32 a) {
     D_80078E30 = ((s32)(a << 16) >> 16);
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_800191D4);
+s32 func_800191D4(s32 a) {
+    register s32 *p = &D_80078E30;
+    s32 r;
+    if (*p < 0) {
+        r = 1;
+    } else if (func_8001923C(a) != 0) {
+        r = 1;
+    } else {
+        r = *p != a;
+    }
+    return r;
+}
 
 s32 func_8001923C(s32 n) {
     if (n == 0xB3) {
@@ -3458,7 +3498,25 @@ void func_8001BA84(void) {
     func_8001BC6C(D_800630E8 + 0x18, 0x80);
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_8001BADC);
+s32 func_8001BADC(s32 n, s32 flag) {
+    s32 i;
+    u32 c;
+    u32 w;
+    u32 code;
+    u8 *base;
+    u8 *p;
+    for (i = 0; i < 15; i++) {
+        c = (i < n) ? -(flag != 0) & 8 : 0;
+        code = 0x62000000;
+        w = (c << 16) | ((c << 8) | code) | c;
+        base = (u8 *)D_80074808;
+        p = base + i * 0x14;
+        *(u32 *)(p + 8) = w;
+        p = base + (0x1D - i) * 0x14;
+        *(u32 *)(p + 8) = w;
+    }
+    return n >= 0x2C;
+}
 
 void func_8001BB60(void) {
     s32 i = 0;

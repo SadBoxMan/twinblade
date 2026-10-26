@@ -440,12 +440,34 @@ void func_sc07_009_8017D024(u8 *arg0) {
 
 extern s16 D_sc07_009_80181A00;
 
-INCLUDE_ASM("asm/stg/sc07_009/nonmatchings/sc07_009", func_sc07_009_8017D060);
+extern s16 D_801274EA[];
+extern s16 D_801274F2;
+extern s16 D_800B9ABA[];
+extern void func_80171A80();
+extern void func_sc07_009_8017D0D4();
+void func_sc07_009_8017D060(s32 arg0) {
+    D_801274EA[0] -= 0x280;
+    D_801274F2 -= 0x500;
+    func_80171A80(arg0, 0xA0);
+    func_80171990(arg0);
+    func_sc07_009_8017D0D4(arg0);
+    D_800B9ABA[0] = 0;
+}
 
 void func_sc07_009_8017D0CC(void) {
 }
 
-INCLUDE_ASM("asm/stg/sc07_009/nonmatchings/sc07_009", func_sc07_009_8017D0D4);
+extern s32 func_80171A88();
+extern void func_80171928();
+void func_sc07_009_8017D0D4(s32 arg0) {
+    if (func_80171A88(arg0) != 0) {
+        func_80171928(arg0);
+    } else {
+        D_801274EA[0] += 4;
+        D_801274F2 += 8;
+        D_800B9ABA[0] += 2;
+    }
+}
 
 void func_sc07_009_8017D150(void) {
     func_8016EE40((s32) &D_sc07_009_80181824, 0x01000000);
@@ -473,15 +495,43 @@ void func_sc07_009_8017D1C8(void) {
     func_sc07_009_8017D338((s32) &D_80126948);
 }
 
-INCLUDE_ASM("asm/stg/sc07_009/nonmatchings/sc07_009", func_sc07_009_8017D260);
+extern s32 D_80126950;
+extern s16 D_801274E8;
+extern s16 D_801274EC;
+extern s16 D_801274F0;
+extern s16 D_801274F4;
+extern s16 D_sc07_009_8019EE74;
+extern s16 D_sc07_009_8019EE76;
+extern s16 D_sc07_009_8019EE78;
+extern s16 D_sc07_009_8019EE7A;
+extern s16 D_sc07_009_8019EE7C;
+extern s16 D_sc07_009_8019EE7E;
+void func_sc07_009_8017D260(void) {
+    D_80126950 = 0x16F;
+    D_801274E8 = D_sc07_009_8019EE74;
+    D_801274EA[0] = D_sc07_009_8019EE76;
+    D_801274EC = D_sc07_009_8019EE78;
+    D_801274F0 = D_sc07_009_8019EE7A;
+    D_801274F2 = D_sc07_009_8019EE7C;
+    D_801274F4 = D_sc07_009_8019EE7E;
+    func_8012A018((s32) func_sc07_009_8017D338, 0);
+    func_sc07_009_8017D338((s32) &D_80126948);
+}
 
-INCLUDE_ASM("asm/stg/sc07_009/nonmatchings/sc07_009", func_sc07_009_8017D304);
+extern s32 func_80174E9C();
+void func_sc07_009_8017D304(void) {
+    D_80126950 = 0x16F;
+    func_80174E9C((s32) &D_sc07_009_8019EE74);
+}
 
 void func_sc07_009_8017D338(s32 arg0) {
     D_sc07_009_80181878[AF(arg0, u8, 4)]();
 }
 
-INCLUDE_ASM("asm/stg/sc07_009/nonmatchings/sc07_009", func_sc07_009_8017D374);
+extern s32 func_sc07_009_8017D39C(s32 arg0, s32 arg1, s32 arg2);
+void func_sc07_009_8017D374(s32 arg0) {
+    func_sc07_009_8017D39C(arg0, (s32) &D_801274E8, (s32) &D_801274E8 + 8);
+}
 
 s32 func_sc07_009_8017D39C(s32 arg0, s32 arg1, s32 arg2) {
     s16 temp_v0;
@@ -632,9 +682,37 @@ void func_sc07_009_8017D980(s32 arg0) {
     AF(arg0, s32, 0x3C) = 0;
 }
 
-INCLUDE_ASM("asm/stg/sc07_009/nonmatchings/sc07_009", func_sc07_009_8017D994);
+s32 func_sc07_009_8017D994(s32 arg0) {
+    s32 v;
+    v = AF(arg0, u8, 0x30);
+    v += 2;
+    if (v >= 0x80) {
+        v = 0x80;
+    }
+    v = v | ((v << 16) | (v << 8));
+    AF(arg0, s32, 0x30) = v;
+    AF(arg0, s32, 0x34) = v;
+    AF(arg0, s32, 0x38) = v;
+    AF(arg0, s32, 0x3C) = v;
+    func_sc07_009_8017DA7C(arg0);
+    return AF(arg0, u8, 0x30) == 0x80;
+}
 
-INCLUDE_ASM("asm/stg/sc07_009/nonmatchings/sc07_009", func_sc07_009_8017DA0C);
+s32 func_sc07_009_8017DA0C(s32 arg0) {
+    s32 v;
+    v = AF(arg0, u8, 0x30);
+    v -= 2;
+    if (v < 0) {
+        v = 0;
+    }
+    v = v | ((v << 16) | (v << 8));
+    AF(arg0, s32, 0x30) = v;
+    AF(arg0, s32, 0x34) = v;
+    AF(arg0, s32, 0x38) = v;
+    AF(arg0, s32, 0x3C) = v;
+    func_sc07_009_8017DA7C(arg0);
+    return AF(arg0, u8, 0x30) == 0;
+}
 
 s32 func_sc07_009_8017DA7C(s32 arg0) {
     AF(arg0, s16, 4) = 4;
@@ -655,7 +733,11 @@ void func_sc07_009_8017DB08(u8 *arg0, s32 arg1) {
     func_8012AD50((s32) arg0, arg1);
 }
 
-INCLUDE_ASM("asm/stg/sc07_009/nonmatchings/sc07_009", func_sc07_009_8017DB34);
+extern s16 D_800B9AB8;
+extern s32 func_8012A758();
+void func_sc07_009_8017DB34(void) {
+    D_800B9AB8 = ((s16) func_8012A758() * 0x140) / 4096;
+}
 
 void func_sc07_009_8017DB80(u8 *arg0) {
     if (AF(arg0, s16, 0x70) == 0) {

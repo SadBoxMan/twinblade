@@ -1299,7 +1299,283 @@ s32 func_sc02_000_8017D4CC(s32 arg0, s32 arg1) {
 }
 
 
-INCLUDE_ASM("asm/stg/sc02_000/nonmatchings/sc02_000", func_sc02_000_8017D538);
+extern void func_sc02_000_801803B0();
+extern u8 D_sc02_000_8018E698;
+extern u8 D_sc02_000_8018E680;
+extern u8 D_sc02_000_801A65BC;
+extern s16 D_sc02_000_8018E6E4;
+extern s16 D_sc02_000_8018E6E8;
+extern s32 func_8012BD3C();
+extern void func_sc02_000_8017F5A0();
+extern void func_sc02_000_8017F5E4();
+s32 func_sc02_000_8017E404(u8 *p, u8 *o);
+void func_sc02_000_8017E5AC(u8 *o);
+void func_sc02_000_8017E6D8(u8 *o);
+s32 func_sc02_000_8017E958(u8 *p, s32 k);
+
+typedef struct { u8 *verts; u32 pad; u32 x; u32 y; u32 z; u32 *start; u32 *end; } CellC77;
+typedef struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteC77;
+extern SV8 D_sc02_000_801E8678;
+
+void func_sc02_000_8017D538(u8 *o) {
+    SV8 r;
+    s32 tmp[4];
+    SV8 box[8];
+    SV8 scr[8];
+    MtxDCM ls;
+    GteC77 g;
+    s32 x0, x1, y0, y1;
+    s32 xi, yi;
+    CellC77 **row;
+    CellC77 **cp;
+    CellC77 *c;
+    u8 *pk;
+    u32 *ot;
+    u8 *verts;
+    u32 *poly;
+    u32 *end;
+    u32 w;
+    s32 hi;
+    s32 xh, xl, yh, yl;
+    s32 a, b;
+    s32 type;
+    u8 *d;
+    u8 *d3;
+    u32 *t;
+    u32 cx, cy, cz;
+    u32 bxl, bxh, byl, byh, bzl, bzh;
+
+    ReadGeomScreen();
+    GsGetLs(o + 0x10, &ls);
+    GsSetLsMatrix(&ls);
+    func_sc02_000_8017CE58(&D_sc02_000_801E8678, &r, AF(o, s32, 0x60));
+    pk = D_800A5E60;
+    ot = D_800A6610[D_800B9A02];
+    x0 = (r.x + 0x4000) / 512;
+    x1 = (r.x + r.z + 0x4000) / 512 + 2;
+    x0 = x0 < 0 ? 0 : (x0 > 63 ? 63 : x0);
+    x1 = x1 < 0 ? 0 : (x1 > 63 ? 63 : x1);
+    y0 = (r.y + 0x4000) / 512 - 1;
+    y1 = (r.y + r.pad + 0x4000) / 512 + 2;
+    y0 = y0 < 0 ? 0 : (y0 > 63 ? 63 : y0);
+    y1 = y1 < 0 ? 0 : (y1 > 63 ? 63 : y1);
+    row = &AF(o, CellC77 **, 0xC)[y0 * 64 + x0];
+    for (yi = y0; yi < y1; yi++, row += 64) {
+        for (xi = x0, cp = row; xi < x1; xi++, cp++) {
+            c = *cp;
+            if (c == 0) continue;
+            cx = c->x; cy = c->y; cz = c->z;
+            bxl = cx & 0xFFFF; byl = cy & 0xFFFF; bzl = cz & 0xFFFF;
+            bxh = cx >> 16; bzh = cz >> 16; byh = cy >> 16;
+            box[0].x = bxl; box[0].y = byl; box[0].z = bzl;
+            box[1].x = bxh; box[1].y = byl; box[1].z = bzl;
+            box[2].x = bxl; box[2].y = byl; box[2].z = bzh;
+            box[3].x = bxh; box[3].y = byl; box[3].z = bzh;
+            box[4].x = bxl; box[4].y = byh; box[4].z = bzl;
+            box[5].x = bxh; box[5].y = byh; box[5].z = bzl;
+            box[6].x = bxl; box[6].y = byh; box[6].z = bzh;
+            box[7].x = bxh; box[7].y = byh; box[7].z = bzh;
+            gte_ldv3c(&box[0]);
+            gte_rtpt();
+            gte_stsxy3(&scr[0], &scr[1], &scr[2]);
+            gte_ldv0(&box[3]);
+            gte_rtps();
+            gte_stsxy(&scr[3]);
+            gte_ldv3c(&box[4]);
+            gte_rtpt();
+            gte_stsxy3(&scr[4], &scr[5], &scr[6]);
+            gte_ldv0(&box[7]);
+            gte_rtps();
+            gte_stsxy(&scr[7]);
+
+            if (scr[0].x > scr[1].x) { hi = scr[0].x; xh = scr[1].x; } else { xh = scr[0].x; hi = scr[1].x; }
+            if (scr[2].x > hi) hi = scr[2].x; else if (scr[2].x < xh) xh = scr[2].x;
+            if (scr[3].x > hi) hi = scr[3].x; else if (scr[3].x < xh) xh = scr[3].x;
+            if (scr[4].x > scr[5].x) { yl = scr[4].x; yh = scr[5].x; } else { yh = scr[4].x; yl = scr[5].x; }
+            if (scr[6].x > yl) yl = scr[6].x; else if (scr[6].x < yh) yh = scr[6].x;
+            if (scr[7].x > yl) yl = scr[7].x; else if (scr[7].x < yh) yh = scr[7].x;
+            xl = xh; if (yh < xl) xl = yh;
+            xh = hi; if (xh < yl) xh = yl;
+            if (xh < -160 || xl > 160) continue;
+
+            if (scr[0].y > scr[1].y) { xl = scr[0].y; yl = scr[1].y; } else { yl = scr[0].y; xl = scr[1].y; }
+            if (scr[2].y > xl) xl = scr[2].y; else if (scr[2].y < yl) yl = scr[2].y;
+            if (scr[3].y > xl) xl = scr[3].y; else if (scr[3].y < yl) yl = scr[3].y;
+            if (scr[4].y > scr[5].y) { xh = scr[4].y; yh = scr[5].y; } else { yh = scr[4].y; xh = scr[5].y; }
+            if (scr[6].y > xh) xh = scr[6].y; else if (scr[6].y < yh) yh = scr[6].y;
+            if (scr[7].y > xh) xh = scr[7].y; else if (scr[7].y < yh) yh = scr[7].y;
+            if (yh < yl) yl = yh;
+            yh = xl; if (yh < xh) yh = xh;
+            if (yh < -120 || yl > 120) continue;
+
+            poly = c->start;
+            end = c->end;
+            verts = c->verts;
+            for (; poly < end; poly += 3) {
+                w = poly[1];
+                a = (s32)(verts + (w & 0xFFFF));
+                b = (s32)(verts + (w >> 16));
+                w = poly[2];
+                d3 = verts + (w & 0xFFFF);
+                w >>= 16;
+                gte_ldv3(a, b, d3);
+                gte_rtpt();
+                gte_stflg(&g.flag);
+                if (g.flag & 0x7F85E000) continue;
+                gte_nclip();
+                type = w & 0xF;
+                d = verts + ((w & 0xFFF0) >> 1);
+                gte_stopz(&g.z);
+                if (g.z <= 0) continue;
+                switch (type) {
+                case 4:
+                case 5:
+                { u32 *otp; s16 p0, p1, p2, q0, q1, q2; s32 m;
+                    gte_stsxy3_f3(pk);
+                    gte_stsz3(&g.sz0, &g.sz1, &g.sz2);
+                    p0 = AF(pk, s16, 8); p1 = AF(pk, s16, 0x10);
+                    if (p0 > p1) { xh = p0; xl = p1; } else { xl = p0; xh = p1; }
+                    p2 = AF(pk, s16, 0x18);
+                    if (p2 > xh) xh = p2; else if (p2 < xl) xl = p2;
+                    if (xh < -160 || xl > 160) continue;
+                    q0 = AF(pk, s16, 0xA); q1 = AF(pk, s16, 0x12);
+                    if (q0 > q1) { yh = q0; yl = q1; } else { yl = q0; yh = q1; }
+                    q2 = AF(pk, s16, 0x1A);
+                    if (q2 > yh) yh = q2; else if (q2 < yl) yl = q2;
+                    if (yh < -120 || yl > 120) continue;
+                    if (g.sz0 > g.sz1) { m = g.sz0; if (m < g.sz2) m = g.sz2; } else { m = g.sz1; if (m < g.sz2) m = g.sz2; }
+                    g.z = m;
+                    if (type != 4) g.z = m + 0x200;
+                    AF(pk, u32, 4) = poly[0];
+                    otp = (u32 *)(((g.z >> 2) << 2) + (u32)ot);
+                    *(u32 *)pk = (*otp & 0xFFFFFF) | 0x4000000;
+                    *otp = (*otp & 0xFF000000) | ((u32)pk & 0xFFFFFF);
+                    pk += 0x14;
+                    break;
+                }
+                case 6:
+                case 7:
+                { u32 *otp; s16 p0, p1, p2, q0, q1, q2; s32 m;
+                    gte_stsxy3c(tmp);
+                    gte_stsz3(&g.sz0, &g.sz1, &g.sz2);
+                    p0 = AF(tmp, s16, 0); p1 = AF(tmp, s16, 4);
+                    if (p0 > p1) { xh = p0; xl = p1; } else { xl = p0; xh = p1; }
+                    p2 = AF(tmp, s16, 8);
+                    if (p2 > xh) xh = p2; else if (p2 < xl) xl = p2;
+                    if (xh < -160 || xl > 160) continue;
+                    q0 = AF(tmp, s16, 2); q1 = AF(tmp, s16, 6);
+                    if (q0 > q1) { yh = q0; yl = q1; } else { yl = q0; yh = q1; }
+                    q2 = AF(tmp, s16, 0xA);
+                    if (q2 > yh) yh = q2; else if (q2 < yl) yl = q2;
+                    if (yh < -120 || yl > 120) continue;
+                    gte_avsz3();
+                    if (g.sz0 > g.sz1) { m = g.sz0; if (m < g.sz2) m = g.sz2; } else { m = g.sz1; if (m < g.sz2) m = g.sz2; }
+                    g.z = m;
+                    if (type != 6) g.z = m + 0x200;
+                    AF(pk, s32, 8) = tmp[0];
+                    AF(pk, s32, 0x10) = tmp[1];
+                    AF(pk, s32, 0x18) = tmp[2];
+                    t = (u32 *)poly[0];
+                    AF(pk, u32, 4) = t[0];
+                    AF(pk, u32, 0xC) = t[1];
+                    AF(pk, u32, 0x14) = t[2];
+                    AF(pk, u16, 0x1C) = t[3];
+                    otp = (u32 *)(((g.z >> 2) << 2) + (u32)ot);
+                    *(u32 *)pk = (*otp & 0xFFFFFF) | 0x7000000;
+                    *otp = (*otp & 0xFF000000) | ((u32)pk & 0xFFFFFF);
+                    pk += 0x20;
+                    break;
+                }
+                case 0:
+                case 1:
+                { u32 *otp; s16 p0, p1, p2, p3, q0, q1, q2, q3; s32 za, zb;
+                    gte_stsxy3_f4(pk);
+                    gte_ldv0(d);
+                    gte_rtps();
+                    p0 = AF(pk, s16, 8); p1 = AF(pk, s16, 0xC);
+                    if (p0 > p1) { xh = p0; xl = p1; } else { xl = p0; xh = p1; }
+                    p2 = AF(pk, s16, 0x10);
+                    if (p2 > xh) xh = p2; else if (p2 < xl) xl = p2;
+                    q0 = AF(pk, s16, 0xA); q1 = AF(pk, s16, 0xE);
+                    if (q0 > q1) { yh = q0; yl = q1; } else { yl = q0; yh = q1; }
+                    q2 = AF(pk, s16, 0x12);
+                    if (q2 > yh) yh = q2; else if (q2 < yl) yl = q2;
+                    gte_stflg(&g.flag);
+                    if (g.flag & 0x7F85E000) continue;
+                    gte_stsz4(&g.sz0, &g.sz1, &g.sz2, &g.sz3);
+                    gte_stsxy(pk + 0x14);
+                    p3 = AF(pk, s16, 0x14);
+                    if (p3 < xl) xl = p3; else if (p3 > xh) xh = p3;
+                    if (xh < -160 || xl > 160) continue;
+                    q3 = AF(pk, s16, 0x16);
+                    if (q3 < yl) yl = q3; else if (q3 > yh) yh = q3;
+                    if (yh < -120 || yl > 120) continue;
+                    za = g.sz2; if (za < g.sz3) za = g.sz3;
+                    zb = g.sz0; if (zb < g.sz1) zb = g.sz1;
+                    if (zb < za) zb = za;
+                    g.z = zb;
+                    if (type != 0) g.z = zb + 0x200;
+                    AF(pk, u32, 4) = poly[0];
+                    otp = (u32 *)(((g.z >> 2) << 2) + (u32)ot);
+                    *(u32 *)pk = (*otp & 0xFFFFFF) | 0x5000000;
+                    *otp = (*otp & 0xFF000000) | ((u32)pk & 0xFFFFFF);
+                    pk += 0x18;
+                    break;
+                }
+                case 2:
+                case 3:
+                { u32 *otp; u32 tw; s16 p0, p1, p2, p3, q0, q1, q2, q3; s32 za, zb;
+                    gte_stsxy3c(tmp);
+                    gte_ldv0(d);
+                    gte_rtps();
+                    gte_stflg(&g.flag);
+                    if (g.flag & 0x7F85E000) continue;
+                    gte_stsxy(&tmp[3]);
+                    gte_stsz4(&g.sz0, &g.sz1, &g.sz2, &g.sz3);
+                    p0 = AF(tmp, s16, 0); p1 = AF(tmp, s16, 4);
+                    if (p0 > p1) { xh = p0; xl = p1; } else { xl = p0; xh = p1; }
+                    p2 = AF(tmp, s16, 8);
+                    if (p2 > xh) xh = p2; else if (p2 < xl) xl = p2;
+                    p3 = AF(tmp, s16, 0xC);
+                    if (p3 > xh) xh = p3; else if (p3 < xl) xl = p3;
+                    if (xh < -160 || xl > 160) continue;
+                    q0 = AF(tmp, s16, 2); q1 = AF(tmp, s16, 6);
+                    if (q0 > q1) { yh = q0; yl = q1; } else { yl = q0; yh = q1; }
+                    q2 = AF(tmp, s16, 0xA);
+                    if (q2 > yh) yh = q2; else if (q2 < yl) yl = q2;
+                    q3 = AF(tmp, s16, 0xC);
+                    if (q3 > yh) yh = q3; else if (q3 < yl) yl = q3;
+                    if (yh < -120 || yl > 120) continue;
+                    gte_avsz4();
+                    za = g.sz2; if (za < g.sz3) za = g.sz3;
+                    zb = g.sz0; if (zb < g.sz1) zb = g.sz1;
+                    if (zb < za) zb = za;
+                    g.z = zb;
+                    if (type != 2) g.z = zb + 0x200;
+                    AF(pk, s32, 8) = tmp[0];
+                    AF(pk, s32, 0x10) = tmp[1];
+                    AF(pk, s32, 0x18) = tmp[2];
+                    AF(pk, s32, 0x20) = tmp[3];
+                    t = (u32 *)poly[0];
+                    AF(pk, u32, 4) = t[0];
+                    AF(pk, u32, 0xC) = t[1];
+                    AF(pk, u32, 0x14) = t[2];
+                    tw = t[3];
+                    AF(pk, u16, 0x1C) = tw;
+                    tw >>= 16;
+                    AF(pk, u16, 0x24) = tw;
+                    otp = (u32 *)(((g.z >> 2) << 2) + (u32)ot);
+                    *(u32 *)pk = (*otp & 0xFFFFFF) | 0x9000000;
+                    *otp = (*otp & 0xFF000000) | ((u32)pk & 0xFFFFFF);
+                    pk += 0x28;
+                    break;
+                }
+                }
+            }
+        }
+    }
+    D_800A5E60 = pk;
+}
 
 s32 func_sc02_000_8017E404(u8 *p, u8 *o) {
     SV4 a;
@@ -1466,7 +1742,261 @@ s32 func_sc02_000_8017E958(u8 *p, s32 k) {
     return 0;
 }
 
-INCLUDE_ASM("asm/stg/sc02_000/nonmatchings/sc02_000", func_sc02_000_8017EA84);
+void func_sc02_000_8017EA84(u8 *o) {
+    u8 *p;
+    u8 *end;
+    s32 key;
+    s32 v;
+    s32 f;
+
+    AF(o, s16, 0xE0)++;
+    switch (AF(o, u16, 0x34)) {
+    case 0:
+        if (func_sc02_000_8017E958(o, 0)) {
+            func_sc02_000_8017E6D8(o);
+            break;
+        }
+        if (AF(o, s16, 0xE0) < 9) {
+            AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B608(AF(AF(o, u8 *, 0x20), s16, 0x12), AF(o, s16, 0xE2), 6);
+        } else {
+            func_8012B14C(o, (AF(o, u16, 0xFE) & 2) ? &D_sc02_000_8018E698 : &D_sc02_000_8018E68C);
+        }
+        v = D_sc02_000_801E8008 = func_8012CBA4(o);
+        if (v == 0 || (v & 0x4000)) {
+            AF(o, s32, 0x4) = AF(o, s32, 0x38);
+            AF(o, s32, 0x8) = AF(o, s32, 0x3C);
+            AF(o, s32, 0xC) = AF(o, s32, 0x40);
+            f = 1;
+        } else {
+            f = 0;
+        }
+        if (f) {
+            func_sc02_000_8017E5AC(o);
+            break;
+        }
+        for (p = (u8 *)&D_801202A0, end = p + 0x6480, key = AF(o, u16, 0); p != end; p += 0x10C) {
+            if (p != o && AF(p, u16, 0) == key && func_sc02_000_8017E404(o, p)) {
+                break;
+            }
+        }
+        func_8012AE00(p);
+        if (AF(o, s16, 0xE0) >= 0x3C) {
+            AF(o, s16, 0xE0) = 0;
+            if (AF(o, u16, 0xFE) & 2) {
+                AF(o, s16, 0xE2) = 0;
+            } else {
+                AF(o, u16, 0xE2) = AF(AF(o, u8 *, 0x20), u16, 0x12) + (rand() & 0x800) - 0x400;
+            }
+        }
+        if (--AF(o, s16, 0xE4) > 0) {
+            break;
+        }
+        if (AF(o, u16, 0xFE) & 2) {
+            break;
+        }
+        if (func_8012BCCC(o) > 0x10000) {
+            break;
+        }
+        if (((s16)AF(o, u16, 0x70) >> 8) == 4 && D_801270D4 != 0) {
+            break;
+        }
+        if (AF(o, u16, 0xFE) & 1) {
+            AF(o, u16, 0x5C) = 0xAA10;
+            AF(o, s16, 0x2) = 1;
+            AF(o, s16, 0x34) = 2;
+            AF(o, s16, 0x5E) = 0;
+            AF(o, s32, 0x1C) = 0x1E;
+            SetScript(o, &D_sc02_000_801A6534);
+            AF(o, s16, 0xFC) = 0;
+            break;
+        }
+        SetScript(o, &D_sc02_000_801A65BC);
+        AF(o, s16, 0x2) = 1;
+        AF(o, s16, 0x34) = 1;
+        AF(o, s32, 0x1C) = 0x19;
+        AF(o, u16, 0xFE) |= 1;
+        break;
+    case 1:
+        AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B8E4(o, 4);
+        if (AF(o, s32, 0x1C) == 0xF) {
+            func_8002D4C8(0x6A9, 0);
+            func_80142414(o, -0x78);
+        }
+        if (func_8012BEE8(o)) {
+            AF(o, u16, 0x5C) = 0xAA10;
+            AF(o, s16, 0x2) = 1;
+            AF(o, s16, 0x34) = 2;
+            AF(o, s16, 0xE0) = 0;
+            AF(o, s16, 0x5E) = 0;
+            AF(o, s32, 0x1C) = 0x1E;
+            SetScript(o, &D_sc02_000_801A6534);
+            AF(o, s16, 0xFC) = 0;
+        }
+        break;
+    case 2:
+        if (func_sc02_000_8017E958(o, 1)) {
+            func_sc02_000_8017E6D8(o);
+            break;
+        }
+        v = D_sc02_000_801E8008 = func_8012CBA4(o);
+        if (v == 0 || (v & 0x4000)) {
+            AF(o, s32, 0x4) = AF(o, s32, 0x38);
+            AF(o, s32, 0x8) = AF(o, s32, 0x3C);
+            AF(o, s32, 0xC) = AF(o, s32, 0x40);
+            f = 1;
+        } else {
+            f = 0;
+        }
+        if (f) {
+            func_sc02_000_8017E5AC(o);
+            break;
+        }
+        for (p = (u8 *)&D_801202A0, end = p + 0x6480, key = AF(o, u16, 0); p != end; p += 0x10C) {
+            if (p != o && AF(p, u16, 0) == key && func_sc02_000_8017E404(o, p)) {
+                break;
+            }
+        }
+        func_8012AE00(p);
+        if (((s16)AF(o, u16, 0x70) >> 8) == 4 && (s16) D_80126B5E >= 0x220) {
+            AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B608(AF(AF(o, u8 *, 0x20), s16, 0x12),
+                (ratan2(AF(o, s16, 0xE) - D_sc02_000_8018E6E8, D_sc02_000_8018E6E4 - AF(o, s16, 6)) - 0x400) & 0xFFF, 6);
+        } else if (AF(o, s32, 0x1C) >= 0x16) {
+            AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B8E4(o, 6);
+        }
+        func_8012B14C(o, &D_sc02_000_8018E680);
+        if (--AF(o, s16, 0xFC) <= 0) {
+            func_80143B6C(o, 0);
+            AF(o, s16, 0xFC) = 8;
+        }
+        if (AF(o, s16, 0xE0) >= 0x5A) {
+            AF(o, s16, 0xE0) = 0;
+            AF(o, u8, 0xC1) = 0;
+            AF(o, s16, 0x2) = 1;
+            AF(o, s16, 0x34) = 0;
+            AF(o, s32, 0x1C) = (rand() & 0x1F) + 0x46;
+            AF(o, s16, 0xE0) = 0;
+            AF(o, u16, 0xE2) = AF(AF(o, u8 *, 0x20), u16, 0x12);
+            switch ((s16)AF(o, u16, 0x70) >> 8) {
+            case 0: case 1: case 2: case 3: case 7:
+                if (AF(o, u16, 0xFE) & 2) {
+                    AF(o, s16, 0xE2) = 0;
+                }
+                break;
+            case 5:
+                func_sc02_000_801803B0(o);
+                goto tail2;
+            case 4: case 6:
+                break;
+            }
+            AF(o, s16, 0xE4) = 0x1E;
+            AF(o, s16, 0x5E) = 0;
+            AF(o, u16, 0x5C) = 0xAA10;
+            func_8012B2CC(o);
+            func_8012B23C(o);
+            func_8012B14C(o, &D_sc02_000_8018E68C);
+            SetScript(o, &D_sc02_000_801A648C);
+        }
+    tail2:
+        if (func_8012BEE8(o)) {
+            AF(o, u16, 0x5C) = 0xAA10;
+            AF(o, s16, 0x2) = 1;
+            AF(o, s16, 0x34) = 2;
+            AF(o, s16, 0x5E) = 0;
+            AF(o, s32, 0x1C) = 0x1E;
+            SetScript(o, &D_sc02_000_801A6534);
+            AF(o, s16, 0xFC) = 0;
+            break;
+        }
+        if (((s16)AF(o, u16, 0x70) >> 8) == 1) {
+            if (func_8012BD3C(o, 0x200, 0x3100)) {
+                func_sc02_000_8017F5E4(o);
+            }
+        } else {
+            if (func_8012BD3C(o, 0x400, 0x1000)) {
+                func_sc02_000_8017F5A0(o);
+            }
+        }
+        break;
+    case 3:
+        AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B608(AF(AF(o, u8 *, 0x20), s16, 0x12), AF(o, s16, 0xE2), 4);
+        if (func_8012BEE8(o)) {
+            AF(o, u8, 0xC1) = 0;
+            AF(o, s16, 0x2) = 1;
+            AF(o, s16, 0x34) = 0;
+            AF(o, s32, 0x1C) = (rand() & 0x1F) + 0x46;
+            AF(o, s16, 0xE0) = 0;
+            AF(o, u16, 0xE2) = AF(AF(o, u8 *, 0x20), u16, 0x12);
+            switch ((s16)AF(o, u16, 0x70) >> 8) {
+            case 0: case 1: case 2: case 3: case 7:
+                if (AF(o, u16, 0xFE) & 2) {
+                    AF(o, s16, 0xE2) = 0;
+                }
+                break;
+            case 5:
+                func_sc02_000_801803B0(o);
+                goto tail3;
+            case 4: case 6:
+                break;
+            }
+            AF(o, s16, 0xE4) = 0x1E;
+            AF(o, s16, 0x5E) = 0;
+            AF(o, u16, 0x5C) = 0xAA10;
+            func_8012B2CC(o);
+            func_8012B23C(o);
+            func_8012B14C(o, &D_sc02_000_8018E68C);
+            SetScript(o, &D_sc02_000_801A648C);
+        }
+    tail3:
+        break;
+    case 4:
+        AF(AF(o, u8 *, 0x20), u16, 0x12) = AF(o, u16, 0xE2);
+        func_8012B2CC(o);
+        func_8012B178(o, 0xFFF80000);
+        v = D_sc02_000_801E8008 = func_8012CBA4(o);
+        if (v == 0 || (v & 0x4000)) {
+            AF(o, s32, 0x4) = AF(o, s32, 0x38);
+            AF(o, s32, 0x8) = AF(o, s32, 0x3C);
+            AF(o, s32, 0xC) = AF(o, s32, 0x40);
+        }
+        for (p = (u8 *)&D_801202A0, end = p + 0x6480, key = AF(o, u16, 0); p != end; p += 0x10C) {
+            if (p != o && AF(p, u16, 0) == key && func_sc02_000_8017E404(o, p)) {
+                break;
+            }
+        }
+        func_8012AE00(p);
+        if (AF(o, s16, 6) < 0x1F8) {
+            AF(o, u8, 0xC1) = 0;
+            AF(o, s16, 0x2) = 1;
+            AF(o, s16, 0x34) = 0;
+            AF(o, s32, 0x1C) = (rand() & 0x1F) + 0x46;
+            AF(o, s16, 0xE0) = 0;
+            AF(o, u16, 0xE2) = AF(AF(o, u8 *, 0x20), u16, 0x12);
+            switch ((s16)AF(o, u16, 0x70) >> 8) {
+            case 0: case 1: case 2: case 3: case 7:
+                if (AF(o, u16, 0xFE) & 2) {
+                    AF(o, s16, 0xE2) = 0;
+                }
+                break;
+            case 5:
+                func_sc02_000_801803B0(o);
+                goto tail4;
+            case 4: case 6:
+                break;
+            }
+            AF(o, s16, 0xE4) = 0x1E;
+            AF(o, s16, 0x5E) = 0;
+            AF(o, u16, 0x5C) = 0xAA10;
+            func_8012B2CC(o);
+            func_8012B23C(o);
+            func_8012B14C(o, &D_sc02_000_8018E68C);
+            SetScript(o, &D_sc02_000_801A648C);
+        tail4:
+            AF(o, s16, 0xE4) = rand() & 0x1F;
+            AF(o, s32, 0x1C) = rand() & 0x1F;
+        }
+        break;
+    }
+}
 
 void func_sc02_000_8017F390(u8 *o) {
     s32 d;
@@ -5077,7 +5607,29 @@ void func_sc02_000_80187558(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc02_000/nonmatchings/sc02_000", func_sc02_000_8018762C);
+/* PORT NOTE: reads a variable never set, as the original (undefined under cl) */
+void func_sc02_000_8018762C(u8 *o, SV8 *p) {
+    SpawnDef d;
+    s32 i;
+    u16 n;
+    s32 x;
+
+    n = D_800B99D8;
+    d.z = p->z;
+    for (i = 0; i < 2; i++) {
+        x = p->x;
+        d.x = (i & 1) ? x + 12 : x - 12;
+        d.y = p->y - i * 24;
+        d.kind = 0x4D;
+        if (i >= 2) {
+            d.unk8 = 0;
+        }
+        d.flags = n;
+        n++;
+        d.unk8 |= 0x100;
+        func_8012C51C(&d, o);
+    }
+}
 
 void func_sc02_000_801876FC(u8 *arg0) {
     D_sc02_000_8018F460[AF(arg0, u16, 2)]();

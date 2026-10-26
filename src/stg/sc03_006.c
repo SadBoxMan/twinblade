@@ -4190,7 +4190,33 @@ void func_sc03_006_80183EE0(u8 *arg0) {
     AF(arg0, s16, 0x5C) = 0;
 }
 
-INCLUDE_ASM("asm/stg/sc03_006/nonmatchings/sc03_006", func_sc03_006_80183EF0);
+
+
+void func_sc03_006_80183EF0(u8 *o) {
+    s32 b;
+    u8 *p;
+    u8 *q;
+    if (func_8012BEE8() != 0) {
+        if (AF(o, s16, 0x106) != 0) {
+            p = AF(o, u8 *, 0x20);
+            AF(p, s16, 0x18) = AF(p, s16, 0x1C) = 0x1000;
+            AF(o, s16, 0x106) = 0;
+        } else {
+            p = AF(o, u8 *, 0x20);
+            AF(p, u16, 0x18) = AF(p, u16, 0x1C) = AF(o, u16, 0x100);
+        }
+        q = o;
+        AF(q, u16, 0x60) = 0;
+        AF(q, u16, 0x5C) |= 1;
+        AF(q, u16, 0x62) = AF(AF(q, u8 *, 0x20), u16, 0x12) + 0x800;
+        AF(q, u16, 0x5E) = 1;
+        func_80131E00(q, 1);
+    } else {
+        q = AF(o, u8 *, 0x20);
+        b = AF(q, s16, 0x18);
+        AF(q, s16, 0x18) = AF(q, s16, 0x1C) = b + (AF(o, s16, 0x100) - b) / 4;
+    }
+}
 
 void func_sc03_006_80183FC8(u8 *arg0) {
     s32 t;
@@ -5335,7 +5361,33 @@ void func_sc03_006_80186710(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_006/nonmatchings/sc03_006", func_sc03_006_801867A4);
+void func_sc03_006_801867A4(u8 *p) {
+    V4 in;
+    V4 out;
+    u8 *o;
+
+    if ((AF(p, u16, 0x70) & 0xF) == 2) {
+        AF(AF(p, u8 *, 0x20), u16, 0x10) -= 0x10;
+        o = AF(p, u8 *, 0x20);
+        if (AF(o, s16, 0x10) < -0x400) {
+            AF(o, s16, 0x10) = -0x400;
+        }
+    } else {
+        in.x = rcos((AF(p, s32, 0xE0) << 6) & 0xFC0) << 8;
+        in.y = 0;
+        in.z = 0;
+        ApplyMatrixLV(AF(p, u8 *, 0x20) + 0x34, &in, &out);
+        AF(p, u16, 0x50) = (u32)out.x >> 16;
+        AF(p, u16, 0x54) = (u32)out.z >> 16;
+        AF(p, s32, 0xE0)++;
+    }
+    if (func_8012CBF4(p) != 0) {
+        AF(p, s32, 0x1C) = 0x20;
+        AF(p, u16, 2)++;
+    } else if (func_8012BEE8(p) != 0) {
+        func_8012C218(p);
+    }
+}
 
 void func_sc03_006_801868AC(u8 *arg0, s32 arg1) {
     s16 temp_v0_2;
@@ -5866,7 +5918,26 @@ void func_sc03_006_80187CFC(u8 *o) {
     func_8013240C(&D_sc03_006_801F7730);
 }
 
-INCLUDE_ASM("asm/stg/sc03_006/nonmatchings/sc03_006", func_sc03_006_80187E24);
+extern u8 D_sc03_006_801C9F6C;
+extern s32 D_sc03_006_801CA1A4;
+
+/* symbol split: splat split one original object into neighbouring symbols; read through the neighbour (offset form), as the original */
+void func_sc03_006_80187E24(u8 *o) {
+    s32 *p;
+
+    AF(o, s16, 2) = 10;
+    func_80132288(&D_sc03_006_801F7730, &D_sc03_006_801C9F6C, D_sc03_006_801CAE68);
+    func_sc03_006_801888A8(o, 2);
+    AF(o, s16, 0xDE) = 0;
+    AF(AF(o, u8 *, 0x20), s16, 0x12) = func_8012B864(o);
+    func_8012B2CC(o);
+    p = &D_sc03_006_801CA1A4;
+    *p = D_sc03_006_801CA0E4[0] / 30;
+    func_8012B23C(o);
+    func_8012B14C(o, p - 2);
+    AF(o, s32, 0x1C) = 0;
+    AF(o, s16, 0x34) = 0;
+}
 
 void func_sc03_006_80187EF0(u8 *arg0, s32 arg1) {
     s32 temp_v0;

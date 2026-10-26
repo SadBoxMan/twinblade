@@ -752,7 +752,22 @@ extern s32 D_800A5EB0;
 extern V16 D_sc03_099_801BC6E0;
 extern s32 D_800A5E90;
 
-INCLUDE_ASM("asm/stg/sc03_099/nonmatchings/sc03_099", func_sc03_099_8017D2AC);
+extern s16 D_sc03_099_80186EE0[];
+
+void func_sc03_099_8017D2AC(u8 *arg0) {
+    B8 v;
+    u8 t;
+    s16 lim;
+
+    if (func_80148800((s32) &D_80126B58) & 3) {
+        t = (AF(arg0, u8, 5) + 1) & 1;
+        AF(arg0, u8, 5) = t;
+        AF(arg0, s32, 0x14) = D_sc03_099_80186EE0[t];
+    }
+    v = *(B8 *)&D_80126940;
+    lim = -0x180; if (AF(&v, s16, 2) > lim) AF(&v, s16, 2) = lim;
+    func_sc03_099_8017D364((s32) arg0, (s32) &v);
+}
 
 void func_sc03_099_8017D364(u8 *arg0, u8 *arg1) {
     FeMtx m;

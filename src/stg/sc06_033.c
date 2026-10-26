@@ -1125,7 +1125,34 @@ extern s32 func_sc06_033_80187E54();
 extern s32 func_8012C51C();
 
 
-INCLUDE_ASM("asm/stg/sc06_033/nonmatchings/sc06_033", func_sc06_033_8017D6CC);
+extern void func_sc06_033_8017DC10(s32 arg0);
+extern u8 D_80126948;
+extern s32 D_80126954;
+extern s32 D_8012695C;
+extern s16 D_80126968;
+extern s16 D_8012696A;
+extern s16 D_8012696C;
+extern s16 D_80126976;
+extern s16 D_80126978;
+extern s16 D_8012697A;
+extern void func_8012A018();
+extern void func_8012A094();
+void func_sc06_033_8017D6CC(void) {
+    D_80126954 = 0x190;
+    D_8012695C = 0x4B0;
+    D_80126968 = 0x2AA;
+    D_8012696A = 0x800;
+    D_8012696C = 0;
+    D_80126976 = 0;
+    D_80126978 = 0;
+    D_8012697A = 0;
+    func_8012A018((s32) func_sc06_033_8017D7A4, 0);
+    func_8012A094((s32) &D_80126948);
+    *(SV8 *)&D_801274E8 = D_80126940;
+    D_801274F0 = 0;
+    func_sc06_033_8017DC10((s32) &D_80126948);
+    func_sc06_033_8017D7A4((s32) &D_80126948);
+}
 
 void func_sc06_033_8017D7A4(s32 arg0) {
     D_sc06_033_801952F4[AF(arg0, u8, 4)]();
@@ -1265,9 +1292,25 @@ s32 func_sc06_033_8017DCC4(u8 *o) {
     return d.x + d.y + d.z > 0xC3FFF;
 }
 
-INCLUDE_ASM("asm/stg/sc06_033/nonmatchings/sc06_033", func_sc06_033_8017DD48);
+void func_sc06_033_8017DD48(void) {
+    s32 i;
+    for (i = 0; i < 0x60; i++) {
+        u8 *p = &D_801202A0 + i * 0x10C;
+        if (AF(p, u16, 0) == 0x315) {
+            AF(p, s16, 0x104) = 1;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/stg/sc06_033/nonmatchings/sc06_033", func_sc06_033_8017DD88);
+void func_sc06_033_8017DD88(void) {
+    s32 i;
+    for (i = 0; i < 0x60; i++) {
+        u8 *p = &D_801202A0 + i * 0x10C;
+        if (AF(p, u16, 0) == 0x315) {
+            AF(p, s16, 0x104) = 0;
+        }
+    }
+}
 
 void func_sc06_033_8017DDC4(u8 *arg0) {
     D_sc06_033_801952FC[AF(arg0, u16, 2)]();
@@ -1287,11 +1330,61 @@ void func_sc06_033_8017DE00(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     func_8012AD50((s32) arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc06_033/nonmatchings/sc06_033", func_sc06_033_8017DE74);
+extern s32 func_8012AD44();
+extern void func_sc06_033_8017DFE8();
+void func_sc06_033_8017DE74(u8 *o) {
+    s32 k;
+    s32 v;
+    s32 a;
+    if (AF(o, s16, 0xFE) == 0) {
+        a = AF(o, s32, 0xE0) + 0xB;
+        k = AF(o, s32, 0xDC);
+        AF(o, s32, 0xE0) = a;
+        v = rsin(a) * 48 / 4096;
+        if (AF(o, s32, 0xE0) >= 0x800) {
+            func_8012AD44(o, 0);
+            return;
+        }
+        func_sc06_033_8017DFE8(o, k, v | (v << 16 | v << 8));
+    } else {
+        AF(o, s16, 0xFE)--;
+    }
+    if (AF(o, s16, 0x104) != 0) {
+        func_8012AD44(o, 2);
+    }
+}
 
-INCLUDE_ASM("asm/stg/sc06_033/nonmatchings/sc06_033", func_sc06_033_8017DF44);
+extern s32 func_80012F74();
+void func_sc06_033_8017DF44(u8 *o) {
+    s32 k;
+    s16 a;
+    s32 v;
+    k = AF(o, s32, 0xDC);
+    a = func_80012F74(AF(o, s16, 0xE0), 0, 10, 1);
+    AF(o, s32, 0xE0) = a;
+    v = rsin(a) * 48 / 4096;
+    v = v | (v << 16 | v << 8);
+    func_sc06_033_8017DFE8(o, k, v);
+    if (AF(o, s16, 0x104) == 0) {
+        func_8012AD44(o, 0);
+    }
+}
 
-INCLUDE_ASM("asm/stg/sc06_033/nonmatchings/sc06_033", func_sc06_033_8017DFE8);
+extern void func_sc06_033_8017E0E4(u8 *o, s32 n, s32 a, s32 b, s32 k, s32 m);
+void func_sc06_033_8017DFE8(u8 *o, s32 k, s32 m) {
+    s16 s;
+    s16 c;
+    s32 t;
+    s = rsin(AF(o, s16, 0x100)) / 128;
+    c = rcos(AF(o, s16, 0x100) += AF(o, s16, 0x102)) / 128;
+    t = AF(o, s32, 0xE4) + 4;
+    AF(o, s32, 0xE4) = t;
+    if (t >= 0x40) {
+        AF(o, s32, 0xE4) = 0;
+    }
+    func_sc06_033_8017E0E4(o, 0, s, c, k, m);
+    func_sc06_033_8017E0E4(o, 1, s, c, k, m);
+}
 
 void func_sc06_033_8017E0E4(u8 *o, s32 n, s32 a, s32 b, s32 k, s32 m) {
     typedef struct { SV8 v[4]; XY uv[4]; s32 c[4]; s32 code; u8 tp; } P;
@@ -8025,7 +8118,20 @@ void func_sc06_033_801915A8(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc06_033/nonmatchings/sc06_033", func_sc06_033_801916BC);
+void func_sc06_033_801916BC(void) {
+    u16 *p;
+    u16 *q;
+    u16 t;
+    s32 i;
+    p = &D_sc06_033_801CB4F4[15];
+    q = p - 1;
+    t = D_sc06_033_801CB4F4[15];
+    for (i = 0; i < 15; i++) {
+        *p-- = *q--;
+    }
+    *p = t;
+    LoadImage(&D_sc06_033_801CB514, D_sc06_033_801CB4F4);
+}
 
 void func_sc06_033_8019171C(u8 *arg0) {
     s32 temp_v0;

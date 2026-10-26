@@ -4381,7 +4381,35 @@ void func_sc01_084_801855EC(u8 *o) {
     AF(o, s16, 0xDC) = rand() & 0xFFF;
 }
 
-INCLUDE_ASM("asm/stg/sc01_084/nonmatchings/sc01_084", func_sc01_084_801856D8);
+/* symbol split: splat split one original object into neighbouring symbols; read through the neighbour (offset form), as the original */
+void func_sc01_084_801856D8(u8 *o) {
+    SV8 v;
+    struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } d;
+    void *q;
+
+    if (func_8012BEE8(o) != 0) {
+        v.x = AF(o, s16, 6);
+        v.y = AF(o, s16, 0xA);
+        v.z = AF(o, s16, 0xE);
+        func_sc01_084_80184138((u8 *)&v);
+        if ((&D_sc01_084_8018A914)[3] == 0) {
+            func_sc01_084_80183DA4((u8 *)&D_sc01_084_8018A914);
+        }
+    }
+    q = &d;
+    if (D_801270C8[0] != 0 && D_801270CC == 0) {
+        D_801270CC = 1;
+        d.x = AF(o, s16, 6);
+        d.y = AF(o, s16, 0xA);
+        d.z = AF(o, s16, 0xE);
+        d.kind = 0x1E;
+        d.flags = 0;
+        d.unk8 = 0;
+        d.unk10 = 0;
+        d.unkE = 0;
+        func_8012C51C(q, o);
+    }
+}
 
 void func_sc01_084_801857BC(s32 arg0, s32 arg1) {
     s32 temp_v0;

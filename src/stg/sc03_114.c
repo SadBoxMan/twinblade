@@ -754,7 +754,34 @@ extern s32 D_sc03_114_80183280;
 extern s32 D_sc03_114_80183284;
 s32 func_sc03_114_8017E918(s32 arg0, s32 arg1, s32 arg2);
 
-INCLUDE_ASM("asm/stg/sc03_114/nonmatchings/sc03_114", func_sc03_114_8017D928);
+extern void func_80017738();
+extern u8 D_sc03_114_80182640;
+extern u8 D_sc03_114_80182778;
+
+void func_sc03_114_8017D928(u8 *o) {
+    u8 *s = AF(o, u8 *, 0x90);
+
+    if (s == &D_sc03_114_801824A8) {
+        if (AF(o, s32, 0x1C) != 0 && --AF(o, s32, 0x1C) == 0) {
+            AF(o, s32, 0x1C) = 0;
+            AF(o, s16, 0x98) = 1;
+        }
+        if (AF(o, u16, 0x72) & 0x4000) {
+            AF(o, s16, 0x98) = 0;
+            AF(o, s32, 0x1C) = 0x14;
+        }
+        if ((u8) func_80029178(0x12C)) {
+            SetScript(o, &D_sc03_114_80182640);
+            AF(o, s32, 0x1C) = 0;
+        }
+    } else if (s == &D_sc03_114_80182640) {
+        if ((u8) func_80029178(0x130)) {
+            SetScript(o, &D_sc03_114_80182778);
+        } else if (!(u8) func_80029178(0x12C)) {
+            SetScript(o, &D_sc03_114_801824A8);
+        }
+    }
+}
 
 void func_sc03_114_8017DA28(void) {
 }
@@ -812,9 +839,33 @@ void func_sc03_114_8017DB74(u8 *arg0) {
     func_sc03_114_8017D740((s32) arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc03_114/nonmatchings/sc03_114", func_sc03_114_8017DC38);
+void func_sc03_114_8017DC38(u8 *o) {
+    s32 n;
 
-INCLUDE_ASM("asm/stg/sc03_114/nonmatchings/sc03_114", func_sc03_114_8017DCC0);
+    if ((u8) func_80029178(0x130)) {
+        n = AF(o, s32, 0x1C);
+        if (n < 0x15) {
+            AF(o, s32, 0x1C) = n + 1;
+            if (n % 3 == 0) {
+                AF(o, s16, 6)++;
+            }
+        }
+    }
+}
+
+void func_sc03_114_8017DCC0(u8 *o) {
+    QuadArg q;
+
+    q.p[0].x = q.p[2].x = -0x2A;
+    q.p[1].x = q.p[3].x = 0x2A;
+    q.p[0].y = q.p[1].y = -0x2C;
+    q.p[2].y = q.p[3].y = 0x2C;
+    q.c[1].r = q.c[1].g = q.c[1].b = q.c[0].r = q.c[0].g = q.c[0].b = 0xA0;
+    q.p[0].z = q.p[1].z = q.p[2].z = q.p[3].z = 0;
+    q.c[3].r = q.c[3].g = q.c[3].b = q.c[2].r = q.c[2].g = q.c[2].b = 0;
+    q.code = 0x60000000;
+    func_80017738(&q, AF(o, u8 *, 0x20) + 0x34);
+}
 
 void func_sc03_114_8017DD64(u8 *arg0) {
     D_sc03_114_80183254[AF(arg0, u16, 2)]();

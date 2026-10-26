@@ -1226,7 +1226,23 @@ typedef struct { s32 v; u8 pad[8]; } E12w;
 typedef struct { s32 v; s32 pad; } E8w;
 typedef struct { SV4 p[4]; s32 c[4]; s32 col; s32 code; u8 flag; } Q74;
 
-INCLUDE_ASM("asm/stg/sc03_101/nonmatchings/sc03_101", func_sc03_101_8017E0BC);
+extern s16 D_sc03_101_80187400[];
+
+void func_sc03_101_8017E0BC(u8 *arg0) {
+    B8 v;
+    u8 t;
+
+    if (func_80148800((s32) &D_80126B58) & 3) {
+        t = (AF(arg0, u8, 5) + 1) & 1;
+        AF(arg0, u8, 5) = t;
+        AF(arg0, s32, 0x14) = D_sc03_101_80187400[t];
+    }
+    v = *(B8 *)&D_80126940;
+    AF(&v, s16, 0) = 0xFC0;
+    AF(&v, s16, 2) = -0x402;
+    AF(&v, s16, 4) = 0x890;
+    func_sc03_101_8017E174((s32) arg0, (s32) &v);
+}
 
 void func_sc03_101_8017E174(u8 *arg0, u8 *arg1) {
     FeMtx m;

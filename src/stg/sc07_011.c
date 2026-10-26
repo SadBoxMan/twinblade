@@ -817,7 +817,29 @@ void func_sc07_011_8017DB54(u8 *arg0) {
     D_sc07_011_8018230C[AF(arg0, u16, 2)]();
 }
 
-INCLUDE_ASM("asm/stg/sc07_011/nonmatchings/sc07_011", func_sc07_011_8017DB90);
+extern s32 func_80014C54();
+extern s32 func_800CF8B4();
+extern s32 D_sc07_011_80182314[];
+extern void func_80029514();
+extern void func_8002AC00();
+void func_sc07_011_8017DB90(u8 *o) {
+    if ((s16)func_80014C54(0, 0, 0x800) != 0 || (s16)func_80014C54(0, 0, 0x40) != 0) {
+        if (func_800CF8B4() != 0) {
+            func_800D1724(D_sc07_011_80182314[AF(o, s16, 0x70)]);
+            switch (AF(o, s16, 0x70)) {
+            case 1:
+                break;
+            case 2:
+                func_80029514(0x398);
+                func_8002AC00(0x1D);
+                break;
+            case 0:
+                break;
+            }
+            func_8012AD50((s32) o);
+        }
+    }
+}
 
 void func_sc07_011_8017DC50(void) {
 }
@@ -831,15 +853,90 @@ void func_sc07_011_8017DC94(u8 *arg0) {
     func_8012AD50((s32) arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc07_011/nonmatchings/sc07_011", func_sc07_011_8017DCB4);
+extern s32 func_8012A758();
+extern s16 D_800B9AB8;
+extern s16 D_800B9B0C;
+extern void func_8012A7D4();
+extern u8 D_sc07_011_80182328;
+extern s32 func_80013294();
+void func_sc07_011_8017DCB4(u8 *o) {
+    SV8 a;
+    SV8 b;
+    s16 v;
+    s16 n;
+
+    v = func_8012A758(o);
+    D_800B9AB8 = v * 320 / 4096;
+    n = AF(o, s16, 0xFC) + 1;
+    AF(o, s16, 0xFC) = n;
+    D_800B9B0C = n - v * 2560 / 4096;
+    func_8012A7D4(&a, &b);
+    D_800B9B0E = -((s16)func_80013294(&D_sc07_011_80182328, &a) / 6);
+}
 
 void func_sc07_011_8017DD78(u8 *arg0) {
     D_sc07_011_8018237C[AF(arg0, u16, 2)]();
 }
 
-INCLUDE_ASM("asm/stg/sc07_011/nonmatchings/sc07_011", func_sc07_011_8017DDB4);
+extern s32 func_8012C1B8();
+extern void func_8001C2C4();
+extern s32 func_sc07_011_8017E294(s32 arg0);
+extern s32 func_sc07_011_8017DF70(s32 arg0, s32 arg1, s32 arg2);
+extern u8 D_sc07_011_8018D244;
+extern u8 D_sc07_011_8018D51C;
+extern u8 D_sc07_011_8018D7F4;
+void func_sc07_011_8017DDB4(u8 *o) {
+    s32 m;
 
-INCLUDE_ASM("asm/stg/sc07_011/nonmatchings/sc07_011", func_sc07_011_8017DE9C);
+    AF(o, s32, 0x20) = 0;
+    AF(o, s32, 0xCC) = 0;
+    AF(o, s32, 0xD0) = 0;
+    AF(o, s32, 0x20) = m = func_8012C1B8();
+    if (m != 0) {
+        func_8001C2C4(m);
+        AF(o, s32, 0xCC) = m = func_8012C1B8();
+        if (m != 0) {
+            func_8001C2C4(m);
+            AF(o, s32, 0xD0) = m = func_8012C1B8();
+            if (m != 0) {
+                func_8001C2C4(m);
+            }
+        }
+    }
+    if (m == 0) {
+        func_sc07_011_8017E294((s32) o);
+        return;
+    }
+    func_sc07_011_8017DF70((s32) o, AF(o, s32, 0x20), (s32) &D_sc07_011_8018D244);
+    func_sc07_011_8017DF70((s32) o, AF(o, s32, 0xCC), (s32) &D_sc07_011_8018D51C);
+    func_sc07_011_8017DF70((s32) o, AF(o, s32, 0xD0), (s32) &D_sc07_011_8018D7F4);
+    AF(o, s16, 0xFC) = (rand() & 3) << 10;
+    AF(o, s16, 0xFE) = 0;
+    func_8012AD50((s32) o);
+}
+
+extern void func_sc07_011_8017DFE8();
+extern s32 func_sc07_011_8017E01C(s32 arg0);
+extern void func_sc07_011_8017E078(u8 *o);
+void func_sc07_011_8017DE9C(u8 *o) {
+    s16 a;
+
+    func_sc07_011_8017DFE8(o);
+    func_sc07_011_8017E01C((s32) o);
+    switch (AF(o, u16, 0x70) & 0xF) {
+    case 0:
+        a = AF(o, s16, 0xFC) + 0x22;
+        AF(o, s16, 0xFC) = a;
+        AF(o, s16, 0xA) = AF(o, u16, 0x8A) + rsin(a) / 256;
+        break;
+    case 1:
+        a = AF(o, s16, 0xFC) + 0x22;
+        AF(o, s16, 0xFC) = a;
+        AF(o, s16, 0xA) = AF(o, u16, 0x8A) + rsin(a) / 256;
+        func_sc07_011_8017E078(o);
+        break;
+    }
+}
 
 s32 func_sc07_011_8017DF70(s32 arg0, s32 arg1, s32 arg2) {
     u16 temp_v0;
@@ -853,7 +950,10 @@ s32 func_sc07_011_8017DF70(s32 arg0, s32 arg1, s32 arg2) {
     return (s32) temp_v0;
 }
 
-INCLUDE_ASM("asm/stg/sc07_011/nonmatchings/sc07_011", func_sc07_011_8017DFE8);
+void func_sc07_011_8017DFE8(u8 *o) {
+    AF(AF(o, u8 *, 0xCC), s16, 0x12) += 0x155;
+    AF(AF(o, u8 *, 0xD0), s16, 0x12) -= 0x155;
+}
 
 s32 func_sc07_011_8017E01C(s32 arg0) {
     s32 temp_s1;

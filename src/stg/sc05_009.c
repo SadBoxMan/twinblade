@@ -771,9 +771,50 @@ typedef struct { s16 x, y; s32 col; } Star8;
 typedef struct { SV8 p[3]; CV4 c[3]; s32 code; } TriArg;
 extern WMtx D_800AE620;
 
-INCLUDE_ASM("asm/stg/sc05_009/nonmatchings/sc05_009", func_sc05_009_8017D950);
+extern s32 func_80019198();
+extern u8 D_sc05_009_80182578;
+extern void func_80172310();
+extern void func_sc05_009_8017DF34();
+s32 func_sc05_009_8017D950(u8 *o) {
+    SV8 v;
 
-INCLUDE_ASM("asm/stg/sc05_009/nonmatchings/sc05_009", func_sc05_009_8017D9F0);
+    if (func_80019198() == 0) {
+        func_80019064(&D_sc05_009_80182578);
+    }
+    AF(o, s16, 6) = AF(o, u16, 0xFC);
+    v.x = AF(o, s16, 0xFC) += AF(o, u16, 0xDE);
+    v.y = D_80126B62;
+    v.z = AF(o, s16, 0xE);
+    v.pad = 0xC00;
+    func_80172310(&v);
+    if (AF(o, s16, 6) >= 0x121) {
+        func_sc05_009_8017DF34();
+        return 1;
+    }
+    return 0;
+}
+
+extern u8 D_sc05_009_80182564;
+extern void func_8013C9C4();
+extern void func_80147364();
+s32 func_sc05_009_8017D9F0(u8 *o) {
+    u8 unused[8]; /* MATCH-TRICK: pads the frame to 0x20 */
+
+    AF(o, s16, 6) = AF(o, u16, 0xFC);
+    AF(o, s16, 0xFC) += AF(o, u16, 0xDE);
+    if (AF(o, s16, 6) >= 0x1A1) {
+        func_8012C658(0x251, 0, o);
+        func_8012C658(0x251, 1, o);
+        func_8012C658(0x251, 2, o);
+        func_8012C658(0x251, 3, o);
+        func_8012C658(0x251, 4, o);
+        func_8013C9C4(&D_sc05_009_80182564);
+        func_80147324(0x807);
+        func_80147364(4, 0x9D2);
+        return 1;
+    }
+    return 0;
+}
 
 void func_sc05_009_8017DAB8(u8 *arg0) {
     D_sc05_009_801825DC[AF(arg0, u16, 2)]();
@@ -806,7 +847,17 @@ void func_sc05_009_8017DAF4(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc05_009/nonmatchings/sc05_009", func_sc05_009_8017DCB0);
+extern void func_8012AD80();
+void func_sc05_009_8017DCB0(u8 *o) {
+    u8 *m = AF(o, u8 *, 0x20);
+
+    AF(m, s16, 0x10) += AF(o, u16, 0xFC);
+    AF(m, s16, 0x14) += AF(o, u16, 0xFE);
+    func_8012AD80(o);
+    if (AF(o, s16, 6) > 0x1000) {
+        func_8012C098(o);
+    }
+}
 
 s32 func_sc05_009_8017DD20(void) {
     return 0x6A;

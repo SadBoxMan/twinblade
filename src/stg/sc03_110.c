@@ -1399,7 +1399,25 @@ void func_sc03_110_8017EAD8(s32 arg0) {
     D_sc03_110_80185980[AF(arg0, u8, 4)]();
 }
 
-INCLUDE_ASM("asm/stg/sc03_110/nonmatchings/sc03_110", func_sc03_110_8017EB14);
+extern s32 func_80148800();
+extern u8 D_80126940;
+extern u8 D_sc03_110_80185984;
+
+void func_sc03_110_8017EB14(u8 *arg0) {
+    B8 v;
+    u8 t;
+
+    if (func_80148800((s32) &D_80126B58) & 3) {
+        t = (AF(arg0, u8, 5) + 1) & 1;
+        AF(arg0, u8, 5) = t;
+        AF(arg0, s32, 0x14) = ((s16 *)&D_sc03_110_80185984)[t];
+    }
+    v = *(B8 *)&D_80126940;
+    if (AF(&v, s16, 0) < -0xB40) AF(&v, s16, 0) = -0xB40;
+    if (AF(&v, s16, 0) > 0x940) AF(&v, s16, 0) = 0x940;
+    if (AF(&v, s16, 2) > -0x300) AF(&v, s16, 2) = -0x300;
+    func_sc03_110_8017EBFC(arg0, (u8 *) &v);
+}
 
 void func_sc03_110_8017EBFC(u8 *arg0, u8 *arg1) {
     FeMtx m;

@@ -987,7 +987,20 @@ void func_8002F12C(u8 *a) {
     func_8002DC68(*(s32 *)(a + 0x4), 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_8002C8BC", func_8002F150);
+void func_8002F150(s32 a) {
+    u8 *t = (u8 *)&g_SoundChan[a - 1];
+    s32 i;
+    for (i = 0; i < 8; i++) {
+        u8 *p = (u8 *)&g_SoundChan[8 + i];
+        if (*(t + i + 0xE) != 0) {
+            *(s16 *)(p + 0x30) = 0;
+            p[0x38] = 0;
+            *(s32 *)(p + 0x2C) = -0x18;
+            *(s32 *)(p + 0x28) = *(s32 *)(p + 0x20) - 0x100;
+            p[0x37] |= 1;
+        }
+    }
+}
 
 void func_8002F1CC(s32 n) {
     u8 *q = n * 0x54 + ((u8 *)g_SoundSlot + 0x54);

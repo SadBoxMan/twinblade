@@ -1772,7 +1772,23 @@ extern u8 D_sc05_005_801A62C0;
 extern s32 func_8012C51C();
 extern s32 func_8012BE54();
 
-INCLUDE_ASM("asm/stg/sc05_005/nonmatchings/sc05_005", func_sc05_005_8017F794);
+extern void func_8012C0EC();
+extern void (*D_sc05_005_801A6190[])();
+
+void func_sc05_005_8017F794(u8 *o) {
+    D_sc05_005_801A6190[AF(o, u16, 2)]();
+    if (AF(o, u16, 0) != 0) {
+        if (AF(o, u8 *, 0x90) == &D_sc05_005_801AB144) {
+            if (AF(o, s32, 0x94) == 10) {
+                func_sc05_005_80181DE4(o, 0x7F9);
+            } else if (AF(o, s32, 0x94) == 15) {
+                func_sc05_005_80181DE4(o, 0x7F8);
+            }
+        }
+        func_sc05_005_8018093C(o);
+        func_8012C0EC(o);
+    }
+}
 
 void func_sc05_005_8017F840(u8 *o) {
     s16 f;

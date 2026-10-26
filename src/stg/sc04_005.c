@@ -1843,7 +1843,14 @@ extern void func_800139C8();
 
 extern u8 D_sc04_005_801ADC4C;
 
-INCLUDE_ASM("asm/stg/sc04_005/nonmatchings/sc04_005", func_sc04_005_8017F210);
+extern void (*D_sc04_005_8018B8B4[])();
+
+void func_sc04_005_8017F210(u8 *o) {
+    if (AF(o, u16, 2) != 0) {
+        func_8012B2CC(o);
+    }
+    D_sc04_005_8018B8B4[AF(o, u16, 2)](o);
+}
 
 s32 func_sc04_005_8017F270(void) {
     return func_800D0F8C(0x62) != 0;

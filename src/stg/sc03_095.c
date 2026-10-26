@@ -700,7 +700,29 @@ extern s32 func_801290DC();
 
 
 
-INCLUDE_ASM("asm/stg/sc03_095/nonmatchings/sc03_095", func_sc03_095_8017D2A8);
+extern s16 D_sc03_095_801849F4[];
+extern u8 D_sc03_095_80184A10;
+extern s16 D_sc03_095_80184A44[];
+extern s16 D_sc03_095_80184A46[];
+extern s16 D_sc03_095_80184A48[];
+extern u8 D_sc03_095_80184A4C;
+
+void func_sc03_095_8017D2A8(u8 *arg0) {
+    B8 v;
+    u8 t;
+    s16 lim;
+
+    if (func_80148800((s32) &D_80126B58) & 3) {
+        t = (AF(arg0, u8, 5) + 1) & 1;
+        AF(arg0, u8, 5) = t;
+        AF(arg0, s32, 0x14) = D_sc03_095_801849F4[t];
+    }
+    v = *(B8 *)&D_80126940;
+    lim = 0x5C0; if (AF(&v, s16, 0) < lim) AF(&v, s16, 0) = lim;
+    lim = 0x940; if (AF(&v, s16, 0) > lim) AF(&v, s16, 0) = lim;
+    lim = 0x1340; if (AF(&v, s16, 4) > lim) AF(&v, s16, 4) = lim;
+    func_sc03_095_8017D390((s32) arg0, (s32) &v);
+}
 
 void func_sc03_095_8017D390(u8 *arg0, u8 *arg1) {
     FeMtx m;
@@ -735,9 +757,36 @@ s32 func_sc03_095_8017D528(s32 arg0) {
     return func_8013B7F4(D_sc03_095_801849F8[arg0], 0);
 }
 
-INCLUDE_ASM("asm/stg/sc03_095/nonmatchings/sc03_095", func_sc03_095_8017D558);
+extern void (*D_sc03_095_80184A54[])();
+extern s16 D_sc03_095_80184A4E;
+extern s16 D_sc03_095_80184A50;
+void func_sc03_095_8017D558(u8 *o) {
+    s16 v;
+    s16 t;
+    D_sc03_095_80184A54[AF(o, u16, 2)]();
+    t = AF(o, s16, 0xA) + 0x802;
+    if (t <= 0) {
+        v = 0x80;
+    } else {
+        v = ((AF(o, s16, 0xFE) - AF(o, s16, 0xA)) << 7) / (AF(o, s16, 0xFE) + 0x802);
+    }
+    AF(&D_sc03_095_80184A4C, s16, 0) = D_sc03_095_80184A4E = D_sc03_095_80184A50 = v;
+}
 
-INCLUDE_ASM("asm/stg/sc03_095/nonmatchings/sc03_095", func_sc03_095_8017D618);
+void func_sc03_095_8017D618(u8 *arg0) {
+    if (func_8012C354(arg0, &D_sc03_095_80184A10)) {
+        SetScript(arg0, (s32) &D_sc03_095_80181260);
+        AF(arg0, u8, 0x75) = 0;
+        AF(arg0, u16, 0x12) = D_sc03_095_80184A44[AF(arg0, s16, 0xFC) * 4];
+        AF(arg0, u16, 0x16) = D_sc03_095_80184A46[AF(arg0, s16, 0xFC) * 4];
+        AF(arg0, u16, 0x1A) = D_sc03_095_80184A48[AF(arg0, s16, 0xFC) * 4];
+        AF(arg0, s32, 0x1C) = D_sc03_095_80184A4A[AF(arg0, s16, 0xFC) * 4];
+        AF(arg0, s16, 2) = 1;
+        AF(AF(arg0, u8 *, 0x20), u16, 0x2C) |= 0x80;
+        AF(AF(arg0, u8 *, 0x20), u8 *, 0x80) = &D_sc03_095_80184A4C;
+        AF(arg0, u16, 0xFE) = AF(arg0, u16, 0xA);
+    }
+}
 
 void func_sc03_095_8017D704(u8 *arg0) {
     s32 temp_v0;

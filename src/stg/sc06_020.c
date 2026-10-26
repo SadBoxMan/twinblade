@@ -877,7 +877,25 @@ typedef struct { SV8 v[4]; CV4 c; s32 code; } Q1C;
 extern s32 func_sc06_020_8018353C();
 extern s32 func_8012C51C();
 
-INCLUDE_ASM("asm/stg/sc06_020/nonmatchings/sc06_020", func_sc06_020_8017D4A0);
+extern u8 D_80126940;
+extern s32 func_80148800();
+extern s16 D_sc06_020_80188B14[];
+void func_sc06_020_8017D4A0(u8 *o) {
+    typedef struct { u8 b[8]; } B8;
+    B8 v;
+    u8 t;
+
+    if (func_80148800(&D_80126B58) & 3) {
+        t = (AF(o, u8, 5) + 1) & 1;
+        AF(o, u8, 5) = t;
+        AF(o, s32, 0x14) = D_sc06_020_80188B14[t];
+    }
+    v = *(B8 *)&D_80126940;
+    if (AF(&v, s16, 2) < -0x102) {
+        AF(&v, s16, 2) = -0x102;
+    }
+    func_sc06_020_8017D558(o, &v);
+}
 
 void func_sc06_020_8017D558(u8 *arg0, u8 *arg1) {
     FeMtx m;

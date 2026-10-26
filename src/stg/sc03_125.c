@@ -1593,7 +1593,33 @@ extern s32 func_8012DEB8();
 extern void func_8001C2C4();
 
 
-INCLUDE_ASM("asm/stg/sc03_125/nonmatchings/sc03_125", func_sc03_125_8017EEDC);
+extern s32 func_8012C588();
+extern u8 D_sc03_125_80187C50;
+extern u8 D_sc03_125_80187C64;
+extern s32 SetScript();
+extern u8 D_sc03_125_801A8D7C;
+
+void func_sc03_125_8017EEDC(u8 *o) {
+    if ((u32)(func_80029504() - 0x118) >= 0xA) {
+        func_8012CAE4(o);
+        return;
+    }
+    if (func_80029178(0xFA) & 0xFF) {
+        func_80029514(0x12C);
+        func_8012C588(0x3CF, 0);
+        func_8012CAE4(o);
+        return;
+    }
+    func_80029124(0x109, 0);
+    func_80029124(0x110, 1);
+    if (func_sc03_125_801815EC(o, &D_sc03_125_80187C50) != 0) {
+        AF(AF(o, u8 *, 0x68), s16, 0xC) = 0x7FFF;
+        AF(o, s16, 2) = 1;
+        func_8012E8E0(o, &D_sc03_125_80187C64);
+        func_8012E88C(o);
+        SetScript(o, &D_sc03_125_801A8D7C);
+    }
+}
 
 void func_sc03_125_8017EFB0(u8 *arg0) {
     D_sc03_125_80187FB0[AF(arg0, u16, 2)]();

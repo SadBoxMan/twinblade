@@ -278,7 +278,54 @@ s32 func_ovl22_800CB6D4(u8 *arg0) {
     return 0;
 }
 
-INCLUDE_ASM("asm/abil/ovl22/nonmatchings/ovl22", func_ovl22_800CB8A0);
+extern s8 D_ovl22_800CBECC[];
+extern void func_80017DC4();
+extern void func_8012F14C();
+extern void func_800D20C0();
+extern void func_800D23D0();
+extern void func_80017E68();
+extern void func_80017758();
+
+s32 func_ovl22_800CB8A0(arg0) u8 *arg0; {
+    s8 *p;
+    s16 i;
+    AVec v;
+    AVec r;
+    APrim s;
+    AMtx a;
+    AMtx b;
+
+    v.vx = v.vy = v.vz = AF(arg0, u16, 0x28);
+    func_80017DC4(&v, &a);
+    v.vx = v.vz = 0;
+    v.vy = -0x2C;
+    func_8012F14C(arg0 + 0x38, &v, &v);
+    func_800D20C0(&v, &r, 5);
+    func_800D23D0(&r);
+    s.v[1].vx = s.v[1].vy = s.v[1].vz = 0;
+    s.v[0].vz = s.v[2].vz = s.v[3].vz = 0;
+    s.c[1].r = s.c[1].g = (AF(arg0, s16, 0x28) >> 6) + 0x60;
+    s.c[1].b = 0;
+    s.c[0].r = s.c[0].g = s.c[0].b = 0;
+    s.c[2].r = s.c[2].g = s.c[2].b = 0;
+    s.c[3].r = s.c[3].g = s.c[3].b = 0;
+    s.code = 0x50000000;
+    func_80017E68(&v, &a);
+    RotMatrixYXZ(&r, &b);
+    MulMatrix(&a, &b);
+    p = D_ovl22_800CBECC;
+    i = 0;
+    do {
+        s.v[0].vx = *p++;
+        s.v[0].vy = *p++;
+        s.v[2].vx = *p++;
+        s.v[2].vy = *p++;
+        s.v[3].vx = *p++;
+        s.v[3].vy = *p--;
+        func_80017758(&s, &a);
+        i++;
+    } while (i < 4);
+}
 
 void func_ovl22_800CBA74(u8 *arg0) {
     if (D_80078EC1 != 0x15) {

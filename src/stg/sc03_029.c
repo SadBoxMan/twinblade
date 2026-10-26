@@ -3271,6 +3271,11 @@ void func_sc03_029_80182958(u8 *arg0) {
     AF(AF(arg0, void *, 0x68), s16, 0xC) = 0x7FFF;
 }
 
+
+typedef struct { s16 x, y, z, w, f, g, h, i; s32 j; } Arg15DC;
+extern u8 D_sc03_029_801C91A4;
+extern s32 D_sc03_029_801C93DC;
+
 INCLUDE_ASM("asm/stg/sc03_029/nonmatchings/sc03_029", func_sc03_029_801829F4);
 
 void func_sc03_029_80182A14(u8 *arg0) {
@@ -4246,7 +4251,33 @@ void func_sc03_029_80184D34(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_029/nonmatchings/sc03_029", func_sc03_029_80184DC8);
+void func_sc03_029_80184DC8(u8 *p) {
+    V4 in;
+    V4 out;
+    u8 *o;
+
+    if ((AF(p, u16, 0x70) & 0xF) == 2) {
+        AF(AF(p, u8 *, 0x20), u16, 0x10) -= 0x10;
+        o = AF(p, u8 *, 0x20);
+        if (AF(o, s16, 0x10) < -0x400) {
+            AF(o, s16, 0x10) = -0x400;
+        }
+    } else {
+        in.x = rcos((AF(p, s32, 0xE0) << 6) & 0xFC0) << 8;
+        in.y = 0;
+        in.z = 0;
+        ApplyMatrixLV(AF(p, u8 *, 0x20) + 0x34, &in, &out);
+        AF(p, u16, 0x50) = (u32)out.x >> 16;
+        AF(p, u16, 0x54) = (u32)out.z >> 16;
+        AF(p, s32, 0xE0)++;
+    }
+    if (func_8012CBF4(p) != 0) {
+        AF(p, s32, 0x1C) = 0x20;
+        AF(p, u16, 2)++;
+    } else if (func_8012BEE8(p) != 0) {
+        func_8012C218(p);
+    }
+}
 
 void func_sc03_029_80184ED0(u8 *arg0) {
     s16 temp_v0_2;
@@ -4777,7 +4808,23 @@ void func_sc03_029_80186320(u8 *o) {
     func_8013240C(&D_sc03_029_801D98C8);
 }
 
-INCLUDE_ASM("asm/stg/sc03_029/nonmatchings/sc03_029", func_sc03_029_80186448);
+/* symbol split: splat split one original object into neighbouring symbols; read through the neighbour (offset form), as the original */
+void func_sc03_029_80186448(u8 *o) {
+    s32 *p;
+
+    AF(o, s16, 2) = 10;
+    func_80132288(&D_sc03_029_801D98C8, &D_sc03_029_801C91A4, D_sc03_029_801CA0A0);
+    func_sc03_029_80186ECC(o, 2);
+    AF(o, s16, 0xDE) = 0;
+    AF(AF(o, u8 *, 0x20), s16, 0x12) = func_8012B864(o);
+    func_8012B2CC(o);
+    p = &D_sc03_029_801C93DC;
+    *p = D_sc03_029_801C931C[0] / 30;
+    func_8012B23C(o);
+    func_8012B14C(o, p - 2);
+    AF(o, s32, 0x1C) = 0;
+    AF(o, s16, 0x34) = 0;
+}
 
 void func_sc03_029_80186514(u8 *arg0, s32 arg1) {
     s32 temp_v0;

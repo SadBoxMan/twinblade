@@ -630,7 +630,22 @@ extern void func_80178BF8();
 extern u8 func_80172710;
 
 
-INCLUDE_ASM("asm/stg/sc05_000/nonmatchings/sc05_000", func_sc05_000_8017D4A0);
+extern SV8 D_80126940;
+void func_sc05_000_8017D4A0(u8 *o) {
+    SV8 v;
+
+    v = D_80126940;
+    if (v.y < -0x4E0) {
+        v.y = -0x4E0;
+    }
+    if (v.x < -0x2D0) {
+        v.x = -0x2D0;
+    }
+    if (v.x > 0x2D0) {
+        v.x = 0x2D0;
+    }
+    func_sc05_000_8017D538(o, (u8 *)&v);
+}
 
 void func_sc05_000_8017D538(u8 *arg0, u8 *arg1) {
     FeMtx m;
@@ -887,7 +902,26 @@ void func_sc05_000_8017DF08(s32 arg0) {
     func_80146CA0(arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc05_000/nonmatchings/sc05_000", func_sc05_000_8017DF38);
+extern u8 D_80062C14;
+extern u8 D_sc05_000_80181F5C;
+extern void func_80019064();
+extern void func_801511E0();
+extern void func_80154274();
+extern void func_80146E90();
+extern void func_80146DE8();
+extern void func_80147324();
+void func_sc05_000_8017DF38(u8 *o) {
+    func_80019064(&D_80062C14);
+    func_801511E0(o);
+    AF(AF(o, u8 *, 0x20), s16, 0x12) = (AF(o, u16, 0x42) + 0x800) & 0xFFF;
+    func_80154274(o, &D_sc05_000_80181F5C);
+    func_80146E90(o, 0x20);
+    func_80146DE8(o, 0, 0xFFFF0000, 0x180000);
+    func_801477E8(o, 0xFFF00000);
+    func_80149020(o);
+    func_80147324(0x451);
+    func_80146CA0(o);
+}
 
 void func_sc05_000_8017DFDC(s32 arg0, s32 arg1) {
     s32 pad[8];

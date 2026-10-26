@@ -626,7 +626,29 @@ typedef struct { s32 v; s32 pad; } E8w;
 typedef void (*StepFn)(void);
 extern s32 func_8012BD14();
 
-INCLUDE_ASM("asm/stg/sc03_109/nonmatchings/sc03_109", func_sc03_109_8017D3C0);
+extern SV8 D_80126940;
+
+void func_sc03_109_8017D3C0(u8 *o) {
+    SV8 v;
+
+    v = D_80126940;
+    if (v.y < -0x680) {
+        if (v.x < -0x2E0) {
+            v.x = -0x2E0;
+        }
+        if (v.x > 0x2C0) {
+            v.x = 0x2C0;
+        }
+    } else {
+        if (v.x < -0x240) {
+            v.x = -0x240;
+        }
+        if (v.x > 0x240) {
+            v.x = 0x240;
+        }
+    }
+    func_sc03_109_8017D48C(o, &v);
+}
 
 void func_sc03_109_8017D48C(u8 *arg0, u8 *arg1) {
     FeMtx m;
