@@ -26,6 +26,7 @@ def sym_of(x):
     return m[1] if m else None
 def norm(x): return re.sub(r'\s+', ' ', x).strip()
 groups = {}
+pre = {}    # r192: a draft's `static inline` helpers, placed in front of it
 incs = {}   # r142: the drafts' #include lines (a GTE draft needs include/gte.h; split() drops them)
 for n in names:
     f = target(n)
@@ -35,9 +36,15 @@ for n in names:
     if n not in funcs: continue
     # declarations without their comments (a leading comment made a typedef look new: duplicate typedef), and a
     # static helper the draft defines that the file lacks goes in with them (r142, from S1's insert_hand)
-    ds = [P.strip_comments(c) for c in P.chunks(decl) if P.strip_comments(c).strip()]
-    ds += [P.strip_comments(b) for k, b in funcs.items() if k != n and b.lstrip().startswith('static')
-           and not re.search(rf'\b{k}\s*\(', src[f])]
+    # r192: an INCLUDE_ASM line of the draft is not a declaration; a multi-name extern line becomes one line per name
+    ds = [y for c in P.chunks(decl) if P.strip_comments(c).strip() and not c.lstrip().startswith('INCLUDE_ASM')
+          for y in P.split_multi(P.strip_comments(c))]
+    helpers = [(k, P.strip_comments(b)) for k, b in funcs.items() if k != n and b.lstrip().startswith('static')
+               and not re.search(rf'\b{k}\s*\(', src[f])]
+    # r192: a `static inline` helper goes right in front of the function (as r179's handput_inl did), where GCC emits it
+    # in the original's order; other static helpers go with the declarations
+    ds += [b for k, b in helpers if not re.match(r'static\s+inline\b', b)]
+    pre[n] = ''.join(b + '\n\n' for k, b in helpers if re.match(r'static\s+inline\b', b))
     incs.setdefault(f, []).extend(x for x in P.includes(text) if x not in incs.get(f, []))
     groups.setdefault(f, []).append((n, ds, funcs[n]))
 deferred, placed = [], []
@@ -61,10 +68,17 @@ def insert(t, items):
         ret = re.match(r'([\w \*]+?)\s*\b' + n + r'\(', b)[1].strip()
         t = re.sub(rf'^extern [\w \*]+?\b{n}\(\);$', f'extern {ret} {n}();', t, flags=re.M)
         t = re.sub(rf'^extern u8 {n};$', f'extern {ret} {n}();', t, flags=re.M)     # an address-taken guess
+    # r192: a callee the file declares `extern void f(...)` that a draft declares with a value: the draft's return type
+    # (a call whose value is unused compiles the same; the check verifies). Clone drafts carry the source's type.
+    for _, ds, _ in items:
+        for x in ds:
+            m = re.fullmatch(r'\s*extern\s+(?!void\b)([\w \*]+?)\s*\b(func_\w+)\s*\([^;{}]*\)\s*;\s*', x)
+            if m and not re.search(rf'^[\w\s\*]*\bvoid\s+{m[2]}\s*\([^;{{]*\)\s*\{{', t, re.M):   # not one defined void
+                t = re.sub(rf'^(extern\s+)void(\s+{m[2]}\s*\()', lambda q: q[1] + m[1].strip() + q[2], t, flags=re.M)
     k = t.index('\nINCLUDE_ASM') + 1
     t = t[:k] + ''.join(x + '\n' for x, _ in decls) + '\n' + t[k:]
     for n, _, b in items:
-        t = re.sub(rf'INCLUDE_ASM\("[^"]+",\s*{n}\);', lambda m: b, t, count=1)
+        t = re.sub(rf'INCLUDE_ASM\("[^"]+",\s*{n}\);', lambda m: pre.get(n, '') + b, t, count=1)
     owner = {}
     line = t[:k].count('\n') + 1
     for x, _ in decls:
@@ -92,6 +106,40 @@ def knr(b, n):
         if not re.fullmatch(r'(?:[su]32 \w+|[\w ]+\*+\s*\w+)', p): return None
         names.append(re.search(r'(\w+)$', p)[1])
     return b.replace(m[0], f'{m[1]}({", ".join(names)})\n' + ''.join(f'    {p};\n' for p in ps) + '{', 1)
+NARROW = r'(?:[su](?:8|16)|(?:unsigned |signed )?(?:char|short))'
+def widen(b, n):
+    """r192: a definition with narrow parameters (`s16 arg2`) as word parameters narrowed on entry (`s32 arg2_0` and
+    `s16 arg2 = arg2_0;`): it can follow the file's old-style `f();` (an argument with a default promotion cannot
+    match an empty parameter list: "conflicting types"), and compiles the same; None if no parameter is narrow"""
+    m = re.match(rf'([\w \*]+?\s*\b{n})\(([^)]*)\)\s*\{{', b)
+    if not m: return None
+    ps, conv, out = [p.strip() for p in m[2].split(',') if p.strip() and p.strip() != 'void'], [], []
+    for p in ps:
+        q = re.fullmatch(rf'({NARROW})\s+(\w+)', p)
+        if q:
+            out.append(f's32 {q[2]}_0'); conv.append(f'\n    {q[1]} {q[2]} = {q[2]}_0;')
+        else:
+            out.append(p)
+    if not conv: return None
+    return b.replace(m[0], f'{m[1]}({", ".join(out)}) {{' + ''.join(conv), 1)
+def bindiff(limit=8):
+    """r192: the first differing words of the built image against the original (as r175's bindiff_all.py), so a
+    "build differs" says where: a wrong %lo field, a moved function, a size change"""
+    import struct
+    built, ref = (f'build/stg/{STG}/{STG}.bin', f'disc/pac4/{STG.upper()}.bin') if STG else \
+        ('build/stage/stage.bin', 'disc/pac4/SC03_001.bin')
+    base = 0x80128158 if STG else 0x80127000
+    try:
+        a, b = open(built, 'rb').read(), open(ref, 'rb').read()
+    except OSError:
+        return ' (not built)'
+    out = [f' ({len(a)} vs {len(b)} bytes)'] if len(a) != len(b) else []
+    for off in range(0, min(len(a), len(b)) - 3, 4):
+        wa, wb = struct.unpack_from('<I', a, off)[0], struct.unpack_from('<I', b, off)[0]
+        if wa != wb:
+            out.append(f' {base + off:08X}: built {wa:08X} original {wb:08X}')
+            if len(out) >= limit: break
+    return ';'.join(out)
 def check():
     r = subprocess.run(['C:\\msys64\\usr\\bin\\make.exe', CHECK], capture_output=True, text=True, env=ENV)
     return CHECK_OK in r.stdout
@@ -102,7 +150,14 @@ def place(f, items):
         t, owner = insert(base, items)
         open(f, 'w', encoding='utf-8', newline='\n').write(t)
         bad_lines, out = compile_errors(f)
-        if not bad_lines: break
+        if not bad_lines:
+            # r192: a pointer made from an integer usually means a guessed callee type; the bytes may still match,
+            # so it is only reported
+            for m in re.finditer(r':(\d+): warning: ([^\n]*makes pointer from integer[^\n]*)', out):
+                who = [items[j][0] for j in owner.get(int(m[1]), [])]
+                if who:
+                    print(f'warning: {who[0]}: {m[2]}'); why(who[0], 'warning: ' + m[2])
+            break
         bad = set()
         lines = t.splitlines()
         idx = {n: i for i, (n, _, _) in enumerate(items)}
@@ -121,6 +176,15 @@ def place(f, items):
                 items[i] = (n, items[i][1], k); fixed.add(i)
             else:
                 bad.add(i)
+        # a narrow-parameter definition after the file's old-style declaration: word parameters narrowed on entry
+        for m in re.finditer(r':(\d+): conflicting types for `(\w+)\'', out):
+            n = m[2]
+            if n in idx and idx[n] not in fixed:
+                w = widen(items[idx[n]][2], n)
+                if w:
+                    items[idx[n]] = (n, items[idx[n]][1], w); fixed.add(idx[n]); argn[int(m[1])] = n
+                    for q in re.finditer(rf':(\d+): (?:previous declaration of `{n}\'|an argument type that has a default)', out):
+                        argn[int(q[1])] = n
         bad_lines = [l for l in bad_lines if l not in argn]
         for l in bad_lines:
             if l in owner:
@@ -144,11 +208,12 @@ def place(f, items):
         open(f, 'w', encoding='utf-8', newline='\n').write(t)
         if check():
             src[f] = t; placed.extend(n for n, _, _ in items); return True
+        diff = bindiff() if len(items) == 1 else ''
         open(f, 'w', encoding='utf-8', newline='\n').write(src[f])
         if len(items) == 1:
             deferred.append(items[0][0])
             with open(os.path.join(d, '_why.txt'), 'a') as w:
-                w.write(f'{items[0][0]}: build differs\n')
+                w.write(f'{items[0][0]}: build differs{diff}\n')
             return False
         h = len(items) // 2
         bis(items[:h]); bis(items[h:])
@@ -170,6 +235,18 @@ for f, items in groups.items():
     for n, ds, b in items:
         defs[n] = re.match(r'([\w \*]+?)\s*\b' + n + r'\(', b)[1].strip()
     seen, ok = {}, []
+    # r192: function externs two drafts guess differently (`extern void f();` / `extern s32 f();`): the one with a value
+    # for all of them (a call whose value is unused compiles the same); a symbol the file already declares keeps the
+    # file's declaration (missing_decls skips the drafts' lines), so it is no clash either
+    pick = {}
+    for _, ds, _ in items:
+        for x in ds:
+            s = sym_of(x)
+            if s and x.startswith('extern') and '(' in x and (s not in pick or pick[s].startswith('extern void')):
+                pick[s] = x
+    for i, (n, ds, b) in enumerate(items):
+        items[i] = (n, [pick.get(sym_of(x), x) if x.startswith('extern') and '(' in x and sym_of(x) not in defs else x
+                        for x in ds], b)
     for n, ds, b in items:
         # the file's own prototype for this function: the definition must agree with it
         m = re.search(rf'^(?!extern)([A-Za-z_][\w \*]*?)\b{n}\s*\(([^;{{)]*)\)\s*;', t, re.M)
@@ -192,7 +269,7 @@ for f, items in groups.items():
             s = sym_of(x)
             if s in defs and x.startswith('extern') and '(' in x:      # a guess for a function of this batch
                 x = f'extern {defs[s]} {s}();'
-            if s and s in seen and norm(seen[s]) != norm(x): bad = True
+            if s and s in seen and norm(seen[s]) != norm(x) and not P.declared_in(s, t): bad = True
             nds.append(x)
         if bad:
             deferred.append(n); why(n, 'declaration clashes with another draft'); continue

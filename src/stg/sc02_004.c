@@ -110,7 +110,43 @@ void func_sc02_004_8017BEBC(SV8 *r, SV8 *out, s32 arg2) {
     out->pad = maxy - miny;
 }
 
-INCLUDE_ASM("asm/stg/sc02_004/nonmatchings/sc02_004", func_sc02_004_8017C294);
+typedef struct { s16 m[3][3]; s32 t[3]; } WMtx;
+typedef union { s32 w; XY s; } UXY;
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s16 m[3][3]; s32 t[3]; } SMtx;
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
+typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
+typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
+typedef struct { s16 vx, vy, vz, pad; } SV;
+typedef struct { u16 v[6]; } U12;
+typedef struct { u16 x, y, z, pad; } UV4;
+typedef struct { u8 r, g, b, cd; } CV4;
+typedef struct { UV4 p0; UV4 p1; CV4 c0; CV4 c1; s32 code; } LineArg;
+typedef struct { SV4 p[4]; CV4 c[4]; s32 code; } QuadArg;
+typedef struct { u16 active; s16 y; s16 dy; s16 ang; s32 x; s32 z; } Pt16;
+typedef struct { s16 a, b, c, g; u8 d, e; s16 f; Pt16 pts[16]; } PtSys;
+typedef struct { u32 *ot; u8 pad[0x10]; } OtRef;
+typedef struct { u8 b[0x14]; } Ot14;
+typedef struct { unsigned addr : 24; unsigned len : 8; } PTag;
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+typedef struct { s32 w[4]; } W16;
+
+void func_sc02_004_8017C294(SV8 *zero, SV8 *out) {
+    MtxDCM m;
+    MtxDCM mt;
+    SV8 d;
+    ReadRotMatrix(&m);
+    PushMatrix();
+    d.x = zero->x - m.t[0];
+    d.y = zero->y - m.t[1];
+    d.z = zero->z - m.t[2];
+    TransposeMatrix(&m, &mt);
+    ApplyMatrixSV(&mt, &d, out);
+    PopMatrix();
+}
 
 s32 func_sc02_004_8017C338(SV4 *a, SV4 *b, SV4 *o, s32 lim) {
     s32 x;
@@ -161,6 +197,11 @@ s32 func_sc02_004_8017C530(s32 arg0, s32 arg1) {
     RotTransPers(arg0, arg1, (s32) &sp18, (s32) &sp1C);
     return SetGeomOffset(sp10, sp14);
 }
+
+extern s32 func_80128ED8();
+extern void func_801292C8();
+extern void func_8012931C();
+extern s32 func_80135168();
 
 INCLUDE_ASM("asm/stg/sc02_004/nonmatchings/sc02_004", func_sc02_004_8017C59C);
 
@@ -287,7 +328,36 @@ void func_sc02_004_8017D9C4(s32 arg0) {
 
 INCLUDE_ASM("asm/stg/sc02_004/nonmatchings/sc02_004", func_sc02_004_8017DA30);
 
-INCLUDE_ASM("asm/stg/sc02_004/nonmatchings/sc02_004", func_sc02_004_8017DB2C);
+void func_sc02_004_8017DB2C(u8 *arg0) {
+    SV8 a;
+    SV8 b;
+
+    if (func_80128ED8(AF(arg0, s32, 0x20), (s32) (arg0 + 0x24)) != 0) {
+        func_801292C8((s32) arg0);
+        return;
+    }
+    if (AF(arg0, s16, 0x2E) != 0) {
+        func_8012931C((s32) arg0);
+        AF(arg0, s32, 0x10) -= AF(arg0, s32, 0x10) >> 3;
+        AF(arg0, s32, 0x14) -= 0x4000;
+        AF(arg0, s32, 0x18) -= AF(arg0, s32, 0x18) >> 3;
+        return;
+    }
+    a.x = AF(arg0, s16, 6);
+    a.y = AF(arg0, s16, 0xA);
+    a.z = AF(arg0, s16, 0xE);
+    func_8012931C((s32) arg0);
+    b.x = AF(arg0, s16, 6);
+    b.y = AF(arg0, s16, 0xA);
+    b.z = AF(arg0, s16, 0xE);
+    if (func_80135168(0, (s32) &a, (s32) &b) != 0) {
+        AF(arg0, s16, 6) = b.x;
+        AF(arg0, s16, 0xA) = b.y;
+        AF(arg0, s16, 0xE) = b.z;
+        AF(arg0, s32, 0x14) = -(AF(arg0, s32, 0x14) >> 1);
+    }
+    AF(arg0, s32, 0x14) += 0x1C000;
+}
 
 void func_sc02_004_8017DC54(u8 *arg0) {
     D_sc02_004_80181804[AF(arg0, u16, 2)]();

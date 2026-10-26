@@ -16,6 +16,8 @@ Usage: python -I tools/regress.py [AREA|NAME ...] [-j N] [--no-build] [--staged 
   --staged          the commit gate: only the images the staged files can change (git diff --cached, so it follows
                     GIT_INDEX_FILE: the temporary-index commit routine works too); nothing to check -> exit 0
   --paths F ...     the same for an explicit list of changed files
+                    (both first re-split the images whose yaml or symbol file is in the list: asm/ is not committed)
+  --resplit --paths F ...   only that re-split (merge_branch.py after putting files back)
   --record-baseline write tools/regress_baseline.txt from the disc files as they are now
 Results also go to build/regress/last.json; each area's make output to build/regress/<area>.log. A full run (no area,
 no --staged) ends with tools/coverage.py: how much of the checked code is real C, stubs, asm and library, and the
@@ -39,7 +41,7 @@ AREAS = ['main', 'ovl', 'abil', 'stg']
 # the build rules and the compile chain are shared. A change to anything else outside these and the per-image
 # sources below cannot change a checked binary (docs, pc/, the launcher, analysis tools).
 GLOBAL_INPUTS = re.compile(r'^(include/|Makefile$|slus_007\.26\.yaml$|symbol_addrs[^/]*\.txt$|undefined_syms[^/]*\.txt$|'
-                           r'reloc_addrs\.txt$|tools/(jtbl_relabel|exe_syms|gen_ability_ovls|gen_stage_cfgs|regress)\.py$|'
+                           r'reloc_addrs\.txt$|tools/(jtbl_relabel|exe_syms|gen_ability_ovls|gen_stage_cfgs|regress|maspsx_tw)\.py$|'
                            r'tools/regress_baseline\.txt$|tools/coverage\.py$|src/[^/]+\.c$|src/[^/]+\.h$)')
 BUILD_INPUT = re.compile(GLOBAL_INPUTS.pattern + r'|^(src|abil|stg)/|^[^/]+\.yaml$')
 
@@ -124,6 +126,11 @@ def select_for_paths(rows, paths):
         p = p.replace('\\', '/')
         if GLOBAL_INPUTS.match(p):
             return set(names)
+        # the engine (src/stage, matched in the village) is in every stage image, and its names reach them all through
+        # stg/symbol_addrs_engine.txt: the village and every stg image (r192; r161 found only `stage` checked)
+        if p.startswith('src/stage/') or p == 'stg/symbol_addrs_engine.txt':
+            want |= {r[1] for r in rows if r[0] == 'stg'} | {'stage'}
+            continue
         m = (re.match(r'^src/(abil|stg)/(\w+)\.c$', p) or re.match(r'^(abil|stg)/(?:symbol_addrs_)?(\w+)\.(?:yaml|txt)$', p))
         if m:
             want.add(m.group(2).lower())
@@ -132,6 +139,43 @@ def select_for_paths(rows, paths):
         if m and m.group(1) in names:
             want.add(m.group(1))
     return want or None
+
+
+def resplit(paths):
+    """splat again every image whose split inputs are among `paths` (its yaml or symbol file): asm/ is gitignored, so
+    a changed stg/symbol_addrs_<name>.txt was otherwise checked against the old split (r192; the stream recipe was
+    `make split-stg STG=<stages>` by hand before the gate). Returns the images re-split."""
+    stg, other = set(), set()
+    for p in paths:
+        p = p.replace('\\', '/')
+        if p == 'stg/symbol_addrs_engine.txt':
+            stg.add('*')
+        elif re.match(r'^stg/(?:symbol_addrs_)?\w+\.(?:yaml|txt)$', p):
+            stg.add(re.match(r'^stg/(?:symbol_addrs_)?(\w+)\.', p).group(1).lower())
+        elif m := re.match(r'^abil/(?:symbol_addrs_)?(\w+)\.(?:yaml|txt)$', p):
+            other.add(f'abil/{m.group(1).lower()}.yaml')
+        elif re.match(r'^[^/]+\.yaml$', p) and p != 'slus_007.26.yaml':
+            other.add(p)
+    py = os.path.join(ROOT, '.venv', 'Scripts', 'python.exe')
+    py = py if os.path.exists(py) else sys.executable
+    done = []
+    if stg:
+        names = [] if '*' in stg else sorted(n for n in stg if os.path.exists(os.path.join(ROOT, 'stg', n + '.yaml')))
+        if '*' in stg or names:
+            print('regress: re-splitting', 'every stage image' if not names else ' '.join(names))
+            r = subprocess.run([py, os.path.join(ROOT, 'tools', 'gen_stage_cfgs.py'), '--resplit'] + [n.upper() for n in names],
+                               cwd=ROOT, env=dict(os.environ, TWINBLADE_JOBS='4'), capture_output=True, text=True)
+            if r.returncode:
+                sys.exit(f'regress: re-split failed:\n{r.stdout[-2000:]}{r.stderr[-2000:]}')
+            done += names or ['stg']
+    for y in sorted(other):
+        if os.path.exists(os.path.join(ROOT, y)):
+            print('regress: re-splitting', y)
+            r = subprocess.run([py, '-m', 'splat', 'split', y], cwd=ROOT, capture_output=True, text=True)
+            if r.returncode:
+                sys.exit(f'regress: splat {y} failed:\n{r.stdout[-2000:]}{r.stderr[-2000:]}')
+            done.append(y)
+    return done
 
 
 def failure_lines(text, limit=12):
@@ -160,6 +204,11 @@ def main():
             paths = r.stdout.split()
         elif a == '--paths':
             paths = argv[i + 1:]; i = len(argv)
+        elif a == '--resplit':
+            # only re-split the images whose configs or symbol files are in the --paths list (merge_branch.py, after
+            # putting files back)
+            resplit(argv[argv.index('--paths') + 1:] if '--paths' in argv else [])
+            return 0
         elif a == '--record-baseline':
             record_baseline(targets())
             return 0
@@ -182,6 +231,8 @@ def main():
             print('regress: no staged file can change a checked binary (docs, pc/, tools): nothing to check')
             return 0
         rows = [r for r in rows if r[1] in want]
+        if build:
+            resplit(paths)
     elif picks:
         bad = [p for p in picks if p not in AREAS and p not in {r[1] for r in rows}]
         if bad:

@@ -134,7 +134,43 @@ void func_sc03_012_8017BEBC(SV8 *r, SV8 *out, s32 arg2) {
     out->pad = maxy - miny;
 }
 
-INCLUDE_ASM("asm/stg/sc03_012/nonmatchings/sc03_012", func_sc03_012_8017C294);
+typedef struct { s16 m[3][3]; s32 t[3]; } WMtx;
+typedef union { s32 w; XY s; } UXY;
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s16 m[3][3]; s32 t[3]; } SMtx;
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
+typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
+typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
+typedef struct { s16 vx, vy, vz, pad; } SV;
+typedef struct { u16 v[6]; } U12;
+typedef struct { u16 x, y, z, pad; } UV4;
+typedef struct { u8 r, g, b, cd; } CV4;
+typedef struct { UV4 p0; UV4 p1; CV4 c0; CV4 c1; s32 code; } LineArg;
+typedef struct { SV4 p[4]; CV4 c[4]; s32 code; } QuadArg;
+typedef struct { u16 active; s16 y; s16 dy; s16 ang; s32 x; s32 z; } Pt16;
+typedef struct { s16 a, b, c, g; u8 d, e; s16 f; Pt16 pts[16]; } PtSys;
+typedef struct { u32 *ot; u8 pad[0x10]; } OtRef;
+typedef struct { u8 b[0x14]; } Ot14;
+typedef struct { unsigned addr : 24; unsigned len : 8; } PTag;
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+typedef struct { s32 w[4]; } W16;
+
+void func_sc03_012_8017C294(SV8 *zero, SV8 *out) {
+    MtxDCM m;
+    MtxDCM mt;
+    SV8 d;
+    ReadRotMatrix(&m);
+    PushMatrix();
+    d.x = zero->x - m.t[0];
+    d.y = zero->y - m.t[1];
+    d.z = zero->z - m.t[2];
+    TransposeMatrix(&m, &mt);
+    ApplyMatrixSV(&mt, &d, out);
+    PopMatrix();
+}
 
 s32 func_sc03_012_8017C338(SV4 *a, SV4 *b, SV4 *o, s32 lim) {
     s32 x;
@@ -185,6 +221,9 @@ s32 func_sc03_012_8017C530(s32 arg0, s32 arg1) {
     RotTransPers(arg0, arg1, (s32) &sp18, (s32) &sp1C);
     return SetGeomOffset(sp10, sp14);
 }
+
+extern u16 D_800B99D8;
+extern s32 func_80132EF4();
 
 INCLUDE_ASM("asm/stg/sc03_012/nonmatchings/sc03_012", func_sc03_012_8017C59C);
 
@@ -366,7 +405,63 @@ void func_sc03_012_8017DBE4(u8 *arg0) {
     func_sc03_012_8017DCB4((s32) arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc03_012/nonmatchings/sc03_012", func_sc03_012_8017DCB4);
+void func_sc03_012_8017DCB4(u8 *o) {
+    s32 r;
+    s32 inc;
+    s32 h;
+    s32 step;
+    s32 x;
+    s32 y;
+    s32 m;
+    s32 sc;
+    s32 w;
+    s16 n;
+    u16 t;
+    u8 *p;
+    u8 *q;
+
+    r = D_800B99DC;
+    h = AF(o, s16, 0xDE);
+    inc = D_800B99D8;
+    if (h < 0x10) {
+        h = 0x10;
+    }
+    if (h > 0xB0) {
+        h = 0xB0;
+    }
+    step = h / 16;
+    for (x = -h; x < h; x += step) {
+        for (y = -0xE0; y < 0xE0; ) {
+            w = y + 0x28;
+            m = r & 0x1F;
+            y = w + m;
+            t = AF(o, u16, 0xE4) - 1;
+            AF(o, u16, 0xE4) = t;
+            if ((t << 16) == 0) {
+                AF(o, u16, 0xE4) = m + 8;
+                p = (u8 *) func_80132EF4(o, 0x21);
+                if (p == 0) {
+                    return;
+                }
+                if (m > 0x10) {
+                    sc = 0x8000;
+                    n = 7;
+                    AF(p, s16, 0x2C) = n;
+                } else {
+                    sc = ((r & 3) + 5) << 12;
+                    n = r / 4 + 3;
+                    AF(p, s16, 0x2C) = n;
+                }
+                q = AF(p, u8 *, 0x20);
+                AF(q, s16, 0x18) = AF(q, s16, 0x1A) = AF(q, s16, 0x1C) = sc;
+                AF(p, s16, 6) = x;
+                AF(p, s16, 0xE) = y;
+            }
+            r += inc;
+            inc++;
+        }
+    }
+}
 
 void func_sc03_012_8017DE18(u8 *arg0) {
     u16 temp_v0;

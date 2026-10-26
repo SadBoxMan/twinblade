@@ -1,5 +1,6 @@
 #include "common.h"
 #include "gte.h"
+#include "psyq.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 void func_sc04_010_8017BE9C(void) {
@@ -537,6 +538,47 @@ extern s32 func_80012ABC();
 extern void func_8012F14C();
 
 
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+typedef struct { s16 x, y, z; } SV6;
+typedef struct { s32 w[4]; } W16;
+typedef struct { s16 x, y; s32 col; } Star8;
+typedef struct { SV8 p[3]; CV4 c[3]; s32 code; } TriArg;
+typedef struct { s32 a; s32 c4; s32 c8; s16 ang; s16 e; s32 pad10[2]; s32 t18; s32 done; s32 f20; } Fx24;
+typedef struct { s16 x, y, z, w; s16 a, b, c, d; s32 e; } BF70S;
+typedef struct { SV8 v[4]; s32 a, b, c, d, e, f; } Q;
+typedef struct { s16 v; s16 pad[5]; } E12s;
+typedef struct { u8 v; u8 pad[11]; } E12b;
+typedef struct { u32 tag; u32 code; s16 x, y; u8 u, v; u16 clut; s16 w, h; } Sprt;
+typedef struct { s8 lo; u8 hi; } S8P;
+typedef struct { u16 v; } U16R;
+typedef struct { u32 tag; u8 r0, g0, b0, code; s16 x0, y0; u8 r1, g1, b1, p1; s16 x1, y1; u8 r2, g2, b2, p2; s16 x2, y2; u8 r3, g3, b3, p3; s16 x3, y3; } PolyG4;
+typedef struct { s32 v; } S32R;
+typedef struct { u8 pad[0x10]; XY pt[12]; } Pts80182FD4;
+typedef struct {
+    u32 tag;
+    u8 r0, g0, b0, code;
+    s16 x0, y0;
+    u8 u0, v0;
+    u16 clut;
+    s16 x1, y1;
+    u8 u1, v1;
+    u16 tpage;
+    s16 x2, y2;
+    u8 u2, v2;
+    u16 pad1;
+    s16 x3, y3;
+    u8 u3, v3;
+    u16 pad2;
+} PFT4;
+typedef struct { u32 tag; u32 code; } PMODE;
+typedef struct { u8 pad[0x10]; XY t[13]; } FANUV;
+typedef struct { s32 v; u8 pad[8]; } E12w;
+typedef struct { s32 v; s32 pad; } E8w;
+typedef struct { SV4 p[4]; s32 c[4]; s32 col; s32 code; u8 flag; } Q74;
+typedef struct { u32 wx, wy, wz, count; u32 *faces; } Rec;
+extern void func_801292C8();
+extern void func_800139C8();
+
 INCLUDE_ASM("asm/stg/sc04_010/nonmatchings/sc04_010", func_sc04_010_8017D210);
 
 void func_sc04_010_8017D2D4(u8 *arg0, u8 *arg1, u8 *arg2) {
@@ -863,4 +905,24 @@ void func_sc04_010_8017DFF8(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc04_010/nonmatchings/sc04_010", func_sc04_010_8017E064);
+void func_sc04_010_8017E064(u8 *o) {
+    u8 *p;
+    SV8 v;
+    u16 a;
+
+    p = AF(o, u8 *, 0x20);
+    a = AF(o, u16, 0x2C) + 0x40;
+    AF(o, u16, 0x2C) = a;
+    v.z = rsin((s16)a) / 256;
+    v.x = v.y = 0;
+    func_800139C8(AF(p, s16, 0x12), &v, &v);
+    AF(o, s16, 6) = AF(o, s16, 0x12) + v.x;
+    AF(o, s16, 0xE) = AF(o, s16, 0x1A) + v.z;
+    AF(o, s16, 0xA) -= AF(o, s16, 0x30);
+    AF(o, s16, 0x2E) += 0x10;
+    AF(p, s16, 0x18) = AF(p, s16, 0x1A) = AF(p, s16, 0x1A) + AF(o, s16, 0x2E);
+    AF(p, u8, 0x24) = AF(p, u8, 0x25) = AF(p, u8, 0x26) = AF(p, u8, 0x26) - 4;
+    if (func_80146E98(o) != 0) {
+        func_801292C8(o);
+    }
+}

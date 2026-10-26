@@ -1,5 +1,6 @@
 #include "common.h"
 #include "gte.h"
+#include "psyq.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 void func_sc05_006_8017BE9C(void) {
@@ -749,7 +750,56 @@ extern s32 D_sc05_006_8018FD90;
 extern s32 D_sc05_006_8018FD94;
 extern s32 D_sc05_006_8018FD98;
 
-INCLUDE_ASM("asm/stg/sc05_006/nonmatchings/sc05_006", func_sc05_006_8017D6E0);
+typedef struct { s16 x, y, z; } SV6;
+typedef struct { s32 w[4]; } W16;
+typedef struct { s16 x, y; s32 col; } Star8;
+typedef struct { SV8 p[3]; CV4 c[3]; s32 code; } TriArg;
+typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
+typedef struct { s32 a; s32 c4; s32 c8; s16 ang; s16 e; s32 pad10[2]; s32 t18; s32 done; s32 f20; } Fx24;
+typedef struct { s16 x, y, z, w; s16 a, b, c, d; s32 e; } BF70S;
+typedef struct { SV8 v[4]; s32 a, b, c, d, e, f; } Q;
+typedef struct { s16 x, y, z, a, b, c, d, e; s32 f; } FeS14s;
+typedef struct { u8 pad[0x10]; XY pt[12]; } Pts80182FD4;
+typedef struct {
+    u32 tag;
+    u8 r0, g0, b0, code;
+    s16 x0, y0;
+    u8 u0, v0;
+    u16 clut;
+    s16 x1, y1;
+    u8 u1, v1;
+    u16 tpage;
+    s16 x2, y2;
+    u8 u2, v2;
+    u16 pad1;
+    s16 x3, y3;
+    u8 u3, v3;
+    u16 pad2;
+} PFT4;
+typedef struct { u32 tag; u32 code; } PMODE;
+typedef struct { u8 pad[0x10]; XY t[13]; } FANUV;
+
+void func_sc05_006_8017D6E0(u8 *arg0) {
+    s16 r;
+    s32 d1, d2;
+    u8 *s1;
+
+    s1 = AF(arg0, u8 *, 0x34);
+    r = rand();
+    d1 = (r & 0x3F) - 0x20;
+    AF(arg0, s16, 6) = AF(s1, u16, 6) + d1;
+    if (AF(arg0, s32, 0x2C) != 0) {
+        AF(arg0, u16, 0xA) = AF(s1, u16, 0xA) - 0x140;
+        AF(arg0, s16, 0x16) = 0x20;
+    } else {
+        AF(arg0, u16, 0xA) = AF(s1, u16, 0xA);
+        AF(arg0, s16, 0x16) = -0x20;
+    }
+    d2 = ((r >> 6) & 0x3F) - 0x20;
+    AF(arg0, s16, 0xE) = AF(s1, u16, 0xE) + d2;
+    AF(arg0, s32, 0x30) = (r >> 12) & 3;
+    AF(arg0, u16, 2)++;
+}
 
 void func_sc05_006_8017D794(u8 *arg0) {
     s32 temp_v0;
@@ -1096,7 +1146,25 @@ void func_sc05_006_8017E3E4(u8 *arg0) {
     AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
 }
 
-INCLUDE_ASM("asm/stg/sc05_006/nonmatchings/sc05_006", func_sc05_006_8017E4D8);
+void func_sc05_006_8017E4D8(u8 *arg0) {
+    u8 *p;
+    s16 v;
+    s32 t;
+
+    p = AF(arg0, u8 *, 0xDC);
+    if (AF(p, u8, 1) == 0) {
+        v = 1;
+    } else {
+        if (AF(arg0, s16, 0x108) == 0) {
+            AF(arg0, s16, 0x108) = func_80128CFC(AF(p, u16, 2));
+        }
+        t = AF(arg0, s16, 0x108);
+        v = t;
+    }
+    if (v != 0) {
+        AF(arg0, u16, 2)++;
+    }
+}
 
 void func_sc05_006_8017E558(u8 *arg0) {
     SV8 sp10;
@@ -1268,6 +1336,10 @@ void func_sc05_006_8017EB38(s32 arg0) {
     D_sc05_006_80183088[AF(arg0, u8, 4)]();
 }
 
+extern void RotMatrixY();
+extern void SetTransMatrix();
+extern void RotTransSV();
+
 INCLUDE_ASM("asm/stg/sc05_006/nonmatchings/sc05_006", func_sc05_006_8017EB74);
 
 void func_sc05_006_8017EC74(u8 *arg0, u8 *arg1) {
@@ -1383,7 +1455,25 @@ void func_sc05_006_8017F130(u8 *arg0) {
     D_sc05_006_801830B8[AF(arg0, u16, 2)]();
 }
 
-INCLUDE_ASM("asm/stg/sc05_006/nonmatchings/sc05_006", func_sc05_006_8017F16C);
+void func_sc05_006_8017F16C(u8 *o) {
+    WMtx m;
+    SV8 v;
+    s32 flag;
+
+    m = D_800AE620;
+    RotMatrixY(AF(AF(o, u8 *, 0x20), s16, 0x12), &m);
+    m.t[0] = AF(o, s16, 0xFE);
+    m.t[1] = AF(o, s16, 0xA);
+    m.t[2] = AF(o, s16, 0x100);
+    SetRotMatrix(&m);
+    SetTransMatrix(&m);
+    v.x = 0;
+    v.y = 0;
+    v.z = AF(o, s16, 0xE2);
+    RotTransSV(&v, &v, &flag);
+    AF(o, s16, 6) = v.x;
+    AF(o, s16, 0xE) = v.z;
+}
 
 void func_sc05_006_8017F25C(u8 *arg0) {
     s32 *temp_s1;
@@ -1414,7 +1504,19 @@ void func_sc05_006_8017F25C(u8 *arg0) {
     func_8012AD50((s32) arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc05_006/nonmatchings/sc05_006", func_sc05_006_8017F354);
+void func_sc05_006_8017F354(u8 *arg0) {
+    AF(arg0, s32, 8) += AF(arg0, s32, 0x14);
+    AF(arg0, s32, 0x14) += AF(arg0, s32, 0x48);
+    if (AF(arg0, s32, 0x14) > -0x20000) {
+        func_8012C218(arg0);
+        return;
+    }
+    AF(AF(arg0, u8 *, 0x20), u16, 0x12) += 0x30;
+    AF(AF(arg0, u8 *, 0x20), u16, 0x10) += AF(arg0, u16, 0x106);
+    AF(AF(arg0, u8 *, 0x20), u16, 0x14) += AF(arg0, u16, 0x108);
+    AF(arg0, s32, 0xE0) += AF(arg0, s32, 0x18);
+    func_sc05_006_8017F16C(arg0);
+}
 
 s32 func_sc05_006_8017F40C(void) {
     return 0x5F;

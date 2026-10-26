@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Search source variants of one function for a byte match.
 
-Usage: variant_search.py <template.c> <func_name> [-O2|-O0] [--jobs N] [--show N] [--shape]
+Usage: variant_search.py <template.c> <func_name> [-O2|-O0] [--jobs N (default 4)] [--show N] [--shape]
 
 The template is ordinary C with alternatives written as {{a|b|c}} (double braces, so normal C braces are
 left alone). Every combination is compiled and compared with the original asm (tools/cmp_func.py), in
@@ -66,7 +66,7 @@ def score(job):
     except Exception:
         return (10 ** 6, idx, src)
     m = cmp_func.mask
-    if len(a) == len(b) and all(m(x[0], x[2] or y[2]) == m(y[0], x[2] or y[2]) for x, y in zip(a, b)):
+    if len(a) == len(b) and all(cmp_func.same_word(x, y) for x, y in zip(a, b)):
         return (0, idx, src)
     if use_shape:
         m = lambda w, r: shape(cmp_func.mask(w, r))   # noqa: E731
@@ -81,7 +81,7 @@ def main():
     args = sys.argv[1:]
     tmpl, func = args[0], args[1]
     opt = next((a for a in args if a in ('-O2', '-O0', '-O1')), '-O2')
-    jobs = int(args[args.index('--jobs') + 1]) if '--jobs' in args else max(1, os.cpu_count() - 2)
+    jobs = int(args[args.index('--jobs') + 1]) if '--jobs' in args else 4   # LuciDin's CPU cap (r192: was cpu_count-2 = 26)
     show = int(args[args.index('--show') + 1]) if '--show' in args else 3
     variants = list(expand(open(tmpl, encoding='utf-8').read()))
     print(f'{len(variants)} variants, {jobs} workers')

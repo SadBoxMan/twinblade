@@ -32,9 +32,12 @@ CC1       := $(CC_DIR)/cc1.exe
 CPP_FLAGS := -undef -Iinclude -D_LANGUAGE_C -DPSX
 CC1_FLAGS = -quiet $(OPT_FLAGS) -G0 -mips1 -mcpu=3000 -fgnu-linker -mgas -msoft-float
 OPT_FLAGS := -O2
-O0_FILES  := main code_8002C410 stage/engine_8013B568 stage/engine_80144B9C \n             ovl39/ovl39_800D0100 ovl37/ovl37
+O0_FILES  := main code_8002C410 stage/engine_8013B568 stage/engine_80144B9C \
+             ovl39/ovl39_800D0100 ovl37/ovl37
 $(foreach f,$(O0_FILES),$(eval $(BUILD)/src/$(f).o: OPT_FLAGS := -O0))
-MASPSX    := $(PYTHON) tools/maspsx/maspsx.py --expand-div --aspsx-version=2.79
+# tools/maspsx_tw.py (r192): maspsx with the sltu_at rule on (the game's assembler wrote `sltu rd,rs,-N` as
+# `li at,-N; sltu rd,rs,at`; asm/ has no negative sltiu), tools/maspsx itself unmodified
+MASPSX    := $(PYTHON) tools/maspsx_tw.py --expand-div --aspsx-version=2.79
 LD_FLAGS := -nostdlib --no-check-sections -Map $(BUILD)/$(BASENAME).map \
             -T $(LD_SCRIPT) \
             -T $(BUILD)/undefined_syms_auto.txt \

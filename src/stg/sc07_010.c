@@ -365,7 +365,22 @@ extern SV4 D_sc07_010_80185E80;
 extern s32 func_80017E68();
 extern s32 func_80017738();
 
-INCLUDE_ASM("asm/stg/sc07_010/nonmatchings/sc07_010", func_sc07_010_8017C294);
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+extern void func_sc07_010_8017FED8();
+
+void func_sc07_010_8017C294(SV8 *zero, SV8 *out) {
+    MtxDCM m;
+    MtxDCM mt;
+    SV8 d;
+    ReadRotMatrix(&m);
+    PushMatrix();
+    d.x = zero->x - m.t[0];
+    d.y = zero->y - m.t[1];
+    d.z = zero->z - m.t[2];
+    TransposeMatrix(&m, &mt);
+    ApplyMatrixSV(&mt, &d, out);
+    PopMatrix();
+}
 
 s32 func_sc07_010_8017C338(SV4 *a, SV4 *b, SV4 *o, s32 lim) {
     s32 x;
@@ -416,6 +431,11 @@ s32 func_sc07_010_8017C530(s32 arg0, s32 arg1) {
     RotTransPers(arg0, arg1, (s32) &sp18, (s32) &sp1C);
     return SetGeomOffset(sp10, sp14);
 }
+
+typedef struct { u32 tag; u32 tpage; u8 r, g, b, code; s16 x, y; u8 u, v; u16 clut; s16 w, h; } SprT;
+extern SprT D_sc07_010_801A92B4[][6];
+typedef struct { SprT s[6]; } SprSet;
+extern u32 D_800A6620[][0x1000];
 
 INCLUDE_ASM("asm/stg/sc07_010/nonmatchings/sc07_010", func_sc07_010_8017C59C);
 
@@ -1213,7 +1233,16 @@ void func_sc07_010_8017FD54(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc07_010/nonmatchings/sc07_010", func_sc07_010_8017FED8);
+void func_sc07_010_8017FED8(u8 *p) {
+    s32 t[3];
+
+    t[0] = AF(p, s32, 0x1C) += AF(p, s32, 0x2C);
+    t[1] = AF(p, s32, 0x20) += AF(p, s32, 0x30);
+    t[2] = AF(p, s32, 0x24) += AF(p, s32, 0x34);
+    AF(p, s16, 0x3C) += ((s16 *)t)[1];
+    AF(p, s16, 0x3E) += ((s16 *)t)[3];
+    AF(p, s16, 0x40) += ((s16 *)t)[5];
+}
 
 s32 func_sc07_010_8017FF68(s32 arg0, s32 arg1) {
     s32 sp18;
@@ -1722,7 +1751,112 @@ void func_sc07_010_80181728(u8 *arg0) {
 void func_sc07_010_801817C8(void) {
 }
 
-INCLUDE_ASM("asm/stg/sc07_010/nonmatchings/sc07_010", func_sc07_010_801817D0);
+void func_sc07_010_801817D0(s32 n, s32 c) {
+    SprT *p0, *p1, *p2, *p3, *p4, *p5;
+    u8 *base;
+    s32 off;
+    u8 *q1, *q2, *q3, *q4, *q5;
+    u32 *t0, *t1, *t2, *t3, *t4, *t5;
+
+    base = (u8 *)D_sc07_010_801A92B4;
+    off = n * 0x90;
+
+    p0 = (SprT *)(off + base);
+    q1 = base + 0x18;
+    p1 = (SprT *)(off + q1);
+    q2 = base + 0x30;
+    p2 = (SprT *)(off + q2);
+    q3 = base + 0x48;
+    p3 = (SprT *)(off + q3);
+    q4 = base + 0x60;
+    p4 = (SprT *)(off + q4);
+    q5 = base + 0x78;
+    p5 = (SprT *)(off + q5);
+    AF(p0, u8, 3) = 5;
+    t0 = (u32 *)(base + 0x4);
+    *(u32 *)(off + (u8 *)t0) = 0xE100008A;
+    p0->code = 0x64;
+    p0->r = p0->g = p0->b = c;
+    p0->x = -0x140;
+    p0->y = -0xF0;
+    p0->u = 0;
+    p0->v = 0;
+    p0->clut = 0x7800;
+    p0->w = 0x100;
+    p0->h = 0x100;
+    AF(p1, u8, 3) = 5;
+    t1 = (u32 *)(base + 0x1c);
+    *(u32 *)(off + (u8 *)t1) = 0xE100008C;
+    p1->code = 0x64;
+    p1->r = p1->g = p1->b = c;
+    p1->x = -0x40;
+    p1->y = -0xF0;
+    p1->u = 0;
+    p1->v = 0;
+    p1->clut = 0x7800;
+    p1->w = 0x100;
+    p1->h = 0x100;
+    AF(p2, u8, 3) = 5;
+    t2 = (u32 *)(base + 0x34);
+    *(u32 *)(off + (u8 *)t2) = 0xE100008E;
+    p2->code = 0x64;
+    p2->r = p2->g = p2->b = c;
+    p2->x = 0xC0;
+    p2->y = -0xF0;
+    p2->u = 0;
+    p2->v = 0;
+    p2->clut = 0x7800;
+    p2->w = 0x100;
+    p2->h = 0x100;
+    AF(p3, u8, 3) = 5;
+    t3 = (u32 *)(base + 0x4c);
+    *(u32 *)(off + (u8 *)t3) = 0xE100009A;
+    p3->code = 0x64;
+    p3->r = p3->g = p3->b = c;
+    p3->x = -0x140;
+    p3->y = 0x10;
+    p3->u = 0;
+    p3->v = 0;
+    p3->clut = 0x7800;
+    p3->w = 0x100;
+    p3->h = 0x100;
+    AF(p4, u8, 3) = 5;
+    t4 = (u32 *)(base + 0x64);
+    *(u32 *)(off + (u8 *)t4) = 0xE100009C;
+    p4->code = 0x64;
+    p4->r = p4->g = p4->b = c;
+    p4->x = -0x40;
+    p4->y = 0x10;
+    p4->u = 0;
+    p4->v = 0;
+    p4->clut = 0x7800;
+    p4->w = 0x100;
+    p4->h = 0x100;
+    AF(p5, u8, 3) = 5;
+    t5 = (u32 *)(base + 0x7c);
+    *(u32 *)(off + (u8 *)t5) = 0xE100009E;
+    p5->code = 0x64;
+    p5->r = p5->g = p5->b = c;
+    p5->x = 0xC0;
+    p5->y = 0x10;
+    p5->u = 0;
+    p5->v = 0;
+    p5->clut = 0x7800;
+    p5->w = 0x100;
+    p5->h = 0x100;
+    ((PTag *)p0)->addr = ((PTag *)D_800A6620[n])->addr;
+    ((PTag *)D_800A6620[n])->addr = (u32)p0;
+    ((PTag *)p1)->addr = ((PTag *)D_800A6620[n])->addr;
+    ((PTag *)D_800A6620[n])->addr = (u32)p1;
+    ((PTag *)p2)->addr = ((PTag *)D_800A6620[n])->addr;
+    ((PTag *)D_800A6620[n])->addr = (u32)p2;
+    ((PTag *)p3)->addr = ((PTag *)D_800A6620[n])->addr;
+    ((PTag *)D_800A6620[n])->addr = (u32)p3;
+    ((PTag *)p4)->addr = ((PTag *)D_800A6620[n])->addr;
+    ((PTag *)D_800A6620[n])->addr = (u32)p4;
+    ((PTag *)p5)->addr = ((PTag *)D_800A6620[n])->addr;
+    ((PTag *)D_800A6620[n])->addr = (u32)p5;
+}
 
 void func_sc07_010_80181B2C(u8 *arg0) {
     s32 temp_v1;

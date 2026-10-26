@@ -29,6 +29,14 @@ def git(args, env=None, check=True, capture=True):
     return r
 
 
+def blob(spec, env):
+    """a blob's bytes (b'' when absent), read through a bytes pipe: a text pipe on Windows turns LF into CRLF (r168's
+    hand-made commit got CRLF blobs that way). The files themselves go in with `git add`, whose eol filters apply."""
+    r = subprocess.run(['git', 'cat-file', 'blob', spec], cwd=ROOT, env=env, stdout=subprocess.PIPE,
+                       stderr=subprocess.DEVNULL)
+    return r.stdout if r.returncode == 0 else b''
+
+
 def main():
     argv = sys.argv[1:]
     msg_args, extra, paths = [], [], []
@@ -62,6 +70,11 @@ def main():
         git(['add', '-A', '--'] + paths, env)
         if not git(['diff', '--cached', '--name-only'], env).stdout.strip():
             sys.exit('tmp_commit: nothing to commit in ' + ' '.join(paths))
+        crlf = [p for p in git(['diff', '--cached', '--name-only', '--diff-filter=AM'], env).stdout.split()
+                if b'\r\n' in blob(':' + p, env) and b'\r\n' not in blob('HEAD:' + p, env)]
+        if crlf:
+            sys.exit('tmp_commit: these files would be committed with CRLF line endings (their HEAD copy has none); '
+                     'nothing was committed:\n  ' + '\n  '.join(crlf))
         print(git(['diff', '--cached', '--stat'], env).stdout.rstrip())
         r = git(['commit', '-q'] + extra + msg_args, env, check=False, capture=False)
         if r.returncode:

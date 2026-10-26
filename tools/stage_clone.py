@@ -213,11 +213,23 @@ def draft(src, va, vname, tgt, sa, sname):
     for c in mine:
         c = ren(c)
         s = extern_sym(c) if '\n' not in c else None
-        decls.append(have.get(s, c) if s else c)
+        if s == sname:
+            continue          # r192: the function's own guess (`extern void f();`) conflicts with its definition
+        h = have.get(s)
+        # r192: the target's `extern void f()` for a callee the source declares with a value: the source's line (the
+        # body uses the value; place_stage retypes the file's guess, "void value not ignored" otherwise)
+        if h and re.match(r'extern\s+void\s+\w+\s*\(', h) and re.match(r'(?:extern\s+)?(?!void\b)[\w\s\*]+?\b\w+\s*\(', c):
+            h = None
+        decls.append(h or c if s else c)
     # the source's own symbols must all be renamed: one left over would link to the wrong stage
     text = inc + AF + '\n' + '\n'.join(tdefs + decls) + '\n\n' + ren(body) + '\n'
-    if src.name != VILLAGE and re.search(rf'\b(?:func|D|jtbl)_{src.lo}_', text):
-        return None, 'a source symbol left unrenamed'
+    if src.name != VILLAGE:
+        # r192: also within one image (sc05_008 has 18 copies of one shape), where the names share the prefix: a
+        # source-own symbol is left over when neither the asm walk nor the offset move gave it a target name
+        ok = set(st) | set(names.values())
+        left = sorted({w for w in re.findall(rf'\b(?:func|D|jtbl)_{src.lo}_[0-9A-F]{{8}}\b', text) if w not in ok})
+        if left:
+            return None, 'a source symbol left unrenamed: ' + ' '.join(left[:4])
     return text, moved
 
 
@@ -227,7 +239,8 @@ def clone_stage(tgt, idx, out_dir, alt=0, log=print):
     n_shape = n_written = 0
     by_addr = None
     for sa, key in tgt.funcs:
-        cands = [c for c in idx.get(key, []) if c[0] is not tgt]
+        # another image's copy first; then another function of this image (r192: same-stage sources were skipped)
+        cands = sorted((c for c in idx.get(key, []) if c[0] is not tgt or c[1] != sa), key=lambda c: c[0] is tgt)
         if not cands:
             continue
         if by_addr is None:

@@ -682,13 +682,116 @@ extern s32 func_8014CB8C();
 extern s32 func_801726C4();
 extern s32 func_80143C74();
 
-INCLUDE_ASM("asm/stg/sc06_015/nonmatchings/sc06_015", func_sc06_015_8017D818);
+typedef union { s32 w; XY s; } UXY;
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 w[4]; } W16;
+extern u16 D_sc06_015_80182578[];
+extern u8 D_sc06_015_80182598;
+extern u32 D_sc06_015_80194860;
+extern u16 D_sc06_015_80194864[];
+extern void func_800183E0();
+
+void func_sc06_015_8017D818(void) {
+    u32 i;
+
+    for (i = 0; i < 16; i++) {
+        D_sc06_015_80194864[i] = D_sc06_015_80182578[((D_sc06_015_80194860 >> 8) + i) & 0xF] | 0x8000;
+    }
+    func_800183E0(&D_sc06_015_80182598);
+    D_sc06_015_80194860 += 0x100;
+}
 
 s32 func_sc06_015_8017D8A4(void) {
     return 0x6E;
 }
 
-INCLUDE_ASM("asm/stg/sc06_015/nonmatchings/sc06_015", func_sc06_015_8017D8AC);
+extern WMtx D_800AF648;
+extern OtRef D_800A651C[];
+extern s32 D_80126950;
+extern u8 *func_80010A08();
+extern void RotTransSV();
+extern SV8 D_sc06_015_8018F81C;
+extern u32 D_sc06_015_8018F824[];
+extern u8 D_sc06_015_8018F830[];
+extern u8 D_sc06_015_8018F840[];
+extern u8 D_sc06_015_8018F850[];
+
+void func_sc06_015_8017D8AC(o)
+    u8 *o;
+{
+    u8 *pp[4];
+    SV8 v;
+    s16 x[8];
+    s16 y[8];
+    s32 flag;
+    s32 sxy;
+    s32 p;
+    u8 *m;
+    s32 z;
+    s32 r;
+    s32 h;
+    u32 *ot;
+    u8 *prim;
+    u8 *q;
+    s32 i;
+    s32 j;
+    s16 sx;
+    s16 sy;
+
+    m = AF(o, u8 *, 0x20) + 0x34;
+    gte_SetRotMatrix(m);
+    gte_SetTransMatrix(m);
+    RotTransSV(&D_sc06_015_8018F81C, &v, &flag);
+    SetRotMatrix(&D_800AF648);
+    SetTransMatrix(&D_800AF648);
+    z = RotTransPers(&v, &sxy, &p, &flag);
+    if (z > 0 && flag >= 0) {
+        sx = AF(&sxy, s16, 0);
+        sy = AF(&sxy, s16, 2);
+        r = (D_80126950 + 500) * 48 / (z * 4);
+        ot = D_800A651C[D_800B9A02].ot + z;
+        h = r * 179 >> 8;
+        x[0] = sx - r;
+        x[1] = sx - h;
+        x[2] = sx;
+        x[3] = sx + h;
+        x[4] = sx + r;
+        y[0] = sy - r;
+        y[1] = sy - h;
+        y[2] = sy;
+        y[3] = sy + h;
+        y[4] = sy + r;
+        prim = func_80010A08(0x9C);
+        if (prim != 0) {
+            SetDrawMode(prim, 0, 0, (u16) GetTPage(0, 1, 0, 0), 0);
+            q = pp[0] = prim + 0xC;
+            pp[1] = prim + 0x30;
+            pp[2] = prim + 0x54;
+            pp[3] = prim + 0x78;
+            for (j = 0; j < 4;) {
+                i = j * 4;
+                AF(q, u32, 4) = D_sc06_015_8018F824[D_sc06_015_8018F850[i]];
+                AF(q, u32, 0xC) = D_sc06_015_8018F824[D_sc06_015_8018F850[i + 1]];
+                AF(q, u32, 0x14) = D_sc06_015_8018F824[D_sc06_015_8018F850[i + 2]];
+                AF(q, u32, 0x1C) = D_sc06_015_8018F824[D_sc06_015_8018F850[i + 3]];
+                AF(q, u8, 3) = 8;
+                AF(q, u8, 7) = 0x3A;
+                AF(q, s16, 8) = x[D_sc06_015_8018F830[i]];
+                AF(q, s16, 0x10) = x[D_sc06_015_8018F830[i + 1]];
+                AF(q, s16, 0x18) = x[D_sc06_015_8018F830[i + 2]];
+                AF(q, s16, 0x20) = x[D_sc06_015_8018F830[i + 3]];
+                AF(q, s16, 0xA) = y[D_sc06_015_8018F840[i]];
+                AF(q, s16, 0x12) = y[D_sc06_015_8018F840[i + 1]];
+                AF(q, s16, 0x1A) = y[D_sc06_015_8018F840[i + 2]];
+                AF(q, s16, 0x22) = y[D_sc06_015_8018F840[i + 3]];
+                AddPrim(ot, q);
+                j++;
+                q += 0x24;
+            }
+            AddPrim(ot, prim);
+        }
+    }
+}
 
 void func_sc06_015_8017DCD0(u8 *o) {
     s32 dz;
@@ -883,7 +986,16 @@ void func_sc06_015_8017E57C(u8 *arg0) {
     D_sc06_015_80191E4C[AF(arg0, u8, 0x216)]();
 }
 
-INCLUDE_ASM("asm/stg/sc06_015/nonmatchings/sc06_015", func_sc06_015_8017E5B8);
+
+void func_sc06_015_8017E5B8(u8 *o) {
+    func_sc06_015_8017E8CC(o);
+    if (AF(o, s16, 0x210) < 0) {
+        AF(o, s16, 0x210) = -0x30;
+    } else {
+        AF(o, s16, 0x210) = 0x30;
+    }
+    func_80171990(o);
+}
 
 void func_sc06_015_8017E600(s32 arg0) {
     if (func_sc06_015_8017E9A8() != 0) {

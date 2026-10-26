@@ -55,7 +55,7 @@ extern s32 func_8012C354();
 extern s32 func_801788B8();
 extern u8 D_sc05_000_8017E5B8;
 extern u8 D_sc05_000_80181E74;
-extern u8 func_sc05_000_8017DE70;
+extern s32 * func_sc05_000_8017DE70();
 extern void func_80178CBC();
 extern u8 D_sc05_000_80181EA8;
 extern s32 func_80178970();
@@ -418,7 +418,43 @@ extern void func_8012F568();
 extern s32 func_80135888();
 extern s32 func_8014CB8C();
 
-INCLUDE_ASM("asm/stg/sc05_000/nonmatchings/sc05_000", func_sc05_000_8017CD9C);
+typedef struct { U12 e[9]; } U12x9;
+typedef struct { s32 vx, vy, vz, pad; } V4F20;
+typedef struct { s16 x, y, z, pad; } SV_8E8A0;
+typedef struct { s32 x, y, z, pad; } VEC_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT_8E8A0;
+typedef struct { u8 r, g, b, cd; } CV_8E8A0;
+typedef struct { SV_8E8A0 pt[4]; CV_8E8A0 col[4]; s32 code; } PRIM_8E8A0;
+typedef struct { s32 x, y, z; } POS_8E8A0;
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef union { s32 w; XY s; } UXY;
+typedef void (*VoidFn)();
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
+
+void func_sc05_000_8017CD9C(s32 arg0, SV *arg1, s32 arg2) {
+    SV v;
+    s16 i;
+    s16 k;
+
+    v.vx = arg1->vx;
+    v.vy = arg1->vy - 20;
+    v.vz = arg1->vz;
+    func_8012F14C(AF(arg0, s32, 0x20) + 0x34, &v, &v);
+    for (i = 0; i < 2; i++) {
+        k = 1;
+        if ((s16)arg2 == 0) {
+            k = i;
+        }
+        func_80146A6C(0x25, arg0, v.vx, v.vy, v.vz, k, 0);
+    }
+}
 
 void func_sc05_000_8017CE68(u8 *arg0) {
     SV4 v;
@@ -589,6 +625,11 @@ void func_sc05_000_8017D464(s32 arg0) {
     D_sc05_000_80181DCC[AF(arg0, u8, 4)]();
 }
 
+extern s32 func_8012BD14();
+extern void func_80178BF8();
+extern u8 func_80172710;
+
+
 INCLUDE_ASM("asm/stg/sc05_000/nonmatchings/sc05_000", func_sc05_000_8017D4A0);
 
 void func_sc05_000_8017D538(u8 *arg0, u8 *arg1) {
@@ -624,7 +665,23 @@ void func_sc05_000_8017D6D0(u8 *arg0) {
     D_sc05_000_80181E10[AF(arg0, u16, 2)]();
 }
 
-INCLUDE_ASM("asm/stg/sc05_000/nonmatchings/sc05_000", func_sc05_000_8017D70C);
+s32 func_sc05_000_8017D70C(u8 *arg0, s32 *t) {
+    s32 k = AF(arg0, s32, 0xDC);
+    s32 v;
+
+    if (t[0] != k) {
+        t += 2;
+        do {
+            v = t[0];
+            if (v == 0) {
+                return k;
+            }
+            t += 2;
+        } while (v != k);
+        t -= 2;
+    }
+    return t[1];
+}
 
 void func_sc05_000_8017D754(u8 *arg0) {
     s32 temp_s1;
@@ -808,7 +865,18 @@ void func_sc05_000_8017DDBC(u8 *arg0) {
     AF(arg0, s16, 0x100) = 0;
 }
 
-INCLUDE_ASM("asm/stg/sc05_000/nonmatchings/sc05_000", func_sc05_000_8017DE70);
+s32 *func_sc05_000_8017DE70(u8 *arg0) {
+    s32 *r;
+
+    if (func_8012BD14(AF(arg0, s32, 0x64)) < 0x1001) {
+        AF(AF(arg0, s32, 0x64), s16, 2) = 2;
+        func_80178BF8();
+        r = (s32 *) &func_80172710;
+    } else {
+        r = NULL;
+    }
+    return r;
+}
 
 void func_sc05_000_8017DECC(u8 *arg0) {
     D_sc05_000_80181FD0[AF(arg0, u16, 2)]();

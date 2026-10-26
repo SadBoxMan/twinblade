@@ -1640,3 +1640,578 @@ not retried: needs D_80126B5E as s16[]). r170's parks were not retried. Solved t
 sc05_010 80180B44, 80184E4C, sc06_024 8017FCFC, sc06_030 80180228, sc04_016 8017DF8C, sc04_018 8018CDEC.
 MATCH-TRICK held for a ruling: func_sc04_016_8017E960 (s7spec_P7_3.txt b1; a dead two-statement cycle on an
 uninitialised local `t = u + dy; u = t;` steers cse2 and is deleted by flow; file build\work\s7\sc04_016\).
+
+### r179 rows (S1 batch 8, 23 Oct; helper agents, sc02_005 one-copy 79-154 instructions)
+
+| Symptom | Source | Example |
+|---|---|---|
+| (r179) A scalar global's address held in an s-register (lui/addiu sN, lw 0(sN)) across a call | `s32 *q; q = &D_x;` right before the first test, then `*q` (at the function top it moves into the prologue) | r179 c2, c5 sc02_005 |
+| (r179) A global pointer re-read after a call lands in v0 in the original, a0 (old local) in ours | read through `AF(D_ptr, s16, off)` directly, do not reassign the old local | r179 c2 |
+| (r179) sll/sra 16 right after each jal into an s-register | `s16 a = (s16)f(..)`; an s16 local alone delays the sign extension | r179 c2 |
+| (r179) Two s-registers holding incoming a2/a3 swapped | copy the later param into a local (`s32 ang0` param, `s32 ang = ang0;`) | r179 c3 sc02_005 8018EB60 |
+| (r179) `srl` not `sra` on `(r & 0x7F00) >> 5` of a rand() result | the result local u32 | r179 c3 |
+| (r179) Field reloaded with lhu before a global store, decremented and stored back, v0/v1 swapped | `u16 e = AF(o,u16,0xE4); D = 0x100; AF(o,s16,0xE4) = e - 1;` (s16/s32 give lh or keep the swap) | r179 c3 80186600 |
+| (r179) Global loaded into a0, copied to an s-register in the bnez delay slot, else a call result | `t = G; if (t != 0) p = t; else p = f(..);` (`p = G; if (p == 0)` and the ternary load straight into the s-reg) | r179 c4 sc03_124 80186ED8 |
+| (r179) Global pointer reloaded before each field store, ours cse's it into a register | `extern u8 *D_x[];` and `D_x[0]` (in-struct memory: pointer stores invalidate it; a scalar survives even through a `u16 *q`) | r179 c5 80183B0C |
+| (r179) `sw zero,0x10(sN)` through a global base folded into `lui at` by ours | `q = p + 4; *q = 0; f(1, q);` | r179 c5 |
+| (r179) `ori v0,zero,0x8800` where ours has `li v0,-30720` | the field store is u16, not s16 | r179 c7 |
+| (r179) Frame bigger than saved regs in a rand / `%` function | no `u8 unused[]`: GCC reserves it (the array made it 0x18 too big) | r179 c7 |
+| (r179) 4 table fields with a 20-byte stride (D_..FC/FE/500/502) | one `extern S20 D_x[];` struct array (u16 a,b,c,d; pad[12]) | r179 c7 801808B0 |
+| (r179) lhu f2, lhu f70, store E, then the +2 stored back | `u16 a = AF(o,u16,2) + 2; AF(o,s16,0xE) = AF(o,s16,0x70); AF(o,u16,2) = a;` | r179 c8 |
+| (r179) A constant store (li v1,4; sh 0x16) after the next global load in the original | move the statement one line later | r179 c8 |
+| (r179) A global stored, then passed as its address minus 4 in a1 | `u8 **q = &D_x; *q = val; f(o, (u8 *)q - 4);` | r179 c6 8018EFEC |
+| (r179) One of two fields into v0 then j to a shared tail; ours swaps v0/v1 | the whole statement in each arm, test inverted to the arm order (cross-jumping merges the tails) | r179 c6 8018E288 |
+| (r179) `sll 4; sra 16` on an s32 field | `x << 4 >> 16` (`(s16)(x >> 12)` gives sra 12) | r179 c6 |
+| (r179) Frame 8 too big (vars=8), instructions identical, after a cast/pointer read of a struct-table field | cc1 -dl shows a dangling (use (reg N)) before a call; the plain `T[i].f` avoids it but is in_struct (stores pass it) | r179 c1 park 80180610 |
+| (r179) place_stage "build differs" on a switch function with new extern tables | insert by hand (handput.py) and `make check-<stage>`: may be byte-identical | r179 8018074C |
+| (r179) Raw and masked copies of a u16 table value in swapped registers, arm stores misordered | reorder the arm's statements (FC, then the 0x64 pointer store, then FE = 1) | r179 c9 80184EC0 |
+| (r179) `if (x >= K)` arm inline with bnez to else | the `>=` form; `<` gives beqz | r179 c9 |
+| (r179) abs kept as a copy in a2 (addu/bgez/negu), sll/sra 16 at each use | `s16 v = field; if (v < 0) t = -v; else t = v;` with s16 t (ternary / s32 v / in-place negate miss) | r179 c11 |
+| (r179) 32-byte lw/sw x4 copy into base + (idx << 7) + i * 32 | `extern WMtx D_x[][4]; D_x[AF(o,s16,off)][i] = *(WMtx *)(p + 0x34);` | r179 c11 |
+| (r179) Field load (and base reload) hoisted above scalar-global stores, RMW store after them | read the field into a local first, then the global stores, then the store-back | r179 c12 |
+| (r179) x*0x300 as `sll 9; sll 8; addu` | `(x << 9) + (x << 8)` | r179 c12 |
+| (r179) Stored s16 loop index (sh s3) after the last base-field load | put the index store after the field store that reads that base | r179 c12 |
+| (r179) A value picked from two constants into one shared sw (first constant in the bnez delay slot) | if/else with the store in each arm (ternary / local invert the branch) | r179 c10 801822EC |
+| (r179) Globals and a field loaded ahead of a constant field store | compute the expressions that use them before the store (`n = G1 + 0x80; e = G2 - AF(o,u16,0xE); AF(o,s16,6) = -0x80;`) | r179 c13 80185B38 |
+| (r179) RotTransSV with a 0x40 frame | plain `SV8 v; s32 flag;` (flag[6] is 0x10 too big) | r179 c13 80183D90 |
+| (r179) Call result kept sign-extended in an s-reg while the raw value goes to a halfword field | `v = f(); AF(o,s16,off) = v; k = (s16)v;` (s32 k, v) | r179 c14 |
+| (r179) Loop bound copied twice before the entry test, beqz not blez | s32 n, `s16 m = n;` right before `for (i = 0; i < m; i++)` (s16 i) | r179 c14 |
+| (r179) A redundant `sh zero` in an else arm deleted by ours | reverse the chained init so the field the arm rewrites is stored first | r179 c14 |
+| (r179) The ok arm out of line after `bnez q` | `if (q == 0) { f(o); return; }` with the same f(o) also at the end of the other branch | r179 c14 |
+
+Parked by r179 (best attempts in C:/tw/stage-sweep/build/work/r179/, notes folder r179_progress.md): func_sc02_005_80180610 (79/79 instructions, frame 32 vs 24: a cast read of the 801944F4 table field leaves a dangling (use (reg N)) before the first call that reload spills; the plain T[i].f fixes the frame but lets the -96 stores pass the load; best spec_c1_3 v0), func_sc02_005_80184828 (111; 5 lines after the D_80195AF6 branch: D_801E43B4 loaded before `s1 = 1; sh a0,0xE(s0)`, table-first `addu v0,a1,v0`; best v_c10/sc02_005/v0). r178's returned clone func_sc02_041_80184D20 is asm again after the W3 delta (clone_all did not re-place it).
+
+### r186 rows (S1 batch 9, 24 Oct; helper and park agents; merge e91361e)
+
+| Symptom | Source | Example |
+|---|---|---|
+| (r186) A clone draft with a narrow param (`s16 arg2`) fails to compile against the stage's K&R `extern void f();` | make the param s32 (`sh a2` stores it unchanged) | sc02_041 80184D20 |
+| (r186) place_stage defers a function whose function-pointer table extern it drops (`D_x undeclared`) | handput.py (adds the stub's externs) + make check-<stage> | sc03_028 80182E2C |
+| (r186) Struct passed by value: words loaded from the stack into a1-a3 before a jal, and a dead `sw zero` folded by ours into `move a2,zero` | `func(o, v)` with V3 v and an unprototyped extern; put the `v.y = 0` store at the end of each if/else arm, not at the join | c17 sc02_005 80190538 |
+| (r186) `q - (o + 0x180)` reassociated by ours to `(q - 0x180) - o` | inner sum in a temp: `t = AF(o,s16,0xE) + 0x180; x = AF(q,s16,0xE) - t;` | c17 |
+| (r186) Switch on a call result with cases 1 and 2: `beq 1; slti <2; bnez exit; beq 2` | add an empty `case 0: break;` | c17 |
+| (r186) Three-way pick into a scalar global, registers wrong with one shared local stored once | store the global in each arm, the value read into an s16 local | c17 sc03_028 801879AC |
+| (r186) s16 global into v0, `move s0,v0`, compare on v0, `addiu s0,-K` in the bnez slot | `s16 a = G; if (a > K) { a -= K; a *= 2; ..}` as separate statements (the s16 local also gives the 8-byte frame slot: no `u8 unused[8]`) | c18 sc03_028 80188AE4 |
+| (r186) `sll 16; srl 16` zero-extend of a masked value right before a call arg (ours `move a0,v0`) | pass `(s16)t & 0xFFFF` with s32 t (u16 var / cast are elided via nonzero bits) | c18 80182E2C |
+| (r186) Two halfword equality tests plus a third as sltiu range + `andi 0xFFFF` + bne | `u16 v = field; if (v == 0x1F \|\| v == 0x20 \|\| v == 0x1C)` (switch gives slti; s32 v drops the andi) | c18 |
+| (r186) `beq 1` to an out-of-line arm, `bne 2` skips, case-2 store in the `j` delay slot | `switch (field) { case 1: ..; break; case 2: ..; break; }` (if/else-if gives `bne 1` with the arm inline) | c15 sc02_005 801824D0 |
+| (r186) Jump-table switch: table value lhu into an s-reg, `andi v0,sN,0xFF; move sN,v0`, call arg sll/sra'd | one s16 variable: `r = tbl[i].b; flag = r & 0x100; r &= 0xFF; switch (r)` | c15 80185E80 |
+| (r186) Trailing `addu v0,zero,zero` block after the main return's `j` epilogue | `if (A == 0 && !(B)) { ..; return r; } return 0;` | c15 80185E80 |
+| (r186) Table address materialised before `i = 0`, ours puts `move a1,zero` first | pointer local `p = D_tbl;` right after the `n = const` line, index `p[i]` | c15 8018E450 |
+| (r186) A scalar global's lw scheduled above earlier o-field stores in the original, below them in ours (an array load stays below) | the field stores as struct members `((OH06 *)o)->f6 = t;` (AF casts are not MEM_IN_STRUCT: they conflict with scalar globals) | c16 sc02_005 80183610, 80183218 |
+| (r186) A reused flags local takes the wrong a-register on a second field load | read the field inline in the test `if (AF(o,s32,0xE8) & 8)`, `&= ~1` in the else arm | c16 80183218 |
+| (r186) A lui constant held in an s-register across a call after a ternary argument | if/else with the call in each arm (cross-jumping merges them) | c16 80182A8C |
+| (r186) In-place negate of an s16 field: lh in the original, lhu in ours | `s32 v = AF(p,s16,off); AF(p,s16,off) = -v;` or `AF(p,s16,off) *= -1;` (`-AF()`, `0 - AF()`, an s16 local all give lhu) | c19 sc03_028 8018568C, c20 80185864 |
+| (r186) `field + (rand() & M) + K` with `(r & M) + K` computed before the field's lhu | the sum in a local first: `r = (rand() & M) + K; .. = (AF(o,u16,off) + r) & 0xFFF;` | c19 8018A500 |
+| (r186) Row r179-19 with offset 8 | `s32 *q = &D_x; *q = val; f(o, (u8 *)q - 8);` | c19 8018911C |
+| (r186) Frame 8 too big, global lh into v0 then moved to an s-reg (ours loads into the s-reg) | `s16 v = G; if (v > K) { v -= K; a = v * 2; f(a); }` with s16 a | c21 sc03_028 80184B28 |
+| (r186) RMW `\|=` of a halfword with a global store between its load and store, base in a2 | `t = AF(o,u8*,0x20); u16 h = AF(t,u16,0x2C); G = 0x10; AF(t,u16,0x2C) = h \| 0x80;` | c21 80186894 |
+| (r186) `addiu v0,v0,4; sb 0(v0)` chain that ours folds into fixed offsets from the base | load the base into the pointer and add in place: `p = D[0]; p += 0x2D; *p = 0; p += 4; ..` (`p = D[0] + 0x2D` lets it fold); each store run after a global reload gets its own pointer local | c22 sc03_028 80186368 |
+| (r186) Clamp `lh vA; move vB,vA; slti vA; store vB in else`, dead clamp-to-stack then an 8-byte lwl/lwr copy | read the s16 global directly in the test and again in the else store (`if (G < -2) v.y = -2; else v.y = G;`); each clamp reserves an 8-byte slot: the frame gives the real local sizes | c23 sc03_028 8017FE18 |
+| (r186) Stores 4, 8, 0x14, 0xC with 0x14 reloaded | statement order `4 += 0x10; 8 += 0x14; 0x14 += 0x18000; 0xC += 0x18;` plus `u8 unused[16]` for the frame | c23 801829F0 |
+| (r186) A matched draft indexes tables `D_x[i]` that the stage file declares scalar (another placed function reads them whole) | `(&D_x)[i]` with the scalar extern: same code, no declaration change | 801829F0 |
+| (r186) Signed step `if (h < 0) F += h; else F -= h;` with the lh'd s16 copied into v1 in the bgez slot, ours reloads with lhu | read the field directly in the test and both arms (an s16 local reloads; an s32 local shrinks the frame by 8) | c27 sc03_028 801845A4 |
+| (r186) Scalar global pointer re-read after a store through the local copy (ours cse's it) | read it the second time through a one-member struct cast `((struct { u8 *v; } *)&D_x)->v` (in-struct: invalidated by the store) | c24 sc03_028 80184C90 |
+| (r186) Constant held in an a-register from the prologue, used once in a later store | `s32 k; k = 0x1D;` as the first statement, the store uses k | c24 80184C90 |
+| (r186) Global decrement between field loads and their stores (lw G, 3 lhu, sw G, 3 sh) | `n = G; x = f6; y = fA; z = fE; G = n - 1; f7C = x; ..` (s16 x, y, z) | c24 80184C90 |
+| (r186) a0/v1 swapped on the first of a chain of `lh p; lh o` compares | `AF(o,s16,0xA) > AF(p,s16,0xA) - 0x60` instead of `p - 0x60 < o` | c24 80184C90 |
+| (r186) Call result kept in the loop counter's s-register for later tests | reuse the loop counter variable: `i = f(o);` | c24 80185ED4 |
+| (r186) Three clamps of s16 globals into a stack SV8, frame 0x18 above the locals | one s16 local per clamp (plus one for a later re-read): each gives the copy and an 8-byte slot | c24 8017FBE0 |
+| (r186) `x*104` kept in a0 and copied to a1 for two `/1024`s | `d = t * 0x68; A += d / 1024; E += d / 1024;` (one `d = t*0x68/1024` swaps regs and store order) | c24 80183264 |
+| (r186) Three registers holding the same masked angle (`andi s2; move s3,s2; move s1,s2`) | s32 ang, `s16 b = ang;` right after, `s16 c = ang;` before the first field copy | c24 80183264 |
+| (r186) A callee the stage declares void but whose value a new function uses | retype the stage extern s32 (callers that ignore it compile the same; check-<stage> confirms) | sc03_028 func_8012D624 |
+| (r186) A big constant held in a register (`ori aN,0xE100` in a delay slot) and `slt d,aN; bnez`; ours folds to `li 0xE0FF; slt; beqz` | s32 local `lim = 0xE100;` set before the expression, `if (d >= lim)` | c25 sc03_028 80182494 |
+| (r186) Halfword field sign-extended before an if/else (also used as `sra 21`); ours delays the extension into the arm | an s32 local `s32 px = AF(o,s16,6);` | c25 80182494 |
+| (r186) Scalar global pointer reloaded after a field store through its earlier copy | read the first copy in-struct `p = (u8 *)((UXY *)&D_x)->w;`, the later reads plain | c25 80185344 |
+| (r186) A constant set in the delay slot of the first null test and held for a later store | `n = 0x20;` right after the pointer read, store n | c25 80185344 |
+| (r186) Global halfword `\|= K` through lui/addiu into a register then lhu/sh 0(reg) (ours uses lui at, or swaps s-regs) | `s16 *q = &D_x; *q \|= 0x4000;` (u16 for 1) | c26 801833D8, c29 sc03_007 80182BFC |
+| (r186) Switch on cases 1, 2 whose default does real work: `beq 1; slti <2; bnez default; beq 2` | `case 0:` next to `default:` (or `case 0: break;` with the default code after) | c26 8018B390 |
+| (r186) An inlined bool helper (`beq 4 / beq 0xC / bne 5`, `xori 0xD; sltiu`, j over `li v0,1`) | `if (t==4 \|\| t==0xC \|\| t==5) r = 1; else r = t == 0xD;` (s32 t), then test r | c29 80182BFC |
+| (r186) `field + ((rand() & M) + K)` with the constant arg li before the base lw | `(AF(p,u16,off) + (s16)((rand() & 0xFF) + 0x780)) & 0xFFF` | c29 sc03_007 80185620 |
+| (r186) Field plus masked rand minus a constant, field lhu before the andi, addiu -K on the field | `r = rand() & M; AF(p,s16,0xA) = 0; AF(p,s16,6) -= K; AF(p,s16,6) += r;` | c28 sc03_028 801864A8 |
+| (r186) A stack vector's zero sw scheduled after the next field load in the original | store the zero member last | c28 80181000 |
+| (r186) `addiu aN,0x10; sh; addiu aN,-0x10` around a shared switch tail | step the pointer in place: `h += 0x10; *(s16 *)h = K; h -= 0x10;` | c28 801864A8 |
+| (r186) `andi x,2; sltu` (no srl/andi fold), or a sltu index fed into an address computed as a branch | `t = f & 2; ok = t != 0;` as separate statements | c30 sc03_007 80183B58 |
+| (r186) 2D table address in the order `(j*0x34 + D) + i*0x68`, i's multiply first | `k = i * 0x68; ..; row = &D[0][j]; f(o, k + (s32)row)` (int + int keeps the order; pointer + int is canonicalised) | c30 80183B58 |
+| (r186) Compares interleaved `beq 6; beq C; bne 7; bne D` | if/else-if chain in that order with duplicated arm bodies (a switch merges 6-7 into a range) | c30 80183B58 |
+| (r186) Stack address `&w` hoisted into an s-register in the prologue after o+4 | `i = 0; q = o + 4; wp = &w; for (; i < N; ..)`, the call takes wp | c30 80182D88 |
+| (r186) A shared byte store at the join of an if-chain, constants in delay slots | one s32 local set in each arm, stored once after the chain | c30 801813D0 |
+| (r186) A loop's fail arm `f(o); return ret` moved out of line, ret and &w swap s-registers | end the fail arm with `break`: one `return ret` after the loop | c32 sc03_007 8017E83C |
+| (r186) `bnez f` falls into a `j` into the middle of the else-if arm (cross-jumped) | both arms in full: `if (f == 0) {A; B; ret = 0;} else if (f & 0xC000) {if (!(f & 0x2000)) A; B; ret = 0;}` | c32 8017E83C |
+| (r186) After `if (r == 1) f();` a second test of the same s-regs that ours threads and cross-jumps | `one = 1;` between the ifs; `if (r != one) { ..; if (g() == one) f(); }` | c31 sc03_007 801850B4 |
+| (r186) A scalar global reloaded with lui/lw %lo before each field store | retype the stage extern to an array and read `D[0]` everywhere (the rest of the stage stayed byte-identical) | c31 801806B8 (D_801270C8) |
+| (r186) Both paths end `j end; li v0,1`, v0 used for the last field temp | `return 0`s inside the arms, one shared `return 1;` after the if/else | c31 801806B8 |
+| (r186) `a + 0x800 +/- b` reassociated to `a +/- (b +/- 0x800)` | `(s16)(a + 0x800) - b` with s32 a (also gives the lh) | c31 8017EC90 |
+| (r186) v1/a2 swapped on the object pointer in one branch | a separate pointer local per branch | c31 801854A4 |
+| (r186) A store scheduled before an independent field load, no source order moves it; a sibling's body appears inline | mark the sibling's definition `inline` (non-static, defined earlier, no other C callers) and call it (recipes rows on func_8012B8E4) | c33 sc03_007 8018178C (80180BF8) |
+| (r186) Switch-local copy `lh a0; addu v1,a0` then `addiu v0,v1,1` in two cases, in-place in a third | `switch (AF(o,s16,0xFE))` with `AF(o,s16,0xFE)++;` in each case | c33 80185B48 |
+| (r186) Return variable in a1 (`move v0,a1` at the epilogue jumps), ours folds 0 | nest the tail `if (n != 0) { .. }` and finish with `return ret;` | c33 80185B48 |
+| (r186) `(h - 0x200) + x` with the result in h's register | s32 `a = AF(o,s16,off) - 0x200;` just before each use, `(a + x) << 16`; a local per store | c34 801848BC |
+| (r186) `beqz v0; lw v1,0xCC(v0); beqz v1` where ours copies v0 first | separate locals `q = f(); if (q) { p = AF(q,u8*,0xCC); if (p) ..}` | c34 8017F444 |
+| (r186) Inline copy of a stage helper's body (`beqz p` with `move v1,zero`, lh 0x76, slt, 1 reloaded before bne) in a function after the helper | call the helper and mark its definition `inline`: GCC 2.7 inlines it only into later callers, earlier ones keep the jal | c35 sc03_007 8018256C (80180AF4) |
+| (r186) Stack s32 words read back as their upper halfwords (`lhu 0x6A(sp)` after `sw 0x68`) | `UXY pos[3]`: `pos[0].w += out.x; t.x = pos[0].s.y;` | c35 8017FE04 |
+| (r186) place_stage defers a function whose K&R extern for a later-defined prototyped stage function it dropped ("used prior to declaration") | handput.py | sc03_007 8017EA48 |
+| (r186) A local set in both arms of an if/else hoisted by ours into the outer delay slot (`move s1,zero`), the original has a nop | the assignment at the end of the arm, after the inner if | c36 sc03_007 80183894 |
+| (r186) Clamp of an s16 global against centre ±K into a stack vector, a y global later read through an s-register | each clamp in its own block with `s16 g = G; s16 p = P;`, then `y = &G_y;` and `*y` twice (fixes the frame, no unused[]) | c36 8017DE40 |
+| (r186) sh of one param to two adjacent fields from its s-register (ours copies it to v0 first) | two separate statements, not a chained `a = b = x` | c39 sc03_105 801850D8 |
+| (r186) Masked u16 counter compared with slti, ours sltiu | hold it in an s32 or s16 local: `n = (AF(o,u16,off) + 1) & 0x3F; AF(o,u16,off) = n; if (n < 0x1F)` | c39 sc03_007 801810E4 |
+| (r186) `move v0,s0; j end; sh v1,0xE(v0)` (last store through the return register) | `if (o == 0) return 0;` early, the body, then `return o;` | c39 801850D8 |
+| (r186) Table base in a register gives `addu idx,base` (index first), original base first (cse swaps the operand with a known-constant equivalent into second place) | r174's negation lever on struct tables: `n = -(idx * 8); ((SV8 *)((u8 *)tbl - n))->z` (s32 n) | c38 sc02_005 80184828, 8018675C (parks) |
+| (r186) A scalar global lhu scheduled above an o-field store in the original | that one store as an anonymous one-member struct cast `((struct { u8 pad[0xE]; s16 fE; } *)o)->fE = y` (no typedef) | c38 80184828 |
+| (r186) In-struct table reads (the frame-fixing `T[i].f`) let chained scalar-global stores pass them | the global stores through one-member struct casts `((struct { s16 v; } *)&G)->v = K` | c38 80180610 (park, frame 32 vs 24) |
+| (r186) A block's last store cross-jumped into the identical last store of the block falling into the epilogue (2 short); swapping the source order only swaps the stores | make the function return s32 and return on the jumping path: `return --AF(o,s32,0x1C);` (the value return adds a `(use v0)` before that path's j, so no common tail); other paths keep `return;` — only for functions reached through handler tables | c37 sc03_007 80184E8C (park) |
+| (r186) `bnez v0` to an out-of-line success arm, `j end; move v0,zero` inline | `if (f(..) != 0) { ..; return 1; } return 0;` (`if (f() == 0) return 0;` puts the fail block at the end) | c40 sc03_105 8018526C, 8018388C |
+| (r186) A scalar global byte store kept above later scalar-global loads in the original | `extern u8 D_x[];`, `D_x[0] = 0` | c40 80187554 |
+| (r186) An arg-hard-reg global (`lw a0, D_x`) loaded early, the object in t0 | compute both masked call args into locals before the vector inits, in argument order | c40 8018388C |
+| (r186) `sll 16; sra 16` of an s16 accumulator before a branchy abs division, in each arm | `vol -= b.x >= 0 ? b.x*0x7F/320 : -b.x*0x7F/320;` (if/else drops the extension) | c40 80183DA0 |
+| (r186) Division by a loop invariant hoisted whole by ours; the original keeps mult/mfhi in the inner loop and hoists only `x>>31` | write the divisor expression inline from the outer variable `v.x -= ((n*6+0x12)*2)/3;` | c44 sc03_105 801834A4 |
+| (r186) A range copied to an s-reg unextended plus `sll 16; sra 18` for the half | `s16 range = n*0x600+0x2000;` with `rand() % (range >> 2)` inline | c44 801834A4 |
+| (r186) Two identical `x = f; f = (rand()&1) ? x+r : x-r` blocks, the first lh one slot early | a separate s32 temp per block | c44 8017F8D8 |
+| (r186) Stack-vector `sh zero` stores interleaved with the address arithmetic | `a.x = 0; a.z = 0;` after both word computations, before the first use | c44 80185480 |
+| (r186) Two-value pick on a scalar global: `beqz` to an out-of-line case 0 then `beq 1`, shared final store | `switch (G) { case 0: ..; break; case 1: ..; break; }` | c44 8017E180 |
+| (r186) The last test of an s32 function: `blez` to an out-of-line store block with `li v0,1` in the slot, a shared inline `j end; v0=0` | `if (!(f & 1)) return 0; .. if ((s16)*q <= 0) { stores; return 1; } return 0;` | c41 sc03_105 8018233C |
+| (r186) Loop counter `move v1,s0; slti s0,3; bnez; addiu s0,v1,1`, `sll 7; negu` not strength-reduced | `for (i = 0; i < 3; i++) { b.y = -((i + 1) << 7); ..}` | c41 8018423C |
+| (r186) A table base held in an s-register scheduled too early when set at the top | assign it inside the outer loop body after the first call (loop opt hoists it after `&b`) | c41 8018423C |
+| (r186) A call arg fully sign-extended into an s-reg before an intervening rand() | `s32 r = (s16)(rand() % 4096 + 0x2000);` | c41 8018423C |
+| (r186) `lh; sra N` on an s16 field used as an int, ours `lhu; sll 16; sra 16+N` | `f * 2 >> (N+1)` or `f << (16-N) >> 16` (plain `f >> N` always gives lhu/sll/sra) | c45 sc03_105 80184CA8 |
+| (r186) Second of two loops: the rand() % 2^k copy in a0 instead of v1 | its own value local, not the first loop's | c45 801871C0 |
+| (r186) `(s16 field) >> 9` pairs stored as -v and v, ours reloads the field per store | one s16 local per pair: `t = f >> 9; b[2] = -t; b[3] = t;` | c45 80184CA8 |
+| (r186) A table zeroed through `lui at; addu at,at,sN; sh %lo(D+2)(at)` with sN += 8 and a second angle counter | `n = i * 8;` as its own statement, `AF(&D, s16, n) = 0; AF(&D, s16, n + 2) = 0; ..`, `rot.y = i * 0x2AA;` | c46 801829CC |
+| (r186) A call arg loaded straight into a0, used for a field RMW and the jal; ours loads v1 + `move a0,v1` | call the callee with no args `f();` (the pointer local lands in a0); a pointer local per switch case | c46 80186B24 |
+| (r186) `lui a0,0x4000; lui v1,0x2000; or v0,D,v1; or v0,v0,a0` script-pointer store | `((s32)&D \| 0x20000000) \| 0x40000000` | c46 8017E7E8 |
+| (r186) A stack result word loaded before the reloaded object pointer | copy it to a local first `rr = r;`, store from rr | c46 8017E7E8 |
+| (r186) A matched stub's typedef copy differs from the stage's (member names) | rename to the stage's members before placing (place_stage defers: "no member named") | 801871C0 |
+| (r186) A pointer-to-global local used as a load base (`lhu 0xE(s3)`) folded back to lui/%lo by cse | put a join between the pointer's set and its uses: a ternary call argument as if/else with the call in each arm (cross-jumped later) | c43 sc02_000 80188790 (r174 park) |
+| (r186) (correction to r174's "first-declared local recomputes &local") `&m` held in s0 after a struct copy into m | the block move's dest-address pseudo is reused by cse for every later `&m` whatever the declaration order; per-call `addiu aN,sp,K` needs a real basic-block boundary between the calls; a param live across a block boundary becomes a global pseudo and swaps the s-register order | c43 801888F4 (still parked: two labels make it match, no placeable source yet) |
+| (r186) `(rand()&1) ? r+K : K-r` as two arms (`negu v0,s0; j; addiu s0,v0,K` / `addiu s0,s0,K`) | if/else with a separate s32 temp in the negate arm: `nr = -r; r = nr + K;` | c47 sc03_105 801831E0 |
+| (r186) A table base in an s-register set after the loop counter's li | `i = 0x17; t = D_tbl;` then `for (; i > 0; i--, p--)` | c47 801831E0 |
+| (r186) An SV8 copy loop's stores kept above a scalar u16 global load | the copies through `AF(p, s16, off)` (`p->x` lets the load move above) | c47 801831E0 |
+| (r186) A uv pick with a constant shared by both arms set inside each (`li v0,0x1E0` twice) | a third local set in each arm, the test inverted so the bit-clear arm falls through | c47 80183F84 |
+| (r186) Scalar global `++` after an o-field `++`, the global's lw before the field's sh | `n = field + 1; m = G + 1; field = n; G = m;` | c48 801867D0 |
+| (r186) One pointer local for a call result in one case and a field pointer in another (result in a0 not v1) | a pointer local per case | c48 801867D0 |
+| (r186) A u16 field RMW loaded before an s16 field, the first-loaded value always in v1 | s32 t with `t \|= K; t &= 0xFFFF;` before the store (the no-op mask raises t's ref count before combine deletes it) | c42 sc02_028 801829BC (r174 park) |
+| (r186) loop.c hoists a symbol address (la into an s-reg) out of a for loop with a call; the original keeps `lui at; addu at; %lo(at)` | `*(s16 *)((u8 *)D + (i << 1))` (`&D[i]`, `((s16 *)D)[i]`, `i * 2` all force the symbol into a register) | c42 sc01_004 8017DF18 (still parked: an exact allocation-priority tie, 8 lines) |
+| (r186) A loop-bound copy chain `move v0,v1; beqz v0; move s2,v0` before the loop | the count u16 in a real for loop | c42 8017DF18 |
+| (r186) A loop's skip-branch delay slot filled from the target where ours fills from the fallthrough | every increment in the for header `for (..; i++, r++)` | c42 8017DF18 |
+| (r186) `addiu s0,s0,K; sw s0,G` at a tail, ours `addiu v0,s0,K` | `p += K; G = p;` | c42 8017DF18 |
+| (r186) Two call-crossing block-0 locals (a param copy and a stack address) in swapped s-registers | move the param's last use after `i = 0`: `i = 0; u = a2 + K; for (; i < N; i++)` | c42 sc03_118 80184F18 (r174 park) |
+| (r186) A prototyped stage callee called by the original with fewer args | K&R cast `((s32 (*)())f)(o)` (the r148 recipe; also sc03_028 8017F93C) | 80183610, 801879AC |
+
+Parked by r186 (best attempts in C:/tw/stage-sweep/build/work/r179/ spec_c<tag>_<n>.txt, notes folder (dispatcher's) r186_progress.md): func_sc03_105_80184500 (65; 14 lines: a 16-colour fade loop feeding LoadImage, the r/g/b field extracts interleaved with the sums in ours; best spec_c36_11 v2), func_sc03_105_80183A98 (98; 14 lines: two `rand() & 1` add/sub arms, the original lays arm 2 sub-first and cross-jumps arm 1 into it, the first 80183C6C result in s0; every equivalent-arm form collapses to 79; best v_c41 round 2 v0), func_sc02_000_801888F4 (r174's; 74/73: needs a basic-block join after func_8001CC3C and after RotMatrixY; `{ static void *lp = &&lab; } lab:` at both points matches exactly but is not placeable; best spec_c43_9), func_sc01_004_8017DF18 (r174's; 8 lines: s2/s3 swapped between r and the loop bound, an exact global-alloc priority tie 1666/1666; best spec_c42_29, which fixes r174's 3 lines). Not S1's (r185's list): func_sc02_011_8017DE10, func_sc01_004_8017E1D4. Placement choices to know: func_sc03_007_80184E8C is s32 and returns a value only on its decrement path (other paths `return;`; reached only through its handler table); func_sc03_007_80180AF4 and 80180BF8 are marked `inline` (later functions inline them in the original); D_801270C8 is `s32[]` read as [0] in sc03_007.
+
+### r185 rows (S2 batch 7, 24 Oct; park, helper and clone-repair agents; merge b2d79ba)
+
+| Symptom | Source | Example |
+|---|---|---|
+| (r185) a copy the original keeps (a delay-slot `move`, a second register holding the same value) is folded by cse in ours | make it a NARROWING copy (`u8 n = k;`, `s16 f = a;`, `{ s16 m = n; .. }`, `s16 xm = x - 4;`): a narrowing copy is not a plain reg-reg copy, so cse does not make the new variable canonical, and sched1 does not mark it urgent; the copy survives and later becomes a plain move | func_sc04_015_80182F2C, func_sc04_018_801889B8, func_sc04_011_8017D000 |
+| (r185) `n >> 6` of an s16 field comes out lhu / sll / sra where the original has `lh; sra` | cse folds the shift into the sll-16 temp ((x<<16)>>22) and blocks the lh combine: read through a narrowing copy `{ s16 m = n; h = m >> 6; }` | func_sc06_018_8018C3F8 |
+| (r185) a variable assigned for the third time is hoisted to the top of its block / wins a register by its many refs | a variable set more than once is not "birthing" in sched1 (no 0x7f000001 boost) and keeps all its refs in global-alloc: give that job a fresh block-scope local (`{ s32 c = b - 0x10; x = a; y = c; .. }`) | func_sc04_002_80186DD4 |
+| (r185) two chained ALU results in the wrong order (sched1 boosts the second) | set the boosted one's variable twice (`x -= t; x <<= 1; p[0xC] = x;`): it is no longer birthing, and the tie goes by LUID (source) order | func_sc07_001_8017FE38 |
+| (r185) a global's address is folded into each access (`lh sym+off`) where the original keeps a base register (`addiu s1, sym+6; lh 4(s1)`) | access two offsets off one symbol through the file's own scalar (`AF(&D_80126B58, s16, 6)` and `.., 0xA`): cse's use_related_value puts sym+6 in a register and rewrites sym+0xA as 4(reg); casting `((s16 *)&D)[k]` does not | func_sc05_010_80183098 |
+| (r185) the table base lui/addiu comes after an index multiply in ours, before it in the original | put the base in its own variable first (`base = (u8 *)D; off = n * 0x90;`) and take each address off it with its own pointer local (`q1 = base + 0x18; p1 = (T *)(off + q1);`): in the array form expand forces the symbol into a register only after force_operand emitted the multiply; one expression reassociates | func_sc07_010_801817D0 |
+| (r185) a pair pointer `&D + idx*K + 4` is built as (D+4) and &D recomputed as (D+4)-4 | `{ u8 **base = (u8 **)&D; u8 **b1 = base + 1; pb = b1 + idx * 8; pa = base + idx * 8; }`: any folded form becomes the constant D+4 | func_sc06_029_80182ED8 |
+| (r185) two pseudos tied exactly in -dg priority come out swapped | the tie goes to the lower pseudo number: declare the one that must win first (`s32 i;` before `u8 **pb;`) | func_sc06_029_80182ED8 |
+| (r185) loads of o fields scheduled below a scalar global store in ours, above it in the original | write that case's o accesses through a block-scope `ObjS *q = (ObjS *)o;` (in-struct refs do not alias the scalar store); then sweep the statement order (6 orders x 3 forms in one spec) | func_sc04_011_80180B24 |
+| (r185) one `move a1,v0` too few (a value computed straight into the argument register) | statement order: put the store that first uses the late operand next to its partner (`p[2].y = a.y - dx;` right after `p[2].x`): the first use delays the second mult, and the HI copy then shares the loaded register | func_sc06_016_80180894 |
+| (r185) a block-local compare temp takes v0 before a global value that the original keeps in v0 | force the temp global: reuse it later for another job (REG_N_DEATHS != 1: `d = v - e; d <<= 16; if (d < 0) ..; .. d = b.z >> 1;`), and write the join's tail in each arm (cross-jumping merges it) so the value is dead at the join | func_sc04_020_8017D0BC |
+| (r185) one loop pointer register wrong in both loops of a function | one walking pointer shared by both loops (`for (i = 0x32, v = &w[0x32]; ..; v -= 2)` and `for (i = 0, v = w; ..; v += 2)`): one pseudo picks up both loops' conflicts | func_sc06_029_80189440 |
+| (r185) a loop constant hoisted at the wrong point / not hoisted | set it inside the if, right after its first use (`dm = 0xE100004A;` after the first addPrim): its lifetime decides where loop.c moves it | func_sc06_029_80189440 |
+| (r185) the walking pointer of the first of two table loops wins a1 over the second loop's t+4 givs | give each table loop its own walking pointer (one shared t gathers 16 refs) | func_sc04_015_80182F2C |
+| (r185) two field groups through o->0x20 get v1 instead of v0 | one block-scope `{ u8 *q = AF(o, u8 *, 0x20); .. }` per group, not one shared p set twice | func_sc05_003_8017F4FC |
+| (r185) a constant-address pointer local (`u8 *g = &D;`) loses its s-register (cse folds g + K into a constant, combine drops g) | use it only where cse cannot fold: inside a jump-table case block, or behind an if/else whose value is computed into a temp first (`if (n > 0x80) t = -0x40000; else t = -(n << 11); AF(g,s32,0x34) += t;`) | func_sc05_004_8017ECC4, func_sc05_003_8017F338 |
+| (r185) the object pointer outranks a call-crossing local in global-alloc by one ref | one store with a ternary instead of a store in each arm (`DC = !(rand()&1) ? d + (0x800 - t) : d + (0x800 + t);`): 12 refs to 11 | func_sc05_003_8017F338 |
+| (r185) `li v0,1` missing from the bnez delay slots | `if (f(..)) return 1; return 0;` (gives sltu + the li in the slots); `return f(..) != 0;` does not | func_sc06_022_8017F30C |
+| (r185) a pointer local's s-register and a 0x30 frame | set it before the call that crosses it and use it for both loads and the argument (`p = o + 0x88;` before Square0): sched1 may sink its set below the call | func_sc06_011_8017F8F8 |
+| (r185) loop.c hoists D+6 out of a loop where the original reloads | a base-pointer local `u8 *pl = &D_80126B58;` for the fields used in and after the loop | func_sc05_002_8017F538 |
+| (r185) a matched clone fails to place: `conflicting types .. An argument type that has a default promotion can't match an empty parameter name list` | the draft has a narrow parameter (`s16 arg2`, `s8 n`) and the stage declares `f()`: `s32 arg2_0` then `s16 arg2 = arg2_0;` in the body (same code) | func_sc05_007_801809B0 (x4), func_sc07_002_8017D920 |
+| (r185) place_stage: "`D_x' undeclared" although the draft declares it | the draft has several externs on one line and one of them is already declared: place_stage skips the whole line; one extern per line | func_sc07_006_80180CFC |
+| (r185) place_stage "build differs" / "subscripted value is neither array nor pointer" | the draft's extern type differs from the file's (`SV8 D[]` vs `u8 D`, `u32 D[]` vs `u32 D[2][0x1000]`): keep the file's and cast at the use (`&((SV8 *)&D)[i]`, `(u32 *)D + (n << 12)`) | func_sc04_011_80180B24, func_sc06_029_80189440 |
+| (r185) same census shape matched once, but stage_clone writes no draft (same-stage source, K&R source, "a source symbol left unrenamed") | hand clone: copy the source's C, pair own-stage symbols by walking both asm listings, keep the target file's declarations (cast at the use), prototype instead of K&R; 30 / 30 matched first try (r185 A1) | func_sc06_010_80181234, func_sc07_006_8018163C |
+
+Parked by r185 (best spec files in C:\tw\stage-s2\build\work\s7spec_<tag>_<n>.txt, notes folder r185_progress.md):
+func_sc04_011_8018C14C (69/69, 8 lines, still s7spec_P2_3.txt b5; 6 lines in s7spec_K1_4 b2 only with volatile: the
+`a0 = o` argument copy must land after the x store while the 0xC4 value wins v1 by birth order), func_sc07_002_8017DC80
+(346/346, 63 lines = one s0-s4 rotation; abr's -dg priority 1315 vs z 11111; s7spec_K11_7 b1), func_sc04_016_8017E26C
+(267/269, 17 lines, s7spec_K17_1 v3 / K17_4 v0: combine_givs list order), func_sc05_002_8017F348 (124/124, 18 lines:
+loop pointer / i a1/a2, the shared pointer+sound-id pseudo needs 2 more refs; s7spec_A3a_6 v0).
+MATCH-TRICKS held for LuciDin's ruling (files in C:\tw\stage-s2\build\work\s7\<stage>\): func_sc05_001_8017FE0C
+(7 nested `do { } while (0)` around `n = k + 4; n *= 32;`; s7spec_K2_2 v0), func_sc06_018_8018F060 (dead stores
+`pq = (u8 *)&D_800AF630;` before an inlined SetWsm() give cse a base register; 3 copies with sc06_032 8018EDB0, sc06_033
+8018AD9C), and r177's func_sc04_016_8017E960.
+
+### r186 rows, part 2 (S1 batch 9, 24 Oct; merge ce539c0)
+
+| Symptom | Source | Example |
+|---|---|---|
+| (r186) Byte stores to several fields of u8 scalar globals (`sb 0(aN)`, `lui at; sb %lo(D+k)`), D's address kept for a later call | chained stores through `((CV4 *)&D)->r`, `[1].b` (`(&D)[k]` / `AF(&D,u8,k)` put D+k in a register) | c49 sc01_084 8017F8B8 |
+| (r186) `lui/ori` constant and a global pointer lw both ahead of a field `\|=` | read the global into a local before the `\|=`, store the local after | c49 8017FC10 |
+| (r186) `bgtz` to an out-of-line arm, the `<= 0` arm falls through then `j` to shared code | `if (x <= 0) { if (f == 1) goto end; } else { if (f == 0) goto end; }` | c49 80180D38 |
+| (r186) RotTransPers screen-xy word read as `lh 0x1A(sp)` and every later stack arg 4 too high | declare it UXY and read `sxy.s.y` (a plain XY gets an 8-byte slot) | c50 sc01_084 80184460 |
+| (r186) Two stores to the same stack halfword (`sh y-0x22, 0x12; sh y-0x32, 0x12`) | write both assignments (GCC 2.7 keeps the dead store) | c50 8018392C, c51 80183BD0 |
+| (r186) `t = d; if (rand()&1) t = -d;` with `negu s0,s1` where ours merges into `negu s0,s0` | t declared s16 (the mode change stops cse folding `-d` into `-t`) | c50 8018599C |
+| (r186) `-ang` and `r` in swapped s-registers, a global load scheduled late | read both globals into the locals first, then add the table offsets | c51 80183630 |
+| (r186) An lhu of one table entry inside an otherwise s16 expression | that global is u16: declare it u16 | c51 80183630 |
+| (r186) A clone of a K&R-defined source (`s32 f(o)`) placed as a prototype breaks existing no-arg callers ("too few arguments") | keep the prototype; call through `((s32 (*)())f)()` at those callers | sc03_002 80182F0C, sc03_124 80184088, sc03_125 80181790 |
+| (r186) A matched clone calls a later same-stage `s16` function with no extern where the source relied on implicit int | `extern s16 f();` plus `((s32 (*)())f)()` (keeps the no-sign-extension code) | c52 sc03_002 80182F0C |
+| (r186) Two stack s32[3] arrays (one store-only), frame 16 too big, the second array 8 higher | `s32 h[3]; u8 unused[8]; s32 d[3]; u8 unused2[8];` | c54 sc01_084 801807D8 |
+| (r186) A global's address in a register (lui/addiu) and a neighbour global reached as reg+off, or reloaded through it after a store | access both through one array or struct symbol (`extern s32 D_801270C8[]` with [3] / [4] for D_801270D4 / D8; `L16 D_800A5E88[]`) | c53 sc01_084 80180000, 80181310 |
+| (r186) A lone scalar global loaded and stored through a register inside a loop (an array form gets hoisted into an extra s-register) | a local pointer in that case arm `q = &D_x; if (*q == 0) { *q = 1; .. }` | c53 |
+| (r186) A store to the field just incremented followed by an lhu reload instead of an andi of the kept value | `AF(o,u16,0x34)++;` before the neighbouring store, then the compare | c53 |
+| (r186) A jump table for cases 2..6 where only 2/4/6 have bodies | list the empty cases `case 3: case 5: break;` (the table needs the case count) | c53 |
+| (r186) A 3-way constant store, two arms sharing one cross-jumped `sw v0`, the zero arm `sw zero` | order the source `if (y >= A) v1; else if (y >= B) 0; else v2;` | c53 |
+| (r186) s32 globals stored and the next halfword symbols (D_x+2) read right after each store, interleaved sw / lhu; ours hoists the lhu | read the halfwords as `((u16 *)&D_80126B5C)[1]` from the s32 symbol (they alias the store) | c58 sc02_017 80180D8C |
+| (r186) `beq v,K` to an out-of-line arm, the other arm inline | `if (v != K) { inline arm } else { out-of-line arm }` | c58 8017FCFC |
+| (r186) Script-pointer store with `lui 0x4000` OR'd first, then `lui 0x2000` | `((s32)&D \| 0x40000000) \| 0x20000000` (the opposite of c46's order) | c58 8017FCFC |
+| (r186) `bool = 1` in a branch slot, a call, `bool = 0` on the fall-through, then `bnez` on it | an s32 flag set in both arms of an if/else, then `if (r == 0) {..} else if (field & 4) f(); else g();` | c57 sc02_017 80186168 |
+| (r186) `beq r,3` straight to the shared "other" arm that a later `bnez r` also targets | write the other arm twice: `if (r != 3) { ..; if (r == 0) A; else B; } else B;` (cross-jumping merges the B copies) | c57 8017FB60 |
+| (r186) A scalar global's address held in an s-register as a call argument, then read `lh 0(sN)`, neighbours by lui/%lo | pass `s16 *q = &D_x;` to the call and read `*q` (also gives the s1 save for the frame) | c57 80187178 |
+| (r186) Block-local stack slots reused between two if/else arms (an arm's vector at 0x18 in one, 0x20 in the other), frame smaller than the block locals add up to | GCC 2.7 never shares block-scoped locals: move each arm's locals into `static inline` helpers (their frames are temp slots freed after each arm); placed by hand | c55 sc01_084 8017EA98 |
+| (r186) A sum of two inline abs values compared with slti, ours copies the compare into each abs arm | `if (sum < 0x80) return;` inside the inline helper | c55 8017EA98 |
+| (r186) Table loop with the byte-offset induction variable set before `i = 0` | a second induction variable: `for (j = 0, i = 0; i < 3; i++, j += 4)` with `AF(D, s16, j)` | c55 8017EA98 |
+| (r186) Loop-invariant uv constants in s-registers with their li's out of order | `u0 = 0xF0; v = 0;` right after the last setup call (GetClut), the other constant inline; store the prim's tpage before its clut | c55 80183DA4 |
+| (r186) A scalar global's address held in an s-register and read twice (the stage declares it scalar, `(&D_x)[0]` folds) | `u16 *pt = &D_x;` then `*pt` at each use | c56 sc01_084 801809C4 |
+| (r186) A global s16 load hoisted above stack-array stores in ours | declare the global as an array, read `D_x[0]` (array refs are in-struct: they conflict with the `v[i]` stores) | c56 801809C4 |
+| (r186) Frame 8 too big, screen-xy outputs allocated before other locals | the RotTransPers sxy outputs as UXY, not XY (an SImode union gets its slot at first `&`) | c56 80184138 |
+| (r186) `negu sN,sN` in place after a call, after the next call's arg moves | no x0/x1 locals: `a.x = i << 8; b.x = (i + 1) << 8;` then `a.x = -(i << 8); ..` (cse makes the shared value a call-crossing temp) | c56 80180300 |
+| (r186) Two prims filled through a stack array `u8 *pr[2]`, the second store first | chained `AF(pr[0],..) = AF(pr[1],..) = v` | c56 801809C4 |
+| (r186) A 4-byte gte_stsxy stack target pushes the next stack local 4 too high | declare it UXY, read `s.s.x` / `s.s.y` | c61 sc02_017 80181E98 |
+| (r186) `(rand()&1) ? r : -r` then `+ 0x40` (negu in the bnez slot, `j; addiu v0,v0,0x40`) | `z = rand() % 16; v.vz = ((rand() & 1) ? z : -z) + 0x40;` with its own local z | c61 80181294 |
+| (r186) A constant (0x8FFFF) held in an s-register across a call, an `o+0x88` call arg not kept in s1 | one if/else with the call-only arm inline; set the pointer local first in the out-of-line block | c60 sc02_017 80186530 |
+| (r186) Masked ratan2 result `andi a0; move s1,a0`, a0 reused as the next arg, the global store from the arg copy | `t = ratan2(..) & 0xFFF; ang = t;` (s16 ang), pass t | c60 8017F768 |
+| (r186) Array global with [0] and [2] through an s-register but [1] by %lo(D+2) | plain `D[0]`, `D[1]`, `D[2]` of an `extern s16 D[]` (a pointer local folds g[2]) | c60 8017F768 |
+| (r186) `lh; slti -0x7FF; beqz L; slti -0xC00; beqz call`, ours folds to a range test | `if (G >= -0x7FF) d = K; else if (G < -0xC00) d = K; else { call }` (cross-jumping merges the duplicate arm) | c59 sc02_017 801842E0 |
+| (r186) A call result kept unextended in an s-register, `sll/sra 16` at every compare | `s16 d = f();` | c59 8018347C |
+| (r186) A stack address used by two calls in a row held in an s-register in ours; the original rebuilds `addiu aN,sp,K` at each call | move the first call and its input zeroing into a `static inline` helper taking both vector pointers (inlining puts a block boundary between the calls); placed by hand (build/work/r179/handput_inl.py) | c62 sc01_080 801815D4 |
+| (r186) sll 17 / sra 13 as the index of an 8-byte table pair (base and base+8 in two s-registers) | `s16 k = i * 2; x = D[k]; y = D[k + 1];` with s32 i and `extern SV8 D[];` | c62 80182B90 |
+| (r186) A table reached through a byte offset stepping by 8 in its own s-register next to a loop counter | `for (i = 0, j = 0; i < 4; i++, j += 8)` with `AF(D_tbl, s32, j)` | c62 8018287C |
+| (r186) `&r` held in an s-register across `f(&v,&r,K); g(&r); ..; RotMatrixYXZ(&r,&m)`, the original rematerialises `addiu aN,sp,K` per call | wrap the calls in `static inline` helpers taking pointers (`dir(o,&v,&r)`, `rot(&r,&m)`): inlining breaks the cse of the frame address | c63 sc01_080 80181410 |
+| (r186) lhu (not lh) on `r.z = r.y * 2` of an s16 stack vector through a pointer | `r->z = r->y << 1` | c63 80181410 |
+| (r186) Switch case bodies in the order 0, 2, 3, then 1/4, case 5 straight to the exit | the cases in that source order, `case 1: case 4:` sharing one body, explicit `case 5: break;` | c63 8017EFDC |
+| (r186) addPrim tag-link in a loop with the 0xFFFFFF and i registers swapped | PTag bitfield stores `((PTag *)pk)->addr = ((PTag *)otp)->addr; ((PTag *)otp)->addr = (u32)pk;` with `otp = (u32 *)((z << 2) + (u32)ot)` | c66 sc01_080 8017FD64 |
+| (r186) A gte_stsxy0 XY target copied whole into a prim word comes out lwl/lwr | `AF(pk, s32, 8) = *(s32 *)&a;` | c66 8017FD64 |
+| (r186) `rand() & (field & 0x7FF)` with the mask reassociated onto the rand result | read the field as s16: `rand() & (AF(o, s16, off) & 0x7FF)` | c66 801810E4 |
+| (r186) A three-way value into one `sw v0` at the join scheduled after the next block's address setup | the field store in each arm (cross-jumping merges them after scheduling) | c66 801810E4 |
+| (r186) lui of a division magic constant in the bltz slot, ori at the top of both arms, one shared mult tail | the whole expression in each arm (`if (x >= 0) vol = (0xA0 - x) * 111 / 160 + 0x10; else ..`) | c65 sc01_080 8018331C |
+| (r186) A u16 min-compare masking `andi min` before `andi d` | `if (min > d)` instead of `d < min` | c65 8018331C |
+| (r186) Packed sound arg `(pan<<8\|0x3000)\|vol` without sll/sra of the s16 locals | `(u16)(vol \| ((pan << 8) \| 0x3000))` | c65 8018331C |
+| (r186) An s-reg constant li before a field decrement store in ours, after it in the original | declare the block local without an initializer and assign it after the store | c65 80180D54 |
+| (r186) Two o-based pointer locals in swapped s-registers when one pointer local is reused for a later field pointer | a separate local for the second pointer (and its own local for a call result) | c67 sc02_011 80186070, 80186430 |
+| (r186) Field copies into a new object, the last source field's lhu before two constant stores | write the copies in load order before the constant stores | c67 80186430 |
+
+MATCH-TRICK (LuciDin's policy, handoff top; placed by r186 in ce539c0): func_sc02_017_80185680 (one `do { } while (0)` around `nv = old + d;`: raises nv's loop-depth weight so old and p3 get the original's registers; r178's park) and func_sc02_031_80182AB4 (one `volatile` on the first OR into word 4: keeps the two ORs as separate load/store pairs; r174's park). Both carry a `/* MATCH-TRICK: */` comment.
+
+Parked by r186 (merge 2; best attempts in C:/tw/stage-sweep/build/work/r179/ spec_c<tag>_<n>.txt): func_sc01_084_80183790 (16 lines: a pure s1/s2 swap of ang and r; best spec_c51_7 block 1), func_sc01_084_8017F9F4 (4 lines: loop 3's a0=s0 move for rsin after the x multiply chain; best spec_c53_5 block 1), func_sc02_017_801807DC (1 line: the jal-slot store goes through s0, the original through an a0 copy; best stub), func_sc01_080_801820AC (5 lines: the post-division andi/move after the sra/addiu/addu; best spec_c65_6 block 1). Waiting: func_sc03_113_8017F4DC (an A3 twin; its SC05 copy sc05_002 8017F348 is not matched yet). Placement notes: sc01_084 80180000 / 80181310 read D_801270D4 / D8 as D_801270C8[3] / [4]; sc01_084 8017EA98, sc01_080 801815D4 / 80181410 / 80180D54 come with new `static inline` helpers (placed by hand: build/work/r179/handput_inl.py).
+
+### r194 rows (clone pass over all stages, 25 Oct; merge f73fc9f)
+
+| Symptom | Source | Example |
+|---|---|---|
+| (r194) A clone drafted `void` where a placed wrapper does `return f();` ("void value not ignored") | define it `s32` with no return statement when that compiles to the same bytes (r159's form); if s32 adds an instruction (v0 live at exit, a delay slot filled differently) the original is void: park it, the caller needs a ruling | sc02_028 80183C54 (placed), sc02_028 80183AF8 (parked) |
+| (r194) An unsized function-pointer table extern `void (*D[])();` not carried into the file ("undeclared") | `typedef void (*VoidFn)(); extern VoidFn D[];` in the draft | sc05_008 8017F724 |
+| (r194) The file's own guess `extern void f();` (used only for its address) clashes with the clone's definition | retype that line to the definition's type | sc06_025 80184B50 |
+| (r194) A clone reads `D.x` / `.y` / `.z` of a symbol this file declares `u8` | `AF(&D, s16, 0 / 2 / 4)` | sc06_030 8018017C |
+| (r194) A clone's global load comes out `lhu` where this stage's original has `lh` | `*(s16 *)&D` at the use (the file keeps its u16) | sc03_090 8018A9C8 |
+| (r194) A clone steps an `s16` symbol by `&D + i * 14` (stride 28, `sll 2`) | `(u8 *)&D + i * 14` | sc02_028 80183AF8 |
+
+Parked by r194: func_sc02_028_80183AF8 (above), func_sc03_118_8018291C and func_sc03_119_8018291C (three bytes at D+0x4306 (+4) and 4304 / 4305 (+6), the original keeps D+0x4306 in a0 and stores at -2 / -1; ours folds the negative offsets into the symbol: tried AF from 4305, AF from 4306, a local pointer), func_sc03_007_80185948 (a near shape of its source: 44 vs 55 instructions, needs a hand pass).
+
+### r197 rows (S1 batch 10, 25 Oct; helper and park agents; merge 61ee1d4)
+
+| Symptom | Source | Example |
+|---|---|---|
+| (r197) The same `-0x30` in both arms of a rand sign pick (`bnez; negu v0,s0` / `j; addiu v0,v0,-0x30` / `addiu v0,s0,-0x30`) | one subtraction outside the ternary: `((rand() & 1) ? t : -t) - 0x30` (inside each arm drops one instruction) | d3 sc02_011 |
+| (r197) A 0/1 flag in v0 at the join (no s-register, small frame) | set it in each arm after the calls `if (A) { call; r = 0; } else { if (B) call; r = 1; }` (set before the if/else: an s-register and +8 frame) | d3 sc02_011 |
+| (r197) Object and a later call result in swapped s-registers, two null tests sharing one `func_8012CAE4(o)` fail block | write the call once: `if (p == 0) goto fail; .. if (q == 0) { fail: func_8012CAE4(o); return; }` (two copies give o one more ref and the higher priority, though cross-jumping merges them) | d4 sc02_011 |
+| (r197) A guarded tail `if (rand() % 3 != 0) return 0;` gives beq + `li v0,0`, the original bne to the epilogue with v0=0 in the slot | nest the tail `if (rand() % 3 == 0) { .. }` with one `return 0` at the end | d4 sc02_011 |
+| (r197) An s-register holding `o + 0x88` (ours one register short, frame 8 small: no call in its live range) | compute `t = o + 0x88;` before the Square0 call ahead of its use (live across the call) | d5 sc02_011 |
+| (r197) A switch arm's `jal SetScript` merged into one shared copy where the original keeps one per arm | write the last case so its non-call arm comes last (`if (--x == 0) {call} else {store}`): only the shared `sw` cross-jumps | d5 sc02_011 |
+| (r197) `li v0,0xff7e` for a u16 store of `-0x82 - field` where the original has `addiu v0,zero,-0x82` | read the operand as s16: `AF(o,u16,0xFE) = -0x82 - AF(o,s16,0x8A);` (and the store order FC before FE) | d8 sc03_121 8017F234 |
+| (r197) An incremented u16 counter reloaded with `lh` before each multiply in the original, kept in a register and sign-extended in ours | a store to another field right after the `++` (`0x102++; 0x104 += 0x40;`), each use its own statement after a field store | d8 sc03_121 8017F374 |
+| (r197) OT link with the 0xFFFFFF mask hoisted before 0xFF000000 and the loop counter in the next t-register | the stage's PTag bitfield link `((PTag *)pk)->addr = ((PTag *)&ot[z])->addr; ((PTag *)&ot[z])->addr = (u32)pk;` (needs gte.h) | d6 sc02_011 8018576C |
+| (r197) abs-then-halve as `bgez; srl` with `0x20 - w` in the negative arm | `h = (w - 0x20 < 0 ? 0x20 - w : w - 0x20) / 2;` (`if (w<0) w=-w` gives negu, one fewer) | d6 sc02_011 |
+| (r197) A shared fail call inline after a compare chain | early `{ f(o); return; }` blocks (inverted chain), not a nested if with the call at the end | d6 sc02_011 80186868 |
+| (r197) `bne v0,s2` with s2 the switch value inside `case 1` | a plain `== 1` compare (cse reuses the register known to be 1) | d9 sc03_121 |
+| (r197) A masked angle in s0 copied to a second s-register after a call (`move s4,s0` in a slot) | `s32 r = ratan2(..) & 0xFFF; .. d = f(); s16 ang = r;` (a narrowing copy survives cse; an s32 copy folds) | d7 sc02_011 80182714 |
+| (r197) A flag in the wrong s-register with its `= 0` in the jal delay slot | `t = f(); flag = 0; if (t & 3)` (init after the call) | d7 80182714 |
+| (r197) A range tree repeating the same `slti a0,v,0x800` test (`bnez; ..; beqz a0`) | `(v >= 0x800 && v > 0xB00) \|\| (v < 0x800 && v < 0x210)` | d7 |
+| (r197) `switch (mode)` with a `move v1,s3` copy before the case compares | switch on an s16 mode | d7 |
+| (r197) -0x10 pulled into an s-register (`li s0,0xfff0`) for `f = AF(p,u16,off) - 0x10 + (rand() & 0x1F)` | `AF(p,s16,off) += (rand() & 0x1F) - 0x10;` (`-= (rand() & 0x1F) + 0x50`) | d10 sc03_121 |
+| (r197) `addiu v0,v1,0xFF` (ours `-1`) for a u8 decrement stored back | `AF(o,u8,off) = c + 0xFF;` with `u8 c` | d10 sc03_121 |
+| (r197) Byte stores `(i*4+4)` from an s16 loop counter where the original uses the raw counter copy, not the sll/sra shared with the index | write them as shifts `(i << 2) + 4`, `(i << 3) + 8`; an a0-based store only on the first of each CV4 chain: `[1].r = [1].g = 0; [1].b = 0;` | d1 sc01_080 80180728 |
+| (r197) A late `AF(o,s16,2)++` whose lhu is scheduled before the field stores | `s16 y = d.y; s16 s = AF(o,s16,2) + 1;` first, the stores, then `AF(o,s16,2) = s;` | d1 80180728 |
+| (r197) The second SV8 of a pair-table row reached by `sll 4; ori 8` and its own %lo (ours folds +8 into the offset) | `extern SV8 D[];` indexed `[i * 2]` and `[(i * 2) \| 1]` (not a struct {SV8 a, b;}[i].b) | d11 sc03_121 801816C0 |
+| (r197) An s16 field compared with a call result loaded before the jal in ours (extra s-register) | the call result in a local first `r = f() & 0xFF; if (AF(o,s16,0x70) >= r)`, fall-through arm first | d13 sc03_030 8017EDD4 |
+| (r197) ctc2 0-7 from a stack MATRIX, then ctc2 0-4 again after RotMatrixZ | `gte_SetRotMatrix(&m); gte_SetTransMatrix(&m);` (psyq.h MATRIX, gte.h), plain `&m` each time (a pointer local costs an s-register) | d13 sc03_030 80181708 |
+| (r197) sxy stored to a stack copy just below it (sh 0x20/0x22 from lhu 0x24/0x26), frame 8 too big with two XY locals | one `XY s[2];`: RotTransPers into &s[1], copy field-wise `s[0].x = s[1].x; s[0].y = s[1].y;` (a UXY copy goes through a register) | d12 sc03_121 801813E8 |
+| (r197) prim+0xC held in an s-register, computed early among the colour stores | `poly = prim + 0xC;` before SetDrawMode, then AddPrim(ot, poly) | d12 |
+| (r197) The original overwrites a vertex pointer's own register (`addiu s0,s0,8`), ours a temp (`addiu v0,s0,8`) | `a++; gte_ldv0(a);` instead of `gte_ldv0(a + 1)` | d15 sc03_030 |
+| (r197) A u16 global read with lhu in the original, narrowed to lbu in ours (masked & 1, stored as bytes) | hold it in an s32 local, not u8 | d15 sc03_030 |
+| (r197) Two stack structs in swapped order (the second-declared lower, ahead of an s32 flag); declaration order does not move them | declare the struct used only inside the loop in the loop's own block | d16 sc03_030 8017F6E0 |
+| (r197) A stub's `extern void f();` for a callee the stage file defines in C as `s32 f(s32 arg0)` (placement: "conflicting types") | the file's prototype in the stub, call `f((s32)o)` | sc01_077 8018047C |
+| (r197) A stub's `extern s32 D[]` for a symbol the file declares `WMtx D` ("incompatible types in assignment") | the file's typedef + extern, `m = (s32 *)&D;` | sc03_030 8017F6E0 |
+| (r197) place_stage defers a draft whose unsized function-pointer table extern it drops (`D undeclared`) | build/work/r179/handput.py + make check-<stage> | sc03_030 8017F8BC |
+| (r197) A call arg picked by `j` + `li a0,K` in both arms (not `li v0; move a0,v0`) | one call in each arm `if (x & 1) p = f(2); else p = f(1);` (cross-jumping merges the jal) | d17 sc01_077 |
+| (r197) `(u16 field - K) + expr` into an s16 gives `li 0xFEC0; addu` | the field into an s32 local in its own statement after the call (`addiu -K`); `x % 256` keeps its quotient in v0 only with an s16 result local | d17 sc01_077 |
+| (r197) A masked pointer then `addiu s1,s1,0x50` explicitly, used with small offsets | `s = (u8 *)((u32)s & M); s += 0x50;` as separate statements (one expression folds 0x50 into each offset) | d17 sc03_030 80181824 |
+| (r197) Switch tree testing ==1 first, then slti <2, bnez (cases 0 and 1 only) | add an empty `case 2: break;` | d19 sc01_077 |
+| (r197) A field-minus-shift compiled lhu where the original has lh | the s16 field into an s32 local first (`a = AF(o,s16,0x1A); .. -= a << 4;`) | d19 sc01_077 |
+| (r197) After SetScript the loads (lw 0x78 / lhu 2) come before the stores in the original | read the value into a u16 local before the stores | d19 sc01_077 |
+| (r197) A 16x8 table read with the row term (`row<<4`) before `col<<3` | `AF(D_tbl, s16, row*16 + col*8 + off)` (a 2D array evaluates the column first); that form also gives the extra 16-byte stack area (no `unused[16]`) | d18 sc01_077 |
+| (r197) `addu a0,v0` before the null-test branch of a call result stored to a field | `if ((AF(o,s32,0x20) = t = func_8012C1B8()) == 0)` | d18 sc01_077 |
+| (r197) lo/hi loop locals with registers swapped against the base / offset pointers | drop the locals, read the struct fields directly (`y < p->y`, `(p->pad - y)*127/(p->pad - p->z)`); a first range test branching to the increment is `continue` | d18 sc01_077 |
+| (r197) Two lh globals kept across GTE calls, one lh into s2, the other lhu+sll/sra into s1 | both into `s16 x = G1; s16 z = G2;` before the 0x48 store, reused for m.t[0] / m.t[2] | d20 sc01_077 (clone of sc01_080 8017E8A0) |
+| (r197) `lui at,%hi(SYM); addu at,at,a0; lh %lo(SYM)(at)` at every read, ours cse's `la reg,SYM+i` | `AF(D_sym, s16, i)` with a byte-offset local `i = AF(o,u8,0x70)*4` computed first (hi-half adds in the order x, z, y) | d21 sc01_077 8017FAAC |
+| (r197) An out-param word (lw 0x20(sp)) loaded before the object field (lw 0x20(s0)) | copy it first `w = v;`, then use w | d21 sc03_006 |
+| (r197) `li v0,-16376` for a 16-bit store of 0xC008, original `ori v0,zero,0xC008` | store through a u16 field `AF(e,u16,off) = 0xC008` | d23 sc03_006 |
+| (r197) A global `\|=` through an address register with another global's store between its load and store | `q = &D; D_other = k; *q \|= bit;` (scalar `s16 D` kept) | d23 sc03_006 |
+| (r197) A value computed 2-3 times around calls (test, negate arm, plain arm), arm result in v1 not v0 | an inline ABS in the return: `return ((X < 0 ? -X : X) * amp >> 12) + 8;`; a global loaded early and used at the end: s32 local (s16 gives lhu+sll/sra) | d22 sc01_077 8017F7E8 |
+| (r197) `p = &g->idx[k]; p[0]; p[1]` / `k + g->idx` in the wrong register | index twice `g->idx[k]`, `g->idx[k + 1]`; struct fields used across an inner loop that stores to memory go into locals at the top of the outer body | d22 sc03_006 80182F4C |
+| (r197) An lh global read where the stage declares nothing and another new function reads it lhu | declare it `extern u16` and read `(s16)D` at the lh use (still lh; no clash between drafts) | d25 sc03_092 |
+| (r197) Switch on cases 1, 2 only: `beq 1 / slti <2 -> end / beq 2` (ours an if-chain) | add an empty `case 0: break;` | d26 sc03_092 8017EAA0 |
+| (r197) Lerp `addiu -K; *N; negu; magic divide; +C` | `(-((d - K) * N)) / D + C` (`(K - d) * N` gives li/subu) | d26 sc03_092 80180874 |
+| (r197) A strength-reduced pointer copy in a loop (`p+8` in its own register, `lh -2(a0)` in the exit test), the original `addiu v0,a0,8` inside the loop | `p += 0x10;` twice: at the end of the early-skip arm before `continue` and at the loop bottom (cross-jumping merges them later) | d14 sc03_030 80180054 |
+| (r197) abs-difference `lh; lh; move a2,v0; subu; bltz; move a1,v1` | u16 result from a plain ternary on the stack fields `d = (s[1].y - s[0].y >= 0) ? s[1].y - s[0].y : s[0].y - s[1].y;` | d14 sc03_030 8017FB04 |
+| (r197) `sw ra` / `sw s2` save order swapped | assign the s-register pointer after the early-return if | d14 8017FB04 |
+| (r197) A 0..4 classifier inlined as a 5-entry jump table | `switch` listing every case (`case 0: case 2: case 4: break;`); a `p = &D_80126B58` base assigned before the call so its lui lands right after the jal | d27 sc03_092 |
+| (r197) A store through `AF(o,u8*,0x68)` scheduled last but its `lw 0x68` hoisted above the other stores | read the pointer into a local first `m = AF(o,u8*,0x68);`, the other stores, then `AF(m,s16,0xC) = ..` | d27 sc03_092 |
+| (r197) Stage-table loops (D_801202A0 stride 0x10C, D_8011DB30 stride 0x38) with hoisted compare constants (`li s3`) before the `lui/addiu s0` base | index the array each time `AF(D_x + i * 0x10C, u16, 0)`, not a walked pointer | d29 sc03_024 8018046C |
+| (r197) A callee the file defines later with an unused `(s32 arg0)` called with no a0 set | keep the prototype, call `((void (*)())f)()` | d29 8018046C |
+| (r197) A global's address in a register (`lui; addiu` then `lw/sw 0(v1)`) in both arms, the store merged after the arms | assign the pointer inside each arm `if (c) { p = &D; *p -= 1; } else { p = &D; *p += 2; }` | d24 sc03_006 80182A44 |
+| (r197) Inner switch tree `==1; slti 2; beqz end; bnez end` (two real cases) | list an empty `case 2: break;` after them | d24 80182A44 |
+| (r197) A global store in the middle of an `x->f++` (lhu / sw global / addiu / sh) | split it: `n = AF(p,u16,6); D = 0; AF(p,s16,6) = n + 1;` | d30 sc03_024 |
+| (r197) `sb rX,0(a0)` on one global (neighbours lui/%lo), its address passed to two calls | `q = &D; f(p, q); *q = v; g(q, n);` | d30 sc03_024 |
+| (r197) An address `lui/addiu D` then `addiu a1,a3,-8` (a pointer just before a real symbol) | declare the real symbol `extern s32 D[];`, store `D[0] = ..`, pass `D - 2` (a phantom `V3 D-8` compares MATCH but cannot place) | d31 sc03_024 |
+| (r197) A loop with an s16 counter whose increments come out i, table, dest | `for (i = 0; i < 9; i++, t++, p++)` (not `p++; t++;` in the body) | d31 sc03_024 |
+| (r197) A 0x6C-byte global struct copy with an `or a2,a3; andi 3` alignment test and an lwl/lwr loop | a byte-aligned struct type `typedef struct { u8 b[0x6C]; } B6C;` and `dst = src;` | d33 sc03_024 80184CB0 |
+| (r197) `la s0, X+0x14` then `addiu s0,s0,-0x14` for a RotMatrixYXZ argument, t[0..2] stored through s0 | the real symbol is X+0x14 (the matrix's t[0]): `extern s32 D[]; D[0..2] = ..; RotMatrixYXZ(&r, (WMtx *)((u8 *)D - 0x14));` (a `WMtx` at X compares MATCH but X does not exist: link fails) | sc03_024 80184CB0, 80184FA0 |
+| (r197) Two `AF(o,s16,off) -= k` come out in the reverse of source order | write them in the opposite order to the asm | d33 sc03_024 |
+| (r197) A 0/1 found-flag tested with `sll v0,sN,16; beqz` where every s16/u16/(s16) form gives `move` or `andi` | s32 flag with `if (hit << 16)` (marked MATCH-TRICK) | d28 sc03_092 8017E044 |
+| (r197) A global's address in a register reused at an offset (`addiu v0,%lo(D+2)`; `sh 0(v0)`; `addiu a1,v0,-2`) | pointer local `q = &D_x; *q = ..; f(&r, q - 1);` | d28 sc03_092 8017E2FC |
+| (r197) Stack order: an s32 flag must sit before an XY sxy | make sxy the UXY union (SImode: slot at first use; aggregates get slots at declaration) | d32 sc03_024 801838CC |
+| (r197) `addu v1,v0` copy where the store and compare use v0 but the else arm v1 | store the sum to the field first, then `x = AF(prim,s16,0x18);` and use x | d32 sc03_024 |
+| (r197) A clamp `lh a0; slti; addu v1,a0` in the slot | read the global directly in every compare and in the store (`if (G < lo) v.x = lo; else if (G > hi) v.x = hi; else v.x = G;`) | d34 sc02_016 |
+| (r197) `v=9` in the delay slot; else call, `v=0x11`; one `sh v` | each arm its own store `if (..==0) { f(o); AF=0x11; } else AF=9;` | d34 sc02_016 |
+| (r197) A callee the file defines with 3 params called with 2 (a2 never set) | the file's prototype, call through `((s32 (*)())f)(a, b)` | d35 sc02_016 |
+| (r197) A 3-way ternary with the branch inverted (beqz vs bnez) | plain if/else with the constant stored in each arm; in-place `<<= 16` on three fields in address order (4, 8, C) | d35 sc02_016 |
+| (r197) One constant pointer kept in a register with negative offsets off it (`lui/addiu a0, D+k` then `lb -2(a0)`); a base of D+k with -2/-1, a local pointer or a struct cast all fold into separate %lo | write every access `AF(&D_lowest, T, k)` with positive offsets against ONE symbol, the lowest address the function touches (cse's related-value pass then keeps one base and makes the others negative) | p1 sc03_118 / sc03_119 8018291C (r194 park) |
+| (r197) A clone of a near shape 11 instructions short: an s32 store compiled `sb zero` (the file declares the global u8), a table at X+2 that splat names separately | cast at the store `*(s32 *)&D = ..` (keep the file's u8); its own `extern s16 D_X2[];` for the X+2 table | p5 sc03_007 80185948 (r194 park) |
+| (r197) In-place sign-extend after a call (`sll s0,s0,16; sra s0,s0,16`), ours `sll v1,s0` from a reused local (global pseudo: local-alloc cannot tie the extendhisi2 temp) | a fresh block-local s32 `m` used only there, `(s16)m` at each use; if a needed `move s1,s0` copy disappears, declare the copy narrower `s16 b = a;` | p5 sc01_080 8017E724 (r186 park) |
+| (r197) An insn ordered wrongly around a priority-1 insn with no users in its block (a loop counter init, an arg copy) | read -dS for 0x7f000001 boosts: a single-set destination is "birthing" and gets the top priority; set a register twice to drop its boost (`k = 3; z = k; .. k = ..`), or give a value its own single-set local to gain one (`r2 = r + s` instead of `r += s`) | p3 sc03_006 80182080, sc01_080 801820AC (parks) |
+| (r197) A v0/v1 swap between two loads stored to a stack struct, one value stored twice | an unrelated statement (`r = ..`) between them stretches the long-lived value's local-alloc range: move it after the stores | p4 sc01_080 8018230C (park) |
+| (r197) An s0/s1 swap between two loop pointers (global-alloc priority floor_log2(refs)*refs/live, refs weighted by loop depth) | no plain-C lever found; a do-while(0) around the loop body flips it but is structure (rejected); build/work/r179/v_p4/pri.py prints each pseudo's refs / live / priority | p4 sc01_080 80181D98 (still parked) |
+| (r197) Arg setup `lw a0` before `li a1/a2` at a join, ours the reverse (sched1 potential-hazard tie with a store in the same block) | take the store after the call out of the call's block: write it once at the shared join after the if-chain, an early `return` in the arm that skips it | p2 sc03_092 8017E780 (park) |
+| (r197) A store in the jal slot through the a0 copy of an s-register (`move a0,s0; ..; jal; sh v,N(a0)`), ours through s0 (cse folds the `q = o` copy back to o) | a separate pointer q with an early dead `q = 0;` (MATCH-TRICK) so q heads the cse class, then `q = o; AF(q,..) = v; f(q);` with s16 v | p2 sc02_017 801807DC (r186 park) |
+| (r197) `addiu v0,v0,-7; sltiu s1,v0,0xC` (temp in v0, s1 only the 0/1 result) | `k = D >= 7 && D < 0x13;` (the explicit `(u32)(D - 7) < 0xC` puts both in s1) | d37 sc02_016 80181AE8 |
+| (r197) Two loads (`lw 0x78`, `lw 0x20`) before a constant store to o in the original | read the value through 0x78 into a local before that store | d37 80181AE8 |
+| (r197) A pointer global reloaded (lui/lw) after a field store through another object | read the second use through a one-member struct cast `((struct { u8 *v; } *)&D_x)->v` (r186 row 31) | d38 sc02_027 801805EC |
+| (r197) `else if (a.FC >= b.FC)` where the original loads b's field first | `b.FC <= a.FC` | d38 sc02_027 80181740 |
+| (r197) A clamp `li vA,K; slt vA,vA,x; beqz; li aN,K; sh aN` (constant loaded twice, slt not slti K+1) | an s16 local `lim = K; if (x > lim) x = lim;` (an s32 lim gives one li for both) | d40 sc02_027 8017F498 |
+| (r197) A SpawnDef stack build loading the index early (`lh v1,0xFC` ahead of the field stores, lhu reload for unkE) | `idx = AF(o,s16,0xFC);` before the stores, read the field again for unkE; frame 0x40: `u8 unused[8]` after the SpawnDef | d40 sc02_027 |
+| (r197) A loop constant hoisted only because the loop is 1-2 insns under loop.c's threshold (with a call: moved at <= 29 real insns, kept at >= 30) | each s16 temporary adds +1 insn, but on the side where order matters it makes the producer's dest a subreg and kills sched1's birthing boost: add the +1 where order does not matter (still open) | p6 sc01_084 8017F9F4 (park) |
+| (r197) Stores at p+0x18 / p+4 / p+0x2C / p+0x1A, the original not hoisting the p+4 / p+0x2C RMWs above the slow `%10` store | `s32 n = (AF(o,s16,0xFC) + 1) << 10;` right after the 0x18 store, before the RMWs, n stored last; `(x % 10) << 8` as `sll 16; sra 8`: `s16 t = x % 10;` then `t * 256 + 0x2000` | d39 sc02_027 801815E8 |
+| (r197) `slt vK,vC,x` with the constant in a register, ours `slti x,C+1` | compare against an s32 local set just before (`lo = C; if (lo < x)`); when the same constant is also the subtrahend (`C - x`) keep that one literal | d39 sc02_027 8017F2B8 |
+| (r197) Frame 8 bytes too big, the stack struct 8 low (sp+0x10 instead of 0x18) | `u8 unused[8];` BEFORE the struct | d41 sc02_027 |
+| (r197) A field load scheduled before an earlier-written zero store (lhu 2(v0) before sh zero,0x5E) | swap the two statements: the store that uses the load first | d41 sc02_027 |
+| (r197) A global-alloc priority tie (exactly equal floor_log2(refs)*refs/live) broken by the lower pseudo number | live length counts insns after sched1 that survive combine, incl. duplicate stores cross-jumping removes later: write a shared tail in both arms of an if/else to stretch one pseudo (here `tbl = &D` twice instead of a `goto def`); a count as `s32 c = <ternary>; u16 n = c;` turns andi into `move` (nonzero bits) | p7 sc01_004 8017DF18 (r186 park) |
+| (r197) dbr fills a conditional's delay slot from the branch target where the original has a nop; two ±rand arms cross-jump wrongly | `return 1` inside each arm, `return 0` at the end; write both rand arms minus-first `if (!(rand() & 1)) x = b - r; else x = b + r;`; a call-result arithmetic as one expression (single-set temp: birthing boost) | p7 sc03_105 80183A98 (r186 park) |
+| (r197) A stub declares a symbol B8 (struct copy) that the stage file declares u8 (other placed code uses AF on it) | keep the file's u8: `*(B8 *)&D = D_src;` and `(B8 *)&D` (same bytes) | sc03_030 80180E0C |
+
+MATCH-TRICK (placed by r197, each with a `/* MATCH-TRICK: */` comment): func_sc03_092_8017E044 (`if (hit << 16)` on an s32 found-flag: the original tests the low halfword with `sll 16; beqz`; every s16 / u16 / cast form gives `move` or `andi`) and func_sc02_017_801807DC (an early dead `q = 0;` makes cse keep q, not o, as the 0x100 store base so the jal-slot store goes through a0; r186's park). Rejected under the policy and NOT placed: func_sc01_080_80181D98 matches only with a do-while(0) around the whole case-2 loop body inside a for (a nested do-while is structure); the matching file is kept in C:/tw/stage-sweep/build/work/r179/s/sc01_080/ for a ruling.
+
+Parks cleared by r197 (park agents): r194's func_sc03_118_8018291C / func_sc03_119_8018291C (every byte off the lowest symbol D_801D4304) and func_sc03_007_80185948 (u8 global cast at the s32 store, the X+2 table its own extern); r186's func_sc01_080_8017E724, func_sc01_080_801820AC, func_sc02_017_801807DC, func_sc01_004_8017DF18, func_sc03_105_80183A98; r197's own func_sc01_080_8018230C, func_sc03_092_8017E780, func_sc03_006_80182080.
+
+Parked by r197 (best attempts in C:/tw/stage-sweep/build/work/r179/ spec_<tag>_<n>.txt): func_sc01_080_80181D98 (19 lines: s0/s1 swap of p and t, global-alloc priority 1.306 vs 1.03; only the rejected do-while form flips it; best spec_d1_11 block 1; v_p4/pri.py prints the priorities), func_sc01_084_80183790 (s1/s2 swap: local-alloc ties the -ang and &0xFFF temps into ang, priority 3837 vs r 3571; best spec_c51_7 block 1), func_sc01_084_8017F9F4 (loop 3's a0=s0 copy: loop.c hoists -0x4F0 because loop 3 is 28 real insns; an s16 temp adds the insn but kills the sched1 birthing boost; best spec_c53_5 block 1), func_sc02_027_8017F2B8 (3 lines: `slti C+1` vs `li; slt`; best spec_d39_9 block 1), func_sc02_027_8017F498 (4 lines: a0/a1 swap in the -0x300/-0x340 clamp arm; best spec_d40_5 block 1). Still parked from r186, not tried: func_sc03_105_80184500 (14 lines), func_sc02_000_801888F4 (only a label hack matches: rejected).
+
+Placement gaps met by r197 (tools card): place_stage drops unsized function-pointer table externs (`void (*D[])();`: sc03_030 8017F8BC, sc02_016 80181AE8, placed with handput.py); handput.py copies no typedefs (sc03_024 80184CB0 needed B6C by hand); a draft declaring a phantom symbol (a WMtx at an address splat does not name) compares MATCH in cmp_func but fails to link (sc03_024 80184CB0, 80184FA0: the real symbol is D_801C14D8 = the matrix's t[0]); four drafts declared a symbol differently from the file (stub `extern void f()` vs the file's C definition, `s32 D[]` vs `WMtx D` / `P8 D[]`, `B8` vs `u8`): place_stage reports "build differs" with no detail for some of these; cmp_func on src/stg/<stage>.c itself shows the in-context diff.
+
+### r200 rows (S2 batch 8, 26 Oct; park, helper and clone-repair agents; merge 5fd89eb)
+
+| Symptom | Source | Example |
+|---|---|---|
+| (r200) One s-register rotation (every pseudo one register too high, same order) | a short, high-priority copy set before a call and used after it takes s0 first: `{ s16 a = abr; if (a < 4) { .. f(8); .. (a << 5) .. } }`; s16 (an s32 copy is removed by cse, u8/u16 give sltiu); placed inside the block after the test, sched1 sinks it below the call | Z2 sc07_002 8017DC80 |
+| (r200) A field RMW `x = o->C4 | 2` whose load must be boosted by sched1 while the `a0 = o` arg copy fills a load-delay slot | `c = AF(o,u32,0xC4);` right after the earlier store, `AF(o,u32,0xC4) = c | 2;` later (c set once, the or a separate value); `c |= 2` or a single `|=` miss | Z1 sc04_011 8018C14C |
+| (r200) A loop-pointer pseudo losing a register to two others by -dg priority (14 refs / 80 insns) | one marked `do { p += K; } while (0);` as the loop body's last statement: refs inside count at loop depth +1 (MATCH-TRICK) | Z4 sc05_002 8017F348 |
+| (r200) A store giv swallowed by an identical test giv in combine_givs (store via `sw zero,0(t1)` not `%lo(D)(a2)`) | one marked `AF(D, volatile s32, off) = 0;` (MATCH-TRICK); a flag set in if/else and tested after the join as s16/s8 moves which slt input shares v0 | Z3 sc04_016 8017E26C |
+| (r200) A 0x24-byte table loop with a store after the call costing a fifth saved register | recompute `p = &((Fx24 *)&D)[i]` per iteration (a running `p += 0x24` keeps p+0x1C live) | e2 sc04_015 80180618 |
+| (r200) A switch tree rooted at `beq 3` next to a range 1-2 with the same body | separate `case 1: case 2:` and `case 3:` arms with the same statements (cross-jumping merges them); `case 1..3` together gives sltiu | e2 sc04_015 80181F4C |
+| (r200) Compare tree `beq 1; slti 2; bnez end; li 2; bne end` with one call for cases 1 and 2 | `case 0: break;` plus case 1 and case 2 each written out; also list an extra empty `case 2: break;` after the real cases when the tree has it | e13/e14 sc04_018 80180F7C, 8017FF70 |
+| (r200) Angle step `d = ((a - *p) & 0xFFF) | 0xF000`, the original reloading *p per arm and redoing `sll 16` in the compare's slot | write |d| as a full if/else (`if (d < 0) m = -d; else m = d;`, d s16) so the if ends cse's block; then `if (m > (u16)n)` | e1 sc04_002 801829E8 |
+| (r200) Stack-vector loads mixed with s16 field stores, v.z loaded between the 6 and A stores | source order 6, E, A then `AF(o,s16,0x2E) += 0x10;` (stack and o may alias: a read must come before the store it is scheduled above) | e1 sc04_015 8017D6FC |
+| (r200) Count-down loop `li a0,0x5F .. bgez` over a table | the plain count-up `for (i = 0; i < 0x60; i++)` (written by hand as a countdown the constant load moves first) | e5 sc04_003 |
+| (r200) Two s16 range tests on one global folded into `addiu -K; sltiu` (the original slti/bnez pairs) | if / else-if chain with one bound per arm, each arm `r = 0;`, the last `else r = expr;`, `return r;` | e3 sc04_015 80180F94 |
+| (r200) Two cases sharing one store tail (beq to the tail from one, fall-through from the other) | write the tail out in each case + break (cross-jumping merges; no goto) | e3 sc04_018 80180D38 |
+| (r200) An `a||b||c||d ? 3 : 2` result in the wrong register, the 3rd test's branch to its own `j end; li 3` | one else-if arm per call `else if (f(0x63)) v = 3; .. else v = 2;` (FLAGGED: identical-arms ruling asked; placed in 8017F5F8 / 8017F6D8 / 8017F7B8 / 8017F898 and e13's chain) | e10/e11 sc04_018 |
+| (r200) A 3-valued result from two calls with a0 = 0xA or 0x10 | each case its own literal call, then `switch` with an empty `case 1: break;` (a variable argument is one instruction long) | e11 sc04_018 80181124 |
+| (r200) A helper returning a pointer computed straight into v0 (ours `move v0,a0`) | `return &X;` in every branch instead of a local returned once | e10 sc04_018 8018203C |
+| (r200) A stack argument read with lhu while the callee is K&R-declared | keep it s32 in the prototype and copy `s16 e = e0;` before the halfword store | e4 sc06_018 80187250 |
+| (r200) A call result returned through `beqz v0,<epilogue>` while other failures share `j; move v0,zero` | `if ((r = f()) != 0) { ..; if (g() == 0) return 0; o->st = 0xC; r = 1; } return r;` | e4 sc06_018 80187250 |
+| (r200) Loop compare constant hoisted into an s-register by loop.c, the original reloads it | not solved in plain C (for/while/typed index/u16 temp/inline helper all hoist); a backward-goto loop gives 55/55 with s2/s3 swapped | e4 sc06_011 8017F5F0 (parked) |
+| (r200) Three s-regs in the wrong order and &global hoisted into an s-reg before the call result's move/bnez | `d = &D;` in its own local before the call, then `AF(o,u8*,0x20) = p = (u8 *)f();` | e6 sc04_000 8018298C |
+| (r200) o->0x20 loaded three times into a0/v0/v1, ours reuses a0 | a fresh `AF(AF(o,u8*,0x20),..)` (or its own local) per chained-store group | e6 sc04_000 80181ABC |
+| (r200) A global's address kept in a register across an if/else storing a constant in both arms | `s32 *p = D;` (D as s32[]) and `*p = K` in each arm (a ternary or scalar gives lui at / %lo) | e7 sc04_000 80182D78 |
+| (r200) Global loads scheduled above the object's field stores in the original | every o-field access through a block-scope struct type `((ObjS *)o)->fX`, sources in the original's register order | e8 sc04_008 8017DB64 |
+| (r200) Chained stores `p->18 = p->1A = K` landing too early | move the chain to just after the next field copy | e8 |
+| (r200) A switch case `if (x != 1) return NULL;` compiled `beq common; j ret` (original `bne ret; j common`) | write the shared check-and-advance tail out in full in each case | e9 sc04_018 8017F418 |
+| (r200) `slti 0x2A8; xori 1; bnez` around a guarded store | the comparison in a flag first `ok = f() >= 0x2A8; if (ok == 0) {..}` | e15 sc04_018 |
+| (r200) A table search by key with the increment in the branch slot undone by `addiu -8` (cc1 status 2816 on plain loops) | compensation written out: `if (t[0] != k) { t += 2; do { v = t[0]; if (v == 0) return k; t += 2; } while (v != k); t -= 2; } return t[1];` (also for the parked sc02_031 80181F5C family) | e15 sc05_000 8017D70C |
+| (r200) A failure arm placed inline (`beqz`) where the original has bnez to success and `j end; v0=0` inline | `if (f() != 0) { ..; return 1; } return 0;` | e17/e28 sc05_003, sc07_007 |
+| (r200) Magic 0x78787879 after sll 16, sra 4 minus the sign | `(x << 16) / 34` | e17 sc05_003 |
+| (r200) A shared tail call whose early jal has no `move a0` | early exit first `if (x >= 0x10) { f(o); return; }` and end with `f(o);` (cross-jumping) | e18 sc05_003 |
+| (r200) Two stores to one field back to back (`sh zero; sh 0xC006`), ours drops the first | put the `= 0` store earlier, before an unrelated store | e19 sc05_003 801815A0 |
+| (r200) GTE sqr range test (lwc2 9-11, sqr0, swc2 25-27, sltu/xori 0x18FFE) | gte_ldlvl / gte_sqr0 / gte_stlvnl on a V3, `return (u32)(d.x+d.y+d.z - 0x90001) <= 0x18FFE;` | e16 sc05_001 8017F150 |
+| (r200) A word copy via lwl/lwr/swl/swr between globals | both sides as CV4 {u8 r,g,b,cd} and a struct assignment | e25 sc06_018 8018AB00 |
+| (r200) A call result copied to an s-reg only after the next call's a0-a2 setup | two locals `t = f(o); a = t; g(o, 0x32, 2, (s16)t);` then use a | e23 sc06_018 8018ACD4 |
+| (r200) `addiu a3,s0,-0x200; subu a3,a3,rand&0x3F0`, ours folds the constant | `b = a - 0x200;` in its own statement first | e23 sc06_018 8018ACD4 |
+| (r200) A first argument that is a caller's local returned in v0 (`addu v0,s3; sw s4,0(v0)`) | a struct return, or `T *f(T *out, ..) { *out = u; return out; }` to keep the caller unchanged (retype the extern) | e22 sc06_018 8018BFA8 |
+| (r200) &local set in an s-reg in the beqz slot after a call | `p = f(); do {} while (0); mp = &m;` (one marked MATCH-TRICK) | e22 sc06_018 8018AD74 |
+| (r200) A do-while over a 16-byte table with an extra `andi 0xFFFF` after the lhu in the exit test | `u16 id` local, then `e++`, then `} while (id != 0xFF);` | e31 sc06_000 801878A8 |
+| (r200) Unknown switch cases | read the jtbl words in asm/stg/<stage>/data/*.data.s: equal targets share a case group | e26 sc06_022 |
+| (r200) Frame 8 too big from `p->18 = p->1C = p->18 + (o->100 - p->18) / 4` (s16 field read twice) | read it into an s32 local first | e30 sc05_002 |
+| (r200) A global read and written back via a register base (`lh 0(reg)`/`sh 0(reg)`) | `s16 *g = (s16 *)&D_u16;` and go through *g (a u16 pointer gives `li 0xfa80`) | f3 sc04_002 80180090 |
+| (r200) The last test `bnez v0,end` with `li v0,1` in the slot, ours sltu | clamp the field in its own block, then `if (A != 0 || B == 0) return 0; return 1;` | f1 sc04_011 8018315C |
+| (r200) A global's address kept in an s-register for two loads across calls | `void **w = &D;` and `*w` at both places (file's `void *` declaration kept) | f1 sc04_011 801826E4 |
+| (r200) `beqz r; bltz r; slti r,3` after a call | `switch (f()) { case 0: break; case 1: case 2: .. }`; a u8 decrement as `(u8)(t + 0xFF)` | f5 sc04_011 |
+| (r200) A clamp comparing the temporary, not the copy (`addiu v0,v1,3; move v1,v0; slti v0,v0,0x51`) | the clamped local as u8 (cse cannot use the narrow copy in the SImode compare) | f4 sc04_011 8018B744 |
+| (r200) A two-sided range test merged into one sltiu (the original slti then bgez) | nested ifs `if (x < 2) { if (x >= 0) return; }` | f7 sc04_011 |
+| (r200) `D = AF(o,u16,0xA) + (tbl[i] - 1)` giving `li 0xffff; addu` | `t = tbl[i] - 1; D = AF(o,u16,0xA) + t;` (s32 t) or `(s16)(tbl[i] - 1)` | f8 sc04_011 |
+| (r200) A clone that compares byte-identical but will not place | the target file's declarations differ (callee declared s32 and its value returned: the function becomes `s32` with no return; callees defined later with other parameter types: forward prototypes) | f3 sc04_011 80185960, sc05_003 8017EB44 |
+
+MATCH-TRICK (placed by r200, each with a `/* MATCH-TRICK: */` comment): func_sc06_018_8018F060 and its clones
+func_sc06_032_8018EDB0 / func_sc06_033_8018AD9C (r185 K7's dead store `pq = (u8 *)&D_800AF630;` before each inlined SetWsm,
+ACCEPTED per the dispatcher's ruling; note: the stores occur three times, each with a do-while(0)); func_sc05_002_8017F348
+(Z4: one do-while(0) around `p += 0x10C`); func_sc04_016_8017E26C (Z3: one volatile clear); func_sc06_018_8018AD74 (e22:
+one empty do-while(0)). Identical-arms forms placed and FLAGGED for a ruling: sc04_018 8017F5F8 / 8017F6D8 / 8017F7B8 /
+8017F898 (else-if item chains `else if (f(K)) v = 3;`), sc04_015 80181F4C and sc04_018 80180F7C (separate switch arms with
+one body, matching a real separate case label in the compare tree; r186's duplicated-arm row precedent).
+
+Parks cleared by r200 (park agents): sc04_011 8018C14C (fourth round, plain C), sc07_002 8017DC80 (plain C), sc04_016
+8017E26C (one volatile line), sc05_002 8017F348 (one do-while(0)).
+
+Parked by r200 (best attempts in C:/tw/stage-s2/build/work/ s7spec_<tag>_<n>.txt): sc04_015 80180F3C (1 line: `or a2,a2,a3`
+in place vs our own register for hi; e3_8 b3), sc06_011 8017F5F0 (3 lines: loop.c hoists the 0x26E compare constant;
+e4_2 b1), sc06_018 8018C334 (matches as `void f(SV8 *pos, CV4 col)` but the stage's caller passes the integer 0x4040FF:
+"incompatible type"; s32 forms differ), sc05_003 8017ED1C (17 lines: common tail based on an a0 copy of s0, else-arm p/b
+swap; e30_10 b1), sc04_011 801836D4 (~14 lines: lim via lh v0 + slot copy to a1, subu operand swaps; f2_5 b5),
+sc04_011 8018489C (11 lines: a1->s2 / a2->t0 entry copies, negu from the hard register; f5_3 b2), sc04_011 80186B08
+(3 lines: lui/addiu of D_801EFCA8 between sll and sra; f6_3 v0).
+
+Placement gaps met by r200 (tools card): stage_clone drops a source's `static inline` helper (sc06_018 8018F060's clones)
+and drafts nothing for shapes whose target file declares callees differently (4 shapes; hand clones); a deferred clone
+draft leaves a stray line in the target file (`extern void LoadImage();`, then `#include "psyq.h"` in sc06_025, three
+times; the commit gate caught the first); clone drafts carry `#include "psyq.h"`, which clashes with stage files that
+declare `extern void LoadImage();`; place_stage still drops unsized function-pointer table externs (5 functions placed
+with a hand-insert script) and defers a definition whose file extern is `s32` while the draft is `void` and callers use the
+value.
+
+### r199 rows (S1 batch 11, 26 Oct; helper and park agents; merges 0c780cf and 2)
+
+| Symptom | Source | Example |
+|---|---|---|
+| (r199) Two `beqz` fail paths sharing one call/return tail, the second test a `bnez` to the success block with the fail tail between | two early returns `if (p == 0) { fail(o); return; }`, the tail written out in each place | r199 e1 sc03_117 8017FB04 |
+| (r199) lwl/lwr/swl/swr 4-byte copies between globals | `typedef struct { u8 b[4]; } B4;` and a struct assignment `D_a = D_b;` | r199 e1 sc03_117 8017EA1C |
+| (r199) `x = r; if (r & 1) x = -r;` with the copy in the beqz slot and negu reading the original register | `s16 r = rand() % N; if (r & 1) r = -r; v.x += r;` (s32 r, if/else, ternary all fail) | r199 e2 sc03_117 8017FED8 |
+| (r199) Two pointer induction variables: `addiu s0,s3,8` set before the counter's `move s1,zero` | the pointer step in the for increment after the counter `for (i = 0; i < 6; i++, e += 0x20)` | r199 e2 sc03_117 8017ECC4 |
+| (r199) Two calls to one function in an if/else (own a1 constants) merged into one jal in ours, both arms then a shared state++ | `state++` inside each arm, no break in the arms (cross-jumping merges the state++ tails, not the calls); a held `u16 *p = (u16 *)&D_80126B58;` gives the s1 address and the 0x28 frame | r199 e3 sc03_117 8017E498 |
+| (r199) An extra `sll v0,v0,16` before testing the result of a stage callee defined `s16 f(void)` | call it through `((s32 (*)())f)()` (also calls an (s32,s32) callee with no args, keeping the file's prototype) | r199 e3 sc03_117 8017E498, 8017E6EC |
+| (r199) A `lhu/ori/sh` RMW on a global through a register base (`lui; addiu v0; lhu 0(v0)`) beside `lui at` stores | declare it an array `extern u16 D_80126B96[];` and `D_80126B96[0] \|= 0x4000;` | r199 e5 sc02_031 |
+| (r199) A sound volume from magic multiply 0x63E7063F then `sra 18` | `(dx*dx + dz*dz) * 80 / 0xA4000` (0xA4000 = 0x200^2 + 0x280^2, the range-test limits) | r199 e5 sc02_031 |
+| (r199) The base-field `lh s1` scheduled before `sra v1,v0,31` of a rand()%N, s0/s1 swapped between remainder and base | remainder and base in their own locals `b = rand() % 320; r = p->vx; v.vx = r + b`, the second pair its own locals (no reuse) | r199 e4 sc02_031 |
+| (r199) `sll 16; sra 14` on an s16 global loaded lhu (ours a plain `sll 2`), frame 0x18 short | copy the global into an s16 local first `t = D; a = b = -0x200 - t * 4`, separate s16 locals for each clamped copy (they give the frame) | r199 e4 sc02_031 80181378 |
+| (r199) `lui/addiu s1,&D` before `move s2,v0` (the call-result copy), ours the move first | the pointer local `p = &D;` BEFORE the call statement `id = f();`; an early-fail shared tail call written in both arms | r199 e7 sc03_011 80180830 |
+| (r199) In `u8 + u16*24` the v0/v1 roles swapped | the u16 into the local first `v = D_u16; v = D_u8 + v * 24;` | r199 e7 sc03_011 80180A10 |
+| (r199) A call result copied s1 -> s2 straight after the call (s1 later a constant 1 kept across calls) | `m = f(); n = m;` right after the call, m in one arm, n in the other, and `one = 1` | r199 e8 sc03_011 |
+| (r199) Clamped-camera block before RotMatrixZYX / func_8012F14C (a stack slot both clamp result and a2 output, D_80126942 in s0) | copy func_sc03_007_8017DE40: one SV8 q as both, `y = &D_80126942;`, if/else clamp into q.x | r199 e9 sc03_011 |
+| (r199) A constant store scheduled into an earlier lhu load-delay slot instead of the one after the last lh | write the table-read store (`AF(p,s32,0x2C) = tbl[i].pad << 16`) before the constant store in the source | r199 e10 sc03_011 8017ECD4 |
+| (r199) A switch tree with `slti x,2 -> default` between `==1` and `==2`, no `==0` test | an empty `case 0: break;` (its compare folds into default, the split stays) | r199 e11 sc03_029 |
+| (r199) A near-clone of another stage's matched function (sc05_010 80184E4C) using a helper the target stage lacks | copy the matched form with its `static inline` helper renamed per function (`rsgn_80183BB0`): place_stage puts inline helpers in front of the function | r199 e6 sc02_031 80183BB0 |
+| (r199) A jump-table switch whose case blocks are out of case order | write the cases in the order their code appears (2, 1, 4, 3, 5), each with its own full tail (cross-jumping gives the shared jumps) | r199 e13 sc03_124 8018009C |
+| (r199) A global load placed before earlier constant stores in the original | the `AF(o,s32,0x14) += D` statement before the 0x2C / 0x1C stores (or D into a local first) | r199 e13 sc03_124 8017F63C |
+| (r199) An if/else-if chain with the two constants in swapped slots (beqz vs bnez, li 3 / li 4) | invert the test so the nonzero arm comes first `else if (f(0xF7) & 0xFF) v = 3; else v = 4;` | r199 e14 sc03_124 |
+| (r199) A product kept in the multiplier's s-register (`mflo s2; sw s2`), ours in v1 | assign it back first `d = (rand() & 0xFFF) * -d; AF(o,s32,0x14) = d;` | r199 e14 sc03_124 |
+| (r199) Camera code: an `andi 0xFFF` angle in an s-reg gets a `move a0,sN` before its slti; a global both stored through and passed as a pointer | `s16 ang` (not s32); `s16 *t = &D_801274E8; *t = f(*t, ..); .. g(o, t, ang)` | r199 e12 sc03_029 8017F760 |
+| (r199) Two globals loaded into swapped registers for `G = G + 2 + a` | `G += a + 2;` | r199 e15 sc03_124 801810E4 |
+| (r199) A table address `lui/addiu` scheduled before a field store and before the index `sll` | a base local `base = D_tbl; AF(o,s16,2) = 8; t = base + idx * 4;` (a global argument loaded before a field store: read it into a local ahead of the store) | r199 e15 sc03_031 8017F0B0 |
+| (r199) A limit in a2 not a1, `negu` / `slt` against a field read right after | write the compare `field > -lim` (not `-lim < field`) | r199 e17 sc03_112 |
+| (r199) Two SV8 locals swapped s1/s2 with the midpoint (sra into s2) | `SV8 a, b;` on one line and `s16 mid` (not s32) | r199 e17 sc03_112 |
+| (r199) Random sign `x +/- rand() % N`, the base's `lh` after the remainder's `sra v1,v0,31` in the original (sched1 parks the load against the mult in plain inline code) | a static inline helper per divisor `static inline s32 rpm_X(s16 *p) { s32 r = rand() % N; s32 x = *p; return (rand() & 1) ? x + r : x - r; }` called `v.x = rpm_X(&AF(o,s16,6));`; N a constant in the body (a parameter adds 5-9 insns) | r199 e16 sc03_031 8017F728, 8017F428 |
+| (r199) Inline GTE rotate of a constant vector (RotMatrixX on a copy of D_800AE620, ctc2 x5, lwc2 x2, mvmva, mfc2/sh x3) | `m = D_800AE620; RotMatrixX(-0x300, &m); gte_SetRotMatrix(&m); gte_ldv0(&D); gte_rtv0(); gte_stsv(&v);` | r199 e16 sc03_031 |
+| (r199) A field store in the jal delay slot after a global's load (`lh a0,%lo(D)`; `jal; sh v0,0xA0(s0)`), ours stores first | the store as the call's argument `r = f((s16)D, AF(o,s16,0xA0) = r, 4, 1);` | r199 e18 sc03_112 8017E160 |
+| (r199) A loop with two switches whose compare constants 1 and 2 are both hoisted to s-registers (the original only 1) | one `s16 t;` reused for both switch indexes (`t = e->type; switch (t)` .. `t = e->kind; switch (t)`): about 4 more RTL insns take the loop past loop.c's threshold for the second constant (`cc1 -dL`; helper build/work/r179/v_e18/dl.py) | r199 e18 sc03_112 8017E4B4 |
+| (r199) `lb` reads of an s8 table into s16 stack fields, ours `lbu` + `sll/sra 24` | read through an `s32 k` temp `k = *t++; q.p[0].x = k;` (the reverse of the r157 row) | r199 e20 sc01_001 |
+| (r199) A ternary result stored to a stack byte then reloaded `lbu` after the join | an if/else assigning the byte in each arm (a ternary keeps it in a register) | r199 e20 sc01_001 |
+| (r199) `lui/addiu a1,&D_x` hoisted to the function top, one switch arm reading N(a1), another arm direct %lo(D_x+N) | a local `u8 *b = &D_x;` declared first, used only in that arm; the other arm keeps the scalar globals | r199 e21 sc03_002 |
+| (r199) A slti tree (r<100 -> A, <0x78 -> 7, <0x82 -> 0xB, else A) with one shared `sh v0` for 7/0xB | an if/else-if chain setting `s16 s`, both A cases `goto low` (a shared tail; `r>=100 && r<0x82` or a case range reorders the tree) | r199 e21 sc03_002 801816F0 |
+| (r199) Switch arms ending in the same `if (call) AF(o,u16,0x34)++;` tail cross-jumped to one label | write the tail out in each case (GCC merges them) | r199 e22 sc03_002 80181BCC |
+| (r199) `D[(x == 3) * 8]` compiled bne / addiu 16 (fold makes cond ? 16 : 0), the original xori / sltiu / sll 4 | the comparison into an s32 local first `i = AF(o,s16,0xFE) == 3; D[i * 8]` | r199 e19 |
+| (r199) A switch whose cases each `return 0`, the temps avoiding v0 (`move v0,zero` scheduled early) | `break` out of each case and one `return 0;` after the switch (`return 1` inline) | r199 e19 |
+| (r199) A chain of `if (f()) return 1;` with `li v0,1` in each bnez slot, the last call ending `sltu v0,zero,v0` | the last one `if (f()) return 1; return 0;` (not `return f() != 0;`: a j and a separate li block) | r199 e23 sc02_021 |
+| (r199) A min/max ladder with x/y registers swapped, layout right | the fields into named locals first (`a = q4; b = q8; c = qC;`) and `y = x = b` / `y = x = c` | r199 e23 sc02_021 |
+| (r199) Two store values from one register through a copy (`move a0,a1`, low byte from a0, `srl 8` from a1) | reuse the earlier u8 local for the low byte `c = t; *p = c; .. *p = t >> 8;` | r199 e27 sc02_037 |
+| (r199) An `&&` result held in v0 (`and; beqz v0; addu v0,zero,zero` slot, then `slti v0`) before a second test | `if (!(G & BIT)) c = 0; else c = G2 < K;` then `if (c && ..)` (`c = A && B`, ternary forms differ) | r199 e24 sc02_021 |
+| (r199) A struct-base global whose base word goes through a register (`lui/addiu; lw/sw 0(reg)`), other fields %lo, address passed to calls | `extern s32 D_x[];` and D_x[0] (plain stores elsewhere still match) | r199 e24 sc02_021 |
+| (r199) A scalar global (object pointer) reloaded lui+lw after each store through the pointer it holds, ours keeps the first load | the global as an array `extern s32 D[]; AF(D[0], s16, 2) = 4;` (struct / volatile casts reload but keep the address in a register); retype the file's scalar extern and its other C uses `D[0] = ..` | r199 e25 sc03_023 8017E414 |
+| (r199) A global's base in a0 before the first branch, later `lw 0x170(a0)`, ours lui+lw %lo(D+0x170) | a function-top local `u8 *g = &D_80126B58;` used as AF(g, u8 *, 0x170) | r199 e25 sc03_023 |
+| (r199) A search loop's hoisted constants in the wrong order (`li 300` before `li found,1`) | a local `id` set in the for-init `i = 0, p = &table, id = 300, found = 1`, compared `AF(p,u16,0) == id`; the hit path `goto hit;` out of the loop (break-with-flag costs one insn) | r199 e26 sc02_037 8017F578 |
+| (r199) Stack wider than the locals and an s16 field read into v1 then `move s1,v1` in the beqz slot | the local `s16 v` (not s32): it adds the 8-byte slot and the copy; the negative arm out of line `if (v >= 0) {..} else {..; return;}` | r199 e30 sc01_009 |
+| (r199) Stack struct stores in an order the scheduler would not choose (one field last, in the jal slot) | that field's assignment after all the others in the source | r199 e30 sc01_009 |
+| (r199) Clamp `addiu v1,zero,-0x500; subu v1,v1,<lhu field>`, ours `li v1,0xfb00` | read the field as s16 `s16 t = -0x500 - AF(o,s16,0x28); if (v.x < (s16)t) v.x = t;` | r199 e28 sc03_094 |
+| (r199) A table loop with `sll 3; addiu a1,-8` init, entries at %lo(D+2) / %lo(D+6) and the end flag at %lo(D) read after `addiu a1,8` | a struct based at the flag's label, flag first (`typedef struct { s16 next, x, y, z; } WayPt; extern WayPt D_8018B4F2[];`), index `D[i - 1]` | r199 e28 sc03_094 8017E254 |
+| (r199) Three s16 tables 2 bytes apart indexed (n+1)*8 as `addiu; sll 3`, bases not cse'd | `extern u16 D_x[][4];` each, `D_x[n + 1][0]` (1-D `[(n+1)*4]` folds and hoists the bases); a stack SV8 read through t0 in a loop: `q = &a;` before it, `q->x` | r199 e29 sc03_094 |
+| (r199) Two drafts declaring one table differently (SV8[] placed, s16[] in the next) | keep the placed declaration and cast at the use `((s16 *)D)[i * 4] = v;` (same code) | r199 sc03_094 8017E3B0 |
+| (r199) Sound volume / pan in a3 with the 0x66666667 constant shared in a0 (d/80 and d*127/640) | one variable d throughout `v = 8 - d/80; v <<= 8; if (d<0) d=-d; d = d*127/640; call(.., (u16)(v \| 0x3000 \| (0x7F - d)))` | r199 e32 sc03_102 |
+| (r199) Frame 8 bytes too big and one missing register copy (a value compared and copied) | an `s16` local for the reloaded global `s16 py = AF(q,s16,0xA)` compared `y > py` (no unused[]) | r199 e32 |
+| (r199) CV4 bytes `k + 0xF0` compiled `addiu v1,v0,-16`, the original `0xF0` | `u16 k = (D_800B99DA & 1) ? 0xF : 0;` (s32 / s16 / u8 give -16 or lbu) | r199 e31 sc03_102 |
+| (r199) Two halfword stores of `ang + 0x800` with the add and the next call's args scheduled before earlier constant stores | `t = ang + 0x800;` before the stores and a chained store `AF(a,s16,0x28) = AF(p,s16,0x14) = t;` | r199 e31 sc03_102 |
+| (r199) Angle sign-extension `andi a0,x,0xFFF; andi 0x800; beqz; addu v1,a0 (slot); ori v1,a0,0xF000`, s32 versions swap / coalesce | `u16 m = x & 0xFFF; b = m; if (x & 0x800) b = m \| 0xF000;`; then `if ((s16)c < 0) c = -c; s16 e = c;` for the shared sll with sra in the bgez slot | r199 e33 sc03_013 |
+| (r199) A constant table's address cse'd into an extra s-register (read twice across calls) | the clamp as `if (v < 0) vol = 0x1000; else vol = v \| 0x1000;` (the ternary kept s3); `u16 vol` puts the ori into a1 | r199 e33 sc03_013 |
+| (r199) A found flag set to 1 in the loop preheader (hoisted after the other invariants) and 0 on the natural exit, no flag form reproduces it | the search as a `static inline` helper with `return 1` inside the loop and `return 0` after (its value is a compiler temporary, so loop.c hoists the set) | r199 e34 sc03_089 80181F9C |
+| (r199) A clamp limit computed full width (`addiu -0x120; subu`, sll/sra for the compare), ours an HImode `li 0xfee0` | `s16 t = -0x120 - AF(o,s16,0x28); if (v.x < t) v.x = t;` (s16 field keeps SImode; cf. r199 e28) | r199 e34 sc03_089 8018188C |
+| (r199) Frame 8 too big with a 4-word stack argument block (0x10..0x1C), frame 0x30 | `s32 sp[4];` (not the 6 words the save-slot gap suggests: GCC adds the 8-byte pad) | r199 e37 sc03_010 |
+| (r199) A stage function with a matched caller that passes no arguments (`extern void f();`, `f();`), the new definition takes `u8 *o` | K&R `void f(o) u8 *o; {` (a prototype before the caller fails "too few arguments"); or prototype it and call `((void (*)())f)()` | r199 e33 sc03_013 8017E6F4, e37 sc03_010 8017E3B8 |
+| (r199) The result of a call ANDed with a mask, scheduled straight after the jal into an s-register (ours later) | the local u16 `u16 ang; ang = ratan2(..) & 0xFFF;` | r199 e36 sc03_111 |
+| (r199) An s16 field compared then updated, loaded once (lh; `move v1,v0`), ours twice or with a frame slot | no local: `if (AF(o,s16,0xFC) < 0x800) AF(o,s16,0xFC) += 0x40;` | r199 e36 sc03_111 |
+| (r199) `slti; beqz; slti; bnez` on one lh value, ours `addiu; andi 0xFFFF; sltiu` (frame 8 short) | nested ifs `if (v.x < -0x6FF) { if (v.x > -0x7C0) AF = -0x7C0 - v.x; else AF = 0; } else AF = 0;` | r199 e38 sc03_090 / 091 |
+| (r199) Clamp constants in a0 (`addiu a0,K` in the beqz slot, `sh a0`), `>` as `addiu v0,K; slt v0,v0,v1`, ours `slti K+1` | one `s16 lim;` reused for every clamp `lim = K; if (v.x > lim) v.x = lim;` (s32 lim: wrong registers) | r199 e38 |
+| (r199) Header stores to a stack primitive through an s-register (`addiu s0,sp,0x30`), ours sp-relative even with `p = &q;` | the conditional argument as an if/else with a call in each arm `if (flag) f(&D, &m); else f(rot, &m);` (the join ends cse's block; cross-jumping merges the calls) | r199 e35 sc03_116 801812AC |
+| (r199) `li v0,1` scheduled into the load slot before the last store, the original nop then v0 after the store | `if (q != 0) { ..stores.. } return 1;` instead of an early `if (q == 0) return 1;` | r199 e35 sc03_116 80181C4C |
+| (r199) A bail-out branch jumping straight to the shared `o[2]++` tail at the end | an early `{ AF(o,s16,2)++; return; }` plus the second `AF(o,s16,2)++` in the final if (tails merge) | r199 e40 sc03_114 |
+| (r199) Two stores to one s16 stack field | separate statements `sv.y = ..; .. sv.y += dy;` | r199 e40 sc01_074 |
+| (r199) A clamp pair on a stack SV8 field with the bound in a register (`li aN,K` before the load; `li v0,K2; slt`) | one s16 local reused for all four bounds | r199 e41 sc03_096 |
+| (r199) A select chain whose branches all jump to one store with 0x600/0x800 in the slot, z reloaded after the first range test | `if (z < A && in) r = X; else if (z >= B && (z >= C \|\| !in)) r = X; else r = Y;` (merged forms fold the tests) | r199 e41 sc03_100 |
+| (r199) A store kept before a load from the same object (`sh 0x2C(a0)` then `lw 0x20(a0)`) after an if/else picking the value | the store in each arm (cross-jumping merges them, sched2 keeps the order) | r199 e42 |
+| (r199) `addiu v1,s2,0x28` then `addu s2,v1,s0` (ours folds to s2 + (m+0x28)) | a fresh temp `w = y + 0x28; m = r & 0x1F; y = w + m;` | r199 e42 |
+| (r199) A clamp `slti; beqz; addiu vN,K (slot); sh vN` with the constant in v1 / a0, ours `li v0` after the branch | a bound variable set before the test `t = 0x1000; if (v.z < t) v.z = t;`: s32 for a plain stored constant, s16 when it also feeds a cross-jumped `k - x` | r199 e39 sc02_028 |
+| (r199) A field compared against several addresses loaded once then reloaded for a later `&&`'s second `!=` | no local: read AF(o,s32,0x90) directly in every compare | r199 e39 sc03_114 |
+| (r199) Constants 0x5 / 0x64 in swapped registers in a two-SPRT packet fill | the len byte store (o+3 = 5) before the mode word (o+4) in the first packet only | r199 e43 sc01_000 |
+| (r199) An identical if-arm twice in the original, merged into one copy in ours | repeat the shared tail store (o+0x32 = 0) inside every arm instead of once after the chain (cross-jumping then merges only the tail) | r199 e43 sc02_026 |
+| (r199) `&local` held in an s-register after a struct copy (the original recomputes `addiu aN,sp,K` per call), plus an s0/s1 order; r174-r186 needed two block joins (labels) | the struct copy and its first call in a `static inline` helper taking the pointer `static inline void h(WMtx *mp, s32 a) { *mp = D; RotMatrixY(a, mp); }` | r199 q2 sc02_000 801888F4 (r174 park) |
+| (r199) A v.x copy (HI pseudo) and a clamp constant allocated in the wrong order (global-alloc priority floor_log2(refs)*refs/live, `-dg`) | split a shared lim into one-use s16 locals per arm (lower priority, the copy goes first); or assign the constant into the copy inside the arm `s16 lim = -0x580; if (x > lim) { x = lim; v.x = x; }` (more refs for the copy) | r199 q4 sc02_027 8017F498, 8017F2B8 (r197 parks) |
+| (r199) A colour-fade loop with the r/g/b field extracts interleaved with the sums in ours | the extracts as their own single-set statements `r = c & 0x1F; g = ..; b = ..;` before the sums, each sum its own single-set local `rr = (r + ..) & 0x1F` (reusing r loses the tie); `c = *s;` with `s++` in the for increment after `i++` puts the lhu below the z load | r199 q1 sc03_105 80184500 (still parked, 4 lines) |
+| (r199) An s1/s2 swap between two call-crossing locals one insn apart in local-alloc lifetime (priority 3571 vs 3837) | reuse one s32 local for the partner load and an unrelated later global load (`t = D_ABA6; .. t = D_ABAA;`): two sets drop sched1's birthing boost, the loads keep source order | r199 q3 sc01_084 80183790 (r186 park) |
+| (r199) A loop invariant hoisted because the loop is just under loop.c's threshold (28 vs 30 insns) | `(s16)` on a value assigned to an s32 local that is only stored to an s16 field (2 RTL insns at loop time, combine removes them, no SUBREG dest to kill the birthing boost; marked MATCH-TRICK) | r199 q3 sc01_084 8017F9F4 (r186 park) |
+| (r199) A global load and a constant sunk by sched1 to just before their stores (the original right after the call) | the global into a local before the stores and the constant through the reused switch-index variable (`s = 1; .. D = s;`): two sets drop the birthing boost (-dS: 7f000001) | r199 q5 sc02_031 801831B4 |
+
+Placed in r199 under the policy as plain C (listed for LuciDin's review, revert = INCLUDE_ASM): forward gotos to a shared
+tail or out of a search loop (sc03_002 801816F0, sc02_037 8017F578, sc03_013 8017E6F4); K&R definitions where a matched
+caller passes no arguments (sc03_013 8017E6F4, sc03_010 8017E3B8); `static inline` helpers (sc02_031 80183BB0 `rsgn`,
+sc03_031 8017F728 / 8017F428 `rpm_*`, sc03_089 80181F9C `near_12C`, sc02_000 801888F4 `roty`); nested ifs with `= 0` in
+both else arms, the unfolded `a && b ? X : 0` (sc03_090 80181970 / 80181B50, sc03_091 80182788 / 80182968); sc03_023's
+D_801270C8 retyped `s32[]` (as sc03_007; 8017E988's store `D[0] = 0`). MATCH-TRICK line: sc01_084 8017F9F4 (`(s16)` cast).
+HELD, matching, not placed: sc03_094 8017D898 (only `D_80126B66[-4] += ..` for D_80126B5E, an alias index; file
+C:/tw/stage-sweep/build/work/r179/s/sc03_094/func_sc03_094_8017D898.c); the clone-pass copies of r200's pending
+identical-arms sc04_015 80181F4C (sc03_002 8018418C, sc03_124 80185308, sc03_125 80182A10; drafts in
+C:/tw/stage-sweep/build/work/r199/c2/p0) wait for that ruling.
+
+Parked by r199 (best attempts in C:/tw/stage-sweep/build/work/r179/ spec_<tag>_<n>.txt): sc03_105 80184500 (r186 park,
+14 -> 4 lines: global-alloc of the three mult products, z product last after the t1..t5 globals; q1_5 v2; dumps v_q1/d5),
+sc01_009 8017EFC4 (3 empty branch delay slots that reorg fills from the targets; only an inlined s32 helper tested after
+the call keeps them empty, +8 insns; e31_4 b1), sc01_001 80182284 (6 lines: v1/a0 swap in the last `|= 0x50000040`;
+e20_3 b1), sc01_001 8018275C (one extra strength-reduced register in the 20 x 0x4C table loop; e19_16 v0),
+sc02_028 8017F608 (4 lines: the v.x HI copy in a1 and bound k in a0, swapped; e39_8 b1). Still not placed by ruling:
+sc01_080 80181D98, sc02_028 80183AF8, sc04_019 801815DC, r177's sc04_016 8017E960 / sc05_001 8017FE0C.
+
+Placement gaps met by r199 (tools card): place_stage reports a spurious "build differs" with no differing words for a
+draft with a `static inline` helper (sc02_000 801888F4; handput_inl.py placed it, check PASS); place_stage does not
+reconcile one table declared differently by two drafts of the same batch (sc03_094: SV8[] vs s16[], "incompatible types";
+fixed by a cast at the use); a draft that needs a file global retyped scalar -> array (sc03_023 D_801270C8) needs a hand
+edit; clone_all copies a source placed under a pending ruling (r200's identical-arms forms) with nothing to flag it.

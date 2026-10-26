@@ -450,6 +450,36 @@ extern s32 func_80012ABC();
 extern s32 func_8012C354();
 extern u8 D_sc06_027_80181A44;
 
+typedef struct { U12 e[9]; } U12x9;
+typedef struct { s32 vx, vy, vz, pad; } V4F20;
+typedef struct { s16 x, y, z, pad; } SV_8E8A0;
+typedef struct { s32 x, y, z, pad; } VEC_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT_8E8A0;
+typedef struct { u8 r, g, b, cd; } CV_8E8A0;
+typedef struct { SV_8E8A0 pt[4]; CV_8E8A0 col[4]; s32 code; } PRIM_8E8A0;
+typedef struct { s32 x, y, z; } POS_8E8A0;
+typedef struct { s16 m[3][3]; s32 t[3]; } SMtx;
+typedef struct { u8 r, g, b, cd; } CV;
+typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
+typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
+typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
+typedef union { s32 w; XY s; } UXY;
+typedef void (*VoidFn)();
+typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
+typedef struct { s32 v[4]; } V16;
+typedef struct { V16 a, b, c; } Blk30;
+typedef struct { u8 b[0x34]; } R34;
+typedef struct { u8 b[8]; } B8;
+typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
+typedef struct { s16 x, y, z, pad; } FeSv;
+typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
+typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
+extern void func_80013F3C();
+extern s16 D_sc06_027_8019A0DC[];
+
+extern OtRef D_800A651C[];
+extern u8 *func_80010A08();
+
 INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017D104);
 
 void func_sc06_027_8017D1C0(u8 *o, SV8 *a, SV8 *b, s32 d) {
@@ -487,7 +517,40 @@ s32 func_sc06_027_8017D398(void) {
     return 0x81;
 }
 
-INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017D3A0);
+void func_sc06_027_8017D3A0(u8 *o) {
+    u32 *ot;
+    u8 *p;
+
+    ot = D_800A651C[D_800B9A02].ot;
+    p = func_80010A08(0x30);
+    if (p != 0) {
+        SetDrawMode(p, 0, 0, (u16) GetTPage(0, 1, 0, 0), 0);
+        AF(p, u8, 0x10) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x18) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x20) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x28) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x11) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x19) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x21) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x29) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x12) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x1A) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x22) = AF(o, s32, 0x1C);
+        AF(p, u8, 0x2A) = AF(o, s32, 0x1C);
+        AF(p, u8, 0xF) = 8;
+        AF(p, u8, 0x13) = 0x3A;
+        AF(p, s16, 0x14) = -0xA0;
+        AF(p, s16, 0x1C) = 0xA0;
+        AF(p, s16, 0x24) = -0xA0;
+        AF(p, s16, 0x2C) = 0xA0;
+        AF(p, s16, 0x16) = -0x78;
+        AF(p, s16, 0x1E) = -0x78;
+        AF(p, s16, 0x26) = 0x78;
+        AF(p, s16, 0x2E) = 0x78;
+        AddPrim(ot, p + 0xC);
+        AddPrim(ot, p);
+    }
+}
 
 void func_sc06_027_8017D508(u8 *arg0) {
     D_sc06_027_80181A78[AF(arg0, u16, 2)]();
@@ -610,7 +673,13 @@ s32 func_sc06_027_8017DA3C(s32 arg0) {
     return temp_v0 < 1;
 }
 
-INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017DA78);
+void func_sc06_027_8017DA78(s32 arg0, s32 arg1, s32 arg2) {
+    WMtx m;
+
+    func_80013F3C(&m);
+    func_sc06_027_8017DADC((s16)arg0, &m);
+    ApplyMatrixSV(&m, arg1, arg2);
+}
 
 void func_sc06_027_8017DADC(s32 arg0, WMtx *m) {
     WMtx r;
@@ -673,6 +742,32 @@ void func_sc06_027_8017DC3C(u16 *r, s16 *m) {
     m[8] = (sy * sx) >> 15;
 }
 
-INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017DE20);
+s32 func_sc06_027_8017DE20(u32 a) {
+    if (a < 0x400) {
+        return D_sc06_027_8019A0DC[a];
+    }
+    if (a - 0x400 < 0x400) {
+        return D_sc06_027_8019A0DC[0x7FF - a];
+    }
+    if (a - 0x800 < 0x400) {
+        return (s16)-D_sc06_027_8019A0DC[a - 0x800];
+    }
+    if (a - 0xC00 < 0x400) {
+        return (s16)-D_sc06_027_8019A0DC[0xFFF - a];
+    }
+}
 
-INCLUDE_ASM("asm/stg/sc06_027/nonmatchings/sc06_027", func_sc06_027_8017DEDC);
+s32 func_sc06_027_8017DEDC(s32 a) {
+    if (a >= 0 && a < 0x400) {
+        return D_sc06_027_8019A0DC[0x3FF - a];
+    }
+    if (a >= 0x400 && a < 0x800) {
+        return (s16)-D_sc06_027_8019A0DC[a - 0x400];
+    }
+    if (a >= 0x800 && a < 0xC00) {
+        return (s16)-D_sc06_027_8019A0DC[0xBFF - a];
+    }
+    if (a >= 0xC00 && a < 0x1000) {
+        return D_sc06_027_8019A0DC[a - 0xC00];
+    }
+}

@@ -589,6 +589,42 @@ extern u16 D_sc07_006_801CAC28[]; extern u16 D_sc07_006_801CAC48[];
 extern u8 D_sc07_006_8018E4B0;
 extern u8 *D_sc07_006_801BFCDC[];
 
+extern u8 *D_sc07_006_801BF5B4;
+extern u8 *D_sc07_006_801BF5B8;
+extern u8 *D_sc07_006_801BF5BC;
+extern SV8 *D_sc07_006_801C1E80;
+extern SV8 *D_sc07_006_801C1E90;
+extern SV8 *D_sc07_006_801C1E84;
+extern SV8 *D_sc07_006_801C1E94;
+extern SV8 *D_sc07_006_801C1E88;
+extern SV8 *D_sc07_006_801C1E98;
+extern u8 *D_sc07_006_801BF65C;
+extern u8 *D_sc07_006_801BF660;
+extern u8 *D_sc07_006_801BF684;
+extern SV8 *D_sc07_006_801C1E2C;
+extern SV8 *D_sc07_006_801C1E38;
+extern SV8 *D_sc07_006_801C1E30;
+extern SV8 *D_sc07_006_801C1E3C;
+extern SV8 *D_sc07_006_801C1EAC;
+extern SV8 *D_sc07_006_801C1E34;
+extern u8 *D_sc07_006_801BF6A4;
+extern u8 *D_sc07_006_801BF6A8;
+extern u8 *D_sc07_006_801BF6AC;
+extern SV8 *D_sc07_006_801C1E6C;
+extern SV8 *D_sc07_006_801C1E78;
+extern SV8 *D_sc07_006_801C1E70;
+extern SV8 *D_sc07_006_801C1E7C;
+extern SV8 *D_sc07_006_801C1E74;
+extern SV8 *D_sc07_006_801C1EB0;
+extern u8 D_sc07_006_8018DF88; extern u8 D_sc07_006_8018DF90; extern u8 D_sc07_006_8018DF98; extern u8 D_sc07_006_8018DFA0; extern u8 D_sc07_006_8018DFA8;
+extern u16 D_sc07_006_801CAD68[]; extern u16 D_sc07_006_801CADC8[]; extern u16 D_sc07_006_801CADE8[]; extern u16 D_sc07_006_801CAE08[]; extern u16 D_sc07_006_801CAE28[]; extern u16 D_sc07_006_801CAE48[]; extern u16 D_sc07_006_801CAE68[]; extern u16 D_sc07_006_801CAE88[]; extern u16 D_sc07_006_801CAEA8[]; extern u16 D_sc07_006_801CAEC8[];
+
+extern u8 *D_sc07_006_801BF56C;
+extern u8 *D_sc07_006_801BF570;
+extern u8 *D_sc07_006_801BF574;
+extern u8 *D_sc07_006_801BF578;
+extern SV8 *D_sc07_006_801C1E8C;
+
 INCLUDE_ASM("asm/stg/sc07_006/nonmatchings/sc07_006", func_sc07_006_8017D040);
 
 s32 func_sc07_006_8017D0F4(s32 arg0) {
@@ -862,15 +898,52 @@ void func_sc07_006_801805D4(s32 t, u8 *o) {
     lerpv(s, D_sc07_006_801BF55C, D_sc07_006_801C1E48, D_sc07_006_801C1E58);
 }
 
-INCLUDE_ASM("asm/stg/sc07_006/nonmatchings/sc07_006", func_sc07_006_80180924);
+void func_sc07_006_80180924(s32 t) {
+    lerpv(t, D_sc07_006_801BF56C, D_sc07_006_801C1E80, D_sc07_006_801C1E90);
+    lerpv(t, D_sc07_006_801BF570, D_sc07_006_801C1E84, D_sc07_006_801C1E94);
+    lerpv(t, D_sc07_006_801BF574, D_sc07_006_801C1E88, D_sc07_006_801C1E98);
+    lerpv(t, D_sc07_006_801BF578, D_sc07_006_801C1E8C, D_sc07_006_801C1E8C);
+}
 
-INCLUDE_ASM("asm/stg/sc07_006/nonmatchings/sc07_006", func_sc07_006_80180CFC);
+void func_sc07_006_80180CFC(s32 t, u8 *o) {
+    s32 s;
 
-INCLUDE_ASM("asm/stg/sc07_006/nonmatchings/sc07_006", func_sc07_006_80181148);
+    lerpv(t, D_sc07_006_801BF56C, D_sc07_006_801C1E80, D_sc07_006_801C1E90);
+    s = rsin(AF(o, s16, 0xFC)) + (rsin(AF(o, s16, 0xFE) + 0x100) >> 4);
+    lerpv(s, D_sc07_006_801BF570, D_sc07_006_801C1E84, D_sc07_006_801C1E94);
+    s = rsin(AF(o, s16, 0xFC)) + (rsin(AF(o, s16, 0xFE) + 0x200) >> 4);
+    lerpv(s, D_sc07_006_801BF574, D_sc07_006_801C1E88, D_sc07_006_801C1E98);
+    lerpv(t, D_sc07_006_801BF578, D_sc07_006_801C1E8C, D_sc07_006_801C1E8C);
+}
 
-INCLUDE_ASM("asm/stg/sc07_006/nonmatchings/sc07_006", func_sc07_006_8018163C);
+void func_sc07_006_80181148(s32 t) {
+    clutlerp(t, D_sc07_006_801F60A0, D_sc07_006_801CADE8, D_sc07_006_801CAE88);
+    LoadImage(&D_sc07_006_8018DF88, D_sc07_006_801F60A0);
+    clutlerp(t, D_sc07_006_801F60A0 + 0x10, D_sc07_006_801CAE68, D_sc07_006_801CAEC8);
+    LoadImage(&D_sc07_006_8018DF90, D_sc07_006_801F60A0 + 0x10);
+    clutlerp(t, D_sc07_006_801F60A0 + 0x20, D_sc07_006_801CAE48, D_sc07_006_801CAEA8);
+    LoadImage(&D_sc07_006_8018DF98, D_sc07_006_801F60A0 + 0x20);
+    clutlerp(t, D_sc07_006_801F60A0 + 0x30, D_sc07_006_801CAD68, D_sc07_006_801CAE28);
+    LoadImage(&D_sc07_006_8018DFA0, D_sc07_006_801F60A0 + 0x30);
+    clutlerp(t, D_sc07_006_801F60A0 + 0x40, D_sc07_006_801CADC8, D_sc07_006_801CAE08);
+    LoadImage(&D_sc07_006_8018DFA8, D_sc07_006_801F60A0 + 0x40);
+}
 
-INCLUDE_ASM("asm/stg/sc07_006/nonmatchings/sc07_006", func_sc07_006_80181924);
+void func_sc07_006_8018163C(s32 t) {
+    lerpv(t, D_sc07_006_801BF5B4, D_sc07_006_801C1E80, D_sc07_006_801C1E90);
+    lerpv(t, D_sc07_006_801BF5B8, D_sc07_006_801C1E84, D_sc07_006_801C1E94);
+    lerpv(t, D_sc07_006_801BF5BC, D_sc07_006_801C1E88, D_sc07_006_801C1E98);
+}
+
+void func_sc07_006_80181924(s32 t, u8 *o) {
+    s32 s;
+
+    lerpv(t, D_sc07_006_801BF5B4, D_sc07_006_801C1E80, D_sc07_006_801C1E90);
+    s = rsin(AF(o, s16, 0xFC)) + (rsin(AF(o, s16, 0xFE) + 0x100) >> 4);
+    lerpv(s, D_sc07_006_801BF5B8, D_sc07_006_801C1E84, D_sc07_006_801C1E94);
+    s = rsin(AF(o, s16, 0xFC)) + (rsin(AF(o, s16, 0xFE) + 0x200) >> 4);
+    lerpv(s, D_sc07_006_801BF5BC, D_sc07_006_801C1E88, D_sc07_006_801C1E98);
+}
 
 void func_sc07_006_80181C74(u8 *o, s32 n) {
     u8 **p = &D_sc07_006_801BFCCC;
@@ -976,7 +1049,11 @@ void func_sc07_006_80182268(u8 *o, s32 n) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc07_006/nonmatchings/sc07_006", func_sc07_006_801823F8);
+void func_sc07_006_801823F8(s32 t) {
+    lerpv(t, D_sc07_006_801BF65C, D_sc07_006_801C1E2C, D_sc07_006_801C1E38);
+    lerpv(t, D_sc07_006_801BF660, D_sc07_006_801C1E30, D_sc07_006_801C1E3C);
+    lerpv(t, D_sc07_006_801BF684, D_sc07_006_801C1EAC, D_sc07_006_801C1E34);
+}
 
 void func_sc07_006_801826E0(u8 *o, s32 n) {
     u8 **p = &D_sc07_006_801BFCE4;
@@ -1001,7 +1078,11 @@ void func_sc07_006_801826E0(u8 *o, s32 n) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc07_006/nonmatchings/sc07_006", func_sc07_006_801828A4);
+void func_sc07_006_801828A4(s32 t) {
+    lerpv(t, D_sc07_006_801BF6A4, D_sc07_006_801C1E6C, D_sc07_006_801C1E78);
+    lerpv(t, D_sc07_006_801BF6A8, D_sc07_006_801C1E70, D_sc07_006_801C1E7C);
+    lerpv(t, D_sc07_006_801BF6AC, D_sc07_006_801C1E74, D_sc07_006_801C1EB0);
+}
 
 void func_sc07_006_80182B8C(u8 *o, s32 n) {
     u8 **p = &D_sc07_006_801BFCEC;

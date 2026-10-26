@@ -15,7 +15,10 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FUNC = re.compile(r'^(?!typedef|struct|union|enum)[A-Za-z_][\w \*]*?\b([A-Za-z_]\w*)\s*\([^;{]*\)\s*\{', re.M)   # any top-level definition (stage engine functions carry names)
+# any top-level definition (stage engine functions carry names), K&R ones too: `f(a, b) s32 a; s16 b; {` (r192: their
+# bodies stayed in the declaration text, and stage_clone copied them as "declarations" with the source's symbols)
+FUNC = re.compile(r'^(?!typedef|struct|union|enum|extern)[A-Za-z_][\w \*]*?\b([A-Za-z_]\w*)\s*\([^;{]*\)\s*'
+                  r'(?:[A-Za-z_][^;{}()]*;\s*)*\{', re.M)
 
 
 def split(text):
@@ -76,8 +79,17 @@ INCLUDE = re.compile(r'^#include\s+["<][^">]+[">][^\n]*$', re.M)
 
 
 def includes(text):
-    """the draft's #include lines (split() leaves them out: GTE drafts need theirs, include/gte.h)"""
-    return INCLUDE.findall(text)
+    """the draft's #include lines (split() leaves them out: GTE drafts need theirs, include/gte.h); a quoted header
+    that is not under include/ (a scratch header of the draft's work folder) is dropped with a note, as it would not
+    resolve from src/ (r192)"""
+    keep = []
+    for x in INCLUDE.findall(text):
+        m = re.match(r'#include\s+"([^"]+)"', x)
+        if m and not os.path.exists(os.path.join(ROOT, 'include', m[1])):
+            print(f'put_func: dropped {x.strip()} (not a header under include/)')
+            continue
+        keep.append(x)
+    return keep
 
 
 def add_includes(t, incs):
@@ -120,7 +132,8 @@ def defined_names(c):
             if m:
                 names.add(m[1])
     elif '{' not in c:
-        m = re.search(r'(\w+)\s*(?:\[[^\]]*\])*\s*(?:\([^;]*\))?\s*;$', c)
+        fp = re.search(r'\(\s*\*\s*(\w+)\s*(?:\[[^\]]*\])*\s*\)\s*\(', c)   # extern void (*D_X[10])(s32); (r192: was "void")
+        m = fp or re.search(r'(\w+)\s*(?:\[[^\]]*\])*\s*(?:\([^;]*\))?\s*;$', c)
         if m:
             names.add(m[1])
     return names
@@ -134,25 +147,75 @@ def declared_in(name, t):
     t = strip_comments(t)
     return bool(re.search(rf'\btypedef\b[^;{{}}]*\b{n}\s*(?:\[[^\]]*\])*\s*;', t)
                 or re.search(rf'\}}\s*(?:\*?\s*\w+\s*,\s*)*\*?\s*{n}\s*[,;]', t)
-                or re.search(rf'\(\s*\*\s*{n}\s*\)', t)
+                or re.search(rf'\(\s*\*\s*{n}\s*(?:\[[^\]]*\])*\s*\)', t)
                 or re.search(rf'\b(?:struct|union|enum)\s+{n}\s*\{{', t)
                 or re.search(rf'^[A-Za-z_][^\n;{{}}#]*\b{n}\s*(?:\[[^\]]*\])*\s*(?:\([^;{{}}]*\))?\s*(?:=[^;]*)?;', t, re.M)
                 or re.search(rf'^[A-Za-z_][^\n;{{}}]*\b{n}\s*\([^;{{}}]*\)\s*\{{', t, re.M))
 
 
+def split_multi(c):
+    """`extern s32 D_1, *D_2, D_3[4];` as one line per name (r192: the whole line was skipped when one name was already
+    declared); anything else (an initialiser, a function, a typedef) is returned as it is"""
+    m = re.fullmatch(r'\s*(extern\s+[\w\s]*?\w)\s+([^;(){}=]*,[^;(){}=]*);\s*', c)
+    if not m:
+        return [c]
+    return [f'{m[1]} {d.strip()};' for d in m[2].split(',') if d.strip()]
+
+
+def _func_name(c):
+    """the function a prototype chunk declares (`extern s32 f(s32);`, `void *g();`), else None"""
+    m = re.fullmatch(r'\s*(?:extern\s+)?[A-Za-z_][\w\s\*]*?\b(\w+)\s*\([^;{}]*\)\s*;\s*', c)
+    return m[1] if m and not re.match(r'\s*typedef\b', c) else None
+
+
 def missing_decls(cs, t):
     """the declaration chunks the file lacks (r142): comments do not count, and a chunk whose names the file already
-    declares is skipped whole (no duplicate typedef, the file's own extern wins)"""
+    declares is skipped whole (no duplicate typedef, the file's own extern wins). r192: a multi-name extern line is
+    split first; INCLUDE_ASM lines are never declarations; a function the file only declares or defines after its first
+    INCLUDE_ASM (where the new declarations go) still gets its prototype (it was dropped: "undeclared", "used prior to
+    declaration"), unless that later definition is static."""
     tn = norm(strip_comments(t))
+    k = t.find('\nINCLUDE_ASM')
+    head = t[:k] if k >= 0 else t
+    hn = norm(strip_comments(head))
     out = []
-    for c in cs:
-        cc = strip_comments(c)
-        if not cc.strip() or norm(cc) in tn:
-            continue
-        names = defined_names(cc)
-        if names and all(declared_in(x, t) for x in names):
-            continue
-        out.append(cc)
+    for c0 in cs:
+        for c in split_multi(strip_comments(c0)):
+            cc = '\n'.join(l for l in c.splitlines() if not l.lstrip().startswith('INCLUDE_ASM'))
+            fn = _func_name(cc)
+            # an identical extern or prototype only further down still goes up here (a duplicate is harmless)
+            if not cc.strip() or norm(cc) in (hn if fn or cc.lstrip().startswith('extern') else tn):
+                continue
+            if fn:
+                later_static = re.search(rf'^static\b[^;{{}}]*\b{fn}\s*\(', strip_comments(t[len(head):]), re.M)
+                if declared_in(fn, head) or later_static:
+                    continue
+                if any(_func_name(x) == fn for x in out):
+                    continue
+                # defined further down: its own header is the prototype (the draft's guess could conflict with it);
+                # a K&R definition gives `T f();`
+                for d in FUNC.finditer(strip_comments(t[len(head):])):
+                    if d[1] == fn:
+                        h = d[0][:-1].rstrip()                          # the header without its `{`
+                        p = h.index('(', h.index(fn))
+                        # K&R (parameter declarations follow, or bare names): no prototype
+                        if not h.endswith(')') or re.fullmatch(r'\(\s*\w+(?:\s*,\s*\w+)*\s*\)', h[p:]) and h[p:] != '(void)':
+                            h = h[:p] + '()'
+                        cc = ' '.join(h.split()) + ';'
+                        break
+                out.append(cc)
+                continue
+            names = defined_names(cc)
+            if names and all(declared_in(x, t) for x in names):
+                # an extern variable the file declares only further down: the file's own line, up here too
+                if cc.lstrip().startswith('extern') and len(names) == 1 and not declared_in(next(iter(names)), head):
+                    n = re.escape(next(iter(names)))
+                    m = re.search(rf'^extern\b[^;{{}}()]*\b{n}\s*(?:\[[^\]]*\])*\s*;|^extern\b[^;{{}}]*\(\s*\*\s*{n}\b[^;{{}}]*;',
+                                  strip_comments(t[len(head):]), re.M)
+                    if m and m[0] not in out:
+                        out.append(m[0])
+                continue
+            out.append(cc)
     return out
 
 
@@ -208,18 +271,25 @@ def main():
                     break
             else:
                 sys.exit(f'{name}: no INCLUDE_ASM for it in src/ (already decompiled?)')
-    targets = sorted({target_of(f) for f in files if files[f] != backup[f]}) or [('check-main', 'SLUS_007.26: OK')]
-    for f, t in files.items():
-        open(f, 'w', encoding='utf-8', newline='\n').write(t)
+    # r192: only the files that changed are written, and only they are put back (writing every src file back once
+    # left src/stg/sc02_015.c empty when the revert was interrupted)
+    changed = [f for f in files if files[f] != backup[f]]
+    targets = sorted({target_of(f) for f in changed}) or [('check-main', 'SLUS_007.26: OK')]
+    for f in changed:
+        open(f, 'w', encoding='utf-8', newline='\n').write(files[f])
     ok, log = build(targets)
     if ok:
         print('OK: build still matches;', ', '.join(placed), 'now in C')
         return
     print('FAILED, reverting.')
     errs = [l for l in log.splitlines() if 'error' in l.lower() or 'incompatible' in l or 'warning' in l.lower() or '.c:' in l or 'undeclared' in l]
-    print('\n'.join([e for e in errs if 'warning' not in e][:14]) or '\n'.join(errs[:14]) or log[-800:])
-    for f, t in backup.items():
-        open(f, 'w', encoding='utf-8', newline='\n').write(t)
+    errs = list(dict.fromkeys(errs))                   # a header's warning repeats once per file
+    hard = [e for e in errs if 'warning' not in e]
+    print('\n'.join(hard[:40]) or '\n'.join(errs[:40]) or log[-800:])
+    if len(hard if hard else errs) > 40:
+        print(f'... {len(hard if hard else errs) - 40} more lines')
+    for f in changed:
+        open(f, 'w', encoding='utf-8', newline='\n').write(backup[f])
     build(targets)
     sys.exit(1)
 

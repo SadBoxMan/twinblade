@@ -21,6 +21,10 @@ for f in files:
     for m in re.finditer(r'^(?:extern\s+)?(s32|u32|s16|u16|s8|u8|int)\s+(func_\w+)\s*\([^;{]*\)\s*;', t, re.M):
         n = m[2]
         pat = re.compile(r'^(extern\s+)?void\s+%s\s*\(([^;{]*)\)\s*;' % n, re.M)
+        # r192: not a function the stage file defines in C as void (its prototype retyped would conflict with the body)
+        if re.search(r'^[\w\s\*]*\bvoid\s+%s\s*\([^;{]*\)\s*\{' % n, src, re.M):
+            print('stage file:', n, 'is defined void in C: left alone (the draft uses a value it does not return)')
+            continue
         if pat.search(src):
             src = pat.sub(lambda q: '%ss32 %s(%s);' % (q[1] or '', n, q[2]), src)
             open(os.path.join(WT, 'src/stg', st + '.c'), 'w', encoding='utf-8', newline='\n').write(src)

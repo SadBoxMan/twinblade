@@ -445,11 +445,34 @@ extern s32 func_800159E4();
 extern s32 func_8012BB3C();
 extern s32 func_80015978();
 
-INCLUDE_ASM("asm/stg/sc07_011/nonmatchings/sc07_011", func_sc07_011_8017CD9C);
+extern s32 D_800B9ADC[];
+extern u8 D_sc07_011_80189DA4;
+extern u8 D_sc07_011_80189DE0;
+extern s32 *D_801274C8;
+extern s32 *D_801274CC;
 
-INCLUDE_ASM("asm/stg/sc07_011/nonmatchings/sc07_011", func_sc07_011_8017CDD8);
+void func_sc07_011_8017CD9C(void) {
+    D_801274C8 = &D_sc07_011_80189DA4;
+    D_801274CC = &D_sc07_011_80189DE0;
+    D_800B9ADC[0] |= 0x50000000;
+}
 
-INCLUDE_ASM("asm/stg/sc07_011/nonmatchings/sc07_011", func_sc07_011_8017CE14);
+extern u8 D_sc07_011_80189DF4;
+extern u8 D_sc07_011_80189E30;
+extern u8 D_sc07_011_80189E44;
+extern u8 D_sc07_011_80189EF8;
+
+void func_sc07_011_8017CDD8(void) {
+    D_801274C8 = &D_sc07_011_80189DF4;
+    D_801274CC = &D_sc07_011_80189E30;
+    D_800B9ADC[0] |= 0x50000000;
+}
+
+void func_sc07_011_8017CE14(void) {
+    D_801274C8 = &D_sc07_011_80189E44;
+    D_801274CC = &D_sc07_011_80189EF8;
+    D_800B9ADC[0] |= 0x50000000;
+}
 
 void func_sc07_011_8017CE50(u8 *arg0) {
     D_sc07_011_80182178[AF(arg0, u8, 0x15)]();

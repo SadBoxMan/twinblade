@@ -595,6 +595,17 @@ extern void func_8001CD9C();
 
 extern s32 rand();
 
+extern void func_800D20C0();
+extern void func_80017E68();
+extern void func_800D23D0();
+extern void ApplyMatrixSV();
+extern void RotMatrixYXZ();
+extern void ApplyTransposeMatrixLV();
+extern s32 ratan2();
+extern s32 D_801269A4;
+extern s32 D_801269A8;
+extern s32 D_801269AC;
+
 INCLUDE_ASM("asm/stg/sc06_006/nonmatchings/sc06_006", func_sc06_006_8017CE7C);
 
 s32 func_sc06_006_8017CEE0(u8 *arg0) {
@@ -1499,7 +1510,30 @@ void func_sc06_006_8017FA2C(void *a0, void *a1, void *a2) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc06_006/nonmatchings/sc06_006", func_sc06_006_8017FD4C);
+void func_sc06_006_8017FD4C(void *a0, s16 *p, s16 *q, void *m) {
+    SV8 c;
+    SV8 d;
+    V3 w;
+
+    c.x = (p[0] + q[0]) >> 1;
+    c.y = (p[1] + q[1]) >> 1;
+    c.z = (p[2] + q[2]) >> 1;
+    func_8012F14C(a0, &c, &c);
+    func_800D20C0(&c, &d, 8);
+    func_80017E68(&c, m);
+    d.x = q[0] - p[0];
+    d.y = q[1] - p[1];
+    d.z = q[2] - p[2];
+    ApplyMatrixSV(a0, &d, &d);
+    func_800D23D0(&d);
+    RotMatrixYXZ(&d, m);
+    w.x = D_801269A4 - c.x;
+    w.y = D_801269A8 - c.y;
+    w.z = D_801269AC - c.z;
+    ApplyTransposeMatrixLV(m, &w, &w);
+    d.z = -ratan2(w.x, w.y);
+    RotMatrixYXZ(&d, m);
+}
 
 INCLUDE_ASM("asm/stg/sc06_006/nonmatchings/sc06_006", func_sc06_006_8017FECC);
 

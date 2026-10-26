@@ -1,5 +1,6 @@
 #include "common.h"
 #include "gte.h"
+#include "psyq.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 void func_sc03_031_8017BE9C(void) {
@@ -79,7 +80,7 @@ extern u8 D_sc03_031_80182694;
 extern s32 func_80029178();
 extern void func_8012CAE4();
 extern u8 D_sc03_031_801BF864;
-extern void func_sc03_031_80182224();
+extern s32 * func_sc03_031_80182224();
 extern s32 D_sc03_031_801BF8CC[];
 extern s32 func_8012C658();
 extern void func_80029124();
@@ -142,7 +143,7 @@ extern void func_8012A094();
 extern s32 func_8012E778();
 extern s32 func_8014CB2C();
 extern void func_8012B200();
-extern void func_8012B178();
+extern s32 func_8012B178();
 extern u8 D_sc03_031_80186114;
 extern u8 D_sc03_031_80186174;
 extern void func_sc03_031_8017BEBC();
@@ -323,7 +324,29 @@ extern s32 D_sc03_031_801C5ED8;
 extern s32 D_sc03_031_801C5EDC;
 extern s32 D_sc03_031_801C5EE0;
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017BEBC);
+typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
+typedef struct { s16 x, y, z; } SV6;
+typedef struct { s32 w[4]; } W16;
+typedef struct { s16 x, y; s32 col; } Star8;
+typedef struct { SV8 p[3]; CV4 c[3]; s32 code; } TriArg;
+
+void func_sc03_031_8017BEBC(s32 arg0, SV *arg1, s32 arg2) {
+    SV v;
+    s16 i;
+    s16 k;
+
+    v.vx = arg1->vx;
+    v.vy = arg1->vy - 20;
+    v.vz = arg1->vz;
+    func_8012F14C(AF(arg0, s32, 0x20) + 0x34, &v, &v);
+    for (i = 0; i < 2; i++) {
+        k = 1;
+        if ((s16)arg2 == 0) {
+            k = i;
+        }
+        func_80146A6C(0x25, arg0, v.vx, v.vy, v.vz, k, 0);
+    }
+}
 
 void func_sc03_031_8017BF88(u8 *arg0) {
     SV4 v;
@@ -681,7 +704,25 @@ void func_sc03_031_8017CC04(u8 *arg0) {
     AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017CCF8);
+void func_sc03_031_8017CCF8(u8 *arg0) {
+    u8 *p;
+    s16 v;
+    s32 t;
+
+    p = AF(arg0, u8 *, 0xDC);
+    if (AF(p, u8, 1) == 0) {
+        v = 1;
+    } else {
+        if (AF(arg0, s16, 0x108) == 0) {
+            AF(arg0, s16, 0x108) = func_80128CFC(AF(p, u16, 2));
+        }
+        t = AF(arg0, s16, 0x108);
+        v = t;
+    }
+    if (v != 0) {
+        AF(arg0, u16, 2)++;
+    }
+}
 
 void func_sc03_031_8017CD78(u8 *arg0) {
     SV8 sp10;
@@ -1027,7 +1068,27 @@ void func_sc03_031_8017D8A0(u8 *arg0) {
     D_sc03_031_80185EF8[AF(arg0, u16, 2)]();
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017D8DC);
+void func_sc03_031_8017D8DC(u8 *arg0) {
+    s16 r;
+    s32 d1, d2;
+    u8 *s1;
+
+    s1 = AF(arg0, u8 *, 0x34);
+    r = rand();
+    d1 = (r & 0x3F) - 0x20;
+    AF(arg0, s16, 6) = AF(s1, u16, 6) + d1;
+    if (AF(arg0, s32, 0x2C) != 0) {
+        AF(arg0, u16, 0xA) = AF(s1, u16, 0xA) - 0x140;
+        AF(arg0, s16, 0x16) = 0x20;
+    } else {
+        AF(arg0, u16, 0xA) = AF(s1, u16, 0xA);
+        AF(arg0, s16, 0x16) = -0x20;
+    }
+    d2 = ((r >> 6) & 0x3F) - 0x20;
+    AF(arg0, s16, 0xE) = AF(s1, u16, 0xE) + d2;
+    AF(arg0, s32, 0x30) = (r >> 12) & 3;
+    AF(arg0, u16, 2)++;
+}
 
 void func_sc03_031_8017D990(u8 *arg0) {
     s32 temp_v0;
@@ -1435,6 +1496,82 @@ void func_sc03_031_8017EDBC(s32 arg0) {
     D_sc03_031_80185FB8[AF(arg0, u8, 4)]();
 }
 
+typedef struct { u8 b[0x10C]; } O10C;
+extern s32 func_8012B8E4();
+extern s32 func_8012BD3C();
+extern void func_80142414();
+extern s32 D_sc03_031_801B6E34;
+extern s32 func_8012CBA4();
+extern void func_8012ADE4();
+extern s32 func_8012D5E4();
+extern u8 D_sc03_031_801B6EC4;
+extern u8 D_sc03_031_801BEF74;
+extern u8 D_sc03_031_801BF42C;
+
+extern s32 func_8012B744();
+extern u8 D_sc03_031_801BF164;
+
+typedef struct { s32 a; s32 c4; s32 c8; s16 ang; s16 e; s32 pad10[2]; s32 t18; s32 done; s32 f20; } Fx24;
+typedef struct { s16 x, y, z, w; s16 a, b, c, d; s32 e; } BF70S;
+typedef struct { SV8 v[4]; s32 a, b, c, d, e, f; } Q;
+typedef struct { s16 v; s16 pad[5]; } E12s;
+typedef struct { u8 v; u8 pad[11]; } E12b;
+typedef struct { u32 tag; u32 code; s16 x, y; u8 u, v; u16 clut; s16 w, h; } Sprt;
+typedef struct { s8 lo; u8 hi; } S8P;
+typedef struct { u16 v; } U16R;
+typedef struct { u32 tag; u8 r0, g0, b0, code; s16 x0, y0; u8 r1, g1, b1, p1; s16 x1, y1; u8 r2, g2, b2, p2; s16 x2, y2; u8 r3, g3, b3, p3; s16 x3, y3; } PolyG4;
+typedef struct { s32 v; } S32R;
+typedef struct { u8 pad[0x10]; XY pt[12]; } Pts80182FD4;
+typedef struct {
+    u32 tag;
+    u8 r0, g0, b0, code;
+    s16 x0, y0;
+    u8 u0, v0;
+    u16 clut;
+    s16 x1, y1;
+    u8 u1, v1;
+    u16 tpage;
+    s16 x2, y2;
+    u8 u2, v2;
+    u16 pad1;
+    s16 x3, y3;
+    u8 u3, v3;
+    u16 pad2;
+} PFT4;
+typedef struct { u32 tag; u32 code; } PMODE;
+typedef struct { u8 pad[0x10]; XY t[13]; } FANUV;
+typedef struct { s32 v; u8 pad[8]; } E12w;
+typedef struct { s32 v; s32 pad; } E8w;
+typedef struct { SV4 p[4]; s32 c[4]; s32 col; s32 code; u8 flag; } Q74;
+extern void func_80178BF8();
+extern s32 func_8012BDBC();
+extern s32 func_80135888();
+extern void *D_80126B78;
+extern void func_80172710();
+extern SV8 D_sc03_031_801BFB8C[];
+
+extern u8 D_sc03_031_80186000[];
+extern u16 D_sc03_031_801860C4[];
+
+extern SV8 D_sc03_031_8018618C;
+extern u16 D_sc03_031_8018609E[];
+extern void func_801290DC();
+extern void func_8012F568();
+extern u8 D_801152A8;
+extern s16 D_80126B5E;
+extern u8 D_sc03_031_80186184;
+extern void func_8012B260();
+
+extern s32 D_sc03_031_801B6E30;
+extern s32 func_8012B608();
+s32 func_sc03_031_80181138(s32 arg0);
+void func_sc03_031_80181168(s32 arg0);
+extern u8 D_sc03_031_801B6E48;
+extern u8 D_sc03_031_801B6E7C;
+extern void func_80143970();
+extern void func_8012B030();
+extern void func_8012E8A8();
+
 INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017EDF8);
 
 void func_sc03_031_8017EE98(u8 *p, s16 *q) {
@@ -1476,7 +1613,29 @@ void func_sc03_031_8017F074(u8 *arg0) {
     D_sc03_031_80186150[AF(arg0, u16, 2)]();
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017F0B0);
+void func_sc03_031_8017F0B0(u8 *o) {
+    s32 idx;
+    u16 *t;
+    u16 *base;
+    if (func_8012C354(o, (AF(o, u16, 0x70) & 0xF) * 0x34 + D_sc03_031_80186000) != 0) {
+        idx = AF(o, u16, 0x70) >> 12;
+        if ((func_80029178(D_sc03_031_801860AC[idx]) & 0xFF) == 0) {
+            AF(o, s16, 2) = 1;
+        } else if (idx != 5) {
+            base = D_sc03_031_801860C4;
+            AF(o, s16, 2) = 8;
+            t = base + idx * 4;
+            AF(o, s16, 6) = t[0];
+            AF(o, s16, 0xA) = t[1];
+            AF(o, s16, 0xE) = t[2];
+        } else {
+            AF(o, s16, 2) = 7;
+        }
+        AF(o, u8, 0x75) = 1;
+        SetScript(o, &D_sc03_031_80182694);
+        func_8012B2CC(o);
+    }
+}
 
 void func_sc03_031_8017F1B4(s32 arg0) {
     s32 temp_v1;
@@ -1539,7 +1698,55 @@ void func_sc03_031_8017F394(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017F428);
+static inline s32 rpm96_F428(s16 *q) {
+    s32 r = rand() % 96;
+    s32 x = *q;
+    return (rand() & 1) ? x + r : x - r;
+}
+
+static inline s32 rpm5_F428(s16 *q) {
+    s32 r = rand() % 5;
+    s32 x = *q;
+    return (rand() & 1) ? x + r : x - r;
+}
+
+void func_sc03_031_8017F428(u8 *o) {
+    SV8 a;
+    SV8 b;
+    s32 i;
+    u8 *p;
+    
+    AF(o, s32, 0xDC) += 0x40000;
+    p = AF(o, u8 *, 0x20);
+    if ((AF(p, s16, 0x10) += AF(o, u16, 0xDE)) >= 0x500) {
+        a.x = D_80126B5E;
+        a.y = D_80126B62;
+        a.z = D_80126B66;
+        b = a;
+        b.y -= 0x50;
+        if (func_80135888(AF(o, s32, 0x20), AF(o, s32, 0x58), &a, &b) != 0) {
+            func_8012F568(1, 0x4002, 0, 10, &b, &D_801152A8);
+        }
+        AF(p, s16, 0x10) = 0x500;
+        AF(o, s32, 0xDC) = -(AF(o, s32, 0xDC) >> 2);
+        FaceHelper(o, &D_sc03_031_80186184, &a);
+        b = a;
+        for (i = 0; i < 5; i++) {
+            b.x = rpm96_F428(&a.x);
+            b.z = rpm5_F428(&a.z);
+            func_801290DC(0x31, &b);
+        }
+        func_8002D4C8(0x651, 0);
+        if (--AF(o, s32, 0x1C) == 0) {
+            AF(o, s16, 2) = 8;
+            AF(o, s32, 0x58) = (s32) &D_sc03_031_80185FF0 | 0x40000000 | 0x20000000;
+            AF(AF(o, u8 *, 0x20), s32, 0x20) = (s32) &D_sc03_031_801860F4;
+            func_sc03_031_8017F95C(o);
+            func_8012B260(o);
+            func_80029124(D_sc03_031_801860AC[AF(o, u16, 0x70) >> 12], 1);
+        }
+    }
+}
 
 void func_sc03_031_8017F6B8(u8 *arg0) {
     AF(arg0, s16, 2) = 8;
@@ -1550,11 +1757,42 @@ void func_sc03_031_8017F6B8(u8 *arg0) {
     func_8012B2CC((s32) arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017F728);
+static inline s32 rpm_F728(s16 *p) {
+    s32 r = rand() % 160;
+    s32 x = *p;
+    return (rand() & 1) ? x + r : x - r;
+}
+
+void func_sc03_031_8017F728(u8 *o) {
+    SV8 v;
+    s32 i;
+
+    if (AF(o, s32, 0x1C) != 0) {
+        v.y = AF(o, u16, 0xA) + D_sc03_031_8018609E[(AF(o, u16, 0x70) & 0xF) * 4];
+        for (i = 0; i < 10; i++) {
+            v.x = rpm_F728(&AF(o, s16, 6));
+            v.z = rpm_F728(&AF(o, s16, 0xE));
+            func_801290DC(0x31, &v);
+        }
+        AF(o, s32, 0x1C)--;
+    }
+}
 
 INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017F860);
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_8017F95C);
+void func_sc03_031_8017F95C(u8 *o) {
+    WMtx m;
+    SV8 v;
+    m = D_800AE620;
+    RotMatrixX(-0x300, &m);
+    gte_SetRotMatrix(&m);
+    gte_ldv0(&D_sc03_031_8018618C);
+    gte_rtv0();
+    gte_stsv(&v);
+    AF(o, s16, 6) += v.x;
+    AF(o, s16, 0xA) += v.y;
+    AF(o, s16, 0xE) += v.z;
+}
 
 void func_sc03_031_8017FA7C(u8 *arg0) {
     D_sc03_031_801861E0[AF(arg0, u16, 2)]();
@@ -1994,7 +2232,35 @@ s32 func_sc03_031_80180FE4(s32 arg0) {
     return func_8012B23C(arg0);
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_80181030);
+void func_sc03_031_80181030(u8 *o) {
+    V3 v;
+    u8 *p;
+    s32 r;
+    s32 d;
+    AF(o, s16, 2) = 1;
+    AF(o, s16, 0x34) = 0;
+    AF(o, u16, 0x5C) = 0xAA10;
+    AF(o, s32, 0x1C) = (rand() & 0x1F) + 0x24;
+    p = o + 0x88;
+    v.x = AF(o, s16, 6) - AF(p, s16, 0);
+    v.y = 0;
+    v.z = AF(o, s16, 0xE) - AF(p, s16, 4);
+    Square0(&v, &v);
+    if (v.x + v.z > 0x8FFFF) {
+        AF(o, s16, 0xFC) = func_8012B744(o + 4, p);
+    } else {
+        r = rand() & 0x3FF;
+        d = r - 0x200;
+        if (d < 0) {
+            d = r - 0x500;
+        } else {
+            d = r + 0x100;
+        }
+        AF(o, s16, 0xFC) = (AF(AF(o, u8 *, 0x20), u16, 0x12) + d) & 0xFFF;
+    }
+    func_8012B23C(o);
+    SetScript(o, &D_sc03_031_801BF164);
+}
 
 s32 func_sc03_031_80181138(s32 arg0) {
     AF(arg0, s16, 2) = 2;
@@ -2017,7 +2283,50 @@ void func_sc03_031_80181168(s32 arg0) {
     AF(arg0, u16, 0x86) = (u16) (AF(arg0, u16, 0x86) | 2);
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_801811EC);
+void func_sc03_031_801811EC(u8 *o) {
+    switch (AF(o, u16, 0x34)) {
+    case 0:
+        AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B8E4(o, 4);
+        if (AF(o, s32, 0x1C) == 0xF) {
+            func_80142414(o, -0x78);
+            func_8002D4C8(0x6A9, 0);
+        }
+        if (func_8012BEE8(o)) {
+            AF(o, s16, 2) = 3;
+            if (AF(o, u16, 0x86) & 2) {
+                AF(o, s16, 0x34) = 1;
+                AF(o, s32, 0x1C) = 0x28;
+                SetScript(o, &D_sc03_031_801BF20C);
+                AF(o, s16, 0xFE) = 0;
+                return;
+            }
+            AF(o, s16, 0x34) = 0;
+            SetScript(o, &D_sc03_031_801BF294);
+            AF(o, s32, 0x1C) = 0x19;
+            AF(o, u16, 0x86) |= 2;
+        }
+        break;
+    case 1:
+        if (AF(o, s32, 0x1C) >= 0x16) {
+            AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B8E4(o, 6);
+        }
+        func_8012B178(o, D_sc03_031_801B6E34);
+        if (func_8012CBA4(o) != 0x2000) {
+            func_8012ADE4(o);
+        }
+        if (--AF(o, s16, 0xFE) <= 0) {
+            func_80143B6C(o, 0);
+            AF(o, s16, 0xFE) = 8;
+        }
+        if (func_8012BEE8(o)) {
+            func_sc03_031_80181030(o);
+        }
+        if (func_8012BD3C(o, 0x200, 0x1000)) {
+            func_sc03_031_801813B4(o);
+        }
+        break;
+    }
+}
 
 void func_sc03_031_801813B4(s32 arg0) {
     AF(arg0, s16, 2) = 4;
@@ -2026,7 +2335,48 @@ void func_sc03_031_801813B4(s32 arg0) {
     AF(arg0, s32, 0x1C) = 0x14;
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_801813F8);
+void func_sc03_031_801813F8(u8 *o) {
+    switch (AF(o, u16, 0x34)) {
+    case 0:
+        if (AF(o, s32, 0x1C) == 7) {
+            func_8012D5E4(o, &D_sc03_031_801B6EC4, &D_sc03_031_801B6EC4 + 8, 0xB);
+        }
+        break;
+    case 1:
+        AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B8E4(o, 6);
+        break;
+    case 2:
+        if (AF(o, s32, 0x1C) == 0xA) {
+            func_8012D5E4(o, &D_sc03_031_801B6EC4, &D_sc03_031_801B6EC4 + 8, 0xB);
+        }
+        break;
+    }
+    if (func_8012BEE8(o)) {
+        switch (AF(o, u16, 0x34)) {
+        case 0:
+            if (func_8012BD3C(o, 0x400, 0x4000)) {
+                AF(o, s16, 0x34) = 1;
+                SetScript(o, &D_sc03_031_801BEF74);
+                AF(o, s32, 0x1C) = 0xA;
+            } else {
+                AF(o, s16, 2) = 2;
+                AF(o, s16, 0x34) = 0;
+                SetScript(o, &D_sc03_031_801BF01C);
+            }
+            break;
+        case 1:
+            AF(o, s16, 0x34) = 2;
+            AF(o, s32, 0x1C) = 0x18;
+            SetScript(o, &D_sc03_031_801BF42C);
+            break;
+        case 2:
+            AF(o, s16, 2) = 2;
+            AF(o, s16, 0x34) = 0;
+            SetScript(o, &D_sc03_031_801BF01C);
+            break;
+        }
+    }
+}
 
 s32 func_sc03_031_8018156C(s32 arg0) {
     s32 *var_s1;
@@ -2065,9 +2415,34 @@ void func_sc03_031_801816E4(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_80181728);
+void func_sc03_031_80181728(u8 *o) {
+    if (AF(o, s32, 0x1C) >= 4) {
+        AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012B608(AF(AF(o, u8 *, 0x20), s16, 0x12), AF(o, s16, 0xFC), 8);
+    }
+    func_8012B178(o, D_sc03_031_801B6E30);
+    if (func_8012CBA4(o) != 0x2000) {
+        func_8012ADE4(o);
+    }
+    if (func_8012BEE8(o) != 0) {
+        func_sc03_031_80181138((s32) o);
+    }
+}
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_801817D0);
+void func_sc03_031_801817D0(u8 *o) {
+    V3 v;
+
+    if (AF(o, u16, 0x34) == 0 && (AF(o, u16, 0x72) & 0x4000)) {
+        v.x = AF(o, s16, 6) - AF(o, s16, 0x88);
+        v.y = 0;
+        v.z = AF(o, s16, 0xE) - AF(o, s16, 0x8C);
+        Square0(&v, &v);
+        if (v.x + v.z < 0x90000 && func_8012BCCC(o) <= 0x10000) {
+            func_sc03_031_80181168((s32) o);
+        } else {
+            func_sc03_031_80181030(o);
+        }
+    }
+}
 
 void func_sc03_031_80181894(s32 arg0, s32 arg1) {
     if (func_8012BCCC(arg0, arg1) < D_sc03_031_801B6ED4) {
@@ -2130,7 +2505,23 @@ void func_sc03_031_801819D0(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_80181A98);
+void func_sc03_031_80181A98(u8 *o) {
+    if (func_8012C354(o, &D_sc03_031_801B6E48) != 0) {
+        AF(o, u8, 0xC0) = 1;
+        AF(o, s32, 0xB4) = -1;
+        AF(o, u8, 0xC1) = 0;
+        AF(o, u8 *, 0xBC) = &D_sc03_031_801B6E7C;
+        func_80143970(o);
+        func_8012B030(o);
+        if (AF(o, u16, 0x70) & 0x6000) {
+            AF(o, s16, 2) = 6;
+            SetScript(o, &D_sc03_031_801BF01C);
+            func_8012E8A8(o);
+        } else {
+            func_sc03_031_80181030(o);
+        }
+    }
+}
 
 void func_sc03_031_80181B3C(u8 *arg0) {
     D_sc03_031_801BFB74[AF(arg0, u16, 2)]();
@@ -2246,7 +2637,16 @@ s32 func_sc03_031_80181FA8(void) {
     return func_80174764() == 1;
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_80181FCC);
+s32 func_sc03_031_80181FCC(void) {
+    s32 i;
+
+    for (i = 0; i < 0x26; i++) {
+        if (!(func_80029178(D_sc03_031_801BF8CC[i]) & 0xFF)) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 void func_sc03_031_80182030(u8 *arg0) {
     D_sc03_031_801BFB9C[AF(arg0, u16, 2)]();
@@ -2302,4 +2702,24 @@ void func_sc03_031_801821B4(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_031/nonmatchings/sc03_031", func_sc03_031_80182224);
+s32 *func_sc03_031_80182224(u8 *o) {
+    SV8 a;
+    SV8 b;
+    s32 f;
+    u8 *p;
+    s32 *r;
+
+    p = AF(o, u8 *, 0x64);
+    gte_SetRotMatrix((u8 *) D_80126B78 + 0x34);
+    gte_SetTransMatrix((u8 *) D_80126B78 + 0x34);
+    RotTransSV(&D_sc03_031_801BFB8C[0], &a, &f);
+    RotTransSV(&D_sc03_031_801BFB8C[1], &b, &f);
+    if (func_80135888(AF(p, s32, 0x20), AF(p, s32, 0x58), &a, &b) != 0 && func_8012BDBC(p, 0x300) != 0) {
+        AF(p, s16, 2) = 3;
+        func_80178BF8();
+        r = (s32 *) &func_80172710;
+    } else {
+        r = NULL;
+    }
+    return r;
+}
