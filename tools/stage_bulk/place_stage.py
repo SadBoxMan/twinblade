@@ -20,9 +20,10 @@ src = {f: open(f, encoding='utf-8').read() for f in glob.glob(f'src/stg/{STG}.c'
 def target(n):
     for f, t in src.items():
         if re.search(rf'INCLUDE_ASM\("[^"]+",\s*{n}\);', t): return f
-SYM = re.compile(r'(\w+)(?:\[\])?(?:\(.*\))?;$')
+SYM = re.compile(r'(\w+)(?:\[\w*\])?(?:\(.*\))?;$')
 def sym_of(x):
-    m = re.search(r'\(\*(\w+)\[\]\)', x) or SYM.search(x)
+    # r208: `(*D[])()`, `(*D[4])()` and `(*f)()` too
+    m = re.search(r'\(\*\s*(\w+)\s*(?:\[\w*\])?\)', x) or SYM.search(x)
     return m[1] if m else None
 def norm(x): return re.sub(r'\s+', ' ', x).strip()
 groups = {}
@@ -39,35 +40,48 @@ for n in names:
     # r192: an INCLUDE_ASM line of the draft is not a declaration; a multi-name extern line becomes one line per name
     ds = [y for c in P.chunks(decl) if P.strip_comments(c).strip() and not c.lstrip().startswith('INCLUDE_ASM')
           for y in P.split_multi(P.strip_comments(c))]
-    helpers = [(k, P.strip_comments(b)) for k, b in funcs.items() if k != n and b.lstrip().startswith('static')
+    helpers = [(k, P.strip_comments(b)) for k, b in funcs.items() if k != n and P.strip_comments(b).lstrip().startswith('static')
                and not re.search(rf'\b{k}\s*\(', src[f])]
     # r192: a `static inline` helper goes right in front of the function (as r179's handput_inl did), where GCC emits it
     # in the original's order; other static helpers go with the declarations
     ds += [b for k, b in helpers if not re.match(r'static\s+inline\b', b)]
     pre[n] = ''.join(b + '\n\n' for k, b in helpers if re.match(r'static\s+inline\b', b))
+    # r208: a comment split() attached to the function goes in front of it, so the body starts with its header (a
+    # leading comment crashed the header matches: sc02_003 8018762C, sc03_029 80186448)
+    body = funcs[n]
+    c = re.match(r'\s*(?:/\*.*?\*/\s*)+', body, re.S)
+    if c:
+        pre[n] += c[0].strip() + '\n'; body = body[c.end():]
     incs.setdefault(f, []).extend(x for x in P.includes(text) if x not in incs.get(f, []))
-    groups.setdefault(f, []).append((n, ds, funcs[n]))
+    groups.setdefault(f, []).append((n, ds, body))
 deferred, placed = [], []
 def why(n, s):
     with open(os.path.join(d, '_why.txt'), 'a') as w: w.write(f'{n}: {s}\n')
 ENV = dict(os.environ, PATH='C:\\msys64\\usr\\bin;' + os.environ['PATH'])
 CC = os.path.join(os.getcwd(), 'tools', 'compilers', 'gcc-2.7.2-psx') + os.sep
-def insert(t, items):
-    """the file's text with these drafts in place of their INCLUDE_ASMs, new declarations before the first one;
-    -> (text, {line number: draft index})"""
-    decls = []
-    for i, (_, ds, _) in enumerate(items):
+def array_retypes(t, items):
+    """r208: a file global the file declares scalar (`extern s16 D;`) that a draft declares as an array of the same type
+    (`extern s16 D[];`): the file's line becomes the array and its other uses `D[0]` (same address; check-stage
+    verifies)"""
+    for _, ds, _ in items:
         for x in ds:
-            # only what the file lacks: a typedef, tag, extern or prototype it already has is not added again
-            # (put_func.missing_decls, r142)
-            if P.missing_decls([x], t) and x not in [y for y, _ in decls]:
-                decls.append((x, i))
-    # an old-style guess left in the file by an earlier round (`extern void f();`) takes the return type of f's
-    # definition now being placed (a call whose result is unused compiles the same either way; check-stage verifies)
+            m = re.fullmatch(r'\s*extern\s+([\w ]+?)\s+(\w+)\s*\[\w*\]\s*;\s*', x)
+            if not m: continue
+            line = re.search(rf'^extern\s+{re.escape(m[1])}\s+{m[2]}\s*;$', t, re.M)
+            if not line: continue
+            body = re.sub(rf'\b{m[2]}\b(?!\s*\[)', f'{m[2]}[0]', t[line.end():])
+            t = t[:line.start()] + f'extern {m[1]} {m[2]}[];' + body
+            print(f'{m[2]}: file declaration retyped to an array for a draft ({x.strip()})')
+    return t
+def insert(t, items):
+    """the file's text with these drafts in place of their INCLUDE_ASMs, each one's new declarations directly above it
+    (r208: they went above the first INCLUDE_ASM, which could be after the function); -> (text, {line: draft index})"""
+    # the file's own guesses of a function being placed agree with its definition (put_func.retype_guess, r208): an
+    # `extern void f();` or `extern u8 f;` takes its return type, a void one used for a value gets a cast at the
+    # caller, a non-extern prototype the definition's header
     for n, _, b in items:
-        ret = re.match(r'([\w \*]+?)\s*\b' + n + r'\(', b)[1].strip()
-        t = re.sub(rf'^extern [\w \*]+?\b{n}\(\);$', f'extern {ret} {n}();', t, flags=re.M)
-        t = re.sub(rf'^extern u8 {n};$', f'extern {ret} {n}();', t, flags=re.M)     # an address-taken guess
+        t = P.retype_guess(t, n, b)
+    t = array_retypes(t, items)
     # r192: a callee the file declares `extern void f(...)` that a draft declares with a value: the draft's return type
     # (a call whose value is unused compiles the same; the check verifies). Clone drafts carry the source's type.
     for _, ds, _ in items:
@@ -75,18 +89,15 @@ def insert(t, items):
             m = re.fullmatch(r'\s*extern\s+(?!void\b)([\w \*]+?)\s*\b(func_\w+)\s*\([^;{}]*\)\s*;\s*', x)
             if m and not re.search(rf'^[\w\s\*]*\bvoid\s+{m[2]}\s*\([^;{{]*\)\s*\{{', t, re.M):   # not one defined void
                 t = re.sub(rf'^(extern\s+)void(\s+{m[2]}\s*\()', lambda q: q[1] + m[1].strip() + q[2], t, flags=re.M)
-    k = t.index('\nINCLUDE_ASM') + 1
-    t = t[:k] + ''.join(x + '\n' for x, _ in decls) + '\n' + t[k:]
-    for n, _, b in items:
-        t = re.sub(rf'INCLUDE_ASM\("[^"]+",\s*{n}\);', lambda m: pre.get(n, '') + b, t, count=1)
+    added = {}
+    for i in sorted(range(len(items)), key=lambda i: P.asm_pos(t, items[i][0]) or 0):   # top down
+        n, ds, b = items[i]
+        t, added[i] = P.place_one(t, n, b, ds, pre.get(n, ''))
     owner = {}
-    line = t[:k].count('\n') + 1
-    for x, _ in decls:
-        for _ in range(x.count('\n') + 1):
-            owner[line] = [j for j, (_, ds, _) in enumerate(items) if x in ds]; line += 1
     for i, (n, _, b) in enumerate(items):
         start = t[:t.index(b)].count('\n') + 1
-        for l in range(start, start + b.count('\n') + 1):
+        above = sum(x.count('\n') + 1 for x in added[i]) + (1 if added[i] else 0) + pre.get(n, '').count('\n')
+        for l in range(start - above, start + b.count('\n') + 1):
             owner[l] = [i]
     return t, owner
 def compile_errors(f):
@@ -199,6 +210,11 @@ def place(f, items):
         if not bad:                          # an error outside any draft: give up on this group
             print(f, 'unattributed errors:', out[:600]); deferred.extend(n for n, _, _ in items); items = []; break
         deferred.extend(items[i][0] for i in bad)
+        # r208: each deferral worded with its own first error (the whole log follows, as before)
+        for i in bad:
+            msg = [m[2] for m in re.finditer(r':(\d+): (?!warning)([^\n]*)', out) if i in owner.get(int(m[1]), [])]
+            print(f'deferred: {items[i][0]}: {msg[0] if msg else "an error in code already in the file names it"}')
+            why(items[i][0], 'compile error: ' + (msg[0] if msg else 'in code already in the file that names it'))
         with open(os.path.join(d, '_why.txt'), 'a') as w:
             w.write(out + '\n')
         items = [x for i, x in enumerate(items) if i not in bad]
@@ -223,6 +239,7 @@ def place(f, items):
     open(f, 'w', encoding='utf-8', newline='\n').write(src[f])
 for f, items in groups.items():
     t = src[f]
+    orig0 = t                             # r208: restored whole when nothing of the group is placed (no stray include)
     if AF not in t:                       # the offset macro, once, after the includes
         last = list(re.finditer(r'^#include .*$', t, re.M))[-1]
         t = t[:last.end()] + '\n' + AF + t[last.end():]
@@ -248,34 +265,23 @@ for f, items in groups.items():
         items[i] = (n, [pick.get(sym_of(x), x) if x.startswith('extern') and '(' in x and sym_of(x) not in defs else x
                         for x in ds], b)
     for n, ds, b in items:
-        # the file's own prototype for this function: the definition must agree with it
-        m = re.search(rf'^(?!extern)([A-Za-z_][\w \*]*?)\b{n}\s*\(([^;{{)]*)\)\s*;', t, re.M)
-        if m:
-            ptypes = [p.strip() for p in m[2].split(',') if p.strip() and p.strip() != 'void']
-            hm = re.match(rf'([\w \*]+?)\s*\b{n}\(([^)]*)\)', b)
-            dparams = [p.strip() for p in hm[2].split(',') if p.strip() and p.strip() != 'void']
-            if len(ptypes) != len(dparams):
-                deferred.append(n); why(n, 'parameter count differs from the prototype'); continue
-            newp = []
-            for pt, dp in zip(ptypes, dparams):
-                pname = re.search(r'(\w+)$', dp)[1]
-                tm = re.match(r'^(.*?[\s\*])(\w+)$', pt)      # "StageActor *a" -> "StageActor *"; "s32" stays
-                ptn = tm[1].strip() if tm and tm[1].strip() not in ('', 'unsigned', 'signed') else pt
-                newp.append(f'{ptn}{pname}' if ptn.endswith('*') else f'{ptn} {pname}')
-            b = b.replace(hm[0], f'{m[1].strip()} {n}({", ".join(newp) or "void"})', 1)
-        bad = False
+        # r208: the file's own prototype of this function is retyped to the definition in insert() (put_func.retype_guess;
+        # it was a deferral, "parameter count differs", and an empty `T f();` counted as zero parameters)
+        bad = None
         nds = []
         for x in ds:
             s = sym_of(x)
             if s in defs and x.startswith('extern') and '(' in x:      # a guess for a function of this batch
                 x = f'extern {defs[s]} {s}();'
-            if s and s in seen and norm(seen[s]) != norm(x) and not P.declared_in(s, t): bad = True
+            if s and s in seen and norm(seen[s][0]) != norm(x) and not P.declared_in(s, t): bad = (s, seen[s], x)
             nds.append(x)
         if bad:
-            deferred.append(n); why(n, 'declaration clashes with another draft'); continue
+            # r208: worded (r199: SV8[] vs s16[] for one table in two drafts of a batch); the next round places it
+            # against the first draft's declaration, now in the file
+            deferred.append(n); why(n, f'declaration of {bad[0]} clashes with draft {bad[1][1]}: `{bad[2]}` vs `{bad[1][0]}` (retried next round)'); continue
         for x in nds:
             s = sym_of(x)
-            if s: seen.setdefault(s, x)
+            if s: seen.setdefault(s, (x, n))
         ok.append((n, nds, b))
     # an old-style guess left in the file by an earlier round (`extern void f();`) takes the return type of f's
     # definition now being placed (a call whose result is unused compiles the same either way; check-stage verifies)
@@ -287,6 +293,8 @@ for f, items in groups.items():
         if src[f] != orig and not check():   # only the rewritten guesses, never checked: back to the file as it was
             open(f, 'w', encoding='utf-8', newline='\n').write(orig); src[f] = orig
             placed[:] = [n for n in placed if n not in {x for x, _, _ in ok}]
+        if not any(n in placed for n, _, _ in items) and src[f] != orig0:
+            open(f, 'w', encoding='utf-8', newline='\n').write(orig0); src[f] = orig0
 open(os.path.join(d, '_placed.txt'), 'w').write('\n'.join(placed) + '\n')
 open(os.path.join(d, '_deferred.txt'), 'w').write('\n'.join(deferred) + '\n')
 print(len(placed), 'placed,', len(deferred), 'deferred')

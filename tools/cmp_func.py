@@ -11,6 +11,7 @@ Relocated fields (%hi/%lo/jal targets) are masked on both sides, except that a %
 (a name ending in its address, or one in the symbol files) must give the same address: a wrong struct field no longer
 passes as MATCH (r192). Lines of the build show `<%lo(SYM+addend)>` for those.
 """
+import glob
 import os
 import re
 import subprocess
@@ -21,6 +22,7 @@ CROSS = os.path.join(ROOT, 'tools', 'toolchain', 'bin', 'mipsel-none-elf-')
 PYTHON = sys.executable
 MASPSX = os.path.join(ROOT, 'tools', 'maspsx_tw.py')   # r192: maspsx with the game's sltu_at rule, as the Makefile
 TMP = os.environ.get('CMP_TMP') or os.path.join('build', 'cmp')   # r144: CMP_TMP, one folder per agent
+LAST_GHOST = []   # r208: the last compile's relocation symbols its image does not link with (phantom_symbols)
 
 
 def original_words(func):
@@ -56,8 +58,11 @@ def compiled_words(cfile, func, version, flags):
     plain = os.path.join(TMP, func)
     base = f'{plain}.{os.getpid()}'
     run = lambda *a, **k: subprocess.run(*a, check=True, cwd=ROOT, **k)
+    global LAST_GHOST
     try:
-        return _compiled_words(cfile, func, cc, flags, base, run)
+        words = _compiled_words(cfile, func, cc, flags, base, run)
+        LAST_GHOST = phantom_symbols(base + '.o', func)   # r208: read before the rename (parallel compiles)
+        return words
     finally:
         for ext in ('.i', '.s', '.m.s', '.o'):
             try:
@@ -129,14 +134,55 @@ def _addr_of(name):
 def lo_target(text):
     """the address a %lo immediate stands for, from the original's `%lo(SYM+0x4)` or the build's `<%lo(SYM+0x4)>`
     note; None when it cannot be resolved"""
-    m = re.search(r'%lo\(([A-Za-z_.$][\w.$]*)\s*(?:([+-])\s*(0x[0-9A-Fa-f]+|\d+))?\)', text)
+    # r208: the build's note for a negative addend reads `+-0x24`; the old pattern failed on it and returned None, so
+    # `(u8 *)g_SoundChan - 0x24` passed for the original's `g_SoundSlot + 0x54` (r206)
+    m = re.search(r'%lo\(([A-Za-z_.$][\w.$]*)\s*(?:([+-])\s*(-?)(0x[0-9A-Fa-f]+|\d+))?\)', text)
     if not m:
         return None
     a = _addr_of(m[1])
     if a is None:
         return None
-    off = int(m[3], 0) if m[3] else 0
-    return (a + (-off if m[2] == '-' else off)) & 0xFFFFFFFF
+    off = int(m[4], 0) if m[4] else 0
+    if (m[2] == '-') != (m[3] == '-'):
+        off = -off
+    return (a + off) & 0xFFFFFFFF
+
+
+def link_symbols(func):
+    """the symbols the function's image links with (its last build's map, plus the asm labels of the image), or None
+    when the image was never built (r208)"""
+    for dirpath, _, files in os.walk(os.path.join(ROOT, 'asm', os.environ.get('TWINBLADE_OVL', ''))):
+        if func + '.s' in files:
+            break
+    else:
+        return None
+    rel = os.path.relpath(dirpath, os.path.join(ROOT, 'asm')).replace(os.sep, '/').split('/')
+    if rel[0] == 'stg':
+        maps = [f'build/stg/{rel[1]}/{rel[1]}.map']
+    elif rel[0] == 'nonmatchings':
+        maps = glob.glob(os.path.join(ROOT, 'build', '*.map'))
+    else:
+        maps = glob.glob(os.path.join(ROOT, 'build', rel[0], '*.map'))
+    out = set()
+    for p in maps:
+        p = os.path.join(ROOT, p)
+        if os.path.exists(p):
+            out |= set(re.findall(r'^\s+0x[0-9a-f]+\s+(\w+)(?: = |\s*$)', open(p, errors='replace').read(), re.M))
+    return out or None
+
+
+def phantom_symbols(cfile_obj, func):
+    """the draft's relocation symbols that its image does not link with (r208: sc03_030 8017E430 read D_80126940 for the
+    asm's D_80126942, splat's +0x1000000 alias in sc01_005 8018203C, sc06_014 8017E8D8: MATCH, then no link)"""
+    known = link_symbols(func)
+    if known is None:
+        return []
+    obj = os.path.join(ROOT, cfile_obj)
+    dump = subprocess.run([CROSS + 'objdump', '-r', '-t', obj], capture_output=True, text=True).stdout
+    own = set(re.findall(r'^[0-9a-f]{8} [lg ]\s*[\w ]*\s+(?:\.text|\.data|\.rodata|\.bss|\.sdata|\.sbss)\S*\s+[0-9a-f]+\s+(\w+)$',
+                         dump, re.M))
+    used = set(re.findall(r'^[0-9a-f]{8} R_MIPS_(?:HI16|LO16|26)\s+(\w+)', dump, re.M))
+    return sorted(s for s in used - own - known if not s.startswith('.'))
 
 
 def same_word(x, y):
@@ -159,8 +205,13 @@ def main():
     a = original_words(func)
     b = compiled_words(cfile, c_name or func, version, flags)
     same = len(a) == len(b) and all(same_word(x, y) for x, y in zip(a, b))
+    ghost = LAST_GHOST if same else []
+    if ghost:
+        same = False
     print(f'{func} gcc-{version} {" ".join(flags)}: {"MATCH" if same else "differs"} '
-          f'({len(a)} vs {len(b)} instructions)')
+          f'({len(a)} vs {len(b)} instructions)' + (f'; not in the image\'s link: {" ".join(ghost)}' if ghost else ''))
+    if ghost:
+        return 1
     if not same:
         for i in range(max(len(a), len(b))):
             x = a[i] if i < len(a) else (0, '', False)

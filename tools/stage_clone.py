@@ -17,6 +17,8 @@ three steps over every stage and repeats until a pass places nothing.
 
 Usage: stage_clone.py SC02_031 <out_dir> [--alt N]     one target stage
        stage_clone.py --all <out_root> [--alt N]        every split stage, drafts in <out_root>/<stage>/
+--allow-pending (r208): also clone from the sources listed in tools/stage_bulk/pending_rulings.txt (placed under a
+ruling LuciDin has not given yet; skipped by default).
 --alt N: take the N-th matched source of a shape (0 = the village first, then the stages in name order), to retry a
 draft whose first source did not compile to the target's bytes.
 """
@@ -36,6 +38,14 @@ SYM = re.compile(r'(?<![.\w$])([A-Za-z_]\w*)')
 REGS = re.compile(r'^(?:hi|lo|zero|at|v[01]|a[0-3]|t\d|s[0-8]|k[01]|gp|sp|fp|ra)$')
 DEF = re.compile(r'^[A-Za-z_][\w \*]*?\b(\w+)\s*\([^;]*\)\s*\{', re.M)
 VILLAGE = 'SC03_001'
+PENDING_FILE = os.path.join(ROOT, 'tools', 'stage_bulk', 'pending_rulings.txt')
+PENDING = set()   # r208: filled by main() unless --allow-pending
+
+
+def read_pending():
+    if not os.path.exists(PENDING_FILE):
+        return set()
+    return {l.split('#')[0].strip() for l in open(PENDING_FILE, encoding='utf-8') if l.split('#')[0].strip()}
 
 
 def asm_file(f):
@@ -107,8 +117,65 @@ class Image:
                     self._asm[a] = n
         return self._asm
 
+    def obj(self):
+        return os.path.join(ROOT, 'build', 'src', 'stage', 'sc03_001.o') if self.name == VILLAGE else \
+            os.path.join(ROOT, 'build', 'src', 'stg', self.lo + '.o')
+
     def tokens(self, name):
-        return asm_file(os.path.join(self.asm, name + '.s'))[1]
+        p = os.path.join(self.asm, name + '.s')
+        return asm_file(p)[1] if os.path.exists(p) else self.obj_tokens(name)
+
+    def sym_name(self, a, kind):
+        """the name splat gives an address of this image (an own-range function or datum, else D_<address>)"""
+        own = a >= C.ENG_END
+        if self.name == VILLAGE or not own:
+            return f'{kind}_{a:08X}'
+        return f'{kind}_{self.lo}_{a:08X}'
+
+    def obj_tokens(self, name):
+        """r208: the symbol tokens of a matched function from the image's built object (splat writes no .s for a
+        function with C, so after a re-split no matched function of the image was a clone source: r201's 24 hand
+        clones). A relocation with an addend is named by its exact address, as splat's .s would name it"""
+        import subprocess
+        o = self.obj()
+        if not os.path.exists(o):
+            return []
+        objdump = os.path.join(ROOT, 'tools', 'toolchain', 'bin', 'mipsel-none-elf-objdump')
+        if getattr(self, '_objsyms', None) is None:
+            t = subprocess.run([objdump, '-t', o], capture_output=True, text=True).stdout
+            self._objsyms = {m[3]: (int(m[1], 16), int(m[2], 16))
+                             for m in re.finditer(r'^([0-9a-f]{8}) g\s+F \.text\s+([0-9a-f]{8}) (\w+)$', t, re.M)}
+        if name not in self._objsyms:
+            return []
+        lo_, size = self._objsyms[name]
+        # the symbol's own range (--disassemble=<sym> ran on past the function: 593 relocations for a 0xE0 one)
+        dump = subprocess.run([objdump, '-drz', f'--start-address={lo_:#x}', f'--stop-address={lo_ + size:#x}', o],
+                              capture_output=True, text=True).stdout
+        rows, word = [], {}
+        for line in dump.splitlines():
+            im = re.match(r'\s+([0-9a-f]+):\s+([0-9a-f]{8})\s', line)
+            if im:
+                word[int(im[1], 16)] = int(im[2], 16)
+            rm = re.match(r'\s+([0-9a-f]+): R_MIPS_(HI16|LO16|26)\s+(\S+)', line)
+            if rm and lo_ <= int(rm[1], 16) < lo_ + size:
+                rows.append((int(rm[1], 16), rm[2], rm[3]))
+        out = []
+        for k, (off, kind, sym) in enumerate(rows):
+            if sym.startswith('.'):
+                continue                      # a section (a local jump, static data): splat's .s has no symbol there
+            if kind == '26':
+                out.append(sym); continue
+            lo = (off, word.get(off, 0)) if kind == 'LO16' else \
+                next(((o2, word.get(o2, 0)) for o2, k2, s2 in rows[k + 1:] if k2 == 'LO16' and s2 == sym), None)
+            add = 0
+            if lo:
+                add = lo[1] & 0xFFFF
+                add = add - 0x10000 if add & 0x8000 else add
+                if kind == 'HI16':
+                    add += (word.get(off, 0) & 0xFFFF) << 16
+            a = addr_of(sym, self.syms)
+            out.append(sym if not add or a is None else self.sym_name((a + add) & 0xFFFFFFFF, 'D'))
+        return out
 
     def parsed(self):
         """(declaration chunks without INCLUDE_ASMs, {function: body}, typedef chunks, include lines)"""
@@ -139,10 +206,15 @@ class Image:
         out = {}
         _, funcs, _, _ = self.parsed()
         by_name = {n: a for a, n in self.asm_by_addr().items()}
+        has_obj = os.path.exists(self.obj())
         for n, body in funcs.items():
             inner = body[body.find('{') + 1:body.rfind('}')].strip()
-            if inner and n in by_name:
-                out[by_name[n]] = n
+            # r208: a function with no .s (split after it was matched) by its name's address, its tokens from the object
+            a = by_name.get(n)
+            if a is None and has_obj and not body.lstrip().startswith('static'):
+                a = addr_of(n, self.syms)
+            if inner and a is not None:
+                out[a] = n
         return out
 
 
@@ -170,6 +242,34 @@ def source_index(images):
     return idx
 
 
+_PSYQ = None
+
+
+def psyq_names():
+    """the function names include/psyq.h declares"""
+    global _PSYQ
+    if _PSYQ is None:
+        p = os.path.join(ROOT, 'include', 'psyq.h')
+        t = P.strip_comments(open(p, encoding='utf-8', errors='replace').read()) if os.path.exists(p) else ''
+        _PSYQ = set(re.findall(r'^[A-Za-z_][\w \*]*?\b(\w+)\s*\([^;{}]*\)\s*;', t, re.M))
+    return _PSYQ
+
+
+def retype_uses(body, ren, tsym, src_line):
+    """the body with every use of the (target-named) symbol read as the source's declared type: a scalar
+    `extern T X;` as `(*(T *)&X)`, an array `extern T X[];` as `((T *)&X)` (same address, the source's width and
+    sign); body is still in the source's names, so the source name of tsym is the one replaced"""
+    m = re.fullmatch(r'\s*extern\s+(.+?)\s*\b(\w+)\s*(\[[^\]]*\])?\s*;\s*', src_line)
+    if not m or m[3] and m[3].count('[') > 1:
+        return body
+    srcname = [w for w in set(re.findall(r'\w+', body)) if ren(w) == tsym]
+    if not srcname:
+        return body
+    ty = m[1].strip()
+    rep = f'((({ty} *)&{srcname[0]}))' if m[3] else f'(*({ty} *)&{srcname[0]})'
+    return re.sub(rf'(?<![\w.>])\b{srcname[0]}\b', lambda q: rep, body)
+
+
 def draft(src, va, vname, tgt, sa, sname):
     """the C text of target function sname, copied from source function vname; or (None, why)"""
     vt, st = src.tokens(vname), tgt.tokens(sname)
@@ -187,6 +287,11 @@ def draft(src, va, vname, tgt, sa, sname):
         if ax is not None and ay is not None and ax >= C.ENG_END:
             pairs.append((ax, ay))
     body = vfuncs[vname]
+    # r208: the source's `static inline` helpers the body calls go in front of it (they were dropped: sc03_031
+    # 80180F0C, sc02_003 801888F4, sc06_018 8018F060); their inlined code is in the asm walk, so they rename too
+    inl = [b for k, b in vfuncs.items() if k != vname and re.match(r'static\s+inline\b', P.strip_comments(b).lstrip())
+           and re.search(rf'\b{k}\s*\(', body)]
+    body = ''.join(b + '\n\n' for b in inl) + body
     words = set(re.findall(r'\w+', body))
     mine = [c for c in ch if not re.search(r'^(typedef|struct|union|enum)\b', c, re.M)
             and (syms_c := set(re.findall(r'\b(?:func|D|jtbl)_\w+', c))) and syms_c & words]
@@ -201,8 +306,9 @@ def draft(src, va, vname, tgt, sa, sname):
         ax = int(m[2], 16)
         if ax < C.ENG_END or not pairs:
             continue
-        below = [p for p in pairs if p[0] <= ax]
-        px, py = max(below) if below else min(pairs)
+        # r208: the nearest pair either side (the nearest below could be another block: sc06_024 80181EF4 moved
+        # D_801AC420 by D_801AF7B4's pair, where the asm's D_801AC426 is its `.pad` six bytes above)
+        px, py = min(pairs, key=lambda p: (abs(p[0] - ax), p[0] > ax))
         names[s] = f'{m[1]}_{tgt.lo}_{py + ax - px:08X}'
         moved.append((s, names[s]))
     ren = lambda t: re.sub(r'\b\w+\b', lambda w: names.get(w[0], w[0]), t)  # noqa: E731
@@ -220,7 +326,18 @@ def draft(src, va, vname, tgt, sa, sname):
         # body uses the value; place_stage retypes the file's guess, "void value not ignored" otherwise)
         if h and re.match(r'extern\s+void\s+\w+\s*\(', h) and re.match(r'(?:extern\s+)?(?!void\b)[\w\s\*]+?\b\w+\s*\(', c):
             h = None
+        # r208: a variable the target declares with another type (u16 vs s16, an array vs a scalar, r203 sc01_077 /
+        # sc02_000 D_80126B5E, sc03_030 D_800B9A02): the target's line, and the body reads it as the source's type
+        if h and s and '(' not in c and '(' not in h and P.norm(h) != P.norm(c):
+            body = retype_uses(body, ren, s, c)
         decls.append(h or c if s else c)
+    # r208: psyq.h clashes with a target that declares the library functions itself (`extern void LoadImage();`):
+    # then the draft carries the target's lines for the ones the body calls instead
+    if '#include "psyq.h"' in inc and '#include "psyq.h"' not in tgt.text and set(have) & psyq_names():
+        calls = {s for s in psyq_names() if re.search(rf'\b{s}\s*\(', body)}
+        if calls <= set(have):                # every library call the body makes, the target declares
+            inc = inc.replace('#include "psyq.h"\n', '')
+            decls += [have[s] for s in sorted(calls) if have[s] not in decls]
     # the source's own symbols must all be renamed: one left over would link to the wrong stage
     text = inc + AF + '\n' + '\n'.join(tdefs + decls) + '\n\n' + ren(body) + '\n'
     if src.name != VILLAGE:
@@ -241,6 +358,11 @@ def clone_stage(tgt, idx, out_dir, alt=0, log=print):
     for sa, key in tgt.funcs:
         # another image's copy first; then another function of this image (r192: same-stage sources were skipped)
         cands = sorted((c for c in idx.get(key, []) if c[0] is not tgt or c[1] != sa), key=lambda c: c[0] is tgt)
+        # r208: a source placed under a ruling still pending is no clone source (tools/stage_bulk/pending_rulings.txt)
+        held = [c for c in cands if c[2] in PENDING]
+        cands = [c for c in cands if c[2] not in PENDING]
+        if held and not cands:
+            log(f'{tgt.name} {sa:08X}: only sources under a pending ruling ({held[0][2]}), skipped'); continue
         if not cands:
             continue
         if by_addr is None:
@@ -264,7 +386,13 @@ def clone_stage(tgt, idx, out_dir, alt=0, log=print):
 
 def main():
     args = sys.argv[1:]
+    if not args or args[0] in ('-h', '--help'):
+        sys.exit(__doc__)
     alt = 0
+    if '--allow-pending' in args:
+        args.remove('--allow-pending')
+    else:
+        PENDING.update(read_pending())
     if '--alt' in args:
         i = args.index('--alt')
         alt = int(args[i + 1])

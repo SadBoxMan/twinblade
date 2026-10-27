@@ -2595,3 +2595,12 @@ its lui; the original after `lw 0x1C` and `li -0x40` (sw ra one slot earlier).
 | Chained s16 store `a = b = (8 - n) * 0x600` with the 8-n and product registers swapped | `AF(r,s16,0x1A) = (8 - n) * 0x600; AF(r,s16,0x18) = AF(r,s16,0x1A);` | sc07_010 (B109) |
 
 Placed by r205 (26 Oct evening, after LuciDin's ruling "Yes to all"; r201/r202/r203 held items): symbol split (offset form, no MATCH-TRICK mark): sc01_000 8017D490, sc01_084 801856D8, sc03_116 801810C8, sc03_094 8017D898, sc03_006 80187E24, sc03_030 801804F4, sc01_080 80181BB0, sc02_005 8018FFC4 / 8018F894 / 8018FE18, sc02_011 8018487C, sc07_010 80181C54 (all with a `/* symbol split: ... */` comment). sc06_014 8017E8D8: D_80126CB4 added to stg/symbol_addrs_sc06_014.txt, re-split (`make split-stg STG=sc06_014`), clean array form. Marked tricks kept: sc03_107 8017EF3C (x7, comma expression), sc03_124 80185C98 (U16R cast). Unset reads (PORT NOTE: undefined under cl, as the original): sc02_000 8018762C (clone sc02_003 8018762C), sc03_013 8017DD98, sc03_116 80181204. Tool gaps: tools/stage_bulk/clone_all.py takes the output root as argv[0] (no --help); tools/stage_bulk/place_stage.py crashes (`re.match(...)[1]` on None) on a draft whose function has a leading comment: put the draft with tools/put_func.py instead.
+
+### r208 rows (decomp tools card, 26 Oct; merge 4b2d427; docs/test_infrastructure.md section 2c)
+
+| Problem | Fix | Where |
+|---|---|---|
+| A draft's extern or table "undeclared" after placement; a later prototype breaks fewer-argument calls; a leading comment crashes place_stage; a stray psyq.h after a deferral | fixed in put_func / place_stage (declarations directly above the function, empty guesses kept empty, comment moved, group restored whole): no hand-insert scripts (handput2.py, hp.py, kr.py, voidput.py) needed | r208 |
+| cmp_func MATCH but the link fails or reads another byte (phantom / alias symbol, a neighbour-symbol base with a negative offset) | cmp_func now says "differs; not in the image's link: SYM" or compares the negative addend; after adding a needed label to the stage symbols, rebuild the stage once so its map has it | r208 |
+| A shape with C copies only in re-split images was never cloned | stage_clone reads sources from build/src/stg/<stage>.o: build the stages (`make regress` or check-stg) before a clone pass | r208 |
+| Clone a source placed under a pending ruling | list it in tools/stage_bulk/pending_rulings.txt (default skip); `--allow-pending` to use it | r208 |

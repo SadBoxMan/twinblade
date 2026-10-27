@@ -162,6 +162,43 @@ stages (35 functions placed, each stage's check PASS), then src/ was restored: t
 * A deferred draft whose callee the target file defines void in C while the source returns its value (sc04_019
   801815DC calling 80181998): a source judgement (retype the matched definition), left deferred.
 
+## 2c. Decomp tool fixes of r208 (26 Oct 2026)
+
+The gaps the stage streams logged since r192 (r197, r199-r203, r205, r206 handoff paragraphs; recipes "Placement gaps
+met by r200 / r201 / r203"). Placed cases were tested by putting them back to asm in the worktree
+(tools/stage_bulk/unplace.py), re-placing them with the new tools and restoring the file. Merge 4b2d427; full
+`make regress` 182/182, engine 140/140.
+
+| Tool | Gap | Now (test) |
+|---|---|---|
+| put_func / place_stage | new declarations went above the file's first INCLUDE_ASM, which could be after the function (fp tables "undeclared", ~15 times); a name in an INCLUDE_ASM line or further down counted as declared | each draft's missing declarations go directly above its own INCLUDE_ASM (`place_one`), judged against the text above it only, drafts placed top down (sc07_007 801827E0: its two externs land above it, check OK) |
+| put_func._func_name | `extern void (*D[])();` / `(*f)()` read as a function named `void`: the second one in a draft was dropped as a duplicate prototype | function pointers are variables; both carried (synthetic test) |
+| put_func.missing_decls | a later definition's full header as the prototype broke earlier calls with fewer arguments (sc02_005 80186CA8); a variable the file defines (not extern) only further down got nothing | the draft's empty `T f();` keeps its empty list with the definition's return type (the full header only for a narrow parameter); the draft's extern for a later-defined variable |
+| put_func.retype_guess (both tools) | the file's own guess of the function being placed: `extern T f()` with another return type, `extern u8 f;`, a non-extern prototype with another count (sc06_025 80184B50) or an empty one taken as zero parameters (sc03_002 801821B4, "parameter count differs"); `extern s32 f();` for a void definition whose caller uses the value | the return type follows the definition; a void one keeps `extern void` with `((s32 (*)())f)(` at the caller (26 Oct ruling, r201's voidput.py); the prototype becomes the definition's header, or `T f();` |
+| put_func | no K&R form (r202's kr.py by hand); static inline helpers went with the declarations; no `--help` | an argument-count error on a placed definition retries it K&R; inline helpers in front of their function; usage text |
+| place_stage | crashed on a draft whose function has a leading comment (sc02_003 8018762C, sc03_029 80186448) | the comment goes in front of the function (sc02_003 8018762C unplaced and re-placed: file byte-identical to HEAD) |
+| place_stage | silent or log-only deferrals; two drafts declaring one table differently; a file scalar the draft needs as an array; AF / `#include "psyq.h"` left in a file when nothing placed (sc06_025) | each deferral worded with its first error or the clashing symbol and both forms (retried next round); `extern T D;` retyped `D[]` with other uses `D[0]`; a group that places nothing restores the file whole |
+| cmp_func | a negative %lo addend (`<%lo(g_SoundChan+-0x24)>`) did not parse, so the word stayed masked: r206's false MATCH | parsed: 0x800A46C4 vs the original's 0x800A4694 now differs |
+| cmp_func | phantom / alias symbols passed as MATCH and failed the link (sc03_030 8017E430, sc01_005 8018203C, sc03_024 80184CB0, sc06_014 8017E8D8) | a MATCH whose relocation symbols are absent from the image's last link map (build/.../*.map) is "differs; not in the image's link: SYM" (sc06_014 8017E8D8 with D_80126CB4 taken out of the stage symbols) |
+| stage_clone | splat writes no .s for a function that has C, so after any re-split a matched function was never a clone source (r201's 24 hand clones; a fresh worktree had almost none) | tokens from the built object (build/src/stg/<stage>.o), bounded by the symbol's size, addends named by exact address as splat would; 23,431 sources (sc06_024 80181EF4 drafted from sc06_022 8017FA1C, which has no .s: MATCH, placed back, check OK) |
+| stage_clone | offset move took the nearest pair BELOW (sc06_024 80181EF4: D_801AF7B4's pair for D_801AC420) | nearest pair either side: D_sc06_024_801AC420 |
+| stage_clone | target declares a global with another type (u16 vs s16, array vs scalar D_800B9A02); source static inline helpers dropped; psyq.h clashed with targets declaring LoadImage | the target's line stays and the body reads the global as the source's type (`(*(s16 *)&D)`, `((u16 *)&D)`); inline helpers the body calls are copied; psyq.h dropped when the target declares every library call the body makes (its lines carried) |
+| clone_all | `--help` ran a full unfiltered pass into a folder named `--help` | argparse: `--help`, a root starting with `-` refused, `--passes N`, `--allow-pending` |
+| stage_clone / clone_all | sources placed under a pending ruling were cloned | tools/stage_bulk/pending_rulings.txt (seeded from r199's pending list less K&R and static inline); skipped unless `--allow-pending` |
+| splat symbols | sc07_007 801827E0 needed a label inside splat's blob D_sc07_007_80199AC4 | `D_sc07_007_80199D4C` in stg/symbol_addrs_sc07_007.txt (a comment there must not contain `word:`, splat reads it as an attribute); 801827E0 placed |
+| new: gte_twins.py | r140's PC build broke on a gte.h macro with no PC twin | `make gte-twins` (report only, exit 1 on a gap): 55 macros, 5 without a twin in pc/gte_pc.h: gte_ldv3c, gte_stsxy0, gte_stsxy01, gte_stsxy1, gte_stsxy3c (used in src/stage and many src/stg files) |
+
+Clone pass over every stage (`clone_all --par 4`, build/work/r208c in C:/tw/tools): 0 functions of a matched shape
+still asm, so nothing to place: every census-miss case named by the streams (sc05_001 8017F1E4, sc05_018 8017F990,
+sc06_000 80182888, sc06_033 8017D6CC, sc06_018 8017D874) had been placed by hand. 178 stage functions are left in asm.
+
+**Not done (reasons):**
+* sc05_001 8017F1E4 vs sc02_026 8017D9D8 is no census miss: two immediates differ (`lui a1,0x14 / ori 0x3FFF` vs
+  `0x8 / 0xFFFF`). A near-copy mode (clone with a constant patched) would be a feature of its own.
+* Two drafts of one batch declaring one table differently (SV8[] vs s16[]) are not reconciled: the second is deferred
+  with both forms named and goes in next round against the first's declaration.
+* Stage -O0 translation units: out of scope (a card of its own).
+
 ## 3. Line endings
 
 `.gitattributes` keeps src/, include/ and every *.yaml LF in every checkout, whatever `core.autocrlf` says. Git for

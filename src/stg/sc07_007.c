@@ -2863,7 +2863,17 @@ void func_sc07_007_801827A4(u8 *arg0) {
     D_sc07_007_80188544[AF(arg0, u16, 4)]();
 }
 
-INCLUDE_ASM("asm/stg/sc07_007/nonmatchings/sc07_007", func_sc07_007_801827E0);
+extern void func_8002D844();
+extern u8 D_sc07_007_80199D4C[];
+
+void func_sc07_007_801827E0(void) {
+    s32 i;
+    for (i = 0; i < 0x944B; i++) {
+        ((u8 *)0x801F0000)[i] = D_sc07_007_80199D4C[i];
+    }
+    func_8002D844(0x801F0000);
+    func_8002D4C8(0x18E, 0);
+}
 
 s32 func_sc07_007_8018283C(s32 arg0) {
     return func_8001ABBC(0, 0, (s32) ((D_sc07_007_801887C4[arg0] * 8) + &g_ArchiveFileLoc), 0, /* extra? */ 0);

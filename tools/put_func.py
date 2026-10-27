@@ -165,18 +165,39 @@ def split_multi(c):
 def _func_name(c):
     """the function a prototype chunk declares (`extern s32 f(s32);`, `void *g();`), else None"""
     m = re.fullmatch(r'\s*(?:extern\s+)?[A-Za-z_][\w\s\*]*?\b(\w+)\s*\([^;{}]*\)\s*;\s*', c)
-    return m[1] if m and not re.match(r'\s*typedef\b', c) else None
+    # r208: a function pointer `extern void (*D[])();` / `(*f)();` is a variable (its name was read as `void`, so a
+    # second one in a draft was dropped as a duplicate prototype)
+    if m and re.match(r'\s*\(\s*\*', c[m.end(1):]):
+        return None
+    return m[1] if m and m[1] not in ('void', 'int', 'char', 'short', 'long', 'unsigned', 'signed') \
+        and not re.match(r'\s*typedef\b', c) else None
 
 
-def missing_decls(cs, t):
-    """the declaration chunks the file lacks (r142): comments do not count, and a chunk whose names the file already
+NARROW = re.compile(r'(?:\b[su](?:8|16)\b|\bchar\b|\bshort\b)(?![^,()]*\*)')
+
+
+def asm_pos(t, name):
+    """the offset of name's INCLUDE_ASM line in t, else None"""
+    m = re.search(rf'^INCLUDE_ASM\("[^"]+",\s*{name}\);', t, re.M)
+    return m.start() if m else None
+
+
+def missing_decls(cs, t, at=None):
+    """the declaration chunks the file lacks above offset `at` (r208: the function's own INCLUDE_ASM, where they now go;
+    default the first INCLUDE_ASM, as before) (r142): comments do not count, and a chunk whose names the file already
     declares is skipped whole (no duplicate typedef, the file's own extern wins). r192: a multi-name extern line is
-    split first; INCLUDE_ASM lines are never declarations; a function the file only declares or defines after its first
-    INCLUDE_ASM (where the new declarations go) still gets its prototype (it was dropped: "undeclared", "used prior to
-    declaration"), unless that later definition is static."""
+    split first; INCLUDE_ASM lines are never declarations; a function the file only declares or defines further down
+    still gets its prototype (it was dropped: "undeclared", "used prior to declaration"), unless that later definition
+    is static. r208: only the text ABOVE `at` counts as declaring (an INCLUDE_ASM line or a later mention declares
+    nothing); a variable the file defines only further down gets the draft's extern; a later definition gives its
+    return type with the draft's own parameter list when the draft's is empty (`T f();`: the full header broke earlier
+    calls with fewer arguments, sc02_005 80186CA8) unless a narrow parameter needs the full prototype."""
+    if at is None:
+        k = t.find('\nINCLUDE_ASM')
+        at = k if k >= 0 else len(t)
+    head = re.sub(r'^INCLUDE_ASM\(.*$', '', t[:at], flags=re.M)
+    rest = strip_comments(t[at:])
     tn = norm(strip_comments(t))
-    k = t.find('\nINCLUDE_ASM')
-    head = t[:k] if k >= 0 else t
     hn = norm(strip_comments(head))
     out = []
     for c0 in cs:
@@ -184,24 +205,24 @@ def missing_decls(cs, t):
             cc = '\n'.join(l for l in c.splitlines() if not l.lstrip().startswith('INCLUDE_ASM'))
             fn = _func_name(cc)
             # an identical extern or prototype only further down still goes up here (a duplicate is harmless)
-            if not cc.strip() or norm(cc) in (hn if fn or cc.lstrip().startswith('extern') else tn):
+            if not cc.strip() or norm(cc) in (hn if fn or cc.lstrip().startswith('extern') else tn) or cc in out:
                 continue
             if fn:
-                later_static = re.search(rf'^static\b[^;{{}}]*\b{fn}\s*\(', strip_comments(t[len(head):]), re.M)
+                later_static = re.search(rf'^static\b[^;{{}}]*\b{fn}\s*\(', rest, re.M)
                 if declared_in(fn, head) or later_static:
                     continue
                 if any(_func_name(x) == fn for x in out):
                     continue
-                # defined further down: its own header is the prototype (the draft's guess could conflict with it);
-                # a K&R definition gives `T f();`
-                for d in FUNC.finditer(strip_comments(t[len(head):])):
+                for d in FUNC.finditer(rest):
                     if d[1] == fn:
                         h = d[0][:-1].rstrip()                          # the header without its `{`
                         p = h.index('(', h.index(fn))
-                        # K&R (parameter declarations follow, or bare names): no prototype
-                        if not h.endswith(')') or re.fullmatch(r'\(\s*\w+(?:\s*,\s*\w+)*\s*\)', h[p:]) and h[p:] != '(void)':
-                            h = h[:p] + '()'
-                        cc = ' '.join(h.split()) + ';'
+                        dp = cc[cc.index('(', cc.index(fn)):].rstrip().rstrip(';').strip()
+                        knr = not h.endswith(')') or re.fullmatch(r'\(\s*\w+(?:\s*,\s*\w+)*\s*\)', h[p:]) and h[p:] != '(void)'
+                        if knr or (re.fullmatch(r'\(\s*\)', dp) and not NARROW.search(h[p:])):
+                            h = h[:p] + '()'                            # K&R, or the draft's own empty list
+                        cc = ('extern ' if cc.lstrip().startswith('extern') and not h.startswith('extern') else '') + \
+                            ' '.join(h.split()) + ';'
                         break
                 out.append(cc)
                 continue
@@ -211,12 +232,84 @@ def missing_decls(cs, t):
                 if cc.lstrip().startswith('extern') and len(names) == 1 and not declared_in(next(iter(names)), head):
                     n = re.escape(next(iter(names)))
                     m = re.search(rf'^extern\b[^;{{}}()]*\b{n}\s*(?:\[[^\]]*\])*\s*;|^extern\b[^;{{}}]*\(\s*\*\s*{n}\b[^;{{}}]*;',
-                                  strip_comments(t[len(head):]), re.M)
-                    if m and m[0] not in out:
-                        out.append(m[0])
+                                  rest, re.M)
+                    x = m[0] if m else cc                               # r208: defined (not extern) below: the draft's
+                    if x not in out:
+                        out.append(x)
                 continue
             out.append(cc)
     return out
+
+
+def file_order(t, names):
+    """names sorted by the position of their INCLUDE_ASM in t (r208: each function's declarations go above it, so the
+    upper one's are in place before the lower one is checked)"""
+    return sorted(names, key=lambda n: asm_pos(t, n) if asm_pos(t, n) is not None else len(t))
+
+
+def place_one(t, name, body, decls, pre=''):
+    """t with body in place of name's INCLUDE_ASM and the declarations it lacks directly above it (r208: they went above
+    the file's first INCLUDE_ASM, which could be after the function: "undeclared" function-pointer tables); pre (static
+    inline helpers) goes between the declarations and the function. -> (text, the declarations added)"""
+    at = asm_pos(t, name)
+    new = missing_decls(decls, t, at)
+    block = ''.join(x + '\n' for x in new) + ('\n' if new else '') + pre + body
+    line = re.compile(rf'^INCLUDE_ASM\("[^"]+",\s*{name}\);', re.M)
+    return line.sub(lambda m: block, t, count=1), new
+
+
+def header(body, n):
+    """(return type, parameter text, K&R?) of n's definition in body, else None (a leading comment is skipped, r208:
+    place_stage crashed on one, sc02_003 8018762C)"""
+    m = re.search(rf'^([A-Za-z_][\w \*]*?)\s*\b{n}\s*\(([^)]*)\)\s*([^{{]*)\{{', strip_comments(body), re.M)
+    if not m:
+        return None
+    return m[1].replace('static', '').replace('inline', '').strip(), m[2].strip(), bool(m[3].strip())
+
+
+def knr(text, n):
+    """n's one-line ANSI definition old-style, `s32 f(a, b) s32 a; u8 *b; {`, if every parameter is a word (no
+    promotions); else None (place_stage's knr, r202's kr.py)"""
+    m = re.search(rf'^([\w \*]+?\s*\b{n})\(([^)]*)\)\s*\{{', text, re.M)
+    if not m:
+        return None
+    ps = [p.strip() for p in m[2].split(',') if p.strip() and p.strip() != 'void']
+    names = []
+    for p in ps:
+        if not re.fullmatch(r'(?:[su]32 \w+|[\w ]+\*+\s*\w+)', p):
+            return None
+        names.append(re.search(r'(\w+)$', p)[1])
+    return text[:m.start()] + f'{m[1]}({", ".join(names)})\n' + ''.join(f'    {p};\n' for p in ps) + '{' + text[m.end():]
+
+
+def retype_guess(t, n, body):
+    """r208: the file's own guesses for the function being placed, made to agree with its definition: an
+    `extern T f(...)` or address-taken `extern u8 f;` takes the definition's return type; a void definition whose
+    caller uses the value keeps `extern void f();` and the caller gets `((s32 (*)())f)(` (26 Oct ruling, r201's
+    voidput.py); a non-extern prototype above it (sc06_025 80184B50) becomes the definition's header, or `T f();`
+    when its parameter count differs (an empty `T f();` is not a zero-parameter prototype, r201 sc03_002 801821B4)"""
+    h = header(body, n)
+    if not h:
+        return t
+    ret, params, is_knr = h
+    if ret == 'void' and re.search(rf'(?:=\s*|return\s+){n}\s*\(', t):
+        t = re.sub(rf'(=\s*|return\s+){n}\s*\(', rf'\1((s32 (*)()){n})(', t)
+    t = re.sub(rf'^extern\s+[\w \*]+?\b{n}\s*\(', f'extern {ret} {n}(', t, flags=re.M)
+    t = re.sub(rf'^extern u8 {n};$', f'extern {ret} {n}();', t, flags=re.M)
+    at = asm_pos(t, n)
+    if at is None:
+        return t
+    pm = None
+    for pm in re.finditer(rf'^(?!extern|static|typedef)[A-Za-z_][\w \*]*?\b{n}\s*\(([^;{{)]*)\)\s*;', t[:at], re.M):
+        pass
+    if pm:
+        count = lambda s: len([p for p in s.split(',') if p.strip() and p.strip() != 'void'])
+        if is_knr or count(pm[1]) != count(params) or not pm[1].strip():
+            new = f'{ret} {n}();' if is_knr or not NARROW.search(params) else f'{ret} {n}({params});'
+        else:
+            new = f'{ret} {n}({params});'
+        t = t[:pm.start()] + new + t[pm.end():]
+    return t
 
 
 def target_of(path):
@@ -247,7 +340,11 @@ def main():
              for f in glob.glob(os.path.join(ROOT, 'src', os.environ.get('TWINBLADE_OVL', ''), '**', '*.c'), recursive=True)}
     backup = dict(files)
     placed = []
-    for path in sys.argv[1:]:
+    pre_used = set()
+    args = [a for a in sys.argv[1:] if a not in ('-h', '--help')]
+    if len(args) != len(sys.argv) - 1 or not args:
+        sys.exit(__doc__)
+    for path in args:
         text = open(path, encoding='utf-8').read()
         decl, funcs = split(text)
         if not funcs:
@@ -255,17 +352,24 @@ def main():
         # r142: a static helper of the draft with no INCLUDE_ASM anywhere goes in with the declarations
         has_asm = lambda name: any(re.search(rf'INCLUDE_ASM\("[^"]+",\s*{name}\);', t) for t in files.values())
         helpers = [b for name, b in funcs.items() if not has_asm(name) and b.lstrip().startswith('static')]
-        for name, body in funcs.items():
-            if body in helpers:
-                continue
-            pat = re.compile(rf'INCLUDE_ASM\("[^"]+",\s*{name}\);')
+        # r208: a `static inline` helper goes right in front of the function that follows it in the draft (r179's
+        # handput_inl, r202's hp.py); other static helpers go in with the declarations
+        inl = [b for b in helpers if re.match(r'static\s+inline\b', strip_comments(b).lstrip())]
+        helpers = [b for b in helpers if b not in inl]
+        order = [n for n in funcs if funcs[n] not in helpers and funcs[n] not in inl]
+        for f0, t0 in files.items():                           # r208: in file order (each one's declarations above it)
+            if any(asm_pos(t0, n) is not None for n in order):
+                order = file_order(t0, order)
+                break
+        for name in order:
+            body = funcs[name]
+            pre = ''.join(b + '\n\n' for b in inl if text.index(b) < text.index(body) and b not in pre_used)
+            pre_used.update(b for b in inl if b in pre)
             for f, t in files.items():
-                if pat.search(t):
+                if asm_pos(t, name) is not None:
                     t = add_includes(t, includes(text))
-                    new_decl = missing_decls(chunks(decl), t) + [h for h in helpers if h not in t]
-                    if new_decl:                               # before the first INCLUDE_ASM, which may be this function's own
-                        t = t.replace('\nINCLUDE_ASM', '\n' + '\n'.join(new_decl) + '\n\nINCLUDE_ASM', 1)
-                    t = pat.sub(lambda m: body, t, count=1)
+                    t = retype_guess(t, name, body)
+                    t, _ = place_one(t, name, body, chunks(decl) + [h for h in helpers if h not in t], pre)
                     files[f] = t                               # decl is kept: every file that gets a function needs the declarations (deduped per file)
                     placed.append(name)
                     break
@@ -278,6 +382,18 @@ def main():
     for f in changed:
         open(f, 'w', encoding='utf-8', newline='\n').write(files[f])
     ok, log = build(targets)
+    # r208 (r202's kr.py): a placed definition that an earlier caller calls with fewer or more arguments, old-style
+    # (word parameters compile the same; the build check verifies)
+    retry = {m[1] for m in re.finditer(r"too (?:few|many) arguments to function `(\w+)'", log)} & set(placed)
+    if not ok and retry:
+        for f in changed:
+            for n in retry:
+                k = knr(files[f], n)
+                if k:
+                    files[f] = k
+                    print(f'put_func: {n} written K&R (a caller passes another argument count)')
+            open(f, 'w', encoding='utf-8', newline='\n').write(files[f])
+        ok, log = build(targets)
     if ok:
         print('OK: build still matches;', ', '.join(placed), 'now in C')
         return

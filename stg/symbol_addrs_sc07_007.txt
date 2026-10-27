@@ -1,4 +1,5 @@
 // Stage SC07_007 (stg/sc07_007.yaml): names given by hand first
+D_sc07_007_80199D4C = 0x80199D4C; // r208 table inside the blob D_sc07_007_80199AC4 plus 0x288, read by 801827E0
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
 func_80012ABC = 0x80012ABC; // type:func
 func_80012C6C = 0x80012C6C; // type:func

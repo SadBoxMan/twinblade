@@ -111,6 +111,10 @@ check: check-main $(addprefix check-,$(OVERLAYS)) check-abil check-stg
 regress:
 	$(PYTHON) tools/regress.py $(R)
 
+# gte-twins (r208): report the include/gte.h macros with no C twin in pc/gte_pc.h (the PC build needs one each)
+gte-twins:
+	$(PYTHON) tools/gte_twins.py
+
 # one line per checked image, "<area> <name> <built binary> <original>": what tools/regress.py builds and compares
 # (a stage's original is disc/pac4/<NAME>.bin in upper case: regress.py makes it so, rather than a sed that not every
 # sed on a Windows PATH honours)

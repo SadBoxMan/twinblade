@@ -8,19 +8,26 @@ Appends one line per stage and pass to <root>/_log.csv. Run from PowerShell (Git
 --stages SC01,SC02 (r142, 22 Oct): place only in stages whose name starts with one of these prefixes, so two streams
 can each clone inside their own stage groups (the drafts are still written for every stage; only placing is limited).
 jobs: compiles at a time per stage, default 4 (LuciDin's CPU cap with several streams building, 22 Oct; never above 8).
-usage: clone_all.py <root> [jobs=4] [--par N] [--stages PREFIX,...] [STAGE ...]"""
+usage: clone_all.py <root> [jobs=4] [--par N] [--stages PREFIX,...] [--allow-pending] [--passes N] [STAGE ...]"""
 import csv, glob, os, re, subprocess, sys, threading, time
 from concurrent.futures import ThreadPoolExecutor
-args = sys.argv[1:]
-par = 1
-if '--par' in args:
-    i = args.index('--par'); par = int(args[i + 1]); del args[i:i + 2]
-prefixes = ()
-if '--stages' in args:
-    i = args.index('--stages'); prefixes = tuple(s.strip().lower() for s in args[i + 1].split(',') if s.strip()); del args[i:i + 2]
-root = args[0]
-jobs = args[1] if len(args) > 1 else '4'
-only = {s.lower() for s in args[2:]}
+import argparse
+# r208: argparse (`clone_all.py --help` used to run a full unfiltered pass into a folder named `--help`, r203)
+ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+ap.add_argument('root', help='output root for the passes (drafts in <root>/p<N>/<stage>/, log <root>/_log.csv)')
+ap.add_argument('jobs', nargs='?', default='4', help='compiles at a time per stage (default 4, never above 8)')
+ap.add_argument('only', nargs='*', help='place only in these stages (names)')
+ap.add_argument('--par', type=int, default=1, help='stages at a time (CPU cap: 4)')
+ap.add_argument('--stages', default='', help='place only in stages starting with one of these prefixes: SC01,SC02')
+ap.add_argument('--allow-pending', action='store_true',
+                help='also clone from sources in tools/stage_bulk/pending_rulings.txt (skipped by default)')
+ap.add_argument('--passes', type=int, default=5, help='at most this many passes (default 5)')
+a = ap.parse_args()
+if a.root.startswith('-') or not re.fullmatch(r'\d+', a.jobs):
+    ap.error(f'bad root or jobs: {a.root!r} {a.jobs!r}')
+root, jobs, par = a.root, a.jobs, a.par
+prefixes = tuple(s.strip().lower() for s in a.stages.split(',') if s.strip())
+only = {s.lower() for s in a.only}
 env = dict(os.environ, PATH='C:\\msys64\\usr\\bin;' + os.environ['PATH'])
 log = os.path.join(root, '_log.csv')
 os.makedirs(root, exist_ok=True)
@@ -54,7 +61,8 @@ def one(p, d):
 p = 0
 while True:
     out = os.path.join(root, f'p{p}')
-    r = subprocess.run([sys.executable, 'tools/stage_clone.py', '--all', out, '--alt', str(p)], capture_output=True,
+    r = subprocess.run([sys.executable, 'tools/stage_clone.py', '--all', out, '--alt', str(p)] +
+                       (['--allow-pending'] if a.allow_pending else []), capture_output=True,
                        text=True, env=env)
     open(os.path.join(root, f'p{p}.log'), 'w').write(r.stdout + r.stderr)
     print(r.stdout.splitlines()[-1] if r.stdout else r.stderr[-500:], flush=True)
@@ -62,5 +70,5 @@ while True:
     with ThreadPoolExecutor(par) as ex:
         total = sum(ex.map(lambda d: one(p, d), dirs))
     print(f'pass {p}: {total} placed', flush=True)
-    if total == 0 or p >= 4: break
+    if total == 0 or p >= a.passes - 1: break
     p += 1
