@@ -593,7 +593,23 @@ typedef struct { SV4 p[4]; s32 c[4]; s32 col; s32 code; u8 flag; } Q74;
 typedef struct { u32 wx, wy, wz, count; u32 *faces; } Rec;
 
 
-INCLUDE_ASM("asm/stg/sc04_008/nonmatchings/sc04_008", func_sc04_008_8017D168);
+extern s32 func_80148800();
+extern u8 D_80126940;
+extern s16 D_sc04_008_80182534[];
+
+void func_sc04_008_8017D168(u8 *arg0) {
+    SV8 v;
+    u8 t;
+
+    if (func_80148800((s32) &D_80126B58) & 3) {
+        t = (AF(arg0, u8, 5) + 1) & 1;
+        AF(arg0, u8, 5) = t;
+        AF(arg0, s32, 0x14) = D_sc04_008_80182534[t];
+    }
+    v = *(SV8 *)&D_80126940;
+    v.z = -0x480;
+    func_sc04_008_8017D210(arg0, &v);
+}
 
 void func_sc04_008_8017D210(u8 *arg0, u8 *arg1) {
     FeMtx m;

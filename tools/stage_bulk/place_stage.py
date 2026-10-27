@@ -16,7 +16,9 @@ AF = '#define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))'
 STG = os.environ.get('TWINBLADE_STG', '').lower()
 CHECK, CHECK_OK = (f'check-{STG}', f'{STG}.bin: OK') if STG else ('check-stage', 'stage.bin: OK')
 names = [l.strip() for l in open(os.path.join(d, '_matched.txt')) if l.strip()]
-src = {f: open(f, encoding='utf-8').read() for f in glob.glob(f'src/stg/{STG}.c' if STG else 'src/stage/*.c')}
+# r209: a stage with an -O0 run has three files (tools/stage_units.py); each draft goes to the one holding its INCLUDE_ASM
+import stage_units as U
+src = {f: open(f, encoding='utf-8').read() for f in ([os.path.relpath(p).replace(os.sep, '/') for p in U.files(STG)] if STG else glob.glob('src/stage/*.c'))}
 def target(n):
     for f, t in src.items():
         if re.search(rf'INCLUDE_ASM\("[^"]+",\s*{n}\);', t): return f
@@ -28,6 +30,7 @@ def sym_of(x):
 def norm(x): return re.sub(r'\s+', ' ', x).strip()
 groups = {}
 pre = {}    # r192: a draft's `static inline` helpers, placed in front of it
+inl = {}    # r211: a draft's `static inline` helpers [(name, text)], put into pre once per file below
 incs = {}   # r142: the drafts' #include lines (a GTE draft needs include/gte.h; split() drops them)
 for n in names:
     f = target(n)
@@ -45,7 +48,8 @@ for n in names:
     # r192: a `static inline` helper goes right in front of the function (as r179's handput_inl did), where GCC emits it
     # in the original's order; other static helpers go with the declarations
     ds += [b for k, b in helpers if not re.match(r'static\s+inline\b', b)]
-    pre[n] = ''.join(b + '\n\n' for k, b in helpers if re.match(r'static\s+inline\b', b))
+    inl[n] = [(k, b) for k, b in helpers if re.match(r'static\s+inline\b', b)]
+    pre[n] = ''
     # r208: a comment split() attached to the function goes in front of it, so the body starts with its header (a
     # leading comment crashed the header matches: sc02_003 8018762C, sc03_029 80186448)
     body = funcs[n]
@@ -54,6 +58,13 @@ for n in names:
         pre[n] += c[0].strip() + '\n'; body = body[c.end():]
     incs.setdefault(f, []).extend(x for x in P.includes(text) if x not in incs.get(f, []))
     groups.setdefault(f, []).append((n, ds, body))
+# r211: drafts of one batch carrying the same `static inline` helper (twins matched with one helper set): it goes in
+# once, in front of the first of them by address (each copy made the batch defer as a redefinition)
+for f, items in groups.items():
+    seen = set()
+    for n, _, _ in sorted(items, key=lambda it: P.asm_pos(src[f], it[0]) or 0):
+        pre[n] = ''.join(b + '\n\n' for k, b in inl.get(n, []) if k not in seen) + pre[n]
+        seen.update(k for k, _ in inl.get(n, []))
 deferred, placed = [], []
 def why(n, s):
     with open(os.path.join(d, '_why.txt'), 'a') as w: w.write(f'{n}: {s}\n')
@@ -103,7 +114,7 @@ def insert(t, items):
 def compile_errors(f):
     """line numbers of the errors cc1 reports for f (cpp keeps the line markers)"""
     r1 = subprocess.run([CC + 'cpp.exe', '-undef', '-Iinclude', '-D_LANGUAGE_C', '-DPSX', f], capture_output=True)
-    r2 = subprocess.run([CC + 'cc1.exe', '-quiet', '-O2', '-G0', '-mips1', '-mcpu=3000', '-fgnu-linker', '-mgas',
+    r2 = subprocess.run([CC + 'cc1.exe', '-quiet', '-O0' if U.is_o0(f) else '-O2', '-G0', '-mips1', '-mcpu=3000', '-fgnu-linker', '-mgas',
                          '-msoft-float', '-fsyntax-only'], input=r1.stdout, capture_output=True)
     out = (r1.stderr + r2.stderr).decode('utf-8', 'replace')
     return [int(m[1]) for m in re.finditer(r'^\S*' + re.escape(os.path.basename(f)) + r':(\d+): (?!warning)', out, re.M)], out

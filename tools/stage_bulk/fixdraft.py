@@ -5,6 +5,8 @@ checkout it lives in (any worktree); run from PowerShell. jobs: compiles at a ti
 usage: fixdraft.py <in_dir> <out_dir> [jobs=4]"""
 import glob, os, re, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'tools'))
+import stage_units as U  # r211: a stage -O0 unit's function compiles -O0
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 src_d, out_d = os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2])
 jobs = int(sys.argv[3]) if len(sys.argv) > 3 else 4
@@ -134,7 +136,7 @@ def fix(t, errs):
 
 
 def cmp(path, fn):
-    r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'cmp_func.py'), path, fn, '2.7.2', '-O2'],
+    r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'cmp_func.py'), path, fn, '2.7.2', U.opt_of(fn)],
                        capture_output=True, text=True, env=env, cwd=ROOT)
     return r.stdout + r.stderr
 

@@ -57,7 +57,9 @@ segments:
     vram: 0x80128158
     subsegments:
       - {start: 0x0, type: bin, name: sc03_118_engine, linker_section_order: .rodata}  # the shared engine, matched in src/stage (placed first: a .data piece would follow the .text)
-      - [0x53D44, c, sc03_118]     # the stage's own code, 0x8017BE9C-0x8018991C
+      - [0x53D44, c, sc03_118]     # the stage's own code, 0x8017BE9C-0x80183178
+      - [0x5B020, c, sc03_118_o0]  # -O0 code, 0x80183178-0x801838A4
+      - [0x5B74C, c, sc03_118_post]  # -O2 again, 0x801838A4-0x8018991C
       - [0x617C4, data, sc03_118_data]
       - [0xAC6F4, bin, sc03_118_tail]  # the image length is not a multiple of 4
   - [0xAC6F7]

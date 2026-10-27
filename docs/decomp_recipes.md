@@ -148,7 +148,7 @@ python tools/regdump.py t.c func_X -O2           how GCC placed each variable: r
 | a byte store to Work through `lui at,1; addu at,a1,at; sb -0x5C1B(at)` with the base in an argument register | the pointer is set at function start (`register Work *w = &D_800AF630;`) and the store is in a block with two predecessors, so cse cannot fold the constant address; a `#define WORK ((Work *)0x800AF630)` constant gives `lui at,0x800c; sb` instead | func_80015208 (open), docs: include/work.h |
 | a Work field read after stores through other pointers, reloaded | `WORK->field` (the constant pointer is never cached in a register) | include/work.h comment |
 | a function that takes arguments is called with none, and the callee uses the caller's a0 | write the call as `f()` with a K&R extern: GCC leaves a0..a3 as they are, so the caller's own arguments arrive (the PC build writes them in, pc/gen.py "argument pass-through") | func_8001CD50 -> func_8001CF48, func_80027BF0 |
-| `-O0` code: every local on the stack, `fp` frame | it is `main.c`, `code_8002C410.c` or one of the stage's two -O0 files; write plain statements, locals in declaration order (section 6) | func_80010BB4 |
+| `-O0` code: every local on the stack, `fp` frame | it is `main.c`, `code_8002C410.c`, one of the stage's two -O0 files or a stage image's `src/stg/<stage>_o0.c` (r209: SC03_014 / 015 / 118 / 119); write plain statements, locals in declaration order (section 6) | func_80010BB4 |
 | the first test's taken branch lands straight in the then-block of a later test of the same flag (`bnez v0, .L_late` past the whole body) | test it twice: `if (!(a->unkC4 & 2) && (a->unkB4 & 0x20000)) { ... } if (a->unkC4 & 2) f(5); else f(0x38);`: CSE follows the jump, knows the flag on that path and threads the branch. An early `return` for the first test lays the path out inline instead | func_80130C08 |
 | a chain of thresholds whose results sit in the delay slots of branches that skip to the join (`bnez v0,L; addiu s1,zero,4` ... `addiu s1,zero,8` ... `addiu s1,zero,0xC`) | nest the assignments, each before the test that may skip the rest: `k = 4; if (max / 2 >= cur) { k = 8; if (max / 5 >= cur) k = 0xC; }`. An if / else-if chain branches on the false side instead | func_80130D48 |
 | signed division of a u16 field (`sra v1,a0,31; subu; sra`) and one magic constant (`0x66666667` in a2) shared by `/10` and `/5`, where yours divides unsigned (`srl`, `multu 0xCCCCCCCD`) | load the field into an `s32` local first (`max = w->hpMax;`): a zero-extended operand written directly is known non-negative and divided unsigned | func_80130D48 |
@@ -2604,3 +2604,85 @@ Placed by r205 (26 Oct evening, after LuciDin's ruling "Yes to all"; r201/r202/r
 | cmp_func MATCH but the link fails or reads another byte (phantom / alias symbol, a neighbour-symbol base with a negative offset) | cmp_func now says "differs; not in the image's link: SYM" or compares the negative addend; after adding a needed label to the stage symbols, rebuild the stage once so its map has it | r208 |
 | A shape with C copies only in re-split images was never cloned | stage_clone reads sources from build/src/stg/<stage>.o: build the stages (`make regress` or check-stg) before a clone pass | r208 |
 | Clone a source placed under a pending ruling | list it in tools/stage_bulk/pending_rulings.txt (default skip); `--allow-pending` to use it | r208 |
+
+### r209 rows (stage -O0 units, 27 Oct; merge 7be489e; docs/test_infrastructure.md section 2d)
+
+All 52 -O0 functions of SC03_014 / 015 / 118 / 119 are in `src/stg/<stage>_o0.c`: 21 shapes by hand (20 at the first
+compile), r174's three (80183D50, 80184538, sc03_118 801833C4), m2c's 80184028, 28 clone copies. Write them in
+`<stage>_o0.c` drafts and compare with `cmp_func ... 2.7.2 -O0` (cmp_par picks -O0 by itself).
+
+| The diff shows (-O0) | Write the source as | Where |
+|---|---|---|
+| m2c's draft 3 instructions long (an extra `sw v0; lw v0` pair) | m2c's temps are each a stack slot at -O0: write the statements by hand; `r = f(...); return r;` gives the original's `sw v0,0x18(fp); lw v0,0x18(fp); j end` | func_sc03_014_801846E4 (x6 with sc03_118 80183178 / 801831D0 / 80183228) |
+| `lw o; lw o; lw o; lhu f; addiu -1; move; sh; sll; sra; bnez` | `if (--o->f == 0)`: the pre-decrement's copy is tested; `o->f++` alone gives the same three loads with no test | func_sc03_014_80184058, sc03_118 801834DC |
+| a global decremented with a copy, then reloaded for the test | `D--; if (D == 0)`; `if (++D >= 0x1E)` tests the copy instead (no reload) | func_sc03_014_80184474 |
+| `sltiu v1,v0,0x10` in a counted loop | the counter is `u32` (`for (i = 0; i < 16; i++)`, the 2.7.2 `bnez body; j end` test at the top) | func_sc03_014_80184354 |
+| s16 fields at 0xE2 / 0xE4 and s32 words at 0xE0 / 0xE4 in one object | two struct views of the one pointer: the file's `Obj` for the halfwords, `((ObjE0 *)o)->e0 += K` for the word (a cast costs nothing at -O0) | func_sc03_014_80184058, sc03_118 80183634 / 801832E0 |
+| frame 8 bytes bigger, nothing stored there | an unused `s32` local (section 6) | func_sc03_014_80184474 |
+| a clone draft of a stage with -O0 units fails "conflicting types for SV8" | fixed in stage_clone (the three units' headers were concatenated) | r209 |
+| a draft placed above the file's only copy of a typedef it uses: "parse error before `*'" | fixed in put_func (the typedef moves up) | r209 |
+
+### r210 rows (the village SC03_001, 27 Oct; merge f1bd37a)
+
+The village (src/stage/sc03_001.c, splat's `stage` overlay: names `func_<ADDR>`, no stage infix) had 146 INCLUDE_ASMs
+and no stream: `stage_clone.py --all` never targets it, so no clone pass had ever placed into it although 119 of the
+146 shapes were matched elsewhere. `stage_clone.py SC03_001 <dir>` (single target) + cmp_par (TWINBLADE_OVL=stage) +
+place_stage (no TWINBLADE_STG: src/stage, check-stage) placed 119 in one pass; the one-copy rest went to helpers.
+
+| The diff shows | Write the source as | Where |
+|---|---|---|
+| A village function with matched twins elsewhere still INCLUDE_ASM | `stage_clone.py SC03_001 <dir>`, `$env:TWINBLADE_OVL="stage"; cmp_par.py <dir> 4`, `place_stage.py <dir>` (no TWINBLADE_STG); clone_all.py / `--all` skip the village | r210 c1 (117 + 2) |
+| A clone draft "not in the image's link: D_sc03_001_<addr>" | the offset-moved name for a village target takes the stage infix; rename to `D_<addr>` (the village's name) and re-check | func_8017F13C (from sc03_124 8018236C) |
+| An object field pointer loaded into a0 once and used for a state test and a call; ours loads it into v0 and again into a0 | read it once into a local: `u8 *p = AF(o, void *, 0x64); if (AF(p, u16, 2) ...) func_8012BD14(p);` | func_80186A8C / 80186B54 / 80186C54 |
+| A call argument chosen by `li a0,0x10` in a bne delay slot and `li a0,0xA` on the fall-through, no s-register | a ternary straight into the argument: `func_8018766C(func_801877C0() == 3 ? 0xA : 0x10, 0x16)` (an if-assigned local gave 30 insns and a saved s1) | func_8018321C family (m3) |
+| The 0 / 3 / other tree on one call (beqz, beq 3, then `j` to a shared fall-through call with its args in delay slots) | `switch (f()) { case 0: v = g(7, 0x13) != 0; break; case 3: v = 0; break; default: v = g(9, 0x11) != 0; }`; an if / else-if chain on a temp swaps the arm layout | func_80180AC4, func_80184AC4 |
+| `bnez v0; li v0,2` then `li v0,1` before the `sh` | plain if / else with the store in each arm (the ternary gives the opposite order) | func_80181B40 |
+| Several state arms ending in the same tail call | write the call out in full in each arm of the else-if chain (cross-jumping merges them); a state variable followed by a switch adds 4 insns | func_801840E4 |
+| func_8017BEA4 has no prologue (starts `lhu v0,2(a0)`) | not a whole function: stage.yaml starts the village's own code at 0x8017BEA4, so the prologue is engine_801458E0.c's 2-insn `func_8017BE9C`; the stg yamls start at 0x8017BE9C. Needs the boundary moved (then sc03_124's func_sc03_124_8017BE9C clones) | parked, r210 |
+
+### r211 rows (stage park round, 27 Oct; merges 50c4e5f and a607038; helper agents a1-a35; docs/test_infrastructure.md 2e)
+
+90 stage functions from asm (128 -> 38 left, 26 of them sc07_002's): 45 of the 100 listed were never-tried leftovers
+(sc04 smalls, the sc06_018 / 032 / 033 trios, 13 giants of 411-5122 insns), the rest old parks. Second rounds on
+re-parked functions (a fresh agent, the first round's cause in the brief) cleared 13 of 16. Work files:
+C:/tw/parks/build/work/r211/ (results.txt, list.md, spec_<tag>_<n>.txt, x_<tag>/ dumps and RESUME notes).
+
+| The diff shows | Write the source as | Where |
+|---|---|---|
+| a range test's result built in t0 or a pseudo copied to v0, `addu v0,zero,zero` first in the original | nested ifs returning constants, `if (a) { if (b) return 1; } return 0;` (the return sets v0 as a hard register) | sc04_015 80180F3C (x9, + village), sc02_000 80188680 |
+| `andi; andi; sll; or` (both masks first) where ours interleaves | each mask in its own s32 local, then the shift / or | sc04_015 80180F3C |
+| a colour built from a call result with the wrong register in the final `or` | `c = v; c \|= (c << 16) \| (c << 8);` (one pseudo for v and the result) | sc03_118 80184E78 (x2) |
+| a sched1 tie on `li a0,K` after the next argument's ori | pass the object, `f(o)`, where the stage calls f with arg0 elsewhere (a0 set twice is not birthing) | sc02_026 8017F5DC (x3) |
+| insns that should follow a value-returning call stay above it (the call is a birthing insn at max priority) | make one later call a call_value: a void callee called through `((s32 (*)())f)(..)`, marked MATCH-TRICK (LuciDin 27 Oct: kept) | sc03_030 8017EEE0 |
+| registers one up in a leaf (a1..t0 for a0..a3) | one s32 local reused for an early global read, a quotient and a later read (one multi-block global pseudo) | sc02_026 8017EA88 |
+| a value in the wrong register because a short temp outranks it in local-alloc | one variable for the earlier value AND the later one: a pseudo that dies more than once is never local-alloc'd, global-alloc takes it after the locals | sc01_001 80182284 (`c` = D_3044 then 0x50000040), sc01_000 8017E4A0 (`c` = 0xE100001E, 0x80, the tag word), sc06_006 (partial) |
+| a clamp temp merged into its copy's register (`subu a0; bgez a0`) | reuse the temp as the variable of a later test (`v = r \| g \| b; if (v == 0)`): it outlives the copy and stays the class leader | sc06_018 8018F694 (x3) |
+| a global-alloc preference from the wrong operand | set_preference uses only the FIRST operand of a binary SET_SRC; order the operands, or assign to a variable live where v0 is busy (a switch variable) so the conflict prunes v0 | sc03_116 8017BF14 |
+| two global pseudos tied on refs, the longer-lived must win | one do-while(0) around a one-insn statement of it INSIDE the inner loop (+1 loop-weighted ref), marked MATCH-TRICK; in straight-line code the loop notes are a sched1 barrier | sc03_116 8017BF14 |
+| a whole permutation of hoisted invariants (s5/s6/s7, t8/t9) shifted by one | global-alloc's integer priority sits on bucket edges: change the loop's RTL length by one insn (`x = c->z; zh = x >> 16;` as two locals, an extra copy `zc = zb; if (zc < za) zc = za;`) | sc06_029 8017C954, sc07_000 8017CDF0 |
+| the first stack local's address (sp+0x10, frame offset 0) kept in an s-register across calls | move the whole body with its locals into a `static inline` helper called once: the inlined frame base gets a const-equivalence and every frame address substitutes into the argument registers | sc06_029 8018A180 |
+| `&local` passed to two calls in a long loop merged, hoisted and spilled (frame 8 too big) | a static inline helper owning the local and making the calls; a pointer that must be set before `i = 0` goes in the for-init | sc06_010 8017E764 |
+| `addiu aN,sp,0x10` / a symbol address rebuilt before every jal, ours kept in s0 | one static inline helper per call step owning its own `SV8 v` (each reuses one frame slot); a helper taking `SV8 *` makes cse fold the parameters | sc06_018 8019059C / 80191C50 (x3 each) |
+| a loop compare constant hoisted into an s-register next to n (ours `li v0,1` in the loop) | a local set in the for-init and compared: `for (i = 0, one = 1, q = ...)`, `== one`; a pointer in different registers in different copies of a repeated block is declared inside each block | sc07_006 80183814 |
+| a stride chain's first giv "not worth while", the counter not eliminated | index the typed table `D[i].field` as the stage declares it; or end cse1's path in the body (the call written in each arm of an if, an inlined helper with early returns): the chain is recomputed, duplicate givs combine, the biv goes | sc01_001 8018275C, 80182A48, 80181A4C (111 -> 77) |
+| a store that must sit before / after a load through an AF cast | AF-cast loads depend on every scalar-global store; struct-field accesses (a local typedef, or the globals as fields of their splat-split base struct through the lower neighbour) depend only on struct stores (MEM_IN_STRUCT); a plain AF store keeps its place before a scalar load | sc07_006 8017D040, sc06_018 80191320, sc06_016 8017F784 |
+| a compare jumps onto its copy register (`addu a1,v0` then the slti on a1) | a narrowing copy target: `s16 a; s32 t; t = (s16)(a + 1); a = t;` (not a reg-reg copy, so optimize_reg_copy_1 leaves the compare on t) | sc01_008 8017F470 |
+| a constant holder shared by two arms outranks a long-lived copy | a block-scoped variable in each arm (2 refs, short life each) | sc02_028 8017F608 |
+| a dead product / sign-extension kept to the end in the original | an else-if over different conditions with one body (LuciDin 27 Oct: the three-arm `t < 0 / t > 0 / else` accepted) | sc02_021 8017DC10 |
+| case 8 branches back into case 7's first block | `goto` to a label at the top of case 7 (no 2.7.2 pass creates that branch: the source had it; LuciDin 27 Oct: accepted) | sc03_124 80188C68 (x4 + village) |
+| a big function that is N copies of one block, frame about N*24 with no stack stores | N calls to a static inline the stage already has (lerpv) | sc07_006 8017DC1C (1518) |
+| a fresh giant renderer | check the matched stages for the same callee sequence first: four of r211's giants were sc01_000's chunk renderer (ReadGeomScreen / GsGetLs / GsSetLsMatrix, MtxDCM / ChunkDCM / GteDCM) with small changes | sc06_000 8017E35C / 8017EF68, sc06_010 8017BEBC / 8017CAD4, sc06_029 8017C954 |
+
+r213 (27 Oct, merge 911cf1a): G14 placed after LuciDin's ruling: sc03_010 8017C730 and its clone sc03_013 8017C730, one MATCH-TRICK line `type = mid > yhi || mid > ymid || mid == ymid;` (a dead store: `type` is reset per poly; its tests keep the original's dead (s16)ymid sign-extension).
+
+Parked by r211 (best files under C:/tw/parks/build/work/r211/; FABLE = the agents' call): sc02_000 80187738 x2 (15
+lines, spec_k24_4 b3; sched1 has no memory dependence between same-base disjoint accesses: two volatiles reproduce the
+order, 4 lines, spec_a2_12 v3; FABLE), sc03_092 8017E60C (5, spec_a8_8 b1; global-alloc ranks the masked value 1.33 over
+the inline's s16 copy 0.5; FABLE), sc04_011 801836D4 (7, spec_a10_8; the right load order and the right registers exclude
+each other in local-alloc, xor canonicalised; partial spec_a34_12 v3; FABLE), sc06_006 8017E078 (10, spec_a10_15 b1;
+reusing a function-scope temp fixes the unpack but sinks `sh b,8`; FABLE), sc05_001 8017FE0C (15, spec_a13_12 v0; FABLE),
+sc01_001 80181A4C (77, spec_a14_2 v2; counter now eliminated, a cse2 path break before the dir stores is missing; FABLE),
+sc06_024 8017EC4C (7, spec_a20_19; an s5/s6 tie, r 2222 vs sp 2187, needs one insn of live length; FABLE). No natural
+form found (a13): sc04_016 8017E960 (15, spec_a13_3 v0; only the rejected dead cycle keeps dy canonical in cse) and
+sc01_080 80181D98 (19, spec_a13_7 v1; only loop notes flip the p / t priorities). HELD for a ruling: sc03_010 8017C730
+(x2, 1061) with one marked dead store `type = mid > yhi || mid > ymid || mid == ymid;` (s/sc03_010/*.held).

@@ -1407,7 +1407,30 @@ void func_sc03_030_8017EDD4(u8 *o) {
 
 extern void func_8014C860();
 
-INCLUDE_ASM("asm/stg/sc03_030/nonmatchings/sc03_030", func_sc03_030_8017EEE0);
+extern B8 D_sc03_030_801E076C;
+extern s32 func_8012CBCC();
+extern void func_80131E00();
+extern void func_8012B21C();
+
+void func_sc03_030_8017EEE0(u8 *o) {
+    B8 a;
+    B8 b;
+    u8 *p;
+
+    a = D_sc03_030_801E076C;
+    b = D_sc03_030_801E076C;
+    p = AF(o, u8 *, 0x20);
+    AF(p, u16, 0x10) = (AF(p, u16, 0x10) + 0xE3) & 0xFFF;
+    AF(p, u16, 0x14) = (AF(p, u16, 0x14) + 0x71) & 0xFFF;
+    if (func_8012CBCC(o) & 0x6000) {
+        func_sc03_030_8017F0E8(o, &a);
+        func_sc03_030_8017F0E8(o, &b);
+        ((s32 (*)())func_80131E00)(o, 0x12); /* MATCH-TRICK: void callee called through an s32 cast, value unused: a call_value sets v0 twice, so sched1 keeps the first call below the addiu s1/s2 (as the original) */
+        func_8012B21C(o);
+        func_8012BF4C(o, 0x20);
+        func_8012AD50(o);
+    }
+}
 
 void func_sc03_030_8017EFD8(s32 arg0) {
     func_8012AD80(arg0);

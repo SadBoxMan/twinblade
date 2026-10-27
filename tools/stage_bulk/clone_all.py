@@ -22,7 +22,7 @@ ap.add_argument('--stages', default='', help='place only in stages starting with
 ap.add_argument('--allow-pending', action='store_true',
                 help='also clone from sources in tools/stage_bulk/pending_rulings.txt (skipped by default)')
 ap.add_argument('--passes', type=int, default=5, help='at most this many passes (default 5)')
-a = ap.parse_args()
+a = ap.parse_intermixed_args()   # r211: stage names may follow --par / --stages
 if a.root.startswith('-') or not re.fullmatch(r'\d+', a.jobs):
     ap.error(f'bad root or jobs: {a.root!r} {a.jobs!r}')
 root, jobs, par = a.root, a.jobs, a.par
@@ -42,13 +42,16 @@ def one(p, d):
     if not drafts or (only and st not in only) or (prefixes and not st.lower().startswith(prefixes)):
         return 0
     t = time.time()
-    c = subprocess.run([sys.executable, 'tools/stage_bulk/cmp_par.py', d, jobs], capture_output=True, text=True, env=env)
+    # r211: the village (src/stage/sc03_001.c) compiles against asm/stage and places into src/stage (no TWINBLADE_STG)
+    village = st.lower() == 'sc03_001'
+    c = subprocess.run([sys.executable, 'tools/stage_bulk/cmp_par.py', d, jobs], capture_output=True, text=True,
+                       env=dict(env, TWINBLADE_OVL='stage') if village else env)
     m = re.search(r'(\d+) / (\d+) match', c.stdout)
     match = int(m[1]) if m else 0
     placed = deferred = 0
     if match:
         pl = subprocess.run([sys.executable, 'tools/stage_bulk/place_stage.py', d], capture_output=True, text=True,
-                            env=dict(env, TWINBLADE_STG=st))
+                            env=env if village else dict(env, TWINBLADE_STG=st))
         m2 = re.search(r'(\d+) placed, (\d+) deferred', pl.stdout)
         placed, deferred = (int(m2[1]), int(m2[2])) if m2 else (0, 0)
         if not m2: print(st, 'place_stage:', (pl.stdout + pl.stderr)[-800:], flush=True)

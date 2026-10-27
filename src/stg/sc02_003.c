@@ -5977,7 +5977,23 @@ s32 func_sc02_003_801884FC(u8 *o) {
     return 2;
 }
 
-INCLUDE_ASM("asm/stg/sc02_003/nonmatchings/sc02_003", func_sc02_003_80188680);
+s32 func_sc02_003_80188680(u8 *o, s32 x0, s32 y0) {
+    s16 x = x0;
+    s16 y = y0;
+    s16 px = AF(o, s16, 6);
+    s16 pz = AF(o, s16, 0xE);
+
+    if (x - 0x30 < px) {
+        if (px < x + 0x30) {
+            if (y - 0x30 < pz) {
+                if (pz < y + 0x30) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 void func_sc02_003_801886DC(u8 *arg0) {
     D_sc02_003_8018F558[AF(arg0, u16, 2)]();

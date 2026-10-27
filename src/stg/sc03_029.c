@@ -3276,7 +3276,12 @@ typedef struct { s16 x, y, z, w, f, g, h, i; s32 j; } Arg15DC;
 extern u8 D_sc03_029_801C91A4;
 extern s32 D_sc03_029_801C93DC;
 
-INCLUDE_ASM("asm/stg/sc03_029/nonmatchings/sc03_029", func_sc03_029_801829F4);
+s32 func_sc03_029_801829F4(void) {
+    if (D_8012704C == 0) {
+        return 0x18;
+    }
+    return 0x2B;
+}
 
 void func_sc03_029_80182A14(u8 *arg0) {
     D_sc03_029_8018BE04[AF(arg0, u16, 2)]();

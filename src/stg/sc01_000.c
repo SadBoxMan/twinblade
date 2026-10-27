@@ -975,7 +975,36 @@ void func_sc01_000_8017E3A0(s32 x0, s32 y0, s32 x1, s32 y1, s32 c, s32 blue) {
     D_800A5E60 = p;
 }
 
-INCLUDE_ASM("asm/stg/sc01_000/nonmatchings/sc01_000", func_sc01_000_8017E4A0);
+typedef struct { u32 tag; u32 mode; u8 r, g, b, code; s16 x, y; u8 u, v; u16 clut; s16 w, h; } SprtM;
+extern u32 D_800A6614[][0x1000];
+
+void func_sc01_000_8017E4A0(void) {
+    SprtM *p;
+    u32 c;
+
+    p = (SprtM *)D_800A5E60;
+    ((u8 *)p)[3] = 5;
+    c = 0xE100001E;
+    p->mode = c;
+    p->code = 0x64;
+    c = 0x80;
+    p->r = p->g = p->b = c;
+    p->x = -0x40;
+    p->y = 0x50;
+    p->u = 0;
+    p->v = c;
+    p->clut = 0x40D7;
+    p->w = 0xA0;
+    p->h = 0x20;
+    p->w = 0x80;
+    p->h = 0x10;
+    c = *(u32 *)p & 0xFF000000;
+    c |= getaddr(D_800A6614[D_800B9A02]) & 0xFFFFFF;
+    *(u32 *)p = c;
+    setaddr(D_800A6614[D_800B9A02], p);
+    p++;
+    D_800A5E60 = (u8 *)p;
+}
 
 void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *p;

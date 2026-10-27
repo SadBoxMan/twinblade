@@ -199,6 +199,44 @@ sc06_000 80182888, sc06_033 8017D6CC, sc06_018 8017D874) had been placed by hand
   with both forms named and goes in next round against the first's declaration.
 * Stage -O0 translation units: out of scope (a card of its own).
 
+## 2d. Stage -O0 translation units (r209, 27 Oct 2026)
+
+Four stage images hold a run of functions built without optimisation, which no -O2 file can match: SC03_014 / SC03_015
+0x80183CF0-0x801848E4 (16 functions each) and SC03_118 / SC03_119 0x80183178-0x801838A4 (10 each). A scan of every
+image's own code for the -O0 prologue (`addu fp,sp,zero`, 0x03A0F021, in a function's first 12 words) finds no other
+(`python -I tools/stage_units.py` lists them). Merge 7be489e (gate 182/182, engine 140/140).
+
+| Piece | What it does |
+|---|---|
+| tools/stage_units.py (new) | `o0_runs()` finds the runs; `files(stage)` (`<stage>.c`, then `<stage>_o0.c` and `<stage>_post.c` where they exist), `stage_of(file)`, `unit_of(file)`, `file_of(stage, func)`, `stages()`, `is_o0(file)`, `opt_of(func)` (-O0 when its .s is in an `_o0` folder). Every tool that needs a stage's files asks here |
+| tools/gen_stage_cfgs.py | a stage with a run gets three `c` subsegments: `<stage>` up to the run, `<stage>_o0` (the run), `<stage>_post` (the -O2 code after it); one run per stage (two would stop it); the other 135 configs are unchanged byte for byte |
+| Makefile | `$(BUILD)/src/stg/%_o0.o: OPT_FLAGS := -O0`; STG_RULES links `src/stg/<stage>_o0.c` and `_post.c` when they exist; JTBL_ASM reads the stage's `asm/stg/<stage>` for them |
+| src/stg | split once by tools/stage_bulk/split_o0.py: the new files start with the old file's includes, every declaration above the cut and a prototype for every function the earlier part defines (calls convert their arguments as in one file); INCLUDE_ASM lines point at `nonmatchings/<stage>_o0` / `_post`. Symbols and the check stay the stage's (func_sc03_014_80183CF0, check-sc03_014) |
+| stage_clone | reads every unit's asm folder and object, de-duplicates the repeated header chunks (gcc 2.7.2 rejects a typedef given twice: the first clone pass compiled nothing); no "no asm file" line for a function already in C (18,280 lines on a fresh split) |
+| place_stage, put_func | the draft goes to the unit holding its INCLUDE_ASM; the syntax screen of an `_o0` file runs -O0; target_of maps `_o0` / `_post` to check-<stage>; a one-line typedef the file has only further down is moved up above the draft (r174's Obj118 below sc03_118 801832E0) |
+| cmp_par | compiles a draft -O0 when its function is in an -O0 unit (so clone_all works there) |
+| regress, stage_progress, stage_census, coverage --progress, unplace, m2c_stage, sweep, fix_decl | count / map the extra files as the stage's (fix_decl takes a unit name, `sc03_014_o0`) |
+
+Tested: the four stages OK after the split with the code unchanged, full `make regress` 182/182 and engine 140/140;
+then r174's three -O0 matches placed by place_stage into the `_o0` files (cmp_par chose -O0 itself) and a clone pass
+filled 28 twins. r211 (27 Oct): variant_search, auto_match, regdump, stage_bulk/fixdraft and stage_bulk/hand compile a
+function of an -O0 unit at -O0 when no flag is given (`stage_units.opt_of`, which now also knows a placed -O0 function
+by the `_o0` file holding it). **Not done:** a stage with two -O0 runs would need a fourth and fifth unit (none exists).
+
+## 2e. Stage park round tools (r211, 27 Oct 2026)
+
+Merges 50c4e5f and a607038 (gates 140/140; full `make regress` 182/182 and engine 140/140 on the branch before each).
+
+| Piece | What changed |
+|---|---|
+| variant_search, auto_match, regdump, stage_bulk/fixdraft, stage_bulk/hand | default optimisation from `stage_units.opt_of(func)` (-O0 for an `_o0` unit's function, else -O2); an explicit -O0 / -O2 still wins. Tested on an unplaced sc03_118 80183178: MATCH by default, 19 lines at -O2 |
+| stage_clone | an offset-moved symbol takes the target's own name form (`tgt.sym_name`: the village's `D_<addr>`, r210's gap); `--all` includes the village |
+| stage_bulk/clone_all | the village target compiles against asm/stage (TWINBLADE_OVL=stage) and places into src/stage; stage names may follow `--par` / `--stages` (parse_intermixed_args). Tested by unplacing func_80187690: clone_all placed it again |
+| stage_bulk/place_stage | a `static inline` helper carried by several drafts of one batch (twins matched with one helper set) goes in once, in front of the first by address (each copy used to defer the batch as a redefinition). Tested on the sc06_032 / sc06_033 clone batches: 2/0 each, identical to placing them one at a time |
+| stage_census | docstring: the seam is 0x8017BE9C |
+
+m2c and jump tables (r213, 27 Oct; merge 911cf1a): `tools/stage_bulk/m2c_stage.py` now reads each `jtbl_*` table from the stage's data asm (asm/stg/<stage>/data, or asm/stage/data), writes a copy of the function with an `.Ljt_<addr>` label before every case target and the table as a rodata `.word` list (r211's mkjt.py), and runs m2c on that; functions without a table pass through, and a "Decompilation failure" result is skipped. Tested on the village: func_801549F8 gave no draft before and now a clean 21-case switch draft. func_80171B4C, func_801734BC and func_80159A20 get past the jump table but m2c still reads an unset $a0 (existing limitation, no draft). The two split stages tried (sc06_032, sc03_124) have no INCLUDE_ASM left in their stage files, so they gave 0 drafts.
+
 ## 3. Line endings
 
 `.gitattributes` keeps src/, include/ and every *.yaml LF in every checkout, whatever `core.autocrlf` says. Git for

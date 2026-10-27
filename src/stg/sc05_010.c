@@ -2707,7 +2707,179 @@ void func_sc05_010_80181B4C(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc05_010/nonmatchings/sc05_010", func_sc05_010_80181CDC);
+extern u8 D_sc05_010_8019292C;
+extern void Square0();
+extern s32 ratan2();
+extern s32 rcos();
+extern s32 rsin();
+
+static inline UXY Aim_80181CDC(u8 *o, SV8 *t) {
+    UXY r;
+    s32 ang;
+    s32 dx, dy, dz, c;
+    dz = t->z - AF(o, s16, 0xE);
+    dx = t->x - AF(o, s16, 6);
+    dy = t->y - AF(o, s16, 0xA);
+    ang = (ratan2(-dz, dx) - 0x400) & 0xFFF;
+    r.s.y = ang;
+    c = rcos(ang);
+    dz = (dz * c + dx * rsin(ang)) >> 12;
+    r.s.x = ratan2(dy, -dz);
+    return r;
+}
+
+void func_sc05_010_80181CDC(u8 *o) {
+    SV8 pos;
+    SV8 tgt;
+    V3 v;
+    s32 d;
+    UXY a;
+    UXY b;
+
+    switch (AF(o, s16, 0x10A)) {
+    case 0:
+        break;
+    case 1:
+        func_8012F14C(AF(D_sc05_010_801C7E54, u8 *, 0x20) + 0x34, &D_sc05_010_8019292C, &pos);
+        v.x = AF(o, s16, 6) - pos.x;
+        v.y = AF(o, s16, 0xA) - pos.y;
+        v.z = AF(o, s16, 0xE) - pos.z;
+        Square0(&v, &v);
+        d = v.x + v.y + v.z;
+        v.x = AF(o, s16, 6) - D_80126B5E;
+        v.y = AF(o, s16, 0xA) - D_80126B62;
+        v.z = AF(o, s16, 0xE) - (s16)D_80126B66;
+        Square0(&v, &v);
+        d -= v.x + v.y + v.z;
+        if (d > 0) {
+            if (d > 0x4000) {
+                AF(o, s16, 0xFC) += 0x20;
+            } else {
+                AF(o, s16, 0xFC) = AF(o, s16, 0xFC) + d / 512;
+                AF(o, s16, 0x102) = AF(o, s16, 0x102) - 1;
+            }
+            if (AF(o, s16, 0xFC) > 0x400) AF(o, s16, 0xFC) = 0x400;
+        } else {
+            if (d < 0) {
+                if (d < -0x4000) {
+                    AF(o, s16, 0xFC) -= 0x20;
+                } else {
+                    AF(o, s16, 0xFC) = AF(o, s16, 0xFC) + d / 512;
+                    AF(o, s16, 0x102) = AF(o, s16, 0x102) - 1;
+                }
+                if (AF(o, s16, 0xFC) < -0x400) AF(o, s16, 0xFC) = -0x400;
+            }
+            AF(o, s16, 0x102) -= 4;
+        }
+        tgt.x = D_80126B5E;
+        tgt.y = -0xC0;
+        tgt.z = -0x100;
+        a = Aim_80181CDC(o, &tgt);
+        b = Aim_80181CDC(o, &pos);
+        AF(AF(o, u8 *, 0x20), s16, 0x14) += func_8012B608(b.s.x, a.s.x, 4);
+        AF(o, s16, 0x100) += func_8012B608(AF(o, s16, 0x100), AF(AF(o, u8 *, 0x20), s16, 0x14), 4);
+        AF(o, s16, 0xFE) += func_8012B608(b.s.y, a.s.y, 8);
+        if (AF(o, s16, 0x102) <= 0) {
+            AF(o, s16, 0x10A) = 2;
+            AF(o, s16, 0x102) = 0xF;
+        }
+        break;
+    case 2:
+        if (--AF(o, s16, 0x102) != 0) {
+            AF(o, s16, 0xFE) += 0x18;
+        } else {
+            AF(o, s16, 0x10A) = 3;
+            func_8002D4C8(0x89A, 0);
+        }
+        break;
+    case 3:
+        func_8012F14C(AF(D_sc05_010_801C7E54, u8 *, 0x20) + 0x34, &D_sc05_010_8019292C, &pos);
+        if (pos.z > 0 && AF(AF(o, u8 *, 0x64), u16, 0x34) < 4) {
+            AF(o, s16, 0x10A) = 1;
+            AF(AF(o, u8 *, 0x64), s16, 0x100) = 0;
+        }
+        v.x = AF(o, s16, 6) - pos.x;
+        v.y = AF(o, s16, 0xA) - pos.y;
+        v.z = AF(o, s16, 0xE) - pos.z;
+        Square0(&v, &v);
+        d = v.x + v.y + v.z;
+        v.x = AF(o, s16, 6) - D_80126B5E;
+        v.y = AF(o, s16, 0xA) + 0xC0;
+        v.z = AF(o, s16, 0xE) - (s16)D_80126B66;
+        Square0(&v, &v);
+        d -= v.x + v.y + v.z;
+        if (d > 0) {
+            if (d > 0x4000) {
+                AF(o, s16, 0xFC) += 0x20;
+            } else {
+                AF(o, s16, 0xFC) += d / 512;
+            }
+            if (AF(o, s16, 0xFC) > 0x400) AF(o, s16, 0xFC) = 0x400;
+        } else if (d < 0) {
+            if (d < -0x4000) {
+                AF(o, s16, 0xFC) -= 0x20;
+            } else {
+                AF(o, s16, 0xFC) += d / 512;
+            }
+            if (AF(o, s16, 0xFC) < -0x400) AF(o, s16, 0xFC) = -0x400;
+        }
+        tgt.x = D_80126B5E;
+        tgt.y = -0xC0;
+        tgt.z = D_80126B66;
+        a = Aim_80181CDC(o, &tgt);
+        b = Aim_80181CDC(o, &pos);
+        AF(AF(o, u8 *, 0x20), s16, 0x14) += func_8012B608(b.s.x, a.s.x, 4);
+        AF(o, s16, 0x100) += func_8012B608(AF(o, s16, 0x100), AF(AF(o, u8 *, 0x20), s16, 0x14), 4);
+        AF(o, s16, 0xFE) += func_8012B608(b.s.y, a.s.y, 8);
+        break;
+    case 4:
+        AF(AF(o, u8 *, 0x20), s16, 0x14) += func_8012B608(AF(AF(o, u8 *, 0x20), s16, 0x14), 0x180, 0x10);
+        AF(o, s16, 0xFC) += func_8012B608(AF(o, s16, 0xFC), 0, 0x10);
+        AF(o, s16, 0xFE) += func_8012B608(AF(o, s16, 0xFE), 0x400, 0x10);
+        AF(o, s16, 0x100) += func_8012B608(AF(o, s16, 0x100), 0, 0x10);
+        break;
+    case 5:
+        func_8012F14C(AF(D_sc05_010_801C7E54, u8 *, 0x20) + 0x34, &D_sc05_010_8019292C, &pos);
+        if (pos.z > 0 && AF(AF(o, u8 *, 0x64), u16, 0x34) < 4) {
+            AF(o, s16, 0x10A) = 1;
+            AF(AF(o, u8 *, 0x64), s16, 0x100) = 0;
+        }
+        v.x = AF(o, s16, 6) - pos.x;
+        v.y = AF(o, s16, 0xA) - pos.y;
+        v.z = AF(o, s16, 0xE) - pos.z;
+        Square0(&v, &v);
+        d = v.x + v.y + v.z;
+        v.x = AF(o, s16, 6) - D_80126B5E;
+        v.y = AF(o, s16, 0xA) + 0xC0;
+        v.z = AF(o, s16, 0xE) - (s16)D_80126B66;
+        Square0(&v, &v);
+        d -= v.x + v.y + v.z;
+        if (d > 0) {
+            if (d > 0x4000) {
+                AF(o, s16, 0xFC) += 0x40;
+            } else {
+                AF(o, s16, 0xFC) += d / 256;
+            }
+            if (AF(o, s16, 0xFC) > 0x400) AF(o, s16, 0xFC) = 0x400;
+        } else if (d < 0) {
+            if (d < -0x4000) {
+                AF(o, s16, 0xFC) -= 0x40;
+            } else {
+                AF(o, s16, 0xFC) += d / 256;
+            }
+            if (AF(o, s16, 0xFC) < -0x400) AF(o, s16, 0xFC) = -0x400;
+        }
+        tgt.x = D_80126B5E;
+        tgt.y = -0xC0;
+        tgt.z = D_80126B66;
+        a = Aim_80181CDC(o, &tgt);
+        b = Aim_80181CDC(o, &pos);
+        AF(AF(o, u8 *, 0x20), s16, 0x14) += func_8012B608(b.s.x, a.s.x, 4);
+        AF(o, s16, 0x100) += func_8012B608(AF(o, s16, 0x100), AF(AF(o, u8 *, 0x20), s16, 0x14), 4);
+        AF(o, s16, 0xFE) += func_8012B608(b.s.y, a.s.y, 4);
+        break;
+    }
+}
 
 void func_sc05_010_801828E0(u8 *o) {
     u8 unused[8];

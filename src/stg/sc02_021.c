@@ -851,7 +851,164 @@ extern u8 D_sc02_021_801836EC;
 extern u8 D_sc02_021_8018385C;
 extern u8 D_sc02_021_8018371C;
 
-INCLUDE_ASM("asm/stg/sc02_021/nonmatchings/sc02_021", func_sc02_021_8017DC10);
+typedef struct { unsigned addr : 24; unsigned len : 8; } PTag;
+extern void SetRotMatrix();
+extern void SetTransMatrix();
+extern void func_sc02_021_8017E410();
+extern u8 D_800AF648;
+
+s32 func_sc02_021_8017DC10(u8 *obj) {
+    SV8 v[4];
+    s32 buf[6];
+    s32 z;
+    u32 *ot;
+    u8 *p;
+    s32 y;
+    s32 k;
+    s32 t;
+    s32 n;
+    s32 maxx, minx, maxy, miny, x0, x1;
+    s32 clip;
+
+    SetRotMatrix(&D_800AF648);
+    SetTransMatrix(&D_800AF648);
+    ot = D_800A6610[D_800B9A02];
+    p = D_800A5E60;
+    if (AF(obj, s32, 4) > AF(obj, s32, 8)) {
+        AF(obj, s32, 0x1C) = 0;
+        return 1;
+    }
+    if (AF(obj, s32, 8) < AF(obj, s32, 0)) {
+        y = AF(obj, s32, 8) + (AF(obj, s32, 0) - AF(obj, s32, 8)) % 128;
+        if (AF(obj, s32, 0) + 0x80 < AF(obj, s32, 8)) k = 0;
+        else if (AF(obj, s32, 8) < AF(obj, s32, 4) - 0x80) k = 1;
+        else {
+            n = y + 0x80;
+            if ((AF(obj, s32, 0) - n) / 128 == 0) k = 2;
+            else k = 3;
+        }
+        v[0].x = v[2].x = AF(obj, s16, 0x10);
+        v[1].x = v[3].x = AF(obj, s16, 0x12);
+        v[0].z = v[2].z = AF(obj, s16, 0x14);
+        v[1].z = v[3].z = AF(obj, s16, 0x16);
+        y -= 0x80;
+        v[0].y = v[1].y = y;
+        v[2].y = v[3].y = AF(obj, s16, 8);
+        func_sc02_021_8017E410(k, buf);
+        t = (AF(obj, s32, 8) - y) * buf[5];
+        do { gte_ldv3c(v); } while (0); /* MATCH-TRICK: loop note keeps sched1 from moving the address above mflo */
+        gte_rtpt();
+        gte_stsxy3(p + 8, p + 0x10, p + 0x18);
+        gte_ldv0(&v[3]);
+        gte_rtps();
+        gte_stsxy(p + 0x20);
+
+        x0 = AF(p, s16, 8); x1 = AF(p, s16, 0x10);
+        if (x1 < x0) { maxx = x0; minx = x1; } else { minx = x0; maxx = x1; }
+        x0 = AF(p, s16, 0x18);
+        if (maxx < x0) maxx = x0; else if (x0 < minx) minx = x0;
+        x0 = AF(p, s16, 0x20);
+        if (maxx < x0) maxx = x0; else if (x0 < minx) minx = x0;
+        x0 = AF(p, s16, 0xA); x1 = AF(p, s16, 0x12);
+        if (x1 < x0) { maxy = x0; miny = x1; } else { miny = x0; maxy = x1; }
+        x0 = AF(p, s16, 0x1A);
+        if (maxy < x0) maxy = x0; else if (x0 < miny) miny = x0;
+        x0 = AF(p, s16, 0x22);
+        if (maxy < x0) maxy = x0; else if (x0 < miny) miny = x0;
+        clip = 0;
+        if (maxx < -0xA0 || minx > 0xA0) clip = 1;
+        if (maxy < -0x78 || miny > 0x78) clip = 1;
+        gte_stszotz(&z);
+        if (z > 0 && !clip) {
+
+            AF(p, u32, 4) = 0x808080;
+            if (t < 0) {
+                AF(p, u8, 3) = 9;
+                AF(p, u8, 7) = 0x2E;
+            } else if (t > 0) {
+                AF(p, u8, 3) = 9;
+                AF(p, u8, 7) = 0x2E;
+            } else {
+                AF(p, u8, 3) = 9;
+                AF(p, u8, 7) = 0x2E;
+            }
+            AF(p, u32, 0xC) = buf[1] | (buf[3] << 8) | buf[2];
+            AF(p, u32, 0x14) = buf[0] | (buf[3] << 8) | (buf[2] + buf[4]);
+            AF(p, u32, 0x1C) = ((buf[3] + buf[5]) << 8) | buf[2];
+            AF(p, u32, 0x24) = ((buf[3] + buf[5]) << 8) | (buf[2] + buf[4]);
+            k = z;
+            if (AF(obj, s32, 0x20) != 0) k -= 0x40;
+            if (k < 0) k = 0;
+
+            ((PTag *)p)->addr = ((PTag *)&ot[k])->addr;
+            ((PTag *)&ot[k])->addr = (u32)p;
+            p += 0x28;
+        }
+        if (AF(obj, s32, 0x1C) == 0) AF(obj, s32, 0x1C) = 1;
+        else if (AF(obj, s32, 0x1C) == 1) AF(obj, s32, 0x1C) = 2;
+    } else {
+        y = AF(obj, s32, 0);
+    }
+    for (;; y -= 0x80) {
+        if (AF(obj, s32, 0) - 0x80 < y) k = 0;
+        else if (y < AF(obj, s32, 4) + 0x80) k = 1;
+        else {
+            n = y + 0x80;
+            if (((AF(obj, s32, 0) - n) / 128 & 1) == 0) k = 2;
+            else k = 3;
+        }
+        func_sc02_021_8017E410(k, buf);
+        if (y < AF(obj, s32, 0xC)) break;
+        if (y < AF(obj, s32, 4)) break;
+        v[0].x = v[2].x = AF(obj, s16, 0x10);
+        v[1].x = v[3].x = AF(obj, s16, 0x12);
+        v[0].z = v[2].z = AF(obj, s16, 0x14);
+        v[1].z = v[3].z = AF(obj, s16, 0x16);
+        v[0].y = v[1].y = y - 0x80;
+        v[2].y = v[3].y = y;
+        gte_ldv3c(v);
+        gte_rtpt();
+        gte_stsxy3(p + 8, p + 0x10, p + 0x18);
+        gte_ldv0(&v[3]);
+        gte_rtps();
+        gte_stsxy(p + 0x20);
+
+        x0 = AF(p, s16, 8); x1 = AF(p, s16, 0x10);
+        if (x1 < x0) { maxx = x0; minx = x1; } else { minx = x0; maxx = x1; }
+        x0 = AF(p, s16, 0x18);
+        if (maxx < x0) maxx = x0; else if (x0 < minx) minx = x0;
+        x0 = AF(p, s16, 0x20);
+        if (maxx < x0) maxx = x0; else if (x0 < minx) minx = x0;
+        x0 = AF(p, s16, 0xA); x1 = AF(p, s16, 0x12);
+        if (x1 < x0) { maxy = x0; miny = x1; } else { miny = x0; maxy = x1; }
+        x0 = AF(p, s16, 0x1A);
+        if (maxy < x0) maxy = x0; else if (x0 < miny) miny = x0;
+        x0 = AF(p, s16, 0x22);
+        if (maxy < x0) maxy = x0; else if (x0 < miny) miny = x0;
+        clip = 0;
+        if (maxx < -0xA0 || minx > 0xA0) clip = 1;
+        if (maxy < -0x78 || miny > 0x78) clip = 1;
+        gte_stszotz(&z);
+        if (z > 0 && !clip) {
+
+            AF(p, u32, 4) = 0x808080;
+            AF(p, u8, 3) = 9;
+            AF(p, u8, 7) = 0x2E;
+            AF(p, u32, 0xC) = buf[1] | (buf[3] << 8) | buf[2];
+            AF(p, u32, 0x14) = buf[0] | (buf[3] << 8) | (buf[2] + buf[4]);
+            AF(p, u32, 0x1C) = ((buf[3] + buf[5]) << 8) | buf[2];
+            AF(p, u32, 0x24) = ((buf[3] + buf[5]) << 8) | (buf[2] + buf[4]);
+            k = z;
+            if (AF(obj, s32, 0x20) != 0) k -= 0x40;
+
+            ((PTag *)p)->addr = ((PTag *)&ot[k])->addr;
+            ((PTag *)&ot[k])->addr = (u32)p;
+            p += 0x28;
+        }
+    }
+    D_800A5E60 = p;
+    return 0;
+}
 
 void func_sc02_021_8017E410(s32 n, s32 *p) {
     switch (n) {

@@ -1856,7 +1856,26 @@ s32 func_sc04_005_8017F270(void) {
     return func_800D0F8C(0x62) != 0;
 }
 
-INCLUDE_ASM("asm/stg/sc04_005/nonmatchings/sc04_005", func_sc04_005_8017F290);
+extern u8 D_sc04_005_8018B810;
+extern s32 *func_sc04_005_8017F458();
+
+void func_sc04_005_8017F290(u8 *o) {
+    if (func_8012C354(o, &D_sc04_005_8018B810) != 0) {
+        if (func_80029178(0xDC) & 0xFF) {
+            func_8012C218(o);
+        } else {
+            AF(o, u8, 0xC0) = 1;
+            AF(o, u8, 0x75) = 2;
+            AF(o, s16, 0xAE) = -1;
+            AF(o, s32, 0xB4) = 0;
+            AF(o, s16, 2) = 1;
+            AF(o, s32, 0xC4) |= 3;
+            SetScript(o, &D_sc04_005_80187E20);
+            AF(o, s32, 0x6C) = func_801788B8(o, func_sc04_005_8017F458);
+            AF(AF(o, u8 *, 0x20), s32, 4) |= 0x1000000;
+        }
+    }
+}
 
 void func_sc04_005_8017F350(void) {
 }

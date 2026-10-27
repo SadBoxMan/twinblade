@@ -1,7 +1,8 @@
 # Stage image SC03_001 (the village): loaded to 0x80128158 with each stage.
-# 0x80128158-0x8017BEA4 is the shared stage engine: byte-identical in all 134 stage images
+# 0x80128158-0x8017BE9C is the shared stage engine: byte-identical in all 134 stage images
 # apart from relocated addresses (tools: docs/stage_engine.md), so engine function addresses
-# hold for every stage. 0x8017BEA4-0x8018D220 is this stage's own code, the rest its data.
+# hold for every stage. 0x8017BE9C-0x8018D220 is this stage's own code, the rest its data (r210: the seam was
+# 0x8017BEA4, which split func_8017BE9C's 2-insn prologue into the engine; the stg yamls start at 0x8017BE9C).
 name: Stage image SC03_001 (village) with the shared stage engine
 sha1: f8fd92f59c6871577c61cb626cb9ddb0db5ba884
 options:
@@ -58,7 +59,7 @@ segments:
       - [0x14834, c, engine_8013C98C]  # -O2 again, between the two -O0 files
       - [0x1CA44, c, engine_80144B9C]  # -O0
       - [0x1D788, c, engine_801458E0]  # -O2 to the end of the engine
-      - [0x53D4C, c, sc03_001]     # the village's own code
+      - [0x53D44, c, sc03_001]     # the village's own code
       - [0x650C8, data, sc03_001_data]
       - [0xC730C, bin, sc03_001_tail]  # the image length is not a multiple of 4
   - [0xC730F]

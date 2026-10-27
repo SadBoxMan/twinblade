@@ -2,7 +2,7 @@
 every use in the draft (scalar: (*(T *)&N); array: ((T *)N)). Rewrites drafts in place; prints what changed. Also
 retypes an engine/EXE function the stage file declares `void` when a draft uses its value (writes src/stg/<stage>.c
 of the checkout it lives in).
-usage: fix_decl.py <stage> <draft.c|dir> ..."""
+usage: fix_decl.py <stage> <draft.c|dir> ...   (r209: <stage> may be a unit, sc03_014_o0, for drafts placed in that file)"""
 import glob, os, re, sys
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # the checkout (any worktree)
 st = sys.argv[1]

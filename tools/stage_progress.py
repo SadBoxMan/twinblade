@@ -2,7 +2,8 @@
 """Matched / total functions of every stage image's own code (r145, docs/stage_status.md). Read-only: reads src/ only.
 
 The village's own code is src/stage/sc03_001.c (the engine, src/stage/engine*.c, is counted by `make progress` as the
-`stage` overlay); every other image is src/stg/<name>.c (stg/<name>.yaml, tools/gen_stage_cfgs.py). In each file a
+`stage` overlay); every other image is src/stg/<name>.c (stg/<name>.yaml, tools/gen_stage_cfgs.py; r209: with <name>_o0.c and
+<name>_post.c where the image has an -O0 run, tools/stage_units.py). In each file a
 function is one of:
   C      a definition with a body (matched: `make check-<name>` is byte-identical)
   stub   a definition with an empty body: splat writes these itself for `jr ra; nop`, so they are not decomp work
@@ -58,11 +59,19 @@ def count(path):
 
 
 def stages():
-    """[(NAME, path)]: the village first, then every split image"""
-    out = [('SC03_001', os.path.join(ROOT, 'src', 'stage', 'sc03_001.c'))]
-    for p in sorted(glob.glob(os.path.join(ROOT, 'src', 'stg', '*.c'))):
-        out.append((os.path.basename(p)[:-2].upper(), p))
+    """[(NAME, [paths])]: the village first, then every split image (r209: a stage with an -O0 run has three files,
+    tools/stage_units.py)"""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import stage_units as U
+    out = [('SC03_001', [os.path.join(ROOT, 'src', 'stage', 'sc03_001.c')])]
+    for lo in U.stages(ROOT):
+        out.append((lo.upper(), U.files(lo, ROOT)))
     return out
+
+
+def count_all(paths):
+    """(C, stub, asm) summed over a stage's files"""
+    return tuple(map(sum, zip(*(count(p) for p in paths))))
 
 
 def same_code():
@@ -77,7 +86,7 @@ def same_code():
 
 
 def main():
-    rows = [(n,) + count(p) for n, p in stages()]
+    rows = [(n,) + count_all(ps) for n, ps in stages()]
     tc = sum(r[1] for r in rows)
     ts = sum(r[2] for r in rows)
     ta = sum(r[3] for r in rows)

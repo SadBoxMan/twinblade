@@ -16,7 +16,7 @@ with `$env:TWINBLADE_STG = "<stage>"; tools/stage_bulk/place_stage.py`. tools/st
 three steps over every stage and repeats until a pass places nothing.
 
 Usage: stage_clone.py SC02_031 <out_dir> [--alt N]     one target stage
-       stage_clone.py --all <out_root> [--alt N]        every split stage, drafts in <out_root>/<stage>/
+       stage_clone.py --all <out_root> [--alt N]        every split stage and the village (r211), drafts in <out_root>/<stage>/
 --allow-pending (r208): also clone from the sources listed in tools/stage_bulk/pending_rulings.txt (placed under a
 ruling LuciDin has not given yet; skipped by default).
 --alt N: take the N-th matched source of a shape (0 = the village first, then the stages in name order), to retry a
@@ -31,6 +31,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import put_func as P  # noqa: E402
 import stage_census as C  # noqa: E402
+import stage_units as U  # noqa: E402
 
 AF = '#define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))'
 INS = re.compile(r'\s*/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/\s+(\w+)\s*(.*)')
@@ -88,19 +89,22 @@ class Image:
     def __init__(self, name):
         self.name, self.lo = name, name.lower()
         if name == VILLAGE:
-            self.src = os.path.join(ROOT, 'src', 'stage', 'sc03_001.c')
-            self.asm = os.path.join(ROOT, 'asm', 'stage', 'nonmatchings', 'sc03_001')
+            self.srcs = [os.path.join(ROOT, 'src', 'stage', 'sc03_001.c')]
+            self.asms = [os.path.join(ROOT, 'asm', 'stage', 'nonmatchings', 'sc03_001')]
+            self.objs = [os.path.join(ROOT, 'build', 'src', 'stage', 'sc03_001.o')]
             self.syms = read_syms(['symbol_addrs_stage.txt'])
             self.own = re.compile(r'(func|D)_([0-9A-F]{8})$')
         else:
-            self.src = os.path.join(ROOT, 'src', 'stg', self.lo + '.c')
-            self.asm = os.path.join(ROOT, 'asm', 'stg', self.lo, 'nonmatchings', self.lo)
+            # r209: an image with an -O0 run has three C files (tools/stage_units.py), each its asm folder and object
+            self.srcs = U.files(self.lo, ROOT)
+            self.asms = [os.path.join(ROOT, 'asm', 'stg', self.lo, 'nonmatchings', U.unit_of(p)) for p in self.srcs]
+            self.objs = [os.path.join(ROOT, 'build', 'src', 'stg', U.unit_of(p) + '.o') for p in self.srcs]
             self.syms = read_syms(['symbol_addrs_stage.txt', f'stg/symbol_addrs_{self.lo}.txt'])
             self.own = re.compile(rf'(func|D)_{self.lo}_([0-9A-F]{{8}})$')
         ws = C.load(os.path.join(ROOT, 'disc', 'pac4', name + '.bin'))
         ee = (C.ENG_END - C.BASE) // 4
         self.funcs = [(C.BASE + a * 4, C.norm(ws, a, b)) for a, b in C.find_funcs(ws, ee)]
-        self.text = open(self.src, encoding='utf-8').read()
+        self.text = ''.join(open(p, encoding='utf-8').read() for p in self.srcs)
         self.todo = set(re.findall(r'INCLUDE_ASM\("[^"]+",\s*(\w+)\);', self.text))
         self._asm = None
         self._parsed = None
@@ -109,7 +113,7 @@ class Image:
         """{first address: function name} for the asm folder (from the file names; named files are read)"""
         if self._asm is None:
             self._asm = {}
-            for f in glob.glob(os.path.join(self.asm, '*.s')):
+            for f in (f for d in self.asms for f in glob.glob(os.path.join(d, '*.s'))):
                 n = os.path.basename(f)[:-2]
                 m = re.search(r'_([0-9A-F]{8})$', n)
                 a = int(m[1], 16) if m else asm_file(f)[0]
@@ -117,13 +121,12 @@ class Image:
                     self._asm[a] = n
         return self._asm
 
-    def obj(self):
-        return os.path.join(ROOT, 'build', 'src', 'stage', 'sc03_001.o') if self.name == VILLAGE else \
-            os.path.join(ROOT, 'build', 'src', 'stg', self.lo + '.o')
-
     def tokens(self, name):
-        p = os.path.join(self.asm, name + '.s')
-        return asm_file(p)[1] if os.path.exists(p) else self.obj_tokens(name)
+        for d in self.asms:
+            p = os.path.join(d, name + '.s')
+            if os.path.exists(p):
+                return asm_file(p)[1]
+        return self.obj_tokens(name)
 
     def sym_name(self, a, kind):
         """the name splat gives an address of this image (an own-range function or datum, else D_<address>)"""
@@ -137,17 +140,16 @@ class Image:
         function with C, so after a re-split no matched function of the image was a clone source: r201's 24 hand
         clones). A relocation with an addend is named by its exact address, as splat's .s would name it"""
         import subprocess
-        o = self.obj()
-        if not os.path.exists(o):
-            return []
         objdump = os.path.join(ROOT, 'tools', 'toolchain', 'bin', 'mipsel-none-elf-objdump')
         if getattr(self, '_objsyms', None) is None:
-            t = subprocess.run([objdump, '-t', o], capture_output=True, text=True).stdout
-            self._objsyms = {m[3]: (int(m[1], 16), int(m[2], 16))
-                             for m in re.finditer(r'^([0-9a-f]{8}) g\s+F \.text\s+([0-9a-f]{8}) (\w+)$', t, re.M)}
+            self._objsyms = {}
+            for o in (o for o in self.objs if os.path.exists(o)):
+                t = subprocess.run([objdump, '-t', o], capture_output=True, text=True).stdout
+                self._objsyms.update({m[3]: (o, int(m[1], 16), int(m[2], 16)) for m in
+                                      re.finditer(r'^([0-9a-f]{8}) g\s+F \.text\s+([0-9a-f]{8}) (\w+)$', t, re.M)})
         if name not in self._objsyms:
             return []
-        lo_, size = self._objsyms[name]
+        o, lo_, size = self._objsyms[name]
         # the symbol's own range (--disassemble=<sym> ran on past the function: 593 relocations for a 0xE0 one)
         dump = subprocess.run([objdump, '-drz', f'--start-address={lo_:#x}', f'--stop-address={lo_ + size:#x}', o],
                               capture_output=True, text=True).stdout
@@ -182,13 +184,17 @@ class Image:
         if self._parsed is None:
             decl, funcs = P.split(self.text)
             ch = [re.sub(r'^INCLUDE_ASM\(.*\n?', '', c, flags=re.M).strip() for c in P.chunks(decl)]
-            ch = [c for c in ch if c]
+            # r209: an image's later units repeat the first one's declarations (tools/stage_units.py): each chunk once
+            # (gcc 2.7.2 rejects a typedef given twice, even the same text)
+            seen = set()
+            ch = [c for c in ch if c and not (P.norm(c) in seen or seen.add(P.norm(c)))]
             tdefs = []
             for c in ch:
                 m = re.search(r'^(typedef|struct|union|enum)\b', c, re.M)
                 if m and not re.search(r'^INCLUDE_ASM', c[m.start():], re.M):
                     tdefs.append(c[m.start():])
-            inc = ''.join(f'#include "{h}"\n' for h in re.findall(r'^#include "(\w+\.h)"', self.text, re.M))
+            inc = ''.join(f'#include "{h}"\n' for h in
+                          dict.fromkeys(re.findall(r'^#include "(\w+\.h)"', self.text, re.M)))
             self._parsed = (ch, funcs, tdefs, inc)
         return self._parsed
 
@@ -206,7 +212,7 @@ class Image:
         out = {}
         _, funcs, _, _ = self.parsed()
         by_name = {n: a for a, n in self.asm_by_addr().items()}
-        has_obj = os.path.exists(self.obj())
+        has_obj = any(os.path.exists(o) for o in self.objs)
         for n, body in funcs.items():
             inner = body[body.find('{') + 1:body.rfind('}')].strip()
             # r208: a function with no .s (split after it was matched) by its name's address, its tokens from the object
@@ -227,7 +233,7 @@ def extern_sym(line):
 
 
 def all_images():
-    names = [VILLAGE] + sorted(os.path.basename(p)[:-2].upper() for p in glob.glob(os.path.join(ROOT, 'src', 'stg', '*.c')))
+    names = [VILLAGE] + [lo.upper() for lo in U.stages(ROOT)]
     return {n: Image(n) for n in names}
 
 
@@ -309,7 +315,7 @@ def draft(src, va, vname, tgt, sa, sname):
         # r208: the nearest pair either side (the nearest below could be another block: sc06_024 80181EF4 moved
         # D_801AC420 by D_801AF7B4's pair, where the asm's D_801AC426 is its `.pad` six bytes above)
         px, py = min(pairs, key=lambda p: (abs(p[0] - ax), p[0] > ax))
-        names[s] = f'{m[1]}_{tgt.lo}_{py + ax - px:08X}'
+        names[s] = tgt.sym_name(py + ax - px, m[1])   # r211: the village's own symbols are D_<addr> (r210)
         moved.append((s, names[s]))
     ren = lambda t: re.sub(r'\b\w+\b', lambda w: names.get(w[0], w[0]), t)  # noqa: E731
     # a symbol the target file already declares keeps the file's declaration (two sources may guess an engine
@@ -366,10 +372,13 @@ def clone_stage(tgt, idx, out_dir, alt=0, log=print):
         if not cands:
             continue
         if by_addr is None:
-            by_addr = tgt.asm_by_addr()
+            by_addr, done = tgt.asm_by_addr(), tgt.matched()
         sname = by_addr.get(sa)
         if sname is None:
-            log(f'{tgt.name} {sa:08X}: no asm file at the census start'); continue
+            # r209: a fresh split writes no .s for a function in C, so only a missing asm function is worth a line
+            if sa not in done:
+                log(f'{tgt.name} {sa:08X}: no asm file at the census start')
+            continue
         if sname not in tgt.todo:
             continue
         n_shape += 1
@@ -403,9 +412,7 @@ def main():
     if args[0] == '--all':
         root = args[1]
         ts = tw = 0
-        for n, im in images.items():
-            if n == VILLAGE:
-                continue
+        for n, im in images.items():   # r211: the village too (src/stage/sc03_001.c; r210 found it skipped)
             s, w = clone_stage(im, idx, os.path.join(root, im.lo), alt)
             ts, tw = ts + s, tw + w
             print(f'{n}: {s} functions of a matched shape still asm, {w} drafts')

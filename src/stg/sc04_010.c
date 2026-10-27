@@ -579,7 +579,28 @@ typedef struct { u32 wx, wy, wz, count; u32 *faces; } Rec;
 extern void func_801292C8();
 extern void func_800139C8();
 
-INCLUDE_ASM("asm/stg/sc04_010/nonmatchings/sc04_010", func_sc04_010_8017D210);
+extern u8 D_80126940;
+extern void func_sc04_010_8017D2D4();
+
+void func_sc04_010_8017D210(u8 *o) {
+    SV8 a;
+    SV8 b;
+
+    a = *(SV8 *)&D_80126940;
+    b = *(SV8 *)&D_80126940;
+    a.x = 0x1D0;
+    a.y = -0x802;
+    a.z = 0x1180;
+    if (b.x > 0x1D0) {
+        b.x = 0x1D0;
+    }
+    if (b.z < 0x10E0) {
+        b.z = 0x10E0;
+    } else if (b.z > 0x1220) {
+        b.z = 0x1220;
+    }
+    func_sc04_010_8017D2D4(o, &a, &b);
+}
 
 void func_sc04_010_8017D2D4(u8 *arg0, u8 *arg1, u8 *arg2) {
     FeMtx m;
@@ -646,13 +667,56 @@ void func_sc04_010_8017D560(u8 *arg0) {
     func_8002D4C8(0xAAF, 0);
 }
 
-INCLUDE_ASM("asm/stg/sc04_010/nonmatchings/sc04_010", func_sc04_010_8017D5DC);
+typedef struct { u8 b[4]; } B4;
+extern s32 func_8001D074();
+extern void func_800233CC();
+extern void func_8001CD9C();
+extern u8 D_sc04_010_8018F598[];
+extern u8 D_sc04_010_8018F59C;
+extern u8 D_sc04_010_8018E24C;
+extern u8 D_sc04_010_8018E250;
+
+s32 func_sc04_010_8017D5DC(u8 *arg0) {
+    u8 *o;
+    u8 *p;
+
+    o = (u8 *) func_8001D074(0x7E, 0x100);
+    if (o == 0) {
+        return 0;
+    }
+    p = D_sc04_010_8018F598;
+    func_800233CC(p, 0x28);
+    *(B4 *)p = *(B4 *)&D_sc04_010_8018E24C;
+    *(B4 *)&D_sc04_010_8018F59C = *(B4 *)&D_sc04_010_8018E250;
+    func_8001CD9C(o, p);
+    AF(o, u16, 0x2C) = 0xC008;
+    AF(o, s32, 4) |= 0x50000000;
+    AF(o, u16, 8) = AF(arg0, u16, 6);
+    AF(o, u16, 0xA) = AF(arg0, u16, 0xA);
+    AF(o, u16, 0xC) = AF(arg0, u16, 0xE);
+}
 
 void func_sc04_010_8017D6C4(s32 arg0) {
     AF(arg0, s16, 0xFE) = 0;
 }
 
-INCLUDE_ASM("asm/stg/sc04_010/nonmatchings/sc04_010", func_sc04_010_8017D6CC);
+void func_sc04_010_8017D6CC(u8 *o) {
+    if (AF(o, s16, 0xFE) != 0) {
+        D_sc04_010_8018F598[2] += 0x10;
+        D_sc04_010_8018F598[1] += 0xC;
+        D_sc04_010_8018F598[0] += 4;
+        if (D_sc04_010_8018F598[2] >= 0xF0) {
+            AF(o, s16, 0xFE) = 0;
+        }
+    } else {
+        D_sc04_010_8018F598[2] -= 0x10;
+        D_sc04_010_8018F598[1] -= 0xC;
+        D_sc04_010_8018F598[0] -= 4;
+        if (D_sc04_010_8018F598[2] < 0x61) {
+            AF(o, s16, 0xFE)++;
+        }
+    }
+}
 
 void func_sc04_010_8017D7A0(s32 arg0) {
     func_8012C588(0x2D6, arg0);

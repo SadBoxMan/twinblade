@@ -133,7 +133,8 @@ def select_for_paths(rows, paths):
             continue
         m = (re.match(r'^src/(abil|stg)/(\w+)\.c$', p) or re.match(r'^(abil|stg)/(?:symbol_addrs_)?(\w+)\.(?:yaml|txt)$', p))
         if m:
-            want.add(m.group(2).lower())
+            # r209: src/stg/<stage>_o0.c and _post.c are the stage's (tools/stage_units.py)
+            want.add(re.sub(r'_(?:o0|post)$', '', m.group(2).lower()) if m.group(1) == 'stg' else m.group(2).lower())
             continue
         m = re.match(r'^src/(\w+)/', p) or re.match(r'^(\w+)\.yaml$', p)
         if m and m.group(1) in names:

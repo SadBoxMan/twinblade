@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Census of the stage images' own code (docs/decomp_census.md). Read-only: reads disc/pac4/*.bin and src/ only.
 
-Every stage image (disc/pac4/*.bin, loaded at 0x80128158) starts with the shared engine (0x80128158-0x8017BEA4,
-identical apart from relocations), then the stage's own code, then its data. The own code starts at 0x8017BEA4;
+Every stage image (disc/pac4/*.bin, loaded at 0x80128158) starts with the shared engine (0x80128158-0x8017BE9C,
+identical apart from relocations), then the stage's own code, then its data. The own code starts at 0x8017BE9C;
 its end is where a function would start on a zero word (SC03_001: 0x8018D220, the same as splat's split).
 Functions are found by walking: one ends at the first `jr ra` past every forward branch target.
 
@@ -148,8 +148,12 @@ def ref_status(name=REF):
     village, src/stg/<stage>.c for the others (r145); an address may be inside a function (a named symbol)"""
     lo = name.lower()
     paths = ['symbol_addrs_stage.txt'] + ([] if name == REF else [f'stg/symbol_addrs_{lo}.txt'])
-    src = os.path.join(ROOT, 'src', 'stage', 'sc03_001.c') if name == REF else os.path.join(ROOT, 'src', 'stg', lo + '.c')
-    if not os.path.exists(src):
+    if name == REF:
+        srcs = [os.path.join(ROOT, 'src', 'stage', 'sc03_001.c')]
+    else:
+        import stage_units as U                     # r209: <stage>_o0.c and _post.c too
+        srcs = U.files(lo, ROOT)
+    if not os.path.exists(srcs[0]):
         return None
     syms = {}
     for p in paths:
@@ -158,7 +162,8 @@ def ref_status(name=REF):
             if m:
                 syms[m[1]] = int(m[2], 16)
     unm = set()
-    for n in re.findall(r'INCLUDE_ASM\("[^"]+",\s*(\w+)\);', open(src, encoding='utf-8', errors='replace').read()):
+    text = ''.join(open(s, encoding='utf-8', errors='replace').read() for s in srcs)
+    for n in re.findall(r'INCLUDE_ASM\("[^"]+",\s*(\w+)\);', text):
         m = re.search(r'_([0-9A-F]{8})$', n)
         if m:
             unm.add(int(m[1], 16))

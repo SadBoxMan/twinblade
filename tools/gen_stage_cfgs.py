@@ -13,7 +13,8 @@ first) into stg/symbol_addrs_engine.txt, and so do the EXE's symbols (a first sp
 packages). splat lists all of them in undefined_*_auto.txt, which the link reads.
 
 Writes, for every stage named (default: every stage in stg/ already):
-  stg/<name>.yaml                 the splat config (asm/stg/<name>/, src/stg/<name>.c, build/stg/<name>/)
+  stg/<name>.yaml                 the splat config (asm/stg/<name>/, src/stg/<name>.c, build/stg/<name>/; r209: a stage
+                                  with an -O0 run also <name>_o0.c and <name>_post.c, tools/stage_units.py)
   stg/symbol_addrs_<name>.txt     the names given by hand (kept), then the outside symbols
   stg/symbol_addrs_engine.txt     the engine's functions, shared by all
 `make check-stg` rebuilds and checks every split stage, `make check-<name>` one (part of `make check`).
@@ -34,6 +35,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import stage_census as C  # noqa: E402
+import stage_units as U  # noqa: E402
 
 BASE, ENG_END = C.BASE, C.ENG_END
 NM = os.path.join(ROOT, 'tools', 'toolchain', 'bin', 'mipsel-none-elf-nm')
@@ -55,21 +57,32 @@ def engine_funcs():
 
 
 def layout(name):
-    """(own code start, own code end, image length) as offsets"""
+    """(own code start, own code end, image length, -O0 runs) as offsets (r209: the runs from stage_units.o0_runs)"""
     ws = C.load(os.path.join(ROOT, 'disc', 'pac4', name + '.bin'))
     fs = C.find_funcs(ws, (ENG_END - BASE) // 4)
     size = os.path.getsize(os.path.join(ROOT, 'disc', 'pac4', name + '.bin'))
-    return ENG_END - BASE, fs[-1][1] * 4, size
+    runs = [(s - BASE, e - BASE) for s, e in U.o0_runs(ws, fs, BASE)]
+    if len(runs) > 1:
+        sys.exit(f'{name}: {len(runs)} -O0 runs; stage_units names one per stage (<stage>_o0.c, <stage>_post.c)')
+    return ENG_END - BASE, fs[-1][1] * 4, size, runs
 
 
 def yaml_text(name):
     lo = name.lower()
-    start, end, size = layout(name)
+    start, end, size, runs = layout(name)
     data = open(os.path.join(ROOT, 'disc', 'pac4', name + '.bin'), 'rb').read()
     subs = [f'      - {{start: 0x0, type: bin, name: {lo}_engine, linker_section_order: .rodata}}  # the shared '
-            'engine, matched in src/stage (placed first: a .data piece would follow the .text)',
-            f'      - [0x{start:X}, c, {lo}]     # the stage\'s own code, 0x{BASE + start:08X}-0x{BASE + end:08X}',
-            f'      - [0x{end:X}, data, {lo}_data]']
+            'engine, matched in src/stage (placed first: a .data piece would follow the .text)']
+    if runs:
+        # r209: a run of -O0 functions is a translation unit of its own (src/stg/<stage>_o0.c, built -O0 by the
+        # Makefile), and the -O2 code after it another (<stage>_post.c); tools/stage_units.py
+        (o0, o0_end), = runs
+        subs += [f'      - [0x{start:X}, c, {lo}]     # the stage\'s own code, 0x{BASE + start:08X}-0x{BASE + o0:08X}',
+                 f'      - [0x{o0:X}, c, {lo}_o0]  # -O0 code, 0x{BASE + o0:08X}-0x{BASE + o0_end:08X}',
+                 f'      - [0x{o0_end:X}, c, {lo}_post]  # -O2 again, 0x{BASE + o0_end:08X}-0x{BASE + end:08X}']
+    else:
+        subs.append(f'      - [0x{start:X}, c, {lo}]     # the stage\'s own code, 0x{BASE + start:08X}-0x{BASE + end:08X}')
+    subs.append(f'      - [0x{end:X}, data, {lo}_data]')
     if size % 4:
         subs.append(f'      - [0x{size & ~3:X}, bin, {lo}_tail]  # the image length is not a multiple of 4')
     sub_text = '\n'.join(subs)

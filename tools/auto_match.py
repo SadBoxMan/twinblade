@@ -16,6 +16,9 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import stage_units  # noqa: E402  r211: a stage -O0 unit's function compiles -O0
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ABIL = '--abil' in sys.argv
 if ABIL:
@@ -301,7 +304,7 @@ def try_function(name, asm_path):
             os.makedirs(AUTO, exist_ok=True)
             p = os.path.join(AUTO, name + '.c')
             open(p, 'w').write(c)
-            r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'cmp_func.py'), p, name, '2.7.2', '-O2'], capture_output=True, text=True, cwd=ROOT)
+            r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'cmp_func.py'), p, name, '2.7.2', stage_units.opt_of(name)], capture_output=True, text=True, cwd=ROOT)
             if 'MATCH' in r.stdout and 'MISMATCH' not in r.stdout and 'DIFFER' not in r.stdout.upper().replace('MATCH', ''):
                 return c, 'ok'
     return None, 'no variant matched'

@@ -666,7 +666,21 @@ extern void func_8012B2CC();
 extern void func_8002A04C();
 extern void func_801439C0();
 
-INCLUDE_ASM("asm/stg/sc04_006/nonmatchings/sc04_006", func_sc04_006_8017D268);
+extern u8 D_sc04_006_801836E8[];
+
+void func_sc04_006_8017D268(u8 *arg0) {
+    B8 v;
+    u8 t;
+
+    if (func_80148800((s32) &D_80126B58) & 3) {
+        t = (AF(arg0, u8, 5) + 1) & 1;
+        AF(arg0, u8, 5) = t;
+        AF(arg0, s32, 0x14) = ((s16 *)&D_sc04_006_801836E8)[t];
+    }
+    v = *(B8 *)&D_80126940;
+    AF(arg0, s16, 0x22) = AF(arg0, s16, 0x1A) = ((s16)(((s16 *)&v)[0] - 0x4C0) << 10) / 3648 + 0x600;
+    func_sc04_006_8017D3E4((s32) arg0, (s32) &v);
+}
 
 void func_sc04_006_8017D344(u8 *arg0) {
     B8 v;

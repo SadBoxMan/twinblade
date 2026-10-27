@@ -206,6 +206,10 @@ def missing_decls(cs, t, at=None):
             fn = _func_name(cc)
             # an identical extern or prototype only further down still goes up here (a duplicate is harmless)
             if not cc.strip() or norm(cc) in (hn if fn or cc.lstrip().startswith('extern') else tn) or cc in out:
+                # r209: a one-line typedef the file has only further down moves up here (place_one drops the lower
+                # copy; gcc 2.7.2 rejects a typedef given twice): r174's Obj118 sat below sc03_118 801832E0
+                if TYPE_LINE.match(cc) and '\n' not in cc.strip() and norm(cc) not in hn and cc not in out:
+                    out.append(cc)
                 continue
             if fn:
                 later_static = re.search(rf'^static\b[^;{{}}]*\b{fn}\s*\(', rest, re.M)
@@ -241,6 +245,9 @@ def missing_decls(cs, t, at=None):
     return out
 
 
+TYPE_LINE = re.compile(r'\s*typedef\b')
+
+
 def file_order(t, names):
     """names sorted by the position of their INCLUDE_ASM in t (r208: each function's declarations go above it, so the
     upper one's are in place before the lower one is checked)"""
@@ -253,6 +260,13 @@ def place_one(t, name, body, decls, pre=''):
     inline helpers) goes between the declarations and the function. -> (text, the declarations added)"""
     at = asm_pos(t, name)
     new = missing_decls(decls, t, at)
+    if at is not None:
+        # r209: a typedef moved up from further down (missing_decls) loses its lower line
+        moved = {norm(x) for x in new if TYPE_LINE.match(x) and '\n' not in x.strip()}
+        lines = t[at:].split('\n')
+        keep = [l for l in lines if norm(strip_comments(l)) not in moved or l.startswith('INCLUDE_ASM')]
+        if len(keep) != len(lines):
+            t = t[:at] + '\n'.join(keep)
     block = ''.join(x + '\n' for x in new) + ('\n' if new else '') + pre + body
     line = re.compile(rf'^INCLUDE_ASM\("[^"]+",\s*{name}\);', re.M)
     return line.sub(lambda m: block, t, count=1), new
@@ -317,6 +331,9 @@ def target_of(path):
     rel = os.path.relpath(path, os.path.join(ROOT, 'src')).replace(os.sep, '/')
     if rel.startswith(('abil/', 'stg/')):      # an ability package or a split stage: src/abil/ovlNN.c -> check-ovlNN
         o = rel.split('/')[1][:-2]
+        if rel.startswith('stg/'):             # r209: sc03_014_o0.c / sc03_014_post.c -> check-sc03_014
+            import stage_units
+            o = stage_units.stage_of(o)
         return 'check-' + o, f'{o}.bin: OK'
     if '/' in rel:
         o = rel.split('/')[0]

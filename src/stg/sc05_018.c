@@ -2702,7 +2702,23 @@ void func_sc05_018_8018124C(void) {
     LoadImage(&r, (u32 *) D_sc05_018_801E660C);
 }
 
-INCLUDE_ASM("asm/stg/sc05_018/nonmatchings/sc05_018", func_sc05_018_80181294);
+s32 func_sc05_018_80181294(s32 c0, s32 t) {
+    s32 r, g, b;
+    s32 k;
+    u16 c;
+
+    r = c0 & 0x1F;
+    k = 0x1000 - t;
+    c = c0;
+    g = c >> 5;
+    g &= 0x1F;
+    b = c >> 10;
+    b &= 0x1F;
+    r = ((r * k) >> 12) & 0x1F;
+    g = ((g * k) >> 12) & 0x1F;
+    b = ((b * k) >> 12) & 0x1F;
+    return (u16)(r | 0x8000 | (g << 5) | (b << 10));
+}
 
 s32 func_sc05_018_801812FC(s32 arg0, s32 arg1) {
     s32 temp_v0;
@@ -4096,7 +4112,27 @@ s32 func_sc05_018_80184590(s32 arg0, s32 arg1) {
     return var_v0;
 }
 
-INCLUDE_ASM("asm/stg/sc05_018/nonmatchings/sc05_018", func_sc05_018_801845B4);
+extern u8 D_80078EB0;
+
+s32 func_sc05_018_801845B4(s32 a0, s32 a1, s32 a2, s32 a3) {
+    u8 unused[0x20]; /* MATCH-TRICK: frame pad, the original reserves 0x20 bytes it never uses */
+    s32 h0, m0, h1, m1;
+    s32 lo;
+    s32 hi;
+
+    h0 = a0 & 0xFF;
+    m0 = a1 & 0xFF;
+    lo = (h0 << 8) | m0;
+    h1 = a2 & 0xFF;
+    m1 = a3 & 0xFF;
+    hi = (h1 << 8) | m1;
+    if ((s16)lo <= *(s16 *)&D_80078EB0) {
+        if (*(s16 *)&D_80078EB0 < (s16)hi) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void func_sc05_018_8018460C(u8 *o, s32 n) {
     SV8 a;

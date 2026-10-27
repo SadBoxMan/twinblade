@@ -35,6 +35,8 @@ OPT_FLAGS := -O2
 O0_FILES  := main code_8002C410 stage/engine_8013B568 stage/engine_80144B9C \
              ovl39/ovl39_800D0100 ovl37/ovl37
 $(foreach f,$(O0_FILES),$(eval $(BUILD)/src/$(f).o: OPT_FLAGS := -O0))
+# r209: a stage's -O0 run is its own file, src/stg/<stage>_o0.c (tools/stage_units.py; the four SC03 stages)
+$(BUILD)/src/stg/%_o0.o: OPT_FLAGS := -O0
 # tools/maspsx_tw.py (r192): maspsx with the sltu_at rule on (the game's assembler wrote `sltu rd,rs,-N` as
 # `li at,-N; sltu rd,rs,at`; asm/ has no negative sltiu), tools/maspsx itself unmodified
 MASPSX    := $(PYTHON) tools/maspsx_tw.py --expand-div --aspsx-version=2.79
@@ -66,6 +68,7 @@ ABIL := $(patsubst abil/%.yaml,%,$(wildcard abil/*.yaml))
 # The other stage images (r143, docs/decomp_pilot.md): stg/<name>.yaml, written by tools/gen_stage_cfgs.py (`make
 # split-stg`), only the stage's own code split (the engine is a bin piece, matched in src/stage), asm/stg/<name>/,
 # src/stg/<name>.c, build/stg/<name>/, checked against disc/pac4/<NAME>.bin. Symbols carry the stage's name.
+# r209: a stage with an -O0 run also has src/stg/<name>_o0.c (built -O0) and <name>_post.c (tools/stage_units.py).
 # r145: all 139 images are configured. Quick mode: `make check-stg STG=SC03_005` (or several, space-separated) defines
 # and checks only those stages.
 STG_ALL := $(patsubst stg/%.yaml,%,$(wildcard stg/*.yaml))
@@ -144,7 +147,8 @@ $(BUILD)/%.o: %.s
 # cpp -> cc1 -> maspsx -> jtbl_relabel -> as, keeping the intermediates for inspection. jtbl_relabel points a
 # matched function's jump tables at the original ones in the split's data (tools/jtbl_relabel.py says why); it
 # reads the tables of the file's own segment: asm/<overlay> for src/<overlay>/, asm for the EXE.
-JTBL_ASM = $(firstword $(foreach o,$(OVERLAYS),$(if $(filter $(o)/%,$*),asm/$(o))) $(if $(filter abil/% stg/%,$*),asm/$*) asm)
+# (r209: src/stg/<stage>_o0.c and _post.c read their stage's asm/stg/<stage>)
+JTBL_ASM = $(firstword $(foreach o,$(OVERLAYS),$(if $(filter $(o)/%,$*),asm/$(o))) $(if $(filter abil/% stg/%,$*),asm/$(patsubst %_o0,%,$(patsubst %_post,%,$*))) asm)
 $(BUILD)/src/%.o: src/%.c tools/jtbl_relabel.py $(shell find include -type f 2>/dev/null)
 	@mkdir -p $(dir $@)
 	$(CPP) $(CPP_FLAGS) $< > $(BUILD)/src/$*.i
@@ -203,7 +207,8 @@ $(foreach o,$(ABIL),$(eval $(call ABIL_RULES,$(o))))
 define STG_RULES
 $(1)_S := $$(wildcard asm/stg/$(1)/data/*.s)
 $(1)_B := $$(patsubst assets/%.bin,$(BUILD)/assets/%.o,$$(wildcard assets/stg/$(1)_*.bin))
-$(1)_O := $$(patsubst %.s,$(BUILD)/%.o,$$($(1)_S)) $(BUILD)/src/stg/$(1).o $$($(1)_B)
+$(1)_C := $$(wildcard src/stg/$(1)_o0.c src/stg/$(1)_post.c)
+$(1)_O := $$(patsubst %.s,$(BUILD)/%.o,$$($(1)_S)) $(BUILD)/src/stg/$(1).o $$(patsubst %.c,$(BUILD)/%.o,$$($(1)_C)) $$($(1)_B)
 
 $(BUILD)/stg/$(1)/$(1).elf: $$($(1)_O) $(BUILD)/stg/$(1)/$(1).ld $(EXE_SYMS)
 	$(LD) -nostdlib --no-check-sections -Map $(BUILD)/stg/$(1)/$(1).map \

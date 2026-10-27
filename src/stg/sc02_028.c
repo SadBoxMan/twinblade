@@ -2081,7 +2081,56 @@ extern s16 D_sc02_028_8018F234[];
 extern s16 D_sc02_028_8018F238[];
 
 
-INCLUDE_ASM("asm/stg/sc02_028/nonmatchings/sc02_028", func_sc02_028_8017F608);
+extern s16 D_sc02_028_8018F22C[];
+
+void func_sc02_028_8017F608(u8 *o) {
+    SV8 v;
+    s16 t;
+
+    if (func_80148800(&D_80126B58) & 3) {
+        AF(o, u8, 5) = (AF(o, u8, 5) + 1) & 1;
+    }
+    v = D_80126940;
+    if (v.x < 0x700) {
+        t = 0x600;
+        if (v.x < t) {
+            v.x = t;
+        }
+        AF(o, s16, 0x2E) = 0;
+        AF(o, s32, 0x14) = D_sc02_028_8018F22C[AF(o, u8, 5)];
+    } else {
+        if (v.z < 0x1200) {
+            s16 k = 0x800;
+            if (v.x < k) {
+                AF(o, s16, 0x2E) = k - v.x;
+            } else {
+                AF(o, s16, 0x2E) = 0;
+            }
+        } else {
+            s16 k = 0x7C0;
+            if (v.x < k) {
+                AF(o, s16, 0x2E) = k - v.x;
+            } else {
+                AF(o, s16, 0x2E) = 0;
+            }
+        }
+        if (v.z < 0x1040) {
+            AF(o, s32, 0x14) = D_sc02_028_8018F22C[AF(o, u8, 5)];
+        } else {
+            AF(o, s32, 0x14) = 300;
+        }
+    }
+    AF(o, s16, 0x28) = func_80012F74(AF(o, s16, 0x28), AF(o, s16, 0x2E), 4, 1);
+    t = 0x940;
+    if (v.x > t) {
+        v.x = t;
+    }
+    t = -0x880;
+    if (v.y > t) {
+        v.y = t;
+    }
+    func_sc02_028_8017F9AC(o, (u8 *)&v);
+}
 
 void func_sc02_028_8017F794(u8 *o) {
     SV8 v;
@@ -4987,7 +5036,47 @@ void func_sc02_028_80186A8C(u8 *arg0) {
     AF(arg0, s32, 0x1C) = 0;
 }
 
-INCLUDE_ASM("asm/stg/sc02_028/nonmatchings/sc02_028", func_sc02_028_80186A9C);
+typedef struct { u8 pad0[0x18]; s16 s18; s16 s1A; s16 s1C; u8 pad1[0xE]; u16 f2C; } EA88O;
+typedef struct { u8 pad0[0x20]; EA88O *o; u8 pad1[0x38]; s16 f5C; u8 pad2[0x12]; u16 f70; } EA88P;
+extern s16 D_80126CE0;
+extern s32 D_sc02_028_801D3378;
+extern s32 D_sc02_028_801D337C;
+
+/* squash and stretch (the stage copy of func_8012E364): the 0x5C clear is a plain (non-struct) store so the
+   D_80126CE0 load stays after it (2.7.2 lets a struct store pass a scalar global load); abs() is one insn */
+void func_sc02_028_80186A9C(EA88P *p) {
+    s32 t;
+    s32 d;
+    s32 old;
+    s32 v;
+    s32 k;
+    s32 m;
+    EA88O *o;
+    EA88O *o1;
+    AF(p, s16, 0x5C) = 0;
+    m = (p->f70 & 1) * 0x666;
+    t = D_80126CE0;
+    if (t == 0) {
+        D_sc02_028_801D337C = D_sc02_028_801D3378 = (s16) m + 0x1000;
+    }
+    k = (s16) m + 0x1000;
+    t = k * (0x90 - t) / 144;
+    d = D_sc02_028_801D3378 - t;
+    if (d > 0) {
+        D_sc02_028_801D3378 -= d >> 2;
+    } else if (d < 0) {
+        D_sc02_028_801D3378 += -d / 4;
+    }
+    old = D_sc02_028_801D337C;
+    o1 = p->o;
+    v = D_sc02_028_801D3378 - old + k;
+    D_sc02_028_801D337C = k;
+    D_sc02_028_801D3378 = v;
+    o1->f2C |= 0x10;
+    o = p->o;
+    o->s18 = o->s1C = abs(v);
+    p->o->s1A = m + 0x1000;
+}
 
 void func_sc02_028_80186BCC(u8 *arg0) {
     s32 var_s0;
@@ -5266,7 +5355,20 @@ void func_sc02_028_8018754C(u8 *arg0, s32 spd) {
     ApplyMatrixLV(&m, &v, arg0 + 0x10);
 }
 
-INCLUDE_ASM("asm/stg/sc02_028/nonmatchings/sc02_028", func_sc02_028_801875F0);
+void func_sc02_028_801875F0(u8 *o) {
+    s32 v;
+    s32 t;
+    s32 k;
+
+    v = 0x2F;
+    t = func_8012BD14(o);
+    if (t <= 0x40000) {
+        k = (AF(AF(o, u8 *, 0x20), s16, 0x1A) * 3) >> 9;
+        k *= k;
+        v = 0x7F - t / ((0x40000 - k) / 80);
+    }
+    do { func_8002D59C(0x64E, (u16)(v | 0x5000), AF(o, u16, 0x104)); } while (0); /* MATCH-TRICK: one more ref on v so global-alloc gives v s0 and o s1 */
+}
 
 void func_sc02_028_801876C4(u8 *arg0, s32 arg1) {
     SpawnDef d;

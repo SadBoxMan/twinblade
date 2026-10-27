@@ -2162,7 +2162,40 @@ void func_sc01_009_8017FE78(u8 *o) {
 void func_sc01_009_8017FED0(void) {
 }
 
-INCLUDE_ASM("asm/stg/sc01_009/nonmatchings/sc01_009", func_sc01_009_8017FED8);
+extern u16 D_801202A0;
+
+s32 func_sc01_009_8017FED8(u8 *o) {
+    s16 i;
+    u8 *p;
+    s16 n;
+
+    if (--AF(o, s16, 0x102) == -1) {
+        i = 0;
+        p = (u8 *)&D_801202A0;
+        for (; i < 0x60; i++, p += 0x10C) {
+            if (AF(p, u16, 0) == 0x1AB && AF(p, s16, 0x70) == 0x2B) {
+                n = D_sc01_009_801F32D8;
+                if (AF(p, s16, 0xFC) == n - 1) {
+                    do { /* MATCH-TRICK: weights p+0x102 above n in global alloc */
+                        if (AF(p, s32, 0xCC) != 0) {
+                            AF(o, s16, 0x102) = 0;
+                            return 0;
+                        }
+                    } while (0);
+                    D_sc01_009_801F32D8 = n - 1;
+                    AF(p, s16, 0x102) = 1;
+                    if (D_sc01_009_801F32D8 & 1) {
+                        AF(o, s16, 0x102) = 9;
+                    } else {
+                        AF(o, s16, 0x102) = 4;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    return D_sc01_009_801F32D8 < 2;
+}
 
 void func_sc01_009_8017FFD0(ActF20 *arg0) {
     RECT rect;

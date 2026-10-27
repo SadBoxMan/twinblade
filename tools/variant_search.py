@@ -3,6 +3,8 @@
 
 Usage: variant_search.py <template.c> <func_name> [-O2|-O0] [--jobs N (default 4)] [--show N] [--shape]
 
+Without -O2/-O0 a function of a stage's -O0 unit compiles -O0, every other -O2 (tools/stage_units.py, r211).
+
 The template is ordinary C with alternatives written as {{a|b|c}} (double braces, so normal C braces are
 left alone). Every combination is compiled and compared with the original asm (tools/cmp_func.py), in
 parallel. Prints MATCH and the matching source as soon as one is found, otherwise the best few with their
@@ -20,6 +22,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cmp_func  # noqa: E402
+import stage_units  # noqa: E402
 
 ALT = re.compile(r'\{\{(.*?)\}\}(?!\})', re.S)   # the closing }} is the last two of a run, so an alternative may end in }
 
@@ -80,7 +83,7 @@ def score(job):
 def main():
     args = sys.argv[1:]
     tmpl, func = args[0], args[1]
-    opt = next((a for a in args if a in ('-O2', '-O0', '-O1')), '-O2')
+    opt = next((a for a in args if a in ('-O2', '-O0', '-O1')), None) or stage_units.opt_of(func)   # r211: -O0 units
     jobs = int(args[args.index('--jobs') + 1]) if '--jobs' in args else 4   # LuciDin's CPU cap (r192: was cpu_count-2 = 26)
     show = int(args[args.index('--show') + 1]) if '--show' in args else 3
     variants = list(expand(open(tmpl, encoding='utf-8').read()))

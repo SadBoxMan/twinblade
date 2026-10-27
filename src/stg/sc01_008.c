@@ -1579,7 +1579,41 @@ void func_sc01_008_8017F404(u8 *arg0) {
 }
 
 
-INCLUDE_ASM("asm/stg/sc01_008/nonmatchings/sc01_008", func_sc01_008_8017F470);
+extern u8 D_sc01_008_8019F234;
+extern u8 D_sc01_008_8019F264;
+extern u8 D_sc01_008_8019F284;
+extern void func_800291A0();
+
+void func_sc01_008_8017F470(u8 *arg0) {
+    s16 a;
+    s32 t;
+    switch ((s16) func_801789AC()) {
+    case 0:
+        break;
+    case 1:
+        func_80178CBC((s32) arg0, (s32) &D_sc01_008_8019F234);
+        AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
+        break;
+    case 2:
+        if (AF(arg0, s16, 0x108) == 0) {
+            a = (u8) func_800291B4(0xDF);
+            t = (s16)(a + 1);
+            AF(arg0, s16, 0x108) = t;
+            a = t;
+            if (t >= 13) {
+                a = 0;
+            }
+            func_800291A0(0xDF, a & 0xFF);
+        }
+        func_80178CBC((s32) arg0, (s32) &D_sc01_008_8019F264);
+        AF(arg0, s16, 2) = 4;
+        break;
+    case 3:
+        func_80178CBC((s32) arg0, (s32) &D_sc01_008_8019F284);
+        AF(arg0, s16, 2) = 5;
+        break;
+    }
+}
 
 void func_sc01_008_8017F560(u8 *arg0) {
     if (func_801789AC() != 0) {

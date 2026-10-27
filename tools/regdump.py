@@ -12,6 +12,9 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import stage_units  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CC = os.path.join(ROOT, 'tools', 'compilers', 'gcc-2.7.2-psx')
 TMP = os.path.join(ROOT, 'build', 'cmp')
@@ -22,7 +25,7 @@ MIPS = {2: 'v0', 3: 'v1', 4: 'a0', 5: 'a1', 6: 'a2', 7: 'a3', 8: 't0', 9: 't1', 
 
 def main():
     cfile, func = sys.argv[1], sys.argv[2]
-    opt = sys.argv[3] if len(sys.argv) > 3 else '-O2'
+    opt = sys.argv[3] if len(sys.argv) > 3 else stage_units.opt_of(func)   # r211: -O0 in a stage's -O0 unit
     os.makedirs(TMP, exist_ok=True)
     base = os.path.join(TMP, 'regdump')
     with open(base + '.i', 'w') as f:

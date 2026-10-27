@@ -6811,7 +6811,18 @@ void func_sc02_011_8018A084(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc02_011/nonmatchings/sc02_011", func_sc02_011_8018A184);
+typedef void (*StepFn)(void);
+typedef struct { u32 wx, wy, wz, count; u32 *faces; } Rec;
+typedef struct { u16 x0, y0, w; s16 pad6; u16 *idx; s32 padC[2]; u8 *lists; u8 *a; u8 *b; } MapGrid;
+typedef struct { SV8 v[4]; XY uv[4]; s32 col[4]; s32 code; u8 clut; } QuadSpr;
+typedef struct { s16 x, y, z, w, f, g, h, i; s32 j; } Arg15DC;
+
+s32 func_sc02_011_8018A184(void) {
+    if (D_8012704C == 0) {
+        return 0x18;
+    }
+    return 0x2B;
+}
 
 void func_sc02_011_8018A1A4(u8 *o) {
     u8 *p = AF(o, u8 *, 0xDC);

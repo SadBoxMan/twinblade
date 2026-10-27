@@ -3812,7 +3812,36 @@ void func_sc03_105_80184458(void) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_105/nonmatchings/sc03_105", func_sc03_105_80184500);
+extern u16 D_sc03_105_801BA714[];
+
+void func_sc03_105_80184500(u8 *o) {
+    u16 *d;
+    u16 *s;
+    s32 i;
+    s32 f;
+    s16 c;
+    s32 r, g, b;
+    s32 rr, gg, bb;
+    s32 tx, ty, tz;
+
+    d = D_sc03_105_801BA714;
+    s = D_sc03_105_8018E7A0;
+    f = AF(o, s32, 0xF4);
+    for (i = 0; i < 16; i++, s++) {
+        tx = D_sc03_105_801BA6B4[i].x;
+        ty = D_sc03_105_801BA6B4[i].y;
+        tz = D_sc03_105_801BA6B4[i].z;
+        c = *s;
+        r = c & 0x1F;
+        rr = (r + ((tx * f) >> 16)) & 0x1F;
+        g = (c >> 5) & 0x1F;
+        gg = (g + ((ty * f) >> 16)) & 0x1F;
+        b = (c >> 10) & 0x1F;
+        bb = (b + ((tz * f) >> 16)) & 0x1F;
+        *d++ = rr | ((bb << 10) | (gg << 5)) | 0x8000;
+    }
+    LoadImage((void *)&D_sc03_105_8018E7E0, (void *)D_sc03_105_801BA714);
+}
 
 void func_sc03_105_80184604(s32 n) {
     if (n != -1) {

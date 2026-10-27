@@ -15,6 +15,8 @@ STG = os.environ.get('TWINBLADE_STG', '').lower()
 SRC_GLOB, ASM_GLOB = (f'src/stg/{STG}.c', f'asm/stg/{STG}/nonmatchings/*/*.s') if STG else \
     ('src/stage/*.c', 'asm/stage/nonmatchings/*/*.s')
 src = {f: open(f, encoding='utf-8').read() for f in glob.glob(SRC_GLOB) if os.path.basename(f) not in O0}
+if STG:     # r209: the stage's -O0 unit and the code after it (tools/stage_units.py)
+    src.update({f: open(f, encoding='utf-8').read() for f in glob.glob(f'src/stg/{STG}_o0.c') + glob.glob(f'src/stg/{STG}_post.c')})
 todo = {}
 for f, t in src.items():
     for d, n in re.findall(r'INCLUDE_ASM\("([^"]+)",\s*(\w+)\);', t):
@@ -60,6 +62,37 @@ open(ctx, 'w').write('typedef int s32; typedef unsigned int u32; typedef short s
                      'typedef signed char s8; typedef unsigned char u8;\n' +
                      ''.join(f's32 {c}({", ".join(["s32"] * n) or "void"});\n' for c, n in sorted(nargs.items())))
 
+# r213: m2c gives up on a function with a jump table (the table lives in the data asm, not the function's). Write a copy
+# with a label before each case target and the table as a .word list, as r211's mkjt.py did; plain functions pass through.
+DATA_GLOB = f'asm/stg/{STG}/data/*.s' if STG else 'asm/stage/data/*.s'
+jtbls = {}
+for dp in glob.glob(DATA_GLOB):
+    cur = None
+    for l in open(dp):
+        m = re.match(r'dlabel (jtbl_\w+)', l)
+        if m: cur = m[1]; jtbls[cur] = []; continue
+        if l.startswith('enddlabel'): cur = None; continue
+        m = re.search(r'\.word (0x[0-9A-Fa-f]{8})', l)
+        if cur and m: jtbls[cur].append(int(m[1], 16))
+def with_jtbl(p):
+    lines = open(p).read().splitlines()
+    used = list(dict.fromkeys(re.findall(r'%hi\((jtbl_\w+)\)', '\n'.join(lines))))
+    used = [j for j in used if jtbls.get(j)]
+    if not used: return p
+    tg = {t for j in used for t in jtbls[j]}
+    out = ['.set noat', '.set noreorder', '.section .text']
+    for l in lines:
+        m = re.match(r'\s*/\* \w+ ([0-9A-Fa-f]{8}) \w+ \*/', l)
+        if m and int(m[1], 16) in tg: out.append(f'.Ljt_{int(m[1], 16):08X}:')
+        if not l.startswith('nonmatching'): out.append(l)
+    out.append('.section .rodata')
+    for j in used:
+        out.append(f'glabel {j}')
+        out += [f'.word .Ljt_{t:08X}' for t in jtbls[j]]
+    q = os.path.join(out_dir, os.path.basename(p))
+    open(q, 'w', newline='\n').write('\n'.join(out) + '\n')
+    return q
+
 def existing_decl(t, sym):
     m = re.search(rf'^extern[^;\n]*\b{sym}\b[^;\n]*;', t, re.M)
     if m: return m[0]
@@ -89,13 +122,13 @@ for size, n, f, p in rows:
     buf = io.StringIO()
     try:
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.StringIO()):
-            run(parse_flags(['-t', 'mipsel-gcc-c', '--no-cache', '--valid-syntax', '--context', ctx] + extra + [p]))
+            run(parse_flags(['-t', 'mipsel-gcc-c', '--no-cache', '--valid-syntax', '--context', ctx] + extra + [with_jtbl(p)]))
     except BaseException:
         continue
     c = buf.getvalue()
     c = re.sub(r',\s*M2C_ERROR\(/\* Read from unset register \$a[0-3] \*/\)', '', c)
     c = re.sub(r'\(M2C_ERROR\(/\* Read from unset register \$a[0-3] \*/\)\)', '()', c)
-    if 'M2C_ERROR' in c: continue
+    if 'M2C_ERROR' in c or 'Decompilation failure' in c: continue
     for _ in range(3):
         c = re.sub(r'M2C_FIELD\(((?:[^,()]|\([^()]*\))+), ([\w \*]+)\*, (0x[0-9A-Fa-f]+|\d+)\)',
                    lambda m: f'AF({m[1]}, {m[2].strip()}, {m[3]})', c)

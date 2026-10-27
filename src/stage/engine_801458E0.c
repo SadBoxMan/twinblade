@@ -12253,5 +12253,3 @@ INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017BD50);
 void func_8017BE60(u8 *arg0) {
     D_80190EEC[AF(arg0, u8, 4)]();
 }
-
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_8017BE9C);

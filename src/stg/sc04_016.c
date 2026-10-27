@@ -1183,7 +1183,35 @@ s32 func_sc04_016_8017E6E0(o)
 
 INCLUDE_ASM("asm/stg/sc04_016/nonmatchings/sc04_016", func_sc04_016_8017E960);
 
-INCLUDE_ASM("asm/stg/sc04_016/nonmatchings/sc04_016", func_sc04_016_8017EA74);
+extern void func_80016714();
+
+void func_sc04_016_8017EA74(void) {
+    u8 *p;
+    s32 n;
+    u16 *a;
+    s32 i;
+    s32 one;
+
+    one = 1;
+    p = D_sc04_016_801ABB40;
+    n = 0;
+    do {
+        if (*(s32 *)p != 0) {
+            a = *(u16 **)&D_sc04_016_801ABB40[n + 4];
+            if (*a == one) {
+                func_80016714(a, 0x84);
+            } else if (a != 0) {
+                func_80016714(a, 0x38);
+            }
+            *(s32 *)p = 0;
+        }
+        p += 0x4C;
+        n += 0x4C;
+    } while ((s32)p < (s32)(D_sc04_016_801ABB40 + 0x5F0));
+    for (i = 0x4FB0; i >= 0; i -= 0x50) {
+        *(s32 *)&D_sc04_016_801A6B40[i] = 0;
+    }
+}
 
 void func_sc04_016_8017EB30(u8 *arg0) {
     SetScript(AF(arg0, s32, 0xCC), (s32) &D_sc04_016_80183A64);

@@ -2637,7 +2637,25 @@ s32 func_sc04_015_80180F18(s32 arg0, s32 arg1) {
     return var_v0;
 }
 
-INCLUDE_ASM("asm/stg/sc04_015/nonmatchings/sc04_015", func_sc04_015_80180F3C);
+s32 func_sc04_015_80180F3C(s32 a0, s32 a1, s32 a2, s32 a3) {
+    u8 unused[0x20]; /* MATCH-TRICK: frame pad, the original reserves 0x20 bytes it never uses */
+    s32 h0, m0, h1, m1;
+    s32 lo;
+    s32 hi;
+
+    h0 = a0 & 0xFF;
+    m0 = a1 & 0xFF;
+    lo = (h0 << 8) | m0;
+    h1 = a2 & 0xFF;
+    m1 = a3 & 0xFF;
+    hi = (h1 << 8) | m1;
+    if ((s16)lo <= *(s16 *)&D_80078EB0) {
+        if (*(s16 *)&D_80078EB0 < (s16)hi) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void func_sc04_015_80180F94(u8 *o, s32 n) {
     SV8 a;

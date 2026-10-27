@@ -2285,7 +2285,31 @@ void func_sc03_028_801808CC(u8 *o, s32 a, s32 b, s32 c) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc03_028/nonmatchings/sc03_028", func_sc03_028_80180A08);
+s32 func_sc03_028_80180A08(u8 *o, s32 a1) {
+    u8 *p;
+
+    /* D_sc03_028_801EC44C is read through its neighbour here and in the last store (splat split one object) */
+    if (D_sc03_028_801EC450[-1] == 0) {
+        return 0;
+    }
+    p = D_sc03_028_801EC44C;
+    if (AF(o, s16, 0xA) > AF(p, s16, 0xA) - 0x60) {
+        if (AF(o, s16, 0xA) < AF(p, s16, 0xA) + 0x10) {
+            if (AF(o, s16, 6) < AF(p, s16, 6) + 0x80) {
+                if (AF(p, s16, 6) - 0x80 < AF(o, s16, 6)) {
+                    if (AF(o, s16, 0xE) < AF(p, s16, 0xE) + 0x80) {
+                        if (AF(p, s16, 0xE) - 0x80 < AF(o, s16, 0xE)) {
+                            AF(p, u16, 0x5C) |= 1;
+                            AF(D_sc03_028_801EC450[-1], s16, 0x5E) = a1;
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 s32 func_sc03_028_80180AC4(u8 *o, s32 lim) {
     s32 dz = AF(o, s16, 0xE) - 0x3C0;

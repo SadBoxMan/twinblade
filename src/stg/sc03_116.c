@@ -228,7 +228,682 @@ extern void func_8012E8A8();
 extern s32 func_80178970();
 extern void func_80178D18();
 
-INCLUDE_ASM("asm/stg/sc03_116/nonmatchings/sc03_116", func_sc03_116_8017BF14);
+extern u8 D_800AF630;
+extern u8 *D_800A5E60;
+extern u32 D_800A6610[2][0x1000];
+extern s32 D_sc03_116_80197C28;
+extern s16 D_sc03_116_80197C2C;
+extern s16 D_sc03_116_80197C2E;
+extern s16 D_sc03_116_80197C30;
+extern s32 D_sc03_116_80197C34;
+extern s32 D_sc03_116_80197C44;
+extern s16 D_sc03_116_80197C48;
+extern s16 D_sc03_116_80197C4A;
+extern s16 D_sc03_116_80197C4C;
+extern s32 D_sc03_116_80197C50;
+extern s32 D_sc03_116_80197C60;
+extern s16 D_sc03_116_80197C64;
+extern s16 D_sc03_116_80197C66;
+extern s16 D_sc03_116_80197C68;
+extern s32 D_sc03_116_80197C6C;
+extern s32 D_sc03_116_80197C7C;
+extern s16 D_sc03_116_80197C80;
+extern s16 D_sc03_116_80197C82;
+extern s16 D_sc03_116_80197C84;
+extern s32 D_sc03_116_80197C88;
+
+void func_sc03_116_8017BF14(u8 *obj, s32 far) {
+    s32 sxy[3];
+    SV8 box[8];
+    SV8 scr[8];
+    s32 otz;
+    s32 flag;
+    s32 z;
+    s32 sz0, sz1, sz2, sz3;
+    s32 i;
+    u32 j;
+    u8 *p3;
+    u32 *ot;
+    u8 *pkt;
+    s32 f0, f1, f2, f3;
+    s16 vx3, vz3, vy3;
+    u32 *face;
+    u32 count;
+    u8 *base;
+    s32 n;
+    u32 *bb;
+    u8 *hdr;
+    u8 *w;
+    u32 wx, wy, wz;
+    s16 bz0, bz1;
+    s32 mx0, mn0, mx1, mn1, mx, mn;
+    s32 v;
+    u8 *p0, *p1, *p2;
+    u32 hi;
+    s32 t;
+    s16 tmx, tmn, umx, umn;
+    s32 zm, zb;
+    u32 q0, q1;
+    s16 vx0, vy0, vz0, vx1, vy1, vz1, vx2, vy2, vz2;
+    s32 d;
+    s32 b0, b1, b2, b3;
+    s32 c0, c1, c2, c3;
+    u32 *tex;
+    u32 code;
+    u32 cw3;
+    s16 xl0, xh0, yl0, yh0, zl0, zh0;
+    s16 xl1, xh1, yl1, yh1, zl1, zh1;
+    s16 xl2, xh2, yl2, yh2, zl2, zh2;
+    s16 xl3, xh3, yl3, yh3, zl3, zh3;
+    s16 X0, Y0, Z0, X1, Y1, Z1, X2, Y2, Z2, X3, Y3, Z3;
+    s16 R0, M0, R1, M1, R2, M2, R3, M3;
+
+    w = &D_800AF630;
+    R0 = R1 = R2 = M0 = M1 = M2 = 0;
+    if (D_sc03_116_80197C28 != 0) {
+        X0 = D_sc03_116_80197C2C;
+        Y0 = D_sc03_116_80197C2E;
+        Z0 = D_sc03_116_80197C30;
+        R0 = D_sc03_116_80197C34;
+        M0 = R0 - 0x200;
+    } else {
+        X0 = Y0 = Z0 = 0x6000;
+    }
+    if (D_sc03_116_80197C44 != 0) {
+        X1 = D_sc03_116_80197C48;
+        Y1 = D_sc03_116_80197C4A;
+        Z1 = D_sc03_116_80197C4C;
+        R1 = D_sc03_116_80197C50;
+        M1 = R1 - 0x200;
+    } else {
+        X1 = Y1 = Z1 = 0x6000;
+    }
+    if (D_sc03_116_80197C60 != 0) {
+        X2 = D_sc03_116_80197C64;
+        Y2 = D_sc03_116_80197C66;
+        Z2 = D_sc03_116_80197C68;
+        R2 = D_sc03_116_80197C6C;
+        M2 = R2 - 0x200;
+    } else {
+        X2 = Y2 = Z2 = 0x6000;
+    }
+    if (D_sc03_116_80197C7C != 0) {
+        X3 = D_sc03_116_80197C80;
+        Y3 = D_sc03_116_80197C82;
+        Z3 = D_sc03_116_80197C84;
+        R3 = D_sc03_116_80197C88;
+        M3 = R2 - 0x200;
+    } else {
+        X3 = Y3 = Z3 = 0x6000;
+    }
+    xl0 = X0 - R0;
+    xh0 = X0 + R0;
+    yl0 = Y0 - R0;
+    yh0 = Y0 + R0;
+    zl0 = Z0 - R0;
+    zh0 = Z0 + R0;
+    xl1 = X1 - R1;
+    xh1 = X1 + R1;
+    yl1 = Y1 - R1;
+    yh1 = Y1 + R1;
+    zl1 = Z1 - R1;
+    zh1 = Z1 + R1;
+    xl2 = X2 - R2;
+    xh2 = X2 + R2;
+    yl2 = Y2 - R2;
+    yh2 = Y2 + R2;
+    zl2 = Z2 - R2;
+    zh2 = Z2 + R2;
+    xl3 = X3 - R3;
+    xh3 = X3 + R3;
+    yl3 = Y3 - R3;
+    yh3 = Y3 + R3;
+    zl3 = Z3 - R3;
+    zh3 = Z3 + R3;
+    pkt = D_800A5E60;
+    bb = AF(obj, u32 *, 0xC);
+    hdr = AF(obj, u8 *, 8);
+    ot = D_800A6610[AF(w, u16, 0xA3D2)];
+    n = AF(hdr, s32, 8);
+    base = AF(hdr, u8 *, 0x10);
+    for (i = 0; i < n; i++, bb += 5) {
+        wx = bb[0];
+        wy = bb[1];
+        wz = bb[2];
+        tmn = wx;
+        tmx = wx >> 16;
+        umn = wy;
+        umx = wy >> 16;
+        bz0 = wz;
+        bz1 = wz >> 16;
+        box[0].x = tmn; box[0].y = umn;
+        box[1].x = tmx; box[1].y = umn;
+        box[2].x = tmn; box[2].y = umn;
+        box[3].x = tmx; box[3].y = umn;
+        box[4].x = tmn; box[4].y = umx;
+        box[5].x = tmx; box[5].y = umx;
+        box[6].x = tmn; box[6].y = umx;
+        box[7].x = tmx; box[7].y = umx;
+        box[0].z = bz0; box[1].z = bz0; box[4].z = bz0; box[5].z = bz0;
+        box[2].z = bz1; box[3].z = bz1; box[6].z = bz1; box[7].z = bz1;
+        gte_ldv3c(&box[0]);
+        gte_rtpt();
+        gte_stsxy3(&scr[0], &scr[1], &scr[2]);
+        gte_ldv0(&box[3]);
+        gte_rtps();
+        gte_stsxy(&scr[3]);
+        gte_ldv3c(&box[4]);
+        gte_rtpt();
+        gte_stsxy3(&scr[4], &scr[5], &scr[6]);
+        gte_ldv0(&box[7]);
+        gte_rtps();
+        gte_stsxy(&scr[7]);
+        gte_stszotz(&otz);
+        if (far < otz) continue;
+        if (scr[0].x > scr[1].x) { mx0 = scr[0].x; mn0 = scr[1].x; } else { mn0 = scr[0].x; mx0 = scr[1].x; }
+        v = scr[2].x; if (mx0 < v) mx0 = v; else if (v < mn0) mn0 = v;
+        v = scr[3].x; if (mx0 < v) mx0 = v; else if (v < mn0) mn0 = v;
+        if (scr[4].x > scr[5].x) { mx1 = scr[4].x; mn1 = scr[5].x; } else { mn1 = scr[4].x; mx1 = scr[5].x; }
+        v = scr[6].x; if (mx1 < v) mx1 = v; else if (v < mn1) mn1 = v;
+        v = scr[7].x; if (mx1 < v) mx1 = v; else if (v < mn1) mn1 = v;
+        mn = mn0; if (mn1 < mn) mn = mn1;
+        mx = mx0; if (mx < mx1) mx = mx1;
+        if ((s16)mx < -0xA0 || (s16)mn > 0xA0) continue;
+        if (scr[0].y > scr[1].y) { mx0 = scr[0].y; mn0 = scr[1].y; } else { mn0 = scr[0].y; mx0 = scr[1].y; }
+        v = scr[2].y; if (mx0 < v) mx0 = v; else if (v < mn0) mn0 = v;
+        v = scr[3].y; if (mx0 < v) mx0 = v; else if (v < mn0) mn0 = v;
+        if (scr[4].y > scr[5].y) { mx1 = scr[4].y; mn1 = scr[5].y; } else { mn1 = scr[4].y; mx1 = scr[5].y; }
+        v = scr[6].y; if (mx1 < v) mx1 = v; else if (v < mn1) mn1 = v;
+        v = scr[7].y; if (mx1 < v) mx1 = v; else if (v < mn1) mn1 = v;
+        mn = mn0; if (mn1 < mn) mn = mn1;
+        mx = mx0; if (mx < mx1) mx = mx1;
+        if ((s16)mx < -0x6E || (s16)mn > 0x6E) continue;
+        face = (u32 *)bb[4];
+        count = bb[3];
+        for (j = 0; j < count; j++, face += 3) {
+            hi = face[1];
+            p0 = base + (hi & 0xFFFF);
+            p1 = base + (hi >> 16);
+            hi = face[2];
+            p2 = base + (hi & 0xFFFF);
+            hi = hi >> 16;
+            gte_ldv3(p0, p1, p2);
+            gte_rtpt();
+            gte_stflg(&flag);
+            if (flag & 0x7F85E000) continue;
+            gte_nclip();
+            t = hi & 7;
+            p3 = base + (hi & 0xFFF8);
+            gte_stopz(&z);
+            if (z <= 0) continue;
+            switch (t) {
+                case 6:
+                case 7: {
+                    gte_stsxy3c(sxy);
+                    gte_stsz3(&sz0, &sz1, &sz2);
+                    {
+                        s16 pa, pb, pc;
+                        pa = AF(sxy, s16, 0); pb = AF(sxy, s16, 4);
+                        if (pa > pb) { tmx = pa; tmn = pb; } else { tmn = pa; tmx = pb; }
+                        pc = AF(sxy, s16, 8);
+                        if (pc > tmx) tmx = pc; else if (pc < tmn) tmn = pc;
+                    }
+                    if (tmx < -0xA0 || tmn > 0xA0) break;
+                    {
+                        s16 pa, pb, pc;
+                        pa = AF(sxy, s16, 2); pb = AF(sxy, s16, 6);
+                        if (pa > pb) { umx = pa; umn = pb; } else { umn = pa; umx = pb; }
+                        pc = AF(sxy, s16, 10);
+                        if (pc > umx) umx = pc; else if (pc < umn) umn = pc;
+                    }
+                    if (umx < -0x6E || umn > 0x6E) break;
+                    if (sz0 > sz1) { zm = sz0; if (zm < sz2) zm = sz2; }
+                    else { zm = sz1; if (zm < sz2) zm = sz2; }
+                    z = zm;
+                    f0 = f1 = f2 = f3 = 0;
+                    q0 = AF(p0, u32, 0); q1 = AF(p0, u32, 4);
+                    vx0 = q0; vy0 = q0 >> 16; vz0 = q1;
+                    if (xl0 < vx0 && vx0 < xh0 && yl0 < vy0 && vy0 < yh0 && zl0 < vz0 && vz0 < zh0) f0 = 1;
+                    if (xl1 < vx0 && vx0 < xh1 && yl1 < vy0 && vy0 < yh1 && zl1 < vz0 && vz0 < zh1) f1 = 1;
+                    if (xl2 < vx0 && vx0 < xh2 && yl2 < vy0 && vy0 < yh2 && zl2 < vz0 && vz0 < zh2) f2 = 1;
+                    if (xl3 < vx0 && vx0 < xh3 && yl3 < vy0 && vy0 < yh3 && zl3 < vz0 && vz0 < zh3) f3 = 1;
+                    q0 = AF(p1, u32, 0); q1 = AF(p1, u32, 4);
+                    vx1 = q0; vy1 = q0 >> 16; vz1 = q1;
+                    if (xl0 < vx1 && vx1 < xh0 && yl0 < vy1 && vy1 < yh0 && zl0 < vz1 && vz1 < zh0) f0 = 1;
+                    if (xl1 < vx1 && vx1 < xh1 && yl1 < vy1 && vy1 < yh1 && zl1 < vz1 && vz1 < zh1) f1 = 1;
+                    if (xl2 < vx1 && vx1 < xh2 && yl2 < vy1 && vy1 < yh2 && zl2 < vz1 && vz1 < zh2) f2 = 1;
+                    if (xl3 < vx1 && vx1 < xh3 && yl3 < vy1 && vy1 < yh3 && zl3 < vz1 && vz1 < zh3) f3 = 1;
+                    q0 = AF(p2, u32, 0); q1 = AF(p2, u32, 4);
+                    vx2 = q0; vy2 = q0 >> 16; vz2 = q1;
+                    if (xl0 < vx2 && vx2 < xh0 && yl0 < vy2 && vy2 < yh0 && zl0 < vz2 && vz2 < zh0) f0 = 1;
+                    if (xl1 < vx2 && vx2 < xh1 && yl1 < vy2 && vy2 < yh1 && zl1 < vz2 && vz2 < zh1) f1 = 1;
+                    if (xl2 < vx2 && vx2 < xh2 && yl2 < vy2 && vy2 < yh2 && zl2 < vz2 && vz2 < zh2) f2 = 1;
+                    if (xl3 < vx2 && vx2 < xh3 && yl3 < vy2 && vy2 < yh3 && zl3 < vz2 && vz2 < zh3) f3 = 1;
+                    if (f0 | f1 | f2 | f3) {
+                        b0 = 0;
+                        if (f0) {
+                            d = vx0 - X0; if (d < 0) d = X0 - vx0;
+                            if (d < R0) { if (d < M0) b0 = 0x80; else b0 = (R0 - d) / 4; }
+                            d = vz0 - Z0; if (d < 0) d = Z0 - vz0;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                            d = vy0 - Y0; if (d < 0) d = Y0 - vy0;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                        }
+                        b1 = 0;
+                        if (f1) {
+                            d = vx0 - X1; if (d < 0) d = X1 - vx0;
+                            if (d < R1) { if (d < M1) b1 = 0x80; else b1 = (R1 - d) / 4; }
+                            d = vz0 - Z1; if (d < 0) d = Z1 - vz0;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                            d = vy0 - Y1; if (d < 0) d = Y1 - vy0;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                        }
+                        b2 = 0;
+                        if (f2) {
+                            d = vx0 - X2; if (d < 0) d = X2 - vx0;
+                            if (d < R2) { if (d < M2) b2 = 0x80; else b2 = (R2 - d) / 4; }
+                            d = vz0 - Z2; if (d < 0) d = Z2 - vz0;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                            d = vy0 - Y2; if (d < 0) d = Y2 - vy0;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                        }
+                        b3 = 0;
+                        if (f3) {
+                            d = vx0 - X3; if (d < 0) d = X3 - vx0;
+                            if (d < R3) { if (d < M3) b3 = 0x80; else b3 = (R3 - d) / 4; }
+                            d = vz0 - Z3; if (d < 0) d = Z3 - vz0;
+                            if (R2 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                            d = vy0 - Y3; if (d < 0) d = Y3 - vy0;
+                            if (R2 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                        }
+                        c0 = b0 + b1 + b2 + b3 + 0x10;
+                        if (c0 > 0x80) c0 = 0x80;
+                        b0 = 0;
+                        if (f0) {
+                            d = vx1 - X0; if (d < 0) d = X0 - vx1;
+                            if (d < R0) { if (d < M0) b0 = 0x80; else b0 = (R0 - d) / 4; }
+                            d = vz1 - Z0; if (d < 0) d = Z0 - vz1;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                            d = vy1 - Y0; if (d < 0) d = Y0 - vy1;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                        }
+                        b1 = 0;
+                        if (f1) {
+                            d = vx1 - X1; if (d < 0) d = X1 - vx1;
+                            if (d < R1) { if (d < M1) b1 = 0x80; else b1 = (R1 - d) / 4; }
+                            d = vz1 - Z1; if (d < 0) d = Z1 - vz1;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                            d = vy1 - Y1; if (d < 0) d = Y1 - vy1;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                        }
+                        b2 = 0;
+                        if (f2) {
+                            d = vx1 - X2; if (d < 0) d = X2 - vx1;
+                            if (d < R2) { if (d < M2) b2 = 0x80; else b2 = (R2 - d) / 4; }
+                            d = vz1 - Z2; if (d < 0) d = Z2 - vz1;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                            d = vy1 - Y2; if (d < 0) d = Y2 - vy1;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                        }
+                        b3 = 0;
+                        if (f3) {
+                            d = vx1 - X3; if (d < 0) d = X3 - vx1;
+                            if (d < R3) { if (d < M3) b3 = 0x80; else b3 = (R3 - d) / 4; }
+                            d = vz1 - Z3; if (d < 0) d = Z3 - vz1;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                            d = vy1 - Y3; if (d < 0) d = Y3 - vy1;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                        }
+                        c1 = b0 + b1 + b2 + b3 + 0x10;
+                        if (c1 > 0x80) c1 = 0x80;
+                        b0 = 0;
+                        if (f0) {
+                            d = vx2 - X0; if (d < 0) d = X0 - vx2;
+                            if (d < R0) { if (d < M0) b0 = 0x80; else b0 = (R0 - d) / 4; }
+                            d = vz2 - Z0; if (d < 0) d = Z0 - vz2;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                            d = vy2 - Y0; if (d < 0) d = Y0 - vy2;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                        }
+                        b1 = 0;
+                        if (f1) {
+                            d = vx2 - X1; if (d < 0) d = X1 - vx2;
+                            if (d < R1) { if (d < M1) b1 = 0x80; else b1 = (R1 - d) / 4; }
+                            d = vz2 - Z1; if (d < 0) d = Z1 - vz2;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                            d = vy2 - Y1; if (d < 0) d = Y1 - vy2;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                        }
+                        b2 = 0;
+                        if (f2) {
+                            d = vx2 - X2; if (d < 0) d = X2 - vx2;
+                            if (d < R2) { if (d < M2) b2 = 0x80; else b2 = (R2 - d) / 4; }
+                            d = vz2 - Z2; if (d < 0) d = Z2 - vz2;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                            d = vy2 - Y2; if (d < 0) d = Y2 - vy2;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                        }
+                        b3 = 0;
+                        if (f3) {
+                            d = vx2 - X3; if (d < 0) d = X3 - vx2;
+                            if (d < R3) { if (d < M3) b3 = 0x80; else b3 = (R3 - d) / 4; }
+                            d = vz2 - Z3; if (d < 0) d = Z3 - vz2;
+                            if (R2 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                            d = vy2 - Y3; if (d < 0) d = Y3 - vy2;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                        }
+                        c2 = b0 + b1 + b2 + b3 + 0x10;
+                        if (c2 > 0x80) c2 = 0x80;
+                        AF(pkt, s32, 0x08) = sxy[0];
+                        AF(pkt, s32, 0x14) = sxy[1];
+                        AF(pkt, s32, 0x20) = sxy[2];
+                        code = 0x34000000;
+                        tex = (u32 *)face[0];
+                        cw3 = c0 | code | (c0 << 8) | (c0 << 16);
+                        AF(pkt, u32, 0x04) = cw3;
+                        cw3 = c1 | code | (c1 << 8) | (c1 << 16);
+                        AF(pkt, u32, 0x10) = cw3;
+                        cw3 = c2 | code | (c2 << 8) | (c2 << 16);
+                        AF(pkt, u32, 0x1C) = cw3;
+                        AF(pkt, u32, 0x0C) = tex[1];
+                        AF(pkt, u32, 0x18) = tex[2];
+                        AF(pkt, u16, 0x24) = tex[3];
+                        {
+                            u32 *o;
+                            o = (u32 *)(((z >> 2) << 2) + (u32)ot);
+                            *(u32 *)pkt = (*o & 0xFFFFFF) | (9 << 24);
+                            *o = (*o & 0xFF000000) | ((u32)pkt & 0xFFFFFF);
+                        }
+                        pkt += 0x28;
+                    } else {
+                        AF(pkt, s32, 0x08) = sxy[0];
+                        AF(pkt, s32, 0x10) = sxy[1];
+                        AF(pkt, s32, 0x18) = sxy[2];
+                        tex = (u32 *)face[0];
+                        code = tex[0] & 0xFF000000;
+                        AF(pkt, u32, 0x04) = code | 0x101010;
+                        AF(pkt, u32, 0x0C) = tex[1];
+                        AF(pkt, u32, 0x14) = tex[2];
+                        AF(pkt, u16, 0x1C) = tex[3];
+                        {
+                            u32 *o;
+                            o = (u32 *)(((z >> 2) << 2) + (u32)ot);
+                            *(u32 *)pkt = (*o & 0xFFFFFF) | (7 << 24);
+                            *o = (*o & 0xFF000000) | ((u32)pkt & 0xFFFFFF);
+                        }
+                        pkt += 0x20;
+                    }
+                    break;
+                }
+                case 2:
+                case 3: {
+                    gte_stsxy3c(sxy);
+                    gte_ldv0(p3);
+                    gte_rtps();
+                    {
+                        s16 pa, pb, pc;
+                        pa = AF(sxy, s16, 0); pb = AF(sxy, s16, 4);
+                        if (pa > pb) { tmx = pa; tmn = pb; } else { tmn = pa; tmx = pb; }
+                        pc = AF(sxy, s16, 8);
+                        if (pc > tmx) tmx = pc; else if (pc < tmn) tmn = pc;
+                    }
+                    {
+                        s16 pa, pb, pc;
+                        pa = AF(sxy, s16, 2); pb = AF(sxy, s16, 6);
+                        if (pa > pb) { umx = pa; umn = pb; } else { umn = pa; umx = pb; }
+                        pc = AF(sxy, s16, 10);
+                        if (pc > umx) umx = pc; else if (pc < umn) umn = pc;
+                    }
+                    gte_stflg(&flag);
+                    if (flag & 0x7F85E000) break;
+                    gte_stsz4(&sz0, &sz1, &sz2, &sz3);
+                    gte_stsxy(pkt + 0x20);
+                    {
+                        s16 pd;
+                        pd = AF(pkt, s16, 32);
+                        if (pd < tmn) tmn = pd; else if (tmx < pd) tmx = pd;
+                    }
+                    if (tmx < -0xA0 || tmn > 0xA0) break;
+                    {
+                        s16 pd;
+                        pd = AF(pkt, s16, 34);
+                        if (pd < umn) {
+                            do { umn = pd; } while (0); /* MATCH-TRICK: one more loop-weighted ref of umn so it outranks umx in global alloc (box: umn a2, umx a3) */
+                        } else if (umx < pd) umx = pd;
+                    }
+                    if (umx < -0x6E || umn > 0x6E) break;
+                    { s32 zc; zb = sz2; if (zb < sz3) zb = sz3; zc = sz0; if (zc < sz1) zc = sz1; if (zc < zb) zc = zb; z = zc; }
+                    f0 = f1 = f2 = f3 = 0;
+                    q0 = AF(p0, u32, 0); q1 = AF(p0, u32, 4);
+                    vx0 = q0; vy0 = q0 >> 16; vz0 = q1;
+                    if (xl0 < vx0 && vx0 < xh0 && yl0 < vy0 && vy0 < yh0 && zl0 < vz0 && vz0 < zh0) f0 = 1;
+                    if (xl1 < vx0 && vx0 < xh1 && yl1 < vy0 && vy0 < yh1 && zl1 < vz0 && vz0 < zh1) f1 = 1;
+                    if (xl2 < vx0 && vx0 < xh2 && yl2 < vy0 && vy0 < yh2 && zl2 < vz0 && vz0 < zh2) f2 = 1;
+                    if (xl3 < vx0 && vx0 < xh3 && yl3 < vy0 && vy0 < yh3 && zl3 < vz0 && vz0 < zh3) f3 = 1;
+                    q0 = AF(p1, u32, 0); q1 = AF(p1, u32, 4);
+                    vx1 = q0; vy1 = q0 >> 16; vz1 = q1;
+                    if (xl0 < vx1 && vx1 < xh0 && yl0 < vy1 && vy1 < yh0 && zl0 < vz1 && vz1 < zh0) f0 = 1;
+                    if (xl1 < vx1 && vx1 < xh1 && yl1 < vy1 && vy1 < yh1 && zl1 < vz1 && vz1 < zh1) f1 = 1;
+                    if (xl2 < vx1 && vx1 < xh2 && yl2 < vy1 && vy1 < yh2 && zl2 < vz1 && vz1 < zh2) f2 = 1;
+                    if (xl3 < vx1 && vx1 < xh3 && yl3 < vy1 && vy1 < yh3 && zl3 < vz1 && vz1 < zh3) f3 = 1;
+                    q0 = AF(p2, u32, 0); q1 = AF(p2, u32, 4);
+                    vx2 = q0; vy2 = q0 >> 16; vz2 = q1;
+                    if (xl0 < vx2 && vx2 < xh0 && yl0 < vy2 && vy2 < yh0 && zl0 < vz2 && vz2 < zh0) f0 = 1;
+                    if (xl1 < vx2 && vx2 < xh1 && yl1 < vy2 && vy2 < yh1 && zl1 < vz2 && vz2 < zh1) f1 = 1;
+                    if (xl2 < vx2 && vx2 < xh2 && yl2 < vy2 && vy2 < yh2 && zl2 < vz2 && vz2 < zh2) f2 = 1;
+                    if (xl3 < vx2 && vx2 < xh3 && yl3 < vy2 && vy2 < yh3 && zl3 < vz2 && vz2 < zh3) f3 = 1;
+                    q0 = AF(p3, u32, 0); q1 = AF(p3, u32, 4);
+                    vx3 = q0; vy3 = q0 >> 16; vz3 = q1;
+                    if (xl0 < vx3 && vx3 < xh0 && yl0 < vy3 && vy3 < yh0 && zl0 < vz3 && vz3 < zh0) f0 = 1;
+                    if (xl1 < vx3 && vx3 < xh1 && yl1 < vy3 && vy3 < yh1 && zl1 < vz3 && vz3 < zh1) f1 = 1;
+                    if (xl2 < vx3 && vx3 < xh2 && yl2 < vy3 && vy3 < yh2 && zl2 < vz3 && vz3 < zh2) f2 = 1;
+                    if (xl3 < vx3 && vx3 < xh3 && yl3 < vy3 && vy3 < yh3 && zl3 < vz3 && vz3 < zh3) f3 = 1;
+                    if (f0 | f1 | f2 | f3) {
+                        b0 = 0;
+                        if (f0) {
+                            d = vx0 - X0; if (d < 0) d = X0 - vx0;
+                            if (d < R0) { if (d < M0) b0 = 0x80; else b0 = (R0 - d) / 4; }
+                            d = vz0 - Z0; if (d < 0) d = Z0 - vz0;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                            d = vy0 - Y0; if (d < 0) d = Y0 - vy0;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                        }
+                        b1 = 0;
+                        if (f1) {
+                            d = vx0 - X1; if (d < 0) d = X1 - vx0;
+                            if (d < R1) { if (d < M1) b1 = 0x80; else b1 = (R1 - d) / 4; }
+                            d = vz0 - Z1; if (d < 0) d = Z1 - vz0;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                            d = vy0 - Y1; if (d < 0) d = Y1 - vy0;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                        }
+                        b2 = 0;
+                        if (f2) {
+                            d = vx0 - X2; if (d < 0) d = X2 - vx0;
+                            if (d < R2) { if (d < M2) b2 = 0x80; else b2 = (R2 - d) / 4; }
+                            d = vz0 - Z2; if (d < 0) d = Z2 - vz0;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                            d = vy0 - Y2; if (d < 0) d = Y2 - vy0;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                        }
+                        b3 = 0;
+                        if (f3) {
+                            d = vx0 - X3; if (d < 0) d = X3 - vx0;
+                            if (d < R3) { if (d < M3) b3 = 0x80; else b3 = (R3 - d) / 4; }
+                            d = vz0 - Z3; if (d < 0) d = Z3 - vz0;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                            d = vy0 - Y3; if (d < 0) d = Y3 - vy0;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                        }
+                        c0 = b0 + b1 + b2 + b3 + 0x10;
+                        if (c0 > 0x80) c0 = 0x80;
+                        b0 = 0;
+                        if (f0) {
+                            d = vx1 - X0; if (d < 0) d = X0 - vx1;
+                            if (d < R0) { if (d < M0) b0 = 0x80; else b0 = (R0 - d) / 4; }
+                            d = vz1 - Z0; if (d < 0) d = Z0 - vz1;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                            d = vy1 - Y0; if (d < 0) d = Y0 - vy1;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                        }
+                        b1 = 0;
+                        if (f1) {
+                            d = vx1 - X1; if (d < 0) d = X1 - vx1;
+                            if (d < R1) { if (d < M1) b1 = 0x80; else b1 = (R1 - d) / 4; }
+                            d = vz1 - Z1; if (d < 0) d = Z1 - vz1;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                            d = vy1 - Y1; if (d < 0) d = Y1 - vy1;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                        }
+                        b2 = 0;
+                        if (f2) {
+                            d = vx1 - X2; if (d < 0) d = X2 - vx1;
+                            if (d < R2) { if (d < M2) b2 = 0x80; else b2 = (R2 - d) / 4; }
+                            d = vz1 - Z2; if (d < 0) d = Z2 - vz1;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                            d = vy1 - Y2; if (d < 0) d = Y2 - vy1;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                        }
+                        b3 = 0;
+                        if (f3) {
+                            d = vx1 - X3; if (d < 0) d = X3 - vx1;
+                            if (d < R3) { if (d < M3) b3 = 0x80; else b3 = (R3 - d) / 4; }
+                            d = vz1 - Z3; if (d < 0) d = Z3 - vz1;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                            d = vy1 - Y3; if (d < 0) d = Y3 - vy1;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b2 = (b3 * ((R3 - d) / 4)) >> 7;
+                        }
+                        c1 = b0 + b1 + b2 + b3 + 0x10;
+                        if (c1 > 0x80) c1 = 0x80;
+                        b0 = 0;
+                        if (f0) {
+                            d = vx2 - X0; if (d < 0) d = X0 - vx2;
+                            if (d < R0) { if (d < M0) b0 = 0x80; else b0 = (R0 - d) / 4; }
+                            d = vz2 - Z0; if (d < 0) d = Z0 - vz2;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                            d = vy2 - Y0; if (d < 0) d = Y0 - vy2;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                        }
+                        b1 = 0;
+                        if (f1) {
+                            d = vx2 - X1; if (d < 0) d = X1 - vx2;
+                            if (d < R1) { if (d < M1) b1 = 0x80; else b1 = (R1 - d) / 4; }
+                            d = vz2 - Z1; if (d < 0) d = Z1 - vz2;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                            d = vy2 - Y1; if (d < 0) d = Y1 - vy2;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                        }
+                        b2 = 0;
+                        if (f2) {
+                            d = vx2 - X2; if (d < 0) d = X2 - vx2;
+                            if (d < R2) { if (d < M2) b2 = 0x80; else b2 = (R2 - d) / 4; }
+                            d = vz2 - Z2; if (d < 0) d = Z2 - vz2;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                            d = vy2 - Y2; if (d < 0) d = Y2 - vy2;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                        }
+                        b3 = 0;
+                        if (f3) {
+                            d = vx2 - X3; if (d < 0) d = X3 - vx2;
+                            if (d < R3) { if (d < M3) b3 = 0x80; else b3 = (R3 - d) / 4; }
+                            d = vz2 - Z3; if (d < 0) d = Z3 - vz2;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                            d = vy2 - Y3; if (d < 0) d = Y3 - vy2;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                        }
+                        c2 = b0 + b1 + b2 + b3 + 0x10;
+                        if (c2 > 0x80) c2 = 0x80;
+                        b0 = 0;
+                        if (f0) {
+                            d = vx3 - X0; if (d < 0) d = X0 - vx3;
+                            if (d < R0) { if (d < M0) b0 = 0x80; else b0 = (R0 - d) / 4; }
+                            d = vz3 - Z0; if (d < 0) d = Z0 - vz3;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                            d = vy3 - Y0; if (d < 0) d = Y0 - vy3;
+                            if (R0 < d) b0 = 0; else if (M0 < d) b0 = (b0 * ((R0 - d) / 4)) >> 7;
+                        }
+                        b1 = 0;
+                        if (f1) {
+                            d = vx3 - X1; if (d < 0) d = X1 - vx3;
+                            if (d < R1) { if (d < M1) b1 = 0x80; else b1 = (R1 - d) / 4; }
+                            d = vz3 - Z1; if (d < 0) d = Z1 - vz3;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                            d = vy3 - Y1; if (d < 0) d = Y1 - vy3;
+                            if (R1 < d) b1 = 0; else if (M1 < d) b1 = (b1 * ((R1 - d) / 4)) >> 7;
+                        }
+                        b2 = 0;
+                        if (f2) {
+                            d = vx3 - X2; if (d < 0) d = X2 - vx3;
+                            if (d < R2) { if (d < M2) b2 = 0x80; else b2 = (R2 - d) / 4; }
+                            d = vz3 - Z2; if (d < 0) d = Z2 - vz3;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                            d = vy3 - Y2; if (d < 0) d = Y2 - vy3;
+                            if (R2 < d) b2 = 0; else if (M2 < d) b2 = (b2 * ((R2 - d) / 4)) >> 7;
+                        }
+                        b3 = 0;
+                        if (f3) {
+                            d = vx3 - X3; if (d < 0) d = X3 - vx3;
+                            if (d < R3) { if (d < M3) b3 = 0x80; else b3 = (R3 - d) / 4; }
+                            d = vz3 - Z3; if (d < 0) d = Z3 - vz3;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                            d = vy3 - Y3; if (d < 0) d = Y3 - vy3;
+                            if (R3 < d) b3 = 0; else if (M3 < d) b3 = (b3 * ((R3 - d) / 4)) >> 7;
+                        }
+                        c3 = b0 + b1 + b2 + b3 + 0x10;
+                        if (c3 > 0x80) c3 = 0x80;
+                        AF(pkt, s32, 0x08) = sxy[0];
+                        AF(pkt, s32, 0x14) = sxy[1];
+                        AF(pkt, s32, 0x20) = sxy[2];
+                        gte_stsxy(pkt + 0x2C);
+                        code = 0x3C000000;
+                        tex = (u32 *)face[0];
+                        t = c0 | code | (c0 << 8) | (c0 << 16);
+                        AF(pkt, u32, 0x04) = t;
+                        t = c1 | code | (c1 << 8) | (c1 << 16);
+                        AF(pkt, u32, 0x10) = t;
+                        t = c2 | code | (c2 << 8) | (c1 << 16);
+                        AF(pkt, u32, 0x1C) = t;
+                        t = c3 | code | (c3 << 8) | (c1 << 16);
+                        AF(pkt, u32, 0x28) = t;
+                        AF(pkt, u32, 0x0C) = tex[1];
+                        AF(pkt, u32, 0x18) = tex[2];
+                        q0 = tex[3];
+                        AF(pkt, u16, 0x24) = q0;
+                        AF(pkt, u16, 0x30) = q0 >> 16;
+                        {
+                            u32 *o;
+                            o = (u32 *)(((z >> 2) << 2) + (u32)ot);
+                            *(u32 *)pkt = (*o & 0xFFFFFF) | (12 << 24);
+                            *o = (*o & 0xFF000000) | ((u32)pkt & 0xFFFFFF);
+                        }
+                        pkt += 0x34;
+                    } else {
+                        AF(pkt, s32, 0x08) = sxy[0];
+                        AF(pkt, s32, 0x10) = sxy[1];
+                        AF(pkt, s32, 0x18) = sxy[2];
+                        tex = (u32 *)face[0];
+                        code = tex[0] & 0xFF000000;
+                        AF(pkt, u32, 0x04) = code | 0x101010;
+                        AF(pkt, u32, 0x0C) = tex[1];
+                        AF(pkt, u32, 0x14) = tex[2];
+                        q0 = tex[3];
+                        AF(pkt, u16, 0x1C) = q0;
+                        AF(pkt, u16, 0x24) = q0 >> 16;
+                        {
+                            u32 *o;
+                            o = (u32 *)(((z >> 2) << 2) + (u32)ot);
+                            *(u32 *)pkt = (*o & 0xFFFFFF) | (9 << 24);
+                            *o = (*o & 0xFF000000) | ((u32)pkt & 0xFFFFFF);
+                        }
+                        pkt += 0x28;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    D_800A5E60 = pkt;
+}
 
 void func_sc03_116_80180980(void) {
     D_8012704C = 1;

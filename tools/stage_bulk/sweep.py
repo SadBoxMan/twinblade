@@ -7,7 +7,7 @@ usage: sweep.py order <root>                     write <root>/_order.txt (one st
        sweep.py group <root> <first> <count> [workers=5] [clone_par=6]
                                                  bulk stages first..first+count-1 of the order, then clone_all
 Appends one line per stage to <root>/_bulk.csv; the clone pass logs to <root>/clone_<first>/_log.csv."""
-import csv, os, re, subprocess, sys, threading, time
+import csv, glob, os, re, subprocess, sys, threading, time
 from concurrent.futures import ThreadPoolExecutor
 env = dict(os.environ, PATH='C:\\msys64\\usr\\bin;' + os.environ['PATH'])
 cmd, root = sys.argv[1], sys.argv[2]
@@ -15,7 +15,9 @@ os.makedirs(root, exist_ok=True)
 order_f = os.path.join(root, '_order.txt')
 
 def asm_left(st):
-    return len(re.findall(r'^INCLUDE_ASM', open(f'src/stg/{st}.c', encoding='utf-8').read(), re.M))
+    # r209: with <stage>_o0.c and _post.c (tools/stage_units.py)
+    return sum(len(re.findall(r'^INCLUDE_ASM', open(f, encoding='utf-8').read(), re.M))
+               for f in glob.glob(f'src/stg/{st}.c') + glob.glob(f'src/stg/{st}_o0.c') + glob.glob(f'src/stg/{st}_post.c'))
 
 if cmd == 'order':
     c = os.path.join(root, '_census.csv')

@@ -1548,7 +1548,18 @@ extern s32 D_sc04_000_801AAEAC;
 extern s32 func_8012E57C();
 
 
-INCLUDE_ASM("asm/stg/sc04_000/nonmatchings/sc04_000", func_sc04_000_8017EBE8);
+void func_sc04_000_8017EBE8(u8 *o) {
+    s32 i;
+    u8 *p;
+
+    for (i = 0; i < 0x60; i++) {
+        p = (u8 *)&D_801202A0 + i * 0x10C;
+        if (AF(p, u16, 0) == 0x3AF) {
+            func_8012AD50(p);
+        }
+    }
+    func_80171990(o);
+}
 
 void func_sc04_000_8017EC64(s32 arg0) {
     if (func_8012E544(0x3AF) == 0) {
@@ -1660,7 +1671,29 @@ s32 func_sc04_000_8017F204(void) {
     return func_800D0F8C(0x60) != 0;
 }
 
-INCLUDE_ASM("asm/stg/sc04_000/nonmatchings/sc04_000", func_sc04_000_8017F224);
+extern u8 D_sc04_000_80186FFC;
+extern s32 *func_sc04_000_8017F3F4();
+
+void func_sc04_000_8017F224(s32 arg0) {
+    void *temp_a0;
+
+    if (func_8012C354(arg0, (s32) &D_sc04_000_80186FFC) != 0) {
+        if ((u8)func_80029178(0xDA) != 0) {
+            func_8012C218(arg0);
+            return;
+        }
+        AF(arg0, u8, 0xC0) = 1;
+        AF(arg0, u8, 0x75) = 2;
+        AF(arg0, s16, 0xAE) = -1;
+        AF(arg0, s32, 0xB4) = 0;
+        AF(arg0, s16, 2) = 1;
+        AF(arg0, s32, 0xC4) = (s32) (AF(arg0, s32, 0xC4) | 3);
+        SetScript(arg0, (s32) &D_sc04_000_801835B0);
+        AF(arg0, s32, 0x6C) = func_801788B8(arg0, (s32) &func_sc04_000_8017F3F4);
+        temp_a0 = AF(arg0, void *, 0x20);
+        AF(temp_a0, s32, 4) = (s32) (AF(temp_a0, s32, 4) | 0x01000000);
+    }
+}
 
 void func_sc04_000_8017F2E4(void) {
 }
@@ -2136,7 +2169,16 @@ void func_sc04_000_80180020(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc04_000/nonmatchings/sc04_000", func_sc04_000_801803BC);
+extern void (*D_sc04_000_801998F8[])();
+
+void func_sc04_000_801803BC(u8 *o) {
+    s16 *p = &D_80126B66;
+
+    if (*p >= 0x4FD) {
+        *p = 0x4FD;
+    }
+    D_sc04_000_801998F8[AF(o, u16, 2)](o);
+}
 
 void func_sc04_000_80180418(s32 arg0) {
     if (func_8012C354(arg0, (s32) &D_sc04_000_80199570) != 0) {
@@ -2223,7 +2265,12 @@ void func_sc04_000_80180604(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc04_000/nonmatchings/sc04_000", func_sc04_000_8018066C);
+s32 func_sc04_000_8018066C(void) {
+    if (func_800D0F8C(0x60) != 0 && func_800D0F8C(0x61) != 0 && func_800D0F8C(0x62) != 0) {
+        return 1;
+    }
+    return 0;
+}
 
 s32 *func_sc04_000_801806B8(u8 *arg0) {
     if ((AF(arg0, s16, 0xE) - D_80126B66) < 0x50) {

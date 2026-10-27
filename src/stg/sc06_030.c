@@ -1055,7 +1055,322 @@ void func_sc06_030_8017DF70(u8 *o) {
 extern void func_80015978();
 extern void func_8012F2E8();
 
-INCLUDE_ASM("asm/stg/sc06_030/nonmatchings/sc06_030", func_sc06_030_8017E120);
+extern s32 func_8012B608();
+extern u8 D_sc06_030_8019F454;
+extern u8 D_sc06_030_8019F51C;
+extern u8 D_sc06_030_8019F32C;
+extern u8 D_sc06_030_8019F644;
+extern u8 D_sc06_030_80185D70;
+extern u8 D_sc06_030_80185AA8;
+extern s32 D_sc06_030_8019F75C[];
+extern s32 D_sc06_030_8019F89C[];
+extern s32 D_sc06_030_8019FAD4[];
+extern s32 D_sc06_030_8019F9C4[];
+extern s16 D_sc06_030_80185B6C[];
+extern s16 D_sc06_030_80185B18[];
+
+void func_sc06_030_8017E120(u8 *o) {
+    SV8 v;
+    SV8 pos;
+    s32 sxy;
+    s32 p;
+    s32 flag;
+    s32 w;
+    u8 *m;
+    u8 *q;
+    s32 a;
+    s32 c;
+
+    m = AF(o, u8 *, 0xCC);
+    switch (AF(o, u16, 0x34)) {
+    case 0:
+        SetScript(o, &D_sc06_030_8019F454);
+        AF(m, s32, 4) &= 0x7FFFFFFF;
+        AF(m, s32, 0x20) = D_sc06_030_8019F75C[AF(o, s32, 0x94) * 2];
+        AF(o, s16, 0x34) = 1;
+        pos.x = AF(AF(o, u8 *, 0x20), s32, 0x48);
+        pos.y = AF(AF(o, u8 *, 0x20), s32, 0x4C);
+        pos.z = AF(AF(o, u8 *, 0x20), s32, 0x50);
+        SetRotMatrix(&D_800AF630.wsm);
+        SetTransMatrix(&D_800AF648);
+        RotTransPers(&pos, &sxy, &p, &flag);
+        if (flag >= 0 && (u16) (((s16 *)&sxy)[0] + 0x9F) < 0x13F && (u16) (((s16 *)&sxy)[1] + 0x77) < 0xEF) {
+            w = ((((s16 *)&sxy)[0] << 7) + 0x5000) / 320;
+            if (w < 0) {
+                w = 0;
+            }
+            if (w >= 0x80) {
+                w = 0x7F;
+            }
+            func_8002D4C8(0x942, (w | 0x2000) & 0xFFFF);
+        }
+        AF(o, s16, 0x84) = 0x1E;
+        break;
+    case 1:
+        if (AF(o, s16, 0x84) != 0) {
+            AF(o, s16, 0x84)--;
+        } else {
+            AF(o, s16, 0x84) = 0xF;
+            pos.x = AF(AF(o, u8 *, 0x20), s32, 0x48);
+            pos.y = AF(AF(o, u8 *, 0x20), s32, 0x4C);
+            pos.z = AF(AF(o, u8 *, 0x20), s32, 0x50);
+            SetRotMatrix(&D_800AF630.wsm);
+            SetTransMatrix(&D_800AF648);
+            RotTransPers(&pos, &sxy, &p, &flag);
+            if (flag >= 0 && (u16) (((s16 *)&sxy)[0] + 0x9F) < 0x13F && (u16) (((s16 *)&sxy)[1] + 0x77) < 0xEF) {
+                w = ((((s16 *)&sxy)[0] << 7) + 0x5000) / 320;
+                if (w < 0) {
+                    w = 0;
+                }
+                if (w >= 0x80) {
+                    w = 0x7F;
+                }
+                func_8002D4C8(0x944, (w | 0x2000) & 0xFFFF);
+            }
+        }
+        if (AF(o, s32, 0x94) == 0xE) {
+            AF(o, s16, 0x34) = 2;
+            a = (ratan2(-AF(o, s16, 0xE), AF(o, s16, 6)) - 0x400) & 0xFFF;
+            a += (rand() & 0x3FF) - 0x200;
+            a &= 0xFFF;
+            AF(o, s16, 0xFE) = 0x800;
+            AF(o, s16, 0xDC) = AF(o, s16, 6);
+            AF(o, s16, 0xDE) = -((rsin(a) * 0x160) >> 12) - AF(o, s16, 6);
+            AF(o, s16, 0xE0) = AF(o, s16, 0xA);
+            AF(o, s16, 0xE2) = -0x200 - AF(o, s16, 0xA);
+            AF(o, s16, 0xE4) = AF(o, s16, 0xE);
+            c = rcos(a);
+            AF(o, s16, 0x100) = (a + 0x800) & 0xFFF;
+            AF(o, s16, 0xE6) = -((c * 0x160) >> 12) - AF(o, s16, 0xE);
+        } else {
+            AF(m, s32, 0x20) = D_sc06_030_8019F75C[AF(o, s32, 0x94) * 2];
+        }
+        break;
+    case 2:
+        AF(AF(o, u8 *, 0x20), s16, 0x12) += func_8012B608(AF(AF(o, u8 *, 0x20), s16, 0x12), AF(o, s16, 0x100), 0x10);
+        AF(o, s16, 0xFE) -= 0x40;
+        if (AF(o, s16, 0xFE) <= 0) {
+            AF(o, s16, 0x34) = 3;
+            AF(o, s16, 0xFE) = 0;
+            AF(o, s16, 0x102) = 0;
+            SetScript(o, &D_sc06_030_8019F51C);
+            AF(o, s32, 0xEC) = (rand() & 3) * 20;
+        }
+        AF(o, s16, 6) = AF(o, s16, 0xDC) + (((rcos(AF(o, s16, 0xFE)) + 0x1000) * AF(o, s16, 0xDE)) >> 13);
+        AF(o, s16, 0xA) = AF(o, s16, 0xE0) + (((rcos(AF(o, s16, 0xFE)) + 0x1000) * AF(o, s16, 0xE2)) >> 13);
+        AF(o, s16, 0xE) = AF(o, s16, 0xE4) + (((rcos(AF(o, s16, 0xFE)) + 0x1000) * AF(o, s16, 0xE6)) >> 13);
+        AF(m, s32, 0x20) = D_sc06_030_8019F89C[AF(o, s32, 0x94) * 2];
+        if (AF(o, s16, 0x84) != 0) {
+            AF(o, s16, 0x84)--;
+        } else {
+            AF(o, s16, 0x84) = 0xF;
+            pos.x = AF(AF(o, u8 *, 0x20), s32, 0x48);
+            pos.y = AF(AF(o, u8 *, 0x20), s32, 0x4C);
+            pos.z = AF(AF(o, u8 *, 0x20), s32, 0x50);
+            SetRotMatrix(&D_800AF630.wsm);
+            SetTransMatrix(&D_800AF648);
+            RotTransPers(&pos, &sxy, &p, &flag);
+            if (flag >= 0 && (u16) (((s16 *)&sxy)[0] + 0x9F) < 0x13F && (u16) (((s16 *)&sxy)[1] + 0x77) < 0xEF) {
+                w = ((((s16 *)&sxy)[0] << 7) + 0x5000) / 320;
+                if (w < 0) {
+                    w = 0;
+                }
+                if (w >= 0x80) {
+                    w = 0x7F;
+                }
+                func_8002D4C8(0x944, (w | 0x2000) & 0xFFFF);
+            }
+        }
+        break;
+    case 3:
+        AF(o, s16, 0xFE) += 0x20;
+        AF(o, s16, 0x100) += 0x20;
+        AF(AF(o, u8 *, 0x20), s16, 0x12) = AF(o, s16, 0x100);
+        AF(o, s16, 6) = (rsin(AF(o, s16, 0x100)) * 0x160) >> 12;
+        AF(o, s16, 0xE) = (rcos(AF(o, s16, 0x100)) * 0x160) >> 12;
+        AF(o, s16, 0xE0) = (AF(o, s16, 0xE0) + 0x80) & 0xFFF;
+        AF(o, s16, 0xA) = ((rsin(AF(o, s16, 0xE0)) * 32) >> 12) - 0x200;
+        AF(m, s32, 0x20) = D_sc06_030_8019FAD4[AF(o, s32, 0x94) * 2];
+        if (AF(o, s16, 0x84) != 0) {
+            AF(o, s16, 0x84)--;
+        } else {
+            AF(o, s16, 0x84) = 0xF;
+            pos.x = AF(AF(o, u8 *, 0x20), s32, 0x48);
+            pos.y = AF(AF(o, u8 *, 0x20), s32, 0x4C);
+            pos.z = AF(AF(o, u8 *, 0x20), s32, 0x50);
+            SetRotMatrix(&D_800AF630.wsm);
+            SetTransMatrix(&D_800AF648);
+            RotTransPers(&pos, &sxy, &p, &flag);
+            if (flag >= 0 && (u16) (((s16 *)&sxy)[0] + 0x9F) < 0x13F && (u16) (((s16 *)&sxy)[1] + 0x77) < 0xEF) {
+                w = ((((s16 *)&sxy)[0] << 7) + 0x5000) / 320;
+                if (w < 0) {
+                    w = 0;
+                }
+                if (w >= 0x80) {
+                    w = 0x7F;
+                }
+                func_8002D4C8(0x944, (w | 0x2000) & 0xFFFF);
+            }
+        }
+        if (AF(o, s16, 0x102) <= AF(o, s16, 0xFE)) {
+            AF(o, s32, 0x94) = 0xB;
+            AF(o, s16, 0x102) += 0xD7;
+        }
+        if (AF(o, s32, 0x94) == 0x10) {
+            q = func_8012C588(0x30B, o);
+            if (q != 0) {
+                FaceHelper(o, &D_sc06_030_80185D70, &v);
+                AF(q, s16, 6) = AF(q, s16, 0x88) = v.x;
+                AF(q, s16, 0xA) = AF(q, s16, 0x8A) = v.y;
+                AF(q, s16, 0xE) = AF(q, s16, 0x8C) = v.z;
+                AF(q, s32, 0x10) = (D_sc06_030_80185B18[D_sc06_030_80185B6C[AF(o, s32, 0xEC)]] - AF(q, s16, 6)) << 11;
+                AF(q, s32, 0x14) = (-0x182 - AF(q, s16, 0xA)) << 11;
+                AF(q, s32, 0x18) = (D_sc06_030_80185B18[D_sc06_030_80185B6C[AF(o, s32, 0xEC)] + 1] - AF(q, s16, 0xE)) << 11;
+                func_8002D4C8(0x943, 0);
+            }
+            AF(o, s32, 0xEC)++;
+            if (AF(o, s16, 0x102) >= 0x1000) {
+                AF(o, s16, 0x34) = 4;
+                AF(o, s32, 0x14) = 0;
+                SetScript(o, &D_sc06_030_8019F32C);
+            }
+        }
+        break;
+    case 4:
+        AF(o, s32, 8) += AF(o, s32, 0x14);
+        AF(o, s32, 0x14) += AF(o, s32, 0x48);
+        if (AF(o, s16, 0xA) < -0x3FF) {
+            AF(o, s16, 0x34) = 5;
+            AF(o, s32, 0x1C) = 0x8E;
+        }
+        AF(m, s32, 0x20) = D_sc06_030_8019F89C[AF(o, s32, 0x94) * 2];
+        if (AF(o, s16, 0x84) != 0) {
+            AF(o, s16, 0x84)--;
+        } else {
+            AF(o, s16, 0x84) = 0xF;
+            pos.x = AF(AF(o, u8 *, 0x20), s32, 0x48);
+            pos.y = AF(AF(o, u8 *, 0x20), s32, 0x4C);
+            pos.z = AF(AF(o, u8 *, 0x20), s32, 0x50);
+            SetRotMatrix(&D_800AF630.wsm);
+            SetTransMatrix(&D_800AF648);
+            RotTransPers(&pos, &sxy, &p, &flag);
+            if (flag >= 0 && (u16) (((s16 *)&sxy)[0] + 0x9F) < 0x13F && (u16) (((s16 *)&sxy)[1] + 0x77) < 0xEF) {
+                w = ((((s16 *)&sxy)[0] << 7) + 0x5000) / 320;
+                if (w < 0) {
+                    w = 0;
+                }
+                if (w >= 0x80) {
+                    w = 0x7F;
+                }
+                func_8002D4C8(0x944, (w | 0x2000) & 0xFFFF);
+            }
+        }
+        break;
+    case 5:
+        if (--AF(o, s32, 0x1C) == 0) {
+            AF(o, s16, 0x34) = 6;
+            a = (ratan2(-D_80126B66, (s16)D_80126B5E) - 0x200) & 0xFFF;
+            if (a < 0x400) {
+                v.x = 0;
+                v.z = 0x140;
+            } else if (a < 0x800) {
+                v.x = 0x160;
+                v.z = 0;
+            } else if (a < 0xC00) {
+                v.x = 0;
+                v.z = -0x140;
+            } else {
+                v.x = -0x160;
+                v.z = 0;
+            }
+            AF(o, s16, 0xFE) = 0;
+            AF(o, s16, 0xDC) = v.x;
+            AF(o, s16, 0xDE) = AF(o, s16, 6) - v.x;
+            AF(o, s16, 0xE0) = -0x182;
+            AF(o, s16, 0xE2) = AF(o, s16, 0xA) + 0x182;
+            AF(o, s16, 0xE4) = v.z;
+            AF(o, s16, 0xE6) = AF(o, s16, 0xE) - v.z;
+        }
+        AF(m, s32, 0x20) = D_sc06_030_8019F89C[AF(o, s32, 0x94) * 2];
+        if (AF(o, s16, 0x84) != 0) {
+            AF(o, s16, 0x84)--;
+        } else {
+            AF(o, s16, 0x84) = 0xF;
+            pos.x = AF(AF(o, u8 *, 0x20), s32, 0x48);
+            pos.y = AF(AF(o, u8 *, 0x20), s32, 0x4C);
+            pos.z = AF(AF(o, u8 *, 0x20), s32, 0x50);
+            SetRotMatrix(&D_800AF630.wsm);
+            SetTransMatrix(&D_800AF648);
+            RotTransPers(&pos, &sxy, &p, &flag);
+            if (flag >= 0 && (u16) (((s16 *)&sxy)[0] + 0x9F) < 0x13F && (u16) (((s16 *)&sxy)[1] + 0x77) < 0xEF) {
+                w = ((((s16 *)&sxy)[0] << 7) + 0x5000) / 320;
+                if (w < 0) {
+                    w = 0;
+                }
+                if (w >= 0x80) {
+                    w = 0x7F;
+                }
+                func_8002D4C8(0x944, (w | 0x2000) & 0xFFFF);
+            }
+        }
+        break;
+    case 6:
+        AF(AF(o, u8 *, 0x20), s16, 0x12) += func_8012BA10(o, 8);
+        AF(o, s16, 0xFE) += 0x20;
+        AF(m, s32, 0x20) = D_sc06_030_8019F89C[AF(o, s32, 0x94) * 2];
+        if (AF(o, s16, 0x84) != 0) {
+            AF(o, s16, 0x84)--;
+        } else {
+            AF(o, s16, 0x84) = 0xF;
+            pos.x = AF(AF(o, u8 *, 0x20), s32, 0x48);
+            pos.y = AF(AF(o, u8 *, 0x20), s32, 0x4C);
+            pos.z = AF(AF(o, u8 *, 0x20), s32, 0x50);
+            SetRotMatrix(&D_800AF630.wsm);
+            SetTransMatrix(&D_800AF648);
+            RotTransPers(&pos, &sxy, &p, &flag);
+            if (flag >= 0 && (u16) (((s16 *)&sxy)[0] + 0x9F) < 0x13F && (u16) (((s16 *)&sxy)[1] + 0x77) < 0xEF) {
+                w = ((((s16 *)&sxy)[0] << 7) + 0x5000) / 320;
+                if (w < 0) {
+                    w = 0;
+                }
+                if (w >= 0x80) {
+                    w = 0x7F;
+                }
+                func_8002D4C8(0x944, (w | 0x2000) & 0xFFFF);
+            }
+        }
+        if (AF(o, s16, 0xFE) == 0x5C0) {
+            SetScript(o, &D_sc06_030_8019F644);
+        }
+        if (AF(o, s16, 0xFE) >= 0x800) {
+            AF(o, s16, 0x34) = 7;
+        }
+        AF(o, s16, 6) = AF(o, s16, 0xDC) + (((rcos(AF(o, s16, 0xFE)) + 0x1000) * AF(o, s16, 0xDE)) >> 13);
+        AF(o, s16, 0xA) = AF(o, s16, 0xE0) + (((rcos(AF(o, s16, 0xFE)) + 0x1000) * AF(o, s16, 0xE2)) >> 13);
+        AF(o, s16, 0xE) = AF(o, s16, 0xE4) + (((rcos(AF(o, s16, 0xFE)) + 0x1000) * AF(o, s16, 0xE6)) >> 13);
+        break;
+    case 7:
+        if (AF(o, s16, 0x98) == 0) {
+            AF(o, s16, 2) = 2;
+            AF(m, s32, 4) |= 0x80000000;
+            AF(o, s32, 0x1C) = 0x1E;
+            AF(o, s16, 0xFC) = 1;
+            SetScript(o, &D_sc06_030_8019EC8C);
+        } else {
+            AF(m, s32, 0x20) = D_sc06_030_8019F9C4[AF(o, s32, 0x94) * 2];
+        }
+        break;
+    }
+    AF(m, s16, 8) = AF(o, s16, 6);
+    AF(m, s16, 0xA) = AF(o, s16, 0xA);
+    AF(m, s16, 0xC) = AF(o, s16, 0xE);
+    AF(m, s16, 0xA) += 0x10;
+    AF(m, s16, 0x10) = AF(AF(o, u8 *, 0x20), s16, 0x10);
+    AF(m, s16, 0x12) = AF(AF(o, u8 *, 0x20), s16, 0x12);
+    AF(m, s16, 0x14) = AF(AF(o, u8 *, 0x20), s16, 0x14);
+    AF(o, s16, 0x104) = (s16)(AF(o, s16, 0x104) + 0x20) % 160;
+    LoadImage((s32) &D_sc06_030_80185AA8, (s32) (AF(o, s16, 0x104) + &D_sc06_030_80185928));
+}
 
 void func_sc06_030_8017EEF0(u8 *o) {
     SV8 v;
