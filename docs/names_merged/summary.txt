@@ -1,0 +1,122 @@
+parsed rows: 4370; unique (scope,address,name): 4357; family shapes: 282
+skipped: names_stage_engine_proposals.md: no address: 46
+skipped: names_stage_engine_proposals.md: unsplittable multi-address row: 9
+skipped: object_struct.md: struct field rows (not names): 788
+skipped: r271:abil_packages.md:2734: proposed not an identifier: 1
+skipped: r271:abil_packages.md:2735: proposed not an identifier: 1
+skipped: r271:abil_packages.md:2737: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:551: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:582: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:591: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:603: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:672: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:674: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:685: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:686: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:687: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:699: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:701: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:703: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:711: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:712: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:713: proposed not an identifier: 1
+skipped: r274:names_exe_proposals.md:714: proposed not an identifier: 1
+skipped: structs_2.md: struct field rows (not names): 395
+dropped (already named): 0; superseded by ruling: 69
+needs ruling: 16
+exe_H: 467
+exe_MM: 306
+engine_H: 508
+engine_ML: 1248
+stage_H: 631
+stage_ML: 545
+abil_H: 267
+abil_ML: 6
+ovl_H: 290
+ovl_ML: 4
+scope abil: H 267, M 6
+scope engine: H 509, L 259, M 990
+scope exe: H 468, L 48, M 259
+scope ovl: H 302, M 4
+scope stage: H 631, L 15, M 530
+same-address conflicts: 71 (resolved 69)
+  engine 0x801270C0: WorldAnimMode / g_UpdateAllActors -> g_WorldAnimMode
+  engine 0x80128EA8: SpriteAnim_Start / StartSpriteAnim -> StartSpriteAnim
+  engine 0x80128ED8: SpriteAnim_Step / StepSpriteAnim -> StepSpriteAnim
+  engine 0x8012A2F4: Camera_UnlockHeight / ClearCameraHeightLimit -> ClearCameraHeightLimit
+  engine 0x8012A304: Camera_LockHeight / SetCameraHeightLimit -> SetCameraHeightLimit
+  engine 0x8012A62C: CameraEaseFrom / StartCameraBlendFrames -> StartCameraBlendFrames
+  engine 0x8012EF34: ProjectPointZ / ProjectWorldPointZ -> ProjectPointZ
+  engine 0x8012EFB8: ProjectPoint / ProjectWorldPoint -> ProjectPoint
+  engine 0x8013C9C4: StartCameraShake / StartRumbleSequence -> StartCameraShake
+  engine 0x80146750: AllocObj68High / SpawnObj68Upper -> SpawnObj68Upper
+  engine 0x8014680C: AllocObj68Low / SpawnObj68Lower -> SpawnObj68Lower
+  engine 0x80146EC0: PlaceAtModelPointCam / PlaceAtObjPoint -> PlaceAtObjPoint
+  engine 0x80147364: PlaySePositional / SoundCommand -> PlaySePositional
+  engine 0x801487F4: GetObjPadHeld / Pad_Held -> GetObjPadHeld
+  engine 0x80148800: GetObjPadPressed / Pad_Pressed -> GetObjPadPressed
+  engine 0x80148AFC: FaceStickDir / Pad_FaceStick -> FaceStickDir
+  engine 0x80148E54: GetObjStickAngle / Pad_StickAngle -> GetObjStickAngle
+  engine 0x801493D0: Actor_ModelPointToPos / ObjLocalToWorld16To -> ObjLocalToWorld16To
+  engine 0x801498E0: Technique3Attack / TryEC0Mode3Swing -> Technique3Attack
+  engine 0x80149954: Technique4HoldAttack / TryEC0Mode4Swing -> Technique4HoldAttack
+  engine 0x80149D10: CheckEC0ModePower / CheckTechniqueTrigger -> CheckTechniqueTrigger
+  engine 0x80149FB0: ToggleEC0BitOnSelect / ToggleSelectionBit7 -> ToggleSelectionBit7
+  engine 0x8014A59C: ChargeGauge / UpdateChargeGauge -> UpdateChargeGauge
+  engine 0x8014AA04: SetEC0Mode / SetLuminaSelection -> SetLuminaSelection
+  engine 0x8014AC10: DeleteEffectsOfKind / FreeEffectsByKind -> FreeEffectsByKind
+  engine 0x8014ACC0: SpendEC0ModeTime / SpendTechniqueTime -> SpendTechniqueTime
+  engine 0x8014B2F8: CurePoison / Stats_CurePoison -> CurePoison
+  engine 0x8014B33C: SetPoisonWord / Stats_SetPoison -> SetPoisonWord
+  engine 0x8014B944: AddWakeGauge / Stats_AddMeterEA4 -> AddWakeGauge
+  engine 0x8014BB24: AddHp / Stats_AddHP -> AddHp
+  engine 0x8014C168: FindActorByKind / FindActorByKindAny -> FindActorByKindAny
+  engine 0x8014C3A4: Actor_GiveHit / StrikeActorFacing -> StrikeActorFacing
+  engine 0x8014C3D0: Actor_HitFromSource / StrikeActorToward -> StrikeActorToward
+  engine 0x8014C4AC: Actor_SendHit / StrikeActor -> StrikeActor
+  engine 0x8014C5FC: GetPitchToObjOffset / PitchToward -> GetPitchToObjOffset
+  engine 0x8014CB7C: IsSteelActive / PlayerFlag800 -> IsSteelActive
+  engine 0x80155FD4: RunAttackHitSet2 / SwordHitAbility -> RunAttackHitSet2
+  engine 0x80155FF8: RunAttackHit / SwordHitCheck -> RunAttackHit
+  engine 0x80156370: RollDamage / RollHitDamage -> RollDamage
+  engine 0x801619A4: GetActiveEC0Mode / GetActiveTechnique -> GetActiveTechnique
+  engine 0x801619D0: IsEC0Mode3 / IsTechnique3Active -> IsTechnique3Active
+  engine 0x80161A00: IsEC0Mode4 / IsTechnique4Active -> IsTechnique4Active
+  engine 0x80161A30: IsEC0Mode5 / IsTechnique5Active -> IsTechnique5Active
+  engine 0x80161A60: IsEC0Mode6 / IsTechnique6Active -> IsTechnique6Active
+  engine 0x80161A90: TickEC0Mode6Timer / TickGlideTimer -> TickGlideTimer
+  engine 0x80162F08: AccelClamped / AddObj68Accel -> AddObj68Accel
+  engine 0x80163194: AccelAlongMatrix / AddObj68AccelByMatrix -> AddObj68AccelByMatrix
+  engine 0x801632F0: GetSweepHitResult / Sweep_FirstResult -> GetSweepHitResult
+  engine 0x80165624: Ability_CannotAfford / LacksAbilityBp -> LacksAbilityBp
+  engine 0x80165718: Ability_EndOnHit / DropTimedAbility -> DropTimedAbility
+  engine 0x80165770: Ability_ResumeHop / EndAbility12 -> NEEDS A RULING
+  engine 0x801657A0: Ability_SaveStats / SaveStatusOnce -> SaveStatusOnce
+  engine 0x80165840: Ability_RestoreStats / RestoreStatusOnce -> RestoreStatusOnce
+  engine 0x8016629C: SpawnDustB / SpawnFootPuff -> SpawnDustB
+  exe 0x80013328: Distance3D / PosDist -> PosDist
+  exe 0x80013B64: RotateVecZ / RotateVectorZ -> RotateVectorZ
+  exe 0x80013E94: PackAngles10 / PackVec10 -> PackAngles10
+  exe 0x8001599C: CopyVec / CopyVec3 -> CopyVec
+  exe 0x800167F0: FadeDone / FadeStep -> FadeStep
+  exe 0x80016ED4: DrawPrimFT4Screen / DrawStackFT4Screen -> DrawPrimFT4Screen
+  exe 0x800174DC: DrawPrimGT3Screen / DrawStackGT3Screen -> DrawPrimGT3Screen
+  exe 0x800178EC: DrawPrimGT4Screen / DrawStackGT4Screen -> DrawPrimGT4Screen
+  exe 0x8001C2C4: InitModelEmpty / InitNullModel -> InitNullModel
+  exe 0x80029178: GetFlag / TestGameFlag -> GetFlag
+  exe 0x80029204: GetGameWord / GetVar32 -> GetVar32
+  exe 0x8002D4C8: PlaySound / SoundRequest -> PlaySound
+  exe 0x800C7C74: g_BufferIndex / g_DrawBufferIndex -> g_BufferIndex
+  ovl:36 0x800CFBCC: RequestFieldFileLoad / RequestPicture -> RequestPicture
+  ovl:36 0x800D1E28: StartExitFade / StartMapChangeFade -> StartMapChangeFade
+  ovl:36 0x800D1EBC: ExitFadeDone / StepMapChangeFade -> StepMapChangeFade
+  ovl:36 0x800D2318: AnglesFromPackedDir / Effect_AnglesFromPacked -> NEEDS A RULING
+flag counts in needs_ruling:
+      9 e:function not CamelCase
+      3 e:global without g_ / not CamelCase
+      2 b:local name equals a proposed global name
+      1 a:same address, other names AnglesFromPackedD
+      1 a:same address, other names EndAbility12
+      1 a:same address, other names Effect_AnglesFrom
+      1 a:same address, other names Ability_ResumeHop
+      1 f:PsyQ-like prefix (warning)

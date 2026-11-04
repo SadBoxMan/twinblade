@@ -1,0 +1,7 @@
+address,scope,current,proposed,confidence,source,note
+0x800CB018,abil:ovl13,func_ovl13_800CB018,Stun_Cleanup,M,r271:abil_packages.md:2548,e:package prefix Pkg_Name (r271 convention; one ruling)
+0x800CAF7C,abil:ovl17,func_ovl17_800CAF7C,Sleepy_Cleanup,M,r271:abil_packages.md:2599,e:package prefix Pkg_Name (r271 convention; one ruling)
+0x800CC580,abil:ovl19,D_ovl19_800CC580,Shrink_LightSet,M,r271:abil_packages.md:2613,e:local data without g_ (one ruling)
+0x800CB148,abil:ovl1a,func_ovl1a_800CB148,Hop_Cleanup,M,r271:abil_packages.md:2618,e:package prefix Pkg_Name (r271 convention; one ruling)
+0x800CB804,abil:ovl2d,func_ovl2d_800CB804,Homing_SparkUpdate,M,r271:abil_packages.md:2781,e:package prefix Pkg_Name (r271 convention; one ruling)
+0x800CBC60,abil:ovl2d,func_ovl2d_800CBC60,Homing_TrailUpdate,M,r271:abil_packages.md:2782,e:package prefix Pkg_Name (r271 convention; one ruling)

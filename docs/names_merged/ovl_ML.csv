@@ -1,0 +1,5 @@
+address,scope,current,proposed,confidence,source,note
+0x800D1658,ovl:36,func_800D1658,DiscardItemSlot,M,r271:mode_overlays.md:1332,
+0x800D2AD8,ovl:39,func_800D2AD8,DecDCTGetEnv,M,r271:mode_overlays.md:1504,f:PsyQ-like prefix (warning)
+0x800D2B64,ovl:39,func_800D2B64,DecDCTPutEnv,M,r271:mode_overlays.md:1505,f:PsyQ-like prefix (warning)
+0x800D2C00,ovl:39,func_800D2C00,DecDCTBufSize,M,r271:mode_overlays.md:1506,f:PsyQ-like prefix (warning)

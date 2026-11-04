@@ -1,0 +1,283 @@
+family,first_stage,address,proposed,confidence,source,purpose
+P01,sc01_004,0x8017CDB4 / 0x8017CF34 / 0x8017CFE4,RoomEntrySteps / RoomExitSteps / RoomSteps3,M,r275:stage_survey.md:170,`table[+0x15](obj)`; which table is which sequence is data
+P01,sc01_004,0x8017CDF0,RoomEntryStart,H,r275:stage_survey.md:171,"entry walk script, StartFade(0), step + 1"
+P01,sc01_004,0x8017CE34,RoomFadeDone,H,r275:stage_survey.md:172,FadeDone(0) != 0
+P01,sc01_004,0x8017CE58 / 0x8017D020,RoomEntryWalk / RoomEntryWalk2,M,r275:stage_survey.md:173,"a walk script, timer 10, step + 1"
+P01,sc01_004,0x8017CE98,RoomExitStart,H,r275:stage_survey.md:174,"timer, sound commands 0x1C / 0x1D, SoundCmd1(1), StartExitFade"
+P01,sc01_004,0x8017CF70,RoomExitStartKeepSound,M,r275:stage_survey.md:175,the same without SoundCmd1
+P01,sc01_004,0x8017CF14,RoomExitFadeDone,H,r275:stage_survey.md:176,ExitFadeDone()
+P01,sc01_004,0x8017D13C / 0x8017D164 / 0x8017D18C,StartEntryWalk1 / 2 / 3,M,r275:stage_survey.md:177,"StartPlayerActionScript(D_..., 0x01000000)"
+F001,sc01_004,0x8017D308,OpenStageMenu,H,r275:stage_survey.md:336,"g_StageMode 3, frame hook"
+F001,sc01_004,0x8017D35C,CloseStageMenu,H,r275:stage_survey.md:337,frame hook = StageFrame
+F001,sc01_004,0x8017D41C,MenuPageInit,M,r275:stage_survey.md:338,"func_800D24A0(4), page build"
+F001,sc01_004,0x8017D4A4,MenuBuildPage,H,r275:stage_survey.md:339,"page tables, owned-item categories"
+F001,sc01_004,0x8017D758,MenuFillNames,H,r275:stage_survey.md:340,strcpy item names
+F001,sc01_004,0x8017D964,MenuRunPage,H,r275:stage_survey.md:341,input + draw + message
+F001,sc01_004,0x8017DAB4,MenuWaitMessage,M,r275:stage_survey.md:342,confirm closes / back
+F001,sc01_004,0x8017DC38,MenuInput,H,r275:stage_survey.md:343,"pad, cursor repeat, sounds"
+F001,sc01_004,0x8017DF18,MenuDraw,H,r275:stage_survey.md:344,"DrawMessage0, DrawChoiceCursor"
+F001,sc01_004,0x8017E3A0,MenuLineText,H,r275:stage_survey.md:345,line text + grey colour
+F001,sc01_004,0x8017E5B8,MenuHelpText,M,r275:stage_survey.md:346,per-page message pointer
+F001,sc01_004,0x8017EB30,MenuSelect,H,r275:stage_survey.md:347,"page actions, refusals"
+F001,sc01_004,0x8017EF8C,MenuEntryLocked,M,r275:stage_survey.md:348,var tests
+F002,sc01_005,0x80180010,HostStartFirstEvent,H,r275:stage_survey.md:359,"SetProgress(0xA), flags 0x125-0x128 = 0, StartEvent"
+F002,sc01_005,0x801800C0,HostRunFirstEvent,H,r275:stage_survey.md:360,"signal flags -> player moves, Start skip, SetProgress(2)"
+F002,sc01_005,0x801803AC,HostEventExit,H,r275:stage_survey.md:361,"SetProgress(2), RequestMapChange"
+F002,sc01_005,0x80180808,RestInit,H,r275:stage_survey.md:362,progress < 5 or 0x294: AddHp / AddBp 999
+F002,sc01_005,0x8017FD50,DrawRestOverlay,M,r275:stage_survey.md:363,AllocPrim full-screen colour quads
+F002,sc01_005,0x8018041C,HostStartSecondEvent,H,r275:stage_survey.md:364,StartEvent(D_801BC348)
+F002,sc01_005,0x801812B0,DisplayInit,H,r275:stage_survey.md:365,"item model D_801C339C[n], opened bit 0x20"
+F002,sc01_005,0x8018165C,DisplayTalk,H,r275:stage_survey.md:366,message D_801C37D4[n]
+F002,sc01_005,0x80181894,DisplayUnwrap,H,r275:stage_survey.md:367,"parts fly off, scale up, sound 0xC86, SetVar bit 0x20"
+F002,sc01_005,0x80181B00,DisplayPlaySound,M,r275:stage_survey.md:368,SoundRequest(id) per item
+F002,sc01_005,0x8017F790,RoomMusicCheck,M,r275:stage_survey.md:369,"GetVar(0x7E), SoundCmd1(1)"
+F014,sc02_000,0x80183FC8,BoulderInit,H,r275:stage_survey.md:425,"AllocActorModel, three starts by D_800B9A0E"
+F014,sc02_000,0x80184BD8,BoulderRoll,H,r275:stage_survey.md:426,"spin, bounce, HitPlayerFatal when it reaches Musashi, rumble 0x4E2"
+F014,sc02_000,0x8018419C,BoulderShakeWait,H,r275:stage_survey.md:427,"periodic StartCameraShake, counter -> next state"
+F014,sc02_000,0x80185C48,BoulderPathTest,M,r275:stage_survey.md:428,CollidePath along its motion
+F014,sc02_000,0x8018623C,BoulderSound,H,r275:stage_survey.md:429,"SoundRequest(id & 0xFFFF, arg & 0xFFFF)"
+F014,sc02_000,0x80183814,EventRunToExit,H,r275:stage_survey.md:430,"camera modes by z, messages by z, RequestMapChange(D_8018EA48)"
+F014,sc02_000,0x80183A80,ShowRunMessage,H,r275:stage_survey.md:431,"OpenMessage at z marks D_8018EDD0, sounds 0x5A1/0x5F1/0x5F2"
+F014,sc02_000,0x80183310,EventDropIn,M,r275:stage_survey.md:432,"Musashi placed high and falls (SetEffectAccel), HUD"
+F014,sc02_000,0x80186530,RestoreOrbUpdate,H,r275:stage_survey.md:433,"glows while D_801270C8, starts heal action near Musashi"
+F014,sc02_000,0x80186764,RestoreOrbInit,H,r275:stage_survey.md:434,"two models, script D_8018AF28"
+F014,sc02_000,0x80182894,EventRestoreHpBp,H,r275:stage_survey.md:435,"WalkToPoint, FillHp, FillBp, SetFlag80"
+F014,sc02_000,0x80186AE4,FloorSwitchUpdate,H,r275:stage_survey.md:436,D_801270C8 = 1 while Musashi or kind 0x2F stands on it
+F014,sc02_000,0x801869CC,FloorSwitchEvent,H,r275:stage_survey.md:437,StartEvent(D_8018F33C) once
+F014,sc02_000,0x80186D88,SmashableWaitBoulder,H,r275:stage_survey.md:438,"breaks when the boulder passes, sound 0x4DC"
+F014,sc02_000,0x80187988,FragmentInit,M,r275:stage_survey.md:439,"random velocities, three models"
+F014,sc02_000,0x8018825C,FleeingCreatureRun,M,r275:stage_survey.md:440,"runs ahead, spawns 0x3F copies, knocked away by the boulder (0x6AA)"
+F014,sc02_000,0x80188F60,SparkleSoundUpdate,M,r275:stage_survey.md:441,sound 0x4CF volume/pan from Musashi's heading
+F014,sc02_000,0x80181820,CameraRoomStart,H,r275:stage_survey.md:442,"camera targets, SetCameraUpdate, SnapCamera"
+F023,,0x8018ECE4,RescueNpcInit,H,r275:stage_survey.md:492,"SetupActor, talk marker by flag, SpawnActorArg(0x8F)"
+F023,,0x8018EDE8,RescueNpcTalk,H,r275:stage_survey.md:493,"sets its flag, RunScript"
+F023,,0x8018EF34,RescueNpcTalkEnd,H,r275:stage_survey.md:494,"flag 0x54 -> SetProgress(0x5A), SetFlag(0xEA)"
+F023,,0x8018F138,CountRescued,H,r275:stage_survey.md:495,counts set flags of the table
+F045,,0x80183084,SoldierInit,M,r275:stage_survey.md:537,"SetupActor by subtype, SpawnShadow"
+F045,,0x801832A8,SoldierPatrol,M,r275:stage_survey.md:538,"home walk, TargetInSight, 0xA9B"
+F045,,0x8018365C,SoldierChase,M,r275:stage_survey.md:539,TargetInFront -> attack states
+F045,,0x80184A94,SoldierAttackHit,M,r275:stage_survey.md:540,"segment hit, 0xCB2, SetGrabReaction"
+F045,,0x80184B6C,SoldierThrow,M,r275:stage_survey.md:541,"SpawnActor 0x19F / 0x1A7, 0xCB3"
+F045,,0x801840FC,SoldierDeathPuff,M,r275:stage_survey.md:542,"SpawnKind205 puffs, 0xCBA, FreeActor"
+F067,,0x8017EF30,VillagerTalkCheck,M,r275:stage_survey.md:631,"DistSqToPlayer + ResetScriptVM, talk-marker handler"
+F067,,0x80180B5C,VillagerAppearAt,M,r275:stage_survey.md:632,PlaceObject + ShowModel + SetScript + start path
+F067,,0x80180D9C,VillagerTalkOnceFlag,H,r275:stage_survey.md:633,"GetFlag(0x110) / SetFlag(0x110, 1)"
+F067,,0x80181300,VillagerPickStateByProgress,M,r275:stage_survey.md:634,"progress 0xC8, chapter index"
+F067,,0x80181394,VillagerResetStats,M,r275:stage_survey.md:635,ClearStatsWords + sound 0x464
+F067,,0x801815A0,VillagerInit,M,r275:stage_survey.md:636,func_8018727C model + clock tests + SpawnTalkMarker
+F067,,0x80182058,VillagerTalkCheckFar,M,r275:stage_survey.md:637,"DistSqToPlayer, ResetScriptVM, 35 lines"
+F067,,0x80182704,VillagerWalkHome,M,r275:stage_survey.md:638,door open (func_801886A0) + path steps (func_80187A64)
+F067,,0x8018247C,VillagerEventEnd,H,r275:stage_survey.md:639,IsEventDone / EndEvent / SetScript
+F068,,0x8017BF50,SpawnPointList,H,r275:stage_survey.md:650,up to 16 SpawnFromDef(0x158) / SpawnProp(0x11) from +0xDC list
+F068,,0x8017E578,RoomExitStep,H,r275:stage_survey.md:651,P01-style exit with SoundCmd1(1)
+F068,,0x8017EA58,CameraPadControl,M,r275:stage_survey.md:652,GetObjPadHeld / Pressed
+F068,,0x8018727C,VillagerAllocModel,H,r275:stage_survey.md:653,"model from def, link door kind 0x61 by def +0x12"
+F068,,0x8018739C,PlayerInDoorFront,H,r275:stage_survey.md:654,"WorldToActorLocal + IsInArea(-0xC0..0x40, -0x60..0) of the linked door"
+F068,,0x8018766C,HourInRange,H,r275:stage_survey.md:655,"D_80078EB1 (hour) in [a, b)"
+F068,,0x80187690,ClockInRange,H,r275:stage_survey.md:656,"hh:mm in [t0, t1)"
+F068,,0x80187750,SetVillagerShadow,M,r275:stage_survey.md:657,"+0x58 = shadow def, +0x5C = 0x800"
+F068,,0x80187778,VillagerHideAt,H,r275:stage_survey.md:658,HideModel + PlaceObject
+F068,,0x801877C0,GetChapterIndex,H,r275:stage_survey.md:659,progress thresholds 0x14/0x46/0x64/0x82 -> 0-4
+F068,,0x80187904,GetLateChapterIndex,H,r275:stage_survey.md:660,thresholds 0x3B6/0x3E8/0x44C/0x4B0 -> 0-4
+F068,,0x80187960,FixProgress3A2,H,r275:stage_survey.md:661,progress 0x3A2 -> 0x3AC
+F068,,0x80187A64,VillagerPathStep,H,r275:stage_survey.md:662,"walk point list fwd / back, 8x when PlayerFlag80B"
+F068,,0x80187C2C,DoorBlockedByPlayer,L,r275:stage_survey.md:663,PlayerActionBlocksInput / PlayerFlag80B
+F068,,0x80187F84,DoorInit,H,r275:stage_survey.md:664,"model per door index, talk handler"
+F068,,0x80187DAC,DoorUpdate,M,r275:stage_survey.md:665,open / close requests
+F068,,0x801881A0,DoorOpen,H,r275:stage_survey.md:666,"angle to 0x600, sound 0x514"
+F068,,0x8018828C,DoorClose,H,r275:stage_survey.md:667,sound 0x515
+F068,,0x801886A0,RequestDoorOpen,H,r275:stage_survey.md:668,"FindActorByKindArg(0x61, n), +0x108 = 1"
+F068,,0x80188124,DoorTalkRun,H,r275:stage_survey.md:669,"func_80188830 script, event end"
+F068,,0x80188BFC,SnapToNearestDoor,H,r275:stage_survey.md:670,nearest kind-0x61 actor to Musashi
+F068,,0x80186DDC,KeyGateInit,H,r275:stage_survey.md:671,"leaves +-0x600, flag 0xF6, progress 0xE6"
+F068,,0x80187004,KeyGateOpen,H,r275:stage_survey.md:672,"sound 0x7A0, SetFlag(0xF6), TakeItem(0x59)"
+F068,,0x801870B0,KeyGateTalk,M,r275:stage_survey.md:673,"two scripts, IsEventDone"
+F069,,0x80188FDC,ShopOpen,M,r275:stage_survey.md:684,func_800D24A0 + ShopBuildList
+F069,,0x80189030,ShopBuildList,H,r275:stage_survey.md:685,"goods by shop type, flag unlocks"
+F069,,0x801898E4,ShopFormatEntry,M,r275:stage_survey.md:686,"strcpy x8, BCD prices, flags 0xFB / 0x9B"
+F069,,0x8018A3A8,ShopMenuMain,M,r275:stage_survey.md:687,"answers, item icons, sounds"
+F069,,0x8018ABAC,InnRest,H,r275:stage_survey.md:688,AddHp + AddBp + ClearStatsWords
+F069,,0x8018AEE8,ShopCursorMove,H,r275:stage_survey.md:689,"pad dirs, sounds 0x473 / 0x45A"
+F069,,0x8018B238,ShopDraw,H,r275:stage_survey.md:690,DrawMessage0 + DrawChoiceCursor
+F069,,0x8018B8DC,ShopSetCounts,H,r275:stage_survey.md:691,GetVar item counts -> SetMessageNumber
+F069,,0x8018D0E4,GiveFlagItem,M,r275:stage_survey.md:692,"GetVar id, SetFlag, PutItem / TakeItem"
+F071,,0x8017F1F0,ClockWindowFade,H,r275:stage_survey.md:707,"minutes-of-day window, 16-minute fade, -1 outside"
+F071,,0x8017F750,DrawWindowLightAlt,M,r275:stage_survey.md:708,quad type 0x200
+F071,,0x8017F804,BirdSpawnerUpdate,H,r275:stage_survey.md:709,"hour 7-19, SpawnActorArg(0x140)"
+F071,,0x8017FC00,UpdateAmbientSound,H,r275:stage_survey.md:710,sound 0x7E6 pan / volume
+F071,,0x80180224,SpritePropInit,M,r275:stage_survey.md:711,AllocActorSprite + anim
+F071,,0x801804D0,PropInitByProgress,H,r275:stage_survey.md:712,absent for progress 0x181-0x1D5
+F082,sc03_014,0x80184A08,FightTrigger,H,r275:stage_survey.md:777,"events by flag 0x8B, sets flag 0xB9, SoundCmd1(0), sound 0xBD8"
+F082,sc03_014,0x80184F14,FightPhase1,H,r275:stage_survey.md:778,"6 hits -> SetProgress(0x2C6), sound 0x8B5"
+F082,sc03_014,0x80185180,FightPhase2,H,r275:stage_survey.md:779,"progress >= 0x2D0, kind 0x265 waves, event D_80190078"
+F082,sc03_014,0x80185380,FightPhase3End,H,r275:stage_survey.md:780,"linked HP <= 0 -> event, SetProgress(0x2DA)"
+F082,sc03_014,0x801856C4,FightActorGate,H,r275:stage_survey.md:781,progress < 0x2BC
+F082,sc03_014,0x801874C0,AttackerSweep,H,r275:stage_survey.md:782,"sounds 0xA7F / 0xA80 / 0xA89, three damage segments, kind 0x3DE"
+F082,sc03_014,0x80183D50,SetPieceSelectMap,M,r275:stage_survey.md:783,"RelocateSeqBlock x3, flag test, SelectCollisionMap x2"
+F089,sc03_089,0x80183CE8,TrackNearestSources,M,r275:stage_survey.md:821,two nearest of four kinds -> SetSeqPoint 1 / 2
+F089,sc03_089,0x8018406C,DiverInit,M,r275:stage_survey.md:822,"SetupActor, spawn companion 0x178"
+F089,sc03_089,0x801841E8,DiverWander,M,r275:stage_survey.md:823,"pitch heading, MoveCollidePassable"
+F089,sc03_089,0x801844C8,DiverDive,M,r275:stage_survey.md:824,"turn, 0x6FF, swoop, return"
+F089,sc03_089,0x80184D7C,BombInit,M,r275:stage_survey.md:825,"model + sprite, parent serial"
+F089,sc03_089,0x80184F98,BombFall,H,r275:stage_survey.md:826,"landing -> 0x1AA + 8 x 0x1B0, 0x705"
+F089,sc03_089,0x801855BC,BlastRingInit,M,r275:stage_survey.md:827,"model, script"
+F089,sc03_089,0x80185678,BlastRingGrow,M,r275:stage_survey.md:828,"scale up / hold / shrink, hit test"
+F089,sc03_089,0x801858BC,DebrisInit,M,r275:stage_survey.md:829,"random velocity, gravity"
+F093,,0x8017EF3C,ChainBugInit,H,r275:stage_survey.md:864,switch over variant: head / segment / projectile / spawner set-ups
+F093,,0x801805BC,ChainBugMain,M,r275:stage_survey.md:865,ACTOR-MAIN
+F093,,0x8017FCF0,ChainBugHeadChase,H,r275:stage_survey.md:866,"turn to target, lunge state 4 when close and in front"
+F093,,0x8017FE24,ChainBugTumble,H,r275:stage_survey.md:867,"wall-bounce heading table, 0x833, settles at random"
+F093,,0x8018087C,ChainBugReturnHome,H,r275:stage_survey.md:868,"walk to +0x88 home, engage when target in sight"
+F093,,0x80180968,ChainBugRearUp,H,r275:stage_survey.md:869,"sinusoid rise, 0x98F"
+F093,,0x80180A9C,ChainBugLunge,M,r275:stage_survey.md:870,"dive forward, re-strike or recover"
+F093,,0x80180CD4,ChainBugSpit,H,r275:stage_survey.md:871,"SpawnActorArg(0x1EA, 0xE) + 0xC5D at count 6"
+F093,,0x80180D98,ChainBugShotFly,H,r275:stage_survey.md:872,projectile move / hit / time-out
+F093,,0x80180E18,ChainBugSpawnerTick,H,r275:stage_survey.md:873,timed head spawn near Musashi
+F093,,0x80181058,ChainBugKeepTwo,H,r275:stage_survey.md:874,spawn a head when fewer than two exist
+F093,,0x80180EB8 / 0x80180F88,ChainBugGrowChain,H,r275:stage_survey.md:875,"spawn next segment, then follow"
+F093,,0x801804D8,SpawnGroundDust,H,r275:stage_survey.md:876,prop 0x7B on the ground every 8 frames
+F093,,0x801805F8,SpawnShotTrail,H,r275:stage_survey.md:877,prop 0x7C at the shot
+F094,,0x8017D9B8,BurstEnemyInit,M,r275:stage_survey.md:891,"SetupActor, shadow"
+F094,,0x8017DCA0 / 0x8017DD78,BurstEnemyChase,H,r275:stage_survey.md:892,"sight / front tests, approach"
+F094,,0x8017E888,SpawnBurstRing,H,r275:stage_survey.md:893,20 x SpawnShadowBAt + 0x521
+F094,,0x8017E9CC,BurstHitPlayer,H,r275:stage_survey.md:894,radius test + HitPlayer
+F094,,0x8017E960,SwingHitPlayer,H,r275:stage_survey.md:895,ActorSegmentDamagesPlayer once per swing
+F094,,0x8017EB04,ChooseAttackKind,H,r275:stage_survey.md:896,flag 0x20 by GetStatsWord94 / rand
+F094,,0x8017EB70,MoveAndSeparate,H,r275:stage_survey.md:897,MoveOnGround + push off other actors
+F094,,0x8017E668 / 0x8017E7C0,BurstEnemyDie,H,r275:stage_survey.md:898,"blink, DropItem 1/32, free"
+F096,,0x8017F0B0,HopperMain,H,r275:stage_survey.md:923,dispatcher + IsActorFar despawn
+F096,,0x8017F140,HopperInit,H,r275:stage_survey.md:924,"SetupActor, sprite, variant bits"
+F096,,0x8017F2E8,HopperWander,H,r275:stage_survey.md:925,"hop, turn at walls"
+F096,,0x8017F640,HopperApproach,H,r275:stage_survey.md:926,"approach, leap at < 0x4001"
+F096,,0x8017F788,HopperAimLeap,H,r275:stage_survey.md:927,"HeadingPitchTo Musashi, fast forward"
+F096,,0x8017FD08,HopperWaitAmbush,H,r275:stage_survey.md:928,show when Musashi near
+F096,,0x8017FD64,HopperDropIn,H,r275:stage_survey.md:929,"land, 0x832 panned"
+F096,,0x8017FEE4,HopperHurt,H,r275:stage_survey.md:930,"hit kind switch, TakeDamage"
+F096,,0x80180A84,SpawnDeathPuffs,H,r275:stage_survey.md:931,5 x kind 0x33
+F099,sc03_118,0x80183D68,AbilityGateEvent,H,r275:stage_survey.md:965,"flag 0x8B, stats 3, SetFlag(0xB8), SpawnActor(0x249)"
+F099,sc03_118,0x80184430,CameraScriptedPath,M,r275:stage_survey.md:966,camera mode set by the gate
+F099,sc03_118,0x801825EC,HitTriggerEvent,H,r275:stage_survey.md:967,hit kinds -> event D_8018E014
+F099,sc03_118,0x80182DC4,EventEndSetProgress1CC,H,r275:stage_survey.md:968,SetProgress(0x1CC)
+F099,sc03_118,0x801845C8,TimedSetProgress276,H,r275:stage_survey.md:969,"SetProgress(0x276), FreeActor"
+F099,sc03_118,0x80188FB0,NearEventSetProgress1D1,H,r275:stage_survey.md:970,"event D_801D09F4, SetProgress(0x1D1)"
+F099,sc03_118,0x80188990,RoamObjKnockBack,M,r275:stage_survey.md:971,"bounce 0x754 / 0x7DF, progress 0x1D7 gate"
+F103,,0x80180FF8,SpinnerInit,M,r275:stage_survey.md:1011,"SetupActor, hidden variant +0x70 bit 0"
+F103,,0x80181248,SpinnerWindUp,M,r275:stage_survey.md:1012,"script, 0x17-frame timer"
+F103,,0x801812BC,SpinnerStartSpin,M,r275:stage_survey.md:1013,"StopWithGravity, heading pick"
+F103,,0x80181310,SpinnerSpin,M,r275:stage_survey.md:1014,"yaw spin, sound 0x662, contact, move"
+F103,,0x801813CC,SpinnerDie,M,r275:stage_survey.md:1015,"script, sound 0x98A"
+F103,,0x801814A8,SpinnerDeathBlink,M,r275:stage_survey.md:1016,"blink, DropItem 1/4, reset"
+F103,,0x8018155C,SpinnerOnHit24,M,r275:stage_survey.md:1017,kind 0x24 hit -> spawn 0x35C
+F103,,0x8018159C,SpinnerMove,M,r275:stage_survey.md:1018,MoveOnGround + bounce rules
+F103,,0x8018175C,SpinnerHitPlayer,H,r275:stage_survey.md:1019,"box test, HitPlayer"
+F103,,0x801818E8,SpinnerPickHeading,M,r275:stage_survey.md:1020,random / target heading
+F103,,0x80181ABC,SpinnerResetOrDespawn,H,r275:stage_survey.md:1021,back to spawn point or DespawnActor
+F104,,0x801822F0,WarpFlashMain,H,r275:stage_survey.md:1033,two state tables by +0x70
+F104,,0x80182374,SparkleInit,M,r275:stage_survey.md:1034,"64 particles, timer"
+F104,,0x80182460,SparkleUpdate,M,r275:stage_survey.md:1035,per-particle steps
+F104,,0x80182564,SparkleRespawn,M,r275:stage_survey.md:1036,random direction / colour
+F104,,0x8018298C,FlashInit,M,r275:stage_survey.md:1037,AllocActorSprite
+F104,,0x80182A38,FlashGrow,H,r275:stage_survey.md:1038,scale to 0x1000
+F104,,0x80182B20,FlashGrowLarge,M,r275:stage_survey.md:1039,"scale to 0x7000, func_80016940(4)"
+F104,,0x80182BA8,FlashHideShowPlayer,M,r275:stage_survey.md:1040,"despawn 0x3AF, hide / show Musashi"
+F104,,0x80182C90,FlashShrinkY,H,r275:stage_survey.md:1041,scale y down
+F104,,0x80182D08,FlashShrinkOut,H,r275:stage_survey.md:1042,"scale x down, DespawnActor"
+F104,,0x80182D78,FlashFlicker,H,r275:stage_survey.md:1043,colour by frame parity
+F106,,0x80182EA0,BlockThrowerInit,M,r275:stage_survey.md:1061,"SetupActor, scale 0x1800, variant"
+F106,,0x80181C20,BlockThrowerStartRoar,L,r275:stage_survey.md:1062,"script, state 2"
+F106,,0x80181C7C,BlockThrowerStartWander,M,r275:stage_survey.md:1063,state 3 or burst
+F106,,0x80181CE8,BlockThrowerStartTurn,M,r275:stage_survey.md:1064,"heading, state 4"
+F106,,0x80181D44,BlockThrowerKnockedOff,M,r275:stage_survey.md:1065,"fall, sound 0x7E5"
+F106,,0x80181F40,BlockThrowerStartBurst,M,r275:stage_survey.md:1066,"state 5, 3 shots"
+F106,,0x801821C4,BlockThrowerLiftBlock,H,r275:stage_survey.md:1067,SpawnActor(0x239) at head
+F106,,0x80182424,BlockThrowerHurt,H,r275:stage_survey.md:1068,TakeDamageAndRecoil
+F106,,0x801828A4,BlockThrowerBreakPiece,H,r275:stage_survey.md:1069,HP < 0xB5 -> kind 0x22D
+F106,,0x80182A6C,BlockThrowerShoot,H,r275:stage_survey.md:1070,"kind 0x20 projectile, 0x83A"
+F106,,0x80182BA4,BlockThrowerContact,H,r275:stage_survey.md:1071,damage 20
+F106,,0x80182C30,BlockThrowerDeathSound,H,r275:stage_survey.md:1072,0x853
+F106,,0x80182D2C,BrokenPieceInit,M,r275:stage_survey.md:1073,"model, velocity, smoke"
+F106,,0x801831B8,BlockThrowerBurst,M,r275:stage_survey.md:1074,burst timing
+F106,,0x80183494,BlockThrowerThrow,H,r275:stage_survey.md:1075,frame 0x18 -> throw
+F106,,0x80183548,BrokenPieceFly,M,r275:stage_survey.md:1076,"MoveObject, smoke, free"
+F107,,0x80183710,ThrownBlockMain,H,r275:stage_survey.md:1086,table + CarryPlayerExact
+F107,,0x80183648,ThrownBlockLaunch,H,r275:stage_survey.md:1087,"velocity, sound 0xB3F"
+F107,,0x80183790,ThrownBlockOverPlayer,M,r275:stage_survey.md:1088,box test above Musashi
+F107,,0x80183820,ThrownBlockFindTarget,H,r275:stage_survey.md:1089,kinds 0x1FC / 0x239
+F107,,0x8018395C,ThrownBlockHitPlayer,H,r275:stage_survey.md:1090,HitPlayer
+F107,,0x80183A88,ThrownBlockPushPlayer,M,r275:stage_survey.md:1091,solid box
+F107,,0x80183C54,ThrownBlockDustRing,H,r275:stage_survey.md:1092,8 props
+F107,,0x80183D94,ThrownBlockInit,M,r275:stage_survey.md:1093,"model, shadow"
+F107,,0x80183E68,ThrownBlockFly,M,r275:stage_survey.md:1094,"landing, 0xBCB"
+F107,,0x80183F24,ThrownBlockRest,M,r275:stage_survey.md:1095,"on ground, hits"
+F108,,0x8017D698,TalkCheckNear,H,r275:stage_survey.md:1108,"distance^2 < 0x1001, idle"
+F108,,0x8017DC20,RewardLightInit,M,r275:stage_survey.md:1109,"flag, sprite, child 0x1F9"
+F108,,0x8017DE58,RewardLightShow,M,r275:stage_survey.md:1110,"grow, sounds, spawn reward"
+F108,,0x8017E07C,SpawnRewardChest,M,r275:stage_survey.md:1111,SpawnActorFromDef kind 0x8E
+F108,,0x8017E108,RewardLightCheck,M,r275:stage_survey.md:1112,three condition variants
+F108,,0x8017E278,CountRoomEnemies,H,r275:stage_survey.md:1113,kinds 0x1FC 0x1DC 0x210 0x219
+F108,,0x8017E2E8,FreeRoomEnemies,H,r275:stage_survey.md:1114,same kinds
+F108,,0x8017E39C,RewardLightWait,M,r275:stage_survey.md:1115,child mirror / trigger
+F109,,0x80182B9C,LeaperApproach,M,r275:stage_survey.md:1126,"bob, head to target"
+F109,,0x80182DC4,LeaperMain,M,r275:stage_survey.md:1127,table + invuln timer
+F109,,0x80182ED4,LeaperSplash,M,r275:stage_survey.md:1128,"TraceMap, 0x83C"
+F109,,0x80182F7C,LeaperDeathSound,H,r275:stage_survey.md:1129,0xA9E
+F109,,0x8018308C,LeaperIdle,M,r275:stage_survey.md:1130,distance wake
+F109,,0x80183130,LeaperLunge,M,r275:stage_survey.md:1131,"velocity, 0xA9D, damage"
+F109,,0x801831FC,LeaperAir,M,r275:stage_survey.md:1132,damage until landing
+F110,,0x8018093C,RewardLightTrigger,M,r275:stage_survey.md:1143,"SetFlag(table), StartEvent"
+F110,,0x80182E54,StomperLand,M,r275:stage_survey.md:1144,"wakes kind 0x210, 0x84B, damage"
+F110,,0x8018323C,StomperInit,M,r275:stage_survey.md:1145,"SetupActor, shadow"
+F110,,0x801832E4,StomperTurnToTarget,H,r275:stage_survey.md:1146,TurnStepToTarget
+F110,,0x8018334C,StomperWaitNear,H,r275:stage_survey.md:1147,0x80 box -> jump
+F110,,0x801833BC,StomperAir,M,r275:stage_survey.md:1148,"sway, wakes kind 0x210"
+F110,,0x801834E4,StomperTurnHome,H,r275:stage_survey.md:1149,heading to spawn point
+F110,,0x80183564,StomperWalkHome,H,r275:stage_survey.md:1150,walk to spawn point
+F110,,0x80186DCC,DrawQuadGte,M,r275:stage_survey.md:1151,GTE quad to OT
+F111,sc04_018,0x8017E8FC,PickVillagerScript2BC,H,r275:stage_survey.md:1162,progress < 0x2BC
+F111,sc04_018,0x8017E950,RaiseProgress2BC,H,r275:stage_survey.md:1163,"kind 0x22B, SetProgress(0x2BC)"
+F111,sc04_018,0x8017EAFC,VillagerInitAfter2A8,M,r275:stage_survey.md:1164,progress >= 0x2A8
+F111,sc04_018,0x8017F0D8,SetFlag10COn,H,r275:stage_survey.md:1165,"0x10C = 1, 0x10D = 0"
+F111,sc04_018,0x8017F108,SetFlag10DOn,H,r275:stage_survey.md:1166,"0x10C = 0, 0x10D = 1"
+F111,sc04_018,0x8017F1A8,SetProgress280,H,r275:stage_survey.md:1167,SetProgress(0x280)
+F111,sc04_018,0x8017FA34,SetFlag107,H,r275:stage_survey.md:1168,SetFlag(0x107)
+F111,sc04_018,0x8017FF70,EventNpcWait,M,r275:stage_survey.md:1169,"StartEvent, SetProgress(0x2B2)"
+F111,sc04_018,0x8018001C,VillagerInit2A8Only,M,r275:stage_survey.md:1170,0x2A8 <= progress < 0x2B2
+F111,sc04_018,0x801877B0,RunMessageWindow,M,r275:stage_survey.md:1171,message open / update / close
+F113,,0x80180B70,KnockDownHurtStart,H,r275:stage_survey.md:1197,"rumble, 0x451, ApplyQueuedHurt, front/back motion, 5 x SpawnEffect(0x42)"
+F113,,0x80180CC4,KnockDownHurtLand,H,r275:stage_survey.md:1198,"on landing: damage, ResetPlayerKind, blend, DropTimedAbility"
+F113,,0x80180DB4,GasPuffInit,H,r275:stage_survey.md:1199,"AllocSprite16To3E, green colour, StartSpriteAnim"
+F113,,0x80180E8C,GasPuffUpdate,H,r275:stage_survey.md:1200,"rises, grows, fades, FreeEffect at anim end"
+F113,,0x80180F50,GasPuffFollow,M,r275:stage_survey.md:1201,"ObjLocalToWorld16 to its owner, else func_800D1FC8(o, 5)"
+F114,sc05_003,0x8017F68C,BeastUpdate,H,r275:stage_survey.md:1222,"state table, footsteps 0x7F9 / 0x7F8, contact hit, DespawnIfFar"
+F114,sc05_003,0x8017F738,BeastInit,H,r275:stage_survey.md:1223,"SetupActor, SnapToGround, SpawnShadowSized"
+F114,sc05_003,0x8017F9B4,BeastWander,M,r275:stage_survey.md:1224,"TurnStep, MoveOnGround, random timers"
+F114,sc05_003,0x8017FB9C,BeastTurnToPlayer,M,r275:stage_survey.md:1225,"TargetInFront, TurnStepToTarget, walk"
+F114,sc05_003,0x8017FC3C,BeastAlignToGround,H,r275:stage_survey.md:1226,"FindGround, ground-normal pose"
+F114,sc05_003,0x801801C0,BeastSpawn24F,H,r275:stage_survey.md:1227,"SpawnActor(0x24F), script D_801A96F0"
+F114,sc05_003,0x80180230,BeastScriptSequence,M,r275:stage_survey.md:1228,timed scripts facing away
+F114,sc05_003,0x801803B8,BeastHurt,H,r275:stage_survey.md:1229,"TakeDamage, SetReactionStep"
+F114,sc05_003,0x801805E4,BeastDie,M,r275:stage_survey.md:1230,"props, DropItem, despawn"
+F114,sc05_003,0x80180834,BeastContactHit,H,r275:stage_survey.md:1231,PathHitsModel + HitPlayer
+F114,sc05_003,0x80181CDC,PlaySoundPanned,H,r275:stage_survey.md:1232,"ProjectPoint, distance volume + pan, SoundRequest"
+F114,sc05_003,0x8018105C,BeastMissileInit,M,r275:stage_survey.md:1233,"AllocActorModel, attach to a part"
+F114,sc05_003,0x801812AC,BeastMissileFly,H,r275:stage_survey.md:1234,"MoveCollidePassable, trail props, ActorSegmentDamagesPlayer"
+F115,,0x80180000,RotorFlyerInit,M,r275:stage_survey.md:1266,SetupActor + two spinning models
+F115,,0x8017F2E8,RotorFlyerRoam,H,r275:stage_survey.md:1267,"home-radius wander, wall check, aggro at 0x24000"
+F115,,0x8017EC48,ProbeWallAhead,H,r275:stage_survey.md:1268,"TraceMap ahead, push back"
+F115,,0x8017EF54,PlayPannedHum,H,r275:stage_survey.md:1269,"RotTransPers -> pan, SoundRequest(0x849)"
+F115,,0x8017F100,RotorFlyerExhaust,M,r275:stage_survey.md:1270,"0x281 puffs, prop 0x23"
+F115,,0x8017F9FC,RotorFlyerUpdate,M,r275:stage_survey.md:1271,state table + far-despawn
+F115,,0x8017FDDC,RotorFlyerHurt,M,r275:stage_survey.md:1272,SetReactionStep(6) at HP < 0
+F115,,0x8017FF74,RotorFlyerFall,M,r275:stage_survey.md:1273,FinishEnemy below y 0x10
+F115,,0x8017FCC0,RotorFlyerDie,H,r275:stage_survey.md:1274,"free parts, drop, FreeActor"
+F115,,0x8018037C,RotorShotFly,H,r275:stage_survey.md:1275,ActorSegmentDamagesPlayer 0x30
+F115,,0x8017FB10,DebrisBounce,M,r275:stage_survey.md:1276,"two bounces, 90 frames"
+F115,,0x80181220,SprayMechInit,H,r275:stage_survey.md:1277,"SetupActor, parts 0x26F / 0x270"
+F115,,0x801813D0,SprayMechRoam,M,r275:stage_survey.md:1278,same wander
+F115,,0x8018165C,SprayMechSpray,M,r275:stage_survey.md:1279,"prop 0x7F arc, sounds 0x95F / 0x960"
+F115,,0x801810AC,SprayMechHurt,H,r275:stage_survey.md:1280,"ShowDamage / ShowDefeat, 0x9B7"
+F115,,0x80180CA8,SprayMechExplode,H,r275:stage_survey.md:1281,"sparks then 0x33 / 0x32 / 0x281, 0x961"
+F115,,0x8018309C,SprayShotFly,M,r275:stage_survey.md:1282,"sprite anim, trail 0x22, PointHitsPlayer"
+F116,,0x8017E9F4,PushCurrentUpdate,M,r275:stage_survey.md:1295,"pushes Musashi +z, sound 0x978"
+F116,,0x8017F510,ExitViaNearestDoor,H,r275:stage_survey.md:1296,RequestMapChange(nearest flagged actor +0xDC)
+F116,,0x8017F5F0,MovePlayerIntoDoor,M,r275:stage_survey.md:1297,"WorldToActorLocal, sound 0x8B0"

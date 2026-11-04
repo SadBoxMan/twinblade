@@ -1,0 +1,70 @@
+scope,address,chosen,reason
+engine,0x801270C0,g_WorldAnimMode,"C: values 1, 2 (Map) and 3 are tested (engine.c:1218, engine_8013C98C.c:2860), so a mode not a bool; r271 name with the g_ the style needs"
+engine,0x80128EA8,StartSpriteAnim,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x80128ED8,StepSpriteAnim,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8012A2F4,ClearCameraHeightLimit,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8012A304,SetCameraHeightLimit,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8012A62C,StartCameraBlendFrames,synonyms; owning card's name and family stem kept
+engine,0x8012EF34,ProjectPointZ,synonyms; owning card's name and family stem kept
+engine,0x8012EFB8,ProjectPoint,synonyms; owning card's name and family stem kept
+engine,0x8013C9C4,StartCameraShake,"r272 body: plays the list into the camera y offset, rumble is a side effect; owning card"
+engine,0x80146750,SpawnObj68Upper,"C: takes a spawn record and fills the first free 0x68 entry 8-19 (engine_801458E0.c), not only an allocator"
+engine,0x8014680C,SpawnObj68Lower,C: same as func_80146750 for entries 0-7
+engine,0x80146EC0,PlaceAtObjPoint,synonyms; owning card's name and family stem kept
+engine,0x80147364,PlaySePositional,SoundCommand is vague; the body is a positional SE
+engine,0x801487F4,GetObjPadHeld,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x80148800,GetObjPadPressed,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x80148AFC,FaceStickDir,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x80148E54,GetObjStickAngle,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x801493D0,ObjLocalToWorld16To,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x801498E0,Technique3Attack,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x80149954,Technique4HoldAttack,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x80149D10,CheckTechniqueTrigger,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x80149FB0,ToggleSelectionBit7,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x8014A59C,UpdateChargeGauge,verb-first form of the same reading
+engine,0x8014AA04,SetLuminaSelection,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L); the pause menu passes the menu row + 1
+engine,0x8014AC10,FreeEffectsByKind,engine stem Free* (FreeActor); same reading
+engine,0x8014ACC0,SpendTechniqueTime,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x8014B2F8,CurePoison,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8014B33C,SetPoisonWord,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8014B944,AddWakeGauge,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out); Stats_AddMeterEA4 is address-based
+engine,0x8014BB24,AddHp,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8014C168,FindActorByKindAny,"r272: a second copy of FindActorByKind, so the plain name would be used twice"
+engine,0x8014C3A4,StrikeActorFacing,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8014C3D0,StrikeActorToward,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8014C4AC,StrikeActor,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x8014C5FC,GetPitchToObjOffset,r272 body includes the offset argument; owning card
+engine,0x8014CB7C,IsSteelActive,"bit 0x800 is set only for ability 0x10 (Steel, r271); PlayerFlag800 is L"
+engine,0x80155FD4,RunAttackHitSet2,synonyms; owning card's name and family stem kept
+engine,0x80155FF8,RunAttackHit,synonyms; owning card's name and family stem kept
+engine,0x80156370,RollDamage,synonyms; owning card's name and family stem kept
+engine,0x801619A4,GetActiveTechnique,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x801619D0,IsTechnique3Active,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x80161A00,IsTechnique4Active,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x80161A30,IsTechnique5Active,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x80161A60,IsTechnique6Active,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L)
+engine,0x80161A90,TickGlideTimer,D_80078EC0 is the Lumina technique selection (r271 read the slot-3 packages); EC0-based names are placeholders (r272 M/L); technique 6 is the glide (ovl35)
+engine,0x80162F08,AddObj68Accel,synonyms; owning card's name and family stem kept
+engine,0x80163194,AddObj68AccelByMatrix,synonyms; owning card's name and family stem kept
+engine,0x801632F0,GetSweepHitResult,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x80165624,LacksAbilityBp,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x80165718,DropTimedAbility,owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out)
+engine,0x801657A0,SaveStatusOnce,C: latches D_80078EC3 first (engine_801458E0.c:16296); Once is the precise reading
+engine,0x80165840,RestoreStatusOnce,"the same latch, cleared"
+engine,0x8016629C,SpawnDustB,synonyms; owning card's name and family stem kept (SpawnDust family)
+exe,0x80013328,PosDist,synonyms; owning card's name and family stem kept (r274 Pos family)
+exe,0x80013B64,RotateVectorZ,synonyms; owning card's name and family stem kept
+exe,0x80013E94,PackAngles10,synonyms; owning card's name and family stem kept
+exe,0x8001599C,CopyVec,synonyms; owning card's name and family stem kept
+exe,0x800167F0,FadeStep,"r274 body: advances and draws the fade, 1 when finished; FadeDone reads only the return"
+exe,0x80016ED4,DrawPrimFT4Screen,synonyms; owning card's name and family stem kept (DrawPrim family)
+exe,0x800174DC,DrawPrimGT3Screen,synonyms; owning card's name and family stem kept (DrawPrim family)
+exe,0x800178EC,DrawPrimGT4Screen,synonyms; owning card's name and family stem kept (DrawPrim family)
+exe,0x8001C2C4,InitNullModel,synonyms; owning card's name and family stem kept
+exe,0x80029178,GetFlag,synonyms; owning card's name and family stem kept; r272 and r275 also use GetFlag
+exe,0x80029204,GetVar32,synonyms; owning card's name and family stem kept (GetVar family)
+exe,0x8002D4C8,PlaySound,synonyms; owning card's name and family stem kept (r274 sound API family)
+exe,0x800C7C74,g_BufferIndex,synonyms; owning card's name and family stem kept
+ovl:36,0x800CFBCC,RequestPicture,r271 read the field overlay (picture interlude); r275 name is a working name from callers
+ovl:36,0x800D1E28,StartMapChangeFade,owning card (r271 field overlay); r275 working name
+ovl:36,0x800D1EBC,StepMapChangeFade,owning card (r271 field overlay); r275 working name

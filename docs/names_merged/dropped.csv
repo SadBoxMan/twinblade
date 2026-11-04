@@ -1,0 +1,70 @@
+address,scope,current,proposed,confidence,source,note
+0x801270C0,engine,D_801270C0,g_UpdateAllActors,H,r272:names_stage_engine_proposals.md:793,superseded by g_WorldAnimMode
+0x80128EA8,engine,func_80128EA8,SpriteAnim_Start,H,r271:abil_packages.md:2843,conf inferred (source lists H or strong M only); source also proposed SpriteAnimStart; superseded by StartSpriteAnim
+0x80128ED8,engine,func_80128ED8,SpriteAnim_Step,H,r271:abil_packages.md:2844,conf inferred (source lists H or strong M only); source also proposed SpriteAnimStep; superseded by StepSpriteAnim
+0x8012A2F4,engine,func_8012A2F4,Camera_UnlockHeight,H,r271:abil_packages.md:2845,conf inferred (source lists H or strong M only); superseded by ClearCameraHeightLimit
+0x8012A304,engine,func_8012A304,Camera_LockHeight,H,r271:abil_packages.md:2846,conf inferred (source lists H or strong M only); superseded by SetCameraHeightLimit
+0x8012A62C,engine,func_8012A62C,CameraEaseFrom,H,r271:abil_packages.md:2847,conf inferred (source lists H or strong M only); superseded by StartCameraBlendFrames
+0x8012EF34,engine,func_8012EF34,ProjectWorldPointZ,H,r271:abil_packages.md:2848,conf inferred (source lists H or strong M only); superseded by ProjectPointZ
+0x8012EFB8,engine,func_8012EFB8,ProjectWorldPoint,H,r271:abil_packages.md:2849,conf inferred (source lists H or strong M only); source also proposed WorldToScreen; superseded by ProjectPoint
+0x8013C9C4,engine,func_8013C9C4,StartRumbleSequence,H,r271:abil_packages.md:2850,conf inferred (source lists H or strong M only); superseded by StartCameraShake
+0x80146750,engine,func_80146750,AllocObj68High,H,r272:names_stage_engine_proposals.md:522,superseded by SpawnObj68Upper
+0x8014680C,engine,func_8014680C,AllocObj68Low,H,r272:names_stage_engine_proposals.md:523,superseded by SpawnObj68Lower
+0x80146EC0,engine,func_80146EC0,PlaceAtModelPointCam,H,r271:abil_packages.md:2854,conf inferred (source lists H or strong M only); superseded by PlaceAtObjPoint
+0x80147364,engine,func_80147364,SoundCommand,H,r271:abil_packages.md:2855,conf inferred (source lists H or strong M only); superseded by PlaySePositional
+0x801487F4,engine,func_801487F4,Pad_Held,H,r271:abil_packages.md:2856,conf inferred (source lists H or strong M only); superseded by GetObjPadHeld
+0x80148800,engine,func_80148800,Pad_Pressed,H,r271:abil_packages.md:2857,conf inferred (source lists H or strong M only); superseded by GetObjPadPressed
+0x80148AFC,engine,func_80148AFC,Pad_FaceStick,M,r271:abil_packages.md:2858,superseded by FaceStickDir
+0x80148E54,engine,func_80148E54,Pad_StickAngle,H,r271:abil_packages.md:2859,conf inferred (source lists H or strong M only); superseded by GetObjStickAngle
+0x801493D0,engine,func_801493D0,Actor_ModelPointToPos,H,r271:abil_packages.md:2860,conf inferred (source lists H or strong M only); superseded by ObjLocalToWorld16To
+0x801498E0,engine,func_801498E0,TryEC0Mode3Swing,L,r272:names_stage_engine_proposals_2.md:357,superseded by Technique3Attack
+0x80149954,engine,func_80149954,TryEC0Mode4Swing,L,r272:names_stage_engine_proposals_2.md:358,superseded by Technique4HoldAttack
+0x80149D10,engine,func_80149D10,CheckEC0ModePower,M,r272:names_stage_engine_proposals_2.md:368,superseded by CheckTechniqueTrigger
+0x80149FB0,engine,func_80149FB0,ToggleEC0BitOnSelect,M,r272:names_stage_engine_proposals_2.md:328,superseded by ToggleSelectionBit7
+0x8014A59C,engine,func_8014A59C,ChargeGauge,M,r272:names_stage_engine_proposals_2.md:339,superseded by UpdateChargeGauge
+0x8014AA04,engine,func_8014AA04,SetEC0Mode,M,r272:names_stage_engine_proposals_2.md:403,superseded by SetLuminaSelection
+0x8014AC10,engine,func_8014AC10,DeleteEffectsOfKind,H,r271:abil_packages.md:2867,conf inferred (source lists H or strong M only); superseded by FreeEffectsByKind
+0x8014ACC0,engine,func_8014ACC0,SpendEC0ModeTime,M,r272:names_stage_engine_proposals_2.md:405,superseded by SpendTechniqueTime
+0x8014B2F8,engine,func_8014B2F8,Stats_CurePoison,H,r271:abil_packages.md:2869,conf inferred (source lists H or strong M only); superseded by CurePoison
+0x8014B33C,engine,func_8014B33C,Stats_SetPoison,H,r271:abil_packages.md:2870,conf inferred (source lists H or strong M only); source also proposed SetPoisonFlag; superseded by SetPoisonWord
+0x8014B944,engine,func_8014B944,Stats_AddMeterEA4,H,r271:abil_packages.md:2871,conf inferred (source lists H or strong M only); superseded by AddWakeGauge
+0x8014BB24,engine,func_8014BB24,Stats_AddHP,H,r271:abil_packages.md:2872,conf inferred (source lists H or strong M only); superseded by AddHp
+0x8014C168,engine,func_8014C168,FindActorByKind,H,r271:abil_packages.md:2873,conf inferred (source lists H or strong M only); superseded by FindActorByKindAny
+0x8014C3A4,engine,func_8014C3A4,Actor_GiveHit,H,r271:abil_packages.md:2874,conf inferred (source lists H or strong M only); source also proposed Actor_HitFacing; superseded by StrikeActorFacing
+0x8014C3D0,engine,func_8014C3D0,Actor_HitFromSource,H,r271:abil_packages.md:2875,conf inferred (source lists H or strong M only); superseded by StrikeActorToward
+0x8014C4AC,engine,func_8014C4AC,Actor_SendHit,H,r271:abil_packages.md:2876,conf inferred (source lists H or strong M only); superseded by StrikeActor
+0x8014C5FC,engine,func_8014C5FC,PitchToward,H,r271:abil_packages.md:2877,conf inferred (source lists H or strong M only); superseded by GetPitchToObjOffset
+0x8014CB7C,engine,func_8014CB7C,PlayerFlag800,L,r272:names_stage_engine_proposals.md:656,superseded by IsSteelActive
+0x80155FD4,engine,func_80155FD4,SwordHitAbility,M,r271:abil_packages.md:2879,superseded by RunAttackHitSet2
+0x80155FF8,engine,func_80155FF8,SwordHitCheck,M,r271:abil_packages.md:2880,superseded by RunAttackHit
+0x80156370,engine,func_80156370,RollHitDamage,H,r271:abil_packages.md:2881,conf inferred (source lists H or strong M only); superseded by RollDamage
+0x801619A4,engine,func_801619A4,GetActiveEC0Mode,M,r272:names_stage_engine_proposals_2.md:1389,superseded by GetActiveTechnique
+0x801619D0,engine,func_801619D0,IsEC0Mode3,M,r272:names_stage_engine_proposals_2.md:1390,superseded by IsTechnique3Active
+0x80161A00,engine,func_80161A00,IsEC0Mode4,M,r272:names_stage_engine_proposals_2.md:1391,superseded by IsTechnique4Active
+0x80161A30,engine,func_80161A30,IsEC0Mode5,M,r272:names_stage_engine_proposals_2.md:1392,superseded by IsTechnique5Active
+0x80161A60,engine,func_80161A60,IsEC0Mode6,M,r272:names_stage_engine_proposals_2.md:1393,superseded by IsTechnique6Active
+0x80161A90,engine,func_80161A90,TickEC0Mode6Timer,M,r272:names_stage_engine_proposals_2.md:1394,superseded by TickGlideTimer
+0x80162F08,engine,func_80162F08,AccelClamped,H,r271:abil_packages.md:2888,conf inferred (source lists H or strong M only); superseded by AddObj68Accel
+0x80163194,engine,func_80163194,AccelAlongMatrix,H,r271:abil_packages.md:2889,conf inferred (source lists H or strong M only); superseded by AddObj68AccelByMatrix
+0x801632F0,engine,func_801632F0,Sweep_FirstResult,H,r271:abil_packages.md:2890,conf inferred (source lists H or strong M only); source also proposed GetHitResult; superseded by GetSweepHitResult
+0x80165624,engine,func_80165624,Ability_CannotAfford,H,r271:abil_packages.md:2891,conf inferred (source lists H or strong M only); source also proposed IsBPShort; superseded by LacksAbilityBp
+0x80165718,engine,func_80165718,Ability_EndOnHit,H,r271:abil_packages.md:2892,conf inferred (source lists H or strong M only); superseded by DropTimedAbility
+0x801657A0,engine,func_801657A0,Ability_SaveStats,H,r271:abil_packages.md:2894,conf inferred (source lists H or strong M only); source also proposed SaveAbilityStats; superseded by SaveStatusOnce
+0x80165840,engine,func_80165840,Ability_RestoreStats,H,r271:abil_packages.md:2895,conf inferred (source lists H or strong M only); source also proposed RestoreAbilityStats; superseded by RestoreStatusOnce
+0x8016629C,engine,func_8016629C,SpawnFootPuff,H,r271:abil_packages.md:2896,conf inferred (source lists H or strong M only); superseded by SpawnDustB
+0x80013328,exe,func_80013328,Distance3D,H,r271:abil_packages.md:2824,conf inferred (source lists H or strong M only); superseded by PosDist
+0x80013B64,exe,func_80013B64,RotateVecZ,H,r271:abil_packages.md:2825,conf inferred (source lists H or strong M only); superseded by RotateVectorZ
+0x80013E94,exe,func_80013E94,PackVec10,H,r271:abil_packages.md:2826,conf inferred (source lists H or strong M only); superseded by PackAngles10
+0x8001599C,exe,func_8001599C,CopyVec3,H,r271:abil_packages.md:2827,conf inferred (source lists H or strong M only); superseded by CopyVec
+0x800167F0,exe,func_800167F0,FadeDone,M,r275:stage_survey.md:44,r275 working name for an outside call; superseded by FadeStep
+0x80016ED4,exe,func_80016ED4,DrawStackFT4Screen,H,r271:abil_packages.md:2828,conf inferred (source lists H or strong M only); superseded by DrawPrimFT4Screen
+0x800174DC,exe,func_800174DC,DrawStackGT3Screen,H,r271:abil_packages.md:2829,conf inferred (source lists H or strong M only); superseded by DrawPrimGT3Screen
+0x800178EC,exe,func_800178EC,DrawStackGT4Screen,H,r271:abil_packages.md:2830,conf inferred (source lists H or strong M only); superseded by DrawPrimGT4Screen
+0x8001C2C4,exe,func_8001C2C4,InitModelEmpty,H,r271:abil_packages.md:2831,conf inferred (source lists H or strong M only); superseded by InitNullModel
+0x80029178,exe,func_80029178,TestGameFlag,H,r271:abil_packages.md:2834,conf inferred (source lists H or strong M only); superseded by GetFlag
+0x80029204,exe,func_80029204,GetGameWord,H,r271:abil_packages.md:2835,conf inferred (source lists H or strong M only); superseded by GetVar32
+0x8002D4C8,exe,func_8002D4C8,SoundRequest,H,r275:stage_survey.md:39,r275 working name for an outside call; superseded by PlaySound
+0x800C7C74,exe,D_800C7C74,g_DrawBufferIndex,H,r271:abil_packages.md:2838,conf inferred (source lists H or strong M only); superseded by g_BufferIndex
+0x800CFBCC,ovl:36,func_800CFBCC,RequestFieldFileLoad,M,r275:stage_survey.md:45,r275 working name for an outside call; superseded by RequestPicture
+0x800D1E28,ovl:36,func_800D1E28,StartExitFade,H,r275:stage_survey.md:43,r275 working name for an outside call; superseded by StartMapChangeFade
+0x800D1EBC,ovl:36,func_800D1EBC,ExitFadeDone,H,r275:stage_survey.md:43,r275 working name for an outside call; superseded by StepMapChangeFade
