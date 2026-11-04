@@ -1,0 +1,64 @@
+r278 clash check: 59 renamed names, 0 with a clash
+
+0x80180A70 stage:sc06_029 SpawnWeakPoints          -> BossCollapseSequence       ok
+0x80180734 stage:sc03_124 TalkerFlag106            -> TalkerTakeItem58           ok
+0x80181C1C stage:sc05_017 SetFlag124Var8A          -> GiveItem28SetFlag124       ok
+0x801839A8 stage:sc02_017 EventSetProgress50       -> TakeFourItemsSetProgress50 ok
+0x80180EA8 stage:sc03_011 SceneSetProgress3F2      -> SceneTakeItem6C            ok
+0x8017FAA8 stage:sc03_013 EventSetProgress3D4      -> EventGiveItem1C            ok
+0x80146C98 engine         SetEffectState           -> SetObjState                ok
+0x80146CA0 engine         NextEffectState          -> NextObjState               ok
+0x80146CB4 engine         PrevEffectState          -> PrevObjState               ok
+0x80146D80 engine         ClearEffectVel           -> ClearObjVel                ok
+0x80146D90 engine         ClearEffectAccel         -> ClearObjPush               ok
+0x80146DB8 engine         SetEffectAccelV          -> SetObjPushV                ok
+0x80146DE8 engine         SetEffectAccel           -> SetObjPush                 ok
+0x80146DF8 engine         SetEffectAccelClamped    -> SetObjPushClamped          ok
+0x80146E90 engine         SetEffectTimer           -> SetObjTimer                ok
+0x80146E98 engine         TickEffectTimer          -> TickObjTimer               ok
+0x8002B0B4 exe            SaveCardStep             -> CardStep                   ok
+0x800CAE44 abil:ovl2e     GrenadeUpdate            -> Grenade_Update             ok
+0x800CAFC4 abil:ovl2e     GrenadeObjUpdate         -> Grenade_ObjUpdate          ok
+0x800CB114 abil:ovl2e     GrenadeObjFly            -> Grenade_ObjFly             ok
+0x800CB304 abil:ovl2e     GrenadeObjExplode        -> Grenade_ObjExplode         ok
+0x800CB488 abil:ovl2e     GrenadeFlameUpdate       -> Grenade_FlameUpdate        ok
+0x800CAF9C abil:ovl2f     JavelinObjUpdate         -> Javelin_ObjUpdate          ok
+0x800CB118 abil:ovl2f     JavelinObjFly            -> Javelin_ObjFly             ok
+0x800CB358 abil:ovl2f     JavelinGlowUpdate        -> Javelin_GlowUpdate         ok
+0x800CCBF0 abil:ovl30     LuminaSpinSlash          -> Lumina_SpinSlash           ok
+0x800CCD60 abil:ovl30     LuminaSetBladeScale      -> Lumina_SetBladeScale       ok
+0x800CCD94 abil:ovl30     LuminaSpinSteps          -> Lumina_SpinSteps           ok
+0x800CCE24 abil:ovl31     SlamQuake                -> Slam_Quake                 ok
+0x800CCF14 abil:ovl31     ShockwaveUpdate          -> Shockwave_Update           ok
+0x800CD3C8 abil:ovl31     ShockwaveRippleUpdate    -> Shockwave_RippleUpdate     ok
+0x800CD6DC abil:ovl31     SlamSteps                -> Slam_Steps                 ok
+0x800CCB78 abil:ovl32     BarrierStart             -> Barrier_Start              ok
+0x800CCBE4 abil:ovl32     BarrierObjUpdate         -> Barrier_ObjUpdate          ok
+0x800CCF68 abil:ovl32     BarrierBreak             -> Barrier_Break              ok
+0x800CD198 abil:ovl32     BarrierShotUpdate        -> Barrier_ShotUpdate         ok
+0x800CE1E4 abil:ovl32     BarrierSteps             -> Barrier_Steps              ok
+0x800CCB78 abil:ovl33     FlameStart               -> Flame_Start                ok
+0x800CCF28 abil:ovl33     FlameHoldNotify          -> Flame_HoldNotify           ok
+0x800CCF58 abil:ovl33     FlameCancel              -> Flame_Cancel               ok
+0x800CD328 abil:ovl33     FlameShotUpdate          -> Flame_ShotUpdate           ok
+0x800CD668 abil:ovl33     FlameSteps               -> Flame_Steps                ok
+0x800CCB78 abil:ovl34     SpinStart                -> Spin_Start                 ok
+0x800CCCC0 abil:ovl34     SpinEnter                -> Spin_Enter                 ok
+0x800CCCF4 abil:ovl34     SpinDispatch             -> Spin_Dispatch              ok
+0x800CD494 abil:ovl34     SpinTurn                 -> Spin_Turn                  ok
+0x800CD5CC abil:ovl34     SpinContactHit           -> Spin_ContactHit            ok
+0x800CE040 abil:ovl34     SpinSteps                -> Spin_Steps                 ok
+0x800CE044 abil:ovl34     SpinStates               -> Spin_States                ok
+0x800CCB28 abil:ovl35     GlideStart               -> Glide_Start                ok
+0x800CCB78 abil:ovl35     GlideMarkTrail           -> Glide_MarkTrail            ok
+0x800CCB84 abil:ovl35     GlideTrailUpdate         -> Glide_TrailUpdate          ok
+0x800CCBC0 abil:ovl35     GlideTrailDraw           -> Glide_TrailDraw            ok
+0x800D2468 ovl:36         ClearStageMenu           -> ClearStageMode             ok
+0x800D24A0 ovl:36         OpenStageMenu            -> OpenStageMode              ok
+0x800D25FC ovl:36         StageMenuUpdate          -> StageModeUpdate            ok
+0x800D2624 ovl:36         CloseStageMenu           -> CloseStageMode             ok
+0x80115110 ovl:36         g_StageMenu              -> g_StageMode                ok
+0x8011DB24 ovl:36         g_StageMenuUpdate        -> g_StageFrameHook           ok
+
+Same engine / exe address named differently by two scopes (0):
+
