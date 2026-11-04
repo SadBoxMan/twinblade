@@ -989,3 +989,43 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8016DF20,engine,RunSwirlFxState,RunSwirlFxState,M,H,PROMOTE,D_80190844[state](obj): the swirl effect's states,0
 0x8016E5B8,engine,RunScreenFxState,RunScreenFxState,M,H,PROMOTE,D_80190898[state](obj): the screen effect's states,0
 0x80172694,engine,PlayerEvent20,PlayerEvent20,M,H,PROMOTE,returns +0x1F4 & 0x20; the PlayerEvent family,0
+0x80143B6C,engine,SpawnShadowB,SpawnKind1C,L,H,FIX,"SpawnActorArg(0x1C, n, owner), +0xFC = the owner's heading when n is 0. Kind 0x1C is not the shadow (SpawnShadow is kind 0x1B), and its callers are an enemy's finish (TimedGlide) and actors arriving with a sound, so ""ShadowB"" misleads; a kind-number name like SpawnKind205 until kind 0x1C's step is read",246
+0x801788B8,engine,SpawnTalkMarker,SpawnTalkMarker,L,H,PROMOTE,"SpawnActorArg(0x83) linked to the actor (+0x64), at its position and heading, +0xDC = the callback. TalkToActor runs +0xDC of kind 0x83 actors when Musashi talks, so the marker is what he talks to",185
+0x80143C74,engine,SpawnKind205,SpawnKind205,L,H,PROMOTE,"SpawnActorArg(0x205, n, owner); a kind-number name, accurate",83
+0x80153C74,engine,SetGrabReaction,SetGrabReaction,L,L,KEEP,"D_8011DB0C = kind, D_8011DB1A = value; RunGrabbedKindState clears D_8011DB0C and RunHitHandler tests D_8011DB1A against 1000. Grab-specific use is not shown; RunHitHandler's reads would settle it",66
+0x8014168C,engine,GetModeTableValue,GetModeTableValue,L,L,KEEP,byte + byte * byte of the table at D_80115148 (in g_StageMode); what the stage-mode table holds is not in reach,62
+0x8014CC28,engine,PlayerObjFallStep,ProbePlatformByMove,L,H,FIX,"by how he moved since +0x88: ProbePlatformFall (height changed), ProbePlatformSlide (x / z), else ProbePlatformStill. Only the platform probes, no fall step: ""FallStep"" misleads (renamed with ProbeGroundByMove)",52
+0x8014F3E8,engine,PlayerObjGroundStep,ProbeGroundByMove,L,H,FIX,"unless +0x44 bit 18: ProbeGroundStill when he did not move since +0x88, else TraceGroundMove; the ground probes by movement, pair of ProbePlatformByMove (was PlayerObjGroundStep)",49
+0x80175414,engine,CloseHudPanel,CloseHudPanel,L,L,KEEP,D_8011F7A8 state 1 to 0 with two timers; scene ends call it. Which HUD panel is not in reach,43
+0x80132784,engine,MimeBlend,MimeBlend,L,L,KEEP,85 lines blending a model's pose with a weight (GTE) and the matrices at +0x34 / +0x54; MIMe-style rests on lines not read in full,39
+0x80142414,engine,SpawnKind13,SpawnHeadMarker,L,M,FIX,"SpawnActor(0x13, owner), +0x52 = v. Kind 0x13 is the head marker (HeadMarkerSetup is kind 0x13's set-up); M because HeadMarker is itself an M name",37
+0x801511E0,engine,ApplyQueuedHurt,ShowQueuedDamageNumber,L,H,FIX,"only ShowDamageNumber(o, +0xF2) (the queued hit's damage); nothing is applied, so ""ApplyQueuedHurt"" misleads",34
+0x80174764,engine,GetStageWord9C8,GetStageWord9C8,L,L,KEEP,"returns D_8011F9C8; an address-named getter, waits for the variable's name",34
+0x8012CB64,engine,IsInArea,IsInArea,L,L,KEEP,INCLUDE_ASM: no C body; the x / z rectangle test rests on the r272 reading,33
+0x80147A84,engine,ResetObjMoveParams,SetVelFromMoveSpeedKeepAxes,L,H,FIX,"AddMoveSpeedFacing(o, 0, 0, 0): vel = the move speed turned by the facing, the flagged axes kept (SetVelKeepAxes); not a reset of parameters. The kept-axes partner of SetVelFromMoveSpeedFacing",31
+0x80143BDC,engine,SpawnShadowBAt,SpawnKind1CAt,L,H,FIX,"SpawnActorFromDef of kind 0x1C (n 1) at a point, no owner; renamed with SpawnKind1C (kind 0x1C is not the shadow)",30
+0x8014B12C,engine,PlayerFlag80B,PlayerFlag80B,L,L,KEEP,ObjFlag80 (L) on Musashi; rests on ObjFlag80's word,30
+0x80172630,engine,SetPlayerState1F4Bit100,SetPlayerEvent100,L,H,FIX,+0x1F4 ,30
+0x80175454,engine,OpenHudPanel,OpenHudPanel,L,L,KEEP,D_8011F7A8 state 0 to 1 with a 0xA-frame count; which HUD panel is not in reach,26
+0x8014CB58,engine,GetStatsByteC0,GetTechnique,L,M,FIX,D_80078EC0 & 0x7F; r276 ruling 2 made D_80078EC0 the Lumina technique selection (the *Technique* names). M with that ruling's evidence,25
+0x8014CB2C,engine,GetPlayerByte1C7,GetPlayerByte1C7,L,H,PROMOTE,"g_Player +0x1C7 with bit 7 moved to bit 31; a field-number name like ClearObjByte1C7, accurate",24
+0x80172658,engine,PlayerState1F4Bit1,PlayerEvent01,L,H,FIX,"returns +0x1F4 & 1: the PlayerEvent word's test (PlayerEvent04 / 10 / 80 ...), so the family's name",18
+0x8014CB8C,engine,PlayerFlag1000,PlayerFlag1000,L,H,PROMOTE,"g_PlayerFlags & 0x1000; a flag-number name, accurate",17
+0x8015BF48,engine,SetPlayerKind4,StartPlayerSlide,L,H,FIX,"SetKindAndState(p, 4) and StartSlopeSlide: kind 4 started like StartPlayerFall (3) and StartPlayerJump (2); ""SetPlayerKind4"" hides the start",17
+0x80171A04,engine,SetActionMark1,SetActionMark1,L,L,KEEP,+0x217 = 1; what the mark is read for is not in reach,17
+0x80171A10,engine,SetActionMark2,SetActionMark2,L,L,KEEP,+0x217 = 2; see SetActionMark1,17
+0x8017267C,engine,PlayerState1F4Bit8,PlayerEvent08,L,H,FIX,returns +0x1F4 & 8; the PlayerEvent family,16
+0x801470AC,engine,ShowPlayerAbility,ShowPlayerAbility,L,L,KEEP,+0x222 = 0; pair of HidePlayerAbility (L); what +0x222 hides is in its reader,15
+0x801495C4,engine,IntoParentFrame,IntoParentFrame,L,L,KEEP,"a 16.16 point's whole parts through h_801495C4 in place; the helper is not named, L",13
+0x8014B2A8,engine,ClearStatsWords,CurePlayerPoison,L,H,FIX,"only CurePoison on Musashi (poison word and its copy cleared); ""Stats words"" says nothing",13
+0x8017303C,engine,StartPlayerMotionAction,StartPlayerMotionAction,L,H,PROMOTE,"D_80127508 = the motion, D_80126B30 = 1, SetActionHandler of the motion action; EndPlayerMotionAction is its pair",13
+0x801754A8,engine,UpdateHudPanel,UpdateHudPanel,L,L,KEEP,the panel's step by state with a may-show flag; which panel is not in reach,13
+0x8014B5C4,engine,SetObjByte1C7,SetObjByte1C7,L,H,PROMOTE, b; a field-number name (packages store the technique with bit 7),12
+0x80174E9C,engine,StartCameraPan,StartCameraPan,L,H,PROMOTE,"D_8012697C = n, D_80126980 = 0, SetCameraUpdate(CameraPanUpdate)",12
+0x80174774,engine,GetStageHalf938,GetStageHalf938,L,L,KEEP,returns D_80126938; address-named getter,10
+0x80142454,engine,SpawnHeadMarkerOnPlayer,SpawnHeadMarkerOnPlayer,L,L,KEEP,kind 0x13 (the head marker) over Musashi with a height and parent g_Player; rests on the HeadMarker word (M),9
+0x80143CD4,engine,SpawnKind39Trio,SpawnKind39Trio,L,H,PROMOTE,"SpawnActorArg(0x39, 0 / 1 / 2, owner); a kind-number name",9
+0x8014B598,engine,SetPlayer1C4And21C,SetPlayer1C4And21C,L,H,PROMOTE,"g_Player +0x1C4 = n, +0x21C = a pointer; a field-number name",9
+0x8014CB0C,engine,PlayerFlag80,PlayerFlag80,L,H,PROMOTE,g_PlayerFlags & 0x80; a flag-number name,9
+0x8014CB1C,engine,GetStatsWord94,GetPoisonWord,L,H,FIX,returns g_StatusPoison (0x80078E94); the getter of SetPoisonWord,9
+0x80172664,engine,PlayerState1F4Bit2,PlayerEvent02,L,H,FIX,returns +0x1F4 & 2; the PlayerEvent family,9
