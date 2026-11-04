@@ -129,3 +129,78 @@ Counts by scope and confidence (after merging, before batching):
 8. ovl39 movie-sample names (`strSetDefDecEnv`, `strInit`, `strCallback`, `strNextVlc`, `strNext`, `strSync`,
    `strKickCD`, `isEndOfFlame`) and `DecDCTReset`: these are the PsyQ movie sample's / LIBPRESS's own names. Keep
    them lower-case like DecDCTvlc in symbol_addrs_ovl39.txt (r271's choice), or not.
+
+## r278: Phase 2 cleanup (stage_H and engine_H to "apply as is")
+
+Docs only; branch research/r278-names-cleanup from research/r277-names-check. `r278_apply.py` rebuilds every changed
+batch from r277's copy plus its CHANGES list and writes `CHANGES_r278.csv` (address, scope, old, new, reason; one
+note-only row has old == new). Every changed row's `note` starts with `r278:` (and `was <old name>` for a rename).
+Run from the repository root, in this order: `r278_apply.py`, `r278_evidence_check.py`, `r278_clash_check.py`.
+
+| batch | rows changed | what |
+|---|---|---|
+| stage_H.csv | 6 renamed, 1 note | evidence check (below) and the item hand-over names |
+| engine_H.csv | 10 renamed | the 0x80146C98-0x80146E98 helper family |
+| exe_H.csv | 1 renamed | r277's VAGUE `SaveCardStep` |
+| abil_H.csv | 36 renamed | the Pkg_ style note |
+| ovl_H.csv | 6 renamed | the "stage menu" / g_StageMode note |
+| total | 59 renamed + 1 note = 60 rows in CHANGES_r278.csv | |
+
+* **Evidence check (stage_H, all 631 rows).** `r278_evidence_check.py` finds each call or constant named in r275's
+  evidence cell in the function's body, under its proposed and its current name (stage-local `D_` / `func_` written
+  with the stage prefix, 16.16 and range-end forms of constants allowed). It writes `r278_evidence_check.csv`
+  (status, what was checked, what was missing, r278's reading). 542 rows confirmed, 77 have nothing checkable (prose
+  such as "attack state", "part motion"), 12 missed. 10 of the 12 are fine one level down (a helper or wrapper holds
+  the call: MoveImage, ClearSeqPoint, GetVarCF / SetVarCF, spawn 0x38E, or the constant is written another way).
+  The other 2 are r277's sc06_029 case, and they are not a plain swap: 0x8017EBC4 (`BossCoreInit`, state 0 of the
+  core) is the function with the five `SpawnActorArg(0x294, i)` weak points. The name stays and the note corrects
+  the evidence (kind 0x2EF is spawned by 0x80180030). 0x80180A70 is the core's state 0xE after `EventAfterBoss`,
+  renamed `BossCollapseSequence` (r277's fix). The rest of the sc06_029 table was re-read and matches the C.
+* **Weak "Thing + flag number" names (stage_H).** 61 names are built on a flag, var or progress number. 5 bodies
+  have a clear point and were renamed: `TalkerTakeItem58` and `GiveItem28SetFlag124` (r277's fixes),
+  `TakeFourItemsSetProgress50` (TakeItem 0x4E / 0x50 / 0x51 / 0x52), `SceneTakeItem6C`, `EventGiveItem1C` (an
+  event that gives item 0x1C). **56 kept**: their bodies only set or test that flag or progress, so the name says
+  what they do. No door case was found.
+* **engine_H 0x80146C98-0x80146E98.** These are generic object-record helpers. Callers include Musashi's action handlers
+  (most of the 62 +0x24-setter calls in engine_801458E0.c), StepToward on any walker, stage code, and the packages
+  on Musashi and their 0x68 objects. +0x02 / +0x10 / +0x1C are fields of the
+  shared ObjHeader (r273 object_struct.md 3.1). +0x24..+0x2C is **not an acceleration**: func_80147F78 /
+  func_80147B5C copy it into the pending push D_80127090 and from there into vel. So it is a stored velocity, which
+  r273 calls Musashi's `push` (the Mover's accel is +0x44). New names: `SetObjState`, `NextObjState`, `PrevObjState`,
+  `ClearObjVel`, `ClearObjPush`, `SetObjPushV`, `SetObjPush`, `SetObjPushClamped`, `SetObjTimer`, `TickObjTimer`.
+  r277 suggested `SetObjAccel`; that was not taken, for the reason above. The M neighbours `AddPushVel` /
+  `SetPushVel` (engine_ML) already use the word.
+* **exe_H 0x8002B0B4** is now `CardStep`: it steps g_CardStep for check / save / load / mode 3. r277's `MemCardStep`
+  was not taken because the EXE links LIBMCRD and its `MemCard*` names are in symbol_addrs_psyq.txt.
+* **Pkg_ style (abil_H).** r271 section 6 gives every package-local name a `Prefix_` (slot 3 by behaviour). 36 rows
+  in ovl2e, ovl2f and ovl30-ovl35 lacked the underscore and now have it (`Grenade_ObjUpdate`, `Slam_Quake`,
+  `Shockwave_Update`, `Spin_States` ...). The convention itself is still ruling 2 above (and package data without
+  g_ is ruling 3), but it is now applied the same way to all packages, so either ruling is one mechanical step.
+* **Stage menu / stage mode.** The word is now Mode: engine_H's `g_StageMode`, matching the C's own `StageMode`
+  typedef (engine_8013C98C.c, engine_8012F5F4.c); the engine card owns engine bss. In ovl_H: `ClearStageMode`,
+  `OpenStageMode`, `StageModeUpdate`, `CloseStageMode`. Two ovl36 globals were the **same addresses** as engine_H
+  rows under other names (0x80115110 `g_StageMenu`, 0x8011DB24 `g_StageMenuUpdate`). They now carry the engine's
+  names (`g_StageMode`, `g_StageFrameHook`); define each once, in the engine's symbol file.
+* **Clash checks.** `r278_clash_check.py` writes `r278_clash_check.txt`. It checks style; the same name at another
+  address in the same link scope, in any batch (H, ML / MM and family shapes); the symbol files; every identifier
+  in include/ and src/; C keywords and symbol_addrs_psyq.txt. **0 clashes in the 59 new names.** It also looks for
+  an engine or EXE address named differently by two scopes, a check r276 ran only inside one scope. On r277's files
+  it finds exactly the two stage-menu globals above; after r278 it finds 0. A test run with planted names
+  (SetScript, PlaySound, MemCardInit, a duplicate stage name, a bad style) flags all five.
+* **engine_H comment-only rows (r277's "if time allows").** 10 more were read, drawn with
+  `random.Random("278:engine-comment")` from the 135 whose r272 evidence is only a comment citation:
+  HeadingTo, IsOnScreen, GetCameraHeading, HeadingToPlayer, AddDrawModeAt, g_NextActorId, PathHitsModelTwoCells,
+  WorldToLocal16, GetMessageAnswer, DebugDrawActorLine. All 10 fit the C. Only the "Debug" in DebugDrawActorLine
+  rests on thin ground: its one caller (sc01_084) draws red tick-marked ruler lines.
+
+**Recommendation after r278:** all five H batches (exe_H, engine_H, stage_H, abil_H, ovl_H) are "apply as is",
+with the usual match check.
+
+**Still "review"** (none of it blocks applying):
+1. The 56 kept flag / progress-number names in stage_H. They are accurate; better names can come later.
+2. The 77 stage_H rows with nothing mechanically checkable, and r277's four UNSURE stage words ("Tough", "Bgm",
+   "Glow", "Face"). Not changed.
+3. Rulings 2 and 3 above (Pkg_Name, package data without g_) are still open.
+4. Outside the H batches: engine_ML `MoveEffect` (0x801473EC) also sets Musashi's +0x44 bit 31 and is probably
+   another generic helper. stage_family_shapes.csv F014's evidence text still says "SetEffectAccel" (r275 text, not
+   a name). Neither was touched.
