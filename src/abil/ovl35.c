@@ -101,9 +101,128 @@ s16 func_ovl35_800CCBC0(void) {
     return n;
 }
 
-INCLUDE_ASM("asm/abil/ovl35/nonmatchings/ovl35", func_ovl35_800CCDE8);
+extern void func_80148534();
+extern void func_80165FA4();
+extern void func_80149350();
+typedef struct { u8 on, idx, cnt, alpha; s16 e[16][6]; } ARing;
 
-INCLUDE_ASM("asm/abil/ovl35/nonmatchings/ovl35", func_ovl35_800CD314);
+s32 func_ovl35_800CCDE8(o, mode, n)
+u8 *o;
+s16 mode;
+s16 n;
+{
+    AVec s;
+    AVec t;
+    AVec a;
+    AVec b;
+    s32 flag;
+    u8 *m;
+    ARing *r;
+
+    r = (ARing *)D_ovl35_800CD6E0;
+    m = AF(o, u8 *, 0x34);
+    switch (mode) {
+    case 0:
+        r->on = 1;
+        r->cnt = 0;
+        r->idx = 0;
+        r->alpha = 0xF4;
+        break;
+    case 1:
+        a.vx = r->e[r->idx][0];
+        a.vy = r->e[r->idx][1];
+        a.vz = r->e[r->idx][2];
+        b.vx = r->e[r->idx][3];
+        b.vy = r->e[r->idx][4];
+        b.vz = r->e[r->idx][5];
+        if (++r->idx >= 0x10) {
+            r->idx = 0;
+        }
+        if (r->cnt < 0xF) {
+            r->cnt++;
+        }
+        break;
+    case 2:
+        r->alpha -= 0x10;
+        if (r->alpha < 0x10) {
+            r->on = 0;
+            return 1;
+        }
+        if (r->cnt >= 2 && (r->alpha >> 4) < r->cnt) {
+            r->cnt--;
+        }
+        return 0;
+    }
+    func_80148534(&s, &t);
+    func_80165FA4(m, &s, &t);
+    func_80149350(m, &s, &s);
+    RotTransSV(&t, &t, &flag);
+    if (mode != 0) {
+        a.vx = (s.vx + a.vx) >> 1;
+        a.vy = (s.vy + a.vy) >> 1;
+        a.vz = (s.vz + a.vz) >> 1;
+        b.vx = (t.vx + b.vx) >> 1;
+        b.vy = (t.vy + b.vy) >> 1;
+        b.vz = (t.vz + b.vz) >> 1;
+        a.vx -= b.vx;
+        a.vy -= b.vy;
+        a.vz -= b.vz;
+        VectorNormalSS(&a, &a);
+        a.vx = b.vx + a.vx / n;
+        a.vy = b.vy + a.vy / n;
+        a.vz = b.vz + a.vz / n;
+        r->e[r->idx][0] = a.vx;
+        r->e[r->idx][1] = a.vy;
+        r->e[r->idx][2] = a.vz;
+        r->e[r->idx][3] = b.vx;
+        r->e[r->idx][4] = b.vy;
+        r->e[r->idx][5] = b.vz;
+        if (++r->idx >= 0x10) {
+            r->idx = 0;
+        }
+        if (r->cnt < 0xF) {
+            r->cnt++;
+        }
+    }
+    r->e[r->idx][0] = s.vx;
+    r->e[r->idx][1] = s.vy;
+    r->e[r->idx][2] = s.vz;
+    r->e[r->idx][3] = t.vx;
+    r->e[r->idx][4] = t.vy;
+    r->e[r->idx][5] = t.vz;
+    return 0;
+}
+
+extern AMtx D_8011F75C;
+extern void func_80147324();
+extern void func_800233CC();
+extern AModel *D_8011F758[];
+
+void func_ovl35_800CD314(u8 *arg0) {
+    s32 t;
+    AModel *m;
+
+    t = AF(arg0, s32, 0x1C);
+    m = AF(arg0, AModel *, 0x20);
+    if (t < 0x20) {
+        if (!(t & 7)) {
+            AF(arg0, AMtx, 0x38) = D_8011F75C;
+            m->unk04 = (m->unk04 & 0x7FFFFFFF) | (D_8011F758[0]->unk04 & 0x80000000);
+            m->scale.vx = D_8011F758[0]->scale.vx;
+            m->scale.vy = D_8011F758[0]->scale.vy;
+            AF(arg0, s16, 6) = AF(arg0, s32, 0x4C);
+            AF(arg0, s16, 0xA) = AF(arg0, s32, 0x50) - 8;
+            AF(arg0, s32, 0x30) = 0;
+            AF(arg0, s16, 0xE) = AF(arg0, s32, 0x54);
+            func_80147324(0x8E2);
+        }
+        AF(arg0, s32, 0x30) += 0x10;
+        func_800233CC(D_ovl35_800CD7A4, AF(arg0, s32, 0x30) & 0xFFFF);
+        AF(arg0, s32, 0x1C)++;
+        return;
+    }
+    func_80146C3C(arg0);
+}
 
 void func_ovl35_800CD458(u8 *a) {
     D_ovl35_800CD6D0[AF(a, u16, 2)](a);

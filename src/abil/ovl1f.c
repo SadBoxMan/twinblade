@@ -196,7 +196,125 @@ void func_ovl1f_800CB23C(u8 *arg0) {
 extern void func_80015978();
 extern s32 func_8012EFB8();
 
-INCLUDE_ASM("asm/abil/ovl1f/nonmatchings/ovl1f", func_ovl1f_800CB300);
+extern AVec D_ovl1f_800CAE0C;
+extern s16 D_ovl1f_800CBEA0;
+extern s16 D_ovl1f_800CBEA2;
+extern u8 D_ovl1f_800CBEB0;
+extern u16 D_800B99DA;
+extern u8 D_80114EB0;
+extern u8 D_80114EC8;
+extern s16 D_80126B18;
+extern s16 D_80126B1A;
+extern s16 D_80126B1C;
+extern s32 D_801151D8;
+extern void func_80013F3C();
+extern void func_800126C4();
+extern void func_800123F0();
+extern void func_80012558();
+extern void func_80163194();
+extern void func_80162FC0();
+extern s32 func_80163950();
+extern void func_8016345C();
+extern void func_80163328();
+extern s32 func_801633A8();
+extern void StartRumbleScript();
+extern void func_80013E94();
+extern s32 func_80146A6C();
+extern s32 func_801632E0();
+extern void func_ovl1f_800CB760();
+extern s32 func_8016380C();
+
+void func_ovl1f_800CB300(u8 *arg0) {
+    AMtx m;
+    AVec k;
+    AVec b;
+    s32 w;
+    u8 *mo;
+    AVec *pk;
+    u16 *o;
+    u16 t;
+    s32 r;
+    s32 f;
+    u32 u;
+
+    mo = AF(arg0, u8 *, 0x20);
+    k = D_ovl1f_800CAE0C;
+    pk = &k;
+    if (func_80146E98(arg0) != 0) {
+        goto kill;
+    }
+    func_80013F3C(&m);
+    func_800126C4(&m, AF(mo, s16, 0x10));
+    func_800123F0(&m, AF(mo, s16, 0x14));
+    func_80012558(&m, AF(mo, s16, 0x12));
+    AF(mo, AMtx, 0x34) = m;
+    AF(mo, u16, 0x2C) |= 1;
+    func_80163194(arg0, -(((AF(arg0, s32, 0x50) - 0x28) << 14) / 40), 0, 0, &m);
+    func_80162FC0(arg0);
+    func_80163950(arg0);
+    t = AF(mo, u16, 0x1A) + 0x200;
+    AF(mo, u16, 0x1A) = t;
+    AF(mo, u16, 0x18) = t;
+    if ((s16) t > 0x2000) {
+        AF(mo, u16, 0x18) = AF(mo, u16, 0x1A) = 0x2000;
+    }
+    r = D_800B99DA & 1;
+    D_ovl1f_800CBEA0 = r - 0x10;
+    D_ovl1f_800CBEA2 = -0x20 - r;
+    func_8016345C(arg0, 0x26, 0, 0x8000, pk);
+    func_80163328(arg0);
+    u = func_801633A8(arg0);
+    switch (u) {
+    case 1:
+        StartRumbleScript(&D_ovl1f_800CBEB0);
+        func_80013E94(&D_80114EB0, &w);
+        w |= 0x80000000;
+        func_80146A6C(0x1F, arg0, D_80126B18, D_80126B1A, D_80126B1C, w, 0);
+        o = (u16 *) func_801632E0(arg0);
+        if (o == NULL) {
+            break;
+        }
+        if (func_ovl1f_800CB7B0(arg0) != 0) {
+            break;
+        }
+        if (*o == 0x151) {
+            func_ovl1f_800CB760(arg0, 0x7B3);
+        } else {
+            func_ovl1f_800CB760(arg0, 0x648);
+        }
+        break;
+    case 2:
+        break;
+    case 4:
+        func_80013E94(&D_80114EC8, &w);
+        w |= 0x80000000;
+        func_80146A6C(7, arg0, D_80126B18, D_80126B1A, D_80126B1C, w, 0);
+        goto kill;
+    }
+    f = func_8016380C(arg0, &b);
+    if (f & 0x8000) {
+        goto kill;
+    }
+    if (!(f & 0x2000)) {
+        return;
+    }
+    if (AF(&b, u8, 6) == 0x19) {
+        if (D_801151D8 != 0 && func_ovl1f_800CB7B0(arg0) == 0) {
+            func_ovl1f_800CB760(arg0, 0x6DE);
+        }
+        goto kill;
+    }
+    if (AF(&b, u8, 6) != 2) {
+        return;
+    }
+    func_80146A6C(0x10, arg0, AF(arg0, s16, 6), AF(arg0, s16, 0xA), AF(arg0, s16, 0xE), 0, 0);
+    func_80146E90(arg0, 0x1E);
+    func_80147364(4, 0x649);
+    func_80147324(0x441);
+    func_80146CA0(arg0);
+kill:
+    func_80146CA0(arg0);
+}
 
 void func_ovl1f_800CB6CC(s32 arg0) {
     func_8016634C();

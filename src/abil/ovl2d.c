@@ -1,5 +1,6 @@
 #include "common.h"
 #include "abil.h"
+#include "gte.h"
 
 extern void func_80162CCC();
 extern void func_800183E0();
@@ -300,7 +301,27 @@ extern u8 D_ovl2d_800CBE5C;
 extern AVec D_ovl2d_800CBEB8[];
 extern ALVec D_ovl2d_800CBEE8;
 
-INCLUDE_ASM("asm/abil/ovl2d/nonmatchings/ovl2d", func_ovl2d_800CB6F4);
+extern u8 D_800AF648[];
+
+s32 func_ovl2d_800CB6F4(u8 *arg0) {
+    s32 v[3];
+    s16 s[2];
+    u8 *mt;
+
+    v[0] = AF(arg0, s16, 6);
+    v[1] = AF(arg0, s16, 0xA);
+    v[2] = AF(arg0, s16, 0xE);
+    mt = D_800AF648;
+    gte_SetRotMatrix(mt);
+    gte_SetTransMatrix(mt);
+    gte_ldlv0(v);
+    gte_rtps();
+    gte_stsxy(s);
+    if ((s[0] >= 0 ? s[0] <= 0xAA : -s[0] <= 0xAA) && (s[1] >= 0 ? s[1] <= 0x80 : -s[1] <= 0x80)) {
+        return 1;
+    }
+    return 0;
+}
 
 void func_ovl2d_800CB804(u8 *arg0) {
     if (D_80078EC1 == 0x1C) {

@@ -314,7 +314,19 @@ extern s32 func_801465C0();
 extern void func_8001CF00();
 extern void func_80015954();
 
-INCLUDE_ASM("asm/abil/ovl2a/nonmatchings/ovl2a", func_ovl2a_800CB708);
+extern void func_80162F08();
+extern void func_80162FC0();
+
+void func_ovl2a_800CB708(u8 *arg0) {
+    func_80162F08(arg0, 0, 0, 0);
+    AF(arg0, s32, 0x10) = AF(arg0, s32, 0x24);
+    AF(arg0, s32, 0x14) = AF(arg0, s32, 0x28);
+    AF(arg0, s32, 0x18) = AF(arg0, s32, 0x2C);
+    func_80162FC0(arg0);
+    if (func_80146E98(arg0) != 0) {
+        func_80146CA0(arg0);
+    }
+}
 
 void func_ovl2a_800CB774(void) {
     func_80162CCC();

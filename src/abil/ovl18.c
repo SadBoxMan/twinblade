@@ -121,9 +121,138 @@ void func_ovl18_800CAFE0(u8 *arg0) {
     AF(q, u16, 0xC) = AF(arg0, u16, 0xE);
 }
 
-INCLUDE_ASM("asm/abil/ovl18/nonmatchings/ovl18", func_ovl18_800CB168);
+extern u8 D_80078EC1;
+extern u16 D_800B99DA;
+extern u16 D_80126BC8;
+extern u16 D_80126BCA;
+extern u16 D_80126BCC;
+extern s32 func_80146AB4();
+extern void func_8002D4C8();
 
-INCLUDE_ASM("asm/abil/ovl18/nonmatchings/ovl18", func_ovl18_800CB328);
+void func_ovl18_800CB168(u8 *arg0) {
+    s32 r;
+    s32 n;
+    u16 c;
+    s32 t;
+    s32 pad[2];
+    s16 x;
+
+    if (D_80078EC1 == 3) {
+        switch (AF(arg0, u32, 0x30)) {
+        case 0:
+            r = rand();
+            AF(arg0, s16, 0x1A) = r & 0xFFF;
+            AF(arg0, u16, 0x2A) = (r & 1) + 2;
+            AF(arg0, s32, 0x30)++;
+            break;
+        case 1:
+            n = AF(arg0, s32, 0x1C);
+            AF(arg0, s32, 0x1C) = n + 1;
+            if (!(n & 3)) {
+                if (func_80146AB4(0x23, arg0, 0, 0, 0, AF(arg0, s16, 0x12), AF(arg0, s16, 0x1A) | ((AF(arg0, u16, 0x28)++ & 7) << 16)) == 0) {
+                    AF(arg0, u16, 0x2A) = 0;
+                }
+                c = AF(arg0, u16, 0x2A) - 1;
+                AF(arg0, u16, 0x2A) = c;
+                if ((s16) c <= 0) {
+                    AF(arg0, s32, 0x1C) = 0x10;
+                    AF(arg0, s32, 0x30)++;
+                }
+            }
+            break;
+        case 2:
+            if (--AF(arg0, s32, 0x1C) == 0) {
+                AF(arg0, s32, 0x30) = 0;
+            }
+            break;
+        }
+        t = *(s16 *)&D_80126BCC;
+        x = t;
+        if (t > 0x1000) {
+            t = D_80126BCA + 0x38;
+            x -= 0xE0;
+            *(s16 *)&D_80126BCC = x;
+            D_80126BC8 = x;
+            D_80126BCA = t;
+        }
+        if (!(D_800B99DA & 0xF)) {
+            func_8002D4C8(0x5FB, 0);
+        }
+    } else {
+        *(s16 *)&D_80126BCC = 0x1000;
+        D_80126BCA = 0x1000;
+        D_80126BC8 = 0x1000;
+        func_80146C3C(arg0);
+    }
+}
+
+extern u8 D_80078EC1;
+extern AMtx D_800AE620;
+extern s16 D_80126B5E;
+extern s16 D_80126B62;
+extern s16 D_80126B66;
+extern u16 D_80126BC8;
+extern u16 D_80126BCA;
+extern u16 D_80126BCC;
+extern s32 func_80146A6C();
+extern void func_8012F14C();
+extern void func_80016714();
+
+void func_ovl18_800CB328(u8 *arg0) {
+    AVec v;
+    AMtx m;
+    u8 *mo;
+    u8 *o;
+    u32 t;
+    u16 s;
+    s32 msk;
+
+    mo = AF(arg0, u8 *, 0x20);
+    o = AF(arg0, u8 *, 0x34);
+    if (D_80078EC1 == 3) {
+        t = AF(arg0, s32, 0x2C) - 4;
+        AF(arg0, s32, 0x2C) = t;
+        if (t < 0x1C) {
+            func_80146A6C(3, arg0, AF(arg0, s16, 6), AF(arg0, s16, 0xA), AF(arg0, s16, 0xE), 0xCCCFFFC, 0xE0009C00);
+            D_80126BC8 = D_80126BCC = D_80126BCC + 0x400;
+            D_80126BCA -= 0x100;
+            if (o != NULL) {
+                func_80016714(o, 0x38);
+            }
+            func_80146C3C(arg0);
+            return;
+        }
+        msk = 0x7FFFFFFF;
+        s = AF(mo, u16, 0x1A) - 0x2C;
+        AF(mo, s32, 4) &= msk;
+        AF(mo, u16, 0x1A) = s;
+        AF(mo, u16, 0x18) = s;
+        AF(arg0, s32, 0x30) += 0xA00000U / (AF(arg0, u32, 0x2C) * 804);
+        m = D_800AE620;
+        RotMatrixY(AF(arg0, s32, 0x30), &m);
+        v.vx = 0;
+        v.vy = -(AF(arg0, u32, 0x2C) >> 1);
+        v.vz = AF(arg0, s32, 0x2C);
+        m.t[0] = D_80126B5E;
+        m.t[1] = D_80126B62 - 0x1C;
+        m.t[2] = D_80126B66;
+        func_8012F14C(&m, &v, &v);
+        AF(arg0, u16, 6) = v.vx;
+        AF(arg0, u16, 0xA) = v.vy;
+        AF(arg0, u16, 0xE) = v.vz;
+        AF(o, s32, 4) &= msk;
+        AF(o, u16, 0x18) = AF(mo, u16, 0x18);
+        AF(o, u16, 0x1A) = AF(mo, u16, 0x1A);
+        AF(o, u16, 8) = AF(arg0, u16, 6);
+        AF(o, u16, 0xA) = AF(arg0, u16, 0xA);
+        AF(o, u16, 0xC) = AF(arg0, u16, 0xE);
+        return;
+    }
+    if (o != NULL) {
+        func_80016714(o, 0x38);
+    }
+    func_80146C3C(arg0);
+}
 
 void func_ovl18_800CB5AC(u8 *a) {
     D_ovl18_800CB614[AF(a, u16, 2)](a);

@@ -176,4 +176,42 @@ void func_800CF180(void)
     addPrim(&g_WorldOtTable[WORK->frame][0xFFF], &D_800CF420[WORK->frame]);
 }
 
-INCLUDE_ASM("asm/ovl38/nonmatchings/ovl38", func_800CF290);
+/* Steps 1 to 3: build the licence image's two sprites (texture page, colour = the fade level) and link them into
+ * the last entry of this frame's ordering table */
+void func_800CF290(void)
+{
+    SprtTpage *p;
+    SprtTpage *q;
+    u32 *t; /* the texture-page word, written through its own pointer (as the original) */
+    u32 *u;
+    s32 f = WORK->frame;
+
+    p = &D_800D3AEC[f];
+    t = &D_800D3AEC[f].tpage;
+    setlen(p, 5);
+    *t = 0xE100008A;
+    p->code = 0x64;
+    p->r0 = p->g0 = p->b0 = D_800D3C10;
+    p->clut = 0x7840;
+    p->x0 = -0x100;
+    p->y0 = -0x1C;
+    p->u0 = 0;
+    p->v0 = 0x38;
+    p->w = 0x100;
+    p->h = 0x60;
+    q = &D_800D3B1C[f];
+    u = &D_800D3B1C[f].tpage;
+    setlen(q, 5);
+    *u = 0xE100008C;
+    q->code = 0x64;
+    q->r0 = q->g0 = q->b0 = D_800D3C10;
+    q->clut = 0x7840;
+    q->x0 = 0;
+    q->y0 = -0x1C;
+    q->u0 = 0;
+    q->v0 = 0x38;
+    q->w = 0x100;
+    q->h = 0x60;
+    addPrim(&g_WorldOtTable[f][0xFFF], q);
+    addPrim(&g_WorldOtTable[f][0xFFF], p);
+}
