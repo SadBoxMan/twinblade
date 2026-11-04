@@ -914,4 +914,78 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80160FE0,engine,RecoverMessageStep,RecoverMessageStep,M,H,PROMOTE,"GetMessageAnswer: close it, next state",0
 0x80161034,engine,RecoverEndStep,RecoverEndStep,M,H,PROMOTE,"ClearPlayerHittable, LeavePlayerKind, back to kind 0",0
 0x80161094,engine,ExitRecover,ExitRecover,M,H,PROMOTE,"the message closed, g_WorldAnimMode = 1, props on: kind 0x1E's exit handler",0
+0x801614E4,engine,CheckLandingFx,CheckLandingFx,M,H,PROMOTE,"HandleLandingFx(p, RunPlayerAirSteps(p, 0))",0
+0x80161554,engine,CheckLandingNoBump,CheckLandingNoBump,M,H,PROMOTE,"HandleLandingToNormal(p, RunPlayerAirSteps(p, 1))",0
+0x80162330,engine,RunSceneExitStep,RunSceneExitStep,M,H,PROMOTE,D_8019006C[+0x15](obj): the scene-exit task's steps,0
+0x8016236C,engine,SceneExitStart,SceneExitStart,M,H,PROMOTE,"EndScene on Musashi, +0x28 = 10, the step +0x15 += 1",0
+0x80162834,engine,RunShadowStep,RunShadowStep,M,H,PROMOTE,D_801900B4[step](record): the shadow record's steps,0
+0x80162870,engine,InitShadow,InitShadow,M,H,PROMOTE,"the shadow record's set-up: the sprite pointer, flags, UpdateShadowMatrix, NextShadowStep",0
+0x801628F4,engine,ShadowStep,ShadowStep,M,H,PROMOTE,the shadow follows the owner's floor point (+0x78..) and UpdateShadowMatrix,0
+0x80162AC0,engine,SetShadowKind,SetShadowKind,M,H,PROMOTE,"record kind = k, step 0",0
+0x80162AE0,engine,PrevShadowStep,PrevShadowStep,M,H,PROMOTE,record step -= 1,0
+0x80162DE8,engine,UpdateObj68MatrixZXY,UpdateObj68MatrixZXY,M,H,PROMOTE,"model +0x34 matrix = identity, RotateMatrixZ, X, Y: the ZXY order of UpdateObj68Matrix",0
+0x80162E48,engine,UpdateObj68MatrixZYX,UpdateObj68MatrixZYX,M,H,PROMOTE,"the same in Z, Y, X order",0
+0x80162EA8,engine,UpdateObj68MatrixYZX,UpdateObj68MatrixYZX,M,H,PROMOTE,"the same in Y, Z, X order",0
 0x80163234,engine,SetObj68VelFromAccel,SetObj68VelFromMoveSpeed,M,H,FIX,"AddObj68MoveSpeedSetVel(o, 0, 0, 0): vel = the move speed. Was SetObj68VelFromAccel",0
+0x801636D0,engine,SpawnSweepHitSparks,ShowSweepHitNumbers,M,H,FIX,"for each sweep result that hit an actor (bit 0), ShowNumberAt the hit point D_80126B18[i] with the damage (mode 0): numbers, not sparks",0
+0x80163A58,engine,RunFusionThrowState,RunFusionThrowState,M,H,PROMOTE,D_801900BC[state](obj): the Fusion throw object's states,0
+0x80163A94,engine,StartFusionThrow,StartFusionThrow,M,H,PROMOTE,"the throw's first step: timer 0x10, effect 0xD, push -0x200000 forward, next state",0
+0x80163C2C,engine,FusionThrowFlyStep,FusionThrowFlyStep,M,H,PROMOTE,"the throw's flight (50 lines): the sweep hits, SE, next states, CollectPickupsNear",0
+0x80163EC8,engine,FusionThrowStuckStep,FusionThrowStuckStep,M,H,PROMOTE,"stuck in a target (89 lines): the assimilate gauge, the scale and position eased",0
+0x80164270,engine,FusionThrowReturnStart,FusionThrowReturnStart,M,H,PROMOTE,"UpdateObj68MatrixYXZ, timer 0x20, next state",0
+0x801642AC,engine,FusionThrowReturnStep,FusionThrowReturnStep,M,H,PROMOTE,"the return flight with SE, next state, CollectPickupsNear",0
+0x8016432C,engine,FusionThrowCatchStep,FusionThrowCatchStep,M,H,PROMOTE,"the catch: parts back on Musashi, SE, FreeObj68",0
+0x80164744,engine,RunRingState,RunRingState,M,H,PROMOTE,"D_80190110[state](obj), then UpdateObj68Matrix while it has a model",0
+0x801647A4,engine,StartRing,StartRing,M,H,PROMOTE,"PlaceAtHand and next state, else FadeRing",0
+0x80164864,engine,RingGrowStep,RingGrowStep,M,H,PROMOTE,"the ring grows and spins, next state at its size",0
+0x80165374,engine,EnterUseAbility,EnterUseAbility,M,H,PROMOTE,"CheckAbilityFails, SetKindAndState(p, 0x17), +0x197 = 1, RunAbilityUse",0
+0x801658EC,engine,SetAbilityUsed,SetAbilityUsed,M,H,PROMOTE,D_80078EC4 = 1,0
+0x80165900,engine,GetAbilityUsed,GetAbilityUsed,M,H,PROMOTE,returns D_80078EC4,0
+0x80165B6C,engine,AbilityFailState0,AbilityFailState0,M,H,PROMOTE,"StayedGrounded, then StartAbilityFailMotion",0
+0x80165BFC,engine,AbilityFailStep,AbilityFailStep,M,H,PROMOTE,"at the motion's end EndAbilityFailFace, LeavePlayerKind, ResetPlayerKind",0
+0x80166018,engine,RunDustFxState,RunDustFxState,M,H,PROMOTE,D_801903EC[state](obj): the dust effect's states,0
+0x80166054,engine,DustFxSetup,DustFxSetup,M,H,PROMOTE,"the dust effect's set-up (43 lines), then DustFxStep, freed at the end",0
+0x801663FC,engine,RunPuffFxState,RunPuffFxState,M,H,PROMOTE,D_801903F4[state](obj): the puff effect's states,0
+0x80166618,engine,RunTrailFxStateA,RunTrailFxStateA,M,M,KEEP,"D_801904BC[state](obj); A / B are the two trail effects (trail 4 and 5), a letter pair, M",0
+0x80166654,engine,RunTrailFxStateB,RunTrailFxStateB,M,M,KEEP,"D_801904CC[state](obj); letter pair, M",0
+0x80167540,engine,GlowFxStep,GlowFxStep,M,H,PROMOTE,"the glow effect's step: DrawGlowFx at the owner, next state, freed at the end",0
+0x80167714,engine,GlowFxPulse,GlowFxPulse,M,H,PROMOTE,"the glow's pulse: DrawGlowFx, the state counts back, freed at the end",0
+0x801678B4,engine,RunGlowFxState,RunGlowFxState,M,H,PROMOTE,D_801904DC[state](obj): the glow effect's states,0
+0x80167A9C,engine,RunHeldGlowFxState,RunHeldGlowFxState,M,H,PROMOTE,D_801904E8[state](obj): the held glow's states,0
+0x801681FC,engine,TrailFxSetupA,TrailFxSetupA,M,M,KEEP,"ResetSwordTrail(o, 4, 4, ..) from the table: trail effect A (trail 4); letter pair, M",0
+0x80168328,engine,TrailFxStepA,TrailFxStepA,M,M,KEEP,"UpdateSwordTrail and DrawSwordTrail, freed when it ends; letter pair, M",0
+0x801683D8,engine,TrailFxFadeA,TrailFxFadeA,M,M,KEEP,"the fade of trail A; letter pair, M",0
+0x80168430,engine,TrailFxSetupB,TrailFxSetupB,M,M,KEEP,"ResetSwordTrail(o, 5, 0x3B, 2): trail effect B (trail 5); letter pair, M",0
+0x80168540,engine,TrailFxStepB,TrailFxStepB,M,M,KEEP,"trail B's step; letter pair, M",0
+0x801685EC,engine,TrailFxFadeB,TrailFxFadeB,M,M,KEEP,"trail B's fade; letter pair, M",0
+0x80168744,engine,RunRingFxState,RunRingFxState,M,H,PROMOTE,D_80190500[state](obj): the ring effect's states,0
+0x801689D8,engine,RunSparkFxStateA,RunSparkFxStateA,M,M,KEEP,"D_80190508[state](obj); spark effect A / B, letter pair, M",0
+0x80168AA8,engine,RunSparkFxStateB,RunSparkFxStateB,M,M,KEEP,"D_80190510[state](obj); letter pair, M",0
+0x80168D58,engine,RunShardFxState,RunShardFxState,M,H,PROMOTE,D_80190518[state](obj): the shard effect's states,0
+0x8016901C,engine,RunStreakFxStateA,RunStreakFxStateA,M,M,KEEP,"D_80190520[state](obj); streak effect A / B, letter pair, M",0
+0x801693CC,engine,RunStreakFxStateB,RunStreakFxStateB,M,M,KEEP,"D_80190528[state](obj); streak effect B, letter pair, M",0
+0x80169830,engine,RunFlashFxState,RunFlashFxState,M,H,PROMOTE,D_80190530[state](obj): the flash effect's states,0
+0x80169B80,engine,RunBoltFxState,RunBoltFxState,M,H,PROMOTE,D_801905E4[state](obj): the bolt effect's states,0
+0x80169F00,engine,RunBlinkFxState,RunBlinkFxState,M,H,PROMOTE,D_801905EC[state](obj): the blink effect's states,0
+0x80169FE0,engine,BlinkFxStep,BlinkFxStep,M,H,PROMOTE,"StepSpriteAnim, freed at its end",0
+0x8016A020,engine,RunChargeFxState,RunChargeFxState,M,H,PROMOTE,D_80190624[state](obj): the charge effect's states,0
+0x8016A08C,engine,ChargeFxStep,ChargeFxStep,M,H,PROMOTE,"the charge effect's step (28 lines), SE 0x44C and freed at the end",0
+0x8016A700,engine,RunAuraFxState,RunAuraFxState,M,H,PROMOTE,D_80190630[state](obj): the aura effect's states,0
+0x8016AB30,engine,RunDamageNumberState,RunDamageNumberState,M,H,PROMOTE,D_80190678[state](obj): the damage-number effect (kind 0x1D)'s states,0
+0x8016AE5C,engine,DamageNumberRise,DamageNumberRise,M,H,PROMOTE,"the number rises (42 lines), next state",0
+0x8016AFB0,engine,DamageNumberHop,DamageNumberHop,M,H,PROMOTE,"the number hops (49 lines), next state",0
+0x8016B114,engine,DamageNumberFade,DamageNumberFade,M,H,PROMOTE,"the number fades with its timer, freed at 0",0
+0x8016B4BC,engine,RunDefeatFxState,RunDefeatFxState,M,H,PROMOTE,D_801906F4[state](obj): the defeat effect's states,0
+0x8016B4F8,engine,DefeatFxSetup,DefeatFxSetup,M,H,PROMOTE,the defeat effect's set-up: its pieces and a timer (0x2D0 or 0xF0),0
+0x8016B5C0,engine,DefeatFxStep,DefeatFxStep,M,H,PROMOTE,"the defeat effect's step: six pieces drawn, DefeatFxPlacePieces",0
+0x8016BBA4,engine,RunOrbitFxState,RunOrbitFxState,M,H,PROMOTE,D_80190744[state](obj): the orbit effect's states,0
+0x8016C14C,engine,RunLinkFxState,RunLinkFxState,M,H,PROMOTE,D_80190774[state](obj): the link effect's states,0
+0x8016CB84,engine,RunProjectileFxState,RunProjectileFxState,M,H,PROMOTE,D_8019077C[state](obj): the projectile effect's states,0
+0x8016D19C,engine,RunBeamFxState,RunBeamFxState,M,H,PROMOTE,D_80190798[state](obj): the beam effect's states,0
+0x8016D428,engine,RunBeamFxStateB,RunBeamFxStateB,M,M,KEEP,"D_801907A0[state](obj); beam effect B, letter pair, M",0
+0x8016DA30,engine,RunFollowFxState,RunFollowFxState,M,H,PROMOTE,"FollowFxPlace, then D_80190808[state](obj)",0
+0x8016DEA4,engine,RunSplashFxState,RunSplashFxState,M,H,PROMOTE,D_8019083C[state](obj): the splash effect's states,0
+0x8016DEE0,engine,SplashFxEnd,SplashFxEnd,M,H,PROMOTE,"StepSpriteAnim, freed at its end",0
+0x8016DF20,engine,RunSwirlFxState,RunSwirlFxState,M,H,PROMOTE,D_80190844[state](obj): the swirl effect's states,0
+0x8016E5B8,engine,RunScreenFxState,RunScreenFxState,M,H,PROMOTE,D_80190898[state](obj): the screen effect's states,0
+0x80172694,engine,PlayerEvent20,PlayerEvent20,M,H,PROMOTE,returns +0x1F4 & 0x20; the PlayerEvent family,0
