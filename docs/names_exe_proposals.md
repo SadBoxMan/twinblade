@@ -25,7 +25,14 @@ ability packages (`src/abil/`) call them. Nothing here is applied: a later local
   "Found along the way" as fields, not proposed as globals.
 
 ## Summary
-(Counts at the end of the file, in "Totals".)
+* 635 function proposals (365 H, 224 M, 46 L) covering every generic function of the EXE except 9 empty or asm-only
+  ones, and 142 global proposals (101 H, 38 M, 3 L). Details in "Totals" at the end.
+* The largest call counts outside the EXE: the sound request PlaySound (2855 calls), InitModel (781), EaseValue (767),
+  GetFlag / SetFlag (662 / 640), EaseAngle (437), GetProgress (433), GetVar / SetVar (400 / 369), ZeroFill (273),
+  ClearTimeChime (266), PosToSVec (264), QueueImage (263), StartFade / FadeStep (222 / 197, every stage file).
+* Main corrections (see "Found along the way"): the c23F0 "sound bank" load is an XA clip request; g_SoundSlot is
+  based 4 bytes late; game.h ModelObj +0x00 / +0x28 comments; work.h's `tick` comment belongs to +0xA3AA; r272's
+  "status effects" are experience gains; untyped `(void)` prototypes pass their arguments through.
 
 ## Names that already exist only in a comment
 `symbol_addrs.txt` names these in a comment line only ("main program: ..."). They are known, so they are not proposed
@@ -34,8 +41,8 @@ again, but they are not applied yet; the local batch can apply them as they are:
 | address | current | known name | note |
 |---|---|---|---|
 | 0x80029178 | func_80029178 | GetFlag | c23F0: bit n of the 64-byte flag array D_800AE648. 662 calls / 88 files. Its setter func_80029124 is proposed below as SetFlag |
-| 0x8001D130 | func_8001D130 | PartShow | c23F0: clears bit 24 of a part's draw word (model section) |
-| 0x8001D150 | func_8001D150 | PartHide | c23F0: sets bit 24 of a part's draw word (model section) |
+| 0x8001D130 | func_8001D130 | PartShow | c23F0: clears bits 24-30 of part b's draw word (`& 0x80FFFFFF`) |
+| 0x8001D150 | func_8001D150 | PartHide | c23F0: sets bit 24 of part i's draw word |
 | 0x80038698 | func_80038698 | SeqReadHeader | named locally per the r274 brief ("SeqReadHeader is named"), not in this snapshot's symbol files; c8BC OpenSeq calls it before the "MTrk" check (INCLUDE_ASM here) |
 
 ## Math, angles and GTE helpers (0x800123F0-0x800140B8)
@@ -1176,3 +1183,150 @@ above). Reads are counted as for functions: "N refs / M files" outside the EXE, 
 | 0x80075840 | D_80075840 | g_CardFileBuf | the card file image: header (0x200), directory (D_80075A40, 0x280), slot header (D_80075FC0), save (D_80075CC0) | M | c23F0: `D_80075840[0] = 'S'; [1] = 'C'`, MemCardWriteFile(.., D_80075840, 0, 0x200) |
 | 0x80075A40 | D_80075A40 | g_CardDir | the 0x280-byte directory read from the card | H | c23F0 MemCardReadData(&D_80075A40, 0x200, 0x280) |
 | 0x80075CC0 | D_80075CC0 | g_CardSaveBuf | the 0x300-byte save buffer | H | c23F0 SetCardSaveData / GetCardSaveData |
+
+## Found along the way
+
+### General, math, primitives, loader, game state
+* **Work fields read as bare globals.** The C reaches many Work fields (Work = 0x800AF630) through `D_` symbols; they
+  should become Work field accesses (or keep a field-named alias), not new globals. The most read: D_800B9A02 = +0xA3D2
+  `frame` (675 refs / 145 files), D_800AF648 = +0x18 `wsm` (362 / 67), D_800B99DA = +0xA3AA (365 / 106, see next),
+  D_800B9A08 = +0xA3D8 `mapId` (115 / 49), D_800B99D8 = +0xA3A8 `tick` (44 / 22), D_800B99DC = +0xA3AC `tickSum`,
+  D_800B9A0A `mapGroup`, D_800B9A04 `exitLoop` (SoftReset), D_800B9A18 `vsyncMode` (the fade speed index),
+  D_800B9A11 = +0xA3E1 (the draw hide mask, model section), D_800B9A13 = +0xA3E3 `pauseMenu`, D_800B9A15 = +0xA3E5
+  (51 refs: set by CheckPauseStart, cleared by the stage code), D_800B99F6 = +0xA3C6 `stateStep`, D_800AF7BC / BE =
+  +0x18C / +0x18E (screen width / height, set by SetScreenMode), D_800AF7CE = +0x19E (the fade level), D_800B93D8 =
+  +0x9DA8 (the debug text records), D_800B97D8 = +0xA1A8 (the image queue).
+* **work.h's `tick` comment is on the wrong field.** "incremented every rendered frame (stage code blinks on its low
+  bits)": main increments +0xA3A8, but the stage code blinks on +0xA3AA (`padA3AA`; `if (D_800B99DA & 1)`, 82 times),
+  which the stage engine increments (src/stage/engine.c:375 `D_800B99DA++`) and ModeTitleLoad zeroes. +0xA3AA wants
+  a name of its own (e.g. `fieldTick`).
+* **Aliases inside g_WorldOtTable.** D_800AA60C (declared `u32 D_800AA60C[][0x1000]` in stg/sc01_000.c) is
+  &g_WorldOtTable[0][0xFFF], so `D_800AA60C[frame]` is the last entry of that frame's OT; D_800A6620 (stg, 14 refs) is
+  &g_WorldOtTable[0][4]; D_800A651C is g_WorldOt[].org. D_800AE610 is the pad-lost frame counter right after the table,
+  and six stage files and AddPrimChecked use its *address* as the table's end. Rewriting these as g_WorldOtTable /
+  g_WorldOt expressions (or naming them as aliases) keeps the link map honest.
+* **Arguments passed through untyped prototypes.** func_80016A5C (DrawPrimLineG2Mtx) and func_800173BC
+  (DrawPrimG3Mtx) are defined `(void)` and call their worker with no arguments, relying on a0 / a1; 41 callers pass two.
+  The same pattern in the stats: func_8002A088 (GainStat0) ignores its parameter and calls func_8002A108() with none,
+  func_8002A2D4 (GainStat1) and func_8002A544 (GainStat3) are defined `(void)` but called with an amount
+  (`func_8002A2D4(d / 10)`, `func_8002A544(0x32)`), and their AddStat*Exp workers are called without one. The matched
+  code depends on a0 surviving, so a prototype should only be changed to `(s32 amount)` where the match still holds.
+* **Twins** (same C body, so likely identical code; no asm here to compare): func_80014070 = func_80015A2C
+  (SVecToVec), func_80014094 = func_80015A50 (VecToSVec), func_8001599C = func_800159C0 (CopyVec), func_80013F3C =
+  func_80017D98 (SetIdentityRot).
+* **r272 readings corrected by the EXE side.** r272's TakeDamageAndRecoil calls func_8002A520 / func_8002A790 "status
+  effects": they are experience gains (GainStat3FromActor / GainStat2FromActor). r272's ScaleByDifficulty says the
+  EXE's func_8002A4FC is "not known": it is GetStat1Value (a stat, not a difficulty).
+* **SoundPack's second field is the BGM id** for the BGM loader (c23F0 `SoundPack.b`, passed to func_800363CC).
+* **QueueImageAt (func_80018450)** fills a slot's x / y / CLUT row but leaves +0xD at 0, so FlushImageQueue ignores
+  them and uses the image list's own coordinates. Either the fields are unused or a caller sets +0xD later.
+* **The memory card code (0x8002AF18-0x8002C3B0) has no caller in the C.** The save screen must call it from code not
+  yet split or through a pointer; the local card should find that caller before trusting SaveCardStep's mode numbers.
+* **D_8010F46C (the item table) is above the EXE** (in an overlay's range) but read by EXE code (GiveItem,
+  AgeItemValues): name it in the overlay that holds it.
+* GetFlag, PartShow and PartHide exist only in a `symbol_addrs.txt` comment (see the table near the top).
+
+### Models, sprites, polygon builders and lights
+* **game.h ModelObj +0x00 comment is wrong**: "2 a 0x38-byte object (func_8001C2C4 / C448 / C558 set it)". Those three
+  set type **1** (kinds 0 / 1 / 7 without parts); type 2 is set only by func_8001CF48 (ResetSprite), the first call of
+  every sprite init (func_8001CB00..func_8001CF00).
+* **game.h ModelObj +0x28 "u32 colour" is wrong** for models: +0x28 / +0x2A are the half width / height of the on-screen
+  test (ResetModelFields sets 200 x 200, SetModelCullBox / `0x7FFF, 0x7FFF` = always drawn, read by IsPointOnScreen).
+  On a sprite the same offsets are the texture's VRAM x / y (r272's StartSpriteAnim writes them).
+* game.h ModelObj fields still unnamed: +0x04 bit 31 hides (DrawModel and DrawSprite skip `+4 < 0`); +0x2C flags bit 0 =
+  the +0x34 matrix is already built (set by func_8001F97C, cleared by DrawTmdModel), 0x10 scale, 0x20 own lights at
+  +0x80, 0x40 Musashi's pose form, 0x80 back colours; +0x2E = first GsDOBJ5 index (kinds 1 / 8); +0x54 = coord.workm
+  written back each draw; +0x74 = DrawShapeModel's screen offset (kind 4); +0x80 = extra-data pointer.
+* r272's evidence for ShowModel / HideModel cites "the EXE's draw (func_8002374C) returns at once when model+4 < 0":
+  func_8002374C is one **sprite** kind's primitive-list drawer; the general tests are in DrawModel (func_8001FB8C) and
+  DrawSprite (func_8001D388), so the bit hides both object types. The conclusion holds; only the cited function is narrow.
+* work.h: +0xA3E1 (`unkA3E1`) is the draw hide mask; +0x198 / +0x19C / +0x2A8 / +0x65A8 (preset packet pointer, preset
+  count, model pool, sprite pool) sit inside `pad18C`. Work.frame and Work.wsm are read as bare globals D_800B9A02
+  (675 refs / 146 files) and D_800AF648 (362 / 68).
+* **Mis-typed prototypes**: src/ovl36/ovl36.c:204 `extern void func_8001CC3C(void *p, s32 a, s32 b, s32 c)` (the
+  definition is `(u8 *o, void *p, s16 x, s16 y)`); src/stage/engine_80144B9C.c:153 `func_8002850C(s32 x, s32 y,
+  s32 z)` (it takes s16 r, g, b colours); src/stage/engine_801458E0.c:79 `extern void func_8001D074()` although it
+  returns the object (its wrappers func_80146554 / 80146578 / 801465C0 are void and hand the result on in v0, as does
+  func_801465E4 for func_8001CFDC). Harmless `s32` vs `void` K&R externs: func_8001C214 (sc06_000, sc04_009, sc03_024),
+  func_8001CA1C (sc03_014 / sc03_015 and their _o0 / _post copies), func_8001D0E8 (sc02_037), func_800233CC (abil ovl31).
+* func_80021174 is defined with an unused third parameter; func_800221A8 calls it through a cast with two
+  (MATCH-TRICK comment), DrawTmdModel with two through a K&R extern.
+* func_8001CF48 is called with no arguments by seven of the sprite inits (K&R pass-through of a0, documented in
+  decomp_recipes); func_8001E094 is called the same way from 11 stage files.
+* **Near-duplicates** (byte identity not checkable here: no asm or ROM in the checkout): func_8001C044 / func_8001C0C8
+  (same behaviour, for vs do-while); func_8001C320 / func_8001C5B8 differ only in the kind constant (1 / 8);
+  func_8001C214 / C4A4 / C810 only in the kind (0 / 7 / 5); the six no-parts inits (C2C4, C448, C558, C6E4, C7B0, C8C4)
+  only in the kind; func_80028428 / func_80028558 only in the `id < 3` test.
+* func_8001C14C's loops stop after 4 objects of each pool (Work+0x6688 and +0x4B8), so it clears only the reserved
+  slots 0-3, not the pools: worth checking that engine_80144B9C's caller expects that.
+* Work+0xA3AA (`padA3AA` in work.h, D_800B99DA in main.c / sc02_011) is a live counter: the env-map builders scroll
+  their uv by it.
+
+### Sound driver
+* **g_SoundSlot is based 4 bytes late.** The 0x18-byte slot records start at 0x800A463C: InitSound sets
+  `D_800A463C = 0x1010` (slot 0's SPU address, start of user SPU RAM) and then "slots 0-3" 0x10000 / 0x14000 /
+  0x18000 / 0x39F00, which through the current struct are slots 1-4's addresses. The code reads slot n's address as
+  `(&D_800A463C)[n * 6]` (func_8002FB08, func_8002FF0C, func_800301C8, func_80037144), and
+  `g_SoundSlot[4].spuAddr` (0x800A46B4) is not a slot field at all: it is the CD fade-out level (FadeOutMusic sets
+  0xFFFF, func_8002D29C lowers it by D_800A46B8). Rebasing the symbol to 0x800A463C with spuAddr at +0 would fix both.
+  The struct comment "Five slots with an SPU RAM address each (0x10000, 0x14000, ...)" is wrong for the same reason.
+* **The SoundChan comment** ("0-7 and 8-15 are initialised differently") hides the split: 0-7 are SFX tracks,
+  8-15 the SFX voices (SPU 16-23). Code also reaches past the array (`&g_SoundChan[16]` = D_800A4C28 voice attrs,
+  `g_SoundChan + 0x812/0x816/0x82F/0x831` = D_800A4EFA / D_800A4EFE / D_800A4F17 / D_800A4F19).
+* **c23F0 comments on the "sound bank" load.** func_8001B0D4's comment ("Load a sound bank file ... start it
+  (func_80036AF8)") and LoadQueueStep's "5 a sound bank": func_80036AF8 queues an XA clip (code `0x4000 | bank<<9 |
+  row<<4 | channel`, step func_80035270, cancel func_800359B0 fades CD input and pauses); it loads nothing into a
+  bank. Banks go through LoadFileStep state 7 (func_8002FD14). GetStreamState's comment "8 finished" is the error
+  flag D_80076214 (timeout or shell open) reported once.
+* **PsyQ "SpuRead" at 0x8003C438 is used as an upload.** Every call sends a main-RAM buffer to SPU RAM after
+  SpuSetTransferStartAddr: func_8002FC64 right after CdGetSector, func_800377D8 for VAB body sectors. It is probably
+  SpuWrite; needs a check against the library object (no asm in the tree).
+* **Prototype mismatches:** func_8002D4C8 is defined `s32` with no return statement (c8BC) but `void` in main.c and
+  the overlays; func_80036EE8 is `s32` with no return; func_8002D844 `s32` vs `void` (sc07_007); func_8002D858 `s16`
+  vs `void` (ovl39.c, ovl39_800D0100.c); func_8002D8A8 / func_8002D8D4 `s32` vs `void` (ovl39_800D1E18);
+  func_8003836C `u8` (definition) vs `s16` (c23F0:933); func_80038308 `s32` vs `s16 n` (c23F0:252);
+  func_800363CC `CdlLOC *` vs `CdFileLoc *` (c23F0); func_8002F5C8 `u16 *` vs `void *` (ovl36); func_8002D80C `u16`
+  vs `s32` (sc06_025). Inside c8BC func_8002DC68 is declared twice (no-proto and full) and func_80016714 three times.
+  c23F0 lines 196-674 carry many unused externs of this file's functions.
+* **Same C bodies (not byte-checked, no asm):** func_80037004 = func_80037334; func_80037EA0 and func_80037F3C are
+  the two voice loops of func_80037FC4; func_80038958 = the first loop of func_80038A58; func_8003916C = the
+  `stop_i` inline and func_800391D4 = `off_i` (also the body of func_80039B20); func_800347C8 = the loop in
+  func_8003491C; func_8002F150 / func_8002F1CC = func_8002F248 cases 2 / 3; func_8002EA10 = first half of
+  func_8002EB10 and func_8002EAB0 = tail of func_8002EBAC; func_80038908's volume formula appears 3 times in
+  func_80038A58; func_8002CFE4's body is inlined at the end of func_8002D4C8, 8002D59C, 8002D6D8, 8002DF80, 8002F80C;
+  func_8002D4C8 and func_8002D59C differ only in how the owner is packed.
+* **Small oddities:** PlaySfx case 10 has no `break` after func_800322A8, so a type-10 SFX also runs the type-8 path
+  (plausibly original); func_8002EAB0's `flags` argument is unused; func_8002EE64 has a dead local (`c = 0x88`);
+  func_80039F14's address arithmetic is written out longhand (it is `a + b * 0x1A`).
+* `func_8002C410` (code_8002C410.c) only references library functions with zero arguments, it is a link-forcing
+  stub, never meant to run.
+
+## What is left
+* **Not named (9):** six empty functions in the model range (0x8001F974, 0x80028234, 0x800282FC, 0x80028A30, 0x80028A38,
+  0x80028A40) and three INCLUDE_ASM ones whose bodies are not in the C (0x8001D3FC, 0x8001EFE0, 0x80023BF0). The four
+  INCLUDE_ASM sound functions are named from their callers only (M); check them against the asm locally.
+* **L rows (46 functions, 3 globals)** need a look in game or in the asm before applying: the option flags 0xD-0x13,
+  flag 0x7F, the ending flag (D_80075838), the bonus count, GainBonus, IncStartCount, AgeItemValues, AllItemsMarked,
+  the empty Init / Load hooks, LoadExtraSoundFile, PlayProgressSounds, IsProgress200To599, ZeroRect, GetCardDirWord,
+  and the L rows of the model and sound sections.
+* **The four stats are numbered, not named.** Stat 0 grows from defeated enemies, stat 1 from walking (and reduces
+  something by its value), stats 2 and 3 from hitting enemies (bytes +0xC9 / +0xC8 of their records). A look at the
+  status screen in game would turn Stat0..Stat3 into the game's own names (the Stat* and CalcPower* names follow).
+* **Tables whose contents are not in the C** (no data here): the sprite and model draw tables (so the sprite-kind inits
+  are named by kind number), the SFX table D_8006451C, the BGM table D_80068B5C, the rumble patterns D_80062C04 /
+  D_80062C14 (stage code starts them often; worth a name once their bytes are read).
+* **Globals not proposed:** status-block fields read as bare globals whose meaning the C does not settle (D_80078EC1,
+  90 refs / 41 files, compared with 5, 8, 0x15; D_80078EBA, 53 / 7, tested for 0 / 3 / 4; D_80078EB2..EB8, four values
+  set to 0xFA for the demo, probably HP / BP and their maximums; D_80078EBF, D_80078EC0, D_80078EC6, D_80078EC8,
+  D_80078EA4). They belong in a status struct in include/ rather than as separate names.
+* Work fields: see "Found along the way"; the local card should add field names to include/work.h rather than name
+  the `D_` aliases.
+
+## Totals
+* **Functions:** 648 generic EXE functions at the snapshot. 635 proposed: **365 H, 224 M, 46 L**. 9 not named (empty or
+  asm without evidence). 4 already known and listed separately (GetFlag, PartShow, PartHide from the `symbol_addrs.txt`
+  comment; SeqReadHeader per the brief).
+* **Globals:** 142 proposed: **101 H, 38 M, 3 L** (six of them as Work field names in the model section).
+* By area (functions): math and copies 72, screen primitives / fades / image queue 50, debug text 11, load queue and
+  boot 42, game state 62, stats / items / save request 64, memory card 10, models / sprites / lights 123, sound driver
+  201. The model and sound sections come from two read-only helper passes, checked here on their key claims.
