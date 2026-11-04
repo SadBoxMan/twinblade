@@ -277,7 +277,7 @@ address,scope,current,proposed,confidence,source,note
 0x8002B00C,exe,func_8002B00C,GetCardSaveData,H,r274:names_exe_proposals.md:458,
 0x8002B064,exe,func_8002B064,ChecksumSlotHeader,H,r274:names_exe_proposals.md:459,
 0x8002B08C,exe,func_8002B08C,ChecksumSaveData,H,r274:names_exe_proposals.md:460,
-0x8002B0B4,exe,func_8002B0B4,SaveCardStep,H,r274:names_exe_proposals.md:461,
+0x8002B0B4,exe,func_8002B0B4,CardStep,H,r274:names_exe_proposals.md:461,"r278: was SaveCardStep; VAGUE (r277): the card state machine (on g_CardStep, D_800760AC) dispatches check / save / load / mode 3 on mode & 7, not save-only; r277's MemCardStep not taken: the EXE links LIBMCRD, whose MemCard* names are in symbol_addrs_psyq.txt, so a MemCard prefix would read as a library function"
 0x8002C320,exe,func_8002C320,CheckCardSlots,H,r274:names_exe_proposals.md:462,
 0x8002C3B0,exe,func_8002C3B0,CountCardBlocks,H,r274:names_exe_proposals.md:463,
 0x8002C410,exe,func_8002C410,ForceLibraryLink,H,r274:names_exe_proposals.md:281,

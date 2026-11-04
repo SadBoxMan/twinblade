@@ -93,10 +93,10 @@ address,scope,current,proposed,confidence,source,note
 0x800D22E4,ovl:36,func_800D22E4,MoveByVelocity,H,r271:mode_overlays.md:1361,conf inferred (source lists H or strong M only)
 0x800D2318,ovl:36,func_800D2318,AnglesFromPackedDir,H,r271:mode_overlays.md:1362,"conf inferred (source lists H or strong M only); conflict resolved over Effect_AnglesFromPacked (owning card (r271 mode_overlays, field overlay); the package-side name has a Module_ prefix and the C takes a FieldDir *)"
 0x800D23D0,ovl:36,func_800D23D0,AnglesFromVector,H,r271:mode_overlays.md:1363,conf inferred (source lists H or strong M only)
-0x800D2468,ovl:36,func_800D2468,ClearStageMenu,H,r271:mode_overlays.md:1364,conf inferred (source lists H or strong M only)
-0x800D24A0,ovl:36,func_800D24A0,OpenStageMenu,H,r271:mode_overlays.md:1365,conf inferred (source lists H or strong M only)
-0x800D25FC,ovl:36,func_800D25FC,StageMenuUpdate,H,r271:mode_overlays.md:1366,conf inferred (source lists H or strong M only)
-0x800D2624,ovl:36,func_800D2624,CloseStageMenu,H,r271:mode_overlays.md:1367,conf inferred (source lists H or strong M only)
+0x800D2468,ovl:36,func_800D2468,ClearStageMode,H,r271:mode_overlays.md:1364,conf inferred (source lists H or strong M only); r278: was ClearStageMenu; one word for the 0x80115110 block (r277 pattern 6): engine_H's g_StageMode (the C's typedef is StageMode); the functions take the same word
+0x800D24A0,ovl:36,func_800D24A0,OpenStageMode,H,r271:mode_overlays.md:1365,conf inferred (source lists H or strong M only); r278: was OpenStageMenu; one word for the 0x80115110 block (r277 pattern 6): engine_H's g_StageMode (the C's typedef is StageMode); the functions take the same word
+0x800D25FC,ovl:36,func_800D25FC,StageModeUpdate,H,r271:mode_overlays.md:1366,conf inferred (source lists H or strong M only); r278: was StageMenuUpdate; one word for the 0x80115110 block (r277 pattern 6): engine_H's g_StageMode (the C's typedef is StageMode); the functions take the same word
+0x800D2624,ovl:36,func_800D2624,CloseStageMode,H,r271:mode_overlays.md:1367,conf inferred (source lists H or strong M only); r278: was CloseStageMenu; one word for the 0x80115110 block (r277 pattern 6): engine_H's g_StageMode (the C's typedef is StageMode); the functions take the same word
 0x800D2650,ovl:36,func_800D2650,DrawTextLine,H,r271:mode_overlays.md:1368,conf inferred (source lists H or strong M only)
 0x800D27DC,ovl:36,func_800D27DC,DrawQuadRow,H,r271:mode_overlays.md:1369,conf inferred (source lists H or strong M only)
 0x800D29F8,ovl:36,func_800D29F8,DrawBarList,H,r271:mode_overlays.md:1370,conf inferred (source lists H or strong M only)
@@ -112,8 +112,8 @@ address,scope,current,proposed,confidence,source,note
 0x800D3764,ovl:36,D_800D3764,g_AbilityPackageTable,H,r271:mode_overlays.md:1380,conf inferred (source lists H or strong M only)
 0x800D384C,ovl:36,D_800D384C,g_Slot3PackageTable,H,r271:mode_overlays.md:1381,conf inferred (source lists H or strong M only)
 0x800D38D8,ovl:36,D_800D38D8,g_DigitGlyphs,H,r271:mode_overlays.md:1383,conf inferred (source lists H or strong M only)
-0x80115110,ovl:36,D_80115110,g_StageMenu,H,r271:mode_overlays.md:1386,conf inferred (source lists H or strong M only)
-0x8011DB24,ovl:36,D_8011DB24,g_StageMenuUpdate,H,r271:mode_overlays.md:1385,conf inferred (source lists H or strong M only)
+0x80115110,ovl:36,D_80115110,g_StageMode,H,r271:mode_overlays.md:1386,"conf inferred (source lists H or strong M only); r278: was g_StageMenu; one word for the 0x80115110 block (r277 pattern 6): engine_H's g_StageMode (the C's typedef is StageMode); same address and symbol as engine_H's row: define it once, in the engine's symbol file"
+0x8011DB24,ovl:36,D_8011DB24,g_StageFrameHook,H,r271:mode_overlays.md:1385,"conf inferred (source lists H or strong M only); r278: was g_StageMenuUpdate; same address as engine_H's g_StageFrameHook (the hook StageModeUpdate calls; the engine and the stages set it next to OpenStageMode): one symbol, the engine's name, define it once in the engine's symbol file"
 0x80127084,ovl:36,D_80127084,g_FullReload,H,r271:mode_overlays.md:1384,conf inferred (source lists H or strong M only)
 0x800CEE74,ovl:37,func_800CEE74,DebugMenuMain,H,r271:mode_overlays.md:1392,conf inferred (source lists H or strong M only)
 0x800CEF00,ovl:37,func_800CEF00,DebugMenuInit,H,r271:mode_overlays.md:1393,conf inferred (source lists H or strong M only)

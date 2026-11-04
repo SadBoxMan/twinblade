@@ -279,16 +279,16 @@ address,scope,current,proposed,confidence,source,note
 0x80146AFC,engine,func_80146AFC,AllocEffect,H,r272:names_stage_engine_proposals.md:482,
 0x80146B9C,engine,func_80146B9C,AllocEffectFromEnd,H,r272:names_stage_engine_proposals.md:483,
 0x80146C3C,engine,func_80146C3C,FreeEffect,H,r272:names_stage_engine_proposals.md:490,
-0x80146C98,engine,func_80146C98,SetEffectState,H,r272:names_stage_engine_proposals.md:493,
-0x80146CA0,engine,func_80146CA0,NextEffectState,H,r272:names_stage_engine_proposals.md:494,
-0x80146CB4,engine,func_80146CB4,PrevEffectState,H,r272:names_stage_engine_proposals.md:495,
-0x80146D80,engine,func_80146D80,ClearEffectVel,H,r272:names_stage_engine_proposals.md:498,
-0x80146D90,engine,func_80146D90,ClearEffectAccel,H,r272:names_stage_engine_proposals.md:502,
-0x80146DB8,engine,func_80146DB8,SetEffectAccelV,H,r272:names_stage_engine_proposals.md:503,
-0x80146DE8,engine,func_80146DE8,SetEffectAccel,H,r272:names_stage_engine_proposals.md:501,
-0x80146DF8,engine,func_80146DF8,SetEffectAccelClamped,H,r272:names_stage_engine_proposals.md:504,
-0x80146E90,engine,func_80146E90,SetEffectTimer,H,r272:names_stage_engine_proposals.md:496,
-0x80146E98,engine,func_80146E98,TickEffectTimer,H,r272:names_stage_engine_proposals.md:497,
+0x80146C98,engine,func_80146C98,SetObjState,H,r272:names_stage_engine_proposals.md:493,"r278: was SetEffectState; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x02 = n"
+0x80146CA0,engine,func_80146CA0,NextObjState,H,r272:names_stage_engine_proposals.md:494,"r278: was NextEffectState; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x02 += 1"
+0x80146CB4,engine,func_80146CB4,PrevObjState,H,r272:names_stage_engine_proposals.md:495,"r278: was PrevEffectState; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x02 -= 1"
+0x80146D80,engine,func_80146D80,ClearObjVel,H,r272:names_stage_engine_proposals.md:498,"r278: was ClearEffectVel; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x10..+0x18 = 0"
+0x80146D90,engine,func_80146D90,ClearObjPush,H,r272:names_stage_engine_proposals.md:502,"r278: was ClearEffectAccel; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x24..+0x2C is copied into vel through the pending push D_80127090 (func_80147F78, func_80147B5C), so a stored velocity (r273: Musashi's push), not accel (accel is +0x44); SetObjPush(0, 0, 0)"
+0x80146DB8,engine,func_80146DB8,SetObjPushV,H,r272:names_stage_engine_proposals.md:503,"r278: was SetEffectAccelV; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x24..+0x2C is copied into vel through the pending push D_80127090 (func_80147F78, func_80147B5C), so a stored velocity (r273: Musashi's push), not accel (accel is +0x44); SetObjPush from a vector"
+0x80146DE8,engine,func_80146DE8,SetObjPush,H,r272:names_stage_engine_proposals.md:501,"r278: was SetEffectAccel; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x24..+0x2C is copied into vel through the pending push D_80127090 (func_80147F78, func_80147B5C), so a stored velocity (r273: Musashi's push), not accel (accel is +0x44); +0x24..+0x2C = (x, y, z); r277 suggested SetObjAccel"
+0x80146DF8,engine,func_80146DF8,SetObjPushClamped,H,r272:names_stage_engine_proposals.md:504,"r278: was SetEffectAccelClamped; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x24..+0x2C is copied into vel through the pending push D_80127090 (func_80147F78, func_80147B5C), so a stored velocity (r273: Musashi's push), not accel (accel is +0x44); SetObjPush with each axis clamped to +-limit"
+0x80146E90,engine,func_80146E90,SetObjTimer,H,r272:names_stage_engine_proposals.md:496,"r278: was SetEffectTimer; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; +0x1C = n"
+0x80146E98,engine,func_80146E98,TickObjTimer,H,r272:names_stage_engine_proposals.md:497,"r278: was TickEffectTimer; generic object-record helper (r277 VAGUE family): callers pass Musashi, actors, 0x68 objects and effects, not only effects; count +0x1C down, 1 at 0"
 0x80146F58,engine,func_80146F58,RotateByCamera,H,r272:names_stage_engine_proposals_2.md:253,
 0x80147078,engine,func_80147078,SetKindAndState,H,r272:names_stage_engine_proposals.md:644,
 0x80147084,engine,func_80147084,ShowPlayerScene,H,r272:names_stage_engine_proposals.md:633,
