@@ -426,3 +426,96 @@ sub-counts (BumpSub1 / BumpSub2), +0x200 a timer. Stage code drives Musashi in c
 | 0x801746DC | func_801746DC | TakePlayerControlNoStop | the same with SetPlayerAction | H | e58E0; 22 calls |
 | 0x80174784 | func_80174784 | StartActionTable | StartPlayerAction(func_801747CC): run D_80190B70[phase] | M | e58E0 |
 | 0x801747AC | func_801747AC | EndActionTable | EndPlayerAction | M | e58E0 |
+
+## Sound requests
+
+The engine has no sound driver of its own: everything goes to the EXE's request function func_8002D4C8(id, arg)
+(src/code_8002C8BC.c: ids below 0x80 go to func_8002E138, 0x100-0x3FF to func_8002D904, 0x400 and up to func_8002DC68
+with the argument). The EXE side is out of this card's scope; the names below assume it ends up as something like PlaySound, so the
+engine side says PlaySe / PlaySound... in step with it.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80147324 | func_80147324 | PlaySe | request a sound, unless it is the id held in D_8012707C (that one is skipped once and the hold cleared) | H | e58E0. 338 calls / 80 files: `func_80147324(0x451)`, `func_80147324(e->+0x2C)` / `(e->+0x2E)` (an effect's two sound ids) |
+| 0x80147300 | func_80147300 | PlaySeNow | PlaySePositional(id, 0) without the skip | H | e58E0 |
+| 0x80147364 | func_80147364 | PlaySePositional | on map 0x308D from Musashi's position when on screen (func_8012E5CC), elsewhere func_8002D4C8(id, arg) | H | e58E0. 41 calls / 32 files: `func_80147364(4, 0x92F)` |
+| 0x801472DC | func_801472DC | ResetSkipSe | D_8012707C = 0x451 (the default id to skip once) | M | e58E0 |
+| 0x801472F0 | func_801472F0 | SetSkipSe | D_8012707C = id | M | e58E0 |
+| 0x8012E5CC | func_8012E5CC | PlaySoundAtPoint | the request, only when the point is on screen (within 199 x 169 of the centre) | H | e.c comment |
+| 0x8012E688 | func_8012E688 | PlaySoundAtActor | the same from the actor's model position (always without a model) | H | e.c comment. 169 calls / 44 files: `func_8012E688(a, 0xBA2, 0)` (84x) |
+| 0x80131AC8 | func_80131AC8 | PlayParamSound | the actor's parameter n (key / value list at +0xBC) as a sound id | H | e5F4 |
+
+## Effects
+
+### The effect pool (30 x 0x58 at D_8011D030, handlers D_80126728 by kind, from room +0x5C)
+
+An effect: +0 kind, +2 state, +4 16.16 position, +0x10 velocity, +0x1C timer, +0x20 model, +0x24..+0x2C acceleration,
++0x2C / +0x30 the two spawn values, +0x34 the owner. func_80165CA0 runs the handlers and moves the models.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80146A6C | func_80146A6C | SpawnEffect | an effect of a kind for an owner at (x, y, z) with two values (+0x2C, +0x30) | H | e58E0 (fills func_80146AFC's record). 540 calls / 98 files: `func_80146A6C(0x1B, a, 0, 0, 0, 1, 0)`, `(0x19, a, 0, 0, 0, 0, 1)` |
+| 0x80146AFC | func_80146AFC | AllocEffect | the first free effect, filled from a spawn record | H | e58E0 |
+| 0x80146B9C | func_80146B9C | AllocEffectFromEnd | the last free effect | H | e58E0 |
+| 0x80146AB4 | func_80146AB4 | SpawnEffectFromEnd | SpawnEffect into the last free slot | H | e58E0 |
+| 0x80146994 | func_80146994 | SpawnEffectOn | SpawnEffect at (0, 0, 0) (the owner's position is the handler's business) | H | e58E0. 38 calls / 27 files: `func_80146994(0x19, a, 0x06920693, 0)` |
+| 0x80146924 | func_80146924 | SpawnEffectOnLimited | SpawnEffectOn unless n of that kind are out | H | e58E0 |
+| 0x801469C8 | func_801469C8 | SpawnEffectLimited | SpawnEffect unless n of that kind are out | H | e58E0. 18 calls: `func_801469C8(0x53, o, x, y - 0xA0, z, 0, 0, 0x14)` |
+| 0x8014C010 | func_8014C010 | SpawnEffect2 | SpawnEffect kind 2 for an owner with one value | M | e58E0; 10 calls |
+| 0x8014C050 | func_8014C050 | FindEffectByKind | the first effect of a kind | H | e58E0; 31 calls / 24 files |
+| 0x80146C3C | func_80146C3C | FreeEffect | zero its model and the effect | H | e58E0. 427 calls / 98 files (the effect handlers' "delete myself") |
+| 0x80165CA0 | func_80165CA0 | UpdateEffects | each live effect's handler, then each model to its effect's position | H | e58E0 |
+| 0x80165C78 | func_80165C78 | ClearEffects | zero the pool (0xA50) | H | e58E0 (`return func_80016714(&D_8011D030, 0xA50)`) |
+| 0x80146C98 | func_80146C98 | SetEffectState | +2 = n (no counter) | H | e58E0; 1 call |
+| 0x80146CA0 | func_80146CA0 | NextEffectState | +2 += 1 | H | e58E0. 134 calls / 41 files |
+| 0x80146CB4 | func_80146CB4 | PrevEffectState | +2 -= 1 | H | e58E0 |
+| 0x80146E90 | func_80146E90 | SetEffectTimer | +0x1C = n | H | e58E0. 144 calls / 53 files: `(e, rand() & 0xF)`, `(e, 3)` |
+| 0x80146E98 | func_80146E98 | TickEffectTimer | count +0x1C down; 1 at 0 | H | e58E0. 119 calls / 52 files |
+| 0x80146D80 | func_80146D80 | ClearEffectVel | velocity zeroed | H | e58E0 |
+| 0x80146CC8 | func_80146CC8 | AddPushVel | velocity += the pending push (D_80127090..98), the push cleared | M | e58E0 |
+| 0x80146D30 | func_80146D30 | SetPushVel | velocity = the pending push, the push cleared | M | e58E0 |
+| 0x80146DE8 | func_80146DE8 | SetEffectAccel | +0x24..+0x2C = (x, y, z) | H | e58E0. 26 calls / 30 files: `(e, 0, -0x400000, 0)` |
+| 0x80146D90 | func_80146D90 | ClearEffectAccel | SetEffectAccel(0, 0, 0) | H | e58E0 |
+| 0x80146DB8 | func_80146DB8 | SetEffectAccelV | SetEffectAccel from a vector | H | e58E0 |
+| 0x80146DF8 | func_80146DF8 | SetEffectAccelClamped | the same, each axis clamped to +-limit | H | e58E0 |
+| 0x801473EC | func_801473EC | MoveEffect | position += velocity; a moving one gets +0x44 bit 31 | M | e58E0. 25 calls / 16 files |
+| 0x801473DC | func_801473DC | ClearVel | velocity zeroed (a second copy) | H | e58E0 |
+| 0x80147460 | func_80147460 | AddFallSpeed | y position += +0x34 | M | e58E0; 26 calls / 18 files |
+| 0x801477E8 | func_801477E8 | SetFallSpeed | +0x34 = v clamped to +-0x1F0000 | M | e58E0. 27 calls: `(a, 0x40000)`, `(a, -0x120000)` |
+| 0x80147814 | func_80147814 | AddFallSpeedClamped | +0x34 += v, clamped | M | e58E0 |
+| 0x80162FC0 | func_80162FC0 | MoveObj68 | position += velocity (the second pool's) | M | e58E0; 10 calls / 18 files |
+
+### The second pool (20 x 0x68 at D_8011F9D0, handlers from Player +0x1E8 = room +0x54)
+
+Used by the ability packages and by stage code for Musashi-side objects (src/abil/ovl1f.c spawns kinds 0xA and 0x27 with
+func_801466F0 / func_801466B4). Its role is not pinned down: the names say "Obj68" until it is.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801466F0 | func_801466F0 | SpawnObj68 | a 0x68 object of a kind for an owner at (x, y, z) with two values; arg7 picks slots 8-19 instead of 0-7 | M | e58E0. 11 calls / 18 files; abil ovl1f |
+| 0x801466B4 | func_801466B4 | SpawnObj68On | the same at (0, 0, 0) | M | e58E0. 32 calls / 16 files: `func_801466B4(0x1B, a, 1, 0, 1)` |
+| 0x80146608 | func_80146608 | SpawnObj68Limited | SpawnObj68 unless n of the kind are out | M | e58E0 |
+| 0x80146750 | func_80146750 | AllocObj68High | a free slot from 8-19 | H | e58E0 |
+| 0x8014680C | func_8014680C | AllocObj68Low | a free slot from 0-7 | H | e58E0 |
+| 0x80162CCC | func_80162CCC | FreeObj68 | zero its model and the object | H | e58E0. 26 calls / 18 files |
+| 0x8014AB7C | func_8014AB7C | FreeObj68ByKind | FreeObj68 on every object of a kind | H | e58E0 |
+| 0x8014C088 | func_8014C088 | FindObj68ByKind | the first object of a kind | H | e58E0 (abil ovl20 `func_8014C088(a, 1)`); 13 calls / 18 files |
+| 0x80162B1C | func_80162B1C | UpdateObj68s | each object's handler (table[kind - 1], a default when NULL), then its model follows | H | e58E0 |
+| 0x80162AF4 | func_80162AF4 | ClearObj68s | zero the pool | H | e58E0 |
+| 0x80162D28 | func_80162D28 | UpdateObj68Matrix | the model matrix from its rotation (X, Y, Z order via func_800126C4 / func_80012558 / func_800123F0) | M | e58E0; 16 calls |
+
+### Effect helpers stage code calls
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8016AA50 | func_8016AA50 | ShowDamage | effect 0x1D at the actor's hit position with the damage n (n < 0: replace a spare effect, at Musashi) | M | e58E0; called by TakeDamage with the damage dealt. 60 calls / 18 files. Effect 0x1D is read as the damage number pop-up |
+| 0x8016B448 | func_8016B448 | SpawnDefeatEffect | one effect 0x1E (an older one finished first) at the actor's hit position | M | e58E0; TakeDamage calls it (via func_8016B428) when the hit finished the actor, with a rumble |
+| 0x8016B428 | func_8016B428 | ShowDefeat | SpawnDefeatEffect(a, 0) | M | e58E0. 42 calls / 13 files |
+| 0x8016B3F4 | func_8016B3F4 | ShowDefeatAlt | SpawnDefeatEffect(a, 1), then func_8016BA48 | L | e58E0; 5 calls |
+| 0x80130740 | func_80130740 | SpawnHitSpark | effect 0x10 at the actor's position plus an offset | M | e5F4 comment ("effect 0x10") |
+| 0x80143640 | func_80143640 | EmitProp22 | every 2^n frames a prop of kind 0x22 at a random point in a box | M | eC98C; 2 calls |
+| 0x801437D8 | func_801437D8 | EmitProp23 | the same with kind 0x23 | M | eC98C; 15 calls |
+| 0x80144090 | func_80144090 | DrawRingBurst | a ring of 16 white triangles round the actor's screen point (radius +0x1C) | H | eC98C comment |
+| 0x8013C9C4 | func_8013C9C4 | StartCameraShake | a (value, frames) list played into the main camera's y offset (+0x80, D_801269C8) and +0x8C; the pad rumbles too | H | eC98C. 146 calls / 54 files |
+| 0x8013CA14 | func_8013CA14 | UpdateCameraShake | its step | H | eC98C |
+| 0x8013C98C | func_8013C98C | InitCameraShake | cleared | H | eC98C; the stage start calls it |
