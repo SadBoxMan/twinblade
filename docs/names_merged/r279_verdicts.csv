@@ -1074,3 +1074,68 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80149FA8,engine,AfterTalkNop,AfterTalkNop,L,H,PROMOTE,empty; called after a successful TryTalk,2
 0x8014C6D0,engine,ClearPlayerMode1C6,ClearPlayerMode1C6,L,H,PROMOTE,g_Player +0x1C6 = 0; a field-number name,2
 0x8014C6E0,engine,SetPlayerMode1C6,SetPlayerMode1C6,L,H,PROMOTE,g_Player +0x1C6 = 1,2
+0x8014C8F0,engine,SetTargetPointToSafePos,SetTargetPointToLastPos,L,H,FIX,"+0x15C (the aim point) = +0x90, which FinishPlayerFrame fills with last frame's position (+0x88); the safe ground point is +0xA0 (SaveSafeGroundPos), so ""SafePos"" misleads; EnterHitState calls it",2
+0x80151880,engine,GetHitGuardClass,GetHitGuardClass,L,L,KEEP,the hit's +0x3E classified (lines not all read); L,2
+0x80153B58,engine,EmitPlayerSmoke,EmitPlayerSmoke,L,L,KEEP,"every few frames an effect on Musashi (lines not read); ""Smoke"" rests on the effect kind",2
+0x801601AC,engine,StartKind18,StartKind18,L,L,KEEP,"motion 0x21, state 1: kind 0x18's start; the kind has no word",2
+0x801608C0,engine,StartKind1C,StartKind1C,L,L,KEEP,"= 0x41, display flags off, motion 0x24, face: kind 0x1C's start; the kind has no word",2
+0x80169228,engine,DrawStreakFxA,DrawStreakFxA,L,L,KEEP,"a streak quad (DrawPrimG4Mtx), MoveByVelocity; letter pair, L",2
+0x80169584,engine,DrawStreakFxB,DrawStreakFxB,L,L,KEEP,"the other streak quad; letter pair, L",2
+0x8016B91C,engine,DefeatFxPlacePieces,DefeatFxPlacePieces,L,H,PROMOTE,DefeatFxPlacePiece for the three pieces +0x10 / +0x14 / +0x18,2
+0x8016B9F8,engine,DefeatFxOffScreen,DefeatFxOffScreen,L,H,PROMOTE,ProjectPoint of the effect's point: nonzero when it falls off screen (flag 0x1000 aside),2
+0x8016C374,engine,LinkFxFollow,LinkFxFollow,L,L,KEEP,"copies a few bytes between records; ""Follow"" not shown",2
+0x8016CBC0,engine,DrawProjectileTrail,DrawProjectileTrail,L,L,KEEP,lines not read in full; L,2
+0x801723C4,engine,SetPlayerKindD,StartPlayerCarry,L,H,FIX,"LeavePlayerKind, SetKindAndState(p, 0xD) (the carry kind, SwitchToCarry's), +0x178 = the actor, LiftActor: a scripted pick-up; ""SetPlayerKindD"" hides it. The StartPlayer* pattern (StartPlayerFall / Jump / Slide)",2
+0x80172414,engine,PlayerAirStep,PlayerAirStep,L,L,KEEP,lines not read in full; L,2
+0x801285D4,engine,ClearWorkA3E1,ClearWorkA3E1,L,H,PROMOTE,D_800B9A11 (Work +0xA3E1) = 0; an offset name,1
+0x80146360,engine,RunPlayerMarkHandler,RunPlayerMarkHandler,L,L,KEEP,"D_8018EFFC[D_80126BA4](player); what the mark is, not in reach",1
+0x8014A2E4,engine,FindUnhittableActorNear,FindUnhittableActorNear,L,L,KEEP,lines not read in full; L,1
+0x8014A674,engine,IsTimer1BCClear,IsTimer1BCClear,L,H,PROMOTE,+0x1BC == 0; TickTimer1BC's test,1
+0x8014A69C,engine,IsTimer1BDClear,IsTimer1BDClear,L,H,PROMOTE,+0x1BD == 0; TickTimer1BD's test (the bar cooldown),1
+0x8014B5B0,engine,ClearPlayerByte1C4,ClearPlayerByte1C4,L,H,PROMOTE,+0x1C4 = 0; a field-number name,1
+0x8014B5B8,engine,GetPlayerByte1C4,GetPlayerByte1C4,L,H,PROMOTE,returns +0x1C4,1
+0x8014B768,engine,SubGauge24,SubGauge24,L,H,PROMOTE,"g_Status +0x24 (0x80078E9C) -= n, floored at 0; a field-number name",1
+0x801508F8,engine,KeepPlayerInArea,KeepPlayerInArea,L,L,KEEP,with +0x1BF set PullPlayerIntoArea (L); the area is not in reach,1
+0x8015094C,engine,PullPlayerIntoArea,PullPlayerIntoArea,L,L,KEEP,lines not read in full; L,1
+0x80151878,engine,HitHandlerNop,HitHandlerNop,L,H,PROMOTE,empty: the hit table's no-op,1
+0x801518D8,engine,IsHitGuardedMode4,IsHitGuardedMode4,L,L,KEEP,+0x3E classified for mode 4 (lines not all read); L,1
+0x80153C8C,engine,ClearCounter5210,ClearCounter5210,L,H,PROMOTE,D_80115210 = 0; an address name,1
+0x80153C9C,engine,IncCounter5210,IncCounter5210,L,H,PROMOTE,D_80115210 += 1,1
+0x80165700,engine,GetAbilityFanfare,GetAbilityFanfare,L,L,KEEP,"D_801902C8[ability]; ""Fanfare"" (what the value is) is not in the C",1
+0x80165938,engine,ResetCloneCounters,ResetCloneCounters,L,L,KEEP,"D_8012672C / D_8012811C / D_80126B08 = 0 and ClearCounter5210; ""Clone"" is not in the C",1
+0x80165958,engine,IncCloneUseCount,IncCloneUseCount,L,L,KEEP,"D_8012672C += 1; ""Clone"" not in the C",1
+0x801659B8,engine,SetCloneFlag6B08,SetCloneFlag6B08,L,L,KEEP,"D_80126B08 = 1; ""Clone"" not in the C",1
+0x80168F40,engine,DrawShardFx,DrawShardFx,L,H,PROMOTE,"the shard effect's line (DrawPrimLineG2Mtx), red to grey",1
+0x8016A8FC,engine,DrawAuraFx,DrawAuraFx,L,H,PROMOTE,the aura effect's green line (DrawPrimLineG2Mtx),1
+0x8016B6BC,engine,DrawDefeatFx,DrawDefeatFx,L,H,PROMOTE,one defeat piece's triangle (DrawPrimG3Screen),1
+0x8016BF34,engine,OrbitFxAngle,OrbitFxAngle,L,L,KEEP,"copies the position into +0x12 / +0x16 / +0x1A (the vector OrbitFxPlace turns): an offset, not an angle",1
+0x8016BFD0,engine,DrawOrbitQuad,DrawOrbitQuad,L,H,PROMOTE,the orbit quad at the screen (DrawPrimG4Screen) with two colours and a scale,1
+0x8016C74C,engine,ProjectileFxAim,ProjectileFxAim,L,L,KEEP,lines not read in full; L,1
+0x8016C83C,engine,ProjectileFxStep,ProjectileFxStep,L,H,PROMOTE,MoveByVelocity then ProjectileFxMatrix: the projectile effect's step,1
+0x8016E460,engine,DrawSwirlTrail,DrawSwirlTrail,L,L,KEEP,"a quad between two records; ""Trail"" is a reading, L",1
+0x8016E7C8,engine,DrawScreenFxQuad,DrawScreenFxQuad,L,H,PROMOTE,a textured quad (tpage 0x27) at the screen with its angles and colour,1
+0x8016F250,engine,SetPlayerByte1C2,SetPlayerByte1C2,L,H,PROMOTE,g_Player +0x1C2 = 1,1
+0x8016F2C8,engine,ClearPlayerActionFlag02,ClearPlayerActionFlag02,L,H,PROMOTE,g_PlayerAction &= ~0x02000000,1
+0x8016F30C,engine,ClearPlayerActionFlag08,ClearPlayerActionFlag08,L,H,PROMOTE,g_PlayerAction &= ~0x08000000,1
+0x80174EF0,engine,StartCameraPanArg,StartCameraPanArg,L,H,PROMOTE,StartCameraPan with the second value and update mode 1,1
+0x8012EECC,engine,ScaleByDifficulty,ScaleDownByStat1,L,H,FIX,"x - x * GetStat1Value() * 100 / 7680: reduced by stat 1, nothing about difficulty",0
+0x801379EC,engine,DisableMessageVoice,DisableMessageVoice,L,L,KEEP,D_8012752E = 0; see EnableMessageVoice,0
+0x80148094,engine,SlopeScaleMoveSpeed,SlopeScaleMoveSpeed,L,L,KEEP,lines not read; L,0
+0x8014A238,engine,FindUnhittableActorAhead,FindUnhittableActorAhead,L,L,KEEP,lines not read in full; L,0
+0x8014A3E0,engine,RevertMoveAgainstDir,RevertMoveAgainstDir,L,L,KEEP,lines not read in full; L,0
+0x8014B5D8,engine,DrainGauge24,DrainGauge24,L,L,KEEP,lines not read in full; L,0
+0x8014B6F0,engine,AddGauge24,AddGauge24,L,H,PROMOTE,"g_Status +0x24 and its saved copy += n, capped at 0xA1; pair of SubGauge24",0
+0x8014BDE0,engine,NopBDE0,NopBDE0,L,H,PROMOTE,empty,0
+0x8014CBD8,engine,ClearPlayerWord184,ClearPlayerWord184,L,H,PROMOTE,g_Player +0x184 = 0,0
+0x80150B9C,engine,SurfaceNop1,SurfaceNop1,L,H,PROMOTE,empty: a surface-table no-op,0
+0x80150BC8,engine,HurtBySurfaceC003,HurtBySurfaceC003,L,L,KEEP,the surface hit unless technique 3 (lines not all read); L,0
+0x80150F78,engine,SurfaceNop2,SurfaceNop2,L,H,PROMOTE,empty: a surface-table no-op,0
+0x80150FD8,engine,SplashOnSurface,SplashOnSurface,L,L,KEEP,"every few frames an effect (lines not read); ""Splash"" rests on the kind",0
+0x801510B8,engine,SurfaceNop3,SurfaceNop3,L,H,PROMOTE,empty,0
+0x801510C0,engine,SurfaceNop4,SurfaceNop4,L,H,PROMOTE,empty,0
+0x80151130,engine,SurfaceNop5,SurfaceNop5,L,H,PROMOTE,empty,0
+0x8015220C,engine,PitFallWait,PitFallWait,L,H,PROMOTE,"ClearPlayerHittable, TickRespawnWait, then the next state",0
+0x80152A08,engine,LaunchHitWait,LaunchHitWait,L,H,PROMOTE,"ClearPlayerHittable, TickRespawnWait, then the next state",0
+0x80152EFC,engine,FlingHitWait,FlingHitWait,L,H,PROMOTE,"ClearPlayerHittable, TickRespawnWait, then the next state",0
+0x80155C0C,engine,FusionFinisherTurn,FusionFinisherTurn,L,L,KEEP,lines not read in full; L,0
+0x80155F58,engine,FusionComboNop,FusionComboNop,L,H,PROMOTE,empty,0
