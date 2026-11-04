@@ -20,6 +20,32 @@ that everything still matches. Snapshot: main = fab5bf5a (4 Nov 2026).
 * Where a struct already in `include/game.h` names the field (StageActor, Mover, ModelObj, Player), the evidence uses
   its field names; corrections to those comments are in "Struct fields" at the end.
 
+## Summary
+* 482 function proposals: 310 H, 124 M, 48 L. 74 global proposals: 50 H, 24 M. Struct-field proposals for StageActor,
+  Player, the effect record and Camera at the end. Nine names that already exist only in a `symbol_addrs.txt` comment
+  are listed separately (not counted).
+* Coverage: of the 462 engine functions stage code calls, every one with 9 or more call sites is here (plus most below
+  that), and the engine functions around them that the evidence needed.
+* Found along the way (worth a look when the names are applied):
+  * func_8012C044's comment says "in range of Musashi's focus", but the test is distance >= D_801274E0: it is the
+    *out of range* test (hence IsActorFar / DespawnIfFar).
+  * game.h's StageActor +0x00 `state` / +0x02 `sub` are really the kind (handler index) and the state.
+  * StageActor +0x44..+0x4C is acceleration for moving actors (StopWithGravity writes +0x48), not only display flags.
+  * The dump_10 address 0x8012AA80 ("AnimAdvance") is not a function start in today's split.
+  * Several byte-identical copies: func_8012A8B0 = SetScript, func_8017196C / 8017197C / 80171990 = SetPhase /
+    BumpSub1 / BumpSub2, func_8014C168 = FindActorByKind, func_801473DC = ClearEffectVel.
+
+## What is left
+* About 110 stage-called engine functions with fewer than 9 call sites (mostly 1-6), e.g. func_8014CC28,
+  func_8014F3E8, func_801535F4, func_8013CB84, func_80147A84 / func_80147AD4, func_8014B598 / func_8014B5C4,
+  func_801495C4, func_8017303C, func_801726xx readers, func_80162120..func_80162760, func_801696D8 / func_80169A4C.
+* Musashi's own controller (0x80146128-0x8016Exxx: movement, ground and wall handling, the hit handler tables) is only
+  touched where stage code calls into it; most of it is still func_.
+* The ~1850 engine functions no stage code calls were not surveyed except where an area needed them.
+* L rows need a check in game before applying: the fixed kinds 0x1C / 0x205 / 0x39 / 0x83 / 0x13, the 0x68 pool
+  ("Obj68"), the -O0 block player ("Seq"), the HUD panel at D_8011F7A8, the player's +0x4C / +0x7E / +0x1F4 bits.
+* Engine data inside the image (0x8018Dxxx, 0x801EDxxx-0x801EFxxx in SC03_001) is not proposed: it moves per stage.
+
 ## Names that already exist (not re-proposed)
 Already in `symbol_addrs_stage.txt` / `stg/symbol_addrs_engine.txt`: SetScript, FaceHelper, BeginScene, EndScene,
 StartFace(At), StartFaceScript(At), FaceScriptStep, FaceSet, FaceLoad, UpdateWeaponParts, ShowAllParts, HideAllParts,
@@ -80,7 +106,7 @@ second, simpler pool (128 x 0x38 at D_8011DB30, handlers D_80126AEC by kind).
 | 0x8012E57C | func_8012E57C | FindActorByKindArg | the first live actor of a kind whose +0x70 is n | H | e.c comment. 124 calls / 18 files: `func_8012E57C(0x61, n)` (kind 0x61's numbered instances) |
 | 0x8012C044 | func_8012C044 | IsActorFar | Musashi's focus (Player +0x154) is at least D_801274E0 away, or the room's own test D_801274D4 when set | M | e.c. The comment says "in range" but the test is distance >= D_801274E0, i.e. *out* of range. 48 calls / 27 files |
 | 0x8012C0EC | func_8012C0EC | DespawnIfFar | DespawnActor when IsActorFar, returning 1 | M | e.c. 35 calls / 34 files, mostly at the top of a state step (`func_8012C0EC(a)`); the name follows the same reading |
-| 0x8012BF7C | func_8012BF7C | IsFarInDepth | |z - focus z| >= 0x360 | M | e.c comment; no stage calls |
+| 0x8012BF7C | func_8012BF7C | IsFarInDepth | abs(z - focus z) >= 0x360 | M | e.c comment; no stage calls |
 | 0x8012BFA8 | func_8012BFA8 | IsFarFromFocus | squared distance to the focus > 0xFFFFF | M | e.c comment; no stage calls |
 | 0x80178608 | func_80178608 | ResetActors | zero the 96 actors (0x6480 bytes), D_801270C0 = 1, room lights and layer values from the room record | M | e58E0. Named for its first job; the rest is the room's set-up (lights, BG layers, handler tables) and could justify "InitRoomActors" |
 | 0x8017849C | func_8017849C | UpdateActors | per frame: the animation pass (func_8012A908), then every live actor (all while D_801270C0 is 1, else those with animFlags 0x1000): save prev, run its kind's handler (or the hit reaction func_80130D0C), move its model | H | e58E0 |
@@ -91,8 +117,8 @@ second, simpler pool (128 x 0x38 at D_8011DB30, handlers D_80126AEC by kind).
 |---|---|---|---|---|---|
 | 0x8012BEE8 | func_8012BEE8 | TickTimer | count +0x1C down; 1 when it is or reaches 0 | H | e.c comment. 1352 calls / 118 files: `if (func_8012BEE8(a)) NextState(a);` |
 | 0x8012BF10 | func_8012BF10 | TickTimerReload | the same, restarting at n when it runs out | H | e.c comment; 4 calls |
-| 0x8012BF4C | func_8012BF4C | SetTimer | +0x1C = n | H | e.c. 88 calls / 34 files: `(a, 0x1E)`, `(a, (rand() & 0x1F) | 0x20)` before TickTimer loops |
-| 0x8012BF54 | func_8012BF54 | SetHittable | flags5C |= 0x8000 | M | e.c; func_8012DBD0 only hurts actors with flags5C bit 15 (and not 0x4000) |
+| 0x8012BF4C | func_8012BF4C | SetTimer | +0x1C = n | H | e.c. 88 calls / 34 files: `(a, 0x1E)`, `(a, (rand() & 0x1F) \| 0x20)` before TickTimer loops |
+| 0x8012BF54 | func_8012BF54 | SetHittable | flags5C \|= 0x8000 | M | e.c; func_8012DBD0 only hurts actors with flags5C bit 15 (and not 0x4000) |
 | 0x8012BF68 | func_8012BF68 | ClearHittable | flags5C &= 0x7FFF | M | e.c; as above |
 | 0x8012E88C | func_8012E88C | ShowModel | model +4 bit 31 cleared | H | e.c; the EXE's draw (src/code_800123F0.c func_8002374C) returns at once when `*(s32 *)(model + 4) < 0`. 306 calls / 44 files |
 | 0x8012E8A8 | func_8012E8A8 | HideModel | model +4 bit 31 set | H | as above; 180 calls / 61 files. eC98C func_801439FC sets the same bit by hand to hide a shadow with no ground under it |
@@ -227,7 +253,7 @@ whose record has flag 0x100. **Model collision** tests a path against one model'
 
 | address | current | proposed | purpose | conf | evidence |
 |---|---|---|---|---|---|
-| 0x8012F568 | func_8012F568 | HitPlayer | note a hit on Musashi: hitFlags |= flags, +0x3E kind, +0x42 facing, +0x40 damage, the two points | H | e.c comment. 117 calls / 57 files: `func_8012F568(1, 1, facing, damage, &p, &D_801152A8)` |
+| 0x8012F568 | func_8012F568 | HitPlayer | note a hit on Musashi: hitFlags \|= flags, +0x3E kind, +0x42 facing, +0x40 damage, the two points | H | e.c comment. 117 calls / 57 files: `func_8012F568(1, 1, facing, damage, &p, &D_801152A8)` |
 | 0x8012DB84 | func_8012DB84 | HitPlayerFatal | D_80126B50 = 1 (func_8014C978), then HitPlayer(1, 0xC001, 0, 1000) | M | e.c; 15 calls / 8 files, no arguments (falls and instant-death floors). 1000 damage and kind 0xC001 are the reason for "fatal" |
 | 0x8012DF34 | func_8012DF34 | SegmentHitsPlayer | a world segment hits Musashi's model (unless the actor's +0xAA says not), then HitPlayer | H | e.c comment; 11 calls |
 | 0x8012DEB8 | func_8012DEB8 | ActorSegmentHitsPlayer | the same for a segment in the actor's model frame (FaceHelper turns both points), noting the actor's heading | H | e.c comment. 219 calls / 48 files: `if (func_8012DEB8(a, &p0, &p1) == 1)` (weapon / body segments) |
@@ -235,7 +261,7 @@ whose record has flag 0x100. **Model collision** tests a path against one model'
 | 0x8012D664 | func_8012D664 | PointHitsPlayer | a point within r + 0x20 of Musashi's chest (0x40 above his feet): HitPlayer with damage x | H | e.c comment; 7 calls `(&v, 0x10, 0xB4)` |
 | 0x8012D624 | func_8012D624 | ActorTouchesPlayer | PointHitsPlayer from the actor's position | H | e.c. 94 calls / 40 files: `func_8012D624(a, 0x1C, 0xA) == 1` (radius, damage) |
 | 0x8012D714 | func_8012D714 | HitBoxEdgesHitPlayer | the actor's collision box edges (bit 1 x, 2 y, 4 z) tested with ActorSegmentHitsPlayer | H | e.c comment; 9 calls |
-| 0x8012DBD0 | func_8012DBD0 | DamageActorsNear | every hittable actor (flags5C 0x8000, not 0x4000, not already hit by this hit id) within the actor's box radius takes speed/angle/hit id n: flags5C |= 1 | H | e.c. 27 calls / 19 files: `func_8012DBD0(a, 0x50, heading + 0x800, 0x1D)` |
+| 0x8012DBD0 | func_8012DBD0 | DamageActorsNear | every hittable actor (flags5C 0x8000, not 0x4000, not already hit by this hit id) within the actor's box radius takes speed/angle/hit id n: flags5C \|= 1 | H | e.c. 27 calls / 19 files: `func_8012DBD0(a, 0x50, heading + 0x800, 0x1D)` |
 | 0x8012E9C0 | func_8012E9C0 | TakeDamage | pending damage (+0x60) scaled by the init record's +0x30, applied (func_8016AA50); finished: func_8016B428 and a rumble | H | e.c comment; 27 calls / 22 files |
 | 0x80131B14 | func_80131B14 | TakeDamageAndRecoil | the same plus HP (+0x76) -= damage, status effects (func_8002A520 / func_8002A790), the model turned to the knock angle, StopWithGravity | H | e5F4. 45 calls / 36 files |
 
@@ -383,9 +409,9 @@ sub-counts (BumpSub1 / BumpSub2), +0x200 a timer. Stage code drives Musashi in c
 
 | address | current | proposed | purpose | conf | evidence |
 |---|---|---|---|---|---|
-| 0x8016EE94 | func_8016EE94 | SetPlayerAction | +0x1F8 = handler | 0x04000000 | flags, the action's state cleared | H | e58E0 |
+| 0x8016EE94 | func_8016EE94 | SetPlayerAction | +0x1F8 = handler \| 0x04000000 \| flags, the action's state cleared | H | e58E0 |
 | 0x8016EDEC | func_8016EDEC | StartPlayerAction | SetPlayerAction, then (unless Musashi's kind is 0x19 / 0x1A) his state handler and func_80159B3C | H | e58E0. 51 calls / 16 files: `func_8016EDEC(stage_fn, 0x01000000)` |
-| 0x8016EFC8 | func_8016EFC8 | SetPlayerActionScript | +0x1FC = an action script, +0x1F8 = its first handler | flags, phase 1 | H | e58E0 |
+| 0x8016EFC8 | func_8016EFC8 | SetPlayerActionScript | +0x1FC = an action script, +0x1F8 = its first handler \| flags, phase 1 | H | e58E0 |
 | 0x8016EF78 | func_8016EF78 | SetPlayerActionScriptReset | SetPlayerActionScript and func_801726D0 | M | e58E0 (arguments pass through in registers) |
 | 0x8016EE40 | func_8016EE40 | StartPlayerActionScript | the above, then as StartPlayerAction | H | e58E0. 338 calls / 135 files: `func_8016EE40(&stage_script, 0x01000000)` |
 | 0x8016F14C | func_8016F14C | RunPlayerAction | each frame: call the handler (func_80148634 first with flag 0x01000000) | H | e58E0; called from the player update func_80146128 |
@@ -395,12 +421,12 @@ sub-counts (BumpSub1 / BumpSub2), +0x200 a timer. Stage code drives Musashi in c
 | 0x8016F1AC | func_8016F1AC | GetPlayerAction | the handler (+0x1F8 & 0x80FFFFFF) | H | e58E0; 63 calls / 44 files (`if (func_8016F1AC() == 0)`) |
 | 0x8016F1C4 | func_8016F1C4 | PlayerActionBlocksInput | 1 on maps listed at D_801908E8, else the handler unless flag 0x10000000 | M | e58E0; 13 calls |
 | 0x8016F264 | func_8016F264 | ClearPlayerActionFlag01 | +0x1F8 &= ~0x01000000 | M | e58E0 (the flag's meaning: func_80148634 is run before the handler) |
-| 0x8016F288 | func_8016F288 | SetPlayerActionFlag01 | +0x1F8 |= 0x01000000 | M | e58E0 |
-| 0x8016F2A8 | func_8016F2A8 | SetPlayerActionFlag02 | |= 0x02000000 | L | e58E0 |
+| 0x8016F288 | func_8016F288 | SetPlayerActionFlag01 | +0x1F8 \|= 0x01000000 | M | e58E0 |
+| 0x8016F2A8 | func_8016F2A8 | SetPlayerActionFlag02 | +0x1F8 \|= 0x02000000 | L | e58E0 |
 | 0x8016F2C8 | func_8016F2C8 | ClearPlayerActionFlag02 | &= ~0x02000000 | L | e58E0 |
-| 0x8016F2EC | func_8016F2EC | SetPlayerActionFlag08 | |= 0x08000000 | L | e58E0 |
+| 0x8016F2EC | func_8016F2EC | SetPlayerActionFlag08 | +0x1F8 \|= 0x08000000 | L | e58E0 |
 | 0x8016F30C | func_8016F30C | ClearPlayerActionFlag08 | &= ~0x08000000 | L | e58E0 |
-| 0x8016F330 | func_8016F330 | SetPlayerActionFlag10 | |= 0x10000000 (see PlayerActionBlocksInput) | M | e58E0 |
+| 0x8016F330 | func_8016F330 | SetPlayerActionFlag10 | +0x1F8 \|= 0x10000000 (see PlayerActionBlocksInput) | M | e58E0 |
 | 0x8016F350 | func_8016F350 | ClearPlayerActionFlag10 | &= ~0x10000000 | M | e58E0 |
 | 0x80171928 | func_80171928 | NextPlayerActionHandler | the next handler from the action script (+0x1FC[phase]), NextPhase | H | e58E0; 110 calls / 44 files |
 | 0x801718AC | func_801718AC | SetPlayerActionList | a new action script, its first handler, NextPhase | M | e58E0 |
@@ -613,7 +639,7 @@ Stats at 0x80078E78 (EXE bss; e5F4's Stats struct): +0x3A hpMax (0x80078EB2), +0
 | 0x801470B4 | func_801470B4 | HidePlayerAbility | +0x222 = 1 | L | e58E0 |
 | 0x801470C0 | func_801470C0 | ApplyPlayerHidden | model +4 bit 31 from the three hide bytes | H | e58E0 |
 | 0x801472B4 | func_801472B4 | ClearPlayerFlag7E2 | +0x7E &= ~2 | M | e58E0; 43 calls / 43 files, with ShowPlayerScene |
-| 0x801472C8 | func_801472C8 | SetPlayerFlag7E2 | +0x7E |= 2 | M | e58E0; 61 calls / 49 files, with HidePlayerScene |
+| 0x801472C8 | func_801472C8 | SetPlayerFlag7E2 | +0x7E \|= 2 | M | e58E0; 61 calls / 49 files, with HidePlayerScene |
 | 0x8014704C | func_8014704C | ClearPlayerMark4C | +0x4C = 0 | L | e58E0, next to BeginScene / EndScene (+0x4D) |
 | 0x80147054 | func_80147054 | SetPlayerMark4C | +0x4C = 1 | L | e58E0 |
 | 0x80147078 | func_80147078 | SetKindAndState | +0 = kind, +2 = 0 | H | e58E0 (func_801516F0 makes Musashi kind 0x19) |
@@ -635,7 +661,7 @@ Stats at 0x80078E78 (EXE bss; e5F4's Stats struct): +0x3A hpMax (0x80078EB2), +0
 | 0x80172658 | func_80172658 | PlayerState1F4Bit1 | +0x1F4 & 1 | L | e58E0 |
 | 0x80172664 | func_80172664 | PlayerState1F4Bit2 | +0x1F4 & 2 | L | e58E0 |
 | 0x8017267C | func_8017267C | PlayerState1F4Bit8 | +0x1F4 & 8 | L | e58E0 |
-| 0x80172630 | func_80172630 | SetPlayerState1F4Bit100 | +0x1F4 |= 0x100 | L | e58E0; 26 calls |
+| 0x80172630 | func_80172630 | SetPlayerState1F4Bit100 | +0x1F4 \|= 0x100 | L | e58E0; 26 calls |
 
 ### Game flags and counters (wrappers over the EXE's flag store: func_80029178 = GetFlag in symbol_addrs.txt's comment, func_80029124 its setter, func_800291A0 / func_800291B4 the byte variables)
 
