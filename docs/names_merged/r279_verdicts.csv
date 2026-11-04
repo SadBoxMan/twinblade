@@ -63,7 +63,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8012E014,engine,CarryPlayerExact,CarryPlayerExact,M,H,PROMOTE,"Musashi's 32-bit position into the model's frame (WorldToLocal16), UpdateModelZYX, back out (LocalToWorld16); CarryPlayer's +0x74 case",21
 0x8013B7AC,engine,ClearSeqPoint,ClearSeqPoint,M,M,KEEP,"D_801EF328[i].active = 0; stage code clears the four points in a loop. The point table is the eB568 ""Seq"" family (SetSeqPoint sets one at Musashi's position); M with the family until that file's purpose is read",21
 0x8016F1C4,engine,PlayerActionBlocksInput,PlayerActionBlocksInput,M,M,KEEP,"nonzero on the maps listed at D_801908E8, else g_Player +0x1F8's action bits unless bit 28; TickGameClock skips its tick on it. Nothing in reach shows input being blocked; what +0x1F8 holds (and what callers do on 1) would settle it",21
-0x8017ADE8,engine,ShowItemIcon,ShowItemIcon,M,M,KEEP,"only LoadItemIcon(n); stage code calls it with item 0x12 and a sound. Rests on LoadItemIcon (0x8017AD0C, not read here)",21
+0x8017ADE8,engine,ShowItemIcon,ShowItemIcon,M,H,PROMOTE,"LoadItemIcon(n), which moves item n's picture into the HUD (read with LoadItemIcon); stage code shows item 0x12 with a sound",21
 0x80126CBA,engine,g_PlayerTargetOff,g_PlayerTargetOff,M,H,PROMOTE,"g_Player +0x162: func_8014C6F4 sets it when Musashi cannot be targeted, DistSqToTarget returns the maximum then, stage enemies attack only while it is 0",20
 0x80135A4C,engine,PathHitsMovingModel,PathHitsMovingModel,M,M,KEEP,"55-line path test against a model with up to six tries; the ""moving"" part was not checked in reach (KeepPlatformStill and sc02_017 pass a model and its +0x58); M",20
 0x801535F4,engine,MovePlayerObj,MovePlayerObj,M,M,KEEP,"collides the move and returns 2 slope / 1 floor / 4 wall / 0 (CollidePath bits); callers switch on it. ""Move"" is the side effect, the return is the point: a name such as MovePlayerObjSurface would need the hidden middle lines read",20
@@ -78,8 +78,8 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8013B598,engine,SetSeqPoint,SetSeqPoint,M,M,KEEP,"D_801EF328[i] on at a position with +0xC 0x100; stage code puts point 0 at Musashi. Seq family, M with ClearSeqPoint",14
 0x80139A44,engine,SetMessageText,SetMessageText,M,H,PROMOTE,g_MessageTexts[i] = v for i < 4; stage talk code sets slot 0 to the text a window inserts,13
 0x8013C08C,engine,StartSeqBlock,StartSeqBlock,M,M,KEEP,"p+8 = block, p+0xC = block + 0x14, RelocateSeqBlock; InitSeqPlayer's 'C' / 'D' / 'E' cases. Seq family, M",13
-0x801474EC,engine,ResetTiltVectors,ResetTiltVectors,M,M,KEEP,+0x118..+0x12C (three s16 vectors) = 0; the tilt reading rests on readers of +0x118 / +0x120 not in reach,13
-0x8014B944,engine,AddWakeGauge,AddWakeGauge,M,M,KEEP,"g_Status +0x2C (and +0x60) += n, capped at 160 with force or flag 0x1B, else 128; abilities and UpdateWakeGauge add to it. The gauge's meaning (wake / sleep) is not in the C; the HUD that draws it would settle ""Wake""",13
+0x801474EC,engine,ResetTiltVectors,ResetTiltVectors,M,H,PROMOTE,"+0x118 (the smoothed up vector), +0x120 (its target) and +0x128 (the extra) zeroed: the three vectors SmoothTiltUpVector reads",13
+0x8014B944,engine,AddWakeGauge,AddWakeGauge,M,H,PROMOTE,"g_Status +0x2C (and +0x60) += n with the caps; UpdateWakeGauge refills it while Musashi sleeps and drains it awake until he lies down (read with it), abilities add to it",13
 0x80156648,engine,ResetAttackHit,ResetAttackHit,M,H,PROMOTE,"+0x1A8 hit window, +0x1A9 swing frame, +0x1C0 hit landed = 0, ResetClankSe; every attack start (packages and engine) calls it",13
 0x80126CF0,engine,g_PlayerWindow,g_PlayerWindow,M,H,PROMOTE,g_Player +0x198: stage talk steps store OpenMessage's window there and step it through the player's phases,12
 0x8013C360,engine,ApplySeqPatches,ApplySeqPatches,M,M,KEEP,"writes each (address, value) of a list (count at +8, records of 3 words from +0x10); stage code applies one to its model data. Patch is right; Seq is the family word, M",12
@@ -117,7 +117,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x801483E8,engine,SaveSafeGroundPos,SaveSafeGroundPos,M,H,PROMOTE,"TraceMap 8 down: a floor hit (0x2000) right at the feet with surface 0, then +0xA0 = the position; jumps and lifts call it before leaving the ground (the respawn point)",8
 0x8014D738,engine,PushBlock,PushBlock,M,M,KEEP,"PushBlockBody on the scratchpad stack; nonzero makes the running / sliding steps leave their kind. Rests on the body (0x8014D790), not read here",8
 0x80161B18,engine,CheckAssimilatePending,CheckAssimilatePending,M,H,PROMOTE,"no event and +0x44 bit 4: LeavePlayerKind, SwitchToAssimilate, 1. Bit 4 is the assimilate request: CancelAssimilate clears it with the +0x184 assimilate fields",8
-0x80161B84,engine,CheckLieDownFlag,CheckLieDownFlag,M,M,KEEP,"+0x44 bit 8 and HasNoPlayerAction: LeavePlayerKind, TriggerLieDown, 1. Rests on TriggerLieDown (0x801498C0), not read here",8
+0x80161B84,engine,CheckLieDownFlag,CheckLieDownFlag,M,H,PROMOTE,"+0x44 bit 8 and HasNoPlayerAction: LeavePlayerKind, TriggerLieDown (SwitchToLieDown, read), 1",8
 0x801622C4,engine,ExpireDeadline8,ExpireDeadline8,M,H,PROMOTE,"flag 0x141 = 1, var 8 = 0, the three timer sprites zeroed; UpdateDeadline8 calls it when the clock reaches var 8's minute, rest / stage code when GetDeadline8Passed. The Deadline8 family names var 8's timed event",8
 0x80163194,engine,AddObj68AccelByMatrix,AddObj68MoveSpeedByMatrix,M,H,FIX,"adds (x, y, z) to the move speed, then vel = matrix * move speed (through g_PushVel, SetPushVel); package bullets pass their heading matrix. Was AddObj68AccelByMatrix",8
 0x801718AC,engine,SetPlayerActionList,SwitchPlayerActionScript,M,H,FIX,"g_PlayerActionScript = list, D_80126D6C = 0, g_PlayerAction = the first word keeping bits 24-30, NextPhase: a running action moves to another script. engine_H's SetPlayerActionScript (0x8016EFC8) is the full start (sets 0x04000000 and clears the whole state), so this one switches; ""List"" was the only word for the same pointer (was SetPlayerActionList)",8
@@ -149,7 +149,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80147A10,engine,AddMoveSpeedZ,AddMoveSpeedZ,M,H,PROMOTE,"the Z one (AddMoveSpeedZLimit, 0x1F0000)",5
 0x801491C4,engine,GetCameraViewYaw,GetCameraViewYaw,M,H,PROMOTE,"ratan2 of the active camera's base vp - vr (x, z): the view's heading; GetHeadingFromCamera and the airborne step turn by it",5
 0x80149A64,engine,CanSwingSword,CanSwingSword,M,H,PROMOTE,CanSwingFusion || CanSwingLumina; the stand and run steps test it in their action switch,5
-0x8014CB68,engine,RequestTalkCheck,RequestTalkCheck,M,M,KEEP,"g_Player +0x1C5 = 1, no more; that a talk check follows rests on the reader func_80149E94 (r272), not read here",5
+0x8014CB68,engine,RequestTalkCheck,RequestTalkCheck,M,H,PROMOTE,"g_Player +0x1C5 = 1, which TryTalkOnRequest reads (and clears) to talk to a near actor next frame",5
 0x80151C54,engine,EndKnockback,EndKnockback,M,H,PROMOTE,"the knockback's end: the damage +0xF2 taken as HP (DamagePlayerHp) or, for handler 0x11, as BP (SpendBp), scale and fall speed reset, ForgetPlayerHit; both knockback steps call it when the motion ends",5
 0x8015369C,engine,StartRespawnWait,StartRespawnWait,M,H,PROMOTE,"the stage respawn hook D_8011DB28 with the last safe point (+0xA0) when set, then +0xDE = 90 frames; pit and launch falls call it",5
 0x80153800,engine,FindRespawnPoint,FindRespawnPoint,M,M,KEEP,"27 lines not read in full: +0x88 = position, the room entry point when +0xDE > 0x20, +0xDE++; the pit / launch respawn steps call it. M until the middle is read",5
@@ -344,9 +344,86 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8017261C,engine,SetPlayerEvent80,SetPlayerEvent80,M,H,PROMOTE,+0x1F4 |= 0x80; the PlayerEvent family (sc03_121),2
 0x80174714,engine,ReleasePlayer,ReleasePlayer,M,M,KEEP,head not read in full: BeginScene and EndPlayerAction when the first test is 0; M,2
 0x80174824,engine,StartActionTable2,StartActionTable2,M,H,PROMOTE,"StartPlayerAction(RunActionTable2, 0x01000000); StartActionTable's second table",2
+0x8017484C,engine,EndActionTable2,EndActionTable2,M,H,PROMOTE,EndPlayerAction and g_PlayerFlags bit 26 cleared; StartActionTable2's pair,2
+0x80174F28,engine,CameraPanUpdate,CameraPanUpdate,M,H,PROMOTE,D_80190B8C[camera mode +4](cam); StartCameraPan / StartCameraPanArg install it as the camera update,2
+0x8017AD0C,engine,LoadItemIcon,LoadItemIcon,M,H,PROMOTE,"item n's palette row and 32 x 40 picture moved into the HUD's VRAM spot (MoveImage to 0x1C8, 0x190); ScriptStep and ShowItemIcon call it",2
+0x80128158,engine,StageMain,StageMain,M,H,PROMOTE,StageStep; ovl36's field loader calls it as the stage image's entry,1
+0x8012C1DC,engine,NextFreeModel,NextFreeModel,M,H,PROMOTE,"the next model after the actor's own with type 0, else NULL; HeadMarkerSetup takes a model with it",1
+0x8013001C,engine,PlayDistanceSound30,PlayDistanceSound30,M,H,PROMOTE,"parameter sound 0x30 when DistSqToTarget < 0x9000, else 0x31, each falling back to the other; PlayDistanceSound32's twin",1
+0x80132F40,engine,PushPlayerOntoBox,PushPlayerOntoBox,M,M,KEEP,24 lines not read in full: puts Musashi on the box's top in its frame when his path crossed the model; M,1
+0x80133CD4,engine,TraceMapPolygon,TraceMapPolygon,M,M,KEEP,"90 lines: one polygon record's crossing test, the end pushed out, floor / wall normals noted (the end seen); M until read in full",1
+0x8013B568,engine,SetSeqHook,SetSeqHook,M,M,KEEP,"D_8018DC60 = f; LoadRoom installs room +0xA8. Seq family, M",1
+0x8013BC7C,engine,RunSeqState,RunSeqState,M,M,KEEP,"D_8018D4BC[p->state](p); Seq family, M",1
+0x801463A0,engine,FinishPlayerFrame,FinishPlayerFrame,M,H,PROMOTE,"the end of Musashi's frame: weapon parts, ApplyPlayerHidden, BuildPlayerMatrixOnce, ApplyPlayerScale, flags cleared, KeepPlayerInArea, StartDeadlineEvent",1
+0x801468C8,engine,AllocShadow,AllocShadow,M,H,PROMOTE,"the first free of the two 0x2C shadow records at D_8011F750 (+0 kind, +4 owner), or 0; the player set-up takes one",1
+0x80146EC0,engine,PlaceAtObjPoint,PlaceAtObjPoint,M,H,PROMOTE,a point of the object's frame into the world (ObjLocalToWorld16) plus an offset turned by the camera; ovl20's firefly follows Musashi with it,1
+0x80146FC4,engine,RespawnIfFallenOut,RespawnIfFallenOut,M,H,PROMOTE,"when y >= 0x401 (below the map): position, +0x88 and heading from the room entry point D_80126DB0; UpdatePlayer calls it",1
+0x801470A0,engine,HidePlayerSys,HidePlayerSys,M,M,KEEP,"+0x220 = 1; pair of ShowPlayerSys, M with it",1
+0x801474D8,engine,ClearAngleOverride,ClearAngleOverride,M,H,PROMOTE,the override angles +0x130..+0x134 and their mask +0x136 = 0; DeathStart with ResetTiltVectors,1
+0x80147514,engine,SmoothTiltUpVector,SmoothTiltUpVector,M,H,PROMOTE,"+0x118 eased (1/8) toward the target +0x120 plus +0x128, then VectorToAngles into +0x100; BuildPlayerMatrixOnce",1
+0x80147628,engine,BuildTiltedMatrix,BuildTiltedMatrix,M,H,PROMOTE,"the model matrix from +0x102 / +0x100 / +0x104 and the model's angles, each replaced by +0x130.. when +0x136 says so; BuildPlayerMatrixOnce",1
 0x80147C30,engine,AccelFacingFree,AddMoveSpeedFacingFree,M,H,FIX,"AddMoveSpeedToWorld, then vel = the result on all three axes (no kept axes); was AccelFacingFree",1
 0x80147D38,engine,AccelMoveToWorldUnlimited,AddMoveSpeedToWorldUnlimited,M,H,FIX,"AddMoveSpeedX / Y / ZLimit with limit 0x7FFFFFFF, then MoveSpeedToWorld; AddMoveSpeedToWorld without the limit. Was AccelMoveToWorldUnlimited (family renamed with AddMoveSpeedFacing)",1
 0x80147F78,engine,AccelWorld,AddMoveSpeedSetVel,M,H,FIX,"AddMoveSpeedX / Y / Z, then vel (+0x10..) = the move speed +0x24.. as it is, through g_PushVel. Not an acceleration, and nothing world-turned (AddMoveSpeedFacing is the turned one). Was AccelWorld",1
+0x801484E8,engine,GetNextPosePointsA,GetNextPosePointsA,M,M,KEEP,"ReadPosePoints of PeekPlayerMotionPose - 0x10; the A / B pair, M with GetPosePointsA",1
+0x8014856C,engine,GetNextPosePointsB,GetNextPosePointsB,M,M,KEEP,"ReadPosePoints of the next pose - 8; A / B pair, M",1
+0x801490E0,engine,SetTiltTargetX,SetTiltTargetX,M,M,KEEP,"+0x108 = n, set by SetTiltTarget; that +0x108.. is a tilt target is in its readers, not read here (SmoothTiltUpVector's target is +0x120)",1
+0x801490E8,engine,SetTiltTargetY,SetTiltTargetY,M,M,KEEP,+0x10A = n; see SetTiltTargetX,1
+0x801490F0,engine,SetTiltTargetZ,SetTiltTargetZ,M,M,KEEP,+0x10C = n; see SetTiltTargetX,1
+0x80149210,engine,SetDoubleTapWindow,SetDoubleTapWindow,M,H,PROMOTE,the countdown +0x1E4 and window +0x1E6 = n frames; the player set-up passes 8,1
+0x80149228,engine,UpdateDoubleTap,UpdateDoubleTap,M,H,PROMOTE,"a press of the same buttons within the window sets +0x1DC, the countdown restarts at each press; UpdatePlayer each frame",1
+0x801493D0,engine,ObjLocalToWorld16To,ObjLocalToWorld16To,M,H,PROMOTE,"a 16.16 point to SVECTOR, ObjLocalToWorld, back into another 16.16 point; ovl17 places its marks with it",1
+0x8014964C,engine,ObjPoint16ToScreen,ObjPoint16ToScreen,M,H,PROMOTE,"a 16.16 point's whole parts through ObjLocalToWorld and the projection, written back in place; ovl22",1
+0x801497A8,engine,CanUseAbility,CanUseAbility,M,H,PROMOTE,"circle pressed, not kind 0x1A, not the blocking flags, the held ability usable here; CheckUseAbility",1
+0x80149864,engine,TriggerUseAbility,TriggerUseAbility,M,H,PROMOTE,SwitchToUseAbility; after CanUseAbility (the Trigger* pattern),1
+0x801498C0,engine,TriggerLieDown,TriggerLieDown,M,H,PROMOTE,SwitchToLieDown; CheckLieDownFlag (the Trigger* pattern),1
+0x80149B14,engine,ContinueFusionCombo,ContinueFusionCombo,M,H,PROMOTE,"TriggerFusionCombo without resetting +0x1AA: the throw when carrying, else EnterFusionCombo; FusionSwingStep after it advances the step",1
+0x80149BEC,engine,TickActionLock,TickActionLock,M,H,PROMOTE,"+0x223 counts down to 0; UpdatePlayer each frame, the air actions refuse while it runs",1
+0x80149C08,engine,CanAirSlash,CanAirSlash,M,H,PROMOTE,"triangle pressed with the Lumina flags, no action lock, no technique time, not +0x44 bits 0x404; PlayerAirborneStep",1
+0x80149DD8,engine,TryTalkOnSquare,TryTalkOnSquare,M,H,PROMOTE,"square pressed, nothing carried, not bits 0x404: +0x190 = 0, TalkToActor over the actors; TryTalk",1
+0x80149E94,engine,TryTalkOnRequest,TryTalkOnRequest,M,H,PROMOTE,"no action and +0x1C5 set: clear it, TalkToActor over the actors; TryTalk",1
+0x8014A048,engine,TryPickUpActor,TryPickUpActor,M,H,PROMOTE,"square (or triangle with the Lumina flag): the first liftable actor along a segment ahead, +0x178 = it, LiftActor, 1; PlayerRunningStep",1
+0x8014A218,engine,TriggerCarry,TriggerCarry,M,H,PROMOTE,SwitchToCarry; after TryPickUpActor (the Trigger* pattern),1
+0x8014A380,engine,HitActorType1F,StrikeActorKind1F,M,H,FIX,"StrikeActor(actor, 0x1F, 0 damage, Musashi's position, his heading); StrikeTouchedActor calls it. The Strike* family word (StrikeActorFacing / Toward / WithDamage) and kind, not Hit / Type",1
+0x8014A4B4,engine,CanGuardHop,CanGuardHop,M,H,PROMOTE,flag 0x1E and cross pressed; the guard step then TriggerGuardHop,1
+0x8014A4FC,engine,TriggerGuardHop,TriggerGuardHop,M,H,PROMOTE,SwitchToGuardHop; after CanGuardHop (the Trigger* pattern),1
+0x8014A51C,engine,CanDoubleJump,CanDoubleJump,M,H,PROMOTE,"flag 0x1E, cross pressed, not +0x44 bit 10, +0xA8 < 0x19, no action lock; TryDoubleJump",1
+0x8014A638,engine,DecaySquash,DecaySquash,M,M,KEEP,"+0x188 -= 4 (to 0) while +0x44 bit 4. Bit 4 is the assimilate request (CancelAssimilate clears it and +0x188), so +0x188 belongs to the assimilate; ""squash"" (UpdateSquash eases the scale to it) is not settled",1
+0x8014A680,engine,TickTimer1BC,TickTimer1BC,M,H,PROMOTE,"+0x1BC counts down to 0; UpdatePlayer; a field-number timer name, accurate",1
+0x8014A6A8,engine,TickTimer1BD,TickTimer1BD,M,H,PROMOTE,+0x1BD counts down to 0; UpdatePlayer,1
+0x8014A71C,engine,TickWallClimbCooldown,TickWallClimbCooldown,M,H,PROMOTE,+0x1BE counts down to 0; CanWallClimb waits for it,1
+0x8014A738,engine,IsGrabbableNear,IsGrabbableNear,M,H,PROMOTE,flag 0x83 and an actor in reaction 7 within 0x40; the stand step then TriggerGrab instead of the Lumina slash,1
+0x8014A830,engine,TriggerGrab,TriggerGrab,M,H,PROMOTE,SwitchToGrab; after IsGrabbableNear,1
+0x8014A850,engine,CatchGrabbableActor,CatchGrabbableActor,M,M,KEEP,41 lines not read in full (the grabbable actor caught into +0x18C with hit 0x1B); M,1
+0x8014AA28,engine,CancelEC0Mode,CancelTechnique,M,M,FIX,"ends Musashi's kind (unless he is in 0x19-0x1A / 0x1D-0x1E), frees the technique's 0x68 objects (0x13, 0x14) and effects (0x3B, 0x3C), action lock +0x223 = 0x10; its caller tests D_80078EC0 & 0x7F. r276 ruling 2 made D_80078EC0 the Lumina technique selection and replaced the *EC0Mode* placeholders with *Technique*; this one was missed. M: 32 lines not all read",1
+0x8014ADE0,engine,TickGameClock,TickGameClock,M,H,PROMOTE,"the clock (16.16 minutes, 0x5A0 a day) += 0x1555 a frame, faster asleep, NextDay at the end of the day; UpdatePlayer",1
+0x8014B160,engine,CureStatus,CureStatus,M,H,PROMOTE,CurePoison and CureShrink; ResetPlayerForDeath,1
+0x8014B190,engine,UpdatePlayerStatusFlags,UpdatePlayerStatusFlags,M,H,PROMOTE,"per frame: scale +0x68.. = 0x1000, +0x44 bit 9 when poisoned / low BP / low wake gauge, the shrink scale 0x555 and bit 10; UpdatePlayer",1
+0x8014B350,engine,UpdatePoison,UpdatePoison,M,H,PROMOTE,"while poisoned: timer += 0x1555 (faster asleep), at 61 LoseHp(8) with the poison number popup and rumble; UpdatePlayer",1
+0x8014B4C4,engine,CureShrink,CureShrink,M,H,PROMOTE,the shrink word D_80078E98 = 0; CureStatus,1
+0x8014B4D4,engine,StartShrink,StartShrink,M,H,PROMOTE,"+0x1C8 = 0, D_80078E98 = 0x80000000, the puff effect; ProcessPlayerHit for hit bit 0x1000",1
+0x8014B504,engine,UpdateShrink,UpdateShrink,M,H,PROMOTE,"while shrunk and no player action: timer += 0x1555, ends past 0x25; UpdatePlayer",1
+0x8014B5D0,engine,ClearObjByte1C7,ClearObjByte1C7,M,H,PROMOTE,"+0x1C7 = 0; a field-number name, accurate",1
+0x8014B7A4,engine,UpdateWakeGauge,UpdateWakeGauge,M,H,PROMOTE,"asleep (+0x44 bit 7): AddWakeGauge refills; awake: g_Status +0x2C drains each frame, and low it sets +0x44 bit 8 (the lie-down request CheckLieDownFlag reads). A wakefulness gauge: Wake is the word",1
+0x8014BDE8,engine,CountWalkDistance,CountWalkDistance,M,H,PROMOTE,"with no player action, AddWalkDistance of the horizontal move from +0x98; FinishPlayerFrame",1
+0x8014C1C8,engine,ClipObjBehindWall,ClipObjBehindWall,M,H,PROMOTE,"TraceMap(1) from a to b + offset, b's position = the hit end; ClipObjBehindWallDef",1
+0x8014C2B0,engine,IsFacingObj,IsFacingObj,M,H,PROMOTE,"AngleDist(GetHeadingToObj(a, b), a's heading) < n",1
+0x8014C3D0,engine,StrikeActorToward,StrikeActorToward,M,H,PROMOTE,StrikeActorWithDamage toward the actor (GetHeadingToObj); ovl2a,1
+0x8014C6F4,engine,UpdatePlayerPoints,UpdatePlayerPoints,M,H,PROMOTE,"per frame: +0x164 from the model, the aim point +0x15C (his position, a decoy's in mode 0x17) and +0x162 when he cannot be aimed at, the focus +0x154; FinishPlayerFrame",1
+0x8014C968,engine,ClearFatalHit,ClearFatalHit,M,H,PROMOTE,D_80126B50 = 0; the stage set-up; pair of SetFatalHit,1
+0x8014C98C,engine,GetFatalHit,GetFatalHit,M,H,PROMOTE,returns D_80126B50; CheckPlayerDeath tests it,1
+0x8014C99C,engine,CloseFlaggedMessage,CloseFlaggedMessage,M,H,PROMOTE,"flag 0x119 and a running action: CloseMessage(+0x198), +0x198 = 0, flag 0x119 = 0; UpdatePlayer",1
+0x8014CA14,engine,PlayInitSeA,PlayInitSeA,M,M,KEEP,"the init record's sound i (+0x14 table) played unless it is the skip id; PlayAttackHitSe. A / B are two tables of the init record (+0x14, +0x1C) chosen by an event flag; what each holds is stage data",1
+0x8014CA70,engine,GetInitSeA,GetInitSeA,M,M,KEEP,"the u16 at init + 0x14 + 2i; A / B pair, M",1
+0x8014CA88,engine,PlayInitSeB,PlayInitSeB,M,M,KEEP,"PlayInitSeA with the +0x1C table; A / B pair, M",1
+0x8014CAE4,engine,GetInitSeB,GetInitSeB,M,M,KEEP,"the u16 at init + 0x1C + 2i; A / B pair, M",1
+0x8014CB9C,engine,SetGroundPush,SetGroundPush,M,H,PROMOTE,g_Player +0x140 = a vector and +0x146 = 1: the ground trace adds it this frame (FinishPlayerFrame clears +0x146); sc03_110's flow zone,1
+0x8014CBE8,engine,ClearPlayerSurface,ClearPlayerSurface,M,H,PROMOTE,g_Player +0x16C (the last trace's surface) = 0,1
+0x8014CCB4,engine,ProbePlatformStill,ProbePlatformStill,M,H,PROMOTE,ProbePlatformStillBody on the scratchpad stack; PlayerObjFallStep's still case,1
+0x8014CD0C,engine,ProbePlatformStillBody,ProbePlatformStillBody,M,H,PROMOTE,"a short segment at his feet: KeepPlatformStill when riding, else FindPlatformStill",1
+0x8014CD80,engine,KeepPlatformStill,KeepPlatformStill,M,H,PROMOTE,"the ridden platform still under him: his position follows it (1), else +0x174 cleared (0); the end read",1
+0x8014CF04,engine,FindPlatformStill,FindPlatformStill,M,H,PROMOTE,"the first platform the segment hits (not carried, not ridden) becomes +0x174 and he is put on it with its surface",1
+0x8014D04C,engine,ProbePlatformSlide,ProbePlatformSlide,M,M,KEEP,"ProbePlatformSlideBody on the scratchpad stack; rests on the body, not read here",1
 0x8014E98C,engine,CollidePlayerMoveBody,CollidePlayerMoveBody,M,H,PROMOTE,"unless +0x44 bit 19 / +0x1F8 bit 26: two passes of func_8014EA4C on the segment from the previous position (+0x88) to the current one (+6/+0xA/+0xE), both 0x10 up; ORs the results",1
 0x80162F08,engine,AddObj68Accel,AddObj68MoveSpeed,M,H,FIX,"AddObj68MoveSpeedX / Y / Z in turn (AddMoveSpeed*Limit, 0x7F0000) on a 0x68 object; the family root. Was AddObj68Accel",1
 0x801630C4,engine,AddObj68AccelLocalYXZ,AddObj68MoveSpeedFacingYXZ,M,H,FIX,"AddObj68MoveSpeedX / Y / Z, then vel = the move speed turned by the model's rotation built Y, X, Z (via g_PushVel); AddObj68MoveSpeedFacing in YXZ order. Was AddObj68AccelLocalYXZ",1
