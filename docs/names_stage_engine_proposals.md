@@ -823,7 +823,7 @@ Proposals only; the local card should change the header together with a rebuild.
 | +0x34 | subTime | stateTime | SetState / NextState clear it |
 | +0x44..+0x4C | display (u32) | a union: display flags on the player / NPC objects (UpdateWeaponParts), acceleration (s32[3]) on moving actors | StopWithGravity (750 calls) writes +0x48 = 0x18000 and zeroes +0x44 / +0x4C on actors; Mover has `accel[3]` there |
 | +0x5C | flags5C | hurtFlags | bit 15 hittable, bit 14 immune, bit 0 hit pending (DamageActorsNear, SetHittable) |
-| +0x5E | unk5E | hitId | the hit's id; low byte the hit kind (0x1D, 0xC: TakeDamage, func_80178790) |
+| +0x5E | unk5E | hitId | the hit's id; low byte the hit kind (0x1D, 0xC: TakeDamage, func_80178840) |
 | +0x60 | unk60 | hitDamage | DamageActorsNear writes the damage, TakeDamage reads it |
 | +0x62 | unk62 | hitAngle | the knock angle (DamageActorsNear, TakeDamageAndRecoil) |
 | +0x70 | unk70 | arg | the spawn's second value (SpawnActorArg); FindActorByKindArg matches it |
@@ -886,3 +886,25 @@ Proposals only; the local card should change the header together with a rebuild.
 | +0x18 / +0x20 | angle / angleTarget (SVECTOR) | ResetKeptCamera (pitch 0x238), SnapCamera |
 | +0x28 / +0x2E | ofs / ofsTarget (Vec3s) | SnapCamera |
 | +0x9C, +0xA0, +0xA2 | updateVars | SetCameraUpdateOf clears them; stage updates use +0xA0 (a direction 0-7 in sc03_002) and +0xA2 (a count) |
+
+### Second pass (smaller callers)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801783D0 | func_801783D0 | ToBcd | n as packed decimal digits (a nibble each), shifted left by s | H | e58E0; 8 calls |
+| 0x8017AD0C | func_8017AD0C | LoadItemIcon | copy item n's palette row and 32 x 40 picture into the HUD's VRAM spot (MoveImage) | M | e58E0 |
+| 0x8017ADE8 | func_8017ADE8 | ShowItemIcon | LoadItemIcon | M | e58E0; 17 calls / 5 files |
+| 0x8014C168 | func_8014C168 | FindActorByKindAny | the first actor of a kind (no skip; a second copy of FindActorByKind) | H | e58E0; abil ovl20 `func_8014C168(a, 0x15C)` |
+| 0x80149350 | func_80149350 | ObjLocalToWorld | LocalToWorld with the object's model matrix | H | e58E0; 13 calls / 13 files |
+| 0x80149374 | func_80149374 | ObjLocalToWorld16 | the same for a 16.16 point | H | e58E0; 26 calls / 29 files |
+| 0x80148038 | func_80148038 | AddFallSpeedLimited | +0x34 += v unless it is already past +-0x1F0000 that way | H | e58E0; 24 calls / 16 files: `(a, 0x18000)` (gravity on the player-side objects) |
+| 0x80159B3C | func_80159B3C | ResetPlayerKind | SetKindAndState(p, 0), then the kind-0 state handler | M | e58E0; 45 calls / 24 files; StartPlayerAction uses it to stop Musashi |
+| 0x801599A4 | func_801599A4 | RunPlayerKindHandler | the player object's handler by kind (D_8018FBA8) | M | e58E0 |
+| 0x80159B70 | func_80159B70 | RunPlayerStateHandler | its kind-0 handler by state (D_8018FCF0) | M | e58E0 |
+| 0x8014B154 | func_8014B154 | ObjFlag80 | +0x44 & 0x80 | L | e58E0 |
+| 0x8014B12C | func_8014B12C | PlayerFlag80B | ObjFlag80 on Musashi | L | e58E0; 27 calls / 9 files |
+| 0x8014E934 | func_8014E934 | CollidePlayerMove | the player's move from +0x88 to here checked twice (func_8014EA4C), on the scratchpad stack | M | e58E0; 32 calls / 21 files |
+| 0x80175454 | func_80175454 | OpenHudPanel | D_8011F7A8 state 0 to 1 (a panel with a 0xA-frame count) | L | e58E0; 21 calls / 21 files |
+| 0x80175414 | func_80175414 | CloseHudPanel | state 1 to 0 | L | e58E0; 39 calls / 26 files |
+| 0x801754A8 | func_801754A8 | UpdateHudPanel | its step by state (D_80190CF8), +9 = whether it may show | L | e58E0; 9 calls |
+| 0x8015BF48 | func_8015BF48 | SetPlayerKind4 | SetKindAndState(p, 4) and its start (func_8015C0C4) | L | e58E0; 10 calls |
