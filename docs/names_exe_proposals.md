@@ -368,13 +368,13 @@ numbered by the message index k; the local card may rename them once checked in 
 | address | current | proposed | purpose | conf | evidence |
 |---|---|---|---|---|---|
 | 0x80029AAC | func_80029AAC | CalcStat0Power | stat 0 value x 75 / 100 | M | c23F0. 2 calls / 1 file: e* func_8014C4AC(o, 9 / 0x11, power, ...) (an attack's strength) |
-| 0x80029AF4 | func_80029AF4 | CalcPowerRand40 | CalcStat2Power x (200 + rand 40) / 100 | M | c23F0. 1 call: func_8014C4AC(o, 0x1B, ...) |
-| 0x80029B4C | func_80029B4C | CalcStat3PowerRand | CalcStat3Power x (a + rand b) / 100 | M | c23F0. 1 call |
-| 0x80029BC8 | func_80029BC8 | CalcStat2PowerRand | CalcStat2Power x (a + rand b) / 100 | M | c23F0. 1 call |
-| 0x80029C44 | func_80029C44 | CalcComboPowerRand | (CalcStat3Power + CalcStat2Power) x (a + rand b) / 100 | M | c23F0. 1 call |
+| 0x80029AF4 | func_80029AF4 | CalcPower03Rand40 | CalcPower03 x (200 + rand 40) / 100 | M | c23F0. 1 call: func_8014C4AC(o, 0x1B, ...) |
+| 0x80029B4C | func_80029B4C | CalcPower02Rand | CalcPower02 x (a + rand b) / 100 | M | c23F0. 1 call |
+| 0x80029BC8 | func_80029BC8 | CalcPower03Rand | CalcPower03 x (a + rand b) / 100 | M | c23F0. 1 call |
+| 0x80029C44 | func_80029C44 | CalcPowerBothRand | (CalcPower02 + CalcPower03) x (a + rand b) / 100 | M | c23F0. 1 call |
 | 0x80029D3C | func_80029D3C | ReduceByStat1 | v - v x (stat 1 value x 60) / 4800, at least 1 | M | c23F0. 3 calls / 2 files: on D_8011DB1A and an actor's +0xF2 (a drain or damage taken) |
-| 0x80029DB4 | func_80029DB4 | CalcStat3Power | (stat 2 value + stat 0 value) x 125 / 100 (150 with flag 0x81) | M | c23F0: GetStat2Value + GetStat0Value. 8 calls / 4 files: stg/sc04_005 / sc04_007 `(o, &tbl, 7, func_80029DB4())` |
-| 0x80029E30 | func_80029E30 | CalcStat2Power | (stat 3 value + stat 0 value) x 175 / 100 | M | c23F0. 8 calls / 4 files: `(o, &tbl, 6, func_80029E30())`. The two Calc names follow the stat each adds to stat 0; rename together with the stats |
+| 0x80029DB4 | func_80029DB4 | CalcPower02 | (stat 2 value + stat 0 value) x 125 / 100 (150 with flag 0x81) | M | c23F0: GetStat2Value + GetStat0Value (func_8002A9DC + func_8002A2B0). 8 calls / 4 files: stg/sc04_005 / sc04_007 `(o, &tbl, 7, func_80029DB4())` |
+| 0x80029E30 | func_80029E30 | CalcPower03 | (stat 3 value + stat 0 value) x 175 / 100 | M | c23F0. 8 calls / 4 files: `(o, &tbl, 6, func_80029E30())`. The Calc names give the stats added; rename together with the stats |
 | 0x80029E94 | func_80029E94 | ScaleByActorInit30 | (an actor's init record +0x30 x k) >> 12 | L | c23F0. no callers |
 | 0x80029EC0 | func_80029EC0 | GetActorExp | an actor's init record +0x2E (the experience it gives) | M | c23F0. no callers; GainStat0FromActor reads the same field |
 | 0x80029ED4 | func_80029ED4 | AddWalkDistance | add to the step count; every 102 the odometer + 1 (cap 9999999), every 10 odometer units GainStat1 | H | c23F0: D_80078F04 / F08 / F0C, only from progress 10. 1 call: e* `func_80029ED4(SVecDist(&a, &b))` |
