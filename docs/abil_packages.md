@@ -2850,7 +2850,8 @@ groups, and 276 package plus 75 engine naming proposals.
   meaning of D_80078EC0 bit 0x80 (pad 0x100 toggles it; when set, the hold button enters kind 0x1C instead of
   charging).
 * Names the C does not back: ovl19 "Shrink" never scales Musashi in this package (it fires four trail shots with hit
-  type 0x1E); Satiate's (ovl18) and Rip-off's (ovl23) in-game effects are not visible (ovl23 is ovl18's twin); the
+  type 0x1E: if anything shrinks, it is the struck enemy, in its own reaction to hit type 0x1E, not traced; Musashi's
+  own small state is the engine's stats +0x22 bit 15 -> scale 0x555 in func_8014B190); Satiate's (ovl18) and Rip-off's (ovl23) in-game effects are not visible (ovl23 is ovl18's twin); the
   cut abilities 6 and 18 (ovl1d, ovl1e). Which stat D_80078EA4 is (Sleepy drains it, Mint holds it full).
 * Objects whose spawner is not in any C: Map's kind-0x17 trail sprites, ovl1c's kind-0x1C rings, ovl2a's
   CB5D8 object; what stage actor kind 0x15C does with the +0xCC target Firefly gives it; Hurl's button step table.
