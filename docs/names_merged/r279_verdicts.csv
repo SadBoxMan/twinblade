@@ -306,7 +306,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80160A74,engine,EndKind1C,EndKind1C,M,M,KEEP,"full gauge: SwitchToLieDown, else kind 0 and its state; kind 0x1C's two steps end with it. ""Kind1C"" is an address-style word; kind 0x1C (StartGuard's D_80078EC0 bit 7 case) has no name yet",2
 0x80160B00,engine,SwitchToLieDown,SwitchToLieDown,M,H,PROMOTE,"SetKindAndState(p, 0x1D) and RunLieDownState; TriggerLieDown and EndKind1C call it",2
 0x80160BB4,engine,StartLieDown,StartLieDown,M,H,PROMOTE,"the lie-down state's first step: face 0x1E, pitch 0xFE9, timers 0, next state",2
-0x80160F00,engine,StartRecover,StartRecover,M,M,KEEP,"motion 4, face, g_WorldAnimMode = 2, props off, timer 0x10: the first step of kind EnterRecover's; what the kind recovers from is not in reach, M",2
+0x80160F00,engine,StartRecover,StartRecover,M,H,PROMOTE,"the recover kind's first step (others frozen, props off, timer); its later step adds 150 HP and BP with a message (RecoverHealStep), so Recover is the word",2
 0x80161124,engine,StartFall,StartFall,M,H,PROMOTE,"the airborne set-up: fall speed capped, motion by movement, face, timer, heading kept, SetPlayerEvent02, SE in technique 6; JumpStart and FallStart call it",2
 0x8016130C,engine,FallOrSlideOnResult,FallOrSlideOnResult,M,H,PROMOTE,result 0 / 0x8000: LeavePlayerKind and StartPlayerFall; 0x4000: SetPlayerKind4 (the slide); 1 when switched; CheckPlayerGround's worker,2
 0x8016163C,engine,HandleLandingToNormal,HandleLandingToNormal,M,M,KEEP,"28 lines not read in full; the ends seen (wall climb facing the wall, 8) fit; M",2
@@ -813,4 +813,105 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80159070,engine,ContinueChoiceStep,ContinueChoiceStep,M,H,PROMOTE,"by the answer opens the next message, next state",0
 0x80159120,engine,ContinueConfirmStep,ContinueConfirmStep,M,H,PROMOTE,the continue confirmation (44 lines): the answer's messages and states,0
 0x801592CC,engine,ContinueRetryStep,ContinueRetryStep,M,H,PROMOTE,"GetMessageAnswer: close it, reopen the continue question, state 9",0
+0x8015934C,engine,DeathExitStep,DeathExitStep,M,H,PROMOTE,the model turns; at the end next state and the continue count D_800AE6BD += 1,0
+0x801593E4,engine,DeathIdleStep,DeathIdleStep,M,H,PROMOTE,"the model keeps turning, nothing else",0
+0x801598E0,engine,UpdatePlayerNoVertical,UpdatePlayerNoVertical,M,H,PROMOTE,"by the pad type +0xA9 (0x73 analog ...) the held-direction bit fixed, then RunPlayerUpdatePhase",0
+0x801599E0,engine,PlayerUpdateFirstPhase,PlayerUpdateFirstPhase,M,H,PROMOTE,"UpdatePlayerKind, then the phase +0x4D += 1",0
+0x80159B08,engine,StartPlayerStand,StartPlayerStand,M,H,PROMOTE,"SetKindAndState(p, 0), StandStart",0
+0x80159BAC,engine,StandWait,StandWait,M,H,PROMOTE,"StayedGrounded, then StandStart",0
+0x8015A1C8,engine,EndStandKind,EndStandKind,M,H,PROMOTE,parts and face 0x11: kind 0's exit handler,0
+0x8015A1FC,engine,StartPlayerRunning,StartPlayerRunning,M,H,PROMOTE,"SetKindAndState(p, 1), RunningStart",0
+0x8015A2A0,engine,RunningWait,RunningWait,M,H,PROMOTE,"StayedGrounded, then RunningStart",0
+0x8015AC90,engine,EndRunningKind,EndRunningKind,M,H,PROMOTE,parts and face 0x11: kind 1's exit handler,0
+0x8015AD78,engine,JumpWait,JumpWait,M,H,PROMOTE,"StayedGrounded, then JumpStart",0
+0x8015BD8C,engine,EndJumpKind,EndJumpKind,M,H,PROMOTE,"display flag, face, swinging bit off: kind 2's exit handler",0
+0x8015BE74,engine,FallEnter,FallEnter,M,H,PROMOTE,FallStart; kind 3's state 0,0
+0x8015BEC4,engine,FallAirStep,FallAirStep,M,H,PROMOTE,PlayerAirborneStep; kind 3's air state,0
+0x8015BEE4,engine,FallLandStep,FallLandStep,M,H,PROMOTE,PlayerLandStep; kind 3's landing state,0
+0x8015BF04,engine,EndFallKind,EndFallKind,M,H,PROMOTE,"display flag, face, swinging bit off: kind 3's exit handler",0
+0x8015BF7C,engine,EnterPlayerSlide,EnterPlayerSlide,M,H,PROMOTE,"SetKindAndState(p, 4), RunPlayerSlideState",0
+0x8015BFB0,engine,StartPlayerSlideDir,StartPlayerSlideDir,M,H,PROMOTE,"SetKindAndState(p, 4), StartSlopeSlideVec",0
+0x8015C08C,engine,TryStartSlopeSlide,TryStartSlopeSlide,M,H,PROMOTE,"StayedGrounded, then StartSlopeSlide",0
+0x8015C128,engine,SlopeSlideStep,SlopeSlideStep,M,H,PROMOTE,"the slide's step (39 lines): down the slope, off it LeavePlayerKind and the fall",0
+0x8015C32C,engine,SlopeSlideEndStep,SlopeSlideEndStep,M,H,PROMOTE,"the slide's end step (74 lines), the same exits",0
+0x8015C6AC,engine,EnterPushBlock,EnterPushBlock,M,H,PROMOTE,"SetKindAndState(p, 9), StartPushBlock",0
+0x8015C750,engine,TryStartPushBlock,TryStartPushBlock,M,H,PROMOTE,"StayedGrounded, then StartPushBlock",0
+0x8015C7E4,engine,PushBlockReadyStep,PushBlockReadyStep,M,H,PROMOTE,unless assimilate / lie down: the push ready step with footsteps and dust,0
+0x8015C944,engine,PushBlockShoveStep,PushBlockShoveStep,M,H,PROMOTE,the shove step with footsteps,0
+0x8015CA28,engine,PushBlockHoldStep,PushBlockHoldStep,M,H,PROMOTE,"the hold step, CheckPlayerGroundNoCollide",0
+0x8015CB94,engine,ExitPushBlock,ExitPushBlock,M,H,PROMOTE,"+0x170 = 0, parts, face: kind 9's exit handler",0
+0x8015CC0C,engine,EnterPole,EnterPole,M,H,PROMOTE,"SetKindAndState(p, 0xB), StartPole",0
+0x8015CCB0,engine,PoleState0,PoleState0,M,H,PROMOTE,StartPole: kind 0xB's state 0,0
+0x8015CD20,engine,PoleStep,PoleStep,M,H,PROMOTE,"the pole step (38 lines): turning round it, the jump off, back to kind 0, SetPlayerEvent10",0
+0x8015CF24,engine,ExitPole,ExitPole,M,H,PROMOTE,parts and face: kind 0xB's exit handler,0
+0x8015CF58,engine,EnterBarSwing,EnterBarSwing,M,H,PROMOTE,"SetKindAndState(p, 0xC), StartBarSwing",0
+0x8015CFFC,engine,BarSwingState0,BarSwingState0,M,H,PROMOTE,StartBarSwing: kind 0xC's state 0,0
+0x8015D104,engine,BarSwingWindupStep,BarSwingWindupStep,M,H,PROMOTE,"the windup: SetPlayerEvent20, the swing speed and pitch 0x600 set, next state",0
+0x8015D1B8,engine,BarSwingStep,BarSwingStep,M,H,PROMOTE,"the swing (36 lines): UpdateBarSwingPoint, SetPlayerEvent20, the let-go",0
+0x8015D414,engine,ExitBarSwing,ExitBarSwing,M,H,PROMOTE,"bar cooldown +0x1BD = 8, the swing point cleared, lifted 0x48, pitch 0, parts, face: kind 0xC's exit handler",0
+0x8015D480,engine,EnterCarry,EnterCarry,M,H,PROMOTE,"SetKindAndState(p, 0xD), StartCarry",0
+0x8015D524,engine,ExitCarry,ExitCarry,M,H,PROMOTE,face 0x11: kind 0xD's exit handler,0
+0x8015D544,engine,TryStartCarry,TryStartCarry,M,H,PROMOTE,"StayedGrounded, then StartCarry",0
+0x8015D5E8,engine,CarryLiftStep,CarryLiftStep,M,H,PROMOTE,the lift: the carried actor moved along D_8018FDEC into his frame,0
+0x8015D738,engine,CarryStep,CarryStep,M,H,PROMOTE,"the carry step (59 lines): the throw / drop inputs, the ground check, SaveSafeGroundPos",0
+0x8015DA90,engine,EnterThrowCarried,EnterThrowCarried,M,H,PROMOTE,"SetKindAndState(p, 0xE), StartThrowCarried",0
+0x8015DB34,engine,TryStartThrowCarried,TryStartThrowCarried,M,H,PROMOTE,"StayedGrounded, then StartThrowCarried",0
+0x8015DBD4,engine,ThrowCarriedStep,ThrowCarriedStep,M,H,PROMOTE,"motion flag 0x4000 releases, else MoveCarriedAlongThrow; CheckPlayerGround",0
+0x8015DC84,engine,ExitThrowCarried,ExitThrowCarried,M,H,PROMOTE,"face, ReleaseCarried: kind 0xE's exit handler",0
+0x8015DDF0,engine,EnterThrowCarriedAlt,EnterThrowCarriedAlt,M,M,KEEP,"SetKindAndState(p, 0xF), StartThrowCarriedAlt; Alt family, M",0
+0x8015DE94,engine,TryStartThrowCarriedAlt,TryStartThrowCarriedAlt,M,M,KEEP,"StayedGrounded, then StartThrowCarriedAlt; Alt family, M",0
+0x8015DF34,engine,ThrowCarriedAltStep,ThrowCarriedAltStep,M,M,KEEP,"ThrowCarriedStep's copy for kind 0xF; Alt family, M",0
+0x8015DFE4,engine,ExitThrowCarriedAlt,ExitThrowCarriedAlt,M,M,KEEP,"face, ReleaseCarriedAlt: kind 0xF's exit handler; Alt family, M",0
+0x8015E150,engine,EnterGrab,EnterGrab,M,H,PROMOTE,"SetKindAndState(p, 0x10), StartGrab",0
+0x8015E1F4,engine,TryStartGrab,TryStartGrab,M,H,PROMOTE,"StayedGrounded, then StartGrab",0
+0x8015E288,engine,GrabReachStep,GrabReachStep,M,H,PROMOTE,"the reach: the ground check, the catch, then the hold motion and state 3",0
+0x8015E344,engine,GrabHoldStep,GrabHoldStep,M,H,PROMOTE,HoldGrabbedAtHands; at the end LeavePlayerKind and back to standing,0
+0x8015E698,engine,GrabMissStep,GrabMissStep,M,H,PROMOTE,at the motion's end on the ground LeavePlayerKind and back to standing,0
+0x8015E714,engine,ExitGrab,ExitGrab,M,H,PROMOTE,"kind 0x10's exit handler: the grabbed actor released, parts, display flag, swinging bit off, face",0
+0x8015E84C,engine,EnterGuard,EnterGuard,M,H,PROMOTE,"SetKindAndState(p, 0x11), StartGuardWithFx",0
+0x8015E8B4,engine,EnterGuardNoFx,EnterGuardNoFx,M,H,PROMOTE,"SetKindAndState(p, 0x11), StartGuard (no effect)",0
+0x8015E924,engine,TryStartGuard,TryStartGuard,M,H,PROMOTE,"StayedGrounded, then StartGuardWithFx",0
+0x8015EA3C,engine,GuardStep,GuardStep,M,H,PROMOTE,"the guard step (67 lines): hop, counter, charge inputs, the ground check, SaveSafeGroundPos",0
+0x8015ED6C,engine,ExitGuard,ExitGuard,M,H,PROMOTE,"the charge gauge D_80078EBF = 0, the guard bit off, ClearGuarding: kind 0x11's exit handler",0
+0x8015EDA0,engine,EnterGuardHop,EnterGuardHop,M,H,PROMOTE,"SetKindAndState(p, 0x12), StartGuardHop",0
+0x8015EE44,engine,TryStartGuardHop,TryStartGuardHop,M,H,PROMOTE,"StayedGrounded, then StartGuardHop",0
+0x8015EEE0,engine,GuardHopStep,GuardHopStep,M,H,PROMOTE,"the guard hop until CheckLanding, SetPlayerEvent02",0
+0x8015EFA4,engine,EnterCounterBurst,EnterCounterBurst,M,H,PROMOTE,"SetKindAndState(p, 0x13), StartCounterBurst",0
+0x8015EFD8,engine,SwitchToCounterBurst,SwitchToCounterBurst,M,H,PROMOTE,"SetKindAndState(p, 0x13), RunCounterBurstState",0
+0x8015F048,engine,TryStartCounterBurst,TryStartCounterBurst,M,H,PROMOTE,"StayedGrounded, then StartCounterBurst",0
+0x8015F118,engine,CounterBurstStep,CounterBurstStep,M,H,PROMOTE,"the counter burst's step: its 0x68 objects, SE, CheckPlayerGround, RunAttackHit",0
+0x8015F260,engine,ExitCounterBurst,ExitCounterBurst,M,H,PROMOTE,"face, swinging and guard bits off, ClearGuarding, +0xF6 = 0x1000: kind 0x13's exit handler",0
+0x8015F2BC,engine,EnterWallClimb,EnterWallClimb,M,H,PROMOTE,"SetKindAndState(p, 0x14), StartWallClimb",0
+0x8015F360,engine,WallClimbState0,WallClimbState0,M,H,PROMOTE,StartWallClimb: kind 0x14's state 0,0
+0x8015F448,engine,WallClimbStep,WallClimbStep,M,H,PROMOTE,"the wall-climb step (67 lines): climbing, the jump off, PushOutOfSolidActors, ClipMoveToMap, SetPlayerEvent04",0
+0x8015F738,engine,ExitWallClimb,ExitWallClimb,M,H,PROMOTE,display flag and face: kind 0x14's exit handler,0
+0x8015F76C,engine,EnterChargedAttack,EnterChargedAttack,M,H,PROMOTE,"SetKindAndState(p, 0x15), StartChargedAttack",0
+0x8015F810,engine,TryStartChargedAttack,TryStartChargedAttack,M,H,PROMOTE,"StayedGrounded, then StartChargedAttack",0
+0x8015F89C,engine,ChargedAttackStep,ChargedAttackStep,M,H,PROMOTE,"the charged attack's step: its 0x68 object (kind 1) spawned, CheckPlayerGround",0
+0x8015F9A4,engine,NoBpMotionStep,NoBpMotionStep,M,H,PROMOTE,"at the motion's end back to kind 0, else CheckPlayerGround; StartNoBpMotion's state",0
+0x8015FA24,engine,ExitChargedAttack,ExitChargedAttack,M,H,PROMOTE,face 0x11: kind 0x15's exit handler,0
+0x8015FA44,engine,EnterAssimilate,EnterAssimilate,M,H,PROMOTE,"SetKindAndState(p, 0x16), StartAssimilate",0
+0x8015FAE8,engine,AssimilateState0,AssimilateState0,M,H,PROMOTE,"the ground check (to the slide when steep), then StartAssimilate",0
+0x8015FCC8,engine,AssimilateTakeStep,AssimilateTakeStep,M,H,PROMOTE,"the taken ability into +0x1A0, SetState4EIfIdle, next state",0
+0x8015FD74,engine,OpenAbilityNameMessage,OpenAbilityNameMessage,M,H,PROMOTE,"SE, OpenMessage of the ability's name (D_8018FF04[+0x1A0]), next state",0
+0x8015FDCC,engine,WaitAbilityNameMessage,WaitAbilityNameMessage,M,H,PROMOTE,"waits for the message, then the effect object 0x24 and SE, next state",0
+0x8015FE70,engine,AssimilateEndStep,AssimilateEndStep,M,H,PROMOTE,"the assimilate's end motion, face, CheckPlayerGround",0
+0x8015FF20,engine,ExitAssimilate,ExitAssimilate,M,H,PROMOTE,"kind 0x16's exit handler: the ability timer / BP bonus, ClearAbilityUsed, face, g_WorldAnimMode = 1, ClearAssimilateState",0
+0x80160174,engine,TryStartKind18,TryStartKind18,M,M,KEEP,"StayedGrounded, then StartKind18 (L); kind 0x18 has no word yet",0
+0x80160334,engine,EnterGuardRecoil,EnterGuardRecoil,M,H,PROMOTE,"SetKindAndState(p, 0x1B), StartGuardRecoil",0
+0x801603D8,engine,TryStartGuardRecoil,TryStartGuardRecoil,M,H,PROMOTE,"StayedGrounded, then StartGuardRecoil",0
+0x80160534,engine,GuardRecoilStep,GuardRecoilStep,M,H,PROMOTE,"the guard recoil's step (39 lines): pushed back, into a block push, CheckPlayerGround",0
+0x80160888,engine,TryStartKind1C,TryStartKind1C,M,M,KEEP,"StayedGrounded, then StartKind1C (L); kind 0x1C has no word yet",0
+0x80160B70,engine,TryStartLieDown,TryStartLieDown,M,H,PROMOTE,"StayedGrounded, then StartLieDown, else the forced-sleep timer cleared",0
+0x80160C28,engine,LieDownTiltStep,LieDownTiltStep,M,H,PROMOTE,"the model tips to 0xC00, then next state",0
+0x80160CB4,engine,LieDownSettleStep,LieDownSettleStep,M,H,PROMOTE,"on the ground at the motion's end: motion 0x27, face, next state",0
+0x80160D10,engine,LieDownStep,LieDownStep,M,H,PROMOTE,"lying down (20 lines): the wake-up back to kind 0, CheckPlayerGround",0
+0x80160DEC,engine,ExitLieDown,ExitLieDown,M,H,PROMOTE,"forced-sleep timer 0, pitch 0, parts, +0x44 bits 7-8 off, face: kind 0x1D's exit handler",0
+0x80160E3C,engine,EnterRecover,EnterRecover,M,H,PROMOTE,"SetKindAndState(p, 0x1E), StartRecover",0
+0x80160E70,engine,SwitchToRecover,SwitchToRecover,M,H,PROMOTE,"SetKindAndState(p, 0x1E), RunRecoverState",0
+0x80160EE0,engine,RecoverState0,RecoverState0,M,H,PROMOTE,StartRecover: kind 0x1E's state 0,0
+0x80160F70,engine,RecoverHealStep,RecoverHealStep,M,H,PROMOTE,"AddHp(150), AddBp(150), the message D_80110EC0, next state",0
+0x80160FE0,engine,RecoverMessageStep,RecoverMessageStep,M,H,PROMOTE,"GetMessageAnswer: close it, next state",0
+0x80161034,engine,RecoverEndStep,RecoverEndStep,M,H,PROMOTE,"ClearPlayerHittable, LeavePlayerKind, back to kind 0",0
+0x80161094,engine,ExitRecover,ExitRecover,M,H,PROMOTE,"the message closed, g_WorldAnimMode = 1, props on: kind 0x1E's exit handler",0
 0x80163234,engine,SetObj68VelFromAccel,SetObj68VelFromMoveSpeed,M,H,FIX,"AddObj68MoveSpeedSetVel(o, 0, 0, 0): vel = the move speed. Was SetObj68VelFromAccel",0
