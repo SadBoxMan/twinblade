@@ -215,3 +215,57 @@ DrawDebugText (named) draws them.
 | 0x80015760 | func_80015760 | DrawDebugNumber | one number record, digit by digit through the digit table D_80062B78 | H | c23F0: nibbles of the value (BcdFromInt first with flag 0x40) |
 | 0x80015908 | func_80015908 | DebugFontUV | the UV word of a character (c - 0x20) in the 8- or 16-pixel font table | H | c23F0: D_80062A78 / D_80062AF8 |
 | 0x80015A74 | func_80015A74 | BcdFromInt | an unsigned value as 10 packed BCD digits | H | c23F0: divides by 10^9 .. 1, four bits a digit |
+
+## Load queue, sound packs and the boot helpers (0x80014554-0x8001C00C)
+
+One load request is queued at a time (D_800BA1B4: 0 idle, 1 a file read, 2 a sound pack, 3 done, 4 a header read,
+5 a sound bank) and LoadQueueStep (named) pumps it every frame. A **sound pack** is an entry of D_80063138 (`SoundPack`
+in c23F0: {archive entry, stream arg, sound id}): its archive entry is read through the CD streamer (func_800363CC) and
+then sound command `id` is sent to the driver (func_8002D4C8); D_800A654C holds the pack now playing, D_800747F8 the
+archive entry now loaded. The pack ids stage code passes (0x16, 0x35, 0x3D, 0x5A, 0x6B ...) and the restart of the
+same pack being a no-op suggest the music (BGM) packs; the names keep "SoundPack".
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80014554 | func_80014554 | InitNop | empty | L | c23F0. no callers |
+| 0x8001455C | func_8001455C | Init3DNop | empty; called by Init3DScene | L | c23F0: Init3DScene calls it before the ambient colour |
+| 0x80015144 | func_80015144 | SoftReset | stop sound (command 2, waiting for the driver), drop the CD request, set Work.exitLoop so main() restarts | H | c23F0: D_800B9A04 = Work+0xA3D4 exitLoop; then func_8002F67C, ResetLoader. 1 call: eC98C func_80141C50 on pad combo 0x90F (Start + Select + L1 + R1 + L2 + R2) |
+| 0x80019398 | func_80019398 | CdFilesReady | 1 once InitCdFiles / InitCdFilesAtLba ran | M | c23F0: D_800747D4, set to 1 at the end of both. no callers |
+| 0x800193A8 | func_800193A8 | SetCdFilesReady | set that flag | M | c23F0. no callers |
+| 0x8001AAA0 | func_8001AAA0 | RequestSoundPack | load request kind 1: play sound pack id (at once when its archive entry is already loaded) | H | c23F0: RequestLoad(1, id, 0, 0, 0). 86 calls / 45 files: `func_8001AAA0(0x35)`, `return func_8001AAA0(0x5A) != 0;` |
+| 0x8001AAD0 | func_8001AAD0 | RequestSoundBank | load request kind 3: a sound bank file g_FileTable[9 + n] | H | c23F0 (comment). 5 calls / 3 files: `func_8001AAD0(1, 0x4331)` |
+| 0x8001ABB4 | func_8001ABB4 | LoadNop | empty | L | c23F0. no callers |
+| 0x8001ABBC | func_8001ABBC | RequestLoad | ask for a load (kind 0 file, 1 sound pack, 2 header, 3 sound bank); 1 when done, 0 while waiting | H | c23F0 (comment). 48 calls / 15 files: ovl36 `func_8001ABBC(0, 0, g_ArchiveFileLoc[n], dest, table)` |
+| 0x8001ACF0 | func_8001ACF0 | QueueLoad | store the request for the pump and set D_800BA1B4 | H | c23F0 (comment) |
+| 0x8001AE90 | func_8001AE90 | IsQueuedLoad | the request is the one already queued (same file first word, or same pack id) | H | c23F0: compares with D_800747F4 |
+| 0x8001AF04 | func_8001AF04 | GetLoadQueueState | 0 idle, 1 done, 2 busy | H | c23F0. 1 call (ovl36) |
+| 0x8001B0D4 | func_8001B0D4 | LoadSoundBankStep | the sound bank load, followed through the driver's load state (func_80034B98) | H | c23F0 (comment); LoadQueueStep state 5 |
+| 0x8001B22C | func_8001B22C | GetSoundBankLoadState | D_800747E8: 0 idle, 1 / 2 / 4 the driver's load states | M | c23F0. 3 calls / 1 file (ovl36) |
+| 0x8001B23C | func_8001B23C | LoadExtraSoundFile | read archive entry D_800AEC78 with the sound table {8, D_800A2E20}; 1 when done | L | c23F0: func_8001B26C fills D_800C7C60 / 64 as ModeTitleLoad does for bank 0x57. 2 calls / 2 files (stg/sc02_000, sc02_003) |
+| 0x8001B26C | func_8001B26C | LoadExtraSoundFileStep | its worker (result in D_800C6D10) | L | c23F0 |
+| 0x8001B324 | func_8001B324 | ResetSoundPacks | reset the pack loader's step and forget the loaded pack | M | c23F0: D_800AE7EC = 0, ForgetSoundPack. 3 calls / 1 file (ovl36 field init); ResetGameState |
+| 0x8001B34C | func_8001B34C | ForgetSoundPack | no pack playing, no entry loaded, ClearTimeChime | M | c23F0: D_800A654C, D_800747F8 = 0 |
+| 0x8001B374 | func_8001B374 | GetSoundPack | the pack playing (D_800A654C) | H | c23F0. no callers |
+| 0x8001B384 | func_8001B384 | ResetSoundPackStep | D_800AE7EC = 0 | M | c23F0. 3 calls / 1 file |
+| 0x8001B394 | func_8001B394 | SoundPackStep | one step of a pack load (kind 2 of the queue); 1 when playing | H | c23F0: LoadQueueStep state 2 |
+| 0x8001B3C4 | func_8001B3C4 | SoundPackStepImpl | its worker: already playing / same entry: just the command; else read the entry (func_800363CC), then the disc check, then the command | H | c23F0 |
+| 0x8001B710 | func_8001B710 | PlayProgressSounds | sound commands 0x24 / 0x25 / 0x26 when byte vars 0x44 / 0x56 / 0x5C are >= 2 | L | c23F0; SoundPackStepImpl calls it after pack 0x3D. 5 calls / 3 files. Probably extra music layers for story progress |
+| 0x8001B788 | func_8001B788 | GetSoundPackPos | the disc position of a pack's archive entry | H | c23F0: g_ArchiveFileLoc[D_80063138[n].entry].pos |
+| 0x8001B7C4 | func_8001B7C4 | ReadHeaderStep | load kind 2: read a file's first sector through the streamer (StreamStep(1)) and keep its first word | M | c23F0; LoadQueueStep state 4 |
+| 0x8001B85C | func_8001B85C | ResetScreenWipe | wipe step = 0 | H | c23F0. 4 calls / 1 file: ovl36 func_800CEFD0 / func_800CF104 before their loops |
+| 0x8001B86C | func_8001B86C | ScreenWipeStep | the room-change wipe: copy the screen into four sprites, then close 30 bars of 8 lines over it; 1 when done | M | c23F0. 2 calls / 1 file: ovl36 `D_80114E9C = func_8001B86C(0)` / `(1)` while the next room loads |
+| 0x8001BA84 | func_8001BA84 | DrawScreenCopy | the four screen-copy sprites (D_800630E8) at brightness 0x80 | M | c23F0 |
+| 0x8001BADC | func_8001BADC | SetWipeBars | colour the first n bars from the top and bottom; 1 when n >= 0x2C | M | c23F0: 15 + 15 TILE colours |
+| 0x8001BB60 | func_8001BB60 | InitWipeBars | 30 full-width TILEs of 8 lines; bar count 0 | H | c23F0 |
+| 0x8001BBBC | func_8001BBBC | AddWipeBar | one 320 x 8 TILE at y | H | c23F0: code 0x62 |
+| 0x8001BC6C | func_8001BC6C | AddScreenSprite | a SPRT showing a rectangle of the frame buffer (page 0x100 / 0x102 by x) | M | c23F0: code 0x64 |
+| 0x8001BD80 | func_8001BD80 | IsSoundLoading | the driver's load state is busy | M | c23F0: func_80034B98() != 0. 2 calls / 1 file |
+| 0x8001BDA0 | func_8001BDA0 | ShutdownSystems | stop sound, the GPU, pads, root counters, CD and callbacks | H | c23F0: func_8002CCD8, ResetGraph(3), PadStopCom, StopRCnt, CdInit, ResetCallback, StopCallback. no callers |
+| 0x8001BE20 | func_8001BE20 | ResetSoundLoadCancel | step = 0 | M | c23F0. 1 call (ovl36) |
+| 0x8001BE30 | func_8001BE30 | CancelSoundLoadStep | cancel a pending sound bank / pack load (command 0x16) and wait for the driver; 1 when idle | M | c23F0. 1 call: ovl36 `if (func_8001BE30() == 0)` |
+| 0x8001BFA0 | func_8001BFA0 | GetTitleMovieIndex | which of the two title movies plays (counter & 1) | M | c23F0: D_80063074. 2 calls: ovl39 `D_800D942C[func_8001BFA0()].name` (CdSearchFile) |
+| 0x8001BFB0 | func_8001BFB0 | NextTitleMovie | counter + 1 | M | c23F0. 1 call: ovl39 func_800D1E58 after starting the movie |
+| 0x8001BFD0 | func_8001BFD0 | ClearTimeChime | stop the time-of-day chime (kind D_800A2B70 and its timer D_800BA0FC = 0) | M | c23F0. 266 calls / 140 files: `func_8002D4C8(0x1C, 0); func_8001BFD0(); func_8002D4C8(0x1D, 0);`; ovl36 plays sounds 0x517 / 0x518 by D_800A2B70 at set progress times |
+| 0x8001BFE8 | func_8001BFE8 | LicenceShown | the licence screen has been shown since boot | M | c23F0: D_800747D8. 1 call: ovl38 skips to step 3 when set |
+| 0x8001BFF8 | func_8001BFF8 | SetLicenceShown | set it | M | c23F0. 1 call: ovl38 |
+| 0x8002C410 | func_8002C410 | ForceLibraryLink | a never-called function that references ~70 PsyQ functions with zero arguments, so the linker keeps them for the overlays | H | src/code_8002C410.c (its own -O0 file). no callers |
