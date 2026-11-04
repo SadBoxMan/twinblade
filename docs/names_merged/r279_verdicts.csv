@@ -1247,3 +1247,55 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8016EAC0,engine,HudSlotSlideIn,HudSlotSlideIn,L,H,PROMOTE,slides in for 6 frames,0
 0x8016EB3C,engine,HudSlotHold,HudSlotHold,L,H,PROMOTE,counts down,0
 0x8016EBA8,engine,HudSlotSlideOut,HudSlotSlideOut,L,H,PROMOTE,"slides out, counting down",0
+0x8001CA1C,exe,InitSpriteModel,InitSpriteModel,M,M,KEEP,"ResetModelFields, type 1, kind 3, coord, +0x20 = the caller's data; DrawModel runs g_ModelDrawFuncs[kind], so ""Sprite"" rests on kind 3's handler in that table (data, not in the C)",350
+0x8001BFD0,exe,ClearTimeChime,ClearTimeChime,M,H,PROMOTE,g_TimeChime and g_TimeChimeTimer = 0: the chime UpdateFieldSound plays stopped (both globals read here),266
+0x8002AC00,exe,GiveItem,GiveItem,M,H,PROMOTE, 0x80 (owned) and the item's value from g_ItemTable; stage rewards call it,197
+0x800A651C,exe,g_WorldOtOrg,g_WorldOtOrg,M,H,PROMOTE,"g_WorldOt (exe_H, 0x800A6518) + 4: the GsOT headers' org field, main sets [frame].org to the table; the Org view of the same records",172
+0x8001C810,exe,InitTransModel,InitTransModel,M,M,KEEP,"ResetModelFields, type 1, kind 5, coord, the TMD list mapped; ""Trans"" rests on kind 5's handler in g_ModelDrawFuncs (data)",137
+0x8001CD50,exe,InitShapeSpriteKind5,InitShapeSpriteKind5,M,M,KEEP,"ResetSprite, kind 5, +0x20 = data; ""Shape"" rests on the sprite kind 5 drawer, not in reach",128
+0x800AE7BC,exe,g_FrontOtOrg,g_FrontOtOrg,M,H,PROMOTE,"the front OT's GsOT org field (main sets [frame].org), the Org view like g_WorldOtOrg",112
+0x8001CD9C,exe,InitShapeSpriteKind6,InitShapeSpriteKind6,M,M,KEEP,"ResetSprite, kind 6, +0x20 = data; ""Shape"" as InitShapeSpriteKind5 (callers then SetShapeCircle, which supports it)",109
+0x8001CC3C,exe,InitSpriteKind3,InitSpriteKind3,M,H,PROMOTE,"ResetSprite, kind 3, VRAM x / y (+0x28 / +0x2A), +0x20 = frames; a kind-number name",102
+0x8001CB6C,exe,InitSpriteKind2,InitSpriteKind2,M,H,PROMOTE,"ResetSprite, kind 2, VRAM x / y, +0x20 = frames, +4 = 0x0C000040",74
+0x8001CF30,exe,SetSpriteNoLight,SetSpriteNoLight,M,M,KEEP,"+4: bit 6 cleared, bit 12 set; that both mean no lighting rests on DrawSprite's reads, not in reach",66
+0x8007609C,exe,g_CardStatus,g_CardStatus,M,H,PROMOTE,"per card port {status, slot bits}: CardStep and ResetCardState read and clear it",56
+0x80024054,exe,SjisToGlyphs,SjisToGlyphs,M,H,PROMOTE,"a Shift-JIS string to a glyph list (-1 ended), the count returned; text drawing calls it",53
+0x800176F0,exe,DrawPrimG4ScreenNoDither,DrawPrimG4ScreenNoDither,M,M,KEEP,"DrawPrimG4(a, 0, 1); what the third argument switches (dither) is in DrawPrimG4, not read here",44
+0x8007622C,exe,g_StreamQueue,g_StreamQueue,M,H,PROMOTE,the 5-entry stream queue QueueBankStream / QueueMusicStream fill and OnStreamSector reads,35
+0x80078EAC,exe,g_Day,g_Day,M,H,PROMOTE,stage code computes hours + it * 24 and NextDay increments it,29
+0x8002953C,exe,GetFoundCount,GetFoundCount,M,M,KEEP,"returns D_80078E84; callers give an item at 0x23 of them. What is counted (""Found"") is not in the C",28
+0x8002955C,exe,IncFoundCount,IncFoundCount,M,M,KEEP,D_80078E84 += 1; see GetFoundCount,27
+0x8001CB00,exe,InitSpriteKind1,InitSpriteKind1,M,H,PROMOTE,"ResetSprite, kind 1, VRAM x / y, +0x20 = frames, +4 = 0x08000000",24
+0x80020F34,exe,ScaleMatrixFast,ScaleMatrixFast,M,M,KEEP,"asm, no body; rests on the r274 reading",23
+0x800A2E20,exe,g_SoundLoadBuf,g_SoundLoadBuf,M,H,PROMOTE,"the staging buffer the sound-bank loads target (g_SoundLoadTable's destination in ModeTitleLoad, ovl36, ovl38)",21
+0x800AE7B8,exe,g_FrontOt,g_FrontOt,M,H,PROMOTE,the two GsOT headers of the front OT (DrawFadeBlack and stage overlays add to them after the world),21
+0x800AE610,exe,g_PadLostFrames,g_PadLostFrames,M,H,PROMOTE,"counted up while pad 0 is missing (more than 10 clears the connected flag) and reset when it is back; AddPrimChecked also compares the OT pointer with its address, an end-of-table bound",18
+0x8001CD04,exe,InitShapeSpriteKind4,InitShapeSpriteKind4,M,M,KEEP,"ResetSprite, kind 4, +0x20 = data; ""Shape"" rests on the sprite kind 4 drawer",17
+0x8006A980,exe,g_MergedSfxFlags,g_MergedSfxFlags,M,H,PROMOTE,"PlaySfx merges same-frame sounds into it, UpdateSound's FlushMergedSfx plays and clears it",17
+0x80013E94,exe,PackAngles10,PackAngles10,M,H,PROMOTE,bits 3-12 of each of three angles packed 10:10:10 into a word; effect spawns pass it as the value,15
+0x80020DA4,exe,RotMatrixZYXFast,RotMatrixZYXFast,M,H,PROMOTE,a 3 x 3 rotation from three 12-bit angles through the sin / cos word table (no GTE),15
+0x8006A96E,exe,g_LoopSfxFlags,g_LoopSfxFlags,M,H,PROMOTE,the loop sound's source bits and playing bit: SetLoopSfxLevel / UpdateLoopSfx,14
+0x80075840,exe,g_CardFileBuf,g_CardFileBuf,M,H,PROMOTE,"the card file image CardStep builds ('S', 'C' header ...) and reads",14
+0x8007620C,exe,g_CdAudioStatus,g_CdAudioStatus,M,H,PROMOTE,the CD-audio status bits GetCdAudioState / PeekCdAudioState read and InitCdAudio clears,14
+0x80076243,exe,g_StreamPhase,g_StreamPhase,M,H,PROMOTE,the stream sector phase OnStreamSector switches on (1 seq header ... 4 done),13
+0x800AE6A8,exe,g_EntryPoint,g_EntryPoint,M,H,PROMOTE,the map-entry record QueueMapChange and ClearEntryPoint fill and the room loader reads,13
+0x80029E30,exe,CalcPower03,CalcPower03,M,H,PROMOTE,(stat 3 value + stat 0 value) * 175 / 100; a stat-number name,11
+0x80029DB4,exe,CalcPower02,CalcPower02,M,H,PROMOTE,(stat 2 value + stat 0 value) * 125 / 100 (150 with flag 0x81),10
+0x800760C4,exe,g_CardResult,g_CardResult,M,H,PROMOTE,CardStep's last card call result,10
+0x800762B4,exe,g_SeqVoiceKeyed,g_SeqVoiceKeyed,M,H,PROMOTE,16 per-voice flags cleared each sequencer tick and set by SeqNoteOn,10
+0x800A4F1C,exe,g_BgmExtraParts,g_BgmExtraParts,M,H,PROMOTE,"bits that PlayBgm turns into MuteSeqChannel calls, set by sound commands",10
+0x800C5328,exe,g_BankSlotMap,g_BankSlotMap,M,H,PROMOTE,the bank id to slot map ClearBankMap fills and the bank uploads read,10
+0x8001CA88,exe,InitShapeModel,InitShapeModel,M,M,KEEP,"ResetModelFields, type 1, kind 4, +0x20 = data, +0x74 = 0; ""Shape"" rests on model kind 4's handler (data)",9
+0x800242D0,exe,FormatDigitGlyphs,FormatDigitGlyphs,M,H,PROMOTE,a number to digit glyphs from D_80063858 with leading zeros and a separator by flags (-1 ended); the deadline timers draw it,8
+0x800A2B70,exe,g_TimeChime,g_TimeChime,M,H,PROMOTE,"the chime kind (1 plays 0x518, 2 0x517) UpdateFieldSound runs and ClearTimeChime clears",8
+0x800A4EA2,exe,g_SuspendedBgmFlags,g_SuspendedBgmFlags,M,H,PROMOTE,the suspended BGM's flags PlayBgm / StopBgm / StopAllMusic read,8
+0x80017738,exe,DrawPrimG4MtxNoDither,DrawPrimG4MtxNoDither,M,M,KEEP,"DrawPrimG4(a, m, 1); the third argument's meaning (dither) is in DrawPrimG4, not read here",7
+0x800A6588,exe,g_ItemValues,g_ItemValues,M,H,PROMOTE,"64 u16 item values: GiveItem sets one, the save slots copy them",6
+0x80037334,exe,ClearBgmLoadQueue2,ClearBgmLoadQueue2,M,H,PROMOTE,the 5 BGM load-queue entries cleared (a copy of 0x80037004); CancelBgmLoad / LoadBgmStep,5
+0x80075818,exe,g_ScreenOfsX,g_ScreenOfsX,M,H,PROMOTE,the display x origin DebugMoveScreen moves (y at +4),5
+0x800A4638,exe,g_SoundVSyncCount,g_SoundVSyncCount,M,H,PROMOTE,+1 each SoundVSync,5
+0x800A4F1A,exe,g_XaPlaying,g_XaPlaying,M,H,PROMOTE,"PlayXa sets it, OnXaDone / StopCdTrack clear it",5
+0x800AE708,exe,g_BgmPackPos,g_BgmPackPos,M,H,PROMOTE,"the disc position of the pack being read, 0 idle; CancelXaClipStep tests it",5
+0x800BA0FC,exe,g_TimeChimeTimer,g_TimeChimeTimer,M,H,PROMOTE,the chime's frame count; UpdateFieldSound stops it at 0x97,5
+0x8001B324,exe,ResetBgmPacks,ResetBgmPacks,M,H,PROMOTE,g_BgmPackStep = 0 and ForgetBgmPack,4
+0x8001BC6C,exe,AddScreenSprite,AddScreenSprite,M,H,PROMOTE,a SPRT of a frame-buffer rectangle (page by the buffer) added to the OT,4

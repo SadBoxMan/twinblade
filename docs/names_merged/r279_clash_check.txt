@@ -1,5 +1,45 @@
-r279 clash check: 1041 H2 names, 0 with a clash
+r279 clash check: 1081 H2 names, 0 with a clash
 
+0x80013E94 exe            func_80013E94            -> PackAngles10               ok
+0x8001B324 exe            func_8001B324            -> ResetBgmPacks              ok
+0x8001BC6C exe            func_8001BC6C            -> AddScreenSprite            ok
+0x8001BFD0 exe            func_8001BFD0            -> ClearTimeChime             ok
+0x8001CB00 exe            func_8001CB00            -> InitSpriteKind1            ok
+0x8001CB6C exe            func_8001CB6C            -> InitSpriteKind2            ok
+0x8001CC3C exe            func_8001CC3C            -> InitSpriteKind3            ok
+0x80020DA4 exe            func_80020DA4            -> RotMatrixZYXFast           ok
+0x80024054 exe            func_80024054            -> SjisToGlyphs               ok
+0x800242D0 exe            func_800242D0            -> FormatDigitGlyphs          ok
+0x80029DB4 exe            func_80029DB4            -> CalcPower02                ok
+0x80029E30 exe            func_80029E30            -> CalcPower03                ok
+0x8002AC00 exe            func_8002AC00            -> GiveItem                   ok
+0x80037334 exe            func_80037334            -> ClearBgmLoadQueue2         ok
+0x8006A96E exe            D_8006A96E               -> g_LoopSfxFlags             ok
+0x8006A980 exe            D_8006A980               -> g_MergedSfxFlags           ok
+0x80075818 exe            D_80075818               -> g_ScreenOfsX               ok
+0x80075840 exe            D_80075840               -> g_CardFileBuf              ok
+0x8007609C exe            D_8007609C               -> g_CardStatus               ok
+0x800760C4 exe            D_800760C4               -> g_CardResult               ok
+0x8007620C exe            D_8007620C               -> g_CdAudioStatus            ok
+0x8007622C exe            D_8007622C               -> g_StreamQueue              ok
+0x80076243 exe            D_80076243               -> g_StreamPhase              ok
+0x800762B4 exe            D_800762B4               -> g_SeqVoiceKeyed            ok
+0x80078EAC exe            D_80078EAC               -> g_Day                      ok
+0x800A2B70 exe            D_800A2B70               -> g_TimeChime                ok
+0x800A2E20 exe            D_800A2E20               -> g_SoundLoadBuf             ok
+0x800A4638 exe            D_800A4638               -> g_SoundVSyncCount          ok
+0x800A4EA2 exe            D_800A4EA2               -> g_SuspendedBgmFlags        ok
+0x800A4F1A exe            D_800A4F1A               -> g_XaPlaying                ok
+0x800A4F1C exe            D_800A4F1C               -> g_BgmExtraParts            ok
+0x800A651C exe            D_800A651C               -> g_WorldOtOrg               ok
+0x800A6588 exe            D_800A6588               -> g_ItemValues               ok
+0x800AE610 exe            D_800AE610               -> g_PadLostFrames            ok
+0x800AE6A8 exe            D_800AE6A8               -> g_EntryPoint               ok
+0x800AE708 exe            D_800AE708               -> g_BgmPackPos               ok
+0x800AE7B8 exe            D_800AE7B8               -> g_FrontOt                  ok
+0x800AE7BC exe            D_800AE7BC               -> g_FrontOtOrg               ok
+0x800BA0FC exe            D_800BA0FC               -> g_TimeChimeTimer           ok
+0x800C5328 exe            D_800C5328               -> g_BankSlotMap              ok
 0x8010F46C engine         D_8010F46C               -> g_ItemTable                ok
 0x801151FC engine         D_801151FC               -> g_PlayerHitBy              ok
 0x801152B0 engine         D_801152B0               -> g_WallNormal               ok
