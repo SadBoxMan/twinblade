@@ -1,3 +1,6 @@
 address,scope,proposed,corrected,reason
 0x8002B0B4,exe,SaveCardStep,MemCardStep,VAGUE: the card state machine dispatches check-directory / save / load / mode 3 on mode & 7: not save-only
 0x80146DE8,engine,SetEffectAccel,SetObjAccel,"VAGUE: writes +0x24..+0x2C; most callers pass the player or an actor (with SetPlayerMotion / SetFallSpeed / ClearHitPending), StepToward clears it on any walker: the ""Effect"" in the name is too narrow (the whole SetEffect* / ClearEffect* helper family in 0x80146C98-0x80146E98 shares this)"
+0x80180734,stage:sc03_124,TalkerFlag106,TalkerTakeItem58,"VAGUE: the C is an item hand-over: flag 0x106 set -> after-script; item 0x58 missing -> ask script; else take item 0x58, set flag 0x106"
+0x80180A70,stage:sc06_029,SpawnWeakPoints,BossCollapseSequence,"WRONG: no SpawnActorArg(0x294) here: a multi-state sequence (3 rings x 8 debris of kind 0x32B via func_8012C51C, sounds, camera shake, EndEvent, state 0xF, GiveItem(0x24)) run after EventAfterBoss; the 5 x 0x294 spawn the evidence describes is in func_sc06_029_8017EBC4 (proposed BossCoreInit)"
+0x80181C1C,stage:sc05_017,SetFlag124Var8A,GiveItem28SetFlag124,"VAGUE: also GiveItem(0x28) first; the name lists the flag and var but leaves out the item, which is the point of the function"

@@ -11,8 +11,9 @@ verdict).
 |---|---|---|---|---|---|---|---|---|
 | exe_H | 60 | 58 | 1 | 0 | 1 | 0.0 (0-6) | 1.7 (0-9) | (pending) |
 | engine_H | 60 | 57 | 1 | 0 | 2 | 0.0 (0-6) | 1.7 (0-9) | (pending) |
+| stage_H | 60 | 53 | 2 | 1 | 4 | 1.7 (0-9) | 3.3 (1-11) | (pending) |
 
-Not yet checked: stage, abil, ovl.
+Not yet checked: abil, ovl.
 
 ## Method
 
@@ -174,4 +175,73 @@ Counts: CORRECT 58, VAGUE 1, WRONG 0, UNSURE 1. WRONG 0.0% (95% Wilson 0-6%), VA
 | 59 | 0x8017B368 | func_8017B368 | ScriptOpCameraCut | CORRECT | reads two points (absolute, or the actor's numbered points), sets the script camera cut flag; stages call it with point pairs |  |
 
 Counts: CORRECT 57, VAGUE 1, WRONG 0, UNSURE 2. WRONG 0.0% (95% Wilson 0-6%), VAGUE 1.7% (0-9%), WRONG + VAGUE 1.7% (0-9%).
+
+## stage_H.csv
+
+631 rows, 570 eligible, 60 sampled (0 of them comment-only evidence; 0 comment-only rows were eligible).
+
+| # | address | current | proposed | verdict | reason | better name |
+|---|---|---|---|---|---|---|
+| 0 | 0x8017CF58 | func_sc06_027_8017CF58 | RoomExitDone | CORRECT | ExitFadeDone, then EndHeldAbility, D_80078EC0 = 6, RequestFullReload; returns 1 when done |  |
+| 1 | 0x8017D060 | func_sc01_004_8017D060 | PickDefaultExit | UNSURE | returns one of six records by progress (first visit sets flag 0xB5, progress 10, the clock); the only caller is a menu choice, and nothing here shows the records are exits (they may be scripts or destinations) |  |
+| 2 | 0x8017D128 | func_sc03_115_8017D128 | PickUpSceneFaceCamera | CORRECT | walks the player toward the camera's point (ActionHelper_1AB0), then EndScene, motion, next phase |  |
+| 3 | 0x8017D3E0 | func_sc04_012_8017D3E0 | EventArrival | CORRECT | 20-frame wait, StartEvent by player z (< 0x400), frees itself when the event ends |  |
+| 4 | 0x8017D490 | func_sc05_007_8017D490 | RideWaitPlayer | CORRECT | ground distance < 0x80 and player y < -0x1BF: StartEvent, next state |  |
+| 5 | 0x8017D610 | func_sc05_011_8017D610 | CastBUpdate | CORRECT | script switches on flags 0x128 / 0x12A / 0x12C and a random blink through QueueImage |  |
+| 6 | 0x8017DB30 | func_sc06_011_8017DB30 | FloorSwitchUpdate | CORRECT | state 0: stood on with player byte 1C7 == 2 -> sinks 0x20; then slides its +0x6C part with sounds |  |
+| 7 | 0x8017DC50 | func_sc05_011_8017DC50 | EventSceneEnd | CORRECT | SetProgress(0x398), GiveItem(0x1D), RequestMapChange, next state |  |
+| 8 | 0x8017DD04 | func_sc01_000_8017DD04 | DrawOpeningPicture | CORRECT | ScaleGridPoints then four POLY_FT4 (code 0x2C) linked into the OT; the opening sequence calls it every step |  |
+| 9 | 0x8017DD98 | func_sc03_013_8017DD98 | ItemGateOpen | CORRECT | per +0x218 slot: SetFlag(0xC1..C3), TakeItem(0x5B..5D), OpenMessage; the "gate" is not in the C but nothing contradicts it |  |
+| 10 | 0x8017DDEC | func_sc02_041_8017DDEC | EventSwitchSpawnsD4 | CORRECT | SetFlag(0xD4), SetVar32(4, 0xD4), new g_SpawnListA / B, respawn |  |
+| 11 | 0x8017E07C | func_sc01_074_8017E07C | DrawCable | CORRECT | one DrawCableSegment, or two through the object when it is past the anchor |  |
+| 12 | 0x8017E20C | func_sc07_000_8017E20C | EventSceneB | CORRECT | SoundCmd1(1), StartEvent(D_801863A0), state 4; called when the player reaches a zone |  |
+| 13 | 0x8017E770 | func_sc05_018_8017E770 | RoomEntryByProgress | CORRECT | progress 0x488 picks StartEntryScript488, else the other entry; StartFade |  |
+| 14 | 0x8017E9F8 | func_sc05_001_8017E9F8 | RoomInitCamera | CORRECT | camera targets, SetCameraUpdate(room hook), SnapCamera |  |
+| 15 | 0x8017ECB4 | func_sc07_000_8017ECB4 | EventSceneA | CORRECT | StartEvent, timer, spawns on the end; EndEvent when done |  |
+| 16 | 0x8017EFAC | func_sc03_112_8017EFAC | MachineHitPlayer | CORRECT | five ActorSegmentHitsPlayer probes across the machine; MachineUpdate then sets the player hit |  |
+| 17 | 0x8017EFC4 | func_sc01_009_8017EFC4 | PickStoryTalk | CORRECT | progress x var 0x3B picks the talk script into D_801E91D4, bumps var 0x3B |  |
+| 18 | 0x8017F028 | func_sc01_004_8017F028 | MenuHostInit | CORRECT | SetProgress(5) if below, timer 4, next state |  |
+| 19 | 0x8017F1FC | func_sc01_008_8017F1FC | AdvisorFirstTalkEnd | CORRECT | UpdateScript done -> EndEvent, TakePlayerControl, next state |  |
+| 20 | 0x8017F200 | func_sc05_002_8017F200 | ColumnScrollAndSpawn | CORRECT | texture v scroll on +0x30 with wrap, SpawnActor(0x1A4) on the timer |  |
+| 21 | 0x8017F3B0 | func_sc02_017_8017F3B0 | EventExitWalk | CORRECT | rumble, step table: RequestMapChange or NextPlayerActionHandler |  |
+| 22 | 0x8017F460 | func_sc01_077_8017F460 | SensorCheck | CORRECT | hit count (mode 4) or z distance triggers 0x8017F5BC with sound 0x495 |  |
+| 23 | 0x8017F770 | func_sc05_002_8017F770 | ColumnInit | CORRECT | AllocActorSprite, InitSpriteKind2, ColumnSpawnRow, state 2 while flag 0xBA clear |  |
+| 24 | 0x8017F904 | func_sc03_113_8017F904 | StepColumnInit | CORRECT | same shape in sc03_113 (AllocActorSprite, StepColumnFill, flag 0xBA) |  |
+| 25 | 0x8017F940 | func_sc05_002_8017F940 | ColumnPlatformMove | CORRECT | moves by the column's speed, freed past the column's range, CarryPlayerExact while stood on |  |
+| 26 | 0x8017FCE0 | func_sc03_029_8017FCE0 | ToughEnemyInit | UNSURE | rejects when kind 0x95 exists or flag 0x9D, then SetupActor / shadow / script; nothing in this body supports "Tough" (that reading is from the actor data, not checked here) |  |
+| 27 | 0x8017FF08 | func_8017FF08 | WindowLitTime8 | CORRECT | null outside progress 0x64-0x258, else the time window 0x96-0xF0 minutes (2:30-4:00) |  |
+| 28 | 0x8017FFA8 | func_sc06_006_8017FFA8 | SpawnCast | CORRECT | 27 x 0x34A, 25 x 0x389 with sub-ids, 0x38F; DirectorInit |  |
+| 29 | 0x80180034 | func_sc05_001_80180034 | LiftFrameInit | CORRECT | frame model, wheel model, props, SpawnActorArg children |  |
+| 30 | 0x80180078 | func_80180078 | RoomManagerFrame | CORRECT | minutes of day, hide flags, DrawWindowLight 2..0x11, ambient timer |  |
+| 31 | 0x801800B8 | func_sc06_006_801800B8 | StartShot | CORRECT | shot camera + per-cast commands (hide, show, script ...); every ShotN calls it with its record |  |
+| 32 | 0x80180300 | func_sc06_025_80180300 | RivalNextRound | CORRECT | round counter + 1, StartEvent for the next round or RivalDefeat at 4 |  |
+| 33 | 0x80180304 | func_sc05_001_80180304 | LiftEndRide | CORRECT | EndEvent, sound 0x8F9, SetFlag per lift, state 3; LiftRise calls it at the top |  |
+| 34 | 0x80180520 | func_sc05_001_80180520 | ShiftBlockWait | CORRECT | random smoke puffs until the parent's +0xFE is set, then ShiftBlockStart |  |
+| 35 | 0x801805B0 | func_sc04_000_801805B0 | PropScaleOut | CORRECT | scale = rsin of a falling counter, FreeProp at 0 |  |
+| 36 | 0x801805E0 | func_sc05_018_801805E0 | EventSetProgress492 | CORRECT | FindActorByKind(0x2C6) -> SetProgress(0x492), SpawnActorArg(0x3BE), music, sound |  |
+| 37 | 0x80180734 | func_sc03_124_80180734 | TalkerFlag106 | VAGUE | the C is an item hand-over: flag 0x106 set -> after-script; item 0x58 missing -> ask script; else take item 0x58, set flag 0x106 | TalkerTakeItem58 |
+| 38 | 0x801808C0 | func_sc06_006_801808C0 | DirectorInit | CORRECT | model, flags 0x143 / 0x6F-0x73, SpawnCast and the set-up helpers |  |
+| 39 | 0x801809D4 | func_sc06_029_801809D4 | EventAfterBoss | CORRECT | timer and kind 0x2EF gone -> state 0xE, bonus unless flag 0x11D, StartEvent |  |
+| 40 | 0x80180A10 | func_sc03_011_80180A10 | Scene3E8Init | CORRECT | progress 0x3E8 only, model, clock copy into vars, SpawnActor(0x374) |  |
+| 41 | 0x80180A70 | func_sc06_029_80180A70 | SpawnWeakPoints | WRONG | no SpawnActorArg(0x294) here: a multi-state sequence (3 rings x 8 debris of kind 0x32B via func_8012C51C, sounds, camera shake, EndEvent, state 0xF, GiveItem(0x24)) run after EventAfterBoss; the 5 x 0x294 spawn the evidence describes is in func_sc06_029_8017EBC4 (proposed BossCoreInit) | BossCollapseSequence |
+| 42 | 0x80180CAC | func_sc03_006_80180CAC | RoomResetVarCC | CORRECT | flag 0x142 = 0, var 0xCC 1 -> 2 |  |
+| 43 | 0x8018104C | func_sc02_031_8018104C | RoomExitStepFlag90 | CORRECT | exit countdown: SoundCmd1(1) unless flag 0x90, stop sounds / chime, StartExitFade |  |
+| 44 | 0x8018112C | func_sc03_006_8018112C | RoomInitCamera | CORRECT | camera targets, SetCameraUpdate(room hook), SnapCamera |  |
+| 45 | 0x80181850 | func_sc03_107_80181850 | RoamObjInit | CORRECT | progress / saved-map gate, SetProgress(0x1D6) on map 0x1052, actor set-up |  |
+| 46 | 0x801818D8 | func_sc03_006_801818D8 | HazardHitsPlayer | CORRECT | six ActorSegmentHitsPlayer probes; HazardUpdate sets damage 0xC on 1 |  |
+| 47 | 0x80181A5C | func_sc03_116_80181A5C | SwellingInit | CORRECT | flag 0x11C gate, sprite model at scale 0x4000, hit data, script |  |
+| 48 | 0x80181C1C | func_sc05_017_80181C1C | SetFlag124Var8A | VAGUE | also GiveItem(0x28) first; the name lists the flag and var but leaves out the item, which is the point of the function | GiveItem28SetFlag124 |
+| 49 | 0x80181FA8 | func_sc03_116_80181FA8 | BarrierInit | CORRECT | flag 0x11C gate, translucent model, hit data, colour fields |  |
+| 50 | 0x8018287C | func_sc01_080_8018287C | HazardBurst | CORRECT | four SegmentHitsPlayer probes set the player hit, sound 0x4A7, SpawnActor(0x37), FreeActor |  |
+| 51 | 0x80182C10 | func_sc01_001_80182C10 | ResetBlinkTexture | CORRECT | MoveImage rect at (0x280, 0x188), blink timer 0x3C; the prologue scene resets it per cut |  |
+| 52 | 0x80182E68 | func_sc02_011_80182E68 | SetPieceInit | CORRECT | RejectSpawn unless var 0xCD and not flag 0x9E, state 1 |  |
+| 53 | 0x80182F94 | func_sc01_001_80182F94 | DebrisInit | CORRECT | model, cull box, script, StopMotion, velocity (0, 0x20000, 0) |  |
+| 54 | 0x80183B1C | func_sc06_029_80183B1C | WeakPointHit | CORRECT | parent-following part; on hit 0x28 off the core's HP (+0x76), defeat at 0 |  |
+| 55 | 0x8018495C | func_sc05_001_8018495C | DripEmitterInit | CORRECT | random timer and period from +0xFC |  |
+| 56 | 0x80185158 | func_sc03_028_80185158 | BossHitBig | UNSURE | MoveCollide; on a hit the boss is touched and ShowDamage(o, 0x64): reads as a thrown object that damages the boss as much as "the boss is hit"; the C does not settle which actor o is |  |
+| 57 | 0x80185344 | func_sc03_028_80185344 | BossHitMid | UNSURE | same family: MoveCollide, shatters into 8 x 0xCC on the floor, ShowDamage(o, 0x28) on a hit near the boss; same open question as BossHitBig |  |
+| 58 | 0x801862C0 | func_sc06_029_801862C0 | Spawn353IfFlag8E | CORRECT | flag 0x8E and helper 1 -> SpawnActor(0x353), state 2 |  |
+| 59 | 0x8018872C | func_8018872C | DoorTalkCheck | CORRECT | map 0x3069 excluded, state / area tests, ResetScriptVM, returns the action handler; installed as the actor's talk hook |  |
+
+Counts: CORRECT 53, VAGUE 2, WRONG 1, UNSURE 4. WRONG 1.7% (95% Wilson 0-9%), VAGUE 3.3% (1-11%), WRONG + VAGUE 5.0% (2-14%).
 
