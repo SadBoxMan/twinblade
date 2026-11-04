@@ -565,8 +565,77 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80161488,engine,CheckLandingBy1C6,CheckLandingBy1C6,M,H,PROMOTE,"air steps; +0x1C6 == 0: HandleLandingKeepKind, else LandingResultCode & ~7; a field-number name",1
 0x8016158C,engine,CheckLandingKeepKindNoBump,CheckLandingKeepKindNoBump,M,H,PROMOTE,"HandleLandingKeepKind(p, RunPlayerAirSteps(p, 1))",1
 0x80161888,engine,HandleLandingFx,HandleLandingFx,M,H,PROMOTE,"bits 1 / 0x4000 / 0x2000: SpawnEffect2(p, 1) + PlayLandSe, returns 1 / 2 / 4",1
+0x8016191C,engine,HandleLandingDust,HandleLandingDust,M,H,PROMOTE,"bits 1 / 0x4000 / 0x2000: SpawnEffect2(p, 1) only, returns 1 / 2 / 4; CheckLandingDust",1
+0x8016197C,engine,LandingResultCode,LandingResultCode,M,H,PROMOTE,bits 1 / 0x4000 / 0x2000 to 1 / 2 / 4,1
+0x80161D58,engine,UpdateDeadlines,UpdateDeadlines,M,H,PROMOTE,UpdateDeadline8 then UpdateDeadline12; UpdatePlayer,1
+0x80161D88,engine,StartDeadlineEvent,StartDeadlineEvent,M,H,PROMOTE,"no event and flag 0x141: clear it, flag 0x95, QueueMapChange(D_80190048); FinishPlayerFrame",1
+0x80161E08,engine,UpdateDeadline8,UpdateDeadline8,M,H,PROMOTE,"var 8 active: the three timer sprites built once, the digits refreshed, ExpireDeadline8 at the minute",1
+0x80162438,engine,UpdateDeadline12,UpdateDeadline12,M,H,PROMOTE,"the same for var 0x12, ClearDeadline12 at the minute",1
+0x80162714,engine,StartDeadline12,StartDeadline12,M,H,PROMOTE,var 0x12 unset: var 0x12 = now + 12 h | 0x8000,1
+0x801627C0,engine,ClearShadow,ClearShadow,M,H,PROMOTE,ZeroFill of the 0x58 bytes (the two shadow records) at D_8011F750; stage init,1
+0x801627E8,engine,UpdateShadow,UpdateShadow,M,H,PROMOTE,kind != 0: D_801900B0[kind - 1](record) for the shadow record; the stage frame,1
+0x80162ACC,engine,NextShadowStep,NextShadowStep,M,H,PROMOTE,record +1 (its step) += 1; InitShadow,1
 0x80162F08,engine,AddObj68Accel,AddObj68MoveSpeed,M,H,FIX,"AddObj68MoveSpeedX / Y / Z in turn (AddMoveSpeed*Limit, 0x7F0000) on a 0x68 object; the family root. Was AddObj68Accel",1
 0x801630C4,engine,AddObj68AccelLocalYXZ,AddObj68MoveSpeedFacingYXZ,M,H,FIX,"AddObj68MoveSpeedX / Y / Z, then vel = the move speed turned by the model's rotation built Y, X, Z (via g_PushVel); AddObj68MoveSpeedFacing in YXZ order. Was AddObj68AccelLocalYXZ",1
+0x8016345C,engine,SweepHitObj68Rolled,SweepHitObj68Rolled,M,H,PROMOTE,"RollDamage for the hit kind, then SweepHitObj68Full; ovl1f",1
+0x801634D8,engine,SweepHitObj68Dmg,SweepHitObj68Dmg,M,H,PROMOTE,SweepHitObj68Full with the given damage and a zero offset; the Fusion throw,1
+0x80163664,engine,CallSweepHit,CallSweepHit,M,H,PROMOTE,TraceAttackPath with kind and damage cut to u16; SweepHitObj68Full,1
+0x8016380C,engine,TraceObj68Move,TraceObj68Move,M,H,PROMOTE,"TraceMap(1) from +0x44 to the position, the moved end on a hit, the bits returned",1
+0x80164530,engine,AimFusionThrow,AimFusionThrow,M,H,PROMOTE,"turns the thrown sword toward the nearest target actor (flags5C 0x2000) ahead, pitching on map 0x30A0",1
+0x80164930,engine,FadeRing,FadeRing,M,H,PROMOTE,"value 0: the ring's colour fades, at the end its 0x68 pieces and itself freed; value 1: shrink",1
+0x80164A74,engine,PlaceAtHand,PlaceAtHand,M,H,PROMOTE,"position = the hand point (GetPosePointsB) in the owner's frame, next state; StartRing",1
+0x80164DB0,engine,FreeFlash,FreeFlash,M,H,PROMOTE,FreeObj68; the flash's end,1
+0x80164DD0,engine,PlaceFlashAtHand,PlaceFlashAtHand,M,H,PROMOTE,"the hand point in the owner's frame, 0x40 up, next state",1
+0x80165140,engine,AddTrailCopy,AddTrailCopy,M,H,PROMOTE,"a free slot of the 8 trail copies gets 8 frames, the rotation and colour",1
+0x8016533C,engine,RestoreAbilityOnLoad,RestoreAbilityOnLoad,M,H,PROMOTE,"D_80126CF8 = the held ability, RunAbilityInitHandler on Musashi; the stage set-up",1
+0x801653B8,engine,SwitchToUseAbility,SwitchToUseAbility,M,H,PROMOTE,"CheckAbilityFails, SetKindAndState(p, 0x17), RunAbilityUse; TriggerUseAbility",1
+0x801654A8,engine,RunPassiveAbility,RunPassiveAbility,M,H,PROMOTE,"each frame (not kinds 0x16 / 0x1A, no action) the passive abilities' handler, ability 0x19's overlay step",1
+0x80165670,engine,SetAbilityTimer,SetAbilityTimer,M,H,PROMOTE,D_80078EC8 = D_8019020C[ability]: the ability's time,1
+0x801656D0,engine,GetAbilityAssimilateRate,GetAbilityAssimilateRate,M,H,PROMOTE,D_80190288[ability]: added to +0x188 per press while assimilating,1
+0x801656E8,engine,GetAbilityBpBonus,GetAbilityBpBonus,M,H,PROMOTE,D_801902A8[ability]: the BP ExitAssimilate gives,1
+0x801657D8,engine,SaveStatus,SaveStatus,M,H,PROMOTE,the status words (poison and the next four) and byte EBB copied to 0x80078ECC..,1
+0x80165874,engine,RestoreStatus,RestoreStatus,M,H,PROMOTE,the saved copies put back,1
+0x80165AC8,engine,RunAbilityEndHandler,RunAbilityEndHandler,M,H,PROMOTE,D_80190364[ability](); StopAbility,1
+0x80165B28,engine,RunAbilityFailState,RunAbilityFailState,M,H,PROMOTE,"+0x44 |= 8, D_801903E0[+0x197]: the fail kind's steps",1
+0x80165BB4,engine,StartAbilityFailMotion,StartAbilityFailMotion,M,H,PROMOTE,"motion 0x22, face 0x1A, +0x197++",1
+0x80165C58,engine,EndAbilityFailFace,EndAbilityFailFace,M,H,PROMOTE,"StartFace(p, 0x11); AbilityFailStep",1
+0x80165E90,engine,UpdateSwordTrails,UpdateSwordTrails,M,H,PROMOTE,with the sword bits and the model shown: each weapon's two pose points scaled and drawn as its glow,1
+0x801661CC,engine,DustFxStep,DustFxStep,M,H,PROMOTE,"StepSpriteAnim (freed at the end), MoveByVelocity, x / z speed x 3/4",1
+0x8016629C,engine,SpawnDustB,SpawnDustB,M,M,KEEP,"SpawnEffect(3) at the feet with another packed value; the letter family with SpawnDustA, M",1
+0x801662F4,engine,SpawnDustC,SpawnDustC,M,M,KEEP,"the same with another value; letter family, M",1
+0x8016634C,engine,SpawnDustD,SpawnDustD,M,M,KEEP,"SpawnEffect(3) at the feet with another packed value; letter family with SpawnDustA, M",1
+0x801663A4,engine,SpawnDustE,SpawnDustE,M,M,KEEP,"the same; letter family, M",1
+0x80167AE0,engine,DrawWeaponGlowB,DrawWeaponGlowB,M,M,KEEP,"56 lines of glow quads between the second weapon's two points (UpdateSwordTrails, bit 29, GetPosePointsB); A / B are the two weapon point pairs, M with GetPosePointsA / B",1
+0x80167DBC,engine,DrawWeaponGlowA,DrawWeaponGlowA,M,M,KEEP,"the first weapon's glow (bit 28, GetPosePointsA); A / B pair, M",1
+0x801687CC,engine,RingFxStep,RingFxStep,M,H,PROMOTE,"DrawRingFx while +0x1C < 3, then FreeEffect",1
+0x80168828,engine,DrawRingFx,DrawRingFx,M,H,PROMOTE,a fan of four triangles scaled by +0x1C and turned by the effect's angles (DrawPrimG3Mtx),1
+0x8016A290,engine,DrawChargeGlow,DrawChargeGlow,M,M,KEEP,"82 lines of quads along the weapon's two points; ""charge"" (the size) not read in full, M",1
+0x8016BA48,engine,ShowDefeat56,ShowDefeat56,M,H,PROMOTE,"SpawnDefeatEffect56(a, 0); ShowDefeatAlt; a kind-number name",1
+0x8016BA68,engine,SpawnDefeatEffect56,SpawnDefeatEffect56,M,H,PROMOTE,"an older effect 0x56 freed, then SpawnEffect(0x56) at the hit position; SpawnDefeatEffect for kind 0x56",1
+0x8016DA04,engine,SpawnFx31,SpawnFx31,M,H,PROMOTE,"SpawnEffectOn(0x31, owner); a kind-number name",1
+0x8016DBD8,engine,FollowFxPlace,FollowFxPlace,M,H,PROMOTE,"position = the owner's frame point (ObjLocalToWorld16), PullTowardCamera",1
+0x8016EF78,engine,SetPlayerActionScriptReset,SetPlayerActionScriptReset,M,H,PROMOTE,SetPlayerActionScript (arguments passed through) then ResetActionHandler,1
+0x8016EFA8,engine,SetPlayerActionScriptPass,SetPlayerActionScriptPass,M,H,PROMOTE,SetPlayerActionScript with the caller's arguments passed through,1
+0x8016F330,engine,SetPlayerActionFlag10,SetPlayerActionFlag10,M,H,PROMOTE,g_PlayerAction |= 0x10000000; a flag-number name,1
+0x8016F350,engine,ClearPlayerActionFlag10,ClearPlayerActionFlag10,M,H,PROMOTE,g_PlayerAction &= ~0x10000000; the pair,1
+0x80171FFC,engine,WalkToPointSpeed,WalkToPointSpeed,M,H,PROMOTE,"SnapToPointIfNear, else face the point and PushStickToward with the speed byte",1
+0x8017209C,engine,WalkToPointSpeedTurning,WalkToPointSpeedTurning,M,H,PROMOTE,WalkToPointSpeed with the turn eased (EaseAngleFrac),1
+0x80172588,engine,ClearPlayerEvents,ClearPlayerEvents,M,H,PROMOTE,+0x1F4 = 0 once a frame at the end of the player update: the PlayerEvent word cleared,1
+0x80172644,engine,SetPlayerEvent200,SetPlayerEvent200,M,H,PROMOTE,+0x1F4 |= 0x200; the PlayerEvent family,1
+0x801726A0,engine,PlayerEvent40,PlayerEvent40,M,H,PROMOTE,returns +0x1F4 & 0x40; the PlayerEvent family,1
+0x801727D0,engine,WalkPlayerToStep,WalkPlayerToStep,M,H,PROMOTE,D_80190A8C[phase](obj): WalkPlayerTo's handler,1
+0x80172844,engine,WalkPlayerToArrive,WalkPlayerToArrive,M,H,PROMOTE,StepToward; on arrival NextPhase and ClearActionHandler,1
+0x80178608,engine,ResetActors,ResetActors,M,M,KEEP,"zeroes the 96 actors, then sets the world mode, the room lights / layers, g_FarDistSq, a 0x400 block and spawns the fixed list (func_8013E4B4): a room-entry reset of which the actors are the first part. A name such as ResetRoomActors needs the rest read",1
+0x80178D40,engine,ScriptStep,ScriptStep,M,H,PROMOTE,"the script interpreter's command step (546 lines, a switch over the opcodes, looping while D_801EF464 == 3)",1
+0x80128420,engine,StageStart,StageStart,M,H,PROMOTE,"InitProps, InitMessages, ... InitCameras, ResetFieldSound, the player set-up, LoadRoom, NextGameStateStep: a new room's start",0
+0x8012BF54,engine,SetHittable,SetHittable,M,H,PROMOTE,Mover flags5C |= 0x8000; the actor-side hittable bit (only actors with it are hurt),0
+0x8012BF68,engine,ClearHittable,ClearHittable,M,H,PROMOTE,flags5C &= 0x7FFF; the pair,0
+0x8012BF7C,engine,IsFarInDepth,IsFarInDepth,M,H,PROMOTE,|z - focus z| >= 0x360,0
+0x8012BFA8,engine,IsFarFromFocus,IsFarFromFocus,M,H,PROMOTE,squared distance to the focus > 0xFFFFF (GTE),0
+0x8012F374,engine,TargetToActorLocal,TargetToActorLocal,M,H,PROMOTE,WorldToLocal of g_Player +0x15C (the aim point) into the actor's model frame,0
+0x8013CB5C,engine,ReleaseDayLighting,ReleaseDayLighting,M,H,PROMOTE,D_801ED450 / D_801ED44C restored from HoldDayLighting's copies,0
+0x801424E4,engine,HeadMarkerStep,HeadMarkerStep,M,H,PROMOTE,"its state handler, then it follows the parent or frees itself when the parent's id changed",0
+0x80142608,engine,HeadMarkerSetup,HeadMarkerSetup,M,H,PROMOTE,"kind 0x13's set-up: a model (own or the parent's next free one), scale, height, the parent's id at +0xFE",0
 0x80147AAC,engine,ApplyMoveSpeedFree,SetVelFromMoveSpeedFacing,M,H,FIX,"AddMoveSpeedFacingFree(o, 0, 0, 0): vel = the move speed turned by the model's facing, all axes; the turned partner of SetVelFromMoveSpeed. Was ApplyMoveSpeedFree",0
 0x80147E44,engine,AccelFacingYXZ,AddMoveSpeedFacingYXZ,M,H,FIX,"AddMoveSpeedX / Y / Z, then the move speed turned by the model's rotation built Y first (RotMatrixY, RotMatrixX ..) into vel through g_PushVel; AddMoveSpeedFacing in YXZ order. Was AccelFacingYXZ",0
 0x80163234,engine,SetObj68VelFromAccel,SetObj68VelFromMoveSpeed,M,H,FIX,"AddObj68MoveSpeedSetVel(o, 0, 0, 0): vel = the move speed. Was SetObj68VelFromAccel",0
