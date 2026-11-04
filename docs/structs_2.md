@@ -10,6 +10,9 @@ Records covered, with the functions that touch them:
 | record | where | size | functions | accesses | section |
 |---|---|---|---|---|---|
 | Camera | 0x80126948 (main), 0x80126DB8 (blend), 0x80126E60 x3, 0x80114EE8 x3, 0x801201F8; `D_801151D4` points to the one in use | 0xA4 | 709 | 3 664 | 2 |
+| Effect | 0x8011D030 x30 | 0x58 | 1 003 | 6 851 | 3.1 |
+| Effect68 | 0x8011F9D0 x20 | 0x68 | 99 | 474 | 3.2 |
+| Trail | 0x801ED6A8 + id * 0xC4 | 0xC4 | 3 | - | 3.3 |
 
 Confidence: **H** an engine or EXE routine pins the meaning; **M** consistent use in several places; **L** offset, size
 and a guess. "funcs" counts functions (the stg files repeat code across stages, so accesses overcount).
@@ -110,6 +113,132 @@ typedef struct Camera {
 while walking would show the formula)? (2) +0x9C / +0xA0 / +0xA2: log them during a cutscene camera. (3) Is the
 path at +0x34 the same format as the actor animation scripts?
 
+## 3. Effect records
+
+There are **two effect pools and one trail record**, all in the engine's fixed area below the actor table:
+
+| record | where | slots | stride | spawned by | owner at |
+|---|---|---|---|---|---|
+| `Effect` (small) | 0x8011D030 | 30 | 0x58 | func_80146A6C(kind, owner, x, y, z, d, e) via func_80146AFC; counted spawns func_80146994, func_801469C8 | +0x34 |
+| `Effect68` (large) | 0x8011F9D0 | 20 (slots 0-7 and 8-19 are two sub-pools) | 0x68 | func_801466F0 via func_8014680C (slots 0-7) or func_80146750 (8-19); counted func_80146608, func_801466B4 | +0x4C |
+| `Trail` | 0x801ED6A8 | indexed by id | 0xC4 | engine_801458E0.c around 0x80166xxx (func_80166F58 clears one) | - |
+
+Both pools share the object header of docs/object_struct.md (kind +0x00, sub-state +0x02, position +0x04, model
++0x20; func_8014AC10 frees an effect's model as func_8012C218 frees an actor's). The 0x68 pool's owner at +0x4C
+explains conflict 6 of the first doc: func_80163A94 / func_80163C2C / func_80163EC8 read a pointer at +0x4C and
+fields at +0x58..+0x67, which are this pool's.
+
+**A layout finding.** The actor table's base `D_80120194` (slot 0 "never handed out") lies inside this area: the 0x68
+pool ends at 0x801201F0 and the map-change camera (section 2) occupies 0x801201F8..0x8012029C, so actor "slot 0"
+(0x80120194..0x8012029F) overlaps the last effect slot and that camera. That is why slot 0 is never used: the
+engine indexes the table from D_80120194 but the first real actor is D_801202A0. (The census shows 10 rows of
+`D_80120194` falling in effect slot 19 at +0x0C; they are the actor-table references, not effect accesses.)
+
+**Who uses them.** Small effects: 6 851 accesses in 1 003 functions (2 849 through the argument of the free function
+func_80146C3C, 1 843 through parameters, 112 through spawn results, 2 026 weak: a pointer that reads an owner at +0x34
+and nothing at or past 0x58). Large effects: 474 in 99 functions (399 weak, by the owner at +0x4C). This replaces the
+first doc's lower bound (72 functions): an effect handler is recognised by freeing itself, which almost all do.
+
+### 3.1 Effect (0x58)
+
+| off | type | name | meaning | conf | evidence |
+|---|---|---|---|---|---|
+| 0x00 | u16 | `kind` | effect kind (0x1B, 0x40, 0x2B, 2, 0x19, 0x11, 6, 0x12, 0x42 are the most spawned), 0 free | H | engine_801458E0.c:func_80146AFC, func_8016706C |
+| 0x02 | u16 | `sub` | the handler's step (780 accesses) | H | engine_801458E0.c:func_80166054 |
+| 0x04 | Fixed[3] | `pos` | position; set from the spawn, often copied from the owner | H | engine_801458E0.c:func_80146AFC, func_80166054 (func_80149374(owner, e + 4)) |
+| 0x10 | s32[3] | `vel` | velocity (func_80166054: x, z from the owner's heading, y = -1.0); also read as six s16 by some kinds (+0x12: colour bytes in func_80166xxx) | M | engine_801458E0.c:func_80166054 |
+| 0x1C | s32 | `timer` | the countdown (1 160 accesses, the busiest field) | H | engine_801458E0.c:func_80167540, func_80167714 |
+| 0x20 | ModelObj * | `model` | | H | engine_801458E0.c:func_80166054, func_8014AC10 |
+| 0x24 | s16[2] | `unk24` | per kind; func_80166054 hands `e + 0x24` to func_80128EA8 | L | engine_801458E0.c:func_80166054, func_8016AB6C |
+| 0x28 | s16 | `unk28` | per kind (counter / id) | L | engine_801458E0.c:func_80168328 |
+| 0x2A | u16 | `unk2A` | per kind: a countdown from a table (D_80190470) | L | engine_801458E0.c:func_8016829C |
+| 0x2C | s32 | `arg0` | the spawner's d: a variant (0 / 2 / 3 select the direction in func_80166054) | H | engine_801458E0.c:func_80146AFC, func_80166054 |
+| 0x30 | u32 | `arg1` | the spawner's e: an angle (low 12 bits) and a shift (bits 12-15) in func_80166054; a scale at +0x32 | H | engine_801458E0.c:func_80146AFC, func_80166054 |
+| 0x34 | Obj * | `owner` | the spawning actor or Musashi | H | engine_801458E0.c:func_80146AFC, func_80166054 |
+| 0x38 | MATRIX | `mtx` | a matrix (`AF(e, MATRIX, 0x38) = D_800AE620`); +0x4C..+0x54 its translation; some kinds keep a pointer at +0x38 instead | M | engine_801458E0.c:func_80167540, func_801670E4, func_80162B1C |
+
+### 3.2 Effect68 (0x68)
+
+| off | type | name | meaning | conf | evidence |
+|---|---|---|---|---|---|
+| 0x00 | u16 | `kind` | | H | engine_801458E0.c:func_80146750, func_80146608 |
+| 0x02 | u16 | `sub` | | H | ovl1c.c:func_ovl1c_800CB10C |
+| 0x04 | Fixed[3] | `pos` | | H | engine_801458E0.c:func_80146750 |
+| 0x10 | s32[3] | `vel` | | M | ovl19.c:func_ovl19_800CB4C8, ovl21.c:func_ovl21_800CB4A4 |
+| 0x1C | s32 | `timer` | | M | ovl27.c:func_ovl27_800CB190 |
+| 0x20 | ModelObj * | `model` | 87 accesses | H | engine_801458E0.c:func_801630C4 |
+| 0x28 | s32 | `unk28` | read only (sc02_031) | L | sc02_031.c:func_sc02_031_8017DE3C |
+| 0x4C | Obj * | `owner` | the spawn's second argument | H | engine_801458E0.c:func_80146750, func_8014680C |
+| 0x50 | s32 | `arg0` | the spawn's f | H | engine_801458E0.c:func_80146750 |
+| 0x54 | s32 | `arg1` | the spawn's g | H | engine_801458E0.c:func_80146750 |
+| 0x58 | void * | `unk58` | a pointer (also read as s16 / AVec in places) | L | engine_801458E0.c:func_80163EC8 |
+| 0x5A, 0x5C | s16 | `unk5A`, `unk5C` | read as s16 by one function; +0x5A overlaps the pointer at +0x58 (conflict 1) | L | engine_801458E0.c:func_80163EC8 |
+| 0x60 | s16[3] | `scale` | 78 accesses at +0x60; a vector handed to the model | L | engine_801458E0.c:func_80163A94 |
+| 0x66 | u16 | `unk66` | += 0x40 (an angle) | L | engine_801458E0.c:func_80163C2C, func_80163EC8 |
+
+### 3.3 Trail (0xC4)
+
+`p = &D_801ED6A8 + id * 0xC4`: +0x00 u8 active, +0x01 u8 head index (0..15, wraps), +0x02 u8 count (up to 15), +0x03
+u8 width, then 16 entries of 12 bytes from +0x04: two s16 points (x, y, z each), the newest written at the head.
+Used by engine_801458E0.c:func_80166690 (draws it), func_80166994 (adds a pair) and func_80166F58 (clears it). M (from those three functions only).
+
+```c
+typedef struct Effect {
+    /* 0x00 */ u16 kind;
+    /* 0x02 */ u16 sub;
+    /* 0x04 */ Fixed pos[3];
+    /* 0x10 */ s32 vel[3];
+    /* 0x1C */ s32 timer;
+    /* 0x20 */ ModelObj *model;     /* = OBJ_HEADER of docs/object_struct.md */
+    /* 0x24 */ s16 unk24[2];
+    /* 0x28 */ s16 unk28;
+    /* 0x2A */ u16 unk2A;
+    /* 0x2C */ s32 arg0;            /* func_80146A6C's d */
+    /* 0x30 */ u32 arg1;            /* func_80146A6C's e */
+    /* 0x34 */ struct Obj *owner;
+    /* 0x38 */ MATRIX mtx;
+} Effect; /* 0x58; D_8011D030[30] */
+
+typedef struct Effect68 {
+    /* 0x00 */ u16 kind;
+    /* 0x02 */ u16 sub;
+    /* 0x04 */ Fixed pos[3];
+    /* 0x10 */ s32 vel[3];
+    /* 0x1C */ s32 timer;
+    /* 0x20 */ ModelObj *model;
+    /* 0x24 */ u8 pad24[4];
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ u8 pad2C[0x20];
+    /* 0x4C */ struct Obj *owner;
+    /* 0x50 */ s32 arg0;
+    /* 0x54 */ s32 arg1;
+    /* 0x58 */ void *unk58;
+    /* 0x5C */ s16 unk5C[2];        /* +0x5A is read too: see conflicts */
+    /* 0x60 */ s16 scale[3];
+    /* 0x66 */ u16 unk66;
+} Effect68; /* 0x68; D_8011F9D0[20], include/abil.h's AObj68 */
+
+typedef struct {
+    /* 0x00 */ u8 active;
+    /* 0x01 */ u8 head;
+    /* 0x02 */ u8 count;
+    /* 0x03 */ u8 width;
+    /* 0x04 */ struct { s16 a[3]; s16 b[3]; } pt[16];
+} Trail; /* 0xC4; D_801ED6A8[] */
+```
+
+**Conflicts.** (1) Effect68 +0x58..+0x5F: a pointer at +0x58 in some functions, s16 at +0x5A and +0x5C in
+func_80163EC8: per-kind use (the draft keeps the pointer and an s16 pair, which leaves +0x5A unnamed). (2) Effect
++0x38: MATRIX in most; the two engine functions that store a pointer there (`| 0x40000000`, `&D_8018EEBC`:
+engine_801458E0.c:func_8015D01C, func_8015D414) are Musashi's routines (his hitData is at +0x38) that the weak seed
+put here, so their rows in Appendix A are not effect accesses. (3) Effect +0x10..+0x1A
+as s32 velocity or s16 halves, as with actors. (4) include/abil.h's `AObj68` is this pool (its loops count up as
+the engine's do).
+
+**Open questions.** (1) Where is the effect runner (the kind table that calls the handlers), EXE or stage? (2) Why
+two sub-pools in the 0x68 pool (0-7, 8-19): who picks func_8014680C over func_80146750? (3) Trail +0x03: width or
+colour? A dump of the trail while Musashi swings would show it.
+
 ## Appendix A. Census tables
 
 ### camera
@@ -165,6 +294,79 @@ path at +0x34 the same format as the actor animation scripts?
 | 0x00A0 | 52 | u8(abs) 42, s16 5, u8 3, s16(abs) 2 | 19 / 33 / 0 / 0 | 37 | 26 | engine.c:func_8012A048 |
 | 0x00A2 | 6 | s16 4, s16(abs) 2 | 2 / 4 / 0 / 0 | 5 | 3 | engine.c:func_8012A048 |
 
+### effect
+
+| off | n | types | R / W / RW / & | funcs | files | example |
+|---|---|---|---|---|---|---|
+| 0x0000 | 30 | u16 19, s16 11 | 17 / 13 / 0 / 0 | 18 | 4 | engine_801458E0.c:func_80146AFC |
+| 0x0002 | 780 | u16 726, s16 54 | 295 / 308 / 177 / 0 | 479 | 109 | engine_801458E0.c:func_80166054 |
+| 0x0004 | 48 | s32 45, u16 3 | 2 / 7 / 39 / 0 | 46 | 39 | engine_801458E0.c:func_80169BBC |
+| 0x0005 | 3 | u8 3 | 2 / 1 / 0 / 0 | 1 | 1 | sc05_008.c:func_sc05_008_8017D900 |
+| 0x0006 | 333 | s16 197, u16 136 | 191 / 128 / 14 / 0 | 205 | 92 | engine_801458E0.c:func_80146AFC |
+| 0x0008 | 28 | s32 18, s16 7, u16 3 | 8 / 19 / 1 / 0 | 16 | 13 | engine_801458E0.c:func_80162B1C |
+| 0x000A | 415 | u16 313, s16 102 | 273 / 136 / 6 / 0 | 196 | 85 | engine_801458E0.c:func_80146AFC |
+| 0x000C | 15 | s16 7, s32 5, u16 3 | 2 / 12 / 1 / 0 | 10 | 8 | engine_801458E0.c:func_80162B1C |
+| 0x000E | 358 | s16 201, u16 157 | 226 / 131 / 1 / 0 | 202 | 86 | engine_801458E0.c:func_80146AFC |
+| 0x0010 | 177 | s32 104, s16 64, u16 9 | 55 / 113 / 9 / 0 | 122 | 52 | engine_801458E0.c:func_80166054 |
+| 0x0012 | 535 | u16 366, s16 166, u8 3 | 283 / 240 / 12 / 0 | 294 | 77 | engine_801458E0.c:func_801670E4 |
+| 0x0014 | 317 | s32 145, u16 135, s16 37 | 146 / 156 / 15 / 0 | 179 | 70 | engine_801458E0.c:func_80166054 |
+| 0x0016 | 269 | s16 150, u16 119 | 85 / 183 / 1 / 0 | 132 | 65 | engine_801458E0.c:func_80166438 |
+| 0x0018 | 101 | s32 61, s16 37, u16 2, u8* 1 | 15 / 77 / 9 / 0 | 95 | 62 | engine_801458E0.c:func_80166054 |
+| 0x001A | 147 | s16 121, u16 26 | 44 / 103 / 0 / 0 | 115 | 70 | engine_801458E0.c:func_80168BDC |
+| 0x001C | 1160 | s32 1156, s16 3, u16 1 | 473 / 662 / 25 / 0 | 448 | 98 | engine_801458E0.c:func_80167540 |
+| 0x001E | 3 | s16 2, u16 1 | 0 / 3 / 0 / 0 | 3 | 3 | sc07_002.c:func_sc07_002_8017E37C |
+| 0x0020 | 323 | s32 154, u8* 97, void* 67, u16* 2, s16 1 | 145 / 178 / 0 / 0 | 314 | 92 | engine_801458E0.c:func_80146C3C |
+| 0x0022 | 1 | s16 1 | 1 / 0 / 0 / 0 | 1 | 1 | sc05_008.c:func_sc05_008_8017DAB8 |
+| 0x0024 | 30 | s16 26, u16 4 | 16 / 12 / 2 / 0 | 18 | 10 | engine_801458E0.c:func_8016AB6C |
+| 0x0026 | 8 | u16 4, s16 4 | 1 / 5 / 2 / 0 | 3 | 2 | engine_801458E0.c:func_8016AB6C |
+| 0x0027 | 1 | u8 1 | 0 / 1 / 0 / 0 | 1 | 1 | ovl27.c:func_ovl27_800CB058 |
+| 0x0028 | 46 | s16 31, u16 11, u8 4 | 23 / 8 / 15 / 0 | 30 | 19 | engine_801458E0.c:func_80168328 |
+| 0x002A | 253 | u16 198, s16 55 | 160 / 92 / 1 / 0 | 126 | 45 | engine_801458E0.c:func_8016829C |
+| 0x002C | 484 | s32 350, u16 82, s16 32, u32 20 | 442 / 39 / 3 / 0 | 349 | 88 | engine_801458E0.c:func_80146AFC |
+| 0x002E | 3 | u16 2, s16 1 | 2 / 1 / 0 / 0 | 2 | 2 | sc05_008.c:func_sc05_008_8017DAB8 |
+| 0x0030 | 372 | s32 315, u32 44, u8* 6, s16 3, u8 2 | 269 / 85 / 18 / 0 | 260 | 67 | engine_801458E0.c:func_80146AFC |
+| 0x0032 | 2 | s16 1, u16 1 | 2 / 0 / 0 / 0 | 2 | 2 | engine_801458E0.c:func_80166054 |
+| 0x0034 | 502 | u8* 233, void* 162, s32 67, s32* 28, u16* 5 | 434 / 68 / 0 / 0 | 458 | 99 | engine_801458E0.c:func_80146AFC |
+| 0x0038 | 41 | AMtx 17, u16 13, MATRIX 10, s16 1 | 15 / 25 / 1 / 0 | 27 | 11 | engine_801458E0.c:func_80167540 |
+| 0x003C | 1 | s32 1 | 0 / 1 / 0 / 0 | 1 | 1 | sc05_008.c:func_sc05_008_8017DAB8 |
+| 0x0040 | 1 | s32 1 | 0 / 1 / 0 / 0 | 1 | 1 | sc05_008.c:func_sc05_008_8017DAB8 |
+| 0x0044 | 1 | s32 1 | 0 / 1 / 0 / 0 | 1 | 1 | sc05_008.c:func_sc05_008_8017DAB8 |
+| 0x0048 | 3 | s32 3 | 0 / 3 / 0 / 0 | 3 | 2 | engine_801458E0.c:func_80162B1C |
+| 0x004C | 21 | s32 21 | 4 / 16 / 1 / 0 | 18 | 13 | engine_801458E0.c:func_80162B1C |
+| 0x0050 | 21 | s32 21 | 4 / 16 / 1 / 0 | 18 | 13 | engine_801458E0.c:func_80162B1C |
+| 0x0054 | 18 | s32 18 | 4 / 13 / 1 / 0 | 15 | 12 | engine_801458E0.c:func_801670E4 |
+
+### effect68
+
+| off | n | types | R / W / RW / & | funcs | files | example |
+|---|---|---|---|---|---|---|
+| 0x0000 | 6 | u16 6 | 4 / 2 / 0 / 0 | 4 | 1 | engine_801458E0.c:func_80146608 |
+| 0x0002 | 6 | u16 5, s16 1 | 5 / 1 / 0 / 0 | 6 | 5 | ovl1c.c:func_ovl1c_800CB10C |
+| 0x0004 | 9 | s32 9 | 0 / 9 / 0 / 0 | 9 | 9 | sc02_031.c:func_sc02_031_8017E358 |
+| 0x0006 | 16 | s16 9, u16 7 | 5 / 9 / 2 / 0 | 14 | 8 | engine_801458E0.c:func_80146750 |
+| 0x0008 | 9 | s32 9 | 0 / 9 / 0 / 0 | 9 | 9 | sc02_031.c:func_sc02_031_8017E358 |
+| 0x000A | 33 | s16 26, u16 7 | 13 / 17 / 3 / 0 | 22 | 16 | engine_801458E0.c:func_80146750 |
+| 0x000C | 19 | StageActor[](abs) 10, s32 9 | 3 / 9 / 0 / 7 | 18 | 10 | engine.c:func_8012C284 |
+| 0x000E | 15 | s16 9, u16 6 | 5 / 9 / 1 / 0 | 13 | 8 | engine_801458E0.c:func_80146750 |
+| 0x0010 | 16 | s32 13, ALVec 2, AVec 1 | 6 / 9 / 1 / 0 | 4 | 3 | ovl19.c:func_ovl19_800CB4C8 |
+| 0x0014 | 13 | s32 13 | 3 / 9 / 1 / 0 | 3 | 2 | ovl21.c:func_ovl21_800CB4A4 |
+| 0x0018 | 13 | s32 13 | 3 / 9 / 1 / 0 | 3 | 2 | ovl21.c:func_ovl21_800CB4A4 |
+| 0x001C | 5 | s32 5 | 4 / 1 / 0 / 0 | 2 | 2 | ovl27.c:func_ovl27_800CB190 |
+| 0x0020 | 87 | void* 49, u8* 33, s32 4, AModel* 1 | 64 / 23 / 0 / 0 | 73 | 27 | engine_801458E0.c:func_801630C4 |
+| 0x0028 | 8 | s32 8 | 8 / 0 / 0 / 0 | 8 | 8 | sc02_031.c:func_sc02_031_8017DE3C |
+| 0x002C | 1 | s32 1 | 1 / 0 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_80163C2C |
+| 0x004C | 71 | void* 33, u8* 27, u16* 8, s32 3 | 69 / 2 / 0 / 0 | 70 | 29 | engine_801458E0.c:func_80146750 |
+| 0x0050 | 24 | s32 24 | 21 / 2 / 1 / 0 | 21 | 17 | engine_801458E0.c:func_80146750 |
+| 0x0054 | 3 | s32 3 | 0 / 3 / 0 / 0 | 3 | 2 | engine_801458E0.c:func_80146750 |
+| 0x0058 | 14 | u8* 9, s16 2, s32* 1, u16 1, AVec 1 | 11 / 3 / 0 / 0 | 13 | 12 | engine_801458E0.c:func_80163EC8 |
+| 0x005A | 3 | s16 2, u16 1 | 2 / 1 / 0 / 0 | 2 | 2 | engine_801458E0.c:func_80163EC8 |
+| 0x005C | 3 | s16 2, u16 1 | 2 / 1 / 0 / 0 | 2 | 2 | engine_801458E0.c:func_80163EC8 |
+| 0x0060 | 78 | s16 68, u16 9, AVec 1 | 43 / 35 / 0 / 0 | 30 | 18 | engine_801458E0.c:func_80163A94 |
+| 0x0062 | 11 | s16 6, u16 5 | 5 / 6 / 0 / 0 | 10 | 7 | engine_801458E0.c:func_80163A94 |
+| 0x0064 | 6 | s16 5, u16 1 | 2 / 4 / 0 / 0 | 6 | 5 | engine_801458E0.c:func_80163A94 |
+| 0x0066 | 4 | u16 3, s16 1 | 1 / 2 / 1 / 0 | 3 | 2 | engine_801458E0.c:func_80163C2C |
+| 0x0067 | 1 | u8 1 | 1 / 0 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_80163EC8 |
+
 ## Appendix Z. The record census script
 
 ```python
@@ -197,6 +399,9 @@ SIZE = int(spec['size'], 16)
 TYPES = set(spec.get('types', []))
 PTRG = set(spec.get('ptr_globals', []))
 MACROS = {k: int(v, 16) for k, v in spec.get('macros', {}).items()}
+SPAWNERS = set(spec.get('spawners', []))          # functions returning a pointer to the record
+ARGFUNCS = {k: v for k, v in spec.get('argfuncs', {}).items()}   # function -> argument index that is the record
+OWNER = spec.get('owner_ptr')                     # weak seed: reads a pointer at this offset, nothing >= size
 INSTSYM = {s: (a, n, st) for s, a, n, st in INST}
 
 def in_inst(addr):
@@ -322,6 +527,9 @@ def base_of(e):
     m = re.match(r'^(.*?)\s*\+\s*(0x[0-9A-Fa-f]+|\d+)$', e)
     if m:
         e, off = strip(m.group(1)), int(m.group(2), 0)
+    m = re.match(r'^&\s*(D_[0-9A-Fa-f]{8})\s*\+\s*\w+$', e)
+    if m and m.group(1) in INSTSYM:
+        return ('abs', m.group(1), INSTSYM[m.group(1)][0] + off)
     m = re.match(r'^&\s*(D_[0-9A-Fa-f]{8})(?:\[(\d+|0x[0-9A-Fa-f]+)\])?$', e)
     if m:
         s = m.group(1)
@@ -427,6 +635,19 @@ for idx, f in enumerate(functions):
         w = is_rec_expr(m.group(2))
         if w and m.group(1) not in PTRG:
             recvar[idx].setdefault(m.group(1), w)
+    for m in re.finditer(r'(?<![\w.>])([A-Za-z_]\w*)\s*=\s*(?:\([\w \*]+\)\s*)?(\w+)\s*\(', f['body']):
+        if m.group(2) in SPAWNERS:
+            recvar[idx].setdefault(m.group(1), 'result of ' + m.group(2))
+    for name, args in f['calls']:
+        if name in ARGFUNCS and len(args) > ARGFUNCS[name] and re.match(r'^\w+$', args[ARGFUNCS[name]]):
+            recvar[idx].setdefault(args[ARGFUNCS[name]], 'argument of ' + name)
+    if OWNER is not None:
+        o = int(OWNER, 16)
+        cand = set(re.findall(r'AF\(\s*(\w+)\s*,\s*[\w ]+\*\s*,\s*0x%X\s*\)' % o, f['body']))
+        for v in cand:
+            offs = [int(x, 0) for x in re.findall(r'AF\(\s*%s\s*,[^,]+,\s*(0x[0-9A-Fa-f]+|\d+)\s*\)' % re.escape(v), f['body'])]
+            if offs and max(offs) < SIZE and v not in recvar[idx]:
+                recvar[idx][v] = 'weak: reads a pointer at +0x%X' % o
     for m in re.finditer(r'for\s*\(\s*(\w+)\s*=\s*([^;]+);', f['body']):
         w = is_rec_expr(m.group(2))
         if w:
@@ -459,10 +680,10 @@ while changed and rounds < 30:
 
 # ---- accesses
 rows = []
-def add(f, off, typ, rw, form, via):
+def add(f, off, typ, rw, form, via, why=''):
     if off is None or not (0 <= off < SIZE):
         return
-    rows.append(dict(file=f['file'], func=f['name'], off=off, type=norm_type(typ), rw=rw, form=form, via=via))
+    rows.append(dict(file=f['file'], func=f['name'], off=off, type=norm_type(typ), rw=rw, form=form, via=via, why=why))
 for idx, f in enumerate(functions):
     body = f['body']; rv = recvar[idx]
     for m in re.finditer(r'\bAF\(', body):
@@ -485,7 +706,7 @@ for idx, f in enumerate(functions):
             if hit:
                 add(f, hit[0] + off, args[1], rw, 'AF', b[1])
         elif b[0] == 'ptrg' or (b[0] == 'var' and b[1] in rv):
-            add(f, b[2] + off, args[1], rw, 'AF', b[1])
+            add(f, b[2] + off, args[1], rw, 'AF', b[1], rv.get(b[1], ''))
     for m in re.finditer(r'\*\s*\(\s*((?:volatile\s+)?\w+(?:\s*\*)*)\s*\*\s*\)\s*\(', body):
         e = balanced(body, m.end() - 1)
         b = base_of(body[m.end():e]) if e > 0 else None
