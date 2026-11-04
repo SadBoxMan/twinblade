@@ -194,7 +194,10 @@ def same_word(x, y):
         return False
     if x[2] and y[2] and '%lo' in x[1] and '%lo' in y[1]:
         a, b = lo_target(x[1]), lo_target(y[1])
-        if a is not None and b is not None and a != b:
+        # r240: the assembler splits a large addend (`&D_800AF630 + 0xA3D2`) into %hi + 1 and a negative %lo
+        # (`<%lo(D_800AF630+-0x5c2e)>`), so the note reads 0x10000 short of the address it links to: the %lo
+        # immediates agree, and the %hi half is checked by the image build
+        if a is not None and b is not None and a != b and abs(a - b) != 0x10000:
             return False
     return True
 

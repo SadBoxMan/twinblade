@@ -164,7 +164,64 @@ void func_ovl20_800CB190(u8 *arg0) {
     func_80146CA0(arg0);
 }
 
-INCLUDE_ASM("asm/abil/ovl20/nonmatchings/ovl20", func_ovl20_800CB278);
+extern u8 D_ovl20_800CBBD8[];
+extern u8 D_ovl20_800CBBD9;
+extern u8 D_ovl20_800CBBDA;
+extern u8 D_ovl20_800CBBDB;
+extern u8 D_ovl20_800CBBDC;
+extern u8 D_ovl20_800CBBDD;
+extern u8 D_ovl20_800CBBDE;
+extern u8 D_ovl20_800CBBDF;
+extern s32 func_80146E98();
+extern s32 func_80146578();
+extern void func_8001CD9C();
+extern void func_800233CC();
+
+void func_ovl20_800CB278(u8 *arg0) {
+    u8 *p;
+    u8 *o;
+    u8 *m;
+    u8 *t;
+
+    p = D_ovl20_800CBBD8;
+    if (func_80146E98(arg0) != 0) {
+        t = (u8 *) func_80146578();
+        o = t;
+        m = t;
+        AF(arg0, u8 *, 0x20) = t;
+        if (o != 0) {
+            func_8001CD9C(o, p);
+            func_800233CC(p, 0x80);
+            do { /* MATCH-TRICK: the loop-end note stops cse1 here, so the else arm keeps its own copy m */
+                AF(o, s16, 0x18) = 0;
+                AF(o, s16, 0x1A) = 0;
+            } while (0);
+            AF(arg0, s16, 0x60) = 0;
+            D_ovl20_800CBBDB = 0;
+            D_ovl20_800CBBDF = 0;
+            if (AF(arg0, s32, 0x50) == 0) {
+                p[0] = 0xFF;
+                D_ovl20_800CBBD9 = 0xFF;
+                D_ovl20_800CBBDA = 0xFF;
+                D_ovl20_800CBBDC = 0;
+                D_ovl20_800CBBDD = 0;
+                D_ovl20_800CBBDE = 0xFF;
+                AF(o, s32, 4) |= 0x50000000;
+            } else {
+                p[0] = 0;
+                D_ovl20_800CBBDA = 0xC0;
+                D_ovl20_800CBBD9 = 0;
+                D_ovl20_800CBBDC = 0;
+                D_ovl20_800CBBDD = 0;
+                D_ovl20_800CBBDE = 0x80;
+                AF(m, s32, 4) |= 0x50000000;
+            }
+            func_80146CA0(arg0);
+            return;
+        }
+        func_80162CCC(arg0);
+    }
+}
 
 void func_ovl20_800CB3C0(u8 *arg0) {
     s16 temp_v1;
@@ -191,7 +248,31 @@ void func_ovl20_800CB3C0(u8 *arg0) {
     }
 }
 
-INCLUDE_ASM("asm/abil/ovl20/nonmatchings/ovl20", func_ovl20_800CB470);
+void func_ovl20_800CB470(u8 *arg0) {
+    u8 *p;
+    u8 *m;
+    u16 t;
+
+    p = D_ovl20_800CBBD8;
+    m = AF(arg0, u8 *, 0x20);
+    func_ovl20_800CB5F4(arg0);
+    p[0] = func_80012F74(p[0], 0, 0xA, 1);
+    D_ovl20_800CBBD9 = func_80012F74(D_ovl20_800CBBD9, 0, 0xA, 1);
+    D_ovl20_800CBBDA = func_80012F74(D_ovl20_800CBBDA, 0, 0xA, 1);
+    D_ovl20_800CBBDC = func_80012F74(D_ovl20_800CBBDC, 0, 0xA, 1);
+    D_ovl20_800CBBDD = func_80012F74(D_ovl20_800CBBDD, 0, 0xA, 1);
+    D_ovl20_800CBBDE = func_80012F74(D_ovl20_800CBBDE, 0, 0xA, 1);
+    if (AF(arg0, s32, 0x50) != 0) {
+        t = AF(m, u16, 0x1E) + 0x20;
+        AF(m, u16, 0x1E) = t;
+        if ((s16) t > 0x1000) {
+            AF(m, u16, 0x1E) = 0x1000;
+        }
+    }
+    if (AF(p, s32, 0) == 0 && AF(&D_ovl20_800CBBDC, s32, 0) == 0) {
+        func_80146CA0(arg0);
+    }
+}
 
 void func_ovl20_800CB5D4(void) {
     func_80162CCC();

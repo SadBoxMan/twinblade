@@ -1,5 +1,6 @@
 #include "common.h"
 #include "psyq.h"
+#include "work.h"
 
 typedef struct { char *name; s32 rest[7]; } TitleMovie;
 extern CdlFILE *CdSearchFile(CdlFILE *fp, char *name);
@@ -215,7 +216,177 @@ void func_800CF3A4(void) {
     D_800B99E8 = D_800EC680;
 }
 
-INCLUDE_ASM("asm/ovl39/nonmatchings/ovl39", func_800CF3E8);
+typedef struct {
+    u32 tag;
+    u32 tpage;
+    u8 r0, g0, b0, code;
+    s16 x0, y0;
+    u8 u0, v0;
+    u16 clut;
+    s16 w, h;
+} TitleSprt;
+extern u32 D_800AA60C[][0x1000];
+extern TitleSprt D_800EC6A8[2];
+extern TitleSprt D_800EC6D8[2];
+extern TitleSprt D_800EC708[2];
+extern TitleSprt D_800EC738[2];
+extern TitleSprt D_800EC768[2];
+extern TitleSprt D_800EC798[2];
+extern TitleSprt D_800EC7C8[2];
+extern TitleSprt D_800EC7F8[2];
+extern TitleSprt D_800EC828[2];
+extern TitleSprt D_800EC858[2];
+
+void func_800CF3E8(void) {
+    Work *w = &D_800AF630;
+    TitleSprt *p;
+    TitleSprt *q;
+    TitleSprt *p1, *p2, *p3, *p4, *p5, *p6;
+    s32 f = w->frame;
+    switch (D_800EC690) {
+    case 0: break;
+    case 1:
+        if (D_800EC694 != 0) {
+            setlen(&D_800EC7C8[f], 5);
+            p = &D_800EC7C8[f];
+            ((u32 *)&D_800EC7C8[f])[1] = 0xE100008A;
+            p->code = 0x64;
+            p->r0 = p->g0 = p->b0 = D_800EC68C;
+            p->x0 = -0xB0;
+            p->y0 = 0x54;
+            p->u0 = 0;
+            p->v0 = 0;
+            p->clut = 0x7800;
+            p->w = 0x100;
+            p->h = 0x20;
+            D_800EC7C8[f].clut = 0x7880;
+            addPrim(D_800AA60C[w->frame], p);
+            setlen(&D_800EC7F8[f], 5);
+            p = &D_800EC7F8[f];
+            ((u32 *)&D_800EC7F8[f])[1] = 0xE100008C;
+            p->code = 0x64;
+            p->r0 = p->g0 = p->b0 = D_800EC68C;
+            p->x0 = 0x50;
+            p->y0 = 0x54;
+            p->u0 = 0;
+            p->v0 = 0;
+            p->clut = 0x7800;
+            p->w = 0x60;
+            p->h = 0x20;
+            D_800EC7F8[f].clut = 0x7880;
+            addPrim(D_800AA60C[w->frame], p);
+        }
+        break;
+    case 2:
+        setlen(&D_800EC828[f], 5);
+        q = &D_800EC828[f];
+        ((u32 *)&D_800EC828[f])[1] = 0xE100008F;
+        q->code = 0x64;
+        q->r0 = q->g0 = q->b0 = D_800EC68C;
+        q->x0 = -0x40;
+        q->y0 = 0x44;
+        q->u0 = 0;
+        q->v0 = 0;
+        q->clut = 0x7800;
+        q->w = 0x80;
+        q->h = 0x40;
+        D_800EC828[f].clut = 0x7A80;
+        addPrim(D_800AA60C[w->frame], q);
+        setlen(&D_800EC858[f], 5);
+        q = &D_800EC858[f];
+        ((u32 *)&D_800EC858[f])[1] = 0xE100008D;
+        q->code = 0x64;
+        q->r0 = q->g0 = q->b0 = D_800EC68C;
+        q->x0 = -0x70;
+        q->y0 = D_800EC678 * 32 + 0x44;
+        q->u0 = 0;
+        q->v0 = 0;
+        q->clut = 0x7800;
+        q->w = 0xE0;
+        q->h = 0x20;
+        D_800EC858[f].clut = 0x7800;
+        addPrim(D_800AA60C[w->frame], q);
+        break;
+    }
+    setlen(&D_800EC6A8[f], 5);
+    p1 = &D_800EC6A8[f];
+    ((u32 *)&D_800EC6A8[f])[1] = 0xE100008A;
+    p1->code = 0x64;
+    p1->r0 = p1->g0 = p1->b0 = D_800EC68C;
+    p1->x0 = -0x140;
+    p1->y0 = -0xDC;
+    p1->u0 = 0;
+    p1->v0 = 0x24;
+    p1->clut = 0x78C0;
+    p1->w = 0x100;
+    p1->h = 0xDC;
+    setlen(&D_800EC6D8[f], 5);
+    p2 = &D_800EC6D8[f];
+    ((u32 *)&D_800EC6D8[f])[1] = 0xE100008C;
+    p2->code = 0x64;
+    p2->r0 = p2->g0 = p2->b0 = D_800EC68C;
+    p2->x0 = -0x40;
+    p2->y0 = -0xDC;
+    p2->u0 = 0;
+    p2->v0 = 0x24;
+    p2->clut = 0x78C0;
+    p2->w = 0x100;
+    p2->h = 0xDC;
+    setlen(&D_800EC708[f], 5);
+    p3 = &D_800EC708[f];
+    ((u32 *)&D_800EC708[f])[1] = 0xE100008E;
+    p3->code = 0x64;
+    p3->r0 = p3->g0 = p3->b0 = D_800EC68C;
+    p3->x0 = 0xC0;
+    p3->y0 = -0xDC;
+    p3->u0 = 0;
+    p3->v0 = 0x24;
+    p3->clut = 0x78C0;
+    p3->w = 0x80;
+    p3->h = 0xDC;
+    setlen(&D_800EC738[f], 5);
+    p4 = &D_800EC738[f];
+    ((u32 *)&D_800EC738[f])[1] = 0xE100009A;
+    p4->code = 0x64;
+    p4->r0 = p4->g0 = p4->b0 = D_800EC68C;
+    p4->x0 = -0x140;
+    p4->y0 = 0;
+    p4->u0 = 0;
+    p4->v0 = 0;
+    p4->clut = 0x78C0;
+    p4->w = 0x100;
+    p4->h = 0xDC;
+    setlen(&D_800EC768[f], 5);
+    p5 = &D_800EC768[f];
+    ((u32 *)&D_800EC768[f])[1] = 0xE100009C;
+    p5->code = 0x64;
+    p5->r0 = p5->g0 = p5->b0 = D_800EC68C;
+    p5->x0 = -0x40;
+    p5->y0 = 0;
+    p5->u0 = 0;
+    p5->v0 = 0;
+    p5->clut = 0x78C0;
+    p5->w = 0x100;
+    p5->h = 0xDC;
+    setlen(&D_800EC798[f], 5);
+    p6 = &D_800EC798[f];
+    ((u32 *)&D_800EC798[f])[1] = 0xE100009E;
+    p6->code = 0x64;
+    p6->r0 = p6->g0 = p6->b0 = D_800EC68C;
+    p6->x0 = 0xC0;
+    p6->y0 = 0;
+    p6->u0 = 0;
+    p6->v0 = 0;
+    p6->clut = 0x78C0;
+    p6->w = 0x80;
+    p6->h = 0xDC;
+    addPrim(D_800AA60C[f], p6);
+    addPrim(D_800AA60C[f], p5);
+    addPrim(D_800AA60C[f], p4);
+    addPrim(D_800AA60C[f], p3);
+    addPrim(D_800AA60C[f], p2);
+    addPrim(D_800AA60C[f], p1);
+}
 
 void func_800CFB3C(void *arg) {
     TitleImg *p = arg;
@@ -240,9 +411,92 @@ void func_800CFB3C(void *arg) {
     }
 }
 
-INCLUDE_ASM("asm/ovl39/nonmatchings/ovl39", func_800CFC1C);
+s32 func_800CFC1C(void *arg) {
+    TitleImg *p = arg;
+    RECT r;
+    u16 *d;
+    u16 *s;
+    u16 *src;
+    s32 i;
+    s32 ch;
+    s32 any;
+    s32 cr, cg, cb;
+    s32 tr, tg, tb;
+    u16 c;
+    s32 t;
+    any = 0;
+    /* PORT NOTE: no return while the counter is below 2, as the original (it returns the slti result, 1) */
+    if (++D_800EC69C >= 2) {
+        D_800EC69C = 0;
+        while (p->type != 0xFF) {
+            if (p->type == 9) {
+                ch = 0;
+                src = p->pix;
+                s = src + p->r.w;
+                d = s;
+                for (i = 0; i < p->r.w; i++, src++) {
+                    t = *src;
+                    cr = *d & 0x1F;
+                    cg = *d & 0x3E0;
+                    cb = *d & 0x7C00;
+                    tr = t & 0x1F;
+                    tg = t & 0x3E0;
+                    tb = t & 0x7C00;
+                    if (cr != tr) {
+                        ch = 1;
+                        if (cr < tr) cr += 1;
+                        if (tr < cr) cr -= 1;
+                    }
+                    if (cg != tg) {
+                        ch = 1;
+                        if (cg < tg) cg += 0x20;
+                        if (tg < cg) cg -= 0x20;
+                    }
+                    if (cb != tb) {
+                        ch = 1;
+                        if (cb < tb) cb += 0x400;
+                        if (tb < cb) cb -= 0x400;
+                    }
+                    c = cr | cg | cb | (t & ~0x7FFF);
+                    if (c == 0 && t != 0) {
+                        c |= 0x8000;
+                    }
+                    *d++ = c;
+                }
+                if (ch) {
+                    r.x = p->r.x;
+                    r.y = p->r.y;
+                    r.w = p->r.w;
+                    r.h = p->r.h;
+                    LoadImage(&r, (u32 *)s);
+                }
+                any |= ch;
+            }
+            p++;
+        }
+        return any;
+    }
+}
 
-INCLUDE_ASM("asm/ovl39/nonmatchings/ovl39", func_800CFE00);
+void func_800CFE00(void) {
+    RECT r[2];
+    s32 off;
+    u8 *p;
+    u8 *q;
+    r[0].x = 0;
+    r[0].y = 0x1E0;
+    r[0].w = 0x100;
+    r[0].h = 1;
+    r[1].x = 0x280;
+    r[1].y = 0x24;
+    r[1].w = 0x140;
+    r[1].h = 0x1B8;
+    off = D_800EC678 * 0x44E20;
+    p = (u8 *)0x80120014 + off;
+    q = (u8 *)0x80120220 + off;
+    LoadImage(&r[0], (u32 *)p);
+    LoadImage(&r[1], (u32 *)q);
+}
 
 s32 func_800CFEB4(void *arg) {
     TitleImg *p = arg;
