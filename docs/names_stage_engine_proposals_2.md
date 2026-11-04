@@ -11,6 +11,29 @@ Contents:
   0x80146128-0x8016F000 are in (b) instead);
 * (b) Musashi's own controller and its neighbours, 0x80146128-0x8016F000, function by function.
 
+## Summary
+* (a): 80 rows (20 H, 43 M, 17 L): every stage-called engine function part 1 left out, outside the (b) range.
+* (b): 1094 rows (102 H, 806 M, 186 L): every func_ in 0x80146128-0x8016F000 that part 1 and (a) do not name, one row
+  each (checked by script against stg/symbol_addrs_engine.txt: none missing, none twice, no name used twice in
+  either doc or clashing with an existing symbol).
+* How (b) was made: five slices, four of them researched by read-only helper agents under one brief (the same columns,
+  evidence rules and part 1's names as vocabulary) and merged here after a format check and spot checks against the
+  C (NextDay, the number pop-up, the poison words, func_80149290). The M share is high on purpose: most of these are
+  states of Musashi's kind machine whose behaviour is clear from the code but whose in-game meaning (guard, charge,
+  Fusion throw, ...) is one reading.
+* Main findings: Player +0 / +2 are the kind and state of a per-kind state machine (kinds 0-0x1E listed in the
+  0x80153000 and 0x8015C000 slices); D_8018FBA8 is the kinds' exit table; the Stats block holds the clock (minutes,
+  day, weekday), the poison and shrink timers and two gauges; the engine's own effect kinds, sword trails and HUD slots
+  sit at 0x80166000 onward. Corrections to part 1 are under "Refinements to part 1" at the end.
+
+## What is left
+* The handler tables (D_8018Fxxx, D_80190xxx) are stage data and are not in this repository, so the order of states
+  inside a kind and which effect kind number each engine effect handler serves are inferred from the call graph and
+  address order (marked in the rows). One look at SC03_001's tables would settle them.
+* func_801536DC is INCLUDE_ASM (no asm in this checkout): named from its callers only (L).
+* Engine functions outside 0x80146128-0x8016F000 that no stage code calls are still unsurveyed (part 1 covered their
+  neighbours only).
+
 ## (a) Smaller stage callers
 
 Counts: stage calls / stage files, then abil calls where there are any.
@@ -125,6 +148,284 @@ Counts: stage calls / stage files, then abil calls where there are any.
 The range holds more than the controller: the effect pools' code, the player object's update and its sub-steps,
 the face and part routines (already named), the engine's own effect kinds and the HUD slots. It is split by address
 below; each slice opens with a short overview. Functions already named in part 1 or in (a) are not repeated.
+
+### 0x80146128-0x8014B000: the player update, pools, model matrix, pad input, action tests
+
+This slice opens Musashi's controller: the per-frame update of the player object (UpdatePlayer and the
+end-of-frame step), the small pool allocators, his model matrix (ground tilt, scale, angle overrides), the
+"move speed" fields +0x24/+0x28/+0x2C turned into a velocity by the model's facing, pose point pairs used by the sword
+trails, pad reading and camera-relative stick / d-pad facing (two 16-entry d-pad tables), a double-tap detector, the
+hit-flag bits (0x8000 pending, 0x4000 guarding), the action tests and starts the kind steps call (jump, the two swords
+by button, the circle ability, R1 guard and its gauge, talk, carry and grab), the mode word 0x80078EC0 ("EC0 mode",
+as part 2 calls it), the per-frame game clock, money and floating numbers.
+Button bits (PS pad, +0xAA/+0xAC): 0x10 triangle, 0x20 circle, 0x40 cross, 0x80 square, 0x08 R1, 0x100 select.
+Player kinds met here (SetKindAndState; names as in part 2's kind tables): 2 jump, 5 Fusion combo (square), 6 Lumina
+slash (triangle), 7 air slash, 8, 0xB pole, 0xC bar, 0xD carry, 0xE / 0xF throw the carried actor, 0x10 grab, 0x11
+guard, 0x12 guard hop, 0x14 wall climb, 0x15 charged attack, 0x17 use ability, 0x1D lie down.
+
+#### Player frame update and per-frame counters
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80146128 | func_80146128 | UpdatePlayer | Musashi's per-frame update: respawn check, pad, clock, sub-steps, the move; 1 when the kind steps ran | H | e58E0; its only caller func_8014607C stores the result in D_801ED4D0 and runs func_80146360 / func_801463A0 only when it is 1. Body calls ReadObjPad (func_80148648(p, 0)), UpdateDoubleTap, TickGameClock, ... ClearVel, then 16.16 pos to +0x98 |
+| 0x80146360 | func_80146360 | RunPlayerMarkHandler | D_8018EFFC[player +0x4C](player) | L | e58E0; +0x4C is the byte SetPlayerMark4C / ClearPlayerMark4C write (D_80126BA4); called by func_8014607C after UpdatePlayer |
+| 0x801463A0 | func_801463A0 | FinishPlayerFrame | end of Musashi's frame: weapon parts, ApplyPlayerHidden, BuildPlayerMatrixOnce, ApplyPlayerScale, model position = pos + offset (+0x138), +0x90 = +0x88, last pos (+0x88..) = pos, +0x48 = flags, flags &= 0x3FFFFFFF | M | e58E0; called last by func_8014607C |
+| 0x80146FC4 | func_80146FC4 | RespawnIfFallenOut | when pos y (+0xA) >= 0x401: pos = D_80126DB0 (16.16 from SVECTOR), +0x88 = that point, model heading = D_80126DB6 | M | e58E0; first call of UpdatePlayer |
+| 0x80147118 | func_80147118 | ApplyPlayerScale | model scale (+0x18/+0x1A/+0x1C) = +0x60 * +0x68 * +0x70 per axis (4096 = 1.0), capped 0xFFFF | H | e58E0; called by FinishPlayerFrame. The init (func_80145CEC area, line ~1366) sets all three vectors to 0x1000 |
+| 0x80147264 | func_80147264 | SetPlayerScaleA | the first scale vector D_80126BB8/BA/BC (+0x60) = three u16 | M | e58E0; no C callers. Field use from ApplyPlayerScale |
+| 0x80147290 | func_80147290 | ResetPlayerScaleA | the same vector = 0x1000 x3 | M | e58E0; no C callers |
+| 0x8014A638 | func_8014A638 | DecaySquash | while +0x44 bit 0x10: squash (+0x188) -= 4, at least 0 | M | e58E0; called by UpdatePlayer. +0x188 = squash (brief) |
+| 0x80149BEC | func_80149BEC | TickActionLock | +0x223 counts down to 0 | M | e58E0; called by UpdatePlayer. CancelEC0Mode sets +0x223 = 0x10; CanAirSlash / CanDoubleJump refuse while it runs |
+| 0x8014A674 | func_8014A674 | IsTimer1BCClear | +0x1BC == 0 | L | e58E0; func_8015AE2C: `if (func_8014A674(a) && func_8014E434(a))` then kind 0xB (func_8015CC40) |
+| 0x8014A680 | func_8014A680 | TickTimer1BC | +0x1BC counts down to 0 | M | e58E0; called by UpdatePlayer |
+| 0x8014A69C | func_8014A69C | IsTimer1BDClear | +0x1BD == 0 | L | e58E0; func_8015AE2C: `if (func_8014A69C(a) && func_8014E6A0(a))` then kind 0xC (func_8015CF8C) |
+| 0x8014A6A8 | func_8014A6A8 | TickTimer1BD | +0x1BD counts down to 0 | M | e58E0; called by UpdatePlayer |
+| 0x8014A71C | func_8014A71C | TickWallClimbCooldown | +0x1BE counts down to 0 | M | e58E0; called by UpdatePlayer; +0x1BE gates CanWallClimb |
+
+#### Pools and allocators
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80146534 | func_80146534 | ClearPushVel | the push vector D_80127090/94/98 = 0 | H | e58E0; no C callers. AddPushVel / SetPushVel consume the same three words |
+| 0x80146554 | func_80146554 | AllocSprite4To6 | func_8001D074(4, 6): a free sprite object from slots 4-5 | H | e58E0; no C callers. Same pattern as AllocSprite16To3E (func_8001D074 = AllocActorSprite's allocator) |
+| 0x80146578 | func_80146578 | AllocSprite6To16 | func_8001D074(6, 0x16) | H | e58E0; 18 abil calls / 14 files, result used (`temp_v0 = func_80146578()`, ovl1f) |
+| 0x801465E4 | func_801465E4 | AllocModel16To26 | func_8001CFDC(0x16, 0x26): a free model object from slots 0x16-0x25 | H | e58E0; 2 abil calls: `o = (u8 *) func_801465E4()` (ovl2c, ovl15). Same pattern as AllocModel6To16 |
+| 0x801468C8 | func_801468C8 | AllocShadow | first free of the two 0x2C-byte shadow records at D_8011F750: +0 = kind, +4 = owner; the record or 0 | M | e58E0; one call, the stage init func_80145CEC: `func_801468C8(&D_80126B58, 1)`. Part 2: D_8011F750 = the shadow decal object, run by UpdateShadow (D_801900B0[kind - 1]) |
+| 0x8014AB5C | func_8014AB5C | ClearObj68Kind | FreeObj68ByKind(kind) (wrapper) | M | e58E0; func_8015F118: `func_8014AB5C(0x19)`, `(0x1D)` |
+| 0x8014ABF0 | func_8014ABF0 | ClearEffectKind | FreeEffectsByKind(kind) (wrapper) | M | e58E0; 4 stage calls / 4 files, all `func_8014ABF0(0x40)` (sc04_002/004/011) |
+| 0x8014AC10 | func_8014AC10 | FreeEffectsByKind | every effect (0x58-byte pool at D_8011D030) of a kind: zero its model (0x84 or 0x38 bytes) and itself | H | e58E0; same body as FreeEffect per entry; CancelEC0Mode calls it with 0x26, 0x27, 0x39, 0x3A, 0x3B, 0x3C |
+
+#### Model matrix: ground tilt, angle overrides, rotation
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80147478 | func_80147478 | BuildPlayerMatrixOnce | unless +0x44 bit 0x40000000: SmoothTiltUpVector, BuildTiltedMatrix, set that bit | M | e58E0; called by FinishPlayerFrame; FinishPlayerFrame's `D_80126B9C &= 0x3FFFFFFF` clears the bit for the next frame |
+| 0x80147514 | func_80147514 | SmoothTiltUpVector | +0x118 eases (1/8) toward the target +0x120 (default (0, -0xFFF, 0)) plus +0x128 when +0x12E; the tilt angles +0x100 from it (func_800129CC) | M | e58E0; called only by BuildPlayerMatrixOnce |
+| 0x80147628 | func_80147628 | BuildTiltedMatrix | model matrix = rotY(+0x102) rotX(+0x100) rotZ(+0x104), then the model's angles, each replaced by +0x130/+0x132/+0x134 when +0x136 bit 1/2/4 | M | e58E0; called only by BuildPlayerMatrixOnce |
+| 0x801474D8 | func_801474D8 | ClearAngleOverride | +0x130..+0x136 (override angles and their mask) = 0 | M | e58E0; func_80158BB0 (a player state set-up) calls it with ResetTiltVectors |
+| 0x801474EC | func_801474EC | ResetTiltVectors | +0x118, +0x120, +0x128 (smoothed up, target up, extra) = 0 | M | e58E0; 5 engine callers (func_801520DC, func_801528B0, ...), 2 stage calls (sc04_011, sc05_010), 2 abil (ovl1a, ovl31), all `func_801474EC(a)` |
+| 0x80147718 | func_80147718 | RebuildModelMatrix | the model matrix (model +0x34) from the model's own angles +0x10/+0x12/+0x14; model +0x2C bit 1 | M | e58E0; no C callers |
+| 0x80147788 | func_80147788 | AddModelRotX | model +0x10 += n (12-bit wrap) | H | e58E0; no C callers |
+| 0x801477A8 | func_801477A8 | AddModelRotY | model +0x12 (heading) += n | H | e58E0; no C callers |
+| 0x801477C8 | func_801477C8 | AddModelRotZ | model +0x14 += n | H | e58E0; no C callers |
+| 0x8014905C | func_8014905C | ClearTilt | tilt angles +0x100..+0x104 and their target +0x108..+0x10C = 0 | M | e58E0; no C callers |
+| 0x80149078 | func_80149078 | SetTiltTarget | +0x108/+0x10A/+0x10C = x, y, z | M | e58E0; no C callers; calls the three below |
+| 0x801490E0 | func_801490E0 | SetTiltTargetX | +0x108 = n | M | e58E0; called by SetTiltTarget |
+| 0x801490E8 | func_801490E8 | SetTiltTargetY | +0x10A = n | M | e58E0; called by SetTiltTarget |
+| 0x801490F0 | func_801490F0 | SetTiltTargetZ | +0x10C = n | M | e58E0; called by SetTiltTarget |
+| 0x801490F8 | func_801490F8 | StepTiltToTarget | each tilt angle +0x100.. steps toward +0x108.. by the speed given (func_80012B04) | M | e58E0; no C callers |
+
+#### Move speed (+0x24/+0x28/+0x2C, the facing frame) to velocity (+0x10..)
+
+The player (and objects moved this way) keep a speed in the model's frame at +0x24/+0x28/+0x2C (the words
+SetEffectAccel writes; forward is -z); these add to it with a limit and turn it into the world velocity +0x10/+0x14/+0x18
+through the push vector D_80127090.. (cleared after). +0x44 bits 0x400000/0x800000/0x1000000 keep an axis raw.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80147860 | func_80147860 | AddMoveSpeed | x, y, z added, each within +-0x1F0000 | M | e58E0; no C callers (AddMoveSpeedX is called with the caller's a0/a1 left in place) |
+| 0x801478B8 | func_801478B8 | AddMoveSpeedUnlimited | the same with the limit 0x7FFFFFFF | M | e58E0; no C callers |
+| 0x80147928 | func_80147928 | AddMoveSpeedX | +0x24 += n within +-0x1F0000 | M | e58E0; called by AccelMoveToWorld, AccelFacingYXZ, AccelWorld |
+| 0x80147948 | func_80147948 | AddMoveSpeedXLimit | +0x24 += n; on the side n pushes, at most the limit | H | e58E0; func_80162F60 passes 0x7F0000 |
+| 0x8014799C | func_8014799C | AddMoveSpeedY | +0x28 += n within +-0x1F0000 | M | e58E0 |
+| 0x801479BC | func_801479BC | AddMoveSpeedYLimit | +0x28 += n with a limit | H | e58E0; func_80162F80 passes 0x7F0000 |
+| 0x80147A10 | func_80147A10 | AddMoveSpeedZ | +0x2C += n within +-0x1F0000 | M | e58E0 |
+| 0x80147A30 | func_80147A30 | AddMoveSpeedZLimit | +0x2C += n with a limit | H | e58E0; func_8015AE2C: `func_80147A30(a, -0x10000, 0xBA000)` (forward acceleration up to a top speed) |
+| 0x80147AAC | func_80147AAC | ApplyMoveSpeedFree | AccelFacingFree(o, 0, 0, 0) | M | e58E0; no C callers. Pair of ResetObjMoveParams (= AccelFacing(o, 0, 0, 0)) |
+| 0x80147AD4 | func_80147AD4 | AccelFacing | add (x, y, z) to the move speed (limited), turn it by the model's facing, velocity from it (axis keeps honoured) | M | e58E0; 7 stage calls / 6 files + 3 abil: `func_80147AD4(a, 0, 0, 0x10000)`, func_80155EA4 `(a, 0, 0, 0x8000)` |
+| 0x80147B18 | func_80147B18 | AccelFacingUnlimited | the same without the 0x1F0000 limit | M | e58E0; 2 stage calls: `func_80147B18(a, 0, 0, 0x10000)` (sc05_007, sc05_009) |
+| 0x80147B5C | func_80147B5C | SetVelKeepAxes | velocity = the turned speed, except axes whose +0x44 keep bit is set take the raw +0x24.. value | M | e58E0; called by AccelFacing / AccelFacingUnlimited |
+| 0x80147C30 | func_80147C30 | AccelFacingFree | AccelFacing without the axis keep bits | M | e58E0; called by ApplyMoveSpeedFree |
+| 0x80147CC8 | func_80147CC8 | AccelMoveToWorld | add (limited) then MoveSpeedToWorld into a vector | M | e58E0; called by AccelFacing, AccelFacingFree |
+| 0x80147D38 | func_80147D38 | AccelMoveToWorldUnlimited | the same unlimited | M | e58E0; called by AccelFacingUnlimited |
+| 0x80147DC0 | func_80147DC0 | MoveSpeedToWorld | the move speed through the model's rotation (rotX, rotY, rotZ from model +0x10..) into a VECTOR | H | e58E0 (ApplyMatrixLV) |
+| 0x80147E44 | func_80147E44 | AccelFacingYXZ | as AccelFacingFree but the matrix built RotMatrixY, then X, then Z | M | e58E0; no C callers |
+| 0x80147F50 | func_80147F50 | ApplyMoveSpeedWorld | AccelWorld(o, 0, 0, 0) | M | e58E0; 4 stage calls / 2 files (sc07_002) + 2 abil: `func_80147F50(o)` |
+| 0x80147F78 | func_80147F78 | AccelWorld | add to the move speed, velocity = the move speed unturned (world axes) | M | e58E0; called by ApplyMoveSpeedWorld |
+| 0x80148094 | func_80148094 | SlopeScaleMoveSpeed | from a surface normal: the move speed cut (uphill) or raised (downhill) by the slope, on its larger axis, into a vector | L | e58E0; no C callers. ratan2 of the normal against the turned speed; 0x200 = across the slope |
+| 0x801483E8 | func_801483E8 | SaveSafeGroundPos | TraceMap 8 units down: floor (0x2000) right below, surface type 0 -> +0xA0 = the position | M | e58E0; 4 engine callers (player kind steps) + 3 abil (ovl1a, ovl31, ovl34): `func_801483E8(a)` |
+
+#### Frames, camera and screen points
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80146EC0 | func_80146EC0 | PlaceAtObjPoint | out (16.16) = a point of the object's frame in the world, plus an offset turned by the camera | M | e58E0 (func_80015954, ObjLocalToWorld16, RotateByCamera); 1 abil call: ovl20 `func_80146EC0(a->+0x4C, a + 4, &pt, &ofs)` |
+| 0x80146F58 | func_80146F58 | RotateByCamera | a vector turned by the camera's pitch and heading (GetCameraPitch, GetCameraHeading, RotMatrix, ApplyMatrixSV) | H | e58E0; called by PlaceAtObjPoint |
+| 0x80149290 | func_80149290 | ObjLocalToWorldAtPos | ObjLocalToWorld with the model's translation (+0x48/+0x4C/+0x50) set to the object's whole position for the call | M | e58E0; func_8014FD54 turns two points (0,0,7) and (0,0,-0x18) for a TraceMap wall test (surface 0x15). Note: the save reads +0x4C twice, so +0x50 is restored with the +0x4C value |
+| 0x801493D0 | func_801493D0 | ObjLocalToWorld16To | ObjLocalToWorld16 into another 16.16 point | M | e58E0; 1 abil call: ovl17 `func_801493D0(t, a + 0x10, a + 4)` |
+| 0x8014942C | func_8014942C | ObjWorldToLocal | WorldToLocal with the object's model matrix | H | e58E0; no C callers. Mirror of ObjLocalToWorld |
+| 0x80149450 | func_80149450 | ObjWorldToLocal16 | the same for the whole parts (+2/+6/+0xA) of a 16.16 point, in place | M | e58E0; no C callers |
+| 0x801494CC | func_801494CC | ObjWorldToLocal16To | the same into another point | M | e58E0; no C callers |
+| 0x80149544 | func_80149544 | ObjPointToScreenOtz | ObjLocalToWorld, then ProjectPointOtz | M | e58E0; no C callers |
+| 0x80149584 | func_80149584 | ObjPointToScreen | ObjLocalToWorld, then ProjectPoint | M | e58E0; no C callers |
+| 0x8014964C | func_8014964C | ObjPoint16ToScreen | a 16.16 point's whole parts through ObjLocalToWorld and ProjectPoint, in place | M | e58E0; 1 abil call: ovl22 `func_8014964C(o, a + 4)`. Twin of IntoParentFrame (0x801495C4), which does the same with ProjectPointOtz |
+| 0x80149184 | func_80149184 | GetHeadingFromCamera | model heading minus GetCameraViewYaw (12 bits) | M | e58E0; 1 stage call (sc06_000) and 3 engine callers, all `D_801152A0 = func_80149184(a)`, later added back (`heading = D_801152A0 + GetCameraViewYaw()`, func_80160534) |
+| 0x801491C4 | func_801491C4 | GetCameraViewYaw | ratan2 of the camera's eye-to-target vector (D_801151D4 +0x3C..+0x50) | M | e58E0; used by GetHeadingFromCamera, func_8015AE2C, func_80160534 |
+
+#### Pose point pairs (sword trails)
+
+The current pose record (model +0x20) carries two s8 point pairs before it: at -0x10 and at -8.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801484B0 | func_801484B0 | GetPosePointsA | the pair at pose -0x10 of Musashi's current pose | M | e58E0; func_80156B74 (mode 0) feeds it to func_80156ECC with the next pose's pair; also func_8015F448, func_80165E90, func_80166994 |
+| 0x801484E8 | func_801484E8 | GetNextPosePointsA | the same pair of the pose one step ahead (func_80154358 peeks the next pose and restores the motion state) | M | e58E0; func_80156B74 |
+| 0x80148534 | func_80148534 | GetPosePointsB | the pair at pose -8 | M | e58E0; func_80156B74 (mode 1), func_8015E40C, func_8015F380, func_8015F448; 1 abil call: ovl35 `func_80148534(&s, &t)` then into the model's frame (ObjLocalToWorld) |
+| 0x8014856C | func_8014856C | GetNextPosePointsB | the pair at -8 of the next pose | M | e58E0; func_80156B74 |
+| 0x801485B8 | func_801485B8 | ReadPosePoints | six s8 at p into two s16 vectors | H | e58E0; used by the four above |
+
+#### Pad input, stick and d-pad facing
+
+The d-pad tables are indexed by held >> 12 (bit 0 up 0x1000, bit 1 right 0x2000, bit 2 down 0x4000, bit 3 left 0x8000,
+the bits ObjUpHeld..ObjLeftHeld test); `a` is the camera's view yaw. The table data is not in the repository: the
+index of each entry is inferred from address order, and each one's angle matches its direction combination (up = a,
+right = a+0x400, down = a+0x800, left = a-0x400, opposite pairs = none), so the order is very likely right.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80148634 | func_80148634 | ClearObjPadInput | held = pressed = 0, stick = 0x8080 (centred) | H | e58E0; 4 stage calls / 4 files (`func_80148634(a)`), 4 engine callers (func_8016F0E4, func_8016F14C, ...). ClearPadInput is the EXE's own |
+| 0x80148648 | func_80148648 | ReadObjPad | pad type, held, pressed, stick from pad n (or the demo pad); cleared when +0x1C5 or outside kinds 0x1E / 0x1A while func_800CF8B4 is 0; an analog pad (0x53 / 0x73) with the d-pad held counts as digital (0x41); while +0x1B0 the buttons are swapped (SW1) and the stick x mirrored | H | e58E0; UpdatePlayer `func_80148648(p, 0)`; +0x1B0 counts down in UpdatePlayer |
+| 0x80148AAC | func_80148AAC | FaceStickDirOffset | FaceStickDir, then when a direction was held heading = (heading + 0xFA) & 0xFF8 | L | e58E0; func_8015C7E4, func_8015CA28 (`if (func_80148AAC(a) & 0xFF)`) |
+| 0x80148AFC | func_80148AFC | FaceStickDir | model heading = the camera-relative d-pad / stick direction (D_8018F004 handlers for a digital pad); 1 when a direction was held | H | e58E0; 1 stage + 3 abil + 4 engine calls, e.g. sc03_121 `func_80148AFC(o)`, func_80155800 before a swing |
+| 0x80148C18 | func_80148C18 | FaceDpadNone | D_8018F004[0]: nothing held, returns 0 | M | e58E0 |
+| 0x80148C20 | func_80148C20 | FaceDpadUp | [1] up: heading = a, returns 1 | M | e58E0 |
+| 0x80148C34 | func_80148C34 | FaceDpadRight | [2] right: a + 0x400 | M | e58E0 |
+| 0x80148C4C | func_80148C4C | FaceDpadUpRight | [3] up+right: a + 0x200 | M | e58E0 |
+| 0x80148C64 | func_80148C64 | FaceDpadDown | [4] down: a + 0x800 | M | e58E0 |
+| 0x80148C7C | func_80148C7C | FaceDpadUpDown | [5] up+down: returns 0 | M | e58E0 |
+| 0x80148C84 | func_80148C84 | FaceDpadDownRight | [6] right+down: a + 0x600 | M | e58E0 |
+| 0x80148C9C | func_80148C9C | FaceDpadUpRightDown | [7] up+right+down: a + 0x400 | M | e58E0 |
+| 0x80148CB4 | func_80148CB4 | FaceDpadLeft | [8] left: a - 0x400 | M | e58E0 |
+| 0x80148CCC | func_80148CCC | FaceDpadUpLeft | [9] up+left: a - 0x200 | M | e58E0 |
+| 0x80148CE4 | func_80148CE4 | FaceDpadLeftRight | [10] right+left: returns 0 | M | e58E0 |
+| 0x80148CEC | func_80148CEC | FaceDpadUpLeftRight | [11] up+right+left: returns 0 | M | e58E0 |
+| 0x80148CF4 | func_80148CF4 | FaceDpadDownLeft | [12] down+left: a - 0x600 | M | e58E0 |
+| 0x80148D0C | func_80148D0C | FaceDpadUpDownLeft | [13] up+down+left: a - 0x400 | M | e58E0 |
+| 0x80148D24 | func_80148D24 | FaceDpadRightDownLeft | [14] right+down+left: a - 0x800 | M | e58E0 |
+| 0x80148D3C | func_80148D3C | FaceDpadAll | [15] all four: returns 0 | M | e58E0 |
+| 0x80148D44 | func_80148D44 | GetPlayerStickAngle | Musashi's camera-relative input direction (D_8018F044 for a digital pad), -1 when none | H | e58E0; 2 abil calls: `model->+0x12 = func_80148D44(a)` (ovl21, ovl34) |
+| 0x80148E54 | func_80148E54 | GetObjStickAngle | the same for an object's own pad fields (D_8018F084) | H | e58E0; 1 stage (sc03_121 `t = func_80148E54(o)`), 2 abil, func_8015EA3C (`if (t >= 0)` move toward it) |
+| 0x80148F60 | func_80148F60 | GetDpadAngleNone | angle table [0]: -1 | M | e58E0 |
+| 0x80148F68 | func_80148F68 | GetDpadAngleUp | [1]: a | M | e58E0 |
+| 0x80148F74 | func_80148F74 | GetDpadAngleRight | [2]: a + 0x400 | M | e58E0 |
+| 0x80148F80 | func_80148F80 | GetDpadAngleUpRight | [3]: a + 0x200 | M | e58E0 |
+| 0x80148F8C | func_80148F8C | GetDpadAngleDown | [4]: a + 0x800 | M | e58E0 |
+| 0x80148F98 | func_80148F98 | GetDpadAngleUpDown | [5]: -1 | M | e58E0 |
+| 0x80148FA0 | func_80148FA0 | GetDpadAngleDownRight | [6]: a + 0x600 | M | e58E0 |
+| 0x80148FAC | func_80148FAC | GetDpadAngleUpRightDown | [7]: a + 0x400 | M | e58E0 |
+| 0x80148FB8 | func_80148FB8 | GetDpadAngleLeft | [8]: a - 0x400 | M | e58E0 |
+| 0x80148FC4 | func_80148FC4 | GetDpadAngleUpLeft | [9]: a - 0x200 | M | e58E0 |
+| 0x80148FD0 | func_80148FD0 | GetDpadAngleLeftRight | [10]: -1 | M | e58E0 |
+| 0x80148FD8 | func_80148FD8 | GetDpadAngleUpLeftRight | [11]: -1 | M | e58E0 |
+| 0x80148FE0 | func_80148FE0 | GetDpadAngleDownLeft | [12]: a - 0x600 | M | e58E0 |
+| 0x80148FEC | func_80148FEC | GetDpadAngleUpDownLeft | [13]: a - 0x400 | M | e58E0 |
+| 0x80148FF8 | func_80148FF8 | GetDpadAngleRightDownLeft | [14]: a - 0x800 | M | e58E0 |
+| 0x80149004 | func_80149004 | GetDpadAngleAll | [15]: -1 | M | e58E0 |
+| 0x80149204 | func_80149204 | ClearDoubleTap | +0x1E4 (countdown and window) and +0x1DC (double-tapped buttons) = 0 | M | e58E0; no C callers |
+| 0x80149210 | func_80149210 | SetDoubleTapWindow | countdown +0x1E4 and window +0x1E6 = n frames | M | e58E0; player init: `func_80149210(&D_80126B58, 8)` |
+| 0x80149228 | func_80149228 | UpdateDoubleTap | a press within the window of the same button's last press sets +0x1DC = those buttons; the countdown restarts at each press | M | e58E0; called by UpdatePlayer after ReadObjPad |
+| 0x80149284 | func_80149284 | TestDoubleTap | +0x1DC & mask | M | e58E0; no C callers |
+| 0x80149FB0 | func_80149FB0 | ToggleEC0BitOnSelect | select (0x100) pressed, not on a map listed at D_8018F0C4, not +0x44 bit 0x400 or +0x1C8: 0x80078EC0 ^= 0x80; 1 then | M | e58E0; func_80159C84, func_8015A3C8, func_8015AE2C, func_8015C128 call it each frame. Guard start (func_8015E9B8) branches on that bit |
+
+#### Hit flags, guard and charge
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8014900C | func_8014900C | SetHitPending | hitFlags (+0x3C) bit 0x8000 set | H | e58E0; pair of ClearHitPending (func_80149020); func_80159A20 |
+| 0x80149034 | func_80149034 | SetGuarding | hitFlags bit 0x4000 set | H | e58E0; set by the guard start func_8015E9B8 (kind 0x11, R1) and func_80160534; GuardBlocksHit tests it |
+| 0x80149048 | func_80149048 | ClearGuarding | hitFlags bit 0x4000 cleared | H | e58E0; func_8015ED6C, func_8015F080, func_8015F260, func_801607B8 (the guard's exits) |
+| 0x8014A454 | func_8014A454 | GuardBlocksHit | guarding (bit 0x4000) and the hit's facing (+0x42) within 0x2AA of the reverse heading: the hit came from the front | H | e58E0; func_8015126C: then func_80160368 (blocked) and the hit is dropped; 2 stage calls: sc03_102 `if (func_8014A454(&D_80126B58) == 0)` apply the push, sc02_027 the same |
+| 0x80149CD4 | func_80149CD4 | CanGuard | R1 (0x08) held, no EC0 mode time (+0x1C8), not +0x44 bits 0x404 | M | e58E0; then kind 0x11 (SwitchToGuard, func_8015E880) in func_80159C84 / func_8015A3C8 / func_8015B950; 4 stage calls / 4 files `if (func_80149CD4(p))` (sc04_002/005/007) |
+| 0x8014A59C | func_8014A59C | ChargeGauge | while +0x44 bit 1 and R1 held: the charge 0x80078EBF += 3 (6 with flag 0x20), at most 0x80; else 0 | M | e58E0; called by UpdatePlayer. The guard start sets +0x44 bit 1; 0x80078EBF is the charge byte (part 2 doc, ChargeFxStep) |
+
+#### Actions: tests and starts (called from the player kind steps)
+
+A test returns 1 when the action may start; the caller then runs RunPlayerKindHandler (the old kind's exit) and the
+start, which is SetKindAndState(p, kind) plus that kind's first state.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801496D4 | func_801496D4 | CanJump | cross (0x40) pressed and no carried actor (+0x178) | H | e58E0; then TriggerJump in func_80155800, func_80159C84, func_8015A3C8, func_8015B950; 1 abil call (ovl34) |
+| 0x80149704 | func_80149704 | TriggerJump | kind 2 from its first state (EnterPlayerJump, func_8015AD08) | H | e58E0; always after CanJump |
+| 0x80149724 | func_80149724 | TriggerJumpRising | kind 2 entered at state 1 (StartPlayerJump, func_8015ACC4): fall speed -0x120000, SpawnEffect2(p, 2), +0xA8 at most 0x18 | M | e58E0; func_8015CD20, func_8015D1B8, func_8015F448 (jumps out of other kinds) |
+| 0x80149744 | func_80149744 | CanChargedAttack | square pressed with the charge full (0x80078EBF >= 0x80), not +0x44 bit 4 | M | e58E0; in the guard step func_8015EA3C and func_8015B950, then TriggerChargedAttack |
+| 0x80149788 | func_80149788 | TriggerChargedAttack | kind 0x15, the charged attack (SwitchToChargedAttack, func_8015F7A0) | M | e58E0; after CanChargedAttack (func_8015EA3C, func_8015B950) |
+| 0x801497A8 | func_801497A8 | CanUseAbility | circle (0x20) pressed, not kind 0x1A, not PlayerFlag800, not +0x44 bits 0x404, the held ability (stats +0x49) not blocked by D_801901EC (bit 0x80); ability 0xF needs no obj68 kind 0xA out | M | e58E0; func_80161BE0: then TriggerUseAbility |
+| 0x80149864 | func_80149864 | TriggerUseAbility | kind 0x17 (SwitchToUseAbility, func_801653B8; CheckAbilityFails sets 0x80078EC5) | M | e58E0; func_80161BE0 |
+| 0x80149884 | func_80149884 | HasNoPlayerAction | GetPlayerAction == 0 (always 0 on map 0x308F) | M | e58E0; func_80161B84 and func_8015F448: `(+0x44 & 0x100) && func_80149884(a)` |
+| 0x801498C0 | func_801498C0 | TriggerLieDown | kind 0x1D, lie down (SwitchToLieDown, func_80160B00) | M | e58E0; func_80161B84 (CheckLieDownFlag), when +0x44 bit 0x100 (fall asleep) and no action |
+| 0x801498E0 | func_801498E0 | TryEC0Mode3Swing | when CanSwingFusion or CanSwingLumina: obj68 kind 8 on Musashi (AllocObj68High, offset (0, -0x1E, 0)); 1 then | L | e58E0; case 3 of the EC0-mode switch (func_801619A4, GetActiveEC0Mode) in func_80159C84 / func_8015A3C8 / func_8015AE2C / func_8015B950 |
+| 0x80149954 | func_80149954 | TryEC0Mode4Swing | square or triangle held: PlaySe(0x8E0) on a new press, func_800CCF28 (overlay), obj68 kind 0x12 on Musashi; released: the sound request (4, 0x8E0) (likely stopping it), 0 | L | e58E0; case 4 of the same switch |
+| 0x80149A64 | func_80149A64 | CanSwingSword | CanSwingFusion or CanSwingLumina | M | e58E0; case 5 of the switch, then func_800CCCC0 (overlay) |
+| 0x80149AA8 | func_80149AA8 | CanSwingFusion | square (0x80) pressed, not +0x44 bits 0x404 | M | e58E0; then TriggerFusionCombo (func_80159C84, func_8015A3C8, the guard step) |
+| 0x80149AD4 | func_80149AD4 | TriggerFusionCombo | with a carried actor (+0x178) kind 0xE (SwitchToThrowCarried); else combo step +0x1AA = 1 and kind 5 (EnterFusionCombo, func_8015554C) | M | e58E0; func_80155800 (a swing chained from a swing), func_80159C84, func_8015A3C8, func_8015B950 |
+| 0x80149B14 | func_80149B14 | ContinueFusionCombo | the same without resetting +0x1AA | M | e58E0; func_80155800 after it advances +0x1AA (1..4) |
+| 0x80149B54 | func_80149B54 | CanSwingLumina | triangle (0x10) pressed, flag 0x80 (TestFlag80), not +0x44 bit 0x400 | M | e58E0; then TriggerLuminaSlash or (near a marked actor) TriggerGrab |
+| 0x80149BAC | func_80149BAC | TriggerLuminaSlash | with a carried actor kind 0xF (SwitchToThrowCarriedAlt); else +0x1AA = 1 and kind 6 (EnterLuminaSlash, func_80157510) | M | e58E0; func_80159C84, func_8015A3C8, func_8015B950, func_8015C32C |
+| 0x80149C08 | func_80149C08 | CanAirSlash | triangle pressed, flags 0x80 and 0x89, no action lock (+0x223), no EC0 mode time, not +0x44 bits 0x404 | M | e58E0; func_8015AE2C only while the motion is D_800D4BE0 (the jump motion, see func_8015B858), then kind 7 (func_801577C8) |
+| 0x80149C94 | func_80149C94 | TriggerAirSlash | kind 7, the air slash (EnterAirSlash, func_801577C8) | M | e58E0; no C callers (func_8015AE2C calls func_801577C8 itself) |
+| 0x80149CB4 | func_80149CB4 | TriggerSwordSkill | StartSwordSkill(p, n) (func_80157D20): kind D_8018F848[n] | M | e58E0; func_80155A44 `(a, 2)`, `(a, 3)` (triangle during a swing, flag 0x85), func_80157F64 `(a, 5)` |
+| 0x80149D10 | func_80149D10 | CheckEC0ModePower | triangle pressed, charge 0x80, an EC0 mode picked (0x80078EC0 & 0x7F): 2 when +0x1C4, else 1; 0 otherwise | M | e58E0; the guard step func_8015EA3C: 1 -> kind 8 (func_80175150), 2 -> StartPlayerActionScript(+0x21C). +0x1C4: GetPlayerByte1C4 |
+| 0x8014A4B4 | func_8014A4B4 | CanGuardHop | flag 0x1E and cross pressed | M | e58E0; the guard step func_8015EA3C, then TriggerGuardHop |
+| 0x8014A4FC | func_8014A4FC | TriggerGuardHop | kind 0x12, the guard hop (SwitchToGuardHop, func_8015EDD4) | M | e58E0; func_8015EA3C |
+| 0x8014A51C | func_8014A51C | CanDoubleJump | flag 0x1E, cross pressed, not +0x44 bit 0x400, +0xA8 < 0x19, no action lock | M | e58E0; func_8015B858: once per jump (+0x240), fall speed -0xE0000 and the jump motion again |
+| 0x8014A6C4 | func_8014A6C4 | CanWallClimb | flag 0x1F, not +0x44 bit 4, cooldown +0x1BE clear | M | e58E0; func_8016163C / func_80161774: on a wall (0x8000) of surface 0x15, then kind 0x14 (func_8015F2F0) facing the wall normal |
+| 0x8014A738 | func_8014A738 | IsGrabbableNear | flag 0x83 and an actor with +0xC1 == 7 (reaction 7) within 0x40 (x and z) | M | e58E0; func_80159C84: then TriggerGrab instead of the triangle swing |
+| 0x8014A830 | func_8014A830 | TriggerGrab | kind 0x10, grab (SwitchToGrab, func_8015E184) | M | e58E0; func_80159C84, chosen over the Lumina slash when IsGrabbableNear |
+| 0x8014A850 | func_8014A850 | CatchGrabbableActor | the first live actor with +0xC1 == 7, hit data, flags5C 0x8000 within 0x40 (y from its +0x40): +0x18C = it, hit type 0x1B (func_8014C4AC); 1 then | M | e58E0; func_8015E288 (GrabReachStep, kind 0x10) |
+| 0x8014A048 | func_8014A048 | TryPickUpActor | square, or triangle with flag 0x80: the first actor (flags5C 0x200, no +0xAA, not +0x184) the segment from Musashi to (0, -0x10, -0x20) of his frame crosses: +0x178 = it, LiftActor; 1 then | M | e58E0; func_8015A3C8 only while the motion is D_800D5428, then TriggerCarry. +0x178 = the carried actor (CanJump refuses, square / triangle throw it: kinds 0xE / 0xF) |
+| 0x8014A1B0 | func_8014A1B0 | LiftActor | strike record type 0xA (lifted; thrown is 9) func_8014C4AC(actor, 0xA, func_80156370(0xA), Musashi's position, his heading) | M | e58E0; TryPickUpActor and func_801723C4 |
+| 0x8014A218 | func_8014A218 | TriggerCarry | kind 0xD, carry (SwitchToCarry, func_8015D4B4) | M | e58E0; after TryPickUpActor |
+| 0x8014A238 | func_8014A238 | FindUnhittableActorAhead | the first live actor with +0xAA set within 0x30 (func_8014C278) and 0x200 of his facing (func_8014C2B0) | L | e58E0; no C callers. StageActor +0xAA: cannot hit Musashi |
+| 0x8014A2E4 | func_8014A2E4 | FindUnhittableActorNear | the first live actor with flags5C 0x8000 and +0xAA set within 0x30 | L | e58E0; func_801508B4, then HitActorType1F |
+| 0x8014A380 | func_8014A380 | HitActorType1F | func_8014C4AC(actor, 0x1F, 0, Musashi's position, his heading) | M | e58E0; func_801508B4 |
+| 0x8014A3E0 | func_8014A3E0 | RevertMoveAgainstDir | when the velocity's whole parts (+0x12, +0x1A) point against D_801152B0 / D_801152B4: position = last position (+0x88); 0 then, else 1 | L | e58E0; no C callers |
+
+#### Talking
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80149D9C | func_80149D9C | TryTalk | TryTalkOnRequest, else TryTalkOnSquare | M | e58E0; func_80159C84 / func_8015A3C8: `if (func_80149D9C(a)) { RunPlayerKindHandler; func_80149FA8; return; }` |
+| 0x80149DD8 | func_80149DD8 | TryTalkOnSquare | square pressed, no carried actor, not +0x44 bits 0x404: +0x190 = 0, then TalkToActor over the 96 actors | M | e58E0; called by TryTalk |
+| 0x80149E94 | func_80149E94 | TryTalkOnRequest | no action and +0x1C5 set: clear it, then TalkToActor over the actors | M | e58E0; called by TryTalk. +0x1C5 is set by RequestTalkCheck (0x8014CB68, 5 stage calls) and blanks the pad in ReadObjPad |
+| 0x80149F2C | func_80149F2C | TalkToActor | an actor of kind 0x83 (SpawnTalkMarker's) or 0x61: its +0xDC callback (func_80144A04); an action back -> RunPlayerKindHandler, ResetPlayerKind, StartPlayerAction(it, 0x01000000) | M | e58E0; called by the two above |
+| 0x80149FA8 | func_80149FA8 | AfterTalkNop | empty | L | e58E0; called after a successful TryTalk (func_80159C84, func_8015A3C8) |
+
+#### EC0 mode, game clock, money, floating numbers
+
+0x80078EC0 (stats +0x48): low 7 bits = the mode picked in the sub-screen (one of six entries whose ownership flags are
+D_8018E5A8[i], func_8013F350); bit 0x80 toggled by select (then guard becomes kind 0x1C). +0x1C8 = the mode's time
+left (GetActiveEC0Mode returns the pick only while it runs). Likely Lumina's elemental scrolls, not proven; the names
+keep part 2's neutral "EC0 mode".
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8014AA04 | func_8014AA04 | SetEC0Mode | 0x80078EC0 = n, keeping bit 0x80 | M | e58E0; eC98C func_8013F350 (the sub-screen list): `func_8014AA04((u8)(n + 1))` then the sound request 0x460 / 0x461 |
+| 0x8014AA28 | func_8014AA28 | CancelEC0Mode | unless Musashi is kind 0x19-0x1A / 0x1D-0x1E: end his kind (ResetPlayerKind; abilities 0xA / 0xC / 0x18 end too, func_80165A20); +0x1C8..+0x1D8 = 0; frees obj68 kinds 5-9 and 0x10-0x14 and effects 0x26, 0x27, 0x39-0x3C; action lock +0x223 = 0x10 | M | e58E0; eC98C func_8013E958 calls it when 0x80078EC0 changed in the sub-screen |
+| 0x8014ACC0 | func_8014ACC0 | SpendEC0ModeTime | +0x1C8 -= n, at least 0 | M | e58E0; 5 abil calls / 2 files: ovl33 `func_8014ACC0(o, 1)`, `(o, 0xA)` |
+| 0x8014ACE8 | func_8014ACE8 | ShowNumberAbove | ShowNumberAt 0x20 above the object | M | e58E0; func_801506A4 `(a, 3, D_8018F16C[..])`, `(a, 2, ..)`, func_80150820 `(a, 4, n)`, func_80151204 `(a, 1, n & 0x7FFF)` |
+| 0x8014AD30 | func_8014AD30 | ShowNumberAt | AllocEffect kind 0x1D (the damage-number effect, ShowDamage's) at a point: +0x2C = mode, +0x30 = value | M | e58E0; func_8014B350 `(a, &v, 6, 0)`, func_801636D0, func_80163EC8. Part 2: DamageNumberSetup reads the value at +0x30 and the launch mode at +0x2C |
+| 0x8014AD7C | func_8014AD7C | AddPlayerMoney | AddMoney(Musashi, n) | H | e58E0; 1 stage call: sc05_017 `func_8014AD7C(0x3C)` |
+| 0x8014ADE0 | func_8014ADE0 | TickGameClock | the clock 0x80078E90 (16.16, whole = minutes, 0x5A0 a day) += 0x1555 a frame (0xAAA8 while asleep, +0x44 bit 0x80, set by StartLieDown); each hour bp > 0: AddHp 4 (10 with flag 0x1B while asleep), bp 0: LoseHp 4 (down to 1); bp -4 each hour (asleep: AddBp 8 with flag 0x1B, else SpendBp 1); at 0x5A0 the next day (func_8014B084) | M | e58E0; called by UpdatePlayer when func_80029104 allows, unless PlayerActionBlocksInput or kind 0x1A / 0x1E or +0x44 bit 0x10. Also AddBp 1 each minute while stats +0x49 (the held ability) is 3 |
+
+#### Notes
+
+* IntoParentFrame (0x801495C4, already named) is not a parent-frame transform: it is ObjLocalToWorld followed by
+  ProjectPointOtz on a 16.16 point in place (a screen point with depth), the twin of ObjPoint16ToScreen (0x8014964C).
+  A name like ObjPoint16ToScreenOtz would fit better.
+* func_80149290 (ObjLocalToWorldAtPos) saves model +0x4C twice (`v[1]` and `v[2]`), so it restores the model's z
+  translation +0x50 with the y value. Matching code; worth a comment.
+* func_80147860, func_80147E44 and func_80147F78 call AddMoveSpeedX (func_80147928) with no arguments: the original
+  passes its own a0/a1 through. The K&R definition of func_80147928 hides it.
+* Player fields pinned down here: +0x24/+0x28/+0x2C move speed in the facing frame; +0x60/+0x68/+0x70 three scale
+  vectors multiplied into the model scale; +0xA0 last safe ground position; +0x100..+0x104 tilt angles,
+  +0x108..+0x10C their target; +0x118 / +0x120 / +0x128 smoothed, target and extra up vectors (+0x12E enables the
+  extra); +0x130..+0x134 angle overrides, +0x136 their mask; +0x178 carried actor; +0x18C grabbed actor;
+  +0x1AA combo step; +0x1B0 swapped-controls timer; +0x1BC / +0x1BD / +0x1BE cooldowns; +0x1C5 talk request;
+  +0x1C8 EC0 mode time; +0x1DC / +0x1E0 / +0x1E4 / +0x1E6 double-tap state; +0x223 action lock. hitFlags 0x4000 =
+  guarding.
+
+Rows: 171 (H 29, M 131, L 11); skipped (already known): 69
 
 ### 0x8014B000-0x80153000: day clock, statuses, ground and wall probes, surfaces, hit reactions
 
@@ -1452,3 +1753,7 @@ Not new proposals: better evidence for names part 1 gave, for the local card to 
   independently.
 * 0x8012E364 / g_PlayerSquash (part 1): Player +0x188 is also the assimilate gauge (filled by square-mashing in the
   Fusion throw), not only a squash value; the squash reading of func_8012E364 stands for what it does with it.
+* 0x801495C4 (part 1: IntoParentFrame, L): it runs ObjLocalToWorld and then ProjectPointOtz on a 16.16 point in place,
+  so it yields a screen point; **ObjPoint16ToScreenOtz** fits (its twin 0x8014964C, ObjPoint16ToScreen, is in (b)).
+* Not a naming matter, for the record: func_80149290 (matched, so the original's code) saves the model's +0x4C twice
+  and restores +0x50 (the z translation) with the y value.
