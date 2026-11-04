@@ -1,0 +1,2 @@
+address,scope,proposed,corrected,reason
+0x8002B0B4,exe,SaveCardStep,MemCardStep,VAGUE: the card state machine dispatches check-directory / save / load / mode 3 on mode & 7: not save-only
