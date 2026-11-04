@@ -19,8 +19,8 @@ Counts: stage calls / stage files, then abil calls where there are any.
 
 | address | current | proposed | purpose | conf | evidence |
 |---|---|---|---|---|---|
-| 0x80130088 | func_80130088 | PlayRetreatSound | parameter sound 0x32 near the target point (DistSqToTarget < 0x9000), 0x33 farther, the other when one is missing | M | e5F4 comment ("moves 0x32 and 0x33"; they go through PlayParamSound, so they are sounds); 6 / 4, after a defeat test (`a->+0x76 <= 0`) |
-| 0x8013001C | func_8013001C | PlayApproachSound | the same with parameters 0x30 / 0x31 | M | e5F4 comment; inline |
+| 0x80130088 | func_80130088 | PlayDistanceSound32 | parameter sound 0x32 near the target point (DistSqToTarget < 0x9000), 0x33 farther, the other when one is missing | M | e5F4 comment ("moves 0x32 and 0x33"; they go through PlayParamSound, so they are sounds); 6 / 4, after a defeat test (`a->+0x76 <= 0`) |
+| 0x8013001C | func_8013001C | PlayDistanceSound30 | the same with parameters 0x30 / 0x31 | M | e5F4 comment; inline |
 | 0x80132EC4 | func_80132EC4 | SetParamValues | every value's low half in a key / value list = v | H | e5F4 comment; 4 / 2: `func_80132EC4(p->a, k)` |
 | 0x80132F40 | func_80132F40 | PushPlayerOntoBox | when Musashi's path from his last position (+0x88) crosses the actor's model, put him on the box's top in its frame | M | e5F4 (PathHitsModel, WorldToLocal, the box's lower y, LocalToWorld into D_80126B5E..66); 1 / 1 |
 | 0x80142454 | func_80142454 | SpawnHeadMarkerOnPlayer | SpawnKind13 (part 1) over Musashi (parent g_Player, n 1), +0x52 = a height offset | L | eC98C; 7 / 5: `func_80142454(-0x80)` |
