@@ -733,4 +733,84 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80151D60,engine,FlattenHitBegin,FlattenHitBegin,M,H,PROMOTE,"the begin step, StartFlattenHit, +0xDE = 0x20, next state",0
 0x80151E78,engine,FlattenHitWait,FlattenHitWait,M,H,PROMOTE,"counts +0xDE down, then 0x10 and next state",0
 0x80151ECC,engine,FlattenHitStretch,FlattenHitStretch,M,H,PROMOTE,"ClearPlayerHittable, scale +0x64 grows by +0xDE * 64 to 0x1556, then next state",0
+0x80151F38,engine,FlattenHitSettle,FlattenHitSettle,M,H,PROMOTE,"ClearPlayerHittable; at the end EndFlattenHit, ResetPlayerKind, DropTimedAbility",0
+0x80152058,engine,RunPitFallHit,RunPitFallHit,M,H,PROMOTE,D_8018F250[state](obj): the pit-fall hit's steps,0
+0x80152094,engine,PitFallHitBegin,PitFallHitBegin,M,H,PROMOTE,"the begin step: collide, fall and ground steps, StartPitFallHit, next state",0
+0x80152194,engine,PitFallDrop,PitFallDrop,M,H,PROMOTE,"counts +0xDE down, then HidePlayerAbility, StartRespawnWait, next state",0
+0x80152254,engine,PitFallRespawn,PitFallRespawn,M,H,PROMOTE,"FindRespawnPoint, then ClearObjPush, EndPitFallHit, ResetPlayerKind, DropTimedAbility",0
+0x80152370,engine,RunBlowbackHit,RunBlowbackHit,M,H,PROMOTE,D_8018F264[state](obj): the blowback hit's steps,0
+0x801523AC,engine,BlowbackHitBegin,BlowbackHitBegin,M,H,PROMOTE,"the begin step, StartBlowback, next state",0
+0x80152500,engine,BlowbackAirStep,BlowbackAirStep,M,H,PROMOTE,"the blowback in the air until landing, then EndBlowback, the next kind, dust, DropTimedAbility",0
+0x80152698,engine,RunSleepHit,RunSleepHit,M,H,PROMOTE,D_8018F280[state](obj): the sleep hit's steps,0
+0x801526D4,engine,SleepHitBegin,SleepHitBegin,M,H,PROMOTE,"the begin step, StartSleepHit",0
+0x8015282C,engine,RunLaunchHit,RunLaunchHit,M,H,PROMOTE,D_8018F298[state](obj): the launch hit's steps,0
+0x80152868,engine,LaunchHitBegin,LaunchHitBegin,M,H,PROMOTE,"the begin step, StartLaunchHit, next state",0
+0x8015294C,engine,LaunchHitRise,LaunchHitRise,M,H,PROMOTE,"the rise, then SetPlayerFlag7E2, HidePlayerAbility, StartRespawnWait, next state",0
+0x80152A50,engine,LaunchHitRespawn,LaunchHitRespawn,M,H,PROMOTE,"FindRespawnPoint, then ClearObjPush, EndLaunchHit, ResetPlayerKind, DropTimedAbility",0
+0x80152B6C,engine,RunFlinchHit,RunFlinchHit,M,H,PROMOTE,D_8018F2AC[state](obj): the flinch hit's steps,0
+0x80152BA8,engine,FlinchHitBegin,FlinchHitBegin,M,H,PROMOTE,"the begin step, StartFlinchHit, next state",0
+0x80152C40,engine,FinishFlinchHit,FinishFlinchHit,M,H,PROMOTE,"ClearPlayerHittable, EndFlinchHit, ResetPlayerKind, DropTimedAbility",0
+0x80152D24,engine,RunFlingHit,RunFlingHit,M,H,PROMOTE,D_8018F2C8[state](obj): the fling hit's steps,0
+0x80152D60,engine,FlingHitBegin,FlingHitBegin,M,H,PROMOTE,"the begin step, StartFlingHit, next state",0
+0x80152E4C,engine,FlingHitRise,FlingHitRise,M,H,PROMOTE,"the rise, then SetPlayerFlag7E2, HidePlayerAbility, StartRespawnWait, next state",0
+0x80152F44,engine,FlingHitRespawn,FlingHitRespawn,M,H,PROMOTE,"FindRespawnPoint, then ClearObjPush, EndFlingHit, ResetPlayerKind, DropTimedAbility",0
+0x80153060,engine,RunVanishKindState,RunVanishKindState,M,H,PROMOTE,D_8018F2DC[state](obj): the vanish kind's steps,0
+0x8015309C,engine,VanishEnter,VanishEnter,M,H,PROMOTE,"the begin step, VanishStart, next state",0
+0x80153150,engine,VanishShrinkStep,VanishShrinkStep,M,H,PROMOTE,"the shrink, then HidePlayerAbility, StartRespawnWait, next state",0
+0x801531BC,engine,VanishWaitStep,VanishWaitStep,M,H,PROMOTE,"ClearPlayerHittable, TickRespawnWait, then next state",0
+0x80153204,engine,VanishRespawnStep,VanishRespawnStep,M,H,PROMOTE,"FindRespawnPoint, then ClearObjPush, RecoverFromVanish, ResetPlayerKind, DropTimedAbility",0
+0x80153320,engine,RunPitFallKindState,RunPitFallKindState,M,H,PROMOTE,D_8018F2F0[state](obj): the pit-fall kind's steps,0
+0x8015335C,engine,PitFallEnter,PitFallEnter,M,H,PROMOTE,"the begin step, PitFallStart, next state",0
+0x80153410,engine,PitFallStep,PitFallStep,M,H,PROMOTE,"the drop, then HidePlayerAbility, StartRespawnWait, next state",0
+0x80153490,engine,PitFallWaitStep,PitFallWaitStep,M,H,PROMOTE,"ClearPlayerHittable, TickRespawnWait, then next state",0
+0x801534D8,engine,PitFallRespawnStep,PitFallRespawnStep,M,H,PROMOTE,"FindRespawnPoint, then ClearObjPush, RecoverFromPitFall, ResetPlayerKind, DropTimedAbility",0
+0x80153C44,engine,SetGrabReactionEx,SetGrabReactionEx,M,M,KEEP,"SetGrabReaction (L) and D_8011DB18 = v; ""Ex"" says nothing, and the word rests on SetGrabReaction, which is L",0
+0x80153CCC,engine,RunGrabbedKindState,RunGrabbedKindState,M,H,PROMOTE,"rumble, D_8018F32C[state](obj), D_8011DB0C / D_8011F748 = 0: the grabbed kind's steps",0
+0x80153D34,engine,GrabbedEnter,GrabbedEnter,M,H,PROMOTE,"the begin step, GrabbedStart, next state",0
+0x801554B8,engine,LoadAbilityPackage,LoadAbilityPackage,M,M,KEEP,"loads the package when +0x1A0 differs from +0x196, then RunAbilityInitHandler (lines not all read); the name waits for r276 ruling 7 (the same name in ovl36)",0
+0x80155518,engine,StartFusionCombo,StartFusionCombo,M,H,PROMOTE,"SetKindAndState(p, 5), FusionSwingStart",0
+0x801555BC,engine,FusionComboWait,FusionComboWait,M,H,PROMOTE,"StayedGrounded, then FusionSwingStart",0
+0x80155800,engine,FusionSwingStep,FusionSwingStep,M,H,PROMOTE,"the Fusion swing's step (52 lines): skill input, the next combo step, MoveObjByVel, ground check, RunAttackHit",0
+0x80155B20,engine,FusionFinisherLaunch,FusionFinisherLaunch,M,H,PROMOTE,"swinging bit, vel cleared, fall speed -0x100000, motion, next state",0
+0x80155B9C,engine,FusionFinisherRise,FusionFinisherRise,M,H,PROMOTE,"swinging bit; once the fall speed is >= 0 the next motion, next state, SE",0
+0x80155C64,engine,FusionFinisherFall,FusionFinisherFall,M,H,PROMOTE,"the finisher's fall: on landing next state and dust, else RunAttackHit",0
+0x80155D70,engine,FusionFinisherLand,FusionFinisherLand,M,H,PROMOTE,"the finisher's landing: off the ground LeavePlayerKind and StartPlayerFall, else the end",0
+0x80155E30,engine,FusionSwingHoldStep,FusionSwingHoldStep,M,H,PROMOTE,"the Fusion swing's hold step: CheckPlayerGround, RunAttackHit",0
+0x80155EA4,engine,FusionDashSlashStep,FusionDashSlashStep,M,H,PROMOTE,"the dash slash: at the motion's end LeavePlayerKind / ResetPlayerKind, else the ground check",0
+0x80155F60,engine,EndFusionComboKind,EndFusionComboKind,M,H,PROMOTE,EndSwordSwing; kind 5's exit handler,0
+0x801574DC,engine,StartLuminaSlash,StartLuminaSlash,M,H,PROMOTE,"SetKindAndState(p, 6), LuminaSlashStart",0
+0x80157580,engine,LuminaSlashEnter,LuminaSlashEnter,M,H,PROMOTE,"off the ground StartPlayerFall, else LuminaSlashStart",0
+0x801576A8,engine,LuminaSlashStep,LuminaSlashStep,M,H,PROMOTE,"the Lumina slash's step: CheckPlayerGround, RunAttackHit",0
+0x8015771C,engine,EndLuminaSlashKind,EndLuminaSlashKind,M,H,PROMOTE,+0x1AA = 0 and EndLuminaSlash; kind 6's exit handler,0
+0x80157788,engine,StartAirSlash,StartAirSlash,M,H,PROMOTE,"D_801ED510 = 300, SetKindAndState(p, 7), AirSlashStart",0
+0x80157880,engine,AirSlashEnter,AirSlashEnter,M,H,PROMOTE,"PushOutOfSolidActors, ProbePlatformFall, ClipMoveToMap, AirSlashStart",0
+0x8015795C,engine,AirSlashStep,AirSlashStep,M,H,PROMOTE,"the air slash's step: air move, landing, the rebound (fall speed -0xC0000, state 4), SetPlayerEvent02",0
+0x80157AC8,engine,AirSlashSkidStep,AirSlashSkidStep,M,H,PROMOTE,"swinging bit, landing skid, RunAttackHit, SetPlayerEvent02",0
+0x80157B74,engine,AirSlashEndStep,AirSlashEndStep,M,H,PROMOTE,"at the motion's end LeavePlayerKind / ResetPlayerKind, else CheckPlayerGround",0
+0x80157BC8,engine,AirSlashReboundStep,AirSlashReboundStep,M,H,PROMOTE,"the rebound in the air until landing, EnterPlayerFall when off, SetPlayerEvent02",0
+0x80157CCC,engine,EndAirSlash,EndAirSlash,M,H,PROMOTE,"action lock 0x10, swinging bit off, face, parts, display flag; kind 7's exit handler",0
+0x80157E00,engine,SkillAWait,SkillAWait,M,H,PROMOTE,"StayedGrounded, then SkillAStart",0
+0x80157EA4,engine,SkillAStep,SkillAStep,M,H,PROMOTE,"skill A's step: on the first hit effect 0x54 at GetAttackHitPoint, the follow-up check",0
+0x80158000,engine,SkillBWait,SkillBWait,M,H,PROMOTE,"StayedGrounded, then SkillBStart",0
+0x801580B4,engine,SkillBLeapStep,SkillBLeapStep,M,H,PROMOTE,"skill B's leap: the air move, landing to the next state, RunAttackHit",0
+0x801581AC,engine,SkillBFinishStep,SkillBFinishStep,M,H,PROMOTE,"skill B's finish: at the end ResetPlayerKind, else RunAttackHit",0
+0x8015824C,engine,RunSkillCState,RunSkillCState,M,H,PROMOTE,D_8018F86C[state](obj): skill C's state table,0
+0x80158288,engine,SkillCWait,SkillCWait,M,H,PROMOTE,"StayedGrounded, then SkillCStart",0
+0x80158344,engine,SkillCStep,SkillCStep,M,H,PROMOTE,"skill C's step: latched input, at the end ResetPlayerKind, else RunAttackHit",0
+0x80158434,engine,SkillCLeapStep,SkillCLeapStep,M,H,PROMOTE,"skill C's leap: landing to the next motion and state, else RunAttackHit",0
+0x80158548,engine,SkillCEndStep,SkillCEndStep,M,H,PROMOTE,"swinging bit; at the motion's end LeavePlayerKind / ResetPlayerKind, else CheckPlayerGround",0
+0x801585EC,engine,EndSwordSkill,EndSwordSkill,M,H,PROMOTE,"swinging bit off, face, parts, display flag: the skills' exit handler",0
+0x8015879C,engine,StartPlayerDeathNoReset,StartPlayerDeathNoReset,M,H,PROMOTE,"death counters cleared, sys and ability shown, kind 0x1A state 1, RunPlayerDeath (no ResetPlayerForDeath)",0
+0x801588CC,engine,RunDeathState,RunDeathState,M,H,PROMOTE,D_8018F8AC[state](obj) and the per-state flags (51 lines): the death kind's handler,0
+0x80158AB4,engine,DeathResetStep,DeathResetStep,M,H,PROMOTE,"ResetPlayerForDeath, next state",0
+0x80158BB0,engine,DeathStart,DeathStart,M,H,PROMOTE,"the death's first step: pitch 0, ResetTiltVectors, ClearAngleOverride, SetPlayerFlag7E2, next state",0
+0x80158C40,engine,DeathSpinStep,DeathSpinStep,M,H,PROMOTE,"SpinPlayerModel by 0x3C000 until it slows, then timer 4, next state",0
+0x80158CD8,engine,DeathPauseStep,DeathPauseStep,M,H,PROMOTE,"a pause, then +0x238 = 0x5B0000, next state",0
+0x80158D60,engine,DeathToppleStep,DeathToppleStep,M,H,PROMOTE,"TipPlayerModel by 0x4C000 until 0xC00, then next state",0
+0x80158E24,engine,DeathFallStep,DeathFallStep,M,H,PROMOTE,"the fall, sound 0x1C, next state",0
+0x80158F00,engine,DeathQuoteStep,DeathQuoteStep,M,H,PROMOTE,"the model turns; when the timer ends one of 11 random messages (D_8018F87C) opens, next state",0
+0x80158FA4,engine,DeathQuoteWaitStep,DeathQuoteWaitStep,M,H,PROMOTE,"waits for the message, then the continue question (D_80110C3C), next state",0
+0x80159070,engine,ContinueChoiceStep,ContinueChoiceStep,M,H,PROMOTE,"by the answer opens the next message, next state",0
+0x80159120,engine,ContinueConfirmStep,ContinueConfirmStep,M,H,PROMOTE,the continue confirmation (44 lines): the answer's messages and states,0
+0x801592CC,engine,ContinueRetryStep,ContinueRetryStep,M,H,PROMOTE,"GetMessageAnswer: close it, reopen the continue question, state 9",0
 0x80163234,engine,SetObj68VelFromAccel,SetObj68VelFromMoveSpeed,M,H,FIX,"AddObj68MoveSpeedSetVel(o, 0, 0, 0): vel = the move speed. Was SetObj68VelFromAccel",0
