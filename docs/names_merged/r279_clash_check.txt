@@ -1,4 +1,4 @@
-r279 clash check: 183 H2 names, 0 with a clash
+r279 clash check: 190 H2 names, 0 with a clash
 
 0x801151FC engine         D_801151FC               -> g_PlayerHitBy              ok
 0x801152B0 engine         D_801152B0               -> g_WallNormal               ok
@@ -35,6 +35,7 @@ r279 clash check: 183 H2 names, 0 with a clash
 0x8012C0EC engine         func_8012C0EC            -> DespawnIfFar               ok
 0x8012C194 engine         func_8012C194            -> AllocActorSprite           ok
 0x8012C438 engine         func_8012C438            -> SetupActorTrans            ok
+0x8012CBF4 engine         func_8012CBF4            -> MoveCollidePassable        ok
 0x8012CE2C engine         func_8012CE2C            -> IsOnGround                 ok
 0x8012DB84 engine         func_8012DB84            -> HitPlayerFatal             ok
 0x8012DFD4 engine         func_8012DFD4            -> CarryPlayer                ok
@@ -68,10 +69,14 @@ r279 clash check: 183 H2 names, 0 with a clash
 0x80147928 engine         func_80147928            -> AddMoveSpeedX              ok
 0x8014799C engine         func_8014799C            -> AddMoveSpeedY              ok
 0x80147A10 engine         func_80147A10            -> AddMoveSpeedZ              ok
+0x80147AAC engine         func_80147AAC            -> SetVelFromMoveSpeedFacing  ok
 0x80147AD4 engine         func_80147AD4            -> AddMoveSpeedFacing         ok
+0x80147B18 engine         func_80147B18            -> AddMoveSpeedFacingUnlimited ok
 0x80147B5C engine         func_80147B5C            -> SetVelKeepAxes             ok
 0x80147C30 engine         func_80147C30            -> AddMoveSpeedFacingFree     ok
 0x80147CC8 engine         func_80147CC8            -> AddMoveSpeedToWorld        ok
+0x80147D38 engine         func_80147D38            -> AddMoveSpeedToWorldUnlimited ok
+0x80147E44 engine         func_80147E44            -> AddMoveSpeedFacingYXZ      ok
 0x80147F50 engine         func_80147F50            -> SetVelFromMoveSpeed        ok
 0x80147F78 engine         func_80147F78            -> AddMoveSpeedSetVel         ok
 0x801483E8 engine         func_801483E8            -> SaveSafeGroundPos          ok
@@ -143,11 +148,13 @@ r279 clash check: 183 H2 names, 0 with a clash
 0x801622C4 engine         func_801622C4            -> ExpireDeadline8            ok
 0x80162D28 engine         func_80162D28            -> UpdateObj68Matrix          ok
 0x80162D88 engine         func_80162D88            -> UpdateObj68MatrixYXZ       ok
+0x80162F08 engine         func_80162F08            -> AddObj68MoveSpeed          ok
 0x80162F60 engine         func_80162F60            -> AddObj68MoveSpeedX         ok
 0x80162F80 engine         func_80162F80            -> AddObj68MoveSpeedY         ok
 0x80162FA0 engine         func_80162FA0            -> AddObj68MoveSpeedZ         ok
 0x80162FC0 engine         func_80162FC0            -> MoveObj68                  ok
 0x80162FF4 engine         func_80162FF4            -> AddObj68MoveSpeedFacing    ok
+0x801630C4 engine         func_801630C4            -> AddObj68MoveSpeedFacingYXZ ok
 0x80163194 engine         func_80163194            -> AddObj68MoveSpeedByMatrix  ok
 0x80163234 engine         func_80163234            -> SetObj68VelFromMoveSpeed   ok
 0x8016325C engine         func_8016325C            -> AddObj68MoveSpeedSetVel    ok

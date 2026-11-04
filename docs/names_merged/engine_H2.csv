@@ -34,6 +34,7 @@ address,scope,current,proposed,confidence,source,note
 0x8012C0EC,engine,func_8012C0EC,DespawnIfFar,H,r272:names_stage_engine_proposals.md:107,r279 promote
 0x8012C194,engine,func_8012C194,AllocActorSprite,H,r272:names_stage_engine_proposals.md:88,r279 promote
 0x8012C438,engine,func_8012C438,SetupActorTrans,M,r272:names_stage_engine_proposals.md:94,r279 fix: was SetupActorAlt
+0x8012CBF4,engine,func_8012CBF4,MoveCollidePassable,H,r272:names_stage_engine_proposals.md:217,r279 promote
 0x8012CE2C,engine,func_8012CE2C,IsOnGround,H,r272:names_stage_engine_proposals.md:222,r279 promote
 0x8012DB84,engine,func_8012DB84,HitPlayerFatal,H,r272:names_stage_engine_proposals.md:256,r279 promote
 0x8012DFD4,engine,func_8012DFD4,CarryPlayer,H,r272:names_stage_engine_proposals.md:149,r279 promote
@@ -67,10 +68,14 @@ address,scope,current,proposed,confidence,source,note
 0x80147928,engine,func_80147928,AddMoveSpeedX,H,r272:names_stage_engine_proposals_2.md:228,r279 promote
 0x8014799C,engine,func_8014799C,AddMoveSpeedY,H,r272:names_stage_engine_proposals_2.md:230,r279 promote
 0x80147A10,engine,func_80147A10,AddMoveSpeedZ,H,r272:names_stage_engine_proposals_2.md:232,r279 promote
+0x80147AAC,engine,func_80147AAC,SetVelFromMoveSpeedFacing,H,r272:names_stage_engine_proposals_2.md:234,r279 fix: was ApplyMoveSpeedFree
 0x80147AD4,engine,func_80147AD4,AddMoveSpeedFacing,H,r272:names_stage_engine_proposals_2.md:235,r279 fix: was AccelFacing
+0x80147B18,engine,func_80147B18,AddMoveSpeedFacingUnlimited,H,r272:names_stage_engine_proposals_2.md:236,r279 fix: was AccelFacingUnlimited
 0x80147B5C,engine,func_80147B5C,SetVelKeepAxes,H,r272:names_stage_engine_proposals_2.md:237,r279 promote
 0x80147C30,engine,func_80147C30,AddMoveSpeedFacingFree,H,r272:names_stage_engine_proposals_2.md:238,r279 fix: was AccelFacingFree
 0x80147CC8,engine,func_80147CC8,AddMoveSpeedToWorld,H,r272:names_stage_engine_proposals_2.md:239,r279 fix: was AccelMoveToWorld
+0x80147D38,engine,func_80147D38,AddMoveSpeedToWorldUnlimited,H,r272:names_stage_engine_proposals_2.md:240,r279 fix: was AccelMoveToWorldUnlimited
+0x80147E44,engine,func_80147E44,AddMoveSpeedFacingYXZ,H,r272:names_stage_engine_proposals_2.md:242,r279 fix: was AccelFacingYXZ
 0x80147F50,engine,func_80147F50,SetVelFromMoveSpeed,H,r272:names_stage_engine_proposals_2.md:243,r279 fix: was ApplyMoveSpeedWorld
 0x80147F78,engine,func_80147F78,AddMoveSpeedSetVel,H,r272:names_stage_engine_proposals_2.md:244,r279 fix: was AccelWorld
 0x801483E8,engine,func_801483E8,SaveSafeGroundPos,H,r272:names_stage_engine_proposals_2.md:246,r279 promote
@@ -142,11 +147,13 @@ address,scope,current,proposed,confidence,source,note
 0x801622C4,engine,func_801622C4,ExpireDeadline8,H,r272:names_stage_engine_proposals_2.md:1416,r279 promote
 0x80162D28,engine,func_80162D28,UpdateObj68Matrix,H,r272:names_stage_engine_proposals.md:529,r279 promote
 0x80162D88,engine,func_80162D88,UpdateObj68MatrixYXZ,H,r272:names_stage_engine_proposals_2.md:1450,r279 promote
+0x80162F08,engine,func_80162F08,AddObj68MoveSpeed,H,r272:names_stage_engine_proposals_2.md:1454,r279 fix: was AddObj68Accel; conflict resolved over AccelClamped (synonyms; owning card's name and family stem kept)
 0x80162F60,engine,func_80162F60,AddObj68MoveSpeedX,H,r272:names_stage_engine_proposals_2.md:1455,r279 fix: was AddObj68AccelX
 0x80162F80,engine,func_80162F80,AddObj68MoveSpeedY,H,r272:names_stage_engine_proposals_2.md:1456,r279 fix: was AddObj68AccelY
 0x80162FA0,engine,func_80162FA0,AddObj68MoveSpeedZ,H,r272:names_stage_engine_proposals_2.md:1457,r279 fix: was AddObj68AccelZ
 0x80162FC0,engine,func_80162FC0,MoveObj68,H,r272:names_stage_engine_proposals.md:510,r279 promote
 0x80162FF4,engine,func_80162FF4,AddObj68MoveSpeedFacing,H,r272:names_stage_engine_proposals_2.md:1458,r279 fix: was AddObj68AccelLocal
+0x801630C4,engine,func_801630C4,AddObj68MoveSpeedFacingYXZ,H,r272:names_stage_engine_proposals_2.md:1459,r279 fix: was AddObj68AccelLocalYXZ
 0x80163194,engine,func_80163194,AddObj68MoveSpeedByMatrix,H,r272:names_stage_engine_proposals_2.md:1460,r279 fix: was AddObj68AccelByMatrix; conflict resolved over AccelAlongMatrix (synonyms; owning card's name and family stem kept)
 0x80163234,engine,func_80163234,SetObj68VelFromMoveSpeed,H,r272:names_stage_engine_proposals_2.md:1461,r279 fix: was SetObj68VelFromAccel
 0x8016325C,engine,func_8016325C,AddObj68MoveSpeedSetVel,H,r272:names_stage_engine_proposals_2.md:1462,r279 fix: was AddObj68AccelWorld

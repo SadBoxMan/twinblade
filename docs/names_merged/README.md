@@ -204,3 +204,78 @@ with the usual match check.
 4. Outside the H batches: engine_ML `MoveEffect` (0x801473EC) also sets Musashi's +0x44 bit 31 and is probably
    another generic helper. stage_family_shapes.csv F014's evidence text still says "SetEffectAccel" (r275 text, not
    a name). Neither was touched.
+
+## r279: Phase 2 check of the M / L rows (promote the ones that hold up)
+
+Docs only; branch research/r279-names-promote from research/r278-names-cleanup. The existing batch files are
+unchanged. Run from the repository root: `r279_order.py` (the order), `r279_h2.py` (the H2 batches from the
+verdicts), `r279_clash_check.py`.
+
+* **Order.** `r279_order.py` counts each row's references in src/ (.c and .h: call sites and function-table
+  entries, not the definition or file-scope declarations; `calls` in the CSVs) and sorts engine_ML (M, then L),
+  exe_MM, stage_ML, most-referenced first (`r279_order.csv`, 2,099 rows).
+* **Judging.** For each row: the body, at least two call sites (one when there is one), the source card's evidence
+  line, every callee under its proposed name, and for data rows its reads and writes. r277's bar: PROMOTE (the name
+  says what the code does: H), FIX (misleading or vague: the right name, H or M), KEEP (plausible, the C in reach
+  cannot settle it: stays M, the reason says what would). A wrapper whose name rests on a callee that was not read
+  is KEEP, not PROMOTE. Flag-number names (`SetPlayerFlag7E2`, `PlayerEvent80`) are promoted under r278's rule:
+  the body only sets or tests that bit, so the name is accurate.
+* **Output.** `r279_verdicts.csv` (address, scope, old_name, new_name, old_conf, new_conf, verdict, reason, calls;
+  one row per judged row, in check order). `engine_H2.csv` holds every PROMOTE and FIX row, in the batch columns;
+  `note` starts with `r279 promote` or `r279 fix: was <old>`. `exe_H2.csv` and `stage_H2.csv` are empty (header
+  only): those batches were not reached.
+
+| batch | judged | PROMOTE (H) | FIX (H) | FIX (M) | KEEP (M) | in H2 |
+|---|---|---|---|---|---|---|
+| engine_ML, M rows | 235 | 161 | 25 | 4 | 45 | 190 |
+| engine_ML, L rows | 0 | | | | | |
+| exe_MM | 0 | | | | | 0 |
+| stage_ML | 0 | | | | | 0 |
+
+The 235 rows are every engine_ML M row with more than 3 references but five, and a few lower ones taken with their
+family (6,966 of the 7,488 references to engine M rows, 93%). They include Musashi's movement (fall speed, move
+speed, ground / air / landing steps, carrying), his hit and guard code, the sword triggers and the camera fields.
+
+**Error rate.** FIX 29 of 235 = 12.3% (95% Wilson 8.7-17.2%); KEEP 45 = 19.1%. 18 of the 29 are one family (below);
+without it, 11 rows = 4.7% were misleading or vague. So the M rows run several times the H batches' 1.7%, as
+expected, and should not be applied unchecked.
+
+**Patterns.**
+1. **Accel is not an acceleration** (18 rows, renamed together). `AccelFacing`, `AccelMoveToWorld*`, `AccelWorld`,
+   `AddObj68Accel*` and their wrappers add to +0x24..+0x2C (AddMoveSpeedX / Y / ZLimit) and turn or copy that into
+   vel. engine_H already calls the field MoveSpeed (`AddMoveSpeedXLimit`, `MoveSpeedToWorld`), so: `AddMoveSpeed*`,
+   `AddMoveSpeedFacing*` (turned by the model's facing), `AddMoveSpeedSetVel` (copied as it is),
+   `SetVelFromMoveSpeed*`, `AddObj68MoveSpeed*`. Note that engine_H names the same field Push in r278's setters
+   (`SetObjPush`, `ClearObjPush`, `SetObjPushV`): two H words for +0x24. One of them should win in a ruling;
+   either way it is one mechanical rename of a known list.
+2. **Effect / Add words on generic movers:** `MoveEffect` (pos += vel on Musashi and walkers) -> `MoveObjByVel`;
+   `AddFallSpeed` (y += speed; engine_H's `AddFallSpeedLimited` is the gravity step) -> `ApplyFallSpeed`.
+3. **Letters and Alt / Ex:** `g_SpawnListA` / `B` -> `g_SpawnListFixed` / `g_SpawnListRanged` (M),
+   `g_CameraShakeB` -> `g_CameraShakeTargetY`, `SetupActorAlt` -> `SetupActorTrans` (M), `StepTowardEx` ->
+   `StepTowardSpeed`, `RunPlayerKindHandler` -> `LeavePlayerKind` (M: D_8018FBA8[kind] runs right before every
+   kind change seen).
+4. **Misleading:** `ClearHitPending` -> `ClearPlayerHittable` (bit 15 of +0x3C is re-armed every frame and a hit
+   taken while it is clear is dropped); `ModelPointsToWorld` -> `ScalePointsByModel` (M, scale only);
+   `SetPlayerActionList` -> `SwitchPlayerActionScript` (engine_H's `SetPlayerActionScript` is the full start).
+5. **KEEP groups:** the eB568 "Seq" family (9 rows: the player, its blocks, relocation, patches, points); the
+   scratchpad-stack wrappers whose Body was not read (PushBlock, ClipMoveToMap, GrabBar, PushOutOfSolidActors);
+   A / B pairs whose tables are stage data (LoadStageFileA / B, GetPosePointsA / B); long bodies not read in full.
+   Each row's reason says what would settle it.
+
+**One H row to change by hand.** engine_H `SetHitPending` (0x8014900C) is the setter of the same bit and should be
+`SetPlayerHittable` before engine_H is applied (it is not in H2, so no address is named twice).
+
+**Clash checks.** `r279_clash_check.py` (r278's checks, input = the H2 batches; also flags an H2 address that an H
+batch already names) writes `r279_clash_check.txt`: 190 names, **0 clashes**. It caught two during the work:
+`ClearHittable` (engine_ML's actor-side name at 0x8012BF68, hence `ClearPlayerHittable`) and
+`SetPlayerActionScript` (engine_H 0x8016EFC8).
+
+**Not checked:** engine_ML M rows with 3 references or fewer (757 rows); every engine_ML L row (258; 78 have 3 or
+more references, led by `SpawnShadowB` 246 and `SpawnTalkMarker` 185); all of exe_MM (306; the most-referenced
+names left in any batch: `InitSpriteModel` 350, `ClearTimeChime` 266, `GiveItem` 197, `g_WorldOtOrg` 172); all of
+stage_ML (545, at most 37 references each).
+
+**Recommendation after r279:** apply `engine_H2.csv` as is with the usual match check, and change engine_H's
+`SetHitPending` to `SetPlayerHittable` with it. Its 4 FIX (M) rows are better names than the batch had; take them
+or filter `confidence == H` (186 rows). Leave the 45 KEEP rows in engine_ML. Next card: the same check on exe_MM's
+89 rows with 3 or more references, then engine_ML's 78 L rows with 3 or more, then the Push / MoveSpeed ruling.
