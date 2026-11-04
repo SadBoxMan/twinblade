@@ -195,7 +195,6 @@ whose record has flag 0x100. **Model collision** tests a path against one model'
 | 0x8012CC64 | func_8012CC64 | MoveCollidePassableAt | MoveCollidePassable with an offset | H | e.c; 94 calls / 38 files |
 | 0x8012CEB0 | func_8012CEB0 | CollidePath | mode bit 0: one TraceMap (mode 1); else TraceMap mode 0, then a 6-unit probe down (mode 2) for the floor; the result | H | e.c. 184 calls / 69 files: `& 0x1F` (32x, the surface type), `& 0x2000` (37x) |
 | 0x8012CE2C | func_8012CE2C | IsOnGround | an 8-unit path down from the position stops nowhere short | M | e.c comment ("standing on something"); 7 calls |
-| 0x8012B030 | func_8012B030 | SnapToGround | (listed under motion) | | |
 
 ### The room's collision map
 
@@ -590,7 +589,7 @@ Stats at 0x80078E78 (EXE bss; e5F4's Stats struct): +0x3A hpMax (0x80078EB2), +0
 | 0x8014BDC8 | func_8014BDC8 | FillBp | bp = bpMax | H | e58E0; 5 calls |
 | 0x8014ADA8 | func_8014ADA8 | AddMoney | the money word (0x80078E8C) += n, at most 99999 | H | e58E0. 32 calls / 40 files |
 | 0x801487F4 | func_801487F4 | GetObjPadHeld | the player object's held buttons (+0xAA) | H | e58E0 (stage camera code: `func_801487F4(&D_80126B58) & 3`) |
-| 0x80148800 | func_80148800 | GetObjPadPressed | its pressed buttons (+0xAC) | H | e58E0. 160 calls / 108 files: `func_80148800(&D_80126B58) & 0x40` (confirm) |
+| 0x80148800 | func_80148800 | GetObjPadPressed | its pressed buttons (+0xAC) | H | e58E0. 160 calls / 108 files: the result tested with masks such as `& 0x40`, `& 0x10`, `& 0xF000` |
 | 0x8014880C | func_8014880C | GetObjStickX | stick x (+0xAE low byte) | H | e58E0 (func_801489E8: x < 0x40 = left) |
 | 0x80148818 | func_80148818 | GetObjStickY | stick y (+0xAE high byte) | H | e58E0 (func_8014891C: y < 0x40 = up) |
 | 0x80148824 | func_80148824 | GetObjStickTilt | the stick's distance from centre | H | e58E0 |
@@ -704,3 +703,186 @@ at D_801EF328. docs/stage_engine.md calls it "the sequence player"; what it play
 | 0x8013B598 | func_8013B598 | SetSeqPoint | point i on at a position, value 0x100 | M | eB568; 14 calls |
 | 0x8013B6A0 | func_8013B6A0 | SetSeqPointN | the same with a value | M | eB568 |
 | 0x8013B7AC | func_8013B7AC | ClearSeqPoint | point i off | M | eB568; 21 calls |
+
+## Globals
+
+Fixed-address engine bss (below 0x80128158, the same in every stage). Counts are stage references (all uses, not only
+reads) / stage files. Several symbols stage code uses are fields of g_Player or g_Camera that splat cut out as their
+own D_ symbols; they get a name each here so the stage C reads, and the struct field it is goes in the evidence.
+Globals in 0x801EDxxx-0x801EFxxx (VM state, windows' text, collision temporaries) lie inside SC03_001's image and move
+with each stage, so they are left out; so is EXE bss (0x800xxxxx).
+
+### Pools, tables, players
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80126B58 | D_80126B58 | g_Player | Musashi's object (game.h `Player`) | H | game.h `extern Player D_80126B58; /* Musashi */`. 727 / 135 |
+| 0x801202A0 | D_801202A0 | g_Actors | the 96 StageActors (0x10C each) | H | e.c comment; UpdateActors' loop. 484 / 109 |
+| 0x80120194 | D_80120194 | g_ActorSlots | the same table from slot 0 (never handed out) | H | e.c comment |
+| 0x8011D030 | D_8011D030 | g_Effects | 30 effects of 0x58 | H | e58E0 UpdateEffects. 43 / 15 |
+| 0x8011F9D0 | D_8011F9D0 | g_Obj68s | 20 objects of 0x68 | M | e58E0 UpdateObj68s |
+| 0x8011DB30 | D_8011DB30 | g_Props | 128 props of 0x38 | H | e.c comment |
+| 0x8011DB2C | D_8011DB2C | g_PropsActive | UpdateProps runs while set | H | e.c |
+| 0x8011DB08 | D_8011DB08 | g_ActorHandlers | the actor handler table (room +0x60), by kind | H | e4B9C LoadRoom; UpdateActors / InitSpawnedActor |
+| 0x80126AEC | D_80126AEC | g_PropHandlers | the prop handler table (room +0x64) | H | e4B9C; UpdateProps |
+| 0x80126728 | D_80126728 | g_EffectHandlers | the effect handler table (room +0x5C) | H | e4B9C; UpdateEffects |
+| 0x801270C0 | D_801270C0 | g_UpdateAllActors | 1: every actor animates and runs (else only animFlags 0x1000 ones) | H | e.c comment, e58E0 UpdateActors. 71 / 34 (cutscenes set it) |
+| 0x801270C4 | D_801270C4 | g_NextActorId | the next actor id (never 0) | H | e.c comment |
+| 0x801274E4 | D_801274E4 | g_SpawnRejected | bit 0: a kind's set-up refused (RejectSpawn) | H | e.c comment |
+| 0x801274C8 | D_801274C8 | g_SpawnListA | a spawn list (room +0xB4), ended by kind 0 | M | e.c / e4B9C comment ("the stage's spawn lists"). 155 / 40: stage code swaps it (`D_801274C8 = &stage_list`) |
+| 0x801274CC | D_801274CC | g_SpawnListB | the second (room +0xB8) | M | as above. 154 / 40 |
+| 0x801274D4 | D_801274D4 | g_FarTest | the room's own IsActorFar test (room +0xC0) | H | e.c comment |
+| 0x801274E0 | D_801274E0 | g_FarDistSq | IsActorFar's squared distance | H | e.c comment |
+| 0x80115110 | D_80115110 | g_StageMode | the stage's mode state (eC98C `StageMode`) | H | eC98C struct. 23 / 9; its fields D_80115112.. D_80115158 are the stage-mode reads (9 files: the stages with mini-games) |
+| 0x8011DB24 | D_8011DB24 | g_StageFrameHook | the stage's own frame step | H | e.c comment ("the stage's frame step"). 23 / 9 |
+| 0x80114EE0 | D_80114EE0 | g_BgLayersOn | the background layers are drawn | H | e.c comment |
+| 0x801269F0 | D_801269F0 | g_Windows | the three message windows (0x4C) | H | e5F4 struct comment |
+| 0x80127524 | D_80127524 | g_FrontWindow | the window that steps first | M | e5F4 UpdateMessages |
+| 0x80127530 | D_80127530 | g_MessageTexts | four inserted texts | M | e5F4 struct comment |
+| 0x80127540 | D_80127540 | g_MessageNumbers | four inserted numbers | H | e5F4 PutMessageNumber |
+| 0x80127088 | D_80127088 | g_ActionHandler | the function CallActionHandler runs (SetActionHandler) | H | e58E0 |
+| 0x801270BC | D_801270BC | g_EngineReadyFlag | EngineReady's value | M | e58E0 |
+| 0x8012707C | D_8012707C | g_SkipSeId | the sound id PlaySe skips once | H | e58E0 |
+| 0x80127090 | D_80127090 | g_PushVel | a pending push (x; +4 y, +8 z) taken by AddPushVel / SetPushVel | M | e58E0 |
+| 0x8011F738 | D_8011F738 | g_ActionArgs | TakeActionArgs' words | H | e58E0 |
+| 0x801152A8 | D_801152A8 | g_GroundNormal | the last floor hit's normal (x; +2 y, +4 z) and +6 | H | e5F4 func_80133CD4 (floor branch); the shadows turn to it (`ratan2(D_801152AC, D_801152AA)`). 176 / 48: `HitPlayer(..., &D_801152A8)` passes it as the hit's second point |
+| 0x801152B0 | D_801152B0 | g_WallNormal | the last steep hit's plane (SVECTOR) | M | e5F4 func_80133CD4 (`D_801152B0 = *p` when normal y >= -0xBCB). 58 / 29 |
+| 0x80127078 | D_80127078 | g_PlayerAttacker | the actor hitting Musashi this frame (stage attackers set it to themselves) | M | stage: `D_80127078 = arg0` (32x); e58E0 func_8015126C takes it |
+| 0x80126AE4 | D_80126AE4 | g_PlayerAttackerPrev | last frame's | M | e58E0 func_8015126C |
+| 0x801151FC | D_801151FC | g_PlayerHitBy | the attacker whose hit landed | M | e58E0; IsPlayerHitBy |
+| 0x80127518 | D_80127518 | g_PlayerHitByHeld | the same, kept until ClearPlayerHitBy | M | e58E0 |
+
+### Cameras
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80126948 | D_80126948 | g_Camera | the main camera | H | e.c struct comment. 714 / 144 (`SnapCamera(&D_80126948)`) |
+| 0x80126E60 | D_80126E60 | g_AltCameras | three alternates | H | e.c. 41 / 10 |
+| 0x80114EE8 | D_80114EE8 | g_SavedCameras | three saved | H | e.c |
+| 0x801201F8 | D_801201F8 | g_KeptCamera | kept across a map change | H | e.c |
+| 0x80126DB8 | D_80126DB8 | g_CameraBlend | the blend toward the picked camera | H | e.c |
+| 0x801151D4 | D_801151D4 | g_ActiveCamera | the camera used this frame | H | e.c comment. 282 / 72 |
+| 0x801150D6 | D_801150D6 | g_CameraIndex | 0 main, 1-3 an alternate | H | e.c comment |
+| 0x80127504 | D_80127504 | g_CameraBlendFrames | frames left of the blend | H | e.c comment |
+| 0x80126940 | D_80126940 | g_CameraFocus | the followed point (x; D_80126942 y, D_80126944 z) | H | e.c comment. 442 / 129 (+102 / +103 for y, z) |
+| 0x801152C0 | D_801152C0 | g_CameraHeightLimitOn | SetCameraHeightLimit's switch | H | e.c comment |
+| 0x80127080 | D_80127080 | g_CameraHeightLimitY | its height | H | e.c |
+| 0x801152C2 | D_801152C2 | g_CameraHeightLimitRange | its range | H | e.c |
+| 0x80126950 | D_80126950 | g_CameraProj | g_Camera +0x08, projection | H | e.c Camera struct. 147 / 65 |
+| 0x80126954 | D_80126954 | g_CameraProjTarget | +0x0C | H | e.c. 433 / 145 (0x190, 0x1F4, 0x12C) |
+| 0x80126958 | D_80126958 | g_CameraDist | +0x10, distance | M | e.c (ResetKeptCamera's 0x5DC); 27 / 8 |
+| 0x8012695C | D_8012695C | g_CameraDistTarget | +0x14 | M | 440 / 143 (0x4B0, 0x3E8, 0x384) |
+| 0x80126960 | D_80126960 | g_CameraAngle | +0x18, SVECTOR | M | e.c (pitch 0x238 at reset); 18 / 7 |
+| 0x80126968 | D_80126968 | g_CameraAngleTarget | +0x20 (x; D_8012696A y, D_8012696C z) | M | 446 / 141 (`D_80126968 = 0x238`) |
+| 0x80126970 | D_80126970 | g_CameraOfs | +0x28 | M | 11 / 3 |
+| 0x80126976 | D_80126976 | g_CameraOfsTarget | +0x2E (x; D_80126978 y, D_8012697A z) | M | 426 / 141 |
+| 0x801269C8 | D_801269C8 | g_CameraShakeY | +0x80 (offset[1]) | H | eC98C UpdateCameraShake |
+| 0x801269D4 | D_801269D4 | g_CameraShakeB | +0x8C (offset[4]) | M | eC98C |
+| 0x801269E8 | D_801269E8 | g_CameraVarA0 | +0xA0, the update's own variable (SetCameraUpdateOf clears it) | M | stage code saves and restores it around SetCameraUpdate (sc03_002); 60 / 20 |
+
+### Musashi's fields used as their own symbols
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80126B5C | D_80126B5C | g_PlayerPosX | +0x04, 16.16 x (B60 y, B64 z) | H | e.c comment on these words. 322 / 93 |
+| 0x80126B5E | D_80126B5E | g_PlayerX | +0x06, whole x (B62 y, B66 z) | H | e.c. 475 / 101 (y 536 / 107, z 504 / 101) |
+| 0x80126B78 | D_80126B78 | g_PlayerModel | +0x20 | H | game.h Player. 395 / 95 (`PathHitsModel(D_80126B78, D_80126B90, ...)`) |
+| 0x80126B90 | D_80126B90 | g_PlayerHitData | +0x38 | H | game.h. 91 / 37 |
+| 0x80126B94 | D_80126B94 | g_PlayerHitFlags | +0x3C | H | game.h |
+| 0x80126B96 | D_80126B96 | g_PlayerHitKind | +0x3E (HitPlayer's second value) | M | e.c HitPlayer. 403 / 72 (`= 0x4004`, `= 0x400F`) |
+| 0x80126B98 | D_80126B98 | g_PlayerHitDamage | +0x40 | H | e.c ActorSegmentDamagesPlayer. 149 / 46 |
+| 0x80126B9A | D_80126B9A | g_PlayerHitFacing | +0x42 | H | e.c. 50 / 19 |
+| 0x80126B9C | D_80126B9C | g_PlayerFlags | +0x44 (0x04000000, 0x08000000, ...) | H | e58E0 (the PlayerFlag readers). 62 / 20 |
+| 0x80126CAC | D_80126CAC | g_PlayerFocus | +0x154 | H | game.h ("the point the camera follows") |
+| 0x80126CB4 | D_80126CB4 | g_PlayerTarget | +0x15C ("Target" in the math table) | M | game.h; 49 / 18 |
+| 0x80126CBA | D_80126CBA | g_PlayerTargetOff | +0x162 | M | game.h; 35 / 15 |
+| 0x80126CE0 | D_80126CE0 | g_PlayerSquash | +0x188 | H | game.h / UpdateSquash. 49 / 20 |
+| 0x80126CF0 | D_80126CF0 | g_PlayerWindow | +0x198, a message window | M | stage: `D_80126CF0 = OpenMessage(D_8012750C)`; 28 / 16 |
+| 0x80126D50 | D_80126D50 | g_PlayerAction | +0x1F8 | H | e58E0. 31 / 13 |
+| 0x80126D54 | D_80126D54 | g_PlayerActionScript | +0x1FC | H | e58E0. 27 / 17 |
+
+### Stage scratch (not named)
+
+Some engine bss is used by each stage for its own purpose: D_801270C8 (194 / 14: 0, 1, 2 states), D_801274E8,
+D_801274EA / EC, D_8012704C, D_801270CC, D_801270D4 / D8, D_801269E4, D_801152BA, D_80115214, D_80126B30, D_8011F9C8,
+D_80127050, D_8012750C. Their meaning changes from stage to stage, so no engine name is proposed; a stage-side
+name per use (in the stage's own symbol file) is the better route.
+
+## Struct fields (proposals for include/game.h)
+
+Proposals only; the local card should change the header together with a rebuild.
+
+### StageActor (0x10C)
+
+| offset | game.h now | proposed | evidence |
+|---|---|---|---|
+| +0x00 | state | kind | the handler index: InitSpawnedActor `a->state = d->kind; D_8011DB08[a->state](a)`; UpdateActors calls `tbl[a->+0]`; FindActorByKind compares it |
+| +0x02 | sub | state | SetState / NextState write it; every actor handler dispatches on it (`table[a->+2]()`) |
+| +0x1C | count | timer | SetTimer / TickTimer (the Mover struct already calls it timer) |
+| +0x24 | pad024 | spriteAnim (AnimPlayer, 8 bytes) | StartSpriteAnim(a->model, a + 0x24, frames) in eC98C and stage code |
+| +0x34 | subTime | stateTime | SetState / NextState clear it |
+| +0x44..+0x4C | display (u32) | a union: display flags on the player / NPC objects (UpdateWeaponParts), acceleration (s32[3]) on moving actors | StopWithGravity (750 calls) writes +0x48 = 0x18000 and zeroes +0x44 / +0x4C on actors; Mover has `accel[3]` there |
+| +0x5C | flags5C | hurtFlags | bit 15 hittable, bit 14 immune, bit 0 hit pending (DamageActorsNear, SetHittable) |
+| +0x5E | unk5E | hitId | the hit's id; low byte the hit kind (0x1D, 0xC: TakeDamage, func_80178790) |
+| +0x60 | unk60 | hitDamage | DamageActorsNear writes the damage, TakeDamage reads it |
+| +0x62 | unk62 | hitAngle | the knock angle (DamageActorsNear, TakeDamageAndRecoil) |
+| +0x70 | unk70 | arg | the spawn's second value (SpawnActorArg); FindActorByKindArg matches it |
+| +0x74 | unk74 | carryExact | CarryPlayer: exact (nonzero) or clipped |
+| +0x76 | unk76 | hp | SetupActor (init +0 x1.5), TakeDamageAndRecoil subtracts, ReactToHit tests `<= 0` |
+| +0xB0 | step | reactionStep | SetReactionStep |
+| +0xB4 | unkB4 | reactionFlags | e5F4 reaction steps test 1, 4, 8, 0x80, 0x40000 |
+| +0xBC | params | params | (as is) FindParam |
+| +0xC1 | unkC1 | reactionKind | RunReaction's index; 0x11 stops the animation |
+| +0xCC | faceTable | faceTable / shadow | NPCs: face scripts; enemies: their shadow actor (`a->+0xCC = SpawnShadow(a)`, FreeShadow(a->+0xCC)); the shadow itself: its 0x38 object |
+| +0xFC | unkFC | ownerId (on followers) | the shadow keeps its owner's +0x36 id there and frees itself when they differ (func_801439FC) |
+
+### Player (Musashi, at 0x80126B58)
+
+| offset | proposed | evidence |
+|---|---|---|
+| +0x3E | hitKind | HitPlayer's second value |
+| +0x40 | hitDamage | ActorSegmentDamagesPlayer / PointHitsPlayer |
+| +0x42 | hitFacing | ActorSegmentHitsPlayer |
+| +0x44 | flags | PlayerFlag* readers, ApplyPlayerHidden's model |
+| +0x4C | mark4C | Set/ClearPlayerMark4C |
+| +0x7E | flags7E | bit 0 (e58E0 6465..6540), bit 1 (Set/ClearPlayerFlag7E2) |
+| +0x88 / +0x90 | lastPos / lastPos2 (SVECTOR) | func_8014F3E8 / func_8014CC28 compare the position with +0x88; func_801463A0 copies +0x88 to +0x90 |
+| +0xA9 | padType | 0x41 digital, 0x53 / 0x73 analog (the ObjXxxHeld readers) |
+| +0xAA | padHeld | GetObjPadHeld |
+| +0xAC | padPressed | GetObjPadPressed |
+| +0xAE | stick | GetObjStickX / Y |
+| +0xB0 | motionTable | SetPlayerMotionIndex |
+| +0xB4 | motion | SetPlayerMotion |
+| +0x198 | window | g_PlayerWindow |
+| +0x1E8 | obj68Handlers | LoadRoom (`g->unk1E8 = room->unk54`), UpdateObj68s |
+| +0x1F0 | hitHandlers | func_80151780 (`tbl = *(arg0 + 0x1F0)`) |
+| +0x1F4 | stateBits | PlayerState1F4Bit* |
+| +0x1F8 | action | SetPlayerAction |
+| +0x1FC | actionScript | SetPlayerActionScript |
+| +0x200 | actionTimer | Set/TickActionTimer |
+| +0x20C | walkCount | ClearWalkCount / AutoWalkFrames |
+| +0x214 / +0x215 / +0x216 / +0x217 | phase / sub1 / sub2 / mark | NextPhase, BumpSub1, BumpSub2, SetActionMark1 |
+| +0x220 / +0x221 / +0x222 | hideSys / hideScene / hideAbility | the Show / Hide pairs, ApplyPlayerHidden |
+
+### Effect (0x58, g_Effects)
+
+| offset | proposed | evidence |
+|---|---|---|
+| +0x00 | kind | g_EffectHandlers index |
+| +0x02 | state | Set / Next / PrevEffectState |
+| +0x04 | pos (Fixed[3]) | AllocEffect writes the whole parts at +6 / +0xA / +0xE |
+| +0x10 | vel (s32[3]) | MoveEffect, ClearEffectVel |
+| +0x1C | timer | Set / TickEffectTimer |
+| +0x20 | model | FreeEffect, UpdateEffects |
+| +0x24 | accel (s32[3]) | SetEffectAccel |
+| +0x2C / +0x30 | value0 / value1 | SpawnEffect's two values (overlaps accel z: per-kind use); stage effects play `PlaySe(e->+0x2C)` / `(e->+0x2E)` |
+| +0x34 | owner | AllocEffect (from the spawn record's owner) |
+
+### Camera (0xA4)
+
+| offset | proposed | evidence |
+|---|---|---|
+| +0x10 / +0x14 | dist / distTarget | ResetKeptCamera (0x5DC), SnapCamera |
+| +0x18 / +0x20 | angle / angleTarget (SVECTOR) | ResetKeptCamera (pitch 0x238), SnapCamera |
+| +0x28 / +0x2E | ofs / ofsTarget (Vec3s) | SnapCamera |
+| +0x9C, +0xA0, +0xA2 | updateVars | SetCameraUpdateOf clears them; stage updates use +0xA0 (a direction 0-7 in sc03_002) and +0xA2 (a count) |
