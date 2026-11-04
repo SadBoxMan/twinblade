@@ -216,12 +216,13 @@ constants also blanked there are 54. These are C-level clones of one source temp
 | `f(a) { func_80154274(a, D_800D57F4); func_801655E4(a); a+0x197++; }` | 3: ovl2b AF4C, ovl2e AED0, ovl2f AEC0 | start step: the shared throw / use animation D_800D57F4 (in the field overlay's data), pay | H |
 | `f(a) { a+0x44 &= ~2; }` | 3: ovl2b B014, ovl2d B02C, ovl2e AFB0 (and ovl27 AFD4, ovl2f AF88 in another spelling) | clear Musashi's flag 2 (a stop hook) | H for the code, unknown flag |
 | actor-array walk: `for (p = D_801202A0; ...; p += 0x10C) if (func_8014C308(o, p, ..) && func_8014C278(o, p, r)) ...` | 3: ovl2b B378, ovl2e B3DC, ovl31 D31C | find the first actor in reach that the object can hit | H |
-| a 4-member ring / sprite set (B6A4 / B930 in ovl15, B728 / B9B4 in ovl2c) and five more function pairs | ovl15 and ovl2c (Gunshot and 3-Way) | twin packages: six function pairs, same code with their own tables | H |
+| `f(o) { if (++o+0x1C < 2) { o+0x30 >>= 1; F1(o); } else free(o); }` (ovl15 B6A4 / B930, ovl2c B728 / B9B4) and six more function pairs (ovl15 AEC0, AF0C, B140, B6FC, B88C, B988 = ovl2c AED0, AF1C, B194, B780, B910, BA0C; B4F0 = B574 with other constants) | ovl15 and ovl2c (Gunshot and 3-Way) | twin packages: a two-frame flash that halves its size, the stack-quad draws and the start / end steps are the same code with their own tables | H |
 | ovl16 B158 / B228 / B304 / B400 / B458 and ovl22 BAD0 / BBA0 / BC7C / BD78 / BDD0 | ovl16 (Depress) and ovl22 (B.O.) | the same five-state cloud / aura effect (the stack-quad draw ovl16 AF84 and its states) | H |
 | ovl2d BAAC / BB54 / BBDC / BC40 and ovl2e B710 / B7B8 / B840 / B8A8 | ovl2d (Homing) and ovl2e (Grenade) | the same sprite-trail / spark object (frame list func_80128ED8, position += velocity) | H |
 | ovl32 CCE88 / CD7A8, ovl33 CCE80 / CD5DC, ovl34 CD96C / CDF84 | three slot-3 packages | the same model-follow and matrix-build helpers | H |
 
 The engine's own template (func_80165B28 / B6C / BB4 / BFC) is the shape the slot-2 packages start from: the
 floor-gated step 0, a start step that sets an animation and a face, a wait for `+0xB8 & 0x8000` (the animation's end)
-and the hand-back `func_801599A4(a); func_80159B3C(a);`. 22 packages hand Musashi back with exactly that pair.
+and the hand-back `func_801599A4(a); func_80159B3C(a);`. 22 packages hand Musashi back with exactly that pair (16 of
+the slot-2 packages and all six slot-3 ones); the timed slot-2 abilities end through func_80165A20 instead.
 
