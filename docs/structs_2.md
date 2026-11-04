@@ -13,6 +13,7 @@ Records covered, with the functions that touch them:
 | Effect | 0x8011D030 x30 | 0x58 | 1 003 | 6 851 | 3.1 |
 | Effect68 | 0x8011F9D0 x20 | 0x68 | 99 | 474 | 3.2 |
 | Trail | 0x801ED6A8 + id * 0xC4 | 0xC4 | 3 | - | 3.3 |
+| Work (with the model pool and the small-object pool inside it) | 0x800AF630 | 0xA444 | 1 218 | 2 315 | 4 |
 
 Confidence: **H** an engine or EXE routine pins the meaning; **M** consistent use in several places; **L** offset, size
 and a guess. "funcs" counts functions (the stg files repeat code across stages, so accesses overcount).
@@ -239,6 +240,95 @@ the engine's do).
 two sub-pools in the 0x68 pool (0-7, 8-19): who picks func_8014680C over func_80146750? (3) Trail +0x03: width or
 colour? A dump of the trail while Musashi swings would show it.
 
+## 4. Work, the EXE's system block (0x800AF630, 0xA444)
+
+**What is there already.** include/work.h defines `Work` with the frame and mode fields named (+0x0000..+0x018A and
++0xA3A8..+0xA434) and everything from +0x018C to +0xA3A8 as one `pad18C`; code reaches it as `register Work *w`,
+through the `WORK` macro, as `D_800AF630.field`, or by absolute symbols (`D_800B9A02` is +0xA3D2, `frame`).
+
+**Who uses it.** 2 315 accesses in 1 218 functions (absolute symbols 1 745, typed 457, AF 57, raw 56): the state
+block (+0xA3A8 on) 1 532 accesses in 946 functions, the display part (below +0x18C) 594 in 278, the "padding"
+189 in 53. The most used fields: `wsm` +0x0018 (546, address taken by 271 functions: the world-to-screen matrix
+handed to GTE set-up), `frame` +0xA3D2 (543 in 331 functions), +0xA3AA (402 in 350), `mapId` +0xA3D8 (149).
+
+**The padding is the object memory.** The census and the allocators show what +0x018C..+0xA3A8 holds:
+
+| off | what | size | evidence |
+|---|---|---|---|
+| 0x018C | screen parameters: width (u16), height (u16; halves are the screen centre), mode flags (u16), three s8 OT counters, a pointer at +0x198, u16 +0x19C, s16 +0x19E (a running sum: `+= D_80062BA0[vsyncMode]`) | 0x11C with what follows up to the model pool | code_800123F0.c:SetScreenMode, InitDisplay, func_800167B8; engine and stage code read the centre (`D_800AF7BC >> 1`) |
+| 0x02A8 | **the model pool**: 192 `ModelObj` of 0x84 (to +0x65A8). func_8001CFDC(a, b) hands out the first free slot in [a, b); the per-frame update walks it in groups that `+0xA3E1` can switch off: slots 0-3, 4 (Musashi's model: `D_80126B78 = &D_800AFAE8`, +0x4B8), 5, 6-21, 22-37, 38-133 (actors: func_8012C1B8 asks for 0x26..0x85), 134-191 | 0x6300 | code_800123F0.c:func_8001CFDC, func_8001F9F8; engine.c:func_8012C1B8, func_8012C1DC (`D_800B3DF0`, slot 134, is "the end of the actor models") |
+| 0x65A8 | **the small-object pool**: 256 objects of 0x38 (the "type 2" model object, to +0x9DA8); func_8001D074(a, b) hands out a slot; groups 0-3, 4-5, 6-21, 22-61, 62-125 (func_8012C194 asks for 0x3E..0x7D), 126-255, switched by the same flag byte | 0x3800 | code_800123F0.c:func_8001D074, func_8001D1C4; engine.c:func_8012C194; engine_801458E0.c:func_80161E08 writes fields of slots 0-3 by absolute address |
+| 0x9DA8 | an image-load queue: 64 entries of 0x10 (`Ent10`, s16 flag first) | 0x400 | code_800123F0.c:func_80015310 |
+| 0xA1A8 | a second queue: 32 entries of 0x10 | 0x200 | code_800123F0.c:ClearImageQueue |
+
+And below +0x18C: `padF0` (0x5C bytes at +0x00F0) is a **third DRAWENV** (its `isbg` byte at +0x107 is set with
+those of draw[0] and draw[1], +0x4F and +0xAB, by code_800123F0.c:func_80028694), and the 0x14 bytes at +0x0174 after
+`disp[2]` are not touched.
+
+**The state block, fields work.h does not name yet** (all by absolute symbol):
+
+| off | type | name | meaning | conf | evidence |
+|---|---|---|---|---|---|
+| 0xA3E1 | u8 | `objUpdateMask` | bits 2..0x80 skip groups of the model and small-object pools in the per-frame update; 1 or 0xC0 written by modes (33 functions). work.h: `unkA3E1` | H | code_800123F0.c:func_8001F9F8, func_8001D1C4 |
+| 0xA3E2 | u8 | `unkA3E2` | one write (ovl36) | L | ovl36.c:func_800CEF5C |
+| 0xA3E5 | u8 | `pauseBlock` | 1: Start does not open the pause menu (written by 46 functions, mostly stage code around cutscenes); CheckPauseStart sets it when it opens the menu. work.h: `unkA3E5` | H | code_800123F0.c:CheckPauseStart, func_80028694 |
+| 0xA3E6 | u8 | `pauseDefer` | nonzero: a Start press only sets pauseBlock | M | code_800123F0.c:CheckPauseStart |
+| 0xA3E7 | u8 | `pauseAllowed` | 1 when the field can pause (with mapLive and no demo) | H | code_800123F0.c:CheckPauseStart |
+
+Corrections to work.h's comments the census supports: `unkA3C4` (+0xA3C4) is never accessed by name; `stateFlag`
++0xA3C2 is read as both s16 and u16; +0xA3D8 `mapId` has its address taken 32 times (passed to the loader).
+
+Draft (the middle of work.h's Work, the rest unchanged):
+
+```c
+typedef struct {
+    /* 0x0000 */ PrimPool pool[2];
+    /* 0x0018 */ MATRIX wsm;
+    /* 0x0038 */ DRAWENV draw[3];         /* was draw[2] + padF0[0x5C] */
+    /* 0x014C */ DISPENV disp[2];
+    /* 0x0174 */ u8 pad174[0x14];
+    /* 0x0188 */ u16 dispIdx;
+    /* 0x018A */ u16 drawIdx;
+    /* 0x018C */ u16 screenW;
+    /* 0x018E */ u16 screenH;
+    /* 0x0190 */ u16 screenFlags;
+    /* 0x0192 */ s8 ot192[3];
+    /* 0x0195 */ u8 pad195[3];
+    /* 0x0198 */ void *unk198;
+    /* 0x019C */ u16 unk19C;
+    /* 0x019E */ s16 unk19E;
+    /* 0x01A0 */ u8 pad1A0[0x108];
+    /* 0x02A8 */ ModelObj models[192];     /* func_8001CFDC */
+    /* 0x65A8 */ u8 smallObjs[256][0x38];  /* the 0x38-byte type-2 objects, func_8001D074 */
+    /* 0x9DA8 */ u8 imageQueue[64][0x10];
+    /* 0xA1A8 */ u8 imageQueue2[32][0x10];
+    /* 0xA3A8 */ u16 tick;
+    /* ... unchanged ... */
+    /* 0xA3E1 */ u8 objUpdateMask;         /* was unkA3E1 */
+    /* 0xA3E2 */ u8 unkA3E2;               /* was padA3E2 */
+    /* 0xA3E3 */ u8 pauseMenu;
+    /* 0xA3E4 */ u8 padA3E4;
+    /* 0xA3E5 */ u8 pauseBlock;            /* was unkA3E5 */
+    /* 0xA3E6 */ u8 pauseDefer;            /* was padA3E6[0] */
+    /* 0xA3E7 */ u8 pauseAllowed;          /* was padA3E6[1] */
+    /* 0xA3E8 */ s32 vsyncMode;
+    /* ... unchanged ... */
+} Work; /* 0xA444 */
+```
+
+**Conflicts.** (1) `models[192]` makes `Work` depend on `ModelObj` (include/game.h): the card has to order the
+headers or keep the pool as bytes. (2) The first 4 small objects (+0x65A8..+0x6687) are written field by field by
+absolute symbols of mixed types (u16, s16, u8 at the same relative offsets 0x38 apart: +0x65A8 / +0x65E0 / +0x6618
+u16, +0x65B0 / +0x65E8 / +0x6620 s16 ...): the 0x38 object's fields, which need their own struct (with the model
+object at +0xCC of an actor, docs/object_struct.md conflict 9). (3) Absolute symbols inside the pools (`D_800AFAE8`,
+`D_800B3DF0`, `D_800B5D28` ...) are `extern u8[]` in the C; with the struct they become `&WORK->models[4]` and so on,
+which changes the code only if the matched C relied on the separate symbol (check per site). (4) +0xA3E1 is written
+both as u8 and through `(*(u8 *)&D_800B9A11)`, which is the same.
+
+**Open questions.** (1) What do the model-pool groups hold (0-3, 5, 6-21, 22-37, 134-191)? A dump with the slot types
+and their models would tell (Musashi's sword, effects, NPCs?). (2) The image queues' entries beyond the flag.
+(3) +0x01A0..+0x02A7 (0x108 bytes) and +0x0174: untouched by the C; anything there in a dump?
+
 ## Appendix A. Census tables
 
 ### camera
@@ -366,6 +456,99 @@ colour? A dump of the trail while Musashi swings would show it.
 | 0x0064 | 6 | s16 5, u16 1 | 2 / 4 / 0 / 0 | 6 | 5 | engine_801458E0.c:func_80163A94 |
 | 0x0066 | 4 | u16 3, s16 1 | 1 / 2 / 1 / 0 | 3 | 2 | engine_801458E0.c:func_80163C2C |
 | 0x0067 | 1 | u8 1 | 1 / 0 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_80163EC8 |
+
+### work
+
+| off | n | types | R / W / RW / & | funcs | files | example |
+|---|---|---|---|---|---|---|
+| 0x0000 | 3 | PrimPool[] 3 | 3 / 0 / 0 / 0 | 1 | 1 | main.c:main |
+| 0x0004 | 3 | S3[](abs) 3 | 3 / 0 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_80175AB8 |
+| 0x0018 | 546 | WMtx(abs) 363, MATRIX 183 | 18 / 1 / 0 / 527 | 271 | 76 | code_800123F0.c:func_80017E8C |
+| 0x0038 | 9 | DRAWENV.tw 2, DRAWENV[] 2, DRAWENV 1, DRAWENV.ofs[0] 1, DRAWENV.ofs[1] 1 | 1 / 6 / 0 / 2 | 3 | 3 | code_800123F0.c:InitDrawDispEnvs |
+| 0x004F | 2 | u8(abs) 2 | 0 / 2 / 0 / 0 | 1 | 1 | code_800123F0.c:func_80028694 |
+| 0x0050 | 1 | u8(abs) 1 | 0 / 1 / 0 / 0 | 1 | 1 | ovl39.c:func_800CFFEC |
+| 0x0094 | 7 | DRAWENV.tw 2, DRAWENV 1, DRAWENV.ofs[0] 1, DRAWENV.ofs[1] 1, DRAWENV.dtd 1 | 0 / 6 / 0 / 1 | 1 | 1 | code_800123F0.c:InitDrawDispEnvs |
+| 0x00AB | 2 | u8(abs) 2 | 0 / 2 / 0 / 0 | 1 | 1 | code_800123F0.c:func_80028694 |
+| 0x00AC | 1 | u8(abs) 1 | 0 / 1 / 0 / 0 | 1 | 1 | ovl39.c:func_800CFFEC |
+| 0x0107 | 2 | u8(abs) 2 | 0 / 2 / 0 / 0 | 1 | 1 | code_800123F0.c:func_80028694 |
+| 0x014C | 4 | DISPENV[] 3, DISPENV 1 | 0 / 0 / 0 / 4 | 3 | 2 | code_800123F0.c:InitDrawDispEnvs |
+| 0x0160 | 2 | DISPENV 2 | 0 / 0 / 0 / 2 | 2 | 1 | code_800123F0.c:InitDrawDispEnvs |
+| 0x0188 | 7 | u16 7 | 6 / 1 / 0 / 0 | 5 | 4 | code_800123F0.c:func_800168C4 |
+| 0x018A | 5 | u16 5 | 3 / 1 / 1 / 0 | 1 | 1 | main.c:main |
+| 0x018C | 33 | u16(abs) 33 | 29 / 3 / 0 / 1 | 23 | 17 | code_800123F0.c:SetScreenMode |
+| 0x018E | 49 | u16(abs) 49 | 41 / 3 / 0 / 5 | 28 | 21 | code_800123F0.c:SetScreenMode |
+| 0x0190 | 3 | u16(abs) 3 | 0 / 3 / 0 / 0 | 3 | 2 | code_800123F0.c:SetScreenMode |
+| 0x0192 | 2 | s8(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | code_800123F0.c:InitDisplay |
+| 0x0193 | 2 | s8(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | code_800123F0.c:InitDisplay |
+| 0x0194 | 2 | s8(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | code_800123F0.c:InitDisplay |
+| 0x0198 | 5 | u32* 2, s32(abs) 2, s32 1 | 2 / 3 / 0 / 0 | 3 | 2 | code_800123F0.c:func_8001C320 |
+| 0x019C | 7 | u16 4, s16 2, u16(abs) 1 | 4 / 3 / 0 / 0 | 4 | 1 | code_800123F0.c:func_8001C044 |
+| 0x019E | 25 | s16(abs) 20, u16 5 | 11 / 8 / 6 / 0 | 9 | 3 | code_800123F0.c:func_800167B8 |
+| 0x02A8 | 2 | u8[](abs) 2 | 2 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001F9F8 |
+| 0x04B8 | 4 | u8(abs) 4 | 0 / 0 / 0 / 4 | 2 | 1 | engine_801458E0.c:func_80145CEC |
+| 0x053C | 1 | u8[](abs) 1 | 1 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001F9F8 |
+| 0x05C0 | 1 | u8[](abs) 1 | 1 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001F9F8 |
+| 0x0E00 | 1 | u8[](abs) 1 | 1 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001F9F8 |
+| 0x1640 | 1 | u8[](abs) 1 | 1 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001F9F8 |
+| 0x47C0 | 2 | u8[](abs) 2 | 2 / 0 / 0 / 0 | 2 | 2 | code_800123F0.c:func_8001F9F8 |
+| 0x65A8 | 2 | u16(abs) 2 | 2 / 0 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x65B0 | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x65B2 | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x65CF | 2 | u8(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x65D4 | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x65E0 | 2 | u16(abs) 2 | 2 / 0 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x65E8 | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x65EA | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x6607 | 2 | u8(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x660C | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x6618 | 2 | u16(abs) 2 | 2 / 0 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x6620 | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x6622 | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x6644 | 2 | s16(abs) 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_80161E08 |
+| 0x6688 | 4 | u8[](abs) 4 | 2 / 0 / 0 / 2 | 2 | 2 | code_800123F0.c:func_8001D1C4 |
+| 0x668C | 1 | s32(abs) 1 | 0 / 0 / 1 / 0 | 1 | 1 | engine_801458E0.c:func_80162870 |
+| 0x66AF | 1 | s8(abs) 1 | 0 / 1 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_80162870 |
+| 0x66BC | 1 | void*(abs) 1 | 0 / 1 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_80162870 |
+| 0x66F8 | 2 | u8[](abs) 2 | 2 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001D1C4 |
+| 0x6A78 | 2 | u8[](abs) 2 | 2 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001D1C4 |
+| 0x7338 | 2 | u8[](abs) 2 | 2 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001D1C4 |
+| 0x8138 | 2 | u8[](abs) 2 | 2 / 0 / 0 / 0 | 1 | 1 | code_800123F0.c:func_8001D1C4 |
+| 0x9DA8 | 2 | Ent10[](abs) 2 | 2 / 0 / 0 / 0 | 2 | 1 | code_800123F0.c:func_80015310 |
+| 0xA1A8 | 4 | Ent10[](abs) 4 | 4 / 0 / 0 / 0 | 4 | 1 | code_800123F0.c:ClearImageQueue |
+| 0xA3A8 | 43 | u16(abs) 39, u16 4 | 42 / 0 / 1 / 0 | 34 | 20 | main.c:main |
+| 0xA3AA | 402 | u16(abs) 370, u16 32 | 384 / 1 / 1 / 16 | 350 | 115 | main.c:ModeTitleLoad |
+| 0xA3AC | 19 | u16(abs) 18, u16 1 | 17 / 0 / 1 / 1 | 19 | 11 | main.c:main |
+| 0xA3AE | 3 | u16 3 | 2 / 1 / 0 / 0 | 3 | 1 | main.c:ModeDispatch |
+| 0xA3B0 | 2 | u16 2 | 0 / 2 / 0 / 0 | 2 | 1 | main.c:NextMode |
+| 0xA3B4 | 16 | u16 13, u16(abs) 3 | 13 / 3 / 0 / 0 | 12 | 7 | main.c:ModeDemoRun |
+| 0xA3B6 | 20 | u16 17, u16(abs) 3 | 3 / 17 / 0 / 0 | 14 | 6 | main.c:ModeLicenceRun |
+| 0xA3B8 | 22 | s16 16, u16(abs) 5, u16 1 | 4 / 15 / 3 / 0 | 12 | 5 | main.c:ModeTitleRun |
+| 0xA3BA | 6 | u16 6 | 1 / 5 / 0 / 0 | 6 | 1 | main.c:NextMode |
+| 0xA3BC | 6 | u16 6 | 0 / 6 / 0 / 0 | 6 | 1 | main.c:NextMode |
+| 0xA3BE | 5 | s16 3, u16 2 | 0 / 4 / 1 / 0 | 5 | 2 | main.c:NextMode |
+| 0xA3C0 | 9 | u16 5, u16(abs) 4 | 8 / 1 / 0 / 0 | 8 | 4 | main.c:NextGameState |
+| 0xA3C2 | 5 | u16 2, s16 2, s16(abs) 1 | 1 / 4 / 0 / 0 | 5 | 3 | main.c:NextGameState |
+| 0xA3C6 | 16 | u16(abs) 11, u16 3, s16 2 | 12 / 4 / 0 / 0 | 14 | 3 | main.c:NextGameState |
+| 0xA3C8 | 5 | u16 3, s16 2 | 0 / 5 / 0 / 0 | 5 | 1 | main.c:NextGameState |
+| 0xA3CA | 3 | u16 2, s16 1 | 0 / 3 / 0 / 0 | 3 | 1 | main.c:NextGameState |
+| 0xA3CC | 8 | u16 5, s16 2, u16(abs) 1 | 2 / 6 / 0 / 0 | 8 | 2 | main.c:NextGameState |
+| 0xA3CE | 7 | u16 5, s16 2 | 0 / 7 / 0 / 0 | 7 | 1 | main.c:NextGameState |
+| 0xA3D0 | 8 | u16 3, s16(abs) 3, s16 2 | 1 / 6 / 1 / 0 | 8 | 3 | main.c:NextGameState |
+| 0xA3D2 | 543 | u16(abs) 429, u16 114 | 453 / 1 / 0 / 89 | 331 | 126 | code_800123F0.c:DrawDebugText |
+| 0xA3D4 | 5 | u16 4, s16(abs) 1 | 1 / 4 / 0 / 0 | 4 | 2 | code_800123F0.c:ResetFrameLoop |
+| 0xA3D8 | 149 | s16(abs) 126, s16 19, u16 4 | 112 / 5 / 0 / 32 | 95 | 54 | main.c:ModeTitleRun |
+| 0xA3DA | 21 | s16(abs) 14, s16 7 | 15 / 6 / 0 / 0 | 18 | 15 | main.c:ModeTitleRun |
+| 0xA3DC | 5 | s16 4, u16(abs) 1 | 4 / 1 / 0 / 0 | 2 | 2 | engine_80144B9C.c:func_80144B9C |
+| 0xA3DE | 23 | s16(abs) 21, s16 2 | 16 / 5 / 0 / 2 | 17 | 5 | engine_8013B568.c:func_8013B83C |
+| 0xA3E0 | 12 | u8(abs) 8, u8 4 | 3 / 8 / 0 / 1 | 9 | 6 | code_800123F0.c:CheckPauseStart |
+| 0xA3E1 | 33 | s8(abs) 27, u8 6 | 4 / 21 / 0 / 8 | 33 | 20 | code_800123F0.c:DrawDebugText |
+| 0xA3E2 | 1 | u8(abs) 1 | 0 / 1 / 0 / 0 | 1 | 1 | ovl36.c:func_800CEF5C |
+| 0xA3E3 | 25 | u8(abs) 23, u8 2 | 7 / 18 / 0 / 0 | 23 | 15 | code_800123F0.c:CheckPauseStart |
+| 0xA3E5 | 54 | s8(abs) 52, u8 2 | 3 / 50 / 0 / 1 | 46 | 12 | code_800123F0.c:CheckPauseStart |
+| 0xA3E6 | 2 | u8(abs) 2 | 2 / 0 / 0 / 0 | 2 | 2 | code_800123F0.c:CheckPauseStart |
+| 0xA3E7 | 16 | u8(abs) 16 | 1 / 14 / 0 / 1 | 15 | 4 | code_800123F0.c:CheckPauseStart |
+| 0xA3E8 | 25 | s32 15, s32(abs) 10 | 14 / 11 / 0 / 0 | 21 | 8 | code_800123F0.c:ResetFrameLoop |
+| 0xA434 | 13 | u8(abs) 7, s8 6 | 6 / 6 / 0 / 1 | 12 | 4 | code_800123F0.c:CheckPauseStart |
 
 ## Appendix Z. The record census script
 
