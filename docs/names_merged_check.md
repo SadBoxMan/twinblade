@@ -12,8 +12,9 @@ verdict).
 | exe_H | 60 | 58 | 1 | 0 | 1 | 0.0 (0-6) | 1.7 (0-9) | (pending) |
 | engine_H | 60 | 57 | 1 | 0 | 2 | 0.0 (0-6) | 1.7 (0-9) | (pending) |
 | stage_H | 60 | 53 | 2 | 1 | 4 | 1.7 (0-9) | 3.3 (1-11) | (pending) |
+| abil_H | 60 | 59 | 0 | 0 | 1 | 0.0 (0-6) | 0.0 (0-6) | (pending) |
 
-Not yet checked: abil, ovl.
+Not yet checked: ovl.
 
 ## Method
 
@@ -244,4 +245,73 @@ Counts: CORRECT 57, VAGUE 1, WRONG 0, UNSURE 2. WRONG 0.0% (95% Wilson 0-6%), VA
 | 59 | 0x8018872C | func_8018872C | DoorTalkCheck | CORRECT | map 0x3069 excluded, state / area tests, ResetScriptVM, returns the action handler; installed as the actor's talk hook |  |
 
 Counts: CORRECT 53, VAGUE 2, WRONG 1, UNSURE 4. WRONG 1.7% (95% Wilson 0-9%), VAGUE 3.3% (1-11%), WRONG + VAGUE 5.0% (2-14%).
+
+## abil_H.csv
+
+267 rows, 227 eligible, 60 sampled (0 of them comment-only evidence; 0 comment-only rows were eligible).
+
+| # | address | current | proposed | verdict | reason | better name |
+|---|---|---|---|---|---|---|
+| 0 | 0x800CAE74 | func_ovl25_800CAE74 | Map_BuildPalette | CORRECT | copies a 0x1F-byte CLUT image, zeroes 2-byte entries whose flag is unset, QueueImage; the map package's entry and step call it twice |  |
+| 1 | 0x800CAE80 | func_ovl28_800CAE80 | Steel_DrawModel | CORRECT | two ping-pong counters, blend rate from the record's top bits, then Steel_SortPackets (the kind-6 model draw) |  |
+| 2 | 0x800CAEC0 | func_ovl22_800CAEC0 | BO_Start | CORRECT | pays BP once, effect 0x35, sound 0x838, four SpawnObj68(0xE) with random angles; the package's step 0 |  |
+| 3 | 0x800CAEC0 | func_ovl24_800CAEC0 | Toxin_Start | CORRECT | Ability_SaveStats, pays BP, SetPoisonWord, effect 0x37, sound; step 0 |  |
+| 4 | 0x800CAEE8 | func_ovl1c_800CAEE8 | Antidote_Cure | CORRECT | CurePoison, effect 0x41, sound, back to the normal kind |  |
+| 5 | 0x800CAEF4 | func_ovl16_800CAEF4 | Depress_Step2WaitTimer | CORRECT | ends the held ability when D_80078EC8 reaches 0 (the shared timer); same body as ovl14 CAF20 |  |
+| 6 | 0x800CAEF8 | func_ovl1d_800CAEF8 | CutHeal_Step2Heal | CORRECT | AddHp(a, 10, 1), back to the normal kind |  |
+| 7 | 0x800CAF0C | func_ovl15_800CAF0C | Gunshot_Step2Draw | CORRECT | at the draw anim end: fire anim when the button is held, else holster |  |
+| 8 | 0x800CAF24 | func_ovl27_800CAF24 | Fence_StepThrust | CORRECT | attack flag, spawn 0x21 on the 0x4000 marker, RunAttackHit while grounded, ends at 0x8000 |  |
+| 9 | 0x800CAF28 | func_ovl16_800CAF28 | Depress_CloudUpdate | CORRECT | state table while D_80078EC1 == 1, else FreeEffect |  |
+| 10 | 0x800CAF60 | func_ovl26_800CAF60 | DKick_StepAir | CORRECT | in-air step: move, fall speed, RunAttackHitSet2 until landing |  |
+| 11 | 0x800CAFC4 | func_ovl2e_800CAFC4 | GrenadeObjUpdate | CORRECT | handler table while ability 0x1D, removed out of range (y > 0x400) |  |
+| 12 | 0x800CB028 | func_ovl2b_800CB028 | Acid_BlobUpdate | CORRECT | same shape for ability 0x19 (acid) |  |
+| 13 | 0x800CB030 | func_ovl2a_800CB030 | Clone_DecoyInit | CORRECT | sprite model, local to world, lifetime 900 (Clone_Lifetime), next state |  |
+| 14 | 0x800CB05C | func_ovl13_800CB05C | Stun_RampScale | UNSURE | k 1 / 2 ramps +0xC0 (0..0x2000) and +0x1B8 / +0x1BA by 0x800; what those three fields are is not in the C (scale is plausible, not shown) |  |
+| 15 | 0x800CB068 | func_ovl1f_800CB068 | Bowl_StepThrow | CORRECT | SpawnObj68(0xA) and sound at the 0x4000 marker, next step at 0x8000 |  |
+| 16 | 0x800CB06C | func_ovl21_800CB06C | Sublime_StateLieDown | CORRECT | airborne: model rot.x tipped to 0xC00, then lies (state); landing ends the ability |  |
+| 17 | 0x800CB10C | func_ovl1c_800CB10C | Antidote_RingUpdate | CORRECT | ability 4 check, two helpers, then the state table; else delete |  |
+| 18 | 0x800CB140 | func_ovl15_800CB140 | Gunshot_Step4Holster | CORRECT | at the anim end back to the normal kind |  |
+| 19 | 0x800CB158 | func_ovl16_800CB158 | Depress_CloudStart | CORRECT | +0x28 grows 0x120 for 8 frames, matrix from the owner, DrawCloud, then state 4 |  |
+| 20 | 0x800CB1A0 | func_ovl1f_800CB1A0 | Bowl_BallUpdate | CORRECT | state table while ability 0xF, positional sound off screen, deleted out of range |  |
+| 21 | 0x800CB1A0 | func_ovl19_800CB1A0 | Shrink_UpdateLights | CORRECT | three light directions from rsin / rcos of the frame counter; the flash step installs and refreshes them |  |
+| 22 | 0x800CB1CC | func_ovl25_800CB1CC | Map_StepShow | CORRECT | waits for button 0x20 (then next step and sound), draws the map layers and the blinking area |  |
+| 23 | 0x800CB1F8 | func_ovl29_800CB1F8 | Hurl_Release | CORRECT | the carried actor (+0x178) gets hit 0x29 with RollDamage, +0x178 cleared; the throw step at the 0x4000 marker |  |
+| 24 | 0x800CB21C | func_ovl15_800CB21C | Gunshot_BulletInit | CORRECT | empty model, owner's rotation, accel, timer 0x10, next state |  |
+| 25 | 0x800CB23C | func_ovl1f_800CB23C | Bowl_BallInit | CORRECT | sprite model, owner's rotation, accel, timer 0x60, next state |  |
+| 26 | 0x800CB2A8 | func_ovl2b_800CB2A8 | Acid_PuddleSpread | CORRECT | model scale +0x80 per frame, hit test until the timer |  |
+| 27 | 0x800CB2CC | func_ovl17_800CB2CC | Sleepy_MarksFollow | CORRECT | follows the owner's model point while ability 0x11, else FreeEffect |  |
+| 28 | 0x800CB2CC | func_ovl21_800CB2CC | Sublime_SpiritInit | CORRECT | empty model at zero scale, timer, two SpawnObj68On(0x28), next state |  |
+| 29 | 0x800CB2E0 | func_ovl15_800CB2E0 | Gunshot_BulletFly | CORRECT | timer -> spark and next; else rotate, move, sweep hit 0x10, impact effects by result |  |
+| 30 | 0x800CB358 | func_ovl2f_800CB358 | JavelinGlowUpdate | CORRECT | state table while the owner is kind 0x26, else FreeEffect |  |
+| 31 | 0x800CB3B4 | func_ovl2a_800CB3B4 | Clone_DecoyBurst | CORRECT | pulsing scale, glow colour ramp to 0xFF, then dust, 0x46 effects, sounds, next state |  |
+| 32 | 0x800CB4D8 | func_ovl14_800CB4D8 | Perfume_CloudEmit | CORRECT | cloud follows the owner and draws; SpawnEffect(0xA) every 0x18 frames while ability 5 |  |
+| 33 | 0x800CB4EC | func_ovl27_800CB4EC | Fence_ProjHitTest | CORRECT | SweepHitObj68 type 0x28, spark 0xB at the hit, 1 on a hit; Fence_ProjHitAt |  |
+| 34 | 0x800CB510 | func_ovl13_800CB510 | Stun_EffectBUpdate | CORRECT | state table while ability 7, else FreeEffect |  |
+| 35 | 0x800CB580 | func_ovl27_800CB580 | Fence_GlowUpdate | CORRECT | state table while ability 0xB, else FreeEffect |  |
+| 36 | 0x800CB5DC | D_ovl14_800CB5DC | Perfume_CloudStates | CORRECT | Perfume_CloudUpdate indexes it by state |  |
+| 37 | 0x800CB6D4 | func_ovl22_800CB6D4 | BO_FlyOrbitStep | CORRECT | ellipse offsets eased in, model turned, angle stepped, 1 after a full turn; three callers loop on it |  |
+| 38 | 0x800CB780 | func_ovl2c_800CB780 | ThreeWay_DrawFanXZ | CORRECT | four Gouraud quads in the XZ plane from a byte table, brightness +0x30; the muzzle effect |  |
+| 39 | 0x800CB880 | D_ovl13_800CB880 | Stun_StepTable | CORRECT | Stun_Update indexes it by +0x197 |  |
+| 40 | 0x800CB8A4 | D_ovl27_800CB8A4 | Fence_StepTable | CORRECT | Fence_Update indexes it by +0x197 |  |
+| 41 | 0x800CBA74 | func_ovl22_800CBA74 | BO_CloudUpdate | CORRECT | state table while ability 0x15, else FreeEffect |  |
+| 42 | 0x800CBB00 | D_ovl15_800CBB00 | Gunshot_FireAnim | CORRECT | SetPlayerMotion while the button is held (draw and fire steps) |  |
+| 43 | 0x800CBBA0 | func_ovl1f_800CBBA0 | Bowl_CloseGauge | CORRECT | the kind-0x27 gauge: state 3 if past state 2, else kill; Bowl_Release |  |
+| 44 | 0x800CBC0C | func_ovl19_800CBC0C | Shrink_ShotHit | CORRECT | actors within 0x40 that can be struck get hit 0x1E |  |
+| 45 | 0x800CBC2C | func_ovl28_800CBC2C | Steel_SortGT3 | CORRECT | POLY_GT3 runs, glint band or lit colours, Steel_AddPrim; Steel_SortPackets case 0x14 |  |
+| 46 | 0x800CBD0C | func_ovl19_800CBD0C | Shrink_RingUpdate | CORRECT | state table while ability 0xD, else FreeObj68 |  |
+| 47 | 0x800CBD54 | func_ovl2a_800CBD54 | Clone_DrawShard4 | CORRECT | one FT4 drawn at four offsets with the model's scale / rotation |  |
+| 48 | 0x800CBE28 | func_ovl28_800CBE28 | Steel_SortGT4 | CORRECT | POLY_GT4 runs; Steel_SortPackets case 0x1C |  |
+| 49 | 0x800CBE7C | D_ovl1f_800CBE7C | Bowl_Steps | CORRECT | Bowl_Update indexes it by +0x197 |  |
+| 50 | 0x800CBED8 | func_ovl25_800CBED8 | Map_ClampToBox | CORRECT | x to +-0x60, y to +-0x40, returns how many were clamped; the map trail |  |
+| 51 | 0x800CC12C | D_ovl2a_800CC12C | Clone_Lifetime | CORRECT | set 0x384 at init, decremented by the idle step |  |
+| 52 | 0x800CC5B0 | D_ovl19_800CC5B0 | Shrink_TrailPoints | CORRECT | the trail init indexes 0xA0 bytes (20 SVECTOR) per trail |  |
+| 53 | 0x800CCA18 | D_ovl28_800CCA18 | Steel_StepTable | CORRECT | Steel_Update indexes it by +0x197 |  |
+| 54 | 0x800CCB28 | func_ovl35_800CCB28 | GlideStart | CORRECT | effect 0x3B, +0x1C8 = 0xBA (the timed technique), back to normal kind |  |
+| 55 | 0x800CCB78 | func_ovl32_800CCB78 | BarrierStart | CORRECT | byte 1C7 = 3, SpawnObj68(7), +0x1C8 = 0xFF |  |
+| 56 | 0x800CCB78 | func_ovl33_800CCB78 | FlameStart | CORRECT | sound, SpawnObj68 0x10 + three 0x11 orbs, +0x1C8 = 0xFF |  |
+| 57 | 0x800CCBC0 | func_ovl35_800CCBC0 | GlideTrailDraw | CORRECT | ring buffer of segment pairs drawn as fading G4 quads; the glide step |  |
+| 58 | 0x800CD5CC | func_ovl34_800CD5CC | SpinContactHit | CORRECT | actors within 0x40 strikable with class 0x25 get the hit, returns the last one; three spin steps |  |
+| 59 | 0x800CD668 | D_ovl33_800CD668 | FlameSteps | CORRECT | kind-8 handler indexes it by state - 2 |  |
+
+Counts: CORRECT 59, VAGUE 0, WRONG 0, UNSURE 1. WRONG 0.0% (95% Wilson 0-6%), VAGUE 0.0% (0-6%), WRONG + VAGUE 0.0% (0-6%).
 
