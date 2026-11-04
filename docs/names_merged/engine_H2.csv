@@ -80,6 +80,7 @@ address,scope,current,proposed,confidence,source,note
 0x801466B4,engine,func_801466B4,SpawnObj68On,H,r272:names_stage_engine_proposals.md:520,r279 promote
 0x801466F0,engine,func_801466F0,SpawnObj68,H,r272:names_stage_engine_proposals.md:519,r279 promote
 0x801468C8,engine,func_801468C8,AllocShadow,H,r272:names_stage_engine_proposals_2.md:193,r279 promote
+0x80146CC8,engine,func_80146CC8,AddPushVel,H,r272:names_stage_engine_proposals.md:499,r279 promote
 0x80146D30,engine,func_80146D30,SetPushVel,H,r272:names_stage_engine_proposals.md:500,r279 promote
 0x80146EC0,engine,func_80146EC0,PlaceAtObjPoint,H,r272:names_stage_engine_proposals_2.md:252,r279 promote; conflict resolved over PlaceAtModelPointCam (synonyms; owning card's name and family stem kept)
 0x80146FC4,engine,func_80146FC4,RespawnIfFallenOut,H,r272:names_stage_engine_proposals_2.md:173,r279 promote
@@ -94,8 +95,11 @@ address,scope,current,proposed,confidence,source,note
 0x801474EC,engine,func_801474EC,ResetTiltVectors,H,r272:names_stage_engine_proposals_2.md:206,r279 promote
 0x80147514,engine,func_80147514,SmoothTiltUpVector,H,r272:names_stage_engine_proposals_2.md:203,r279 promote
 0x80147628,engine,func_80147628,BuildTiltedMatrix,H,r272:names_stage_engine_proposals_2.md:204,r279 promote
+0x80147718,engine,func_80147718,RebuildModelMatrix,H,r272:names_stage_engine_proposals_2.md:207,r279 promote
 0x801477E8,engine,func_801477E8,SetFallSpeed,H,r272:names_stage_engine_proposals.md:508,r279 promote
 0x80147814,engine,func_80147814,AddFallSpeedClamped,H,r272:names_stage_engine_proposals.md:509,r279 promote
+0x80147860,engine,func_80147860,AddMoveSpeed,H,r272:names_stage_engine_proposals_2.md:226,r279 promote
+0x801478B8,engine,func_801478B8,AddMoveSpeedUnlimited,H,r272:names_stage_engine_proposals_2.md:227,r279 promote
 0x80147928,engine,func_80147928,AddMoveSpeedX,H,r272:names_stage_engine_proposals_2.md:228,r279 promote
 0x8014799C,engine,func_8014799C,AddMoveSpeedY,H,r272:names_stage_engine_proposals_2.md:230,r279 promote
 0x80147A10,engine,func_80147A10,AddMoveSpeedZ,H,r272:names_stage_engine_proposals_2.md:232,r279 promote
@@ -110,13 +114,57 @@ address,scope,current,proposed,confidence,source,note
 0x80147F50,engine,func_80147F50,SetVelFromMoveSpeed,H,r272:names_stage_engine_proposals_2.md:243,r279 fix: was ApplyMoveSpeedWorld
 0x80147F78,engine,func_80147F78,AddMoveSpeedSetVel,H,r272:names_stage_engine_proposals_2.md:244,r279 fix: was AccelWorld
 0x801483E8,engine,func_801483E8,SaveSafeGroundPos,H,r272:names_stage_engine_proposals_2.md:246,r279 promote
+0x80148C18,engine,func_80148C18,FaceDpadNone,H,r272:names_stage_engine_proposals_2.md:290,r279 promote
+0x80148C20,engine,func_80148C20,FaceDpadUp,H,r272:names_stage_engine_proposals_2.md:291,r279 promote
+0x80148C34,engine,func_80148C34,FaceDpadRight,H,r272:names_stage_engine_proposals_2.md:292,r279 promote
+0x80148C4C,engine,func_80148C4C,FaceDpadUpRight,H,r272:names_stage_engine_proposals_2.md:293,r279 promote
+0x80148C64,engine,func_80148C64,FaceDpadDown,H,r272:names_stage_engine_proposals_2.md:294,r279 promote
+0x80148C7C,engine,func_80148C7C,FaceDpadUpDown,H,r272:names_stage_engine_proposals_2.md:295,r279 promote
+0x80148C84,engine,func_80148C84,FaceDpadDownRight,H,r272:names_stage_engine_proposals_2.md:296,r279 promote
+0x80148C9C,engine,func_80148C9C,FaceDpadUpRightDown,H,r272:names_stage_engine_proposals_2.md:297,r279 promote
+0x80148CB4,engine,func_80148CB4,FaceDpadLeft,H,r272:names_stage_engine_proposals_2.md:298,r279 promote
+0x80148CCC,engine,func_80148CCC,FaceDpadUpLeft,H,r272:names_stage_engine_proposals_2.md:299,r279 promote
+0x80148CE4,engine,func_80148CE4,FaceDpadLeftRight,H,r272:names_stage_engine_proposals_2.md:300,r279 promote
+0x80148CEC,engine,func_80148CEC,FaceDpadUpLeftRight,H,r272:names_stage_engine_proposals_2.md:301,r279 promote
+0x80148CF4,engine,func_80148CF4,FaceDpadDownLeft,H,r272:names_stage_engine_proposals_2.md:302,r279 promote
+0x80148D0C,engine,func_80148D0C,FaceDpadUpDownLeft,H,r272:names_stage_engine_proposals_2.md:303,r279 promote
+0x80148D24,engine,func_80148D24,FaceDpadRightDownLeft,H,r272:names_stage_engine_proposals_2.md:304,r279 promote
+0x80148D3C,engine,func_80148D3C,FaceDpadAll,H,r272:names_stage_engine_proposals_2.md:305,r279 promote
+0x80148F60,engine,func_80148F60,GetDpadAngleNone,H,r272:names_stage_engine_proposals_2.md:308,r279 promote
+0x80148F68,engine,func_80148F68,GetDpadAngleUp,H,r272:names_stage_engine_proposals_2.md:309,r279 promote
+0x80148F74,engine,func_80148F74,GetDpadAngleRight,H,r272:names_stage_engine_proposals_2.md:310,r279 promote
+0x80148F80,engine,func_80148F80,GetDpadAngleUpRight,H,r272:names_stage_engine_proposals_2.md:311,r279 promote
+0x80148F8C,engine,func_80148F8C,GetDpadAngleDown,H,r272:names_stage_engine_proposals_2.md:312,r279 promote
+0x80148F98,engine,func_80148F98,GetDpadAngleUpDown,H,r272:names_stage_engine_proposals_2.md:313,r279 promote
+0x80148FA0,engine,func_80148FA0,GetDpadAngleDownRight,H,r272:names_stage_engine_proposals_2.md:314,r279 promote
+0x80148FAC,engine,func_80148FAC,GetDpadAngleUpRightDown,H,r272:names_stage_engine_proposals_2.md:315,r279 promote
+0x80148FB8,engine,func_80148FB8,GetDpadAngleLeft,H,r272:names_stage_engine_proposals_2.md:316,r279 promote
+0x80148FC4,engine,func_80148FC4,GetDpadAngleUpLeft,H,r272:names_stage_engine_proposals_2.md:317,r279 promote
+0x80148FD0,engine,func_80148FD0,GetDpadAngleLeftRight,H,r272:names_stage_engine_proposals_2.md:318,r279 promote
+0x80148FD8,engine,func_80148FD8,GetDpadAngleUpLeftRight,H,r272:names_stage_engine_proposals_2.md:319,r279 promote
+0x80148FE0,engine,func_80148FE0,GetDpadAngleDownLeft,H,r272:names_stage_engine_proposals_2.md:320,r279 promote
+0x80148FEC,engine,func_80148FEC,GetDpadAngleUpDownLeft,H,r272:names_stage_engine_proposals_2.md:321,r279 promote
+0x80148FF8,engine,func_80148FF8,GetDpadAngleRightDownLeft,H,r272:names_stage_engine_proposals_2.md:322,r279 promote
+0x80149004,engine,func_80149004,GetDpadAngleAll,H,r272:names_stage_engine_proposals_2.md:323,r279 promote
 0x80149020,engine,func_80149020,ClearPlayerHittable,H,r272:names_stage_engine_proposals.md:645,r279 fix: was ClearHitPending
+0x8014905C,engine,func_8014905C,ClearTilt,H,r272:names_stage_engine_proposals_2.md:211,r279 promote
+0x80149078,engine,func_80149078,SetTiltTarget,H,r272:names_stage_engine_proposals_2.md:212,r279 promote
+0x801490E0,engine,func_801490E0,SetTiltTargetX,H,r272:names_stage_engine_proposals_2.md:213,r279 promote
+0x801490E8,engine,func_801490E8,SetTiltTargetY,H,r272:names_stage_engine_proposals_2.md:214,r279 promote
+0x801490F0,engine,func_801490F0,SetTiltTargetZ,H,r272:names_stage_engine_proposals_2.md:215,r279 promote
+0x801490F8,engine,func_801490F8,StepTiltToTarget,H,r272:names_stage_engine_proposals_2.md:216,r279 promote
 0x80149184,engine,func_80149184,GetHeadingFromCamera,H,r272:names_stage_engine_proposals_2.md:262,r279 promote
 0x801491C4,engine,func_801491C4,GetCameraViewYaw,H,r272:names_stage_engine_proposals_2.md:263,r279 promote
+0x80149204,engine,func_80149204,ClearDoubleTap,H,r272:names_stage_engine_proposals_2.md:324,r279 promote
 0x80149210,engine,func_80149210,SetDoubleTapWindow,H,r272:names_stage_engine_proposals_2.md:325,r279 promote
 0x80149228,engine,func_80149228,UpdateDoubleTap,H,r272:names_stage_engine_proposals_2.md:326,r279 promote
+0x80149284,engine,func_80149284,TestDoubleTap,H,r272:names_stage_engine_proposals_2.md:327,r279 promote
 0x80149290,engine,func_80149290,ObjLocalToWorldAtPos,H,r272:names_stage_engine_proposals_2.md:254,r279 promote
 0x801493D0,engine,func_801493D0,ObjLocalToWorld16To,H,r272:names_stage_engine_proposals_2.md:255,r279 promote; conflict resolved over Actor_ModelPointToPos (owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out))
+0x80149450,engine,func_80149450,ObjWorldToLocal16,H,r272:names_stage_engine_proposals_2.md:257,r279 promote
+0x801494CC,engine,func_801494CC,ObjWorldToLocal16To,H,r272:names_stage_engine_proposals_2.md:258,r279 promote
+0x80149544,engine,func_80149544,ObjPointToScreenOtz,H,r272:names_stage_engine_proposals_2.md:259,r279 promote
+0x80149584,engine,func_80149584,ObjPointToScreen,H,r272:names_stage_engine_proposals_2.md:260,r279 promote
 0x8014964C,engine,func_8014964C,ObjPoint16ToScreen,H,r272:names_stage_engine_proposals_2.md:261,r279 promote
 0x80149724,engine,func_80149724,TriggerJumpRising,H,r272:names_stage_engine_proposals_2.md:350,r279 promote
 0x80149744,engine,func_80149744,CanChargedAttack,H,r272:names_stage_engine_proposals_2.md:351,r279 promote
@@ -133,6 +181,7 @@ address,scope,current,proposed,confidence,source,note
 0x80149BAC,engine,func_80149BAC,TriggerLuminaSlash,H,r272:names_stage_engine_proposals_2.md:364,r279 promote
 0x80149BEC,engine,func_80149BEC,TickActionLock,H,r272:names_stage_engine_proposals_2.md:178,r279 promote
 0x80149C08,engine,func_80149C08,CanAirSlash,H,r272:names_stage_engine_proposals_2.md:365,r279 promote
+0x80149C94,engine,func_80149C94,TriggerAirSlash,H,r272:names_stage_engine_proposals_2.md:366,r279 promote
 0x80149CB4,engine,func_80149CB4,TriggerSwordSkill,H,r272:names_stage_engine_proposals_2.md:367,r279 promote
 0x80149CD4,engine,func_80149CD4,CanGuard,H,r272:names_stage_engine_proposals_2.md:338,r279 promote
 0x80149D9C,engine,func_80149D9C,TryTalk,H,r272:names_stage_engine_proposals_2.md:388,r279 promote
@@ -160,6 +209,7 @@ address,scope,current,proposed,confidence,source,note
 0x8014ADE0,engine,func_8014ADE0,TickGameClock,H,r272:names_stage_engine_proposals_2.md:409,r279 promote
 0x8014B160,engine,func_8014B160,CureStatus,H,r272:names_stage_engine_proposals_2.md:451,r279 promote
 0x8014B190,engine,func_8014B190,UpdatePlayerStatusFlags,H,r272:names_stage_engine_proposals_2.md:452,r279 promote
+0x8014B2D0,engine,func_8014B2D0,PoisonPlayer,H,r272:names_stage_engine_proposals_2.md:453,r279 promote
 0x8014B2F8,engine,func_8014B2F8,CurePoison,H,r272:names_stage_engine_proposals_2.md:454,r279 promote; conflict resolved over Stats_CurePoison (owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out))
 0x8014B310,engine,func_8014B310,StartPoison,H,r272:names_stage_engine_proposals_2.md:455,r279 promote
 0x8014B33C,engine,func_8014B33C,SetPoisonWord,H,r272:names_stage_engine_proposals_2.md:456,r279 promote; conflict resolved over Stats_SetPoison (owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out))
@@ -174,6 +224,7 @@ address,scope,current,proposed,confidence,source,note
 0x8014BDE8,engine,func_8014BDE8,CountWalkDistance,H,r272:names_stage_engine_proposals_2.md:475,r279 promote
 0x8014BFF4,engine,func_8014BFF4,SetState4EIfIdle,H,r272:names_stage_engine_proposals_2.md:476,r279 promote
 0x8014C010,engine,func_8014C010,SpawnEffect2,H,r272:names_stage_engine_proposals.md:488,r279 promote
+0x8014C0C8,engine,func_8014C0C8,FindActorByKindAndDefE,H,r272:names_stage_engine_proposals_2.md:494,r279 promote
 0x8014C118,engine,func_8014C118,FindActorByKindAnd70,H,r272:names_stage_engine_proposals_2.md:495,r279 promote
 0x8014C1A0,engine,func_8014C1A0,ClipObjBehindWallDef,H,r272:names_stage_engine_proposals_2.md:496,r279 promote
 0x8014C1C8,engine,func_8014C1C8,ClipObjBehindWall,H,r272:names_stage_engine_proposals_2.md:497,r279 promote
@@ -182,6 +233,7 @@ address,scope,current,proposed,confidence,source,note
 0x8014C3A4,engine,func_8014C3A4,StrikeActorFacing,H,r272:names_stage_engine_proposals_2.md:511,r279 promote; conflict resolved over Actor_GiveHit (owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out))
 0x8014C3D0,engine,func_8014C3D0,StrikeActorToward,H,r272:names_stage_engine_proposals_2.md:512,r279 promote; conflict resolved over Actor_HitFromSource (owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out))
 0x8014C43C,engine,func_8014C43C,StrikeActorWithDamage,H,r272:names_stage_engine_proposals_2.md:513,r279 promote
+0x8014C5D0,engine,func_8014C5D0,GetPitchToObj,H,r272:names_stage_engine_proposals_2.md:502,r279 promote
 0x8014C5FC,engine,func_8014C5FC,GetPitchToObjOffset,H,r272:names_stage_engine_proposals_2.md:503,r279 promote; conflict resolved over PitchToward (r272 body includes the offset argument; owning card)
 0x8014C6F4,engine,func_8014C6F4,UpdatePlayerPoints,H,r272:names_stage_engine_proposals_2.md:521,r279 promote
 0x8014C88C,engine,func_8014C88C,SetTargetPointToSelf,H,r272:names_stage_engine_proposals_2.md:523,r279 promote
@@ -209,6 +261,7 @@ address,scope,current,proposed,confidence,source,note
 0x8014D790,engine,func_8014D790,PushBlockBody,H,r272:names_stage_engine_proposals_2.md:564,r279 promote
 0x8014DCE0,engine,func_8014DCE0,BlockRaysHitActor,H,r272:names_stage_engine_proposals_2.md:566,r279 promote
 0x8014DD8C,engine,func_8014DD8C,FindPushBlock,H,r272:names_stage_engine_proposals_2.md:567,r279 promote
+0x8014DF3C,engine,func_8014DF3C,PullBlock,H,r272:names_stage_engine_proposals_2.md:568,r279 promote
 0x8014DF94,engine,func_8014DF94,PullBlockBody,H,r272:names_stage_engine_proposals_2.md:569,r279 promote
 0x8014E284,engine,func_8014E284,FindPullBlock,H,r272:names_stage_engine_proposals_2.md:571,r279 promote
 0x8014E434,engine,func_8014E434,GrabPole,H,r272:names_stage_engine_proposals_2.md:577,r279 promote
@@ -228,6 +281,7 @@ address,scope,current,proposed,confidence,source,note
 0x8014F2E0,engine,func_8014F2E0,AnySolidActorOnPath,H,r272:names_stage_engine_proposals_2.md:597,r279 promote
 0x8014F468,engine,func_8014F468,ProbeGroundStill,H,r272:names_stage_engine_proposals_2.md:603,r279 promote
 0x8014F4C0,engine,func_8014F4C0,ProbeGroundStillBody,H,r272:names_stage_engine_proposals_2.md:604,r279 promote
+0x8014FBC0,engine,func_8014FBC0,SnapToFloor,H,r272:names_stage_engine_proposals_2.md:609,r279 promote
 0x8014FC18,engine,func_8014FC18,SnapToFloorBody,H,r272:names_stage_engine_proposals_2.md:610,r279 promote
 0x8014FCFC,engine,func_8014FCFC,IsClimbWallAhead,H,r272:names_stage_engine_proposals_2.md:611,r279 promote
 0x8014FD54,engine,func_8014FD54,IsClimbWallAheadBody,H,r272:names_stage_engine_proposals_2.md:612,r279 promote
@@ -246,13 +300,55 @@ address,scope,current,proposed,confidence,source,note
 0x8015086C,engine,func_8015086C,CurePoisonWithFx,H,r272:names_stage_engine_proposals_2.md:637,r279 promote
 0x801508B4,engine,func_801508B4,StrikeTouchedActor,H,r272:names_stage_engine_proposals_2.md:515,r279 promote
 0x80150A70,engine,func_80150A70,CommitPlayerMove,H,r272:names_stage_engine_proposals_2.md:613,r279 promote
+0x80150BA4,engine,func_80150BA4,HurtBySurface1,H,r272:names_stage_engine_proposals_2.md:652,r279 promote
+0x80150C48,engine,func_80150C48,TakeActorExit,H,r272:names_stage_engine_proposals_2.md:654,r279 promote
+0x80150CA0,engine,func_80150CA0,HurtBySurfaceE001,H,r272:names_stage_engine_proposals_2.md:655,r279 promote
+0x80150CC4,engine,func_80150CC4,TakeExit0,H,r272:names_stage_engine_proposals_2.md:656,r279 promote
+0x80150CE4,engine,func_80150CE4,TakeExit1,H,r272:names_stage_engine_proposals_2.md:657,r279 promote
+0x80150D04,engine,func_80150D04,TakeExit2,H,r272:names_stage_engine_proposals_2.md:658,r279 promote
+0x80150D24,engine,func_80150D24,TakeExit3,H,r272:names_stage_engine_proposals_2.md:659,r279 promote
+0x80150D44,engine,func_80150D44,TakeExit4,H,r272:names_stage_engine_proposals_2.md:660,r279 promote
+0x80150D64,engine,func_80150D64,TakeExit5,H,r272:names_stage_engine_proposals_2.md:661,r279 promote
+0x80150D84,engine,func_80150D84,TakeExit6,H,r272:names_stage_engine_proposals_2.md:662,r279 promote
+0x80150DA4,engine,func_80150DA4,TakeExit7,H,r272:names_stage_engine_proposals_2.md:663,r279 promote
+0x80150DC4,engine,func_80150DC4,TakeExit8,H,r272:names_stage_engine_proposals_2.md:664,r279 promote
+0x80150DE4,engine,func_80150DE4,TakeExit9,H,r272:names_stage_engine_proposals_2.md:665,r279 promote
+0x80150E04,engine,func_80150E04,TakeExit10,H,r272:names_stage_engine_proposals_2.md:666,r279 promote
+0x80150E24,engine,func_80150E24,TakeExit11,H,r272:names_stage_engine_proposals_2.md:667,r279 promote
+0x80150E44,engine,func_80150E44,TakeExit12,H,r272:names_stage_engine_proposals_2.md:668,r279 promote
+0x80150E64,engine,func_80150E64,TakeExit13,H,r272:names_stage_engine_proposals_2.md:669,r279 promote
+0x80150E84,engine,func_80150E84,TakeExit14,H,r272:names_stage_engine_proposals_2.md:670,r279 promote
+0x80150EA4,engine,func_80150EA4,TakeExit15,H,r272:names_stage_engine_proposals_2.md:671,r279 promote
+0x80150F80,engine,func_80150F80,HurtBySurfaceC007,H,r272:names_stage_engine_proposals_2.md:674,r279 promote
+0x80150FB4,engine,func_80150FB4,HurtBySurface8,H,r272:names_stage_engine_proposals_2.md:675,r279 promote
+0x80151014,engine,func_80151014,HurtBySurfaceC00B,H,r272:names_stage_engine_proposals_2.md:677,r279 promote
+0x80151038,engine,func_80151038,HurtBySurfaceC00C,H,r272:names_stage_engine_proposals_2.md:678,r279 promote
+0x80151070,engine,func_80151070,HurtBySurfaceE003,H,r272:names_stage_engine_proposals_2.md:679,r279 promote
+0x80151094,engine,func_80151094,HurtBySurfaceC00D,H,r272:names_stage_engine_proposals_2.md:680,r279 promote
+0x801510C8,engine,func_801510C8,HurtBySurface4018,H,r272:names_stage_engine_proposals_2.md:683,r279 promote
+0x801510EC,engine,func_801510EC,HurtBySurfaceE016,H,r272:names_stage_engine_proposals_2.md:684,r279 promote
+0x80151110,engine,func_80151110,KillBySurface,H,r272:names_stage_engine_proposals_2.md:685,r279 promote
+0x80151138,engine,func_80151138,HurtBySurfaceC01F,H,r272:names_stage_engine_proposals_2.md:687,r279 promote
+0x8015115C,engine,func_8015115C,SetPlayerSurface,H,r272:names_stage_engine_proposals_2.md:688,r279 promote
+0x80151164,engine,func_80151164,QueueHitDamage10,H,r272:names_stage_engine_proposals_2.md:689,r279 promote
+0x801511C4,engine,func_801511C4,SaveHitInfo,H,r272:names_stage_engine_proposals_2.md:701,r279 promote
 0x80151204,engine,func_80151204,ShowDamageNumber,H,r272:names_stage_engine_proposals_2.md:702,r279 promote
+0x80151238,engine,func_80151238,ShowBpLossNumber,H,r272:names_stage_engine_proposals_2.md:703,r279 promote
 0x8015126C,engine,func_8015126C,ProcessPlayerHit,H,r272:names_stage_engine_proposals_2.md:704,r279 promote
 0x80151664,engine,func_80151664,ResetPlayerAfterHit,H,r272:names_stage_engine_proposals.md:646,r279 promote
+0x801516F0,engine,func_801516F0,EnterHitStateSub1,H,r272:names_stage_engine_proposals_2.md:705,r279 promote
 0x8015173C,engine,func_8015173C,EnterHitState,H,r272:names_stage_engine_proposals_2.md:706,r279 promote
+0x80151924,engine,func_80151924,RunKnockbackHit,H,r272:names_stage_engine_proposals_2.md:721,r279 promote
+0x80151980,engine,func_80151980,KnockbackHitBegin,H,r272:names_stage_engine_proposals_2.md:723,r279 promote
 0x801519C8,engine,func_801519C8,StartHitKnockback,H,r272:names_stage_engine_proposals_2.md:724,r279 promote
+0x80151AE4,engine,func_80151AE4,KnockbackGroundStep,H,r272:names_stage_engine_proposals_2.md:725,r279 promote
+0x80151B98,engine,func_80151B98,KnockbackAirStep,H,r272:names_stage_engine_proposals_2.md:726,r279 promote
 0x80151C54,engine,func_80151C54,EndKnockback,H,r272:names_stage_engine_proposals_2.md:727,r279 promote
+0x80151D24,engine,func_80151D24,RunFlattenHit,H,r272:names_stage_engine_proposals_2.md:728,r279 promote
+0x80151D60,engine,func_80151D60,FlattenHitBegin,H,r272:names_stage_engine_proposals_2.md:729,r279 promote
 0x80151DB0,engine,func_80151DB0,StartFlattenHit,H,r272:names_stage_engine_proposals_2.md:730,r279 promote
+0x80151E78,engine,func_80151E78,FlattenHitWait,H,r272:names_stage_engine_proposals_2.md:731,r279 promote
+0x80151ECC,engine,func_80151ECC,FlattenHitStretch,H,r272:names_stage_engine_proposals_2.md:732,r279 promote
 0x80151FB4,engine,func_80151FB4,EndFlattenHit,H,r272:names_stage_engine_proposals_2.md:734,r279 promote
 0x801520DC,engine,func_801520DC,StartPitFallHit,H,r272:names_stage_engine_proposals_2.md:737,r279 fix: was StartPitFall
 0x801522CC,engine,func_801522CC,EndPitFallHit,H,r272:names_stage_engine_proposals_2.md:741,r279 fix: was EndPitFall

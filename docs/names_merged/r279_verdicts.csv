@@ -367,9 +367,9 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80147F78,engine,AccelWorld,AddMoveSpeedSetVel,M,H,FIX,"AddMoveSpeedX / Y / Z, then vel (+0x10..) = the move speed +0x24.. as it is, through g_PushVel. Not an acceleration, and nothing world-turned (AddMoveSpeedFacing is the turned one). Was AccelWorld",1
 0x801484E8,engine,GetNextPosePointsA,GetNextPosePointsA,M,M,KEEP,"ReadPosePoints of PeekPlayerMotionPose - 0x10; the A / B pair, M with GetPosePointsA",1
 0x8014856C,engine,GetNextPosePointsB,GetNextPosePointsB,M,M,KEEP,"ReadPosePoints of the next pose - 8; A / B pair, M",1
-0x801490E0,engine,SetTiltTargetX,SetTiltTargetX,M,M,KEEP,"+0x108 = n, set by SetTiltTarget; that +0x108.. is a tilt target is in its readers, not read here (SmoothTiltUpVector's target is +0x120)",1
-0x801490E8,engine,SetTiltTargetY,SetTiltTargetY,M,M,KEEP,+0x10A = n; see SetTiltTargetX,1
-0x801490F0,engine,SetTiltTargetZ,SetTiltTargetZ,M,M,KEEP,+0x10C = n; see SetTiltTargetX,1
+0x801490E0,engine,SetTiltTargetX,SetTiltTargetX,M,H,PROMOTE,"+0x108 = n: the tilt target, which StepTiltToTarget steps the tilt angle +0x100 toward and ClearTilt clears with it",1
+0x801490E8,engine,SetTiltTargetY,SetTiltTargetY,M,H,PROMOTE,"+0x10A = n, the tilt target's y; see SetTiltTargetX",1
+0x801490F0,engine,SetTiltTargetZ,SetTiltTargetZ,M,H,PROMOTE,"+0x10C = n, the tilt target's z",1
 0x80149210,engine,SetDoubleTapWindow,SetDoubleTapWindow,M,H,PROMOTE,the countdown +0x1E4 and window +0x1E6 = n frames; the player set-up passes 8,1
 0x80149228,engine,UpdateDoubleTap,UpdateDoubleTap,M,H,PROMOTE,"a press of the same buttons within the window sets +0x1DC, the countdown restarts at each press; UpdatePlayer each frame",1
 0x801493D0,engine,ObjLocalToWorld16To,ObjLocalToWorld16To,M,H,PROMOTE,"a 16.16 point to SVECTOR, ObjLocalToWorld, back into another 16.16 point; ovl17 places its marks with it",1
@@ -636,6 +636,101 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8013CB5C,engine,ReleaseDayLighting,ReleaseDayLighting,M,H,PROMOTE,D_801ED450 / D_801ED44C restored from HoldDayLighting's copies,0
 0x801424E4,engine,HeadMarkerStep,HeadMarkerStep,M,H,PROMOTE,"its state handler, then it follows the parent or frees itself when the parent's id changed",0
 0x80142608,engine,HeadMarkerSetup,HeadMarkerSetup,M,H,PROMOTE,"kind 0x13's set-up: a model (own or the parent's next free one), scale, height, the parent's id at +0xFE",0
+0x80146CC8,engine,AddPushVel,AddPushVel,M,H,PROMOTE,"vel += g_PushVel, which is then cleared; SetPushVel's adding form",0
+0x80147264,engine,SetPlayerScaleA,SetPlayerScaleA,M,M,KEEP,"g_Player +0x60.. (the first scale vector) = three u16; A because a second scale vector exists; ApplyPlayerScale's fields would name both, M",0
+0x80147290,engine,ResetPlayerScaleA,ResetPlayerScaleA,M,M,KEEP,"the same vector = 0x1000 x 3; A pair, M",0
+0x80147718,engine,RebuildModelMatrix,RebuildModelMatrix,M,H,PROMOTE,"model +0x34 matrix = identity, RotateMatrixX / Y / Z by the model's angles, model +0x2C |= 1",0
+0x80147860,engine,AddMoveSpeed,AddMoveSpeed,M,H,PROMOTE,AddMoveSpeedX / Y / Z (each within +-0x1F0000); the root of the AddMoveSpeed family,0
+0x801478B8,engine,AddMoveSpeedUnlimited,AddMoveSpeedUnlimited,M,H,PROMOTE,AddMoveSpeedX / Y / ZLimit with 0x7FFFFFFF,0
 0x80147AAC,engine,ApplyMoveSpeedFree,SetVelFromMoveSpeedFacing,M,H,FIX,"AddMoveSpeedFacingFree(o, 0, 0, 0): vel = the move speed turned by the model's facing, all axes; the turned partner of SetVelFromMoveSpeed. Was ApplyMoveSpeedFree",0
 0x80147E44,engine,AccelFacingYXZ,AddMoveSpeedFacingYXZ,M,H,FIX,"AddMoveSpeedX / Y / Z, then the move speed turned by the model's rotation built Y first (RotMatrixY, RotMatrixX ..) into vel through g_PushVel; AddMoveSpeedFacing in YXZ order. Was AccelFacingYXZ",0
+0x80148C18,engine,FaceDpadNone,FaceDpadNone,M,H,PROMOTE,"the d-pad facing table, entry 0 (none held): returns 0",0
+0x80148C20,engine,FaceDpadUp,FaceDpadUp,M,H,PROMOTE,"entry 1 (up): heading = the camera angle a, 1",0
+0x80148C34,engine,FaceDpadRight,FaceDpadRight,M,H,PROMOTE,"entry 2 (right): a + 0x400, 1",0
+0x80148C4C,engine,FaceDpadUpRight,FaceDpadUpRight,M,H,PROMOTE,"entry 3 (up+right): a + 0x200, 1",0
+0x80148C64,engine,FaceDpadDown,FaceDpadDown,M,H,PROMOTE,"entry 4 (down): a + 0x800, 1",0
+0x80148C7C,engine,FaceDpadUpDown,FaceDpadUpDown,M,H,PROMOTE,entry 5 (up+down): 0,0
+0x80148C84,engine,FaceDpadDownRight,FaceDpadDownRight,M,H,PROMOTE,"entry 6 (right+down): a + 0x600, 1",0
+0x80148C9C,engine,FaceDpadUpRightDown,FaceDpadUpRightDown,M,H,PROMOTE,"entry 7 (up+right+down): a + 0x400, 1",0
+0x80148CB4,engine,FaceDpadLeft,FaceDpadLeft,M,H,PROMOTE,"entry 8 (left): a - 0x400, 1",0
+0x80148CCC,engine,FaceDpadUpLeft,FaceDpadUpLeft,M,H,PROMOTE,"entry 9 (up+left): a - 0x200, 1",0
+0x80148CE4,engine,FaceDpadLeftRight,FaceDpadLeftRight,M,H,PROMOTE,entry 10 (right+left): 0,0
+0x80148CEC,engine,FaceDpadUpLeftRight,FaceDpadUpLeftRight,M,H,PROMOTE,entry 11 (up+right+left): 0,0
+0x80148CF4,engine,FaceDpadDownLeft,FaceDpadDownLeft,M,H,PROMOTE,"entry 12 (down+left): a - 0x600, 1",0
+0x80148D0C,engine,FaceDpadUpDownLeft,FaceDpadUpDownLeft,M,H,PROMOTE,"entry 13 (up+down+left): a - 0x400, 1",0
+0x80148D24,engine,FaceDpadRightDownLeft,FaceDpadRightDownLeft,M,H,PROMOTE,"entry 14 (right+down+left): a - 0x800, 1",0
+0x80148D3C,engine,FaceDpadAll,FaceDpadAll,M,H,PROMOTE,entry 15 (all four): 0,0
+0x80148F60,engine,GetDpadAngleNone,GetDpadAngleNone,M,H,PROMOTE,"the d-pad angle table, entry 0: -1",0
+0x80148F68,engine,GetDpadAngleUp,GetDpadAngleUp,M,H,PROMOTE,entry 1 (up): a,0
+0x80148F74,engine,GetDpadAngleRight,GetDpadAngleRight,M,H,PROMOTE,entry 2 (right): a + 0x400,0
+0x80148F80,engine,GetDpadAngleUpRight,GetDpadAngleUpRight,M,H,PROMOTE,entry 3 (up+right): a + 0x200,0
+0x80148F8C,engine,GetDpadAngleDown,GetDpadAngleDown,M,H,PROMOTE,entry 4 (down): a + 0x800,0
+0x80148F98,engine,GetDpadAngleUpDown,GetDpadAngleUpDown,M,H,PROMOTE,entry 5: -1,0
+0x80148FA0,engine,GetDpadAngleDownRight,GetDpadAngleDownRight,M,H,PROMOTE,entry 6 (right+down): a + 0x600,0
+0x80148FAC,engine,GetDpadAngleUpRightDown,GetDpadAngleUpRightDown,M,H,PROMOTE,entry 7: a + 0x400,0
+0x80148FB8,engine,GetDpadAngleLeft,GetDpadAngleLeft,M,H,PROMOTE,entry 8 (left): a - 0x400,0
+0x80148FC4,engine,GetDpadAngleUpLeft,GetDpadAngleUpLeft,M,H,PROMOTE,entry 9 (up+left): a - 0x200,0
+0x80148FD0,engine,GetDpadAngleLeftRight,GetDpadAngleLeftRight,M,H,PROMOTE,entry 10: -1,0
+0x80148FD8,engine,GetDpadAngleUpLeftRight,GetDpadAngleUpLeftRight,M,H,PROMOTE,entry 11: -1,0
+0x80148FE0,engine,GetDpadAngleDownLeft,GetDpadAngleDownLeft,M,H,PROMOTE,entry 12 (down+left): a - 0x600,0
+0x80148FEC,engine,GetDpadAngleUpDownLeft,GetDpadAngleUpDownLeft,M,H,PROMOTE,entry 13: a - 0x400,0
+0x80148FF8,engine,GetDpadAngleRightDownLeft,GetDpadAngleRightDownLeft,M,H,PROMOTE,entry 14: a - 0x800,0
+0x80149004,engine,GetDpadAngleAll,GetDpadAngleAll,M,H,PROMOTE,entry 15: -1,0
+0x8014905C,engine,ClearTilt,ClearTilt,M,H,PROMOTE,the tilt angles +0x100.. and their target +0x108.. = 0,0
+0x80149078,engine,SetTiltTarget,SetTiltTarget,M,H,PROMOTE,SetTiltTargetX / Y / Z,0
+0x801490F8,engine,StepTiltToTarget,StepTiltToTarget,M,H,PROMOTE,each tilt angle +0x100.. steps toward +0x108.. by the speed (EaseAngleStep),0
+0x80149204,engine,ClearDoubleTap,ClearDoubleTap,M,H,PROMOTE,+0x1E4 (countdown and window) and +0x1DC (the double-tapped buttons) = 0,0
+0x80149284,engine,TestDoubleTap,TestDoubleTap,M,H,PROMOTE,returns +0x1DC & mask,0
+0x80149450,engine,ObjWorldToLocal16,ObjWorldToLocal16,M,H,PROMOTE,"the whole parts of a 16.16 point into the object's model frame (WorldToLocal), in place",0
+0x801494CC,engine,ObjWorldToLocal16To,ObjWorldToLocal16To,M,H,PROMOTE,the same into another point,0
+0x80149544,engine,ObjPointToScreenOtz,ObjPointToScreenOtz,M,H,PROMOTE,"LocalToWorld by the model matrix, then ProjectPointOtz",0
+0x80149584,engine,ObjPointToScreen,ObjPointToScreen,M,H,PROMOTE,"LocalToWorld by the model matrix, then ProjectPoint",0
+0x80149C94,engine,TriggerAirSlash,TriggerAirSlash,M,H,PROMOTE,EnterAirSlash (the Trigger* pattern; the airborne step calls EnterAirSlash itself),0
+0x8014B2D0,engine,PoisonPlayer,PoisonPlayer,M,H,PROMOTE,StartPoison on Musashi (the arg passed on),0
+0x8014C0C8,engine,FindActorByKindAndDefE,FindActorByKindAndDefE,M,H,PROMOTE,"the first actor whose state is the kind and +0xFC == v; FindActorByKindAnd70's sibling, a field-number name",0
+0x8014C5D0,engine,GetPitchToObj,GetPitchToObj,M,H,PROMOTE,GetPitchToObjOffset with the default offset D_8018F154,0
+0x8014DF3C,engine,PullBlock,PullBlock,M,H,PROMOTE,PullBlockBody on the scratchpad stack (the body read: PullHeldBlock / FindPullBlock),0
+0x8014FBC0,engine,SnapToFloor,SnapToFloor,M,H,PROMOTE,SnapToFloorBody on the scratchpad stack,0
+0x80150BA4,engine,HurtBySurface1,HurtBySurface1,M,H,PROMOTE,"surface table entry: QueueHit(1, 0x10); a hit-kind name like the rest of the table",0
+0x80150C48,engine,TakeActorExit,TakeActorExit,M,H,PROMOTE,on an exit actor (ProbeExitActor): the map-change record from its +0xDC / +0xFC,0
+0x80150CA0,engine,HurtBySurfaceE001,HurtBySurfaceE001,M,H,PROMOTE,"surface table entry: QueueHit(0xE001, 0x10)",0
+0x80150CC4,engine,TakeExit0,TakeExit0,M,H,PROMOTE,"exit table entry: StartExit(o, 0)",0
+0x80150CE4,engine,TakeExit1,TakeExit1,M,H,PROMOTE,"StartExit(o, 1)",0
+0x80150D04,engine,TakeExit2,TakeExit2,M,H,PROMOTE,"StartExit(o, 2)",0
+0x80150D24,engine,TakeExit3,TakeExit3,M,H,PROMOTE,"StartExit(o, 3)",0
+0x80150D44,engine,TakeExit4,TakeExit4,M,H,PROMOTE,"StartExit(o, 4)",0
+0x80150D64,engine,TakeExit5,TakeExit5,M,H,PROMOTE,"StartExit(o, 5)",0
+0x80150D84,engine,TakeExit6,TakeExit6,M,H,PROMOTE,"StartExit(o, 6)",0
+0x80150DA4,engine,TakeExit7,TakeExit7,M,H,PROMOTE,"StartExit(o, 7)",0
+0x80150DC4,engine,TakeExit8,TakeExit8,M,H,PROMOTE,"StartExit(o, 8)",0
+0x80150DE4,engine,TakeExit9,TakeExit9,M,H,PROMOTE,"StartExit(o, 9)",0
+0x80150E04,engine,TakeExit10,TakeExit10,M,H,PROMOTE,"StartExit(o, 10)",0
+0x80150E24,engine,TakeExit11,TakeExit11,M,H,PROMOTE,"StartExit(o, 11)",0
+0x80150E44,engine,TakeExit12,TakeExit12,M,H,PROMOTE,"StartExit(o, 12)",0
+0x80150E64,engine,TakeExit13,TakeExit13,M,H,PROMOTE,"StartExit(o, 13)",0
+0x80150E84,engine,TakeExit14,TakeExit14,M,H,PROMOTE,"StartExit(o, 14)",0
+0x80150EA4,engine,TakeExit15,TakeExit15,M,H,PROMOTE,"StartExit(o, 15)",0
+0x80150F80,engine,HurtBySurfaceC007,HurtBySurfaceC007,M,H,PROMOTE,"unless ability 0xC is held: QueueHit(0xC007, 0x20)",0
+0x80150FB4,engine,HurtBySurface8,HurtBySurface8,M,H,PROMOTE,"QueueHit(8, 0)",0
+0x80151014,engine,HurtBySurfaceC00B,HurtBySurfaceC00B,M,H,PROMOTE,"QueueHit(0xC00B, 0x20)",0
+0x80151038,engine,HurtBySurfaceC00C,HurtBySurfaceC00C,M,H,PROMOTE,"QueueHit(0xC00C, 0x18; 0x30 on map 0x30A0)",0
+0x80151070,engine,HurtBySurfaceE003,HurtBySurfaceE003,M,H,PROMOTE,"QueueHit(0xE003, 0x10)",0
+0x80151094,engine,HurtBySurfaceC00D,HurtBySurfaceC00D,M,H,PROMOTE,"QueueHit(0xC00D, 0x18)",0
+0x801510C8,engine,HurtBySurface4018,HurtBySurface4018,M,H,PROMOTE,"QueueHit(0x4018, 0x20)",0
+0x801510EC,engine,HurtBySurfaceE016,HurtBySurfaceE016,M,H,PROMOTE,"QueueHit(0xE016, 0x10)",0
+0x80151110,engine,KillBySurface,KillBySurface,M,H,PROMOTE,surface table entry: HitPlayerFatal,0
+0x80151138,engine,HurtBySurfaceC01F,HurtBySurfaceC01F,M,H,PROMOTE,"QueueHit(0xC01F, 0x10)",0
+0x8015115C,engine,SetPlayerSurface,SetPlayerSurface,M,H,PROMOTE,+0x16C = v (the surface ClearPlayerSurface clears),0
+0x80151164,engine,QueueHitDamage10,QueueHitDamage10,M,H,PROMOTE,"QueueHit(kind, 10)",0
+0x801511C4,engine,SaveHitInfo,SaveHitInfo,M,H,PROMOTE,+0xF0 / +0xF2 / +0xF4 = the queued hit +0x3E / +0x40 / +0x42 (ProcessPlayerHit does it inline),0
+0x80151238,engine,ShowBpLossNumber,ShowBpLossNumber,M,H,PROMOTE,ShowNumberAbove kind 5 of +0xF2 when nonzero (the BP-loss popup StartHitKnockback uses),0
+0x801516F0,engine,EnterHitStateSub1,EnterHitStateSub1,M,H,PROMOTE,EnterHitState with state 1,0
+0x80151924,engine,RunKnockbackHit,RunKnockbackHit,M,H,PROMOTE,RunKnockbackSub (a0 passed through); the hit table entry,0
+0x80151980,engine,KnockbackHitBegin,KnockbackHitBegin,M,H,PROMOTE,"the begin step: collide, fall and ground steps, StartHitKnockback, next state",0
+0x80151AE4,engine,KnockbackGroundStep,KnockbackGroundStep,M,H,PROMOTE,"ClearPlayerHittable; at the motion's end EndKnockback / ResetPlayerKind, off the ground EndKnockback / StartPlayerFall, DropTimedAbility",0
+0x80151B98,engine,KnockbackAirStep,KnockbackAirStep,M,H,PROMOTE,"MovePlayerObj until landing, then EndKnockback and the next kind, dust, DropTimedAbility",0
+0x80151D24,engine,RunFlattenHit,RunFlattenHit,M,H,PROMOTE,D_8018F22C[state](obj): the flatten hit's steps,0
+0x80151D60,engine,FlattenHitBegin,FlattenHitBegin,M,H,PROMOTE,"the begin step, StartFlattenHit, +0xDE = 0x20, next state",0
+0x80151E78,engine,FlattenHitWait,FlattenHitWait,M,H,PROMOTE,"counts +0xDE down, then 0x10 and next state",0
+0x80151ECC,engine,FlattenHitStretch,FlattenHitStretch,M,H,PROMOTE,"ClearPlayerHittable, scale +0x64 grows by +0xDE * 64 to 0x1556, then next state",0
 0x80163234,engine,SetObj68VelFromAccel,SetObj68VelFromMoveSpeed,M,H,FIX,"AddObj68MoveSpeedSetVel(o, 0, 0, 0): vel = the move speed. Was SetObj68VelFromAccel",0
