@@ -1004,7 +1004,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8012CB64,engine,IsInArea,IsInArea,L,L,KEEP,INCLUDE_ASM: no C body; the x / z rectangle test rests on the r272 reading,33
 0x80147A84,engine,ResetObjMoveParams,SetVelFromMoveSpeedKeepAxes,L,H,FIX,"AddMoveSpeedFacing(o, 0, 0, 0): vel = the move speed turned by the facing, the flagged axes kept (SetVelKeepAxes); not a reset of parameters. The kept-axes partner of SetVelFromMoveSpeedFacing",31
 0x80143BDC,engine,SpawnShadowBAt,SpawnKind1CAt,L,H,FIX,"SpawnActorFromDef of kind 0x1C (n 1) at a point, no owner; renamed with SpawnKind1C (kind 0x1C is not the shadow)",30
-0x8014B12C,engine,PlayerFlag80B,PlayerFlag80B,L,L,KEEP,ObjFlag80 (L) on Musashi; rests on ObjFlag80's word,30
+0x8014B12C,engine,PlayerFlag80B,IsPlayerAsleep,L,M,FIX,IsObjAsleep on Musashi; renamed with IsObjAsleep (was PlayerFlag80B),30
 0x80172630,engine,SetPlayerState1F4Bit100,SetPlayerEvent100,L,H,FIX,+0x1F4 ,30
 0x80175454,engine,OpenHudPanel,OpenHudPanel,L,L,KEEP,D_8011F7A8 state 0 to 1 with a 0xA-frame count; which HUD panel is not in reach,26
 0x8014CB58,engine,GetStatsByteC0,GetTechnique,L,M,FIX,D_80078EC0 & 0x7F; r276 ruling 2 made D_80078EC0 the Lumina technique selection (the *Technique* names). M with that ruling's evidence,25
@@ -1029,3 +1029,48 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8014CB0C,engine,PlayerFlag80,PlayerFlag80,L,H,PROMOTE,g_PlayerFlags & 0x80; a flag-number name,9
 0x8014CB1C,engine,GetStatsWord94,GetPoisonWord,L,H,FIX,returns g_StatusPoison (0x80078E94); the getter of SetPoisonWord,9
 0x80172664,engine,PlayerState1F4Bit2,PlayerEvent02,L,H,FIX,returns +0x1F4 & 2; the PlayerEvent family,9
+0x8016CF04,engine,ProjectileFxMatrix,ProjectileFxMatrix,L,L,KEEP,39 lines not read in full (the effect's matrix and a step along it); L,8
+0x8016F388,engine,ClearWorkA3E7,ClearWorkA3E7,L,H,PROMOTE,"D_800B9A17 (Work +0xA3E7) = 0; an offset name, accurate",8
+0x8013CABC,engine,RefreshDayLighting,RefreshDayLighting,L,H,PROMOTE,D_801ED44C / D_801ED440 / D_801ED450 set and D_801ED444 cleared so UpdateDayLighting re-applies at once; with Reset / Hold / Release,7
+0x801470B4,engine,HidePlayerAbility,HidePlayerAbility,L,L,KEEP,"+0x222 = 1; pair of ShowPlayerAbility, what +0x222 hides is in its reader",7
+0x8014C6AC,engine,EnableAreaKeep,EnableAreaKeep,L,L,KEEP,"g_Player +0x1BF = 1; KeepPlayerInArea (L) is the reader, not read here",7
+0x8014C6C0,engine,DisableAreaKeep,DisableAreaKeep,L,L,KEEP,g_Player +0x1BF = 0; see EnableAreaKeep,6
+0x80165988,engine,IncStageCount811C,IncStageCount811C,L,H,PROMOTE,"D_8012811C += 1; an address name, accurate",6
+0x801659CC,engine,GetCloneFlag6B08,GetCloneFlag6B08,L,L,KEEP,"returns D_80126B08; ""Clone"" is not in the C",6
+0x8016F2A8,engine,SetPlayerActionFlag02,SetPlayerActionFlag02,L,H,PROMOTE,= 0x02000000; a flag-number name,6
+0x8016F2EC,engine,SetPlayerActionFlag08,SetPlayerActionFlag08,L,H,PROMOTE,= 0x08000000; a flag-number name,6
+0x8012E4C8,engine,RecoilFromBehind,RecoilFromBehind,L,L,KEEP,"scale reset, damage 0, flags5C bit 0, knock angle = heading + 0x800, hit kind 1: a self-made recoil backward; ""FromBehind"" (where the hit came from) is not shown",5
+0x80135480,engine,ClassifyModelHit,ClassifyModelHit,L,L,KEEP,67 lines not read in full; L,5
+0x801536DC,engine,TickRespawnWait,TickRespawnWait,L,L,KEEP,"INCLUDE_ASM, no body; L",5
+0x80169A4C,engine,DrawFlashQuadB,DrawFlashQuadB,L,L,KEEP,"the second of two flash quads (26 lines); letter pair, L",5
+0x8016B3F4,engine,ShowDefeatAlt,ShowDefeatAlt,L,L,KEEP,"SpawnDefeatEffect(a, 1) then ShowDefeat56; Alt says nothing, but what the two effects look like is not in the C",5
+0x80174ED4,engine,CameraPanDone,CameraPanDone,L,H,PROMOTE,D_80126980 bit 15 (the pan's done bit); stage scenes wait on it after StartCameraPan,5
+0x8014704C,engine,ClearPlayerMark4C,ClearPlayerMark4C,L,H,PROMOTE,+0x4C = 0; a field-number name,4
+0x8014B154,engine,ObjFlag80,IsObjAsleep,L,M,FIX,"+0x44 & 0x80: the asleep bit (UpdateWakeGauge and TickGameClock treat bit 7 as asleep, ExitLieDown clears it, StartLieDown sets it per r272); M because the set in StartLieDown is in lines not read",4
+0x8014CAFC,engine,PlayerFlag400,PlayerFlag400,L,H,PROMOTE,g_PlayerFlags & 0x400; a flag-number name,4
+0x801696D8,engine,DrawFlashQuad,DrawFlashQuad,L,H,PROMOTE,a glow quad scaled by +0x2C at the effect's matrix (DrawPrimG4Mtx),4
+0x8016BADC,engine,SpawnBurst22,SpawnBurst22,L,H,PROMOTE,three effects 0x22 (values 0-2) and one 0x24 at a height; a kind-number name,4
+0x8016BF50,engine,OrbitFxPlace,OrbitFxPlace,L,H,PROMOTE,the position from the owner's frame (ObjLocalToWorld),4
+0x8016E3CC,engine,SwirlFxMatrix,SwirlFxMatrix,L,H,PROMOTE,"the position and a camera-facing matrix (AnglesFromVector, RotMatrixYXZ)",4
+0x8016EC0C,engine,DrawHudSlot,DrawHudSlot,L,H,PROMOTE,the HUD slot's sprite rows with a brightness (DrawSpriteRec),4
+0x8016F374,engine,SetWorkA3E7,SetWorkA3E7,L,H,PROMOTE,D_800B9A17 (Work +0xA3E7) = 1; an offset name,4
+0x80172B14,engine,StartPlayerActionB14,StartPlayerActionB14,L,L,KEEP,"D_80126B32 = n, SetActionHandler of an action; ""B14"" is the address",4
+0x8010F46C,engine,g_ItemTable,g_ItemTable,L,H,PROMOTE,8-byte item records (+0 value): GiveItem and AgeItemValues index it by item,3
+0x8013D13C,engine,ApplyLightPeriod,ApplyLightPeriod,L,L,KEEP,"func_8013D9B0, then D_801ED44C; L",3
+0x80147054,engine,SetPlayerMark4C,SetPlayerMark4C,L,H,PROMOTE,+0x4C = 1; a field-number name,3
+0x8014CA00,engine,GetInitWord2C,GetInitWord2C,L,H,PROMOTE,the s16 at the init record (+0x78) + 0x2C,3
+0x80153CBC,engine,GetCounter5210,GetCounter5210,L,L,KEEP,returns D_80115210; address-named getter,3
+0x801659A8,engine,GetStageCount811C,GetStageCount811C,L,H,PROMOTE,returns D_8012811C; pair of IncStageCount811C,3
+0x8016B834,engine,DefeatFxPiece,DefeatFxPiece,L,H,PROMOTE,a 0x38 object for defeat piece n from the piece table,3
+0x8016B964,engine,DefeatFxPlacePiece,DefeatFxPlacePiece,L,H,PROMOTE,one piece's position from the effect's,3
+0x8016BFA8,engine,DrawOrbitFx,DrawOrbitFx,L,H,PROMOTE,DrawOrbitQuad with the effect's colours,3
+0x8016E778,engine,DrawScreenFx,DrawScreenFx,L,H,PROMOTE,DrawScreenFxQuad with its angles and grey colour,3
+0x80172EFC,engine,StartPlayerMotionAction599C,StartPlayerMotionAction599C,L,H,PROMOTE,StartPlayerMotionAction with the motion 0x800D599C,3
+0x80175494,engine,LockHudPanel,LockHudPanel,L,L,KEEP,"D_8011F7A8 = 2; the HudPanel family, L",3
+0x801379D8,engine,EnableMessageVoice,EnableMessageVoice,L,L,KEEP,"D_8012752E = 1; the voice reading is the r272 comment's, L",2
+0x8013D064,engine,StepTimedDusk,StepTimedDusk,L,L,KEEP,"a timed light change to period 2's colours; ""Dusk"" (what period 2 is) is not in the C",2
+0x8013D164,engine,StartTimedDusk,StartTimedDusk,L,L,KEEP,"D_801ED458 = 1, starting StepTimedDusk; see it",2
+0x80148AAC,engine,FaceStickDirOffset,FaceStickDirOffset,L,H,PROMOTE,"FaceStickDir, and when a direction was held the heading snapped to 8 steps ((h + 0xFA) & 0xFF8)",2
+0x80149FA8,engine,AfterTalkNop,AfterTalkNop,L,H,PROMOTE,empty; called after a successful TryTalk,2
+0x8014C6D0,engine,ClearPlayerMode1C6,ClearPlayerMode1C6,L,H,PROMOTE,g_Player +0x1C6 = 0; a field-number name,2
+0x8014C6E0,engine,SetPlayerMode1C6,SetPlayerMode1C6,L,H,PROMOTE,g_Player +0x1C6 = 1,2
