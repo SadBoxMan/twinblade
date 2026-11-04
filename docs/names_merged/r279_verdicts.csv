@@ -1139,3 +1139,111 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80152EFC,engine,FlingHitWait,FlingHitWait,L,H,PROMOTE,"ClearPlayerHittable, TickRespawnWait, then the next state",0
 0x80155C0C,engine,FusionFinisherTurn,FusionFinisherTurn,L,L,KEEP,lines not read in full; L,0
 0x80155F58,engine,FusionComboNop,FusionComboNop,L,H,PROMOTE,empty,0
+0x80158794,engine,DeathNop,DeathNop,L,H,PROMOTE,empty: a death-table no-op,0
+0x80159698,engine,RunSceneTaskStep,RunSceneTaskStep,L,H,PROMOTE,D_8018FAF8[+0x15](obj): the scene task's steps,0
+0x801596D4,engine,SceneTaskStartTimer,SceneTaskStartTimer,L,H,PROMOTE,"+0x28 = 0x10, step +1",0
+0x801596F0,engine,SceneTaskHideAll,SceneTaskHideAll,L,H,PROMOTE,"the scene task's hide step (g_WorldAnimMode = 3, props off per the first pass)",0
+0x80159874,engine,SceneTaskIdle,SceneTaskIdle,L,H,PROMOTE,returns 0,0
+0x8015987C,engine,SceneTaskStartFade,SceneTaskStartFade,L,H,PROMOTE,"StartFade(4, n), step +1",0
+0x801598BC,engine,SceneTaskFadeStep,SceneTaskFadeStep,L,H,PROMOTE,FadeStep(4) != 0,0
+0x80159A18,engine,PlayerUpdateNop,PlayerUpdateNop,L,H,PROMOTE,empty,0
+0x8015C6A4,engine,NopC6A4,NopC6A4,L,H,PROMOTE,empty,0
+0x8015CBCC,engine,NopCBCC,NopCBCC,L,H,PROMOTE,empty,0
+0x8015CBD4,engine,NopCBD4,NopCBD4,L,H,PROMOTE,empty,0
+0x8015CBDC,engine,NopCBDC,NopCBDC,L,H,PROMOTE,empty,0
+0x8015CBE4,engine,NopCBE4,NopCBE4,L,H,PROMOTE,empty,0
+0x8015CBEC,engine,NopCBEC,NopCBEC,L,H,PROMOTE,empty,0
+0x8015CBF4,engine,NopCBF4,NopCBF4,L,H,PROMOTE,empty,0
+0x8015CBFC,engine,NopCBFC,NopCBFC,L,H,PROMOTE,empty,0
+0x8015CC04,engine,NopCC04,NopCC04,L,H,PROMOTE,empty,0
+0x8015EF9C,engine,NopEF9C,NopEF9C,L,H,PROMOTE,empty,0
+0x801600D0,engine,EnterKind18,EnterKind18,L,L,KEEP,kind 0x18 has no word yet,0
+0x80160104,engine,SwitchToKind18,SwitchToKind18,L,L,KEEP,kind 0x18 has no word yet,0
+0x801601E4,engine,Kind18Step1,Kind18Step1,L,L,KEEP,kind 0x18 has no word yet,0
+0x80160244,engine,Kind18Step2,Kind18Step2,L,L,KEEP,kind 0x18 has no word yet,0
+0x801602A4,engine,Kind18Step3,Kind18Step3,L,L,KEEP,kind 0x18 has no word yet,0
+0x8016032C,engine,Nop0032C,Nop0032C,L,H,PROMOTE,empty,0
+0x801607E4,engine,EnterKind1C,EnterKind1C,L,L,KEEP,kind 0x1C has no word yet,0
+0x80160920,engine,Kind1CStep1,Kind1CStep1,L,L,KEEP,kind 0x1C has no word yet (R1 held per the step),0
+0x801609B8,engine,Kind1CStep2,Kind1CStep2,L,L,KEEP,kind 0x1C has no word yet,0
+0x80160A28,engine,ExitKind1C,ExitKind1C,L,L,KEEP,kind 0x1C has no word yet,0
+0x80160ACC,engine,EnterLieDown,EnterLieDown,L,H,PROMOTE,"SetKindAndState(p, 0x1D), StartLieDown",0
+0x801610FC,engine,Nop10FC,Nop10FC,L,H,PROMOTE,empty,0
+0x80161C98,engine,PlaySurfaceSeE4,PlaySurfaceSeE4,L,L,KEEP,a sound by surface from the +0xE4 table; the table is not named,0
+0x801623B8,engine,SceneExitWait,SceneExitWait,L,L,KEEP,returns 0 (the wait is elsewhere); L,0
+0x80162414,engine,SceneExitBusy,SceneExitBusy,L,H,PROMOTE,FadeStep(4) != 0,0
+0x801633A8,engine,GetSweepHitSoft,GetSweepHitSoft,L,L,KEEP,"returns 0; ""Soft"" is not in the C",0
+0x80164410,engine,Nop4410,Nop4410,L,H,PROMOTE,empty,0
+0x80164BA0,engine,RunFlashState,RunFlashState,L,H,PROMOTE,D_8019011C[state](obj): the flash object's states,0
+0x80164BDC,engine,StartFlash,StartFlash,L,L,KEEP,body not read in full; L,0
+0x80164CD4,engine,FlashGrowStep,FlashGrowStep,L,H,PROMOTE,"the flash grows (scale +0x18 / +0x1A), next on its end",0
+0x80164D4C,engine,FlashFadeStep,FlashFadeStep,L,H,PROMOTE,"FadeFlashColour, then freed",0
+0x80164EA4,engine,RunTrailSpriteState,RunTrailSpriteState,L,H,PROMOTE,D_8019012C[state](obj): the trail sprite's states,0
+0x80164EE0,engine,StartTrailSprite,StartTrailSprite,L,H,PROMOTE,"+0x60 / +0x62 = 0, SetTrailSpriteColour, +0x66 = 0, next state",0
+0x80164F44,engine,TrailSpriteShrinkStep,TrailSpriteShrinkStep,L,H,PROMOTE,"shrinks to its size, DrawTrailSprite",0
+0x80165024,engine,TrailSpriteHoldStep,TrailSpriteHoldStep,L,H,PROMOTE,"TickObjTimer, DrawTrailSprite",0
+0x80165064,engine,TrailSpriteBrightenStep,TrailSpriteBrightenStep,L,H,PROMOTE,"SetTrailSpriteColour as the grey rises, DrawTrailSprite",0
+0x801650C4,engine,TrailSpriteFadeStep,TrailSpriteFadeStep,L,H,PROMOTE,"SetTrailSpriteColour as the grey falls, DrawTrailSprite",0
+0x80165978,engine,GetCloneUseCount,GetCloneUseCount,L,L,KEEP,"returns D_8012672C; ""Clone"" not in the C",0
+0x80165A18,engine,NopA18,NopA18,L,H,PROMOTE,empty,0
+0x80165B08,engine,NopB08,NopB08,L,H,PROMOTE,empty,0
+0x80165B10,engine,NopB10,NopB10,L,H,PROMOTE,empty,0
+0x80165B18,engine,NopB18,NopB18,L,H,PROMOTE,empty,0
+0x80165B20,engine,NopB20,NopB20,L,H,PROMOTE,empty,0
+0x80165E2C,engine,DebugPrintWord,DebugPrintWord,L,H,PROMOTE,SetDebugText and SetDebugNumber of the word,0
+0x801678F0,engine,HeldGlowFxStep,HeldGlowFxStep,L,L,KEEP,lines not read in full; L,0
+0x8016829C,engine,TrailFxStartA,TrailFxStartA,L,L,KEEP,"letter pair (trail 4 / 5), L",0
+0x801684B4,engine,TrailFxStartB,TrailFxStartB,L,L,KEEP,"letter pair, L",0
+0x80168664,engine,SpinGlowFxStep,SpinGlowFxStep,L,H,PROMOTE,"the glow's matrix turned 0x400 about X onto the owner's, DrawGlowFx, next state",0
+0x80168780,engine,RingFxSetup,RingFxSetup,L,H,PROMOTE,"EmitFxAhead(o, 8, 0, 2), RingFxStep, next state",0
+0x80168A14,engine,SparkFxSetupA,SparkFxSetupA,L,L,KEEP,"letter pair, L",0
+0x80168AE4,engine,SparkFxSetupB,SparkFxSetupB,L,L,KEEP,"letter pair, L",0
+0x80168B70,engine,SparkFxStepB,SparkFxStepB,L,L,KEEP,"letter pair, L",0
+0x80168D94,engine,ShardFxSetup,ShardFxSetup,L,H,PROMOTE,"the start point kept (+0x10..), counter 0, next state",0
+0x80168EC4,engine,ShardFxStep,ShardFxStep,L,H,PROMOTE,"draws for 5 frames, then freed",0
+0x80169058,engine,StreakFxSetupA,StreakFxSetupA,L,L,KEEP,"letter pair, L",0
+0x801691B8,engine,StreakFxStepA,StreakFxStepA,L,L,KEEP,"letter pair, L",0
+0x80169408,engine,StreakFxSetupB,StreakFxSetupB,L,L,KEEP,"letter pair, L",0
+0x8016951C,engine,StreakFxStepB,StreakFxStepB,L,L,KEEP,"letter pair, L",0
+0x8016986C,engine,FlashFxSetup,FlashFxSetup,L,H,PROMOTE,"its angles from a vector, counter 0, next state",0
+0x801699D0,engine,FlashFxStep,FlashFxStep,L,H,PROMOTE,"DrawFlashQuad / B with the counter, MoveByVelocity",0
+0x80169BBC,engine,BoltFxSetup,BoltFxSetup,L,L,KEEP,lines not read; L,0
+0x80169E44,engine,BoltFxStep,BoltFxStep,L,L,KEEP,lines not read; L,0
+0x80169F3C,engine,BlinkFxSetup,BlinkFxSetup,L,L,KEEP,lines not read in full; L,0
+0x8016A05C,engine,ChargeFxWait,ChargeFxWait,L,L,KEEP,lines not read in full; L,0
+0x8016A1CC,engine,ChargeFxHold,ChargeFxHold,L,L,KEEP,lines not read; L,0
+0x8016A73C,engine,AuraFxSetup,AuraFxSetup,L,L,KEEP,lines not read in full; L,0
+0x8016A890,engine,AuraFxStep,AuraFxStep,L,H,PROMOTE,"DrawAuraFx along the owner's points, freed at the end",0
+0x8016BBE0,engine,OrbitFxSetup,OrbitFxSetup,L,L,KEEP,lines not read in full; L,0
+0x8016BCC0,engine,OrbitFxGrow,OrbitFxGrow,L,H,PROMOTE,"the orbit grows to its size, DrawOrbitFx",0
+0x8016BD78,engine,OrbitFxSpin,OrbitFxSpin,L,H,PROMOTE,"turns 0x22 a frame, DrawOrbitFx",0
+0x8016BEA0,engine,OrbitFxEnd,OrbitFxEnd,L,H,PROMOTE,"turns and shrinks, freed below 0",0
+0x8016C188,engine,LinkFxSetup,LinkFxSetup,L,L,KEEP,lines not read in full; L,0
+0x8016C2C4,engine,LinkFxStep,LinkFxStep,L,L,KEEP,rests on LinkFxFollow (L),0
+0x8016C49C,engine,ProjectileFxSetup,ProjectileFxSetup,L,L,KEEP,lines not read; L,0
+0x8016C998,engine,ProjectileFxTrail,ProjectileFxTrail,L,L,KEEP,lines not read; L,0
+0x8016D1D8,engine,BeamFxSetup,BeamFxSetup,L,L,KEEP,lines not read; L,0
+0x8016D464,engine,BeamFxStep,BeamFxStep,L,H,PROMOTE,"counts +0x1C down, next when it ends or the owner changes",0
+0x8016D4DC,engine,BeamFxHome,BeamFxHome,L,L,KEEP,lines not read in full; L,0
+0x8016D5EC,engine,BeamFxEnd,BeamFxEnd,L,H,PROMOTE,"shrinks by 0x60 a frame, ProjectileFxMatrix",0
+0x8016D64C,engine,BeamFxDrawEnd,BeamFxDrawEnd,L,H,PROMOTE,"DrawProjectileTrail until nothing is left, then freed",0
+0x8016D688,engine,RingWaveSetup,RingWaveSetup,L,L,KEEP,lines not read; L,0
+0x8016D778,engine,RingWaveStep,RingWaveStep,L,H,PROMOTE,"PullTowardCameraDir of its offset, position set",0
+0x8016D848,engine,RingWaveEmit,RingWaveEmit,L,L,KEEP,the same as RingWaveStep in the lines seen; what it emits is not shown,0
+0x8016D984,engine,RingWaveFade,RingWaveFade,L,H,PROMOTE,vel x 15/16 each frame (the wave slows),0
+0x8016DA7C,engine,FollowFxSetup,FollowFxSetup,L,H,PROMOTE,"StartSpriteAnim, vel 0 and -0xC0000 up, next state",0
+0x8016DB34,engine,FollowFxStep,FollowFxStep,L,H,PROMOTE,"rises with its speed, the scale shrinks",0
+0x8016DC20,engine,SplashFxStep,SplashFxStep,L,H,PROMOTE,"its frames, freed at the end",0
+0x8016DF5C,engine,SwirlFxSetup,SwirlFxSetup,L,L,KEEP,lines not read; L,0
+0x8016E1CC,engine,SwirlFxGrow,SwirlFxGrow,L,H,PROMOTE,"grows, timer 0x20, next state",0
+0x8016E26C,engine,SwirlFxSpin,SwirlFxSpin,L,H,PROMOTE,"SwirlFxMatrix, timer 0x10, next state",0
+0x8016E2E8,engine,SwirlFxShrink,SwirlFxShrink,L,H,PROMOTE,"shrinks, freed at the end",0
+0x8016E358,engine,SwirlFxTrailStep,SwirlFxTrailStep,L,H,PROMOTE,"its trail, freed at the end",0
+0x8016E5F4,engine,ScreenFxSetup,ScreenFxSetup,L,H,PROMOTE,"scale 0x100, angle 0, alpha 0x80, next state",0
+0x8016E688,engine,ScreenFxGrow,ScreenFxGrow,L,H,PROMOTE,"grows to 0x3000, DrawScreenFx",0
+0x8016E6E4,engine,ScreenFxHold,ScreenFxHold,L,H,PROMOTE,"counts +0x1C down, DrawScreenFx",0
+0x8016E728,engine,ScreenFxShrink,ScreenFxShrink,L,H,PROMOTE,"turns 0x400 a frame and fades, freed at 0",0
+0x8016E9EC,engine,HudSlotSetup,HudSlotSetup,L,H,PROMOTE,"position -0xD7 and the slot's y, DrawHudSlot, next step",0
+0x8016EAC0,engine,HudSlotSlideIn,HudSlotSlideIn,L,H,PROMOTE,slides in for 6 frames,0
+0x8016EB3C,engine,HudSlotHold,HudSlotHold,L,H,PROMOTE,counts down,0
+0x8016EBA8,engine,HudSlotSlideOut,HudSlotSlideOut,L,H,PROMOTE,"slides out, counting down",0
