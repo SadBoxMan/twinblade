@@ -171,3 +171,71 @@ second, simpler pool (128 x 0x38 at D_8011DB30, handlers D_80126AEC by kind).
 | 0x80143BDC | func_80143BDC | SpawnShadowBAt | kind 0x1C, n 1, at a point, no owner | L | eC98C; 30 calls |
 | 0x80143C74 | func_80143C74 | SpawnKind205 | SpawnActorArg kind 0x205 | L | eC98C; 83 calls / 45 files, the result's fields are set by the caller. Kind unknown: placeholder name |
 | 0x80143CD4 | func_80143CD4 | SpawnKind39Trio | kind 0x39 with n 0, 1, 2 | L | eC98C; 8 calls |
+
+## Collision
+
+Two families. **Map collision** runs a path (from, to) through the room's collision map (the "current header"
+D_801ED3B0, a cell grid of 0x80-unit cells with polygon records; the room record's +0x88/+0x8C/+0x90 give the map and two
+alternates). The path's end comes back moved, its `pad` set to the hit polygon's first halfword (low byte = the surface
+type), and the result's bits say what was hit: **0x2000 floor** (normal y below -0xBCB, i.e. facing up), **0x4000 steep
+slope** (-0xBCB..-0x578), **0x8000 wall**; types 2 and 0x1B also set 0x1000. Mode bit 0x10 lets the path pass polygons
+whose record has flag 0x100. **Model collision** tests a path against one model's collision data (the actor's hitData
++0x58; Musashi's model D_80126B78 and hitData D_80126B90).
+
+### Moving with the map
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8012CC88 | func_8012CC88 | MoveCollideOfs | MoveObject, then CollidePath from the old to the new position (both + ofs) with a mode; vel y = 0 on floor or slope; returns the bits | H | e.c |
+| 0x8012CBA4 | func_8012CBA4 | MoveOnGround | MoveCollideOfs mode 0 (walk: the path, then a probe down for the ground), no offset | H | e.c. 345 calls / 81 files; stage tests `& 0x6000` (88x: on ground) |
+| 0x8012CBCC | func_8012CBCC | MoveCollide | mode 1 (one straight path), no offset | H | e.c. 432 calls / 83 files; `& 0x2000` (107x: landed), `& 0x8000` (25x: hit a wall); e5F4 func_8012F68C tests `(u8)r == 2` (surface type) |
+| 0x8012CBF4 | func_8012CBF4 | MoveCollidePassable | mode 0x11: as MoveCollide, passing polygons flagged 0x100 | M | e.c + e5F4 func_80133CD4 (`(kind & 0x10) && (rec[0] & 0x100)` skips). 272 calls / 75 files |
+| 0x8012CC1C | func_8012CC1C | MoveOnGroundOfs | MoveOnGround with an offset point (e.g. a body centre above the feet) | H | e.c; 22 calls |
+| 0x8012CC40 | func_8012CC40 | MoveCollideAt | MoveCollide with an offset | H | e.c; 45 calls |
+| 0x8012CC64 | func_8012CC64 | MoveCollidePassableAt | MoveCollidePassable with an offset | H | e.c; 94 calls / 38 files |
+| 0x8012CEB0 | func_8012CEB0 | CollidePath | mode bit 0: one TraceMap (mode 1); else TraceMap mode 0, then a 6-unit probe down (mode 2) for the floor; the result | H | e.c. 184 calls / 69 files: `& 0x1F` (32x, the surface type), `& 0x2000` (37x) |
+| 0x8012CE2C | func_8012CE2C | IsOnGround | an 8-unit path down from the position stops nowhere short | M | e.c comment ("standing on something"); 7 calls |
+| 0x8012B030 | func_8012B030 | SnapToGround | (listed under motion) | | |
+
+### The room's collision map
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80133784 | func_80133784 | TraceMap | a path through the current map (up to five slides off what it hits); the end moved, flags 0x2000 / 0x4000 / 0x8000 | H | e5F4 comment. 251 calls / 61 files: `func_80133784(1, &a, &b) & 0x6000` (58x), `!= 0` (52x) |
+| 0x80133AB0 | func_80133AB0 | TraceMapCell | the polygon records of the cell under (x, z) against the path | H | e5F4 |
+| 0x80133CD4 | func_80133CD4 | TraceMapPolygon | one polygon record (3 or 4 edges): crossing, the end pushed out along the normal, floor / wall noted | M | e5F4 |
+| 0x801343C4 | func_801343C4 | TraceMapTwoCells | the path against its start cell, then its end cell when that differs; no slides | H | e5F4 comment; 2 calls |
+| 0x80134510 | func_80134510 | FindGround | the ground under a point (a path from 4 above to 0x2FC below); y set to it | H | e5F4 comment. 29 calls / 27 files: `if (func_80134510(&b) != 0 && y - b.y < 0x80)`; the shadows use it |
+| 0x80135168 | func_80135168 | RaycastMap | the path against the map's cell records with the second record test (func_80134A74 / func_80134C20): the end set to the hit, no slide | M | e5F4 comment; 2 calls |
+| 0x80135004 | func_80135004 | RaycastMapTwoCells | the same, tried again from the end cell | M | e5F4 comment; 4 calls (`func_80135004(1, &a, &b)`) |
+| 0x80134A74 | func_80134A74 | RaycastMapCell | the cell's records for that test | M | e5F4 |
+| 0x801336E8 | func_801336E8 | SetCollisionMaps | the current map (relocated once, func_80136BC4) and two alternates | H | e5F4 comment; the loader passes room +0x88, +0x8C, +0x90 (e4B9C func_80144B9C) |
+| 0x8013373C | func_8013373C | SelectCollisionMap | make alternate i (0 / 1) the current map | H | e5F4 comment. 21 calls / 12 files: `func_8013373C(0)`, `(1)` |
+| 0x80136BC4 | func_80136BC4 | RelocateCollisionMap | turn the header's section offsets (+0xC..+0x1C) into addresses once | M | e5F4 (the struct comment at line 298) |
+
+### Model collision
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80135888 | func_80135888 | PathHitsModel | a path (from, to) against a model's collision (model, hitData); on a hit `to` is moved | H | e5F4. 166 calls / 79 files: `func_80135888(a->model, a->hitData, &p, &q)`, `func_80135888(D_80126B78, D_80126B90, ...)` (Musashi's model and hitData) |
+| 0x80135260 | func_80135260 | PathHitsModelTwoCells | the same with a second try at the end cell | H | e5F4 comment; 5 calls |
+| 0x80135A4C | func_80135A4C | PathHitsMovingModel | the same for a moving path (up to six tries along it) | M | e5F4 comment; 4 calls |
+| 0x80135D20 | func_80135D20 | FindGroundOnModel | a point's ground on a model; the position moved with the model's frame | M | e5F4 comment |
+| 0x80135480 | func_80135480 | ClassifyModelHit | which of the four lists / frames a model hit uses (0 none, 1-4) | L | e5F4; internal |
+| 0x8013361C | func_8013361C | BoxesOverlap | two collision boxes at two offsets overlap on x, z and y | H | e5F4 comment |
+
+### Hits on Musashi and on actors
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8012F568 | func_8012F568 | HitPlayer | note a hit on Musashi: hitFlags |= flags, +0x3E kind, +0x42 facing, +0x40 damage, the two points | H | e.c comment. 117 calls / 57 files: `func_8012F568(1, 1, facing, damage, &p, &D_801152A8)` |
+| 0x8012DB84 | func_8012DB84 | HitPlayerFatal | D_80126B50 = 1 (func_8014C978), then HitPlayer(1, 0xC001, 0, 1000) | M | e.c; 15 calls / 8 files, no arguments (falls and instant-death floors). 1000 damage and kind 0xC001 are the reason for "fatal" |
+| 0x8012DF34 | func_8012DF34 | SegmentHitsPlayer | a world segment hits Musashi's model (unless the actor's +0xAA says not), then HitPlayer | H | e.c comment; 11 calls |
+| 0x8012DEB8 | func_8012DEB8 | ActorSegmentHitsPlayer | the same for a segment in the actor's model frame (FaceHelper turns both points), noting the actor's heading | H | e.c comment. 219 calls / 48 files: `if (func_8012DEB8(a, &p0, &p1) == 1)` (weapon / body segments) |
+| 0x8012D5E4 | func_8012D5E4 | ActorSegmentDamagesPlayer | ActorSegmentHitsPlayer, then Musashi's damage (+0x40) = v | H | e.c comment. 208 calls / 72 files: v = 0x96, 0x30 |
+| 0x8012D664 | func_8012D664 | PointHitsPlayer | a point within r + 0x20 of Musashi's chest (0x40 above his feet): HitPlayer with damage x | H | e.c comment; 7 calls `(&v, 0x10, 0xB4)` |
+| 0x8012D624 | func_8012D624 | ActorTouchesPlayer | PointHitsPlayer from the actor's position | H | e.c. 94 calls / 40 files: `func_8012D624(a, 0x1C, 0xA) == 1` (radius, damage) |
+| 0x8012D714 | func_8012D714 | HitBoxEdgesHitPlayer | the actor's collision box edges (bit 1 x, 2 y, 4 z) tested with ActorSegmentHitsPlayer | H | e.c comment; 9 calls |
+| 0x8012DBD0 | func_8012DBD0 | DamageActorsNear | every hittable actor (flags5C 0x8000, not 0x4000, not already hit by this hit id) within the actor's box radius takes speed/angle/hit id n: flags5C |= 1 | H | e.c. 27 calls / 19 files: `func_8012DBD0(a, 0x50, heading + 0x800, 0x1D)` |
+| 0x8012E9C0 | func_8012E9C0 | TakeDamage | pending damage (+0x60) scaled by the init record's +0x30, applied (func_8016AA50); finished: func_8016B428 and a rumble | H | e.c comment; 27 calls / 22 files |
+| 0x80131B14 | func_80131B14 | TakeDamageAndRecoil | the same plus HP (+0x76) -= damage, status effects (func_8002A520 / func_8002A790), the model turned to the knock angle, StopWithGravity | H | e5F4. 45 calls / 36 files |
