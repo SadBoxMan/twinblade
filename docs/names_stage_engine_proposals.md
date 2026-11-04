@@ -21,11 +21,11 @@ that everything still matches. Snapshot: main = fab5bf5a (4 Nov 2026).
   its field names; corrections to those comments are in "Struct fields" at the end.
 
 ## Summary
-* 482 function proposals: 310 H, 124 M, 48 L. 74 global proposals: 50 H, 24 M. Struct-field proposals for StageActor,
+* 496 function proposals: 311 H, 127 M, 58 L. 74 global proposals: 50 H, 24 M. Struct-field proposals for StageActor,
   Player, the effect record and Camera at the end. Nine names that already exist only in a `symbol_addrs.txt` comment
   are listed separately (not counted).
-* Coverage: of the 462 engine functions stage code calls, every one with 9 or more call sites is here (plus most below
-  that), and the engine functions around them that the evidence needed.
+* Coverage: of the 462 engine functions stage code calls, every one with 9 or more call sites is here (a few only with
+  L names), plus many below that and the engine functions around them that the evidence needed.
 * Found along the way (worth a look when the names are applied):
   * func_8012C044's comment says "in range of Musashi's focus", but the test is distance >= D_801274E0: it is the
     *out of range* test (hence IsActorFar / DespawnIfFar).
@@ -36,9 +36,8 @@ that everything still matches. Snapshot: main = fab5bf5a (4 Nov 2026).
     BumpSub1 / BumpSub2, func_8014C168 = FindActorByKind, func_801473DC = ClearEffectVel.
 
 ## What is left
-* About 110 stage-called engine functions with fewer than 9 call sites (mostly 1-6), e.g. func_8014CC28,
-  func_8014F3E8, func_801535F4, func_8013CB84, func_80147A84 / func_80147AD4, func_8014B598 / func_8014B5C4,
-  func_801495C4, func_8017303C, func_801726xx readers, func_80162120..func_80162760, func_801696D8 / func_80169A4C.
+* About 110 stage-called engine functions with fewer than 9 call sites (mostly 1-6), e.g.
+  func_80147AD4, func_8017303C, func_801726xx readers, func_80162120..func_80162760, func_801696D8 / func_80169A4C.
 * Musashi's own controller (0x80146128-0x8016Exxx: movement, ground and wall handling, the hit handler tables) is only
   touched where stage code calls into it; most of it is still func_.
 * The ~1850 engine functions no stage code calls were not surveyed except where an area needed them.
@@ -663,7 +662,10 @@ Stats at 0x80078E78 (EXE bss; e5F4's Stats struct): +0x3A hpMax (0x80078EB2), +0
 | 0x8017267C | func_8017267C | PlayerState1F4Bit8 | +0x1F4 & 8 | L | e58E0 |
 | 0x80172630 | func_80172630 | SetPlayerState1F4Bit100 | +0x1F4 \|= 0x100 | L | e58E0; 26 calls |
 
-### Game flags and counters (wrappers over the EXE's flag store: func_80029178 = GetFlag in symbol_addrs.txt's comment, func_80029124 its setter, func_800291A0 / func_800291B4 the byte variables)
+### Game flags and counters
+
+Wrappers over the EXE's flag store: func_80029178 (GetFlag in symbol_addrs.txt's comment), func_80029124 its setter,
+func_800291A0 / func_800291B4 the byte variables.
 
 | address | current | proposed | purpose | conf | evidence |
 |---|---|---|---|---|---|
@@ -729,6 +731,42 @@ at D_801EF328. docs/stage_engine.md calls it "the sequence player"; what it play
 | 0x8013B598 | func_8013B598 | SetSeqPoint | point i on at a position, value 0x100 | M | eB568; 14 calls |
 | 0x8013B6A0 | func_8013B6A0 | SetSeqPointN | the same with a value | M | eB568 |
 | 0x8013B7AC | func_8013B7AC | ClearSeqPoint | point i off | M | eB568; 21 calls |
+
+### Second pass (smaller callers)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801783D0 | func_801783D0 | ToBcd | n as packed decimal digits (a nibble each), shifted left by s | H | e58E0; 8 calls |
+| 0x8017AD0C | func_8017AD0C | LoadItemIcon | copy item n's palette row and 32 x 40 picture into the HUD's VRAM spot (MoveImage) | M | e58E0 |
+| 0x8017ADE8 | func_8017ADE8 | ShowItemIcon | LoadItemIcon | M | e58E0; 17 calls / 5 files |
+| 0x8014C168 | func_8014C168 | FindActorByKindAny | the first actor of a kind (no skip; a second copy of FindActorByKind) | H | e58E0; abil ovl20 `func_8014C168(a, 0x15C)` |
+| 0x80149350 | func_80149350 | ObjLocalToWorld | LocalToWorld with the object's model matrix | H | e58E0; 13 calls / 13 files |
+| 0x80149374 | func_80149374 | ObjLocalToWorld16 | the same for a 16.16 point | H | e58E0; 26 calls / 29 files |
+| 0x80148038 | func_80148038 | AddFallSpeedLimited | +0x34 += v unless it is already past +-0x1F0000 that way | H | e58E0; 24 calls / 16 files: `(a, 0x18000)` (gravity on the player-side objects) |
+| 0x80159B3C | func_80159B3C | ResetPlayerKind | SetKindAndState(p, 0), then the kind-0 state handler | M | e58E0; 45 calls / 24 files; StartPlayerAction uses it to stop Musashi |
+| 0x801599A4 | func_801599A4 | RunPlayerKindHandler | the player object's handler by kind (D_8018FBA8) | M | e58E0 |
+| 0x80159B70 | func_80159B70 | RunPlayerStateHandler | its kind-0 handler by state (D_8018FCF0) | M | e58E0 |
+| 0x8014B154 | func_8014B154 | ObjFlag80 | +0x44 & 0x80 | L | e58E0 |
+| 0x8014B12C | func_8014B12C | PlayerFlag80B | ObjFlag80 on Musashi | L | e58E0; 27 calls / 9 files |
+| 0x8014E934 | func_8014E934 | CollidePlayerMove | the player's move from +0x88 to here checked twice (func_8014EA4C), on the scratchpad stack | M | e58E0; 32 calls / 21 files |
+| 0x80175454 | func_80175454 | OpenHudPanel | D_8011F7A8 state 0 to 1 (a panel with a 0xA-frame count) | L | e58E0; 21 calls / 21 files |
+| 0x80175414 | func_80175414 | CloseHudPanel | state 1 to 0 | L | e58E0; 39 calls / 26 files |
+| 0x801754A8 | func_801754A8 | UpdateHudPanel | its step by state (D_80190CF8), +9 = whether it may show | L | e58E0; 9 calls |
+| 0x8015BF48 | func_8015BF48 | SetPlayerKind4 | SetKindAndState(p, 4) and its start (func_8015C0C4) | L | e58E0; 10 calls |
+| 0x8013CB84 | func_8013CB84 | UpdateDayLighting | when the time-of-day period (byte 0x80078EAF, 0-4) changes, the light colours and ambient from D_8018DE74 / D_8018DE3C are eased in (func_8013D9B0 / func_8013DBE4, then the GsF lights, func_8013CF68); the village (0x1010) blends periods 3 and 4 | M | eC98C; 24 calls / 24 files (each stage's frame) |
+| 0x8013CF68 | func_8013CF68 | ApplyDayLights | lights 0-2 (func_80028620) from the period's colours | M | eC98C |
+| 0x8012CB64 | func_8012CB64 | IsInArea | an object's (or a point's) position within an x / z rectangle (four limits) | L | e.c (INCLUDE_ASM, no C yet); 30 calls / 10 files: `func_8012CB64(o, -0xC0, 0x40, -0x60, 0)`, `(&xy, -0xA0, 0x80, -0xC0, 0x80)` |
+| 0x801535F4 | func_801535F4 | MovePlayerObj | a player-side object's move: 2 on a slope (0x4000), 1 on the floor (0x2000), 4 at a wall (0x8000), 1 when falling onto ground | M | e58E0 (the CollidePath bits); 18 calls / 10 files: `switch (func_801535F4(o))` |
+| 0x8014F3E8 | func_8014F3E8 | PlayerObjGroundStep | unless +0x44 bit 18: the ground step when the position did not change since +0x88, else the move step | L | e58E0; 32 calls / 21 files |
+| 0x8014CC28 | func_8014CC28 | PlayerObjFallStep | while +0x44 bit 31: the fall step (height changed) or the slide step (x / z changed); else the stand step | L | e58E0; 32 calls / 21 files |
+| 0x801511E0 | func_801511E0 | ApplyQueuedHurt | the value at +0xF2 (unless 0 or 1000) handed to func_8014ACE8(o, 1, v & 0x7FFF) | L | e58E0; 34 calls / 24 files |
+| 0x8014CB2C | func_8014CB2C | GetPlayerByte1C7 | Player +0x1C7, bit 7 moved to bit 31 | L | e58E0; 24 calls / 23 files: `(func_8014CB2C() & 0x7FFFFFFF) == 2` |
+| 0x8014B5C4 | func_8014B5C4 | SetObjByte1C7 | +0x1C7 = a \| b | L | e58E0; 9 calls: `func_8014B5C4(a, func_8014CB58() & 0xFF, 0x80)` |
+| 0x8014B598 | func_8014B598 | SetPlayer1C4And21C | Player +0x1C4 = n (byte), +0x21C = a pointer | L | e58E0; 9 calls / 16 files: `(3, &stage_data)` |
+| 0x8014B2A8 | func_8014B2A8 | ClearStatsWords | the words 0x80078E94 and 0x80078ECC cleared (func_8014B2F8) | L | e58E0; 9 calls |
+| 0x80141C04 | func_80141C04 | StageModeNop | an empty function | H | eC98C; 9 calls (kept as a hook) |
+| 0x80147A84 | func_80147A84 | ResetObjMoveParams | func_80147AD4(o, 0, 0, 0): four move parameters set (func_80147CC8) and applied (func_80147B5C) | L | e58E0; 13 calls / 11 files |
+| 0x801495C4 | func_801495C4 | IntoParentFrame | a point (x, y, z at +2 / +6 / +0xA) through the parent's transform (h_801495C4) | L | e58E0; 13 calls: `func_801495C4(a->+0x34, a + 4)` |
 
 ## Globals
 
@@ -912,25 +950,3 @@ Proposals only; the local card should change the header together with a rebuild.
 | +0x18 / +0x20 | angle / angleTarget (SVECTOR) | ResetKeptCamera (pitch 0x238), SnapCamera |
 | +0x28 / +0x2E | ofs / ofsTarget (Vec3s) | SnapCamera |
 | +0x9C, +0xA0, +0xA2 | updateVars | SetCameraUpdateOf clears them; stage updates use +0xA0 (a direction 0-7 in sc03_002) and +0xA2 (a count) |
-
-### Second pass (smaller callers)
-
-| address | current | proposed | purpose | conf | evidence |
-|---|---|---|---|---|---|
-| 0x801783D0 | func_801783D0 | ToBcd | n as packed decimal digits (a nibble each), shifted left by s | H | e58E0; 8 calls |
-| 0x8017AD0C | func_8017AD0C | LoadItemIcon | copy item n's palette row and 32 x 40 picture into the HUD's VRAM spot (MoveImage) | M | e58E0 |
-| 0x8017ADE8 | func_8017ADE8 | ShowItemIcon | LoadItemIcon | M | e58E0; 17 calls / 5 files |
-| 0x8014C168 | func_8014C168 | FindActorByKindAny | the first actor of a kind (no skip; a second copy of FindActorByKind) | H | e58E0; abil ovl20 `func_8014C168(a, 0x15C)` |
-| 0x80149350 | func_80149350 | ObjLocalToWorld | LocalToWorld with the object's model matrix | H | e58E0; 13 calls / 13 files |
-| 0x80149374 | func_80149374 | ObjLocalToWorld16 | the same for a 16.16 point | H | e58E0; 26 calls / 29 files |
-| 0x80148038 | func_80148038 | AddFallSpeedLimited | +0x34 += v unless it is already past +-0x1F0000 that way | H | e58E0; 24 calls / 16 files: `(a, 0x18000)` (gravity on the player-side objects) |
-| 0x80159B3C | func_80159B3C | ResetPlayerKind | SetKindAndState(p, 0), then the kind-0 state handler | M | e58E0; 45 calls / 24 files; StartPlayerAction uses it to stop Musashi |
-| 0x801599A4 | func_801599A4 | RunPlayerKindHandler | the player object's handler by kind (D_8018FBA8) | M | e58E0 |
-| 0x80159B70 | func_80159B70 | RunPlayerStateHandler | its kind-0 handler by state (D_8018FCF0) | M | e58E0 |
-| 0x8014B154 | func_8014B154 | ObjFlag80 | +0x44 & 0x80 | L | e58E0 |
-| 0x8014B12C | func_8014B12C | PlayerFlag80B | ObjFlag80 on Musashi | L | e58E0; 27 calls / 9 files |
-| 0x8014E934 | func_8014E934 | CollidePlayerMove | the player's move from +0x88 to here checked twice (func_8014EA4C), on the scratchpad stack | M | e58E0; 32 calls / 21 files |
-| 0x80175454 | func_80175454 | OpenHudPanel | D_8011F7A8 state 0 to 1 (a panel with a 0xA-frame count) | L | e58E0; 21 calls / 21 files |
-| 0x80175414 | func_80175414 | CloseHudPanel | state 1 to 0 | L | e58E0; 39 calls / 26 files |
-| 0x801754A8 | func_801754A8 | UpdateHudPanel | its step by state (D_80190CF8), +9 = whether it may show | L | e58E0; 9 calls |
-| 0x8015BF48 | func_8015BF48 | SetPlayerKind4 | SetKindAndState(p, 4) and its start (func_8015C0C4) | L | e58E0; 10 calls |
