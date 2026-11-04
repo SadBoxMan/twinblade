@@ -44,8 +44,12 @@ packages use. 4. Shared shapes and clones. 5. Package by package (slot 2: ovl13-
   `func_ovlNN_800CAE0C() { func_800183E0(D_ovlNN_xxx); }`: func_800183E0 (src/code_800123F0.c) puts a pointer into
   the first free of 32 records at Work + 0xA1A8 (D_800B97D8), the **end-of-frame image upload queue** that
   FlushImageQueue walks (record types 9 and 0 -> LoadImage of a RECT). So the entry uploads the package's own
-  palette / texture to VRAM. (H) The exceptions are listed per package (ovl2b Acid's 800CAE0C is a per-frame hook,
-  below; ovl1f, ovl2d and ovl28 start later).
+  palette / texture to VRAM. (H) Who calls it: func_801554B8 (engine), when Musashi's pending ability a+0x1A0
+  differs from the loaded one a+0x196, runs func_800D02D0(a+0x1A0) and, once the package is in, func_801659DC(a) =
+  `D_801902E8[a+0x1A0](a)`, a per-ability after-load table in the stage data; its entries are presumably these image
+  entries (M: the table is data, but no other caller exists). The exceptions are listed per package (ovl2b Acid's
+  800CAE0C is a per-frame hook, below, so its load entry is another function; ovl1f and ovl2d start at 800CAE14,
+  ovl28's image entry is 800CC144).
 * **The per-frame entry** is the **button template**,
   `func(a) { a+0x44 |= 8; D_ovlNN_steps[a+0x197](a); }`: Musashi's ability step machine, step byte at actor + 0x197,
   flag 8 in +0x44 marking "an ability is running". All 29 slot-2 packages have exactly one (section 4), usually the
@@ -66,6 +70,8 @@ packages use. 4. Shared shapes and clones. 5. Package by package (slot 2: ovl13-
 | Per-ability cost byte, `D_801901EC[ab]`: low 7 bits the BP cost, bit 0x80 a "continuous" flag | func_80165658 | H (cost), M (flag meaning) |
 | Per-ability duration, `D_8019020C[ab]` -> D_80078EC8 | func_80165670 | H |
 | Three more per-ability byte tables (D_80190288, D_801902A8, D_801902C8) | func_801656D0, func_801656E8, func_80165700 | H (exist), unknown use |
+| Per-ability after-load hook, `D_801902E8[ab](a)` | func_801659DC, from func_801554B8 (the package load) and func_8016533C (stage start) | H (call), M (entries = image entries) |
+| Pending / loaded ability on Musashi | a+0x1A0 / a+0x196 (func_801554B8) | H |
 | BP: current D_80078EB8, max D_80078EB6 (cap 0x662); spend func_8014BD60(a, n), add func_8014BD24 | engine 4671 | H (the meter abilities spend; "BP" is the US HUD term, M) |
 | HP: D_80078EB4 (add func_8014BB24, cap 500, or 999 with flag 0x1B; damage func_8014BC80) | engine 4587 | M |
 
@@ -163,7 +169,12 @@ says each does. Musashi is the stage engine's actor D_80126B58; the template's `
 | func_80163194 | 7 | velocity from three angles and a matrix (D_80127090..98), then func_80146D30 | L |
 | func_8014C278(a, b, r) | 6 | distance(a, b) < r | H |
 | func_80148800(a) / func_801487F4(a) | 6 / 4 | pad words a+0xAC (pressed) / a+0xAA (held) | M |
-| func_80147364(id, b) | 6 | the sound call func_80147324 makes | H |
+| func_80147364(id, b) | 6 | the sound call behind func_80147324 (func_8002D4C8(id, b)); `func_80147364(4, S)` is sound command 4 on sound S, used in cleanups: stop sound S | H (call), M (stop) |
+| func_801657A0() / func_80165840() | 4 / 3 | SAVE the stats D_80078E94.. into D_80078ECC.. (latch D_80078EC3) / RESTORE them | H |
+| func_8014C4AC(t, type, dmg, pos, angle) and func_8014C3A4 / func_8014C3D0 | 3+ | deliver a hit to actor t (+0x5E type, +0x60 damage, +0x62 angle, +0x5C \|= 1); the two wrappers roll the damage (func_80156370) and take the angle from the attacker's facing / the line to the target | H |
+| func_80155FF8(a, n) (via func_80155FB0 / func_80155FD4) | 3 | Musashi's sword-attack collision with attack record n (func_80156044; tables D_8018F3CC, D_8018F548), active while a+0x1A8 != 0 (func_80156648 clears it) | M |
+| func_80162F08 / func_80162FF4 / func_80163194 | 2 / 4 / 7 | add an acceleration to +0x24..+0x2C (clamped +-0x7F0000); FF4 then sets the velocity from it rotated by the model's angles, 194 by a matrix | H |
+| func_8016380C(o, out) / func_80163950(o) | 2 / 3 | map line test from o+0x44 to the position (snap on hit) / land on a platform actor | H |
 | func_8001CD9C / func_8001CD50 / func_8001CB00 | 6 / 5 / 3 | init a sprite slot as kind 6 / 5 / 1 | H |
 | func_80012ABC | 6 | turn an angle toward a target, step-limited | M |
 | func_80154150(a, i) | 5 | start animation number i of the actor's table (a+0xB0) | H |
