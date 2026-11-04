@@ -14,6 +14,8 @@ Records covered, with the functions that touch them:
 | Effect68 | 0x8011F9D0 x20 | 0x68 | 99 | 474 | 3.2 |
 | Trail | 0x801ED6A8 + id * 0xC4 | 0xC4 | 3 | - | 3.3 |
 | Work (with the model pool and the small-object pool inside it) | 0x800AF630 | 0xA444 | 1 218 | 2 315 | 4 |
+| GameState (the live save data: clock, HP / BP, levels) | 0x80078E78 | 0xB0+ | 480 | 1 199 | 5 |
+| StageMode | 0x80115110 | 0xC0 | 200 | 1 043 | 6 |
 
 Confidence: **H** an engine or EXE routine pins the meaning; **M** consistent use in several places; **L** offset, size
 and a guess. "funcs" counts functions (the stg files repeat code across stages, so accesses overcount).
@@ -329,6 +331,140 @@ both as u8 and through `(*(u8 *)&D_800B9A11)`, which is the same.
 and their models would tell (Musashi's sword, effects, NPCs?). (2) The image queues' entries beyond the flag.
 (3) +0x01A0..+0x02A7 (0x108 bytes) and +0x0174: untouched by the C; anything there in a dump?
 
+## 5. The game state record (0x80078E78)
+
+**Why it qualifies.** The 0x80078xxx page is used by 516 functions; nearly all of it is one record at 0x80078E78,
+reached by 480 functions: as `u8` with offsets (`AF(&D_80078E78, T, off)`, `s[0x37]`), through six local typedefs
+(ovl37's `DbgStats` 0x98 bytes and `DbgClock`, the engine's `Stats`, ovl36's `FieldStats`, `G37`, `Blk98`,
+`StatsLoad`) and by absolute symbols (`D_80078E92`, `D_80078EB1` ...). 1 199 accesses, 66 offsets. Nothing in
+include/ names it yet. It looks like the live copy of the save data: the play clock, the time of day, Musashi's
+HP / BP, counters and levels, set up by a new-game routine (code_800123F0.c:func_800295D4).
+
+The census stops at +0xB4 (`D_80078F28`, +0xB0, starts two 0x2DC-byte blocks that func_80029690 clears: a separate
+table). The event flags tested by func_80029178(n) are elsewhere (a bit array at 0x800AE648).
+
+| off | type | name | meaning | conf | evidence |
+|---|---|---|---|---|---|
+| 0x04 | u8[4] | `playTime` | frames (to 30), seconds, minutes, hours; stops at 99:59:59 (`0x633B3B00`) | H | code_800123F0.c:func_80029444 |
+| 0x08 | s32 | `progress08` | returned by func_80029504; compared with 0x4B0 / 0x640 and `>= 10` (a story or day counter) | M | code_800123F0.c:func_80029504, func_80029ED4; engine.c:func_8012832C |
+| 0x0C | s32 | `unk0C` | getter func_8002953C | L | code_800123F0.c:func_8002953C |
+| 0x10 | s32 | `unk10` | getter func_8002957C | L | code_800123F0.c:func_8002957C |
+| 0x14 | s32 | `money14` | 100 at a new game, added to, tested `>= 0x32` with flag 0x11A (37 accesses) | M | code_800123F0.c:func_800295D4 |
+| 0x18 | s32 | `clockSet` | set, then the clock fields are recomputed | M | code_800123F0.c:func_8002931C |
+| 0x1A | u16 | `clock` | the time of day in minutes (0x1A4 = 7:00, 0x528 = 22:00; 90 accesses) | H | code_800123F0.c:func_80029344 |
+| 0x1C..0x32 | s32 / s16 pairs | `unk1C`.. | written by the engine (func_8014B33C, func_8014B5D8, func_8014B7A4), +0x26 read by FaceSet; +0x2C is 0xA00000 at set-up, `+= n`, its high half compared with 0xA0 / 0x80 | L | engine_801458E0.c:func_8014B190, func_8014B5D8 |
+| 0x34 | u16 | `unk34` | (ovl36 FieldStats.unk34; 39 accesses) | L | engine_801458E0.c:func_8014B084 |
+| 0x36 | u8 | `daytime` | 1 from 7:00 to 19:00; actors' hit points are x1.5 when it is 0 (night) | H | code_800123F0.c:func_80029344; engine.c:func_8012C354 |
+| 0x37 | u8 | `dayPeriod` | 0..4 from the clock | H | code_800123F0.c:func_80029344 |
+| 0x38 | u8 | `clockMin` | minutes | H | code_800123F0.c:func_80029344 |
+| 0x39 | u8 | `clockHour` | hours (127 accesses: the most read field) | H | code_800123F0.c:func_80029344; ovl36.c:func_800D0D7C |
+| 0x3A | u16 | `hpMax` | 250 at a new game (engine's `Stats`) | H | code_800123F0.c:func_800295D4; engine_8012F5F4.c (Stats) |
+| 0x3C | u16 | `hp` | | H | idem |
+| 0x3E | u16 | `bpMax` | | H | idem |
+| 0x40 | u16 | `bp` | | H | idem |
+| 0x42 | u8 | `unk42` | a mode compared with 0, 3, 4 (60 accesses; 0 enables the price shuffle of func_8002AC98) | L | code_800123F0.c:func_8002AC98 |
+| 0x43..0x47 | u8 | `unk43`.. | set by the debug menu (ovl37) and the engine | L | ovl37.c:func_800D0964; engine_801458E0.c:func_80149744 |
+| 0x48 | u8 | `unk48` | bit 7 a flag, low 7 bits a value; 1 at a new game | L | code_800123F0.c:func_800295D4 |
+| 0x49 | u8 | `unk49` | compared with 2, 5, 8, 0x10, 0x15 in 100 functions (a chapter or equipped-item number) | L | engine_801458E0.c:func_80146128 |
+| 0x4A..0x4E | u8 | | small flags | L | engine_801458E0.c:func_8015FF20, func_801657A0 |
+| 0x50 | s32 | `unk50` | 29 accesses; tested `== 0` and `< 0x28` | L | engine_801458E0.c:func_80146128 |
+| 0x54..0x68 | s32 | | written by the engine's status code | L | engine_801458E0.c:func_8014B350, func_8014B944, func_801657D8 |
+| 0x6C | s32[4][2] | `levels` | four (level, progress) pairs: the level capped at 30 (func_8002A234: +0x6C, +0x70), the same pattern at +0x74/+0x78, +0x7C/+0x80, +0x84/+0x88 | M | code_800123F0.c:func_8002A108, func_8002A234, func_8002A354, func_8002A480, func_8002A5C4, func_8002A6F0, func_8002A834, func_8002A960 |
+| 0x8C | s32[3] | `odometer` | a sub-counter (mod 102), a total capped at 9 999 999, and the total last reported (every 10 units calls func_8002A2D4) | M | code_800123F0.c:func_80029ED4 |
+
+```c
+typedef struct {
+    /* 0x00 */ u8 pad00[4];
+    /* 0x04 */ u8 playTime[4];        /* frames, s, min, h */
+    /* 0x08 */ s32 progress08;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 money14;
+    /* 0x18 */ s16 clockSet;
+    /* 0x1A */ u16 clock;              /* minutes */
+    /* 0x1C */ s32 unk1C[6];           /* with s16 reads at +0x1E, +0x22, +0x26, +0x2A, +0x2E, +0x32 */
+    /* 0x34 */ u16 unk34;
+    /* 0x36 */ u8 daytime;
+    /* 0x37 */ u8 dayPeriod;
+    /* 0x38 */ u8 clockMin;
+    /* 0x39 */ u8 clockHour;
+    /* 0x3A */ u16 hpMax;
+    /* 0x3C */ u16 hp;
+    /* 0x3E */ u16 bpMax;
+    /* 0x40 */ u16 bp;
+    /* 0x42 */ u8 unk42[7];
+    /* 0x49 */ u8 unk49;
+    /* 0x4A */ u8 unk4A[6];
+    /* 0x50 */ s32 unk50[7];
+    /* 0x6C */ s32 levels[4][2];
+    /* 0x8C */ s32 odometer[3];
+    /* 0x98 */ u8 pad98[0x18];
+} GameState; /* 0xB0 known; D_80078E78 */
+```
+
+**Conflicts.** (1) +0x18: s32 by the census (`D_80078E90 = a`), but +0x1A is the u16 clock written through it: the draft
+splits it into `s16 clockSet` + `u16 clock`, which a matched s32 store would not allow (check func_8002931C).
+(2) +0x1C..+0x33: s32 writes and s16 reads at the odd halves (the high halves of s32 values read as s16). (3) +0x38:
+u8 (minutes) by the clock code, s16 by `DbgStats.unk38`: the debug overlay reads +0x38 and +0x39 as one s16.
+(4) Six different typedefs over the same bytes, with their own names (`unk37`, `b37`, `unk34`): one shared struct in
+include/ would replace them.
+
+**Open questions.** (1) What are +0x08 / +0x0C / +0x10 (a day count, a playthrough count?) and the four levels at
++0x6C (sword techniques? the Bincho fields?). (2) Is the record the save block (a memory-card save would show it
+byte for byte)? (3) +0x49: log it across the story.
+
+## 6. The stage mode state (0x80115110, 0xC0)
+
+Already a typedef (`StageMode`, src/stage/engine_8013C98C.c and engine_8012F5F4.c). 1 043 accesses in 200
+functions, 39 offsets, almost all by absolute symbol in a group of stages (sc01_004 / 005 / 006 / 008 / 009,
+sc03_124, sc04_018 / 019, sc05_017, sc03_001: the menu-like scenes). The census adds:
+
+| off | type | name | meaning | conf | evidence |
+|---|---|---|---|---|---|
+| 0x02 | u16 | `mode` | the step (155 accesses, `++` and `+= 1` in stage code) | H | engine_8013C98C.c:func_8013E588 |
+| 0x0A | s16 | `cursor` | the selected entry (`cur = D_8011511A`, passed to func_8014168C; 222 accesses) | M | engine_8013C98C.c:func_8013E6AC |
+| 0x12 | u16 | `wait` | a countdown (`if (--D_80115122 == 0)`, set to 3 / 8 / 12) | M | engine_8013C98C.c:func_8013F350 |
+| 0x16 | s16 | `screen` | which screen of the scene (compared with 0..4, set from an argument; 197 reads) | M | sc01_004.c:func_sc01_004_8017D308 |
+| 0x20 | s32 | `message` | the message shown | H | engine_8013C98C.c:func_8013EB7C |
+| 0x24 | void * | `list` | a list of 0x20-byte entries (`R8017D4A4`) | L | sc01_004.c:func_sc01_004_8017D4A4 |
+| 0x3C | u16 | `unk3C` | 32 accesses | L | engine_8013C98C.c:func_8013EA54 |
+
+(The typedef's other fields stand; `W80115118` in sc01_004.c is a view of the same record from +0x08.)
+
+## 7. Other candidates checked
+
+Records read through one pointer or one base in 20 or more functions that are **not** given their own section:
+
+| what | functions | why not a section |
+|---|---|---|
+| `D_80126B78` (`AF(D_80126B78, T, off)`, 92 functions) | 92 | Musashi's +0x20, his model pointer: the reads are `ModelObj` fields (docs/object_struct.md 3.6) |
+| `D_801151D4` | 43 | the current camera (section 2) |
+| `D_800A5E88` (`Blk30`, `L16`, `u8`) | 129 | an EXE scratch area: three 8-byte vectors used for GTE input and primitive building, typed differently by each file; not a record with fields |
+| `D_800A651C`, `D_800AE7BC` (`OtRef[]`) | 42, 30 | ordering-table references (`.ot`, `.otLast`); an array of a two-field struct, already typed where used |
+| `D_80115140`, `D_80115158` (`U8R[]`, `S8P[]`) | 17-20 | small per-scene tables (`.v`, `.lo`, `.hi`) |
+| `D_8010EDE8`, `D_8010EDEC`, `D_8010F468` | 10-15 | item / name tables (`.v`, `.name`), below the threshold |
+| `ChunkDCM *`, `SV8 *`, `Pt16 *` ... | 45-158 | local vector and mesh types, already typed in each file |
+
+## 8. Field counts and what is left
+
+Fields in the field tables (the Work row counts the state-block fields of section 4; the pools and the Trail record
+are described in prose and not counted):
+
+| record | H | M | L | total |
+|---|---|---|---|---|
+| Camera | 7 | 8 | 4 | 19 |
+| Effect | 8 | 2 | 3 | 13 |
+| Effect68 | 7 | 2 | 5 | 14 |
+| Work (state-block additions) | 3 | 1 | 1 | 5 |
+| GameState | 10 | 5 | 11 | 26 |
+| StageMode (additions) | 2 | 3 | 2 | 7 |
+| **all** | **37** | **21** | **26** | **84** |
+
+What is left: the effect runner and the camera behaviours' formulas (section 2, 3 open questions); a struct for the
+0x38-byte small object (Work +0x65A8 pool, actor +0xCC), which ties to docs/object_struct.md conflict 9; the meaning of
+the GameState counters (a memory-card save or live log); applying any of this is a local card's job (`make check`,
+`make check-stage` per file, keeping the read signedness as in docs/object_struct.md conflict 1).
+
 ## Appendix A. Census tables
 
 ### camera
@@ -550,6 +686,172 @@ and their models would tell (Musashi's sword, effects, NPCs?). (2) The image que
 | 0xA3E8 | 25 | s32 15, s32(abs) 10 | 14 / 11 / 0 / 0 | 21 | 8 | code_800123F0.c:ResetFrameLoop |
 | 0xA434 | 13 | u8(abs) 7, s8 6 | 6 / 6 / 0 / 1 | 12 | 4 | code_800123F0.c:CheckPauseStart |
 
+### game
+
+| off | n | types | R / W / RW / & | funcs | files | example |
+|---|---|---|---|---|---|---|
+| 0x0004 | 11 | s32 8, u8(abs) 3 | 1 / 8 / 1 / 1 | 8 | 3 | code_800123F0.c:func_80029444 |
+| 0x0005 | 3 | u8(abs) 3 | 1 / 1 / 1 / 0 | 2 | 2 | code_800123F0.c:func_80029444 |
+| 0x0006 | 4 | u8(abs) 4 | 2 / 1 / 1 / 0 | 2 | 2 | code_800123F0.c:func_80029444 |
+| 0x0007 | 2 | u8(abs) 2 | 1 / 0 / 1 / 0 | 2 | 2 | code_800123F0.c:func_80029444 |
+| 0x0008 | 9 | s32 6, s32(abs) 3 | 2 / 7 / 0 / 0 | 9 | 2 | code_800123F0.c:func_80029504 |
+| 0x000C | 10 | s32 6, s32(abs) 4 | 2 / 8 / 0 / 0 | 9 | 2 | code_800123F0.c:func_8002953C |
+| 0x0010 | 9 | s32 6, s32(abs) 3 | 1 / 7 / 1 / 0 | 9 | 2 | code_800123F0.c:func_8002957C |
+| 0x0014 | 37 | s32(abs) 28, s32 9 | 15 / 17 / 0 / 5 | 23 | 9 | code_800123F0.c:func_800295D4 |
+| 0x0018 | 12 | s32 7, s32(abs) 5 | 1 / 9 / 2 / 0 | 9 | 3 | code_800123F0.c:func_8002931C |
+| 0x001A | 90 | u16 43, s16 30, s16(abs) 17 | 80 / 3 / 2 / 5 | 50 | 25 | code_800123F0.c:func_80029344 |
+| 0x001C | 14 | s32 7, s32(abs) 7 | 2 / 9 / 2 / 1 | 11 | 2 | engine_801458E0.c:func_8014B33C |
+| 0x001E | 6 | s16(abs) 4, s16 2 | 6 / 0 / 0 / 0 | 5 | 1 | engine_801458E0.c:func_8014B190 |
+| 0x0020 | 11 | s32 6, s32(abs) 5 | 1 / 10 / 0 / 0 | 9 | 2 | engine_801458E0.c:func_8014B4C4 |
+| 0x0022 | 2 | s16 1, s16(abs) 1 | 2 / 0 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_8014B190 |
+| 0x0024 | 17 | s32 9, s32(abs) 8 | 2 / 10 / 3 / 2 | 11 | 2 | engine_801458E0.c:func_8014B5D8 |
+| 0x0026 | 7 | s16 5, s16(abs) 2 | 7 / 0 / 0 / 0 | 3 | 1 | engine_801458E0.c:FaceSet |
+| 0x0028 | 12 | s32 10, s32(abs) 2 | 1 / 9 / 2 / 0 | 9 | 2 | engine_801458E0.c:func_8014B5D8 |
+| 0x002A | 1 | s16 1 | 1 / 0 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_8014B5D8 |
+| 0x002C | 25 | s32(abs) 17, s32 8 | 2 / 15 / 5 / 3 | 14 | 5 | engine_801458E0.c:func_8014B7A4 |
+| 0x002E | 13 | s16 8, s16(abs) 5 | 13 / 0 / 0 / 0 | 8 | 1 | engine_801458E0.c:func_8014B190 |
+| 0x0030 | 11 | s32 9, s32(abs) 2 | 1 / 8 / 2 / 0 | 9 | 2 | engine_801458E0.c:func_8014B7A4 |
+| 0x0032 | 1 | s16 1 | 1 / 0 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_8014B7A4 |
+| 0x0034 | 39 | u16(abs) 29, s16 7, u16 3 | 31 / 7 / 1 / 0 | 35 | 15 | engine_801458E0.c:func_8014B084 |
+| 0x0036 | 46 | u8(abs) 29, u8 17 | 38 / 8 / 0 / 0 | 40 | 26 | code_800123F0.c:func_80029344 |
+| 0x0037 | 22 | u8 18, u8(abs) 4 | 16 / 6 / 0 / 0 | 13 | 8 | ovl37.c:func_800D0964 |
+| 0x0038 | 40 | u8(abs) 33, s16 7 | 13 / 6 / 0 / 21 | 29 | 14 | engine_801458E0.c:func_80161E08 |
+| 0x0039 | 127 | u8(abs) 116, u8 11 | 120 / 0 / 0 / 7 | 84 | 21 | ovl36.c:func_800D0D7C |
+| 0x003A | 20 | u16(abs) 8, s16 6, u16 6 | 11 / 9 / 0 / 0 | 14 | 6 | code_800123F0.c:func_800295D4 |
+| 0x003C | 41 | u16(abs) 26, u16 8, s16 7 | 20 / 15 / 5 / 1 | 21 | 6 | code_800123F0.c:func_800295D4 |
+| 0x003E | 24 | u16(abs) 11, u16 7, s16 6 | 15 / 9 / 0 / 0 | 16 | 7 | code_800123F0.c:func_800295D4 |
+| 0x0040 | 29 | u16(abs) 14, u16 8, s16 7 | 13 / 15 / 1 / 0 | 20 | 6 | code_800123F0.c:func_800295D4 |
+| 0x0042 | 60 | u8(abs) 53, u8 7 | 52 / 6 / 2 / 0 | 55 | 9 | code_800123F0.c:func_8002AC98 |
+| 0x0043 | 9 | u8 7, u8(abs) 2 | 1 / 8 / 0 / 0 | 9 | 2 | engine_801458E0.c:func_8014B5D8 |
+| 0x0044 | 6 | u8 6 | 0 / 6 / 0 / 0 | 6 | 1 | ovl37.c:func_800D0964 |
+| 0x0045 | 6 | u8 6 | 0 / 6 / 0 / 0 | 6 | 1 | ovl37.c:func_800D0964 |
+| 0x0046 | 6 | u8 6 | 0 / 6 / 0 / 0 | 6 | 1 | ovl37.c:func_800D0964 |
+| 0x0047 | 22 | u8(abs) 16, u8 6 | 11 / 10 / 0 / 1 | 14 | 2 | engine_801458E0.c:func_80149744 |
+| 0x0048 | 38 | u8(abs) 31, u8 7 | 22 / 12 / 4 / 0 | 34 | 11 | code_800123F0.c:func_800295D4 |
+| 0x0049 | 104 | u8(abs) 96, u8 8 | 94 / 9 / 1 / 0 | 100 | 44 | engine_801458E0.c:func_80146128 |
+| 0x004A | 10 | u8 8, u8(abs) 2 | 2 / 8 / 0 / 0 | 9 | 2 | engine_801458E0.c:func_8015FF20 |
+| 0x004B | 11 | u8 6, u8(abs) 5 | 2 / 9 / 0 / 0 | 9 | 2 | engine_801458E0.c:func_801657A0 |
+| 0x004C | 12 | u8 6, u8(abs) 6 | 2 / 10 / 0 / 0 | 11 | 2 | engine_801458E0.c:func_801658DC |
+| 0x004D | 3 | u8(abs) 3 | 1 / 2 / 0 / 0 | 2 | 1 | engine_801458E0.c:func_801653F4 |
+| 0x004E | 3 | s8(abs) 3 | 0 / 3 / 0 / 0 | 3 | 3 | sc07_007.c:func_sc07_007_8017CFEC |
+| 0x0050 | 29 | s32(abs) 20, s32 9 | 16 / 10 / 1 / 2 | 24 | 15 | engine_801458E0.c:func_80146128 |
+| 0x0054 | 11 | s32 9, s32(abs) 2 | 1 / 8 / 2 / 0 | 9 | 2 | engine_801458E0.c:func_8014B350 |
+| 0x0056 | 2 | s16 2 | 2 / 0 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_8014B350 |
+| 0x0058 | 11 | s32 6, s32(abs) 5 | 1 / 8 / 1 / 1 | 9 | 2 | engine_801458E0.c:func_8014B6F0 |
+| 0x005C | 8 | s32 6, s32(abs) 2 | 1 / 7 / 0 / 0 | 8 | 2 | engine_801458E0.c:func_801657D8 |
+| 0x0060 | 15 | s32 12, s32(abs) 3 | 1 / 11 / 3 / 0 | 10 | 2 | engine_801458E0.c:func_8014B944 |
+| 0x0062 | 4 | s16 4 | 4 / 0 / 0 / 0 | 1 | 1 | engine_801458E0.c:func_8014B944 |
+| 0x0064 | 8 | s32 6, s32(abs) 2 | 1 / 7 / 0 / 0 | 8 | 2 | engine_801458E0.c:func_801657D8 |
+| 0x0068 | 8 | u8 6, u8(abs) 2 | 1 / 7 / 0 / 0 | 8 | 2 | engine_801458E0.c:func_801657D8 |
+| 0x006C | 11 | s32 6, s32(abs) 5 | 4 / 7 / 0 / 0 | 10 | 2 | code_800123F0.c:func_8002A234 |
+| 0x0070 | 10 | s32 6, s32(abs) 4 | 1 / 8 / 1 / 0 | 9 | 2 | code_800123F0.c:func_8002A108 |
+| 0x0074 | 11 | s32 6, s32(abs) 5 | 4 / 7 / 0 / 0 | 10 | 2 | code_800123F0.c:func_8002A480 |
+| 0x0078 | 10 | s32 6, s32(abs) 4 | 1 / 8 / 1 / 0 | 9 | 2 | code_800123F0.c:func_8002A354 |
+| 0x007C | 11 | s32 6, s32(abs) 5 | 4 / 7 / 0 / 0 | 10 | 2 | code_800123F0.c:func_8002A960 |
+| 0x0080 | 10 | s32 6, s32(abs) 4 | 1 / 8 / 1 / 0 | 9 | 2 | code_800123F0.c:func_8002A834 |
+| 0x0084 | 11 | s32 6, s32(abs) 5 | 4 / 7 / 0 / 0 | 10 | 2 | code_800123F0.c:func_8002A6F0 |
+| 0x0088 | 10 | s32 6, s32(abs) 4 | 1 / 8 / 1 / 0 | 9 | 2 | code_800123F0.c:func_8002A5C4 |
+| 0x008C | 9 | s32 6, u32(abs) 3 | 1 / 8 / 0 / 0 | 7 | 2 | code_800123F0.c:func_80029ED4 |
+| 0x0090 | 12 | s32(abs) 6, s32 6 | 4 / 7 / 1 / 0 | 8 | 2 | code_800123F0.c:func_80029ED4 |
+| 0x0094 | 8 | s32 6, u32(abs) 2 | 1 / 7 / 0 / 0 | 7 | 2 | code_800123F0.c:func_80029ED4 |
+| 0x00A8 | 1 | s32(abs) 1 | 0 / 0 / 0 / 1 | 1 | 1 | code_8002C8BC.c:func_80034C24 |
+| 0x00B0 | 4 | u8[](abs) 4 | 4 / 0 / 0 / 0 | 4 | 1 | code_800123F0.c:func_80029690 |
+
+### stagemode
+
+| off | n | types | R / W / RW / & | funcs | files | example |
+|---|---|---|---|---|---|---|
+| 0x0000 | 6 | u16 6 | 5 / 1 / 0 / 0 | 6 | 1 | engine_8013C98C.c:func_8013E588 |
+| 0x0002 | 155 | u16(abs) 141, u16 14 | 33 / 39 / 51 / 32 | 93 | 11 | engine_8013C98C.c:func_8013E588 |
+| 0x0004 | 9 | u16(abs) 7, u16 2 | 8 / 1 / 0 / 0 | 9 | 7 | engine_8013C98C.c:func_8013EF88 |
+| 0x0006 | 24 | u16(abs) 22, u16 2 | 12 / 1 / 11 / 0 | 24 | 11 | engine_8013C98C.c:func_8013E5E8 |
+| 0x0008 | 22 | u16 12, W80115118(abs) 10 | 6 / 2 / 4 / 10 | 11 | 6 | engine_8013C98C.c:func_8013E83C |
+| 0x000A | 222 | s16(abs) 198, u16 24 | 114 / 60 / 12 / 36 | 102 | 11 | engine_8013C98C.c:func_8013E6AC |
+| 0x000C | 5 | u16(abs) 3, s16 2 | 2 / 1 / 0 / 2 | 4 | 1 | engine_8013C98C.c:func_8013E5E8 |
+| 0x000E | 32 | u16(abs) 18, s16 14 | 28 / 2 / 2 / 0 | 8 | 1 | engine_8013C98C.c:func_8013E5E8 |
+| 0x0010 | 33 | u16(abs) 31, s32 2 | 11 / 22 / 0 / 0 | 11 | 11 | engine_8013C98C.c:func_8013F350 |
+| 0x0012 | 44 | u16(abs) 44 | 0 / 33 / 11 / 0 | 11 | 11 | engine_8013C98C.c:func_8013F350 |
+| 0x0014 | 6 | s16 5, s16(abs) 1 | 2 / 3 / 0 / 1 | 4 | 2 | engine_8013C98C.c:func_8013E6AC |
+| 0x0016 | 197 | s16(abs) 197 | 172 / 15 / 0 / 10 | 66 | 10 | sc01_004.c:func_sc01_004_8017D308 |
+| 0x0018 | 19 | s16(abs) 15, s16 4 | 11 / 6 / 0 / 2 | 10 | 1 | engine_8013C98C.c:func_8013E83C |
+| 0x001A | 3 | s16 2, s16(abs) 1 | 1 / 2 / 0 / 0 | 3 | 2 | engine_8013C98C.c:func_8013EB7C |
+| 0x001E | 10 | s16(abs) 8, s16 2 | 4 / 6 / 0 / 0 | 3 | 1 | engine_8013C98C.c:func_8013E83C |
+| 0x0020 | 42 | s32(abs) 35, s32 7 | 2 / 30 / 0 / 10 | 40 | 11 | engine_8013C98C.c:func_8013E83C |
+| 0x0024 | 30 | R8017D4A4*(abs) 30 | 20 / 10 / 0 / 0 | 20 | 10 | sc01_004.c:func_sc01_004_8017D4A4 |
+| 0x0029 | 5 | u8(abs) 5 | 5 / 0 / 0 / 0 | 5 | 5 | sc01_004.c:func_sc01_004_8017D758 |
+| 0x0030 | 10 | U8R[](abs) 10 | 0 / 0 / 0 / 10 | 10 | 10 | sc01_004.c:func_sc01_004_8017E804 |
+| 0x0031 | 10 | u8(abs) 10 | 10 / 0 / 0 / 0 | 5 | 5 | sc01_004.c:func_sc01_004_8017E3A0 |
+| 0x0032 | 10 | u8(abs) 10 | 5 / 5 / 0 / 0 | 10 | 5 | sc01_004.c:func_sc01_004_8017DC38 |
+| 0x0033 | 6 | u8(abs) 6 | 1 / 5 / 0 / 0 | 6 | 6 | engine_8013C98C.c:func_8013FFD8 |
+| 0x0038 | 9 | S16R[](abs) 9 | 4 / 0 / 0 / 5 | 9 | 6 | engine_8013C98C.c:func_80140608 |
+| 0x003A | 25 | u16(abs) 25 | 10 / 0 / 0 / 15 | 15 | 10 | sc01_004.c:func_sc01_004_8017D758 |
+| 0x003C | 32 | u16(abs) 30, s16 2 | 10 / 12 / 0 / 10 | 17 | 11 | engine_8013C98C.c:func_8013EA54 |
+| 0x003E | 11 | u8(abs) 10, s16 1 | 1 / 5 / 0 / 5 | 11 | 6 | engine_8013C98C.c:func_8013F350 |
+| 0x0042 | 2 | u8(abs) 2 | 1 / 0 / 0 / 1 | 1 | 1 | engine_8013C98C.c:func_8013F350 |
+| 0x0048 | 18 | S8PE804[](abs) 15, s16 3 | 10 / 3 / 0 / 5 | 18 | 11 | engine_8013C98C.c:func_8013E83C |
+| 0x004A | 7 | s16(abs) 5, s16 2 | 5 / 2 / 0 / 0 | 7 | 6 | engine_8013C98C.c:func_8013E83C |
+| 0x004C | 18 | u16(abs) 15, s16 3 | 0 / 18 / 0 / 0 | 13 | 11 | engine_8013C98C.c:func_8013E83C |
+| 0x004E | 7 | s16(abs) 5, s16 2 | 0 / 7 / 0 / 0 | 7 | 6 | engine_8013C98C.c:func_8013E83C |
+| 0x0052 | 2 | s16 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_8013C98C.c:func_8013E83C |
+| 0x0056 | 2 | s16 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_8013C98C.c:func_8013E83C |
+| 0x0058 | 2 | s32[i] 2 | 0 / 2 / 0 / 0 | 2 | 1 | engine_8013C98C.c:func_8013E6AC |
+| 0x005A | 3 | u16[](abs) 3 | 3 / 0 / 0 / 0 | 1 | 1 | engine_8013C98C.c:func_8013FAF8 |
+| 0x0062 | 1 | u16(abs) 1 | 1 / 0 / 0 / 0 | 1 | 1 | engine_8013C98C.c:func_80141100 |
+| 0x0078 | 1 | s32[i] 1 | 0 / 1 / 0 / 0 | 1 | 1 | engine_8013C98C.c:func_8013EE10 |
+| 0x00B8 | 2 | s32[](abs) 1, s32[] 1 | 1 / 1 / 0 / 0 | 2 | 2 | engine_8013C98C.c:func_8013EF88 |
+| 0x00BC | 1 | u8*(abs) 1 | 0 / 1 / 0 / 0 | 1 | 1 | ovl36.c:func_800D24A0 |
+
+## Appendix Y. The record specs
+
+One JSON file per record, the second argument of rec.py (the output name must differ from the spec name).
+
+`specs/camera.json`:
+
+```json
+{"name": "camera", "size": "0xA4",
+ "instances": [["D_80126948", "0x80126948", 1, "0xA4"], ["D_80126DB8", "0x80126DB8", 1, "0xA4"],
+               ["D_80126E60", "0x80126E60", 3, "0xA4"], ["D_80114EE8", "0x80114EE8", 3, "0xA4"],
+               ["D_801201F8", "0x801201F8", 1, "0xA4"]],
+ "types": ["Camera"], "ptr_globals": ["D_801151D4"]}
+```
+
+`specs/effect.json`:
+
+```json
+{"name": "effect", "size": "0x58", "instances": [["D_8011D030", "0x8011D030", 30, "0x58"]],
+ "spawners": ["func_80146A6C", "func_80146994", "func_801469C8", "func_80146AFC", "func_80146960"],
+ "argfuncs": {"func_80146C3C": 0}, "owner_ptr": "0x34"}
+```
+
+`specs/effect68.json`:
+
+```json
+{"name": "effect68", "size": "0x68", "instances": [["D_8011F9D0", "0x8011F9D0", 20, "0x68"]],
+ "spawners": ["func_80146608", "func_801466B4", "func_801466F0", "func_80146750", "func_8014680C"],
+ "owner_ptr": "0x4C", "types": ["AObj68"]}
+```
+
+`specs/work.json`:
+
+```json
+{"name": "work", "size": "0xA444", "instances": [["D_800AF630", "0x800AF630", 1, "0xA444"]],
+ "types": ["Work"], "macros": {"WORK": "0x800AF630"}}
+```
+
+`specs/game.json`:
+
+```json
+{"name": "game", "size": "0xB4", "instances": [["D_80078E78", "0x80078E78", 1, "0xB4"]],
+ "types": ["DbgStats", "Stats", "G37", "FieldStats", "Blk98", "StatsLoad", "DbgClock"]}
+```
+
+`specs/stagemode.json`:
+
+```json
+{"name": "stagemode", "size": "0xC0", "instances": [["D_80115110", "0x80115110", 1, "0xC0"]],
+ "types": ["StageMode"]}
+```
+
 ## Appendix Z. The record census script
 
 ```python
@@ -608,26 +910,60 @@ SUBF = {'GsRVIEW2': {'vpx': (0, 's32'), 'vpy': (4, 's32'), 'vpz': (8, 's32'), 'v
         'Fixed': {'w': (0, 's32'), 'h': (0, None)}, 'h': {'i': (2, 's16'), 'frac': (0, 'u16')}}
 ELEM = {'s8': 1, 'u8': 1, 's16': 2, 'u16': 2, 's32': 4, 'u32': 4, 'SVECTOR': 8, 'VECTOR': 0x10, 'MATRIX': 0x20,
         'Vec3s': 6, 'GsRVIEW2': 0x20, 'Fixed': 4, 'PrimPool': 0xC, 'DRAWENV': 0x5C, 'DISPENV': 0x14}
+BASIC = {'s8': 1, 'u8': 1, 'char': 1, 's16': 2, 'u16': 2, 'short': 2, 's32': 4, 'u32': 4, 'int': 4}
+FSTRUCTS = defaultdict(dict)    # (file, name) -> fields, for typedefs laid out here
+def layout(body):
+    """offsets of a struct whose members are basic types, pointers or arrays of them (no comments needed)"""
+    fields, off = {}, 0
+    for decl in [d.strip() for d in body.split(';') if d.strip()]:
+        m = re.match(r'^(?:struct\s+)?(\w+)\s+(.*)$', decl)
+        if not m:
+            return None
+        base = m.group(1)
+        for part in m.group(2).split(','):
+            pm = re.match(r'^(\**)\s*(\w+)((?:\[\s*\w+\s*\])*)$', part.strip())
+            if not pm:
+                return None
+            if pm.group(1):
+                size, al = 4, 4
+            elif base in BASIC:
+                size = al = BASIC[base]
+            else:
+                return None
+            n = 1
+            for d in re.findall(r'\[\s*(\w+)\s*\]', pm.group(3)):
+                n *= int(d, 0)
+            off = (off + al - 1) // al * al
+            fields[pm.group(2)] = (off, ('%s *' % base) if pm.group(1) else base, str(n) if pm.group(3) else None)
+            off += size * n
+    return fields
 for d, _, fs in os.walk(ROOT):
     if '/.git' in d:
         continue
     for fn in fs:
         if not fn.endswith(('.c', '.h')):
             continue
-        txt = open(os.path.join(d, fn), encoding='latin-1').read()
-        for m in re.finditer(r'typedef struct(?: \w+)? \{(.*?)\}\s*(\w+);', txt, re.S):
+        rel = os.path.relpath(os.path.join(d, fn), ROOT)
+        txt = comments.sub(lambda m: m.group(0) if re.match(r'/\* 0x[0-9A-Fa-f]+ \*/', m.group(0)) else ' ', open(os.path.join(d, fn), encoding='latin-1').read())
+        for m in re.finditer(r'typedef struct(?: \w+)? \{([^{}]*?)\}\s*(\w+);', txt, re.S):
             body, name = m.group(1), m.group(2)
             if name not in TYPES:
                 continue
+            got = {}
             for fm in re.finditer(r'/\* 0x([0-9A-Fa-f]+) \*/\s*(?:struct\s+)?([\w ]+?)\s*(\*?)\s*\(?\*?(\w+)\)?(?:\([^)]*\))?(\[(\w+)\])?(\[(\w+)\])?\s*;', body):
-                off = int(fm.group(1), 16)
-                STRUCTS[name][fm.group(4)] = (off, fm.group(2).strip() + (' *' if fm.group(3) else ''), fm.group(6))
+                got[fm.group(4)] = (int(fm.group(1), 16), fm.group(2).strip() + (' *' if fm.group(3) else ''), fm.group(6))
+            if not got:
+                got = layout(re.sub(r'/\*.*?\*/', ' ', body)) or {}
+            if got:
+                FSTRUCTS[(rel, name)] = got
+                STRUCTS.setdefault(name, got)
 
-def field_access(sname, chain):
+def field_access(sname, chain, file=None):
     m = re.match(r'(\w+)(?:\[(\w+)\])?(?:\[(\w+)\])?((?:\.\w+(?:\[\w+\])?)*)$', chain)
-    if not m or m.group(1) not in STRUCTS.get(sname, {}):
+    st = FSTRUCTS.get((file, sname)) or STRUCTS.get(sname, {})
+    if not m or m.group(1) not in st:
         return None
-    off, typ, arr = STRUCTS[sname][m.group(1)]
+    off, typ, arr = st[m.group(1)]
     if m.group(2) is not None:
         try:
             off += int(m.group(2), 0) * ELEM.get(typ, 4)
@@ -773,6 +1109,11 @@ byname = defaultdict(list)
 for f in functions:
     byname[f['name']].append(f)
 
+FILETYPE = {}
+for f0 in set(fx['file'] for fx in functions):
+    for m in re.finditer(r'extern\s+(\w+)\s*\*?\s*(D_[0-9A-F]{8})\b', open(os.path.join(ROOT, f0), encoding='latin-1').read()):
+        if m.group(1) in TYPES:
+            FILETYPE[(f0, m.group(2))] = m.group(1)
 DECL_RE = re.compile(r'^\s*(?:register\s+|static\s+|volatile\s+)*((?:struct\s+)?[A-Za-z_]\w*)\s+([^;=(]*?(?:=[^;]*)?);', re.M)
 def local_types(f):
     t = {n: ty for ty, n in f['params']}
@@ -901,7 +1242,7 @@ for idx, f in enumerate(functions):
         add0 = None
         if op == '->' and (base in rv or base in PTRG or base in MACROS):
             t = f['lt'].get(base, '').replace('*', '').strip()
-            sname = t if t in STRUCTS else next(iter(TYPES & set(STRUCTS)), None)
+            sname = t if t in STRUCTS else FILETYPE.get((f['file'], base)) or next(iter(TYPES & set(STRUCTS)), None)
             add0 = 0
         elif op == '.' and base in INSTSYM:
             a, n, st = INSTSYM[base]
@@ -909,10 +1250,10 @@ for idx, f in enumerate(functions):
                 add0 = int(idxs, 0) * st if idxs else 0
             except ValueError:
                 add0 = 0
-            sname = next(iter(TYPES & set(STRUCTS)), None)
+            sname = FILETYPE.get((f['file'], base)) or next(iter(TYPES & set(STRUCTS)), None)
         if add0 is None or sname is None:
             continue
-        fa = field_access(sname, chain)
+        fa = field_access(sname, chain, f['file'])
         if fa:
             add(f, add0 + fa[0], fa[1], rw_of(body, m.start(), m.end()), 'typed', base)
     # absolute symbols inside the instances (not the instance symbols themselves)
