@@ -519,3 +519,188 @@ func_801466F0 / func_801466B4). Its role is not pinned down: the names say "Obj6
 | 0x8013C9C4 | func_8013C9C4 | StartCameraShake | a (value, frames) list played into the main camera's y offset (+0x80, D_801269C8) and +0x8C; the pad rumbles too | H | eC98C. 146 calls / 54 files |
 | 0x8013CA14 | func_8013CA14 | UpdateCameraShake | its step | H | eC98C |
 | 0x8013C98C | func_8013C98C | InitCameraShake | cleared | H | eC98C; the stage start calls it |
+
+## Drawing
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8012E28C | func_8012E28C | AddDrawModeAt | a draw-mode primitive at an OT depth: semi-transparency mode abr from there on | H | e.c comment; 20 calls / 16 files |
+| 0x8012D3B4 | func_8012D3B4 | DebugDrawLine | a line between two world points in a colour | H | e.c comment ("debug drawing"); 3 calls |
+| 0x8012D4B4 | func_8012D4B4 | DebugDrawActorLine | the same for two points of an actor's model frame | H | e.c comment; 12 calls / 1 file |
+| 0x80136D08 | func_80136D08 | DebugDrawLineGrey | a world line, white to grey | H | e5F4 comment |
+| 0x80136ECC | func_80136ECC | DebugDrawScreenLine | a screen line in a colour | H | e5F4 comment |
+| 0x80136DFC | func_80136DFC | DebugPrintPlayer | Musashi's position, heading and one more value printed | H | e5F4 comment |
+| 0x8013AB54 | func_8013AB54 | DrawChoiceCursor | the choice cursor's outline round a rectangle, into a buffer | H | e5F4 comment; 9 calls |
+| 0x80129398 | func_80129398 | ResetBgLayers | both background layers off (pri 0x7FFF), full screen, no scroll | H | e.c (BgLayer struct comment) |
+| 0x80129428 | func_80129428 | EnableBgLayers | D_80114EE0 = 1 | H | e.c; 7 calls / 15 files |
+| 0x8012943C | func_8012943C | DisableBgLayers | D_80114EE0 = 0 | H | e.c; 7 calls / 15 files |
+| 0x8012944C | func_8012944C | SetupBgLayers | layers on; each layer's map set up (or its gradient colours) | H | e.c |
+| 0x8012956C | func_8012956C | DrawBgLayers | each layer: the sky's three bands, a two-colour gradient, or a GsSortFastBg / GsSortBg cell map | H | e.c |
+| 0x801298F4 | func_801298F4 | InitBgLayerMap | a layer's GsMAP / GsBG from its cell and map files | H | e.c |
+| 0x801299C8 | func_801299C8 | FadeBgLayerColours | a layer's colours under the stage's fade (sky, gradient, tint) | H | e.c comment |
+| 0x80132288 | func_80132288 | InitMime | start a MIMe vertex animation (keys, base TMD) | M | e5F4 comment at the MimeAnim struct; 36 calls / 8 files |
+| 0x8013240C | func_8013240C | StepMime | play the keys in turn, rebuilding the TMD (func_801325B8) | M | e5F4; 29 calls / 8 files |
+| 0x801325B8 | func_801325B8 | MimeRebuild | one MIMe step: vertices (and normals) from the base plus weighted differences | H | e5F4 comment |
+| 0x80132784 | func_80132784 | MimeBlend | a MIMe-style blend of two vertex sets with a weight (called from stage water / cloth code) | L | e5F4 (91 lines, no comment); 39 calls / 13 files |
+| 0x80145EE8 | func_80145EE8 | UploadFlagImages | upload the image lists of flags 0x1D-0x21 that are set (n 0), or all five (n 1) | M | e58E0 (MoveImage per list). 32 calls / 40 files, `func_80145EE8(0)` at a stage's start |
+| 0x80146014 | func_80146014 | UploadImageList | MoveImage for each 16-byte record until a zero size | H | e58E0 |
+
+## Other
+
+### Enemy reactions (e5F4 0x8012F5F4-0x80131EE4: the generic hit / knock-back / defeat steps)
+
+An enemy carries a key / value parameter list at +0xBC (key 0xD continues at a pointer): scripts, hooks and sounds by
+key. +0xB0 is the reaction step (table D_8018D9DC), +0xC1 the reaction kind (table D_8018D89C), +0xB4 reaction flags.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80131CF4 | func_80131CF4 | FindParam | the value for a key in a key / value list (0 ends it, key 0xD jumps) | H | e5F4 |
+| 0x80131CA8 | func_80131CA8 | CallParamHook | call the function under key n, 1 when there was one | H | e5F4 |
+| 0x80131A34 | func_80131A34 | PlayParamScript | SetScript with the script under key n (keys 0xB, 8, 0x20 also set +0xC4 bit 2) | H | e5F4; 20 calls / 24 files |
+| 0x80131E00 | func_80131E00 | SetReactionStep | +0xB0 = n and run reaction step n | H | e5F4 (game.h: "func_80131E00 sets it and calls table 0x8018D9DC"). 284 calls / 63 files: `func_80131E00(a, 1)` |
+| 0x80130D0C | func_80130D0C | RunReaction | run reaction kind +0xC1 (UpdateActors calls it instead of the kind's handler while +0xC0 / +0xC1 are set) | H | e5F4 / e58E0 func_8017849C |
+| 0x80131C78 | func_80131C78 | EndReaction | reaction kind 0, model pitch 0, hit kind 0, then hook 0xE | H | e5F4. 82 calls / 31 files |
+| 0x8012F5F4 | func_8012F5F4 | ReactToHit | the first hit step: damage (or hook 3 when +0xC4 bit 1), step 0xC when HP is gone, else the hurt script (key 4) | H | e5F4 comment ("a hit reaction step") |
+| 0x80131340 | func_80131340 | KnockFlying | up, down to the ground, a bounce sliding to a stop, then lying | H | e5F4 comment |
+| 0x80131170 | func_80131170 | StartKnockback | TakeDamageAndRecoil, a velocity from a motion record, the knock script (key n, else 0x24 / 0x20) | H | e5F4 |
+| 0x801319E0 | func_801319E0 | FinishEnemy | hook 0x11, or (none) the drop (func_8002A04C) and FreeActor | M | e5F4; 10 calls |
+| 0x80131D68 | func_80131D68 | ReactToSurface | surface type 2 / 0x1B: step 0x12; 0x1A / 0x1C: FinishEnemy | M | e5F4 (the same types CollidePath flags 0x1000) |
+| 0x80130D48 | func_80130D48 | DropItem | an enemy's drop when defeated: parameter 0x15 picks a fixed item, a roll on D_8018D8EC, or one weighted by Musashi's HP and BP | H | e5F4 comment. 42 calls / 27 files |
+| 0x801312D0 | func_801312D0 | GetBodyCentre | the body centre offset: parameter 0x2E as the height, else D_8018D9C4 | H | e5F4 comment |
+| 0x8012FB54 | func_8012FB54 | TimedGlide | the position steps by the velocity until the count runs out (then FinishEnemy); a linked actor rides | H | e5F4 comment |
+
+### Musashi: stats, input, motion, flags (e58E0)
+
+Stats at 0x80078E78 (EXE bss; e5F4's Stats struct): +0x3A hpMax (0x80078EB2), +0x3C hp, +0x3E bpMax, +0x40 bp;
++0x14 money (0x80078E8C). Pad fields of the player object: +0xA9 pad type (0x41 digital, 0x53 / 0x73 analog), +0xAA held,
++0xAC pressed, +0xAE the stick (x low byte, y high byte, 0x80 centre).
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8014BB24 | func_8014BB24 | AddHp | hp += n (force), else capped at 999 with flag 0x1B, 500 without; then at most hpMax | H | e58E0; 9 calls |
+| 0x8014BB0C | func_8014BB0C | FillHp | hp = hpMax | H | e58E0; 7 calls |
+| 0x8014BC0C | func_8014BC0C | AddMaxHp | hpMax += n, at most 500 | H | e58E0 |
+| 0x8014BC80 | func_8014BC80 | LoseHp | hp -= n; at 0 also D_800B9A17 = 0 | H | e58E0 |
+| 0x8014BC44 | func_8014BC44 | DamagePlayerHp | LoseHp, all of hpMax when the player's +0x44 has 0x02000000 | M | e58E0. 33 calls / 24 files |
+| 0x8014BCC0 | func_8014BCC0 | LoseHpNonLethal | hp -= n, never below 1 | H | e58E0 |
+| 0x8014BCEC | func_8014BCEC | AddMaxBp | bpMax += n, at most 0x662 | H | e58E0. 29 calls / 33 files |
+| 0x8014BD24 | func_8014BD24 | AddBp | bp += n, at most bpMax | H | e58E0. 39 calls / 39 files |
+| 0x8014BD60 | func_8014BD60 | SpendBp | bp -= n, at least 0 | H | e58E0 |
+| 0x8014BD98 | func_8014BD98 | SetBp | bp = n, at most bpMax | H | e58E0 |
+| 0x8014BDC8 | func_8014BDC8 | FillBp | bp = bpMax | H | e58E0; 5 calls |
+| 0x8014ADA8 | func_8014ADA8 | AddMoney | the money word (0x80078E8C) += n, at most 99999 | H | e58E0. 32 calls / 40 files |
+| 0x801487F4 | func_801487F4 | GetObjPadHeld | the player object's held buttons (+0xAA) | H | e58E0 (stage camera code: `func_801487F4(&D_80126B58) & 3`) |
+| 0x80148800 | func_80148800 | GetObjPadPressed | its pressed buttons (+0xAC) | H | e58E0. 160 calls / 108 files: `func_80148800(&D_80126B58) & 0x40` (confirm) |
+| 0x8014880C | func_8014880C | GetObjStickX | stick x (+0xAE low byte) | H | e58E0 (func_801489E8: x < 0x40 = left) |
+| 0x80148818 | func_80148818 | GetObjStickY | stick y (+0xAE high byte) | H | e58E0 (func_8014891C: y < 0x40 = up) |
+| 0x80148824 | func_80148824 | GetObjStickTilt | the stick's distance from centre | H | e58E0 |
+| 0x801488A8 | func_801488A8 | ObjDirHeld | any direction (digital: 0xF000; analog: off centre) | H | e58E0 |
+| 0x8014891C | func_8014891C | ObjUpHeld | up (0x1000, or stick y < 0x40) | H | e58E0 |
+| 0x80148980 | func_80148980 | ObjDownHeld | down (0x4000, or y >= 0xC1) | H | e58E0 |
+| 0x801489E8 | func_801489E8 | ObjLeftHeld | left (0x8000, or x < 0x40) | H | e58E0 |
+| 0x80148A48 | func_80148A48 | ObjRightHeld | right (0x2000, or x >= 0xC1) | H | e58E0 |
+| 0x80154274 | func_80154274 | SetPlayerMotion | the motion (+0xB4) changed when different, then stepped (func_80154418) | M | e58E0. 143 calls / 63 files: `func_80154274(a, &D_800D58AC)` (motions in the ability / field data) |
+| 0x801542A4 | func_801542A4 | RestartPlayerMotion | the same unconditionally | M | e58E0 |
+| 0x801542DC | func_801542DC | SetPlayerMotionBlend | the same with blend frames (+0xBC / +0xBD) | M | e58E0 |
+| 0x80154150 | func_80154150 | SetPlayerMotionIndex | motion n of the object's table (+0xB0) | M | e58E0. 26 calls / 13 files: `(a, 0x27)`, `(a, 0x26)` |
+| 0x80154190 | func_80154190 | RestartPlayerMotionIndex | the same unconditionally | M | e58E0 |
+| 0x801541D8 | func_801541D8 | SetPlayerMotionIndexBlend | the indexed one with blend frames | M | e58E0 |
+| 0x80154134 | func_80154134 | ClearPlayerMotion | motion and its counters zeroed | M | e58E0 |
+| 0x80147084 | func_80147084 | ShowPlayerScene | +0x221 = 0 (the model shows when +0x220..+0x222 are all 0, func_801470C0) | H | e58E0. 44 calls / 44 files, paired with func_801472B4 |
+| 0x8014708C | func_8014708C | HidePlayerScene | +0x221 = 1 | H | e58E0. 60 calls / 48 files, after EndScene (sc01_074) |
+| 0x80147098 | func_80147098 | ShowPlayerSys | +0x220 = 0 | M | e58E0 |
+| 0x801470A0 | func_801470A0 | HidePlayerSys | +0x220 = 1 | M | e58E0 |
+| 0x801470AC | func_801470AC | ShowPlayerAbility | +0x222 = 0 | L | e58E0 (cleared by func_80151664's recovery) |
+| 0x801470B4 | func_801470B4 | HidePlayerAbility | +0x222 = 1 | L | e58E0 |
+| 0x801470C0 | func_801470C0 | ApplyPlayerHidden | model +4 bit 31 from the three hide bytes | H | e58E0 |
+| 0x801472B4 | func_801472B4 | ClearPlayerFlag7E2 | +0x7E &= ~2 | M | e58E0; 43 calls / 43 files, with ShowPlayerScene |
+| 0x801472C8 | func_801472C8 | SetPlayerFlag7E2 | +0x7E |= 2 | M | e58E0; 61 calls / 49 files, with HidePlayerScene |
+| 0x8014704C | func_8014704C | ClearPlayerMark4C | +0x4C = 0 | L | e58E0, next to BeginScene / EndScene (+0x4D) |
+| 0x80147054 | func_80147054 | SetPlayerMark4C | +0x4C = 1 | L | e58E0 |
+| 0x80147078 | func_80147078 | SetKindAndState | +0 = kind, +2 = 0 | H | e58E0 (func_801516F0 makes Musashi kind 0x19) |
+| 0x80149020 | func_80149020 | ClearHitPending | +0x3C &= 0x7FFF | M | e58E0. 76 calls / 24 files |
+| 0x80151664 | func_80151664 | ResetPlayerAfterHit | face 0x11, parts, ShowPlayerAbility, ClearPlayerFlag7E2, hit fields and scale reset, the hit-by actor forgotten | M | e58E0; 38 calls / 24 files |
+| 0x80153BD8 | func_80153BD8 | IsPlayerHitBy | this actor is the one whose hit on Musashi landed (D_801151FC) | M | e58E0 (the player's hit code copies D_80127078, which stage attackers set to themselves, into D_801151FC). 136 calls / 17 files |
+| 0x80153BF0 | func_80153BF0 | ClearPlayerHitBy | the same test, and on a match forget it | M | e58E0. 98 calls / 17 files, right after IsPlayerHitBy |
+| 0x80153C18 | func_80153C18 | ForgetPlayerHit | both hit-by words cleared | M | e58E0 |
+| 0x80153C74 | func_80153C74 | SetGrabReaction | D_8011DB0C = kind, D_8011DB1A = value (read by the player's hit handler) | L | e58E0. 65 calls / 17 files: `(1, 0x14)`, `(3, 0x18)` |
+| 0x80165718 | func_80165718 | DropTimedAbility | for held abilities 3, 12, 24: end it (func_80165A20 clears D_80078EC1..EC4) | M | e58E0. 54 calls / 24 files |
+| 0x80165770 | func_80165770 | EndAbility12 | ability 12: its overlay's end (func_800CAF6C) | L | e58E0; 25 calls |
+| 0x80165A50 | func_80165A50 | ClearHeldAbility | D_80078EC1..EC4 = 0 | H | e58E0 + the e5F4 comment on those bytes |
+| 0x8014CAFC | func_8014CAFC | PlayerFlag400 | Musashi's +0x44 & 0x400 | L | e58E0 |
+| 0x8014CB0C | func_8014CB0C | PlayerFlag80 | +0x44 & 0x80 | L | e58E0; 9 calls |
+| 0x8014CB7C | func_8014CB7C | PlayerFlag800 | +0x44 & 0x800 | L | e58E0 |
+| 0x8014CB8C | func_8014CB8C | PlayerFlag1000 | +0x44 & 0x1000 | L | e58E0; 17 calls / 15 files |
+| 0x8014CB1C | func_8014CB1C | GetStatsWord94 | the word at 0x80078E94 | L | e58E0; 8 calls |
+| 0x8014CB58 | func_8014CB58 | GetStatsByteC0 | 0x80078EC0 & 0x7F | L | e58E0; 25 calls / 16 files |
+| 0x80172658 | func_80172658 | PlayerState1F4Bit1 | +0x1F4 & 1 | L | e58E0 |
+| 0x80172664 | func_80172664 | PlayerState1F4Bit2 | +0x1F4 & 2 | L | e58E0 |
+| 0x8017267C | func_8017267C | PlayerState1F4Bit8 | +0x1F4 & 8 | L | e58E0 |
+| 0x80172630 | func_80172630 | SetPlayerState1F4Bit100 | +0x1F4 |= 0x100 | L | e58E0; 26 calls |
+
+### Game flags and counters (wrappers over the EXE's flag store: func_80029178 = GetFlag in symbol_addrs.txt's comment, func_80029124 its setter, func_800291A0 / func_800291B4 the byte variables)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8016F398 | func_8016F398 | ClearFlags125To12C | flags 0x125-0x12C cleared | H | e58E0 |
+| 0x8016F44C | func_8016F44C | TestFlag125Plus | flag 0x125 + n | H | e58E0 |
+| 0x8016F470 | func_8016F470 | ClearFlag125Plus | flag 0x125 + n cleared | H | e58E0 |
+| 0x8016F410 | func_8016F410 | TakeFlag125Plus | test and clear it, 1 when it was set | H | e58E0; 8 calls |
+| 0x8014BE78 | func_8014BE78 | SetFlag12F | flag 0x12F = 1 | H | e58E0 |
+| 0x8014BE9C | func_8014BE9C | ClearFlag12F | flag 0x12F = 0 | H | e58E0 |
+| 0x8014BEC0 | func_8014BEC0 | SetFlag80 | 0x80078EC0 bit 0, flag 0x80 = 1 | H | e58E0 |
+| 0x8014BEF8 | func_8014BEF8 | TestFlag80 | flag 0x80 | H | e58E0 |
+| 0x8014BF18 | func_8014BF18 | SetVarCF | byte variable 0xCF = max(n, 0) | H | e58E0 |
+| 0x8014BF48 | func_8014BF48 | ClearVarCF | variable 0xCF = 0 | H | e58E0 |
+| 0x8014BF6C | func_8014BF6C | GetVarCF | variable 0xCF | H | e58E0; 9 calls |
+| 0x8014BF8C | func_8014BF8C | SetVarD0 | variable 0xD0 = n | H | e58E0 |
+| 0x8014BFB0 | func_8014BFB0 | ClearVarD0 | variable 0xD0 = 0 | H | e58E0 |
+| 0x8014BFD4 | func_8014BFD4 | GetVarD0 | variable 0xD0 | H | e58E0 |
+| 0x80153C8C | func_80153C8C | ClearCounter5210 | D_80115210 = 0 | L | e58E0 |
+| 0x80153C9C | func_80153C9C | IncCounter5210 | D_80115210 += 1 | L | e58E0 |
+| 0x80153CBC | func_80153CBC | GetCounter5210 | D_80115210 | L | e58E0 |
+
+### Stage start, loading, the stage step
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80128158 | func_80128158 | StageMain | the stage image's entry: StageStep | M | e.c (the image's first function) |
+| 0x80128288 | func_80128288 | StageStep | one handler per stage step (Work +0xA3C6, 0-8) | H | e.c comment |
+| 0x80128420 | func_80128420 | StageStart | everything reset for a new room (props, windows, demo, OT depth, cameras, the loader func_80144B9C), next step | M | e.c |
+| 0x8012832C | func_8012832C | LoadMapExtras | a few maps (0x300E, 0x30A0, 0x3014) load an extra file before going on | H | e.c comment |
+| 0x80128C14 | func_80128C14 | SetMapOtDepth | SetOtDepthLimit by map (0x4E0, 0x420, 0x480, 0xFFB, default 0x3E0) | H | e.c |
+| 0x80128C98 | func_80128C98 | LoadStageFileA | load the stage's extra file i (table D_8018D7BC) to D_801EBC68; 1 when none | M | e.c; 4 calls |
+| 0x80128CFC | func_80128CFC | LoadStageFileB | the same with table D_8018D7CC | M | e.c. 83 calls / 32 files: `if (func_80128CFC(n))` while a room streams its extra data |
+| 0x80128218 | func_80128218 | GetStageLoadAddr | D_801EBC68, where extra loads go | H | e.c comment on D_801EBC68 |
+| 0x80144B9C | func_80144B9C | LoadRoom | the room record of the current map: actors reset, lights, BG layers, handler tables, collision maps, the -O0 block player, the room's start function | H | e4B9C (docs/stage_engine.md calls it "the stage loader") |
+| 0x801457A4 | func_801457A4 | GetRoomRecord | the room record of a map id | H | e4B9C comment; docs/stage_engine.md |
+| 0x8013E5E8 | func_8013E5E8 | StageFrame | the stage's frame: pads read, then the mode's step | H | eC98C comment; 10 calls |
+| 0x8014168C | func_8014168C | GetModeTableValue | a value of the stage mode's table at D_80115148 (byte + byte x byte) | L | eC98C; 50 calls / 9 files |
+| 0x80142414 | func_80142414 | SpawnKind13 | SpawnActor kind 0x13 with +0x52 = v | L | eC98C; 37 calls / 22 files |
+| 0x8014659C | func_8014659C | AllocModel6To16 | a free model from slots 6-0x15 | H | e58E0; 18 calls |
+| 0x801465C0 | func_801465C0 | AllocSprite16To3E | a free 0x38 object from slots 0x16-0x3D | H | e58E0. 72 calls / 48 files |
+| 0x80174E9C | func_80174E9C | StartCameraPan | D_8012697C = n, then SetCameraUpdate(func_80174F28) | L | e58E0; 12 calls |
+| 0x80174764 | func_80174764 | GetStageWord9C8 | D_8011F9C8 | L | e58E0; 33 calls / 40 files |
+| 0x80174774 | func_80174774 | GetStageHalf938 | D_80126938 | L | e58E0; 10 calls |
+
+### The -O0 block player (eB568, D_801EF3F8)
+
+A player for blocks loaded with the room (room +0x94..+0x9C: kinds 'B' to 'N'), relocated in place (records typed 0x24 /
+0x2C / 0x34 / 0x3C, the GPU's textured polygon codes, and their 0x26.. semi-transparent forms), plus four point records
+at D_801EF328. docs/stage_engine.md calls it "the sequence player"; what it plays is not pinned down, so the names keep
+"Seq".
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8013B568 | func_8013B568 | SetSeqHook | the hook the player's frame calls (room +0xA8) | M | eB568 |
+| 0x8013B83C | func_8013B83C | InitSeqPlayer | stop, reset the four points, start the room's block by kind | M | eB568 |
+| 0x8013B7F4 | func_8013B7F4 | RestartSeqPlayer | InitSeqPlayer with the current value | M | eB568; 38 calls / 38 files |
+| 0x8013BD34 | func_8013BD34 | LoadSeqBlockB | a kind-'B' block (relocated once) | M | eB568 |
+| 0x8013C0F8 | func_8013C0F8 | RelocateSeqBlock | a block's sections relocated once | M | eB568; 36 calls / 15 files |
+| 0x8013C360 | func_8013C360 | ApplySeqPatches | write each (address, value) pair of a patch list | M | eB568; 12 calls |
+| 0x8013C414 | func_8013C414 | RelocateSeqBlockPair | a block relocated against a second one | M | eB568; 12 calls |
+| 0x8013C938 | func_8013C938 | StartSeqPlayer | active = 1 | H | eB568; 12 calls / 20 files |
+| 0x8013C964 | func_8013C964 | StopSeqPlayer | active = 0 | H | eB568; 9 calls / 17 files |
+| 0x8013B598 | func_8013B598 | SetSeqPoint | point i on at a position, value 0x100 | M | eB568; 14 calls |
+| 0x8013B6A0 | func_8013B6A0 | SetSeqPointN | the same with a value | M | eB568 |
+| 0x8013B7AC | func_8013B7AC | ClearSeqPoint | point i off | M | eB568; 21 calls |
