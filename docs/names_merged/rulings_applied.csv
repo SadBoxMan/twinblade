@@ -68,3 +68,4 @@ exe,0x800C7C74,g_BufferIndex,synonyms; owning card's name and family stem kept
 ovl:36,0x800CFBCC,RequestPicture,r271 read the field overlay (picture interlude); r275 name is a working name from callers
 ovl:36,0x800D1E28,StartMapChangeFade,owning card (r271 field overlay); r275 working name
 ovl:36,0x800D1EBC,StepMapChangeFade,owning card (r271 field overlay); r275 working name
+ovl:36,0x800D2318,AnglesFromPackedDir,"owning card (r271 mode_overlays, field overlay); the package-side name has a Module_ prefix and the C takes a FieldDir *"

@@ -91,6 +91,7 @@ address,scope,current,proposed,confidence,source,note
 0x800D222C,ovl:36,func_800D222C,SpawnSpriteType2,H,r271:mode_overlays.md:1359,conf inferred (source lists H or strong M only)
 0x800D2294,ovl:36,func_800D2294,SpawnSpriteType6,H,r271:mode_overlays.md:1360,conf inferred (source lists H or strong M only)
 0x800D22E4,ovl:36,func_800D22E4,MoveByVelocity,H,r271:mode_overlays.md:1361,conf inferred (source lists H or strong M only)
+0x800D2318,ovl:36,func_800D2318,AnglesFromPackedDir,H,r271:mode_overlays.md:1362,"conf inferred (source lists H or strong M only); conflict resolved over Effect_AnglesFromPacked (owning card (r271 mode_overlays, field overlay); the package-side name has a Module_ prefix and the C takes a FieldDir *)"
 0x800D23D0,ovl:36,func_800D23D0,AnglesFromVector,H,r271:mode_overlays.md:1363,conf inferred (source lists H or strong M only)
 0x800D2468,ovl:36,func_800D2468,ClearStageMenu,H,r271:mode_overlays.md:1364,conf inferred (source lists H or strong M only)
 0x800D24A0,ovl:36,func_800D24A0,OpenStageMenu,H,r271:mode_overlays.md:1365,conf inferred (source lists H or strong M only)
@@ -206,7 +207,6 @@ address,scope,current,proposed,confidence,source,note
 0x800D1E18,ovl:39,func_800D1E18,TitleMovieExists,H,r271:mode_overlays.md:1493,conf inferred (source lists H or strong M only)
 0x800D1E58,ovl:39,func_800D1E58,TitlePlayMovie,H,r271:mode_overlays.md:1494,conf inferred (source lists H or strong M only)
 0x800D1E9C,ovl:39,func_800D1E9C,StrPlayMovie,H,r271:mode_overlays.md:1495,conf inferred (source lists H or strong M only)
-0x800D2AA0,ovl:39,func_800D2AA0,DecDCTReset,H,r271:mode_overlays.md:1503,conf inferred (source lists H or strong M only); f:PsyQ-like prefix (warning)
 0x800D2C0C,ovl:39,func_800D2C0C,DecDCTin,H,r271:mode_overlays.md:1507,conf inferred (source lists H or strong M only); f:PsyQ-like prefix (warning)
 0x800D2C88,ovl:39,func_800D2C88,DecDCTout,H,r271:mode_overlays.md:1508,conf inferred (source lists H or strong M only); f:PsyQ-like prefix (warning)
 0x800D2CA8,ovl:39,func_800D2CA8,DecDCTinSync,H,r271:mode_overlays.md:1509,conf inferred (source lists H or strong M only); f:PsyQ-like prefix (warning)

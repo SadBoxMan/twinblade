@@ -1,11 +1,10 @@
 address,scope,current,proposed,confidence,source,note
 0x80165770,engine,func_80165770,Ability_ResumeHop,H,r271:abil_packages.md:2893,"conf inferred (source lists H or strong M only); a:same address, other names EndAbility12; e:function not CamelCase"
 0x80165770,engine,func_80165770,EndAbility12,L,r272:names_stage_engine_proposals.md:652,"a:same address, other names Ability_ResumeHop"
+0x8003A424,exe,func_8003A424,SpuInit,H,r274:names_exe_proposals.md:854,f:PsyQ library name
 0x80078EBF,exe,D_80078EBF,ChargeGauge,H,r271:abil_packages.md:2837,conf inferred (source lists H or strong M only); e:global without g_ / not CamelCase
 0x800AE620,exe,D_800AE620,GsIDMATRIX,L,r274:names_exe_proposals.md:1118,e:global without g_ / not CamelCase; f:PsyQ-like prefix (warning)
 0x800D02D0,ovl:36,func_800D02D0,LoadAbilityPackage,H,r271:mode_overlays.md:1308,conf inferred (source lists H or strong M only); b:local name equals a proposed global name
-0x800D2318,ovl:36,func_800D2318,AnglesFromPackedDir,H,r271:mode_overlays.md:1362,"conf inferred (source lists H or strong M only); a:same address, other names Effect_AnglesFromPacked"
-0x800D2318,ovl:36,func_800D2318,Effect_AnglesFromPacked,H,r271:abil_packages.md:2839,"conf inferred (source lists H or strong M only); a:same address, other names AnglesFromPackedDir; e:function not CamelCase"
 0x800D2CA8,ovl:36,func_800D2CA8,ToBcd,H,r271:mode_overlays.md:1371,conf inferred (source lists H or strong M only); b:local name equals a proposed global name
 0x800D2394,ovl:39,func_800D2394,strSetDefDecEnv,H,r271:mode_overlays.md:1496,conf inferred (source lists H or strong M only); e:function not CamelCase
 0x800D2454,ovl:39,func_800D2454,strInit,H,r271:mode_overlays.md:1497,conf inferred (source lists H or strong M only); e:function not CamelCase
@@ -14,4 +13,5 @@ address,scope,current,proposed,confidence,source,note
 0x800D27A0,ovl:39,func_800D27A0,strNext,H,r271:mode_overlays.md:1500,conf inferred (source lists H or strong M only); e:function not CamelCase
 0x800D298C,ovl:39,func_800D298C,strSync,H,r271:mode_overlays.md:1501,conf inferred (source lists H or strong M only); e:function not CamelCase
 0x800D2A24,ovl:39,func_800D2A24,strKickCD,H,r271:mode_overlays.md:1502,conf inferred (source lists H or strong M only); e:function not CamelCase
+0x800D2AA0,ovl:39,func_800D2AA0,DecDCTReset,H,r271:mode_overlays.md:1503,conf inferred (source lists H or strong M only); f:PsyQ library name
 0x800EC9F4,ovl:39,D_800EC9F4,isEndOfFlame,H,r271:mode_overlays.md:1549,conf inferred (source lists H or strong M only); e:global without g_ / not CamelCase

@@ -68,3 +68,4 @@ address,scope,current,proposed,confidence,source,note
 0x800CFBCC,ovl:36,func_800CFBCC,RequestFieldFileLoad,M,r275:stage_survey.md:45,r275 working name for an outside call; superseded by RequestPicture
 0x800D1E28,ovl:36,func_800D1E28,StartExitFade,H,r275:stage_survey.md:43,r275 working name for an outside call; superseded by StartMapChangeFade
 0x800D1EBC,ovl:36,func_800D1EBC,ExitFadeDone,H,r275:stage_survey.md:43,r275 working name for an outside call; superseded by StepMapChangeFade
+0x800D2318,ovl:36,func_800D2318,Effect_AnglesFromPacked,H,r271:abil_packages.md:2839,conf inferred (source lists H or strong M only); superseded by AnglesFromPackedDir

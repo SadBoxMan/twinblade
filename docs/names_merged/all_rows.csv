@@ -2733,7 +2733,7 @@ address,scope,current,proposed,purpose,confidence,source,status,note
 0x8003A234,exe,func_8003A234,SeqMetaEvent,0xFF: tempo 0x51 sets BPM and rate; text/marker/other metas skipped; end of track / unknown sets the end flag,H,r274:names_exe_proposals.md:1040,ok,
 0x8003A3D8,exe,func_8003A3D8,SwapBytes32,Byte-swap a 32-bit word,M,r274:names_exe_proposals.md:855,ok,
 0x8003A404,exe,func_8003A404,SwapBytes16,Byte-swap a 16-bit value,M,r274:names_exe_proposals.md:856,ok,
-0x8003A424,exe,func_8003A424,SpuInit,"PsyQ libspu SpuInit (`_SpuInit(0)`), last function before _SpuInit",H,r274:names_exe_proposals.md:854,ok,f:PsyQ-like prefix (warning)
+0x8003A424,exe,func_8003A424,SpuInit,"PsyQ libspu SpuInit (`_SpuInit(0)`), last function before _SpuInit",H,r274:names_exe_proposals.md:854,ruling,f:PsyQ library name
 0x80062A78,exe,D_80062A78,g_DebugFontUV8,UV words of the 8-pixel debug font from ' ',H,r274:names_exe_proposals.md:1146,ok,
 0x80062BA0,exe,D_80062BA0,g_FadeSpeeds,fade speed per index (index 0 picked by Work.vsyncMode),H,r274:names_exe_proposals.md:1145,ok,
 0x80062BA8,exe,D_80062BA8,g_SortScratch,the scratch argument DrawTmdModel gives GsSortObject4 / 5,M,r274:names_exe_proposals.md:719,ok,
@@ -2968,8 +2968,8 @@ address,scope,current,proposed,purpose,confidence,source,status,note
 0x800D222C,ovl:36,func_800D222C,SpawnSpriteType2,+ func_8001CB6C,H,r271:mode_overlays.md:1359,ok,conf inferred (source lists H or strong M only)
 0x800D2294,ovl:36,func_800D2294,SpawnSpriteType6,+ func_8001CD9C,H,r271:mode_overlays.md:1360,ok,conf inferred (source lists H or strong M only)
 0x800D22E4,ovl:36,func_800D22E4,MoveByVelocity,pos += vel,H,r271:mode_overlays.md:1361,ok,conf inferred (source lists H or strong M only)
-0x800D2318,ovl:36,func_800D2318,AnglesFromPackedDir,ratan2 / SquareRoot0 on +0x2C,H,r271:mode_overlays.md:1362,ruling,"conf inferred (source lists H or strong M only); a:same address, other names Effect_AnglesFromPacked"
-0x800D2318,ovl:36,func_800D2318,Effect_AnglesFromPacked,unpacks o+0x2C to o+0x12 / 0x16,H,r271:abil_packages.md:2839,ruling,"conf inferred (source lists H or strong M only); a:same address, other names AnglesFromPackedDir; e:function not CamelCase"
+0x800D2318,ovl:36,func_800D2318,AnglesFromPackedDir,ratan2 / SquareRoot0 on +0x2C,H,r271:mode_overlays.md:1362,ok,"conf inferred (source lists H or strong M only); conflict resolved over Effect_AnglesFromPacked (owning card (r271 mode_overlays, field overlay); the package-side name has a Module_ prefix and the C takes a FieldDir *)"
+0x800D2318,ovl:36,func_800D2318,Effect_AnglesFromPacked,unpacks o+0x2C to o+0x12 / 0x16,H,r271:abil_packages.md:2839,superseded,conf inferred (source lists H or strong M only); superseded by AnglesFromPackedDir
 0x800D23D0,ovl:36,func_800D23D0,AnglesFromVector,same on an SVECTOR,H,r271:mode_overlays.md:1363,ok,conf inferred (source lists H or strong M only)
 0x800D2468,ovl:36,func_800D2468,ClearStageMenu,"func_80016714(D_80115110, 0xC4)",H,r271:mode_overlays.md:1364,ok,conf inferred (source lists H or strong M only)
 0x800D24A0,ovl:36,func_800D24A0,OpenStageMenu,pauseMenu = kind + 1,H,r271:mode_overlays.md:1365,ok,conf inferred (source lists H or strong M only)
@@ -3093,7 +3093,7 @@ address,scope,current,proposed,purpose,confidence,source,status,note
 0x800D27A0,ovl:39,func_800D27A0,strNext,the sample's name (H),H,r271:mode_overlays.md:1500,ruling,conf inferred (source lists H or strong M only); e:function not CamelCase
 0x800D298C,ovl:39,func_800D298C,strSync,the sample's name (H),H,r271:mode_overlays.md:1501,ruling,conf inferred (source lists H or strong M only); e:function not CamelCase
 0x800D2A24,ovl:39,func_800D2A24,strKickCD,the sample's name; Setloc + CdRead2 (H),H,r271:mode_overlays.md:1502,ruling,conf inferred (source lists H or strong M only); e:function not CamelCase
-0x800D2AA0,ovl:39,func_800D2AA0,DecDCTReset,LIBPRESS API; ResetCallback for 0 (H),H,r271:mode_overlays.md:1503,ok,conf inferred (source lists H or strong M only); f:PsyQ-like prefix (warning)
+0x800D2AA0,ovl:39,func_800D2AA0,DecDCTReset,LIBPRESS API; ResetCallback for 0 (H),H,r271:mode_overlays.md:1503,ruling,conf inferred (source lists H or strong M only); f:PsyQ library name
 0x800D2AD8,ovl:39,func_800D2AD8,DecDCTGetEnv,LIBPRESS API; copies the three tables out (M),M,r271:mode_overlays.md:1504,ok,f:PsyQ-like prefix (warning)
 0x800D2B64,ovl:39,func_800D2B64,DecDCTPutEnv,LIBPRESS API; copies in and sends them (M),M,r271:mode_overlays.md:1505,ok,f:PsyQ-like prefix (warning)
 0x800D2C00,ovl:39,func_800D2C00,DecDCTBufSize,LIBPRESS API; first halfword (M),M,r271:mode_overlays.md:1506,ok,f:PsyQ-like prefix (warning)

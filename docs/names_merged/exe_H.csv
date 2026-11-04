@@ -369,7 +369,6 @@ address,scope,current,proposed,confidence,source,note
 0x8003A0D0,exe,func_8003A0D0,SeqChannelPressure,H,r274:names_exe_proposals.md:1038,
 0x8003A0E4,exe,func_8003A0E4,SeqPitchBend,H,r274:names_exe_proposals.md:1039,
 0x8003A234,exe,func_8003A234,SeqMetaEvent,H,r274:names_exe_proposals.md:1040,
-0x8003A424,exe,func_8003A424,SpuInit,H,r274:names_exe_proposals.md:854,f:PsyQ-like prefix (warning)
 0x80062A78,exe,D_80062A78,g_DebugFontUV8,H,r274:names_exe_proposals.md:1146,
 0x80062BA0,exe,D_80062BA0,g_FadeSpeeds,H,r274:names_exe_proposals.md:1145,
 0x80063138,exe,D_80063138,g_BgmPacks,H,r274:names_exe_proposals.md:1164,

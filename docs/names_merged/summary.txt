@@ -22,9 +22,9 @@ skipped: r274:names_exe_proposals.md:712: proposed not an identifier: 1
 skipped: r274:names_exe_proposals.md:713: proposed not an identifier: 1
 skipped: r274:names_exe_proposals.md:714: proposed not an identifier: 1
 skipped: structs_2.md: struct field rows (not names): 395
-dropped (already named): 0; superseded by ruling: 69
+dropped (already named): 0; superseded by ruling: 70
 needs ruling: 16
-exe_H: 467
+exe_H: 466
 exe_MM: 306
 engine_H: 508
 engine_ML: 1248
@@ -37,9 +37,9 @@ ovl_ML: 4
 scope abil: H 267, M 6
 scope engine: H 509, L 259, M 990
 scope exe: H 468, L 48, M 259
-scope ovl: H 302, M 4
+scope ovl: H 301, M 4
 scope stage: H 631, L 15, M 530
-same-address conflicts: 71 (resolved 69)
+same-address conflicts: 71 (resolved 70)
   engine 0x801270C0: WorldAnimMode / g_UpdateAllActors -> g_WorldAnimMode
   engine 0x80128EA8: SpriteAnim_Start / StartSpriteAnim -> StartSpriteAnim
   engine 0x80128ED8: SpriteAnim_Step / StepSpriteAnim -> StepSpriteAnim
@@ -110,13 +110,12 @@ same-address conflicts: 71 (resolved 69)
   ovl:36 0x800CFBCC: RequestFieldFileLoad / RequestPicture -> RequestPicture
   ovl:36 0x800D1E28: StartExitFade / StartMapChangeFade -> StartMapChangeFade
   ovl:36 0x800D1EBC: ExitFadeDone / StepMapChangeFade -> StepMapChangeFade
-  ovl:36 0x800D2318: AnglesFromPackedDir / Effect_AnglesFromPacked -> NEEDS A RULING
+  ovl:36 0x800D2318: AnglesFromPackedDir / Effect_AnglesFromPacked -> AnglesFromPackedDir
 flag counts in needs_ruling:
-      9 e:function not CamelCase
+      8 e:function not CamelCase
       3 e:global without g_ / not CamelCase
       2 b:local name equals a proposed global name
-      1 a:same address, other names AnglesFromPackedD
+      2 f:PsyQ library name
       1 a:same address, other names EndAbility12
-      1 a:same address, other names Effect_AnglesFrom
       1 a:same address, other names Ability_ResumeHop
       1 f:PsyQ-like prefix (warning)

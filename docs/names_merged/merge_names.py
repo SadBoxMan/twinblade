@@ -264,6 +264,10 @@ asm inline main""".split())
 MIPS_REGS = set("zero at v0 v1 a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 t8 t9 s0 s1 s2 s3 s4 s5 s6 s7 k0 k1 gp sp fp ra".split())
 LIBC = set("""memcpy memset memmove memcmp strcpy strcmp strlen strcat strncpy printf sprintf rand srand abs labs
 malloc free calloc realloc exit bcopy bzero bcmp atoi strtol qsort setjmp longjmp toupper tolower""".split())
+# well-known PsyQ API names not (yet) in symbol_addrs_psyq.txt
+PSYQ_KNOWN = set("""SpuInit SpuStart SpuQuit SsInit SsStart SsEnd CdInit CdControl CdRead CdSync CdReady CdSearchFile
+PadInit PadRead ResetGraph SetDispMask DrawSync VSync VSyncCallback InitGeom GsInitGraph GsInit3D MemCardInit
+MemCardStart DecDCTReset StopCallback ResetCallback ChangeClearPAD EnterCriticalSection ExitCriticalSection""".split())
 PSYQ_PREFIX = re.compile(r"^(Gs[A-Z]|Ss[A-Z]|Spu[A-Z]|MemCard|Cd[A-Z]|Pad[A-Z]|Gpu[A-Z]|Kanji|Mdec|DecDCT)")
 
 
@@ -412,7 +416,7 @@ for r in live:
                 r["status"] = "ruling"
     if n in C_KEYWORDS or n.lower() in MIPS_REGS or n in LIBC:
         r["flags"].append("f:C keyword / register / libc name"); r["status"] = "ruling"
-    if n in psyq_names:
+    if n in psyq_names or n in PSYQ_KNOWN:
         r["flags"].append("f:PsyQ library name"); r["status"] = "ruling"
     elif PSYQ_PREFIX.match(n) and not n.startswith("g_"):
         r["flags"].append("f:PsyQ-like prefix (warning)")
