@@ -50,4 +50,43 @@ void func_800CEF1C(void) {
     }
 }
 
-INCLUDE_ASM("asm/ovl3b/nonmatchings/ovl3b", func_800CEF50);
+typedef struct {
+    u32 tag;
+    u32 tpage;
+    u8 r0, g0, b0, code;
+    s16 x0, y0;
+    u8 u0, v0;
+    u16 clut;
+    s16 w, h;
+} TitleSprt;
+extern u32 D_800AA60C[][0x1000];
+extern TitleSprt D_800CF10C;
+extern TitleSprt D_800CF124;
+
+void func_800CEF50(void) {
+    register Work *w = &D_800AF630;
+    setlen(&D_800CF10C, 5);
+    D_800CF10C.tpage = 0xE100008A;
+    D_800CF10C.code = 0x64;
+    D_800CF10C.x0 = -0xA0;
+    D_800CF10C.y0 = -0x6E;
+    D_800CF10C.r0 = D_800CF10C.g0 = D_800CF10C.b0 = 0x80;
+    D_800CF10C.u0 = 0;
+    D_800CF10C.v0 = 0xA;
+    D_800CF10C.w = 0x100;
+    D_800CF10C.h = 0xF0;
+    D_800CF10C.clut = 0x7800;
+    setlen(&D_800CF124, 5);
+    D_800CF124.tpage = 0xE100008C;
+    D_800CF124.code = 0x64;
+    D_800CF124.x0 = 0x60;
+    D_800CF124.y0 = -0x6E;
+    D_800CF124.r0 = D_800CF124.g0 = D_800CF124.b0 = 0x80;
+    D_800CF124.u0 = 0;
+    D_800CF124.v0 = 0xA;
+    D_800CF124.w = 0x40;
+    D_800CF124.h = 0xF0;
+    D_800CF124.clut = 0x7800;
+    addPrim(D_800AA60C[w->frame], &D_800CF10C);
+    addPrim(D_800AA60C[w->frame], &D_800CF124);
+}
