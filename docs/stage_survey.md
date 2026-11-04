@@ -177,6 +177,134 @@ one constant changed (0x200 for 0x20, docs/decomp_recipes.md r152). Proposed: `D
   phases call NextPhase, StartFace, SetPlayerMotion). Proposed: `Scene<What>Main` / `PlayerAction<n>Main` (M).
 
 ### Shared families
+#### Family index
+Every family (shapes shared by 3+ stages in 3+ shapes, or 2 stages in 8+ shapes; tools: r275 digest), with where it is described below. Stage lists: the digest's families list, reproduced in each section.
+
+| id | stages | shapes | first stage: functions | described |
+|---|---|---|---|---|
+| F001 | 5 | 16 | SC01_004: 0x8017D308..0x8017EF8C | section: stage-local multi-page menu (5 stages) |
+| F002 | 2 | 47 | SC01_005: 0x8017D220..0x801822B0 | section: SC01_005 / SC01_006 room code (2 stages, 47 shapes) |
+| F003 | 3 | 8 | SC01_005: 0x8017BF00..0x801807D8 | section: room-event player action phases (3 stages, 8 shapes) |
+| F004 | 3 | 36 | SC01_077: 0x8017EF50..0x80183CF4 | section: ground enemy (3 stages, 36 shapes) |
+| F005 | 2 | 11 | SC01_077: 0x80185BA4..0x80186A04 | section: four-switch mechanism (2 stages, 11 shapes) |
+| F006 | 16 | 4 | SC01_077: 0x8017C294..0x8017C908 | minor list |
+| F007 | 9 | 4 | SC01_077: 0x801858AC..0x80185B5C | minor list |
+| F008 | 8 | 4 | SC01_077: 0x801844AC..0x801846F8 | minor list |
+| F009 | 33 | 3 | SC01_077: 0x8017C0BC..0x8017C230 | minor list |
+| F010 | 17 | 3 | SC01_077: 0x80184ED8..0x8018514C | minor list |
+| F011 | 10 | 3 | SC01_077: 0x80185428..0x801856F8 | minor list |
+| F012 | 4 | 3 | SC01_077: 0x80183A50..0x80183AA8 | minor list |
+| F013 | 37 | 15 | SC01_084: 0x8017BEBC..0x8017C910 | minor list |
+| F014 | 2 | 158 | SC02_000: 0x8017E958..0x801888F4 | section: the boulder-course code of SC02_000 / SC02_003 (2 stages, 158 shapes) |
+| F015 | 3 | 8 | SC02_000: 0x80188F08..0x8018A650 | section: an 8-slot screen sprite chain (3 stages, 8 shapes) |
+| F016 | 3 | 3 | SC02_000: 0x801822BC..0x80182CB4 | section: exit with SoundCmd1(2) + StartFade(4), message answer (3 stages, 3 sha |
+| F017 | 11 | 8 | SC02_005: 0x8017BE9C..0x8017C41C | section: boss HP-bar and spawn helpers (11 stages, 8 shapes) |
+| F018 | 9 | 5 | SC02_005: 0x80190144..0x80190408 | section: an effect sprite actor (9 stages, 5 shapes) |
+| F019 | 4 | 3 | SC02_005: 0x8018C2B0..0x8018CEE0 | section: prop helpers (4 stages, 3 shapes) |
+| F020 | 7 | 49 | SC02_011: 0x8017E3BC..0x801900F0 | section: Musashi's "obtained" scene and effects (7 stages, 49 shapes) |
+| F021 | 3 | 35 | SC02_011: 0x8018C734..0x8018E8A0 | section: an enemy kind (3 stages, 35 shapes) |
+| F022 | 15 | 15 | SC02_011: 0x8018A72C..0x8018B2C4 | section: / F029: GTE draw helpers (15 / 14 stages, 15 / 7 shapes) |
+| F023 | 32 | 12 | SC02_011: 0x8018ECE4..0x8018F390 | section: the "rescue" talk NPC (32 stages, 12 shapes) |
+| F024 | 27 | 11 | SC02_011: 0x8017C688..0x8017D31C | section: item-aware villager NPC (27 stages, 11 shapes) |
+| F025 | 14 | 10 | SC02_011: 0x8017D50C..0x8017E318 | section: NPC with a flagged one-time event (14 stages, 10 shapes) |
+| F026 | 3 | 9 | SC02_011: 0x80188554..0x80189880 | minor list |
+| F027 | 2 | 9 | SC02_011: 0x80181E00..0x8018CC9C | minor list |
+| F028 | 3 | 8 | SC02_011: 0x8018BDB8..0x8018C5A4 | minor list |
+| F029 | 14 | 7 | SC02_011: 0x8018A708..0x8018AE08 | minor list |
+| F030 | 15 | 6 | SC02_011: 0x8019064C..0x80190C40 | minor list |
+| F031 | 7 | 6 | SC02_011: 0x801901C0..0x801904BC | minor list |
+| F032 | 4 | 6 | SC02_011: 0x8018D19C..0x8018E420 | minor list |
+| F033 | 17 | 5 | SC02_011: 0x8018B5A8..0x8018BA0C | minor list |
+| F034 | 4 | 4 | SC02_011: 0x8018BAD8..0x8018BCC4 | minor list |
+| F035 | 34 | 3 | SC02_011: 0x8018EDB8..0x80190470 | minor list |
+| F036 | 15 | 3 | SC02_011: 0x8017C294..0x8017C4F8 | minor list |
+| F037 | 6 | 3 | SC02_011: 0x8018C31C..0x8018C534 | minor list |
+| F038 | 4 | 3 | SC02_011: 0x8017F2AC..0x8017FA94 | minor list |
+| F039 | 3 | 3 | SC02_011: 0x80187724..0x80189A50 | minor list |
+| F040 | 2 | 8 | SC02_015: 0x8017D468..0x8017E1F0 | minor list |
+| F041 | 13 | 11 | SC02_016: 0x80182224..0x80182874 | minor list |
+| F042 | 2 | 9 | SC02_016: 0x80180B30..0x801820C0 | minor list |
+| F043 | 2 | 17 | SC02_017: 0x80184BA4..0x80185D10 | minor list |
+| F044 | 7 | 12 | SC02_017: 0x80184B18..0x80185C68 | minor list |
+| F045 | 16 | 39 | SC02_026: 0x80182F00..0x80185398 | section: kind-0x12C foot soldier enemy (16 stages) |
+| F046 | 3 | 35 | SC02_026: 0x8017D434..0x8017F9D4 | minor list |
+| F047 | 6 | 26 | SC02_026: 0x8018144C..0x80182E80 | section: splitting blob (6 stages) |
+| F048 | 21 | 21 | SC02_026: 0x8017FAC0..0x80181374 | section: (+F051): bundle of small actors (21 stages) |
+| F049 | 4 | 6 | SC02_026: 0x8017DAB8..0x8017E02C | minor list |
+| F050 | 23 | 5 | SC02_026: 0x80185440..0x8018584C | section: room lights (23 stages) |
+| F051 | 22 | 3 | SC02_026: 0x80180A34..0x80180B90 | section: three tiny helpers used with F048 (22 stages): clear hit (+0xC1/+0x5E) |
+| F052 | 2 | 48 | SC02_027: 0x8017E7F8..0x80189CC4 | minor list |
+| F053 | 8 | 7 | SC02_027: 0x80189EB0..0x8018A4A4 | section: screen-space spawner + sound (8 stages: sc02_027 sc02_028 sc03_099-sc0 |
+| F054 | 4 | 14 | SC02_028: 0x80181EDC..0x8018292C | section: switch / gate set that sets progress 0x172 (4 stages: sc02_028 sc03_09 |
+| F055 | 8 | 5 | SC02_028: 0x801829BC..0x80182F88 | section: warp disc (8 stages: sc02_028 sc03_089-sc03_092 sc03_097 sc03_101 sc03 |
+| F056 | 8 | 15 | SC02_031: 0x8017DB98..0x8017F52C | minor list |
+| F057 | 10 | 10 | SC02_035: 0x801832D4..0x80183E68 | section: flying diver, variant (10 stages: sc02_035 sc03_094 sc03_099 sc03_103  |
+| F058 | 5 | 8 | SC02_035: 0x8017D398..0x8017D85C | section: swinging hazard and platform (5 stages: sc02_035 sc03_098-sc03_101; fi |
+| F059 | 2 | 18 | SC02_039: 0x8017D01C..0x8017F050 | minor list |
+| F060 | 4 | 41 | SC02_041: 0x8017E654..0x801845F0 | minor list |
+| F061 | 3 | 13 | SC02_041: 0x8017CE3C..0x8017FE34 | minor list |
+| F062 | 4 | 12 | SC02_041: 0x8017D244..0x8017DD60 | minor list |
+| F063 | 3 | 11 | SC02_041: 0x8017FF48..0x80180ACC | minor list |
+| F064 | 3 | 5 | SC02_041: 0x80180C40..0x80181284 | minor list |
+| F065 | 13 | 4 | SC02_041: 0x8017E7A4..0x8017EA1C | minor list |
+| F066 | 3 | 3 | SC02_041: 0x80182484..0x801829B4 | minor list |
+| F067 | 4 | 82 | SC03_001: 0x8017EF30..0x80186674 | not described |
+| F068 | 10 | 67 | SC03_001: 0x8017BF50..0x80188ED0 | not described |
+| F069 | 5 | 33 | SC03_001: 0x8017F0EC..0x8018D0E4 | not described |
+| F070 | 3 | 19 | SC03_001: 0x80182638..0x801855CC | not described |
+| F071 | 6 | 17 | SC03_001: 0xDrawChunkedMesh..0x80186DAC | not described |
+| F072 | 9 | 4 | SC03_001: 0x8017E810..0x80188830 | not described |
+| F073 | 4 | 29 | SC03_002: 0x8017EAE8..0x80185000 | not described |
+| F074 | 4 | 19 | SC03_003: 0x8017BEF8..0x8017F204 | minor list |
+| F075 | 2 | 29 | SC03_006: 0x80184B30..0x80188C18 | not described |
+| F076 | 2 | 16 | SC03_006: 0x801838FC..0x801846D0 | not described |
+| F077 | 4 | 4 | SC03_006: 0x80183B14..0x80184300 | minor list |
+| F078 | 3 | 8 | SC03_007: 0xDCB4..0x801846EC | not described |
+| F079 | 2 | 37 | SC03_010: 0x8017C628..0x8017FE88 | not described |
+| F080 | 3 | 10 | SC03_010: 0x8017BEBC..0x8017C6F4 | not described |
+| F081 | 3 | 3 | SC03_010: 0x8017DD84..0x8017DE04 | not described |
+| F082 | 2 | 74 | SC03_014: 0x8017FA5C..0x80189AC4 | not described |
+| F083 | 6 | 3 | SC03_014: 0x80188D64..0x80189630 | not described |
+| F084 | 4 | 3 | SC03_014: 0x8017DF84..0x801842E0 | not described |
+| F085 | 3 | 4 | SC03_024: 0x8017CE10..0x80182F48 | not described |
+| F086 | 3 | 4 | SC03_024: 0x801868C0..0x80186E08 | not described |
+| F087 | 6 | 3 | SC03_028: 0x8017F0D0..0x8017F40C | not described |
+| F088 | 2 | 10 | SC03_031: 0x80180F0C..0x80181A98 | not described |
+| F089 | 4 | 36 | SC03_089: 0x80181474..0x80185C58 | section: diver enemy with bomb (4 stages: sc03_089 sc03_090 sc03_091 sc03_104) |
+| F090 | 2 | 22 | SC03_090: 0x80181578..0x8018A9C8 | section: drifting 0x19E creature + camera bits (2 stages: sc03_090 sc03_091) |
+| F091 | 5 | 19 | SC03_093: 0x801813E0..0x8018232C | section: glowing 0x1A2 creature (5 stages: sc03_093-sc03_097) |
+| F092 | 4 | 9 | SC03_093: 0x8017F2D8..0x8017FA00 | section: occluder hider (4 stages: sc03_093 sc03_095 sc03_096 sc03_097) |
+| F093 | 8 | 29 | SC03_107: 0x8017EF3C..0x801812F8 | section: chained creature, actor kind 0x1EA (8 stages) |
+| F094 | 5 | 19 | SC03_107: 0x8017D9B8..0x8017ED6C | section: ground melee enemy, burst-attack half (5 stages) |
+| F095 | 4 | 6 | SC03_107: 0x801819C8..0x80181CC0 | section: roaming object dispatcher and reaction states (4 stages) |
+| F096 | 4 | 26 | SC03_108: 0x8017F0B0..0x80180B7C | section: hopping blob enemy (4 stages) |
+| F097 | 2 | 11 | SC03_109: 0x8017D2E0..0x8017DC54 | section: spinning platform with four arms (2 stages) |
+| F098 | 7 | 5 | SC03_114: 0x8017E170..0x8017E94C | section: particle prop spawner (7 stages) |
+| F099 | 2 | 54 | SC03_118: 0x80181A64..0x80188FB0 | section: SC03_118 / SC03_119 room code (2 stages, 54 shapes) |
+| F100 | 5 | 15 | SC03_124: 0x8017DB88..0x80183364 | section: village clock lights and master set-up (5 stages) |
+| F101 | 3 | 5 | SC03_124: 0x801807D8..0x80180A88 | section: progress-window NPC with talk zone (3 stages) |
+| F102 | 3 | 5 | SC03_126: 0x8017EA10..0x8017ED0C | section: message sequence in a player-action scene (3 stages) |
+| F103 | 2 | 14 | SC04_000: 0x80180FF8..0x80181BA4 | section: respawning spinning enemy (2 stages) |
+| F104 | 2 | 13 | SC04_000: 0x801822F0..0x80182D78 | section: warp flash / sparkle swarm (2 stages; with F105) |
+| F105 | 3 | 3 | SC04_000: 0x80182724..0x80182800 | section: sparkle quad helpers (3 stages) |
+| F106 | 3 | 33 | SC04_002: 0x80181C20..0x80183548 | section: block-throwing large enemy, kind 0x1FC (3 stages) |
+| F107 | 4 | 14 | SC04_002: 0x801835E0..0x80183F24 | section: thrown block, kind 0x239 (4 stages) |
+| F108 | 3 | 8 | SC04_003: 0x8017D698..0x8017E39C | section: enemy-clear reward light (3 stages) |
+| F109 | 3 | 13 | SC04_004: 0x801829BC..0x801831FC | section: leaping enemy, kind 0x210 (3 stages) |
+| F110 | 2 | 12 | SC04_005: 0x8018093C..0x80186DCC | section: stomping enemy + reward trigger (2 stages) |
+| F111 | 2 | 52 | SC04_018: 0x8017E628..0x801877B0 | section: SC04_018 / SC04_019 village code (2 stages, 52 shapes) |
+| F112 | 3 | 18 | SC04_018: 0x8017E5CC..0x801877B0 | section: village villager steps (3 stages) |
+| F113 | 4 | 5 | SC05_001: 0x80180B70..0x80180F50 | section: Musashi's knock-down hurt and its green puff effect (4 stages) |
+| F114 | 2 | 43 | SC05_003: 0x8017F68C..0x80181CDC | section: the large walking creature of SC05_003 / SC05_005 (2 stages, 43 shapes |
+| F115 | 7 | 49 | SC06_008: 0x8017EC48..0x80183BF4 | section: sc06 mechanical enemies: rotor flyer and sprayer mech, with their debr |
+| F116 | 6 | 13 | SC06_011: 0x8017E9F4..0x8017F6CC | section: lift / conveyor hub of the small sc06 rooms (6 stages, 13 shapes) |
+| F117 | 6 | 87 | SC06_018: 0x80183A00..0x8018A0B8 | section: big sc06 enemy / hazard set (6 stages, 87 shapes) |
+| F118 | 2 | 42 | SC06_018: 0x8018A28C..0x8018CD04 | section: sc06_018 / sc06_032 machine enemy (2 stages, 42 shapes) |
+| F119 | 3 | 33 | SC06_018: 0x9C..0x8018F694 | section: segmented chain machine (3 stages, 33 shapes) |
+| F120 | 4 | 4 | SC06_018: 0x8017BEF8..0x8017DC58 | minor list |
+| F121 | 3 | 3 | SC06_018: 0x8017D934..0x8017DB20 | minor list |
+| F122 | 2 | 34 | SC06_022: 0x8017D414..0x80181A4C | section: sc06_022 / sc06_024 big mechanism (2 stages, 34 shapes) |
+
 ### F001: stage-local multi-page menu (5 stages)
 * **Stages:** sc01_004 sc01_005 sc01_006 sc01_008 sc01_009
 * **What it is:** a menu run as a stage frame hook (H): open (0x8017D308: g_StageMode = 3, frame hook 0x8017D3AC which
