@@ -469,9 +469,768 @@ of +0xF2), sets +0xA8 = 0x20 (not in the sleep family), and resets face 0x11, pa
 
 Rows: 229 (H 17, M 184, L 28); skipped (already known): 42
 
+### 0x80153000-0x8015C000: the kind / state machine, motion scripts, sword attacks, death
+
+Musashi's kind / state machine (Player +0 kind, +2 state, a `D_xxx[+2]` state table per kind; D_8018FBA8[kind] is the
+kind's exit handler, run before every kind change). Here: two hazard kinds (shrink-out, pit fall) with the safe-spot respawn search;
+the grabbed kind; motion- and face-script restarts and the motion interpreter; the sword attacks (kind 5 Fusion combo, kind 6 Lumina
+slash, kind 7 air slash, three skill kinds) with the attack-record hit test and damage / critical rolls; death and the continue
+choice (kind 0x1A); a five-step scene task; the per-frame kind update; kinds 0-4 (stand, run, jump, fall, slide).
+
+#### Hazard kinds: shrink-out and pit fall, then respawn at a safe spot
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80153060 | func_80153060 | RunVanishKindState | this hazard kind's state handler, D_8018F2DC[+2] (5 states: the five below) | M | e58E0; no C callers (a D_8018FBA8-style kind table entry); the table runs to D_8018F2F0, five words |
+| 0x8015309C | func_8015309C | VanishEnter | state 0: CollidePlayerMove, PlayerObjFallStep, PlayerObjGroundStep, then VanishStart and NextEffectState (so state 1 is skipped) | M | e58E0 func_8015309C; same shape as the sibling hazard kinds at 0x80152094 / 0x801523AC |
+| 0x801530E4 | func_801530E4 | VanishStart | StartRumbleScript(D_80062C04), ClearHitPending, SetPlayerFlag7E2, +0xDE = 0x40, drop the linked object (func_8014CBF8), zero +0x118..+0x12C (func_801474EC), ClearDisplayFlag10, next state | M | e58E0; 1 call (VanishEnter) |
+| 0x80153150 | func_80153150 | VanishShrinkStep | the model scale +0x60/+0x62/+0x64 shrinks by 0x100 a frame; at 0: HidePlayerAbility, StartRespawnWait, next state | M | e58E0 (the scale words are reset to 0x1000 by RecoverFromVanish and ResetPlayerForDeath) |
+| 0x801531BC | func_801531BC | VanishWaitStep | ClearHitPending; when TickRespawnWait returns 0: +0xDE = 1 (ring radius for FindRespawnPoint), +0xDF = 0, next state | M | e58E0; identical to the waits at 0x8015220C / 0x80152A08 / 0x80152EFC |
+| 0x80153204 | func_80153204 | VanishRespawnStep | FindRespawnPoint until it succeeds; then position = +0x88 (the spot), ClearEffectAccel, RecoverFromVanish, ResetPlayerKind, DropTimedAbility | M | e58E0 |
+| 0x8015327C | func_8015327C | RecoverFromVanish | DamagePlayerHp(+0xF2), +0xA8 = 0x20, face 0x11, UpdateFlag10Part21, ShowPlayerAbility, ClearPlayerFlag7E2, hit fields +0x3E/+0x40/+0x42/+0xDD cleared, +0x3C bit 0 off, model +0x10 = 0, scale 0x1000, SetFallSpeed(0), ForgetPlayerHit | M | e58E0; 1 call (VanishRespawnStep); byte-for-byte the same as func_801522CC |
+| 0x80153320 | func_80153320 | RunPitFallKindState | the second hazard kind's state handler, D_8018F2F0[+2] (5 states) | M | e58E0; no C callers (kind table entry) |
+| 0x8015335C | func_8015335C | PitFallEnter | state 0: the three move steps, PitFallStart, NextEffectState | M | e58E0 |
+| 0x801533A4 | func_801533A4 | PitFallStart | the same set-up as VanishStart (rumble, +0xDE = 0x40, parts hidden) | M | e58E0; 1 call (PitFallEnter); its body equals VanishStart's |
+| 0x80153410 | func_80153410 | PitFallStep | ClearHitPending, AddFallSpeedLimited(0x18000), AddFallSpeed; once y >= 0x201 or +0xDE has counted out: HidePlayerAbility, StartRespawnWait, next state | M | e58E0 (y grows downward: he drops out of the room) |
+| 0x80153490 | func_80153490 | PitFallWaitStep | as VanishWaitStep | M | e58E0 |
+| 0x801534D8 | func_801534D8 | PitFallRespawnStep | as VanishRespawnStep, with RecoverFromPitFall | M | e58E0 |
+| 0x80153550 | func_80153550 | RecoverFromPitFall | as RecoverFromVanish (damage +0xF2, face, parts, scale, ForgetPlayerHit) | M | e58E0; 1 call (PitFallRespawnStep) |
+
+#### Respawn helpers (shared by the five hazard kinds 0x80151xxx-0x801535xx)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015369C | func_8015369C | StartRespawnWait | calls the stage's respawn hook D_8011DB28 with the last safe point (+0xA0) when one is set, then +0xDE = 0x5A (90 frames) | M | e58E0; 5 calls (func_80152194, func_8015294C, func_80152E4C, VanishShrinkStep, PitFallStep); sc06_000 sets D_8011DB28 (`D_8011DB28 = func_sc06_000_80180AB8`); +0xA0 is written by func_801483E8 only when he stands on a surface-0 floor |
+| 0x801536DC | func_801536DC | TickRespawnWait | INCLUDE_ASM (no asm in this checkout); 0 when the wait set by StartRespawnWait is over | L | e58E0; 5 callers, all `if (func_801536DC(o) == 0) { +0xDE = 1; +0xDF = 0; NextEffectState }` |
+| 0x80153800 | func_80153800 | FindRespawnPoint | with the stage hook: +0x88 = his position; when +0xDE > 0x20: the room's entry point D_80126DB0 (also the model heading); else tries 128 points on a ring of radius +0xDE*4 round the safe point +0xA0 (TestRespawnSpot) and widens the ring each frame; 1 while still searching | M | e58E0; 5 callers (the respawn steps), each placing him at +0x88 when it returns 0; func_80146FC4 uses D_80126DB0 the same way when he falls below y 0x400 |
+| 0x80153978 | func_80153978 | TestRespawnSpot | TraceMap from the candidate to 0x1F below: 0 when it is floor (0x2000) of surface type 0 and ValidateRespawnSpot accepts it | M | e58E0; 1 call (FindRespawnPoint) |
+| 0x801539F8 | func_801539F8 | ValidateRespawnSpot | traces from the safe point (+0xA0, 4 up) to the candidate (must stay floor), then 8 further down and a mode-2 trace agree; stores the spot at +0x88 (and +0x90); 0 on success | M | e58E0; 1 call (TestRespawnSpot) |
+| 0x80153B58 | func_80153B58 | EmitPlayerSmoke | every 4th frame SpawnFx31 (func_8016DA04), every 2nd frame a puff (SpawnEffect kind 3, values 0x08880000 / 0x18009000) at his position | L | e58E0; 2 calls: func_80151780 when +0xF0 & 0x200 (a hit attribute), func_80152E4C (a hazard kind's sink step); doc2 names func_8016DA04 SpawnFx31 |
+
+#### Being grabbed (struggle free), grab requests
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80153C30 | func_80153C30 | SetGrabFatal | D_8011F748 = 1: the grabbed state then ends the grab and DamagePlayerHp(current hp), i.e. the hold kills | M | e58E0 GrabbedStep; 2 stage calls (sc02_027, sc02_028) `func_80153C30()` |
+| 0x80153C44 | func_80153C44 | SetGrabReactionEx | SetGrabReaction(kind, value) and D_8011DB18 = a third value | M | e58E0; no C callers |
+| 0x80153CCC | func_80153CCC | RunGrabbedKindState | StartRumbleScript(D_8018F304), D_8018F32C[+2], then D_8011DB0C (grab reaction) and D_8011F748 cleared each frame | M | e58E0; kind table entry |
+| 0x80153D34 | func_80153D34 | GrabbedEnter | state 0: the three move steps, GrabbedStart, NextEffectState | M | e58E0 |
+| 0x80153D7C | func_80153D7C | GrabbedStart | PlaySe(0x451), motion D_8018F30C, ClearHitPending, his position saved at +0x244..+0x248, struggle count +0xDE = 10 (20 on map 0x3075), +0xDF = 0 | M | e58E0; 1 call (GrabbedEnter) |
+| 0x80153E00 | func_80153E00 | GrabbedStep | each newly pressed direction (digital 0x41 or analog 0x53/0x73) counts +0xDE down, at 0 ForgetPlayerHit (he breaks free); once the holder D_80127518 is gone: back to the saved spot (not on map 0x3075), EndGrab, ResetPlayerKind, DropTimedAbility; grab reactions 1/2/3 deal D_8011DB1A (DamagePlayerHp, func_8014ACE8), 2 with effect 0x42 bursts; SetGrabFatal's flag kills | H | e58E0; SetGrabReaction calls from stages: `func_80153C74(3, 0x18)`, `(1, 0x14)` (sc02_027, sc03_089) |
+| 0x8015410C | func_8015410C | EndGrab | D_80127518 (the holder) = 0, then ResetPlayerAfterHit | M | e58E0; 2 calls (GrabbedStep) |
+
+#### Motion script (Player +0xB4 script, +0xB8 timer and flags, +0xBC index)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80154218 | func_80154218 | RestartPlayerMotionIndexBlend | motion n of the table +0xB0 started unconditionally with blend frames (+0xBC / +0xBD = n), +0xDC = CountMotionPoses, then StepPlayerMotion | H | e58E0; 1 call (SetPlayerMotionIndexBlend, the "if different" form) |
+| 0x8015430C | func_8015430C | RestartPlayerMotionBlend | a motion pointer started unconditionally with blend frames, then StepPlayerMotion | H | e58E0; 1 call (SetPlayerMotionBlend) |
+| 0x80154358 | func_80154358 | PeekPlayerMotionPose | runs one step of the script with side effects off (arg3 = 1) and returns the pose it would put in model +0x20; the motion fields and model +0x20 are restored | M | e58E0; 2 calls: func_801484E8 / func_8014856C `func_801485B8(func_80154358(&D_80126B58) - 0x10, ...)` (a weapon point from the next pose) |
+| 0x80154418 | func_80154418 | StepPlayerMotion | one frame of the motion script with side effects on | H | e58E0; 5 calls: the player update func_80146128 and every Set/Restart motion |
+| 0x8015444C | func_8015444C | RunPlayerMotionScript | the motion script interpreter: on the timer's end reads op +0xB4[+0xBC]: 0 end (flag 0x8000), 1 loop, 2 stop, 3 set hold, 4/11/12 skip, 5 jump to script, 6 go to index, 7-10 raise flags 0x4000/0x2000/0x1000/0x800, 14 face script, 15 face, 16-19 part / display flags, 20 toggle +0x1A8 (the attack's hit window), 21/22 StoreImage, 23/24 fixed pose, 25/26 +0x44 bit 0x20000, else a pose (model +0x20 = op + 0x10) | H | e58E0; 2 calls (StepPlayerMotion, PeekPlayerMotionPose) and itself |
+| 0x801549F8 | func_801549F8 | CountMotionPoses | the number of pose entries before index +0xBC (ops skipped by their length), stored in +0xDC | M | e58E0; 3 calls (the blend starters and op 6) |
+
+#### Face scripts
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80154AB4 | func_80154AB4 | RestartFace | face script n of +0xCC started unconditionally (+0xD0, timers 1, index 0) | H | e58E0; 1 call (StartFace, the "if different" form) |
+| 0x80154B20 | func_80154B20 | RestartFaceAt | the same from index n (+0xD8 / +0xD9) | H | e58E0; 1 call (StartFaceAt) |
+| 0x80154B7C | func_80154B7C | RestartFaceScript | a face script pointer started unconditionally | H | e58E0 (StartFaceScript); 3 stage calls (sc06_006) `func_80154B7C(p, &D_800D5F14)` |
+| 0x80154BC8 | func_80154BC8 | RestartFaceScriptAt | the same from an index | H | e58E0; 1 call (StartFaceScriptAt) |
+| 0x80154BE4 | func_80154BE4 | UpdatePlayerFace | FaceScriptStep with fresh flags, then RefreshFaceOverride | H | e58E0; called each frame by the player update func_80146128 |
+| 0x80154F9C | func_80154F9C | RefreshFaceOverride | swaps the loaded face for the placeholder D_800D8D10 (game-mode word 0x80078E96 bit 0x8000) or the tired face 0x40000002 (stats +0x26 or +0x2E below 0x10) while no action runs, and back to the face word +0xC8 when that ends | M | e58E0; 1 call (UpdatePlayerFace); FaceSet makes the same choice when a face is set |
+
+#### Ability package
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801554B8 | func_801554B8 | LoadAbilityPackage | when the wanted package +0x1A0 differs from the loaded one +0x196: func_800D02D0 (ovl36: a package's archive file loaded) until done, then +0x196 = it and its set-up (func_801659DC: D_801902E8[pkg]); 1 while loading | M | e58E0; no C callers (a handler); func_8015FF20 sets +0x1A0 from +0x184 and D_80078EC1 from it |
+
+#### Kind 5: the Fusion (square button) combo
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80155518 | func_80155518 | StartFusionCombo | SetKindAndState(5), then FusionSwingStart at once | M | e58E0; no C callers. Kind 5 is the attack-button (pad 0x80) kind: func_80149AA8 (0x80 pressed) leads to func_80149AD4, which sets +0x1AA = 1 and calls EnterFusionCombo |
+| 0x8015554C | func_8015554C | EnterFusionCombo | SetKindAndState(5), then its state handler (state 0 waits for the current motion) | M | e58E0; 2 calls: func_80149AD4, func_80149B14 (the stand / run / land steps and the combo itself) |
+| 0x80155580 | func_80155580 | RunFusionComboState | kind 5's state handler, D_8018F37C[+2] | M | e58E0 |
+| 0x801555BC | func_801555BC | FusionComboWait | state 0: when the current motion has ended (func_80161104), FusionSwingStart | M | e58E0 |
+| 0x801555F4 | func_801555F4 | FusionSwingStart | face 0x15; combo step +0x1AA (5 when +0x44 & 0x200; 7 when running at full speed 0xFFF50000 with flag 0x82); per step a motion (D_800D4C94 ...), PlaySe 0x400 / 0x446 / 0x7F, voice PlaySeNow 0x5F3..0x5F6, ResetAttackHit, the trail effect (SpawnEffectOn kind 4); steps 0/1 alternate on +0x1AB; D_8011F730 \|= 3 | M | e58E0; 2 calls (StartFusionCombo, FusionComboWait); effect 4 is the blue trail of doc2's TrailFx A (weapon points func_801484B0) |
+| 0x80155800 | func_80155800 | FusionSwingStep | the swing: +0x44 \|= 2; at the motion's end back to kind 0; square pressed from frame 4 (+0x1A9): after a hit (+0x1C0) the next step (1..4, via func_80149B14), else a fresh combo (func_80149AD4); jump and direction cancel (EnterPlayerJump, EnterPlayerRunning); a drift along the heading; RunAttackHit(+0x1AA) | M | e58E0; kind 5 state 1 |
+| 0x80155A44 | func_80155A44 | CheckFusionSkillInput | steps 0/1: flag 0x85, Lumina owned (TestFlag80), a hit and triangle (0x10) pressed: StartSwordSkill(2); step 2: flag 0x86 and triangle: StartSwordSkill(3); 1 when one started | M | e58E0; 1 call (FusionSwingStep); func_80149CB4 = StartSwordSkill |
+| 0x80155B20 | func_80155B20 | FusionFinisherLaunch | step 4 (the finisher): at the motion's end velocity 0, SetFallSpeed(-0x100000) (up), motion D_800D4DA8 | M | e58E0; reached by FusionSwingStart's double NextEffectState |
+| 0x80155B9C | func_80155B9C | FusionFinisherRise | AddFallSpeedLimited(0x30000) and AddFallSpeed until he falls, then motion D_800D4DB4, PlaySe(0x447) | M | e58E0 |
+| 0x80155C0C | func_80155C0C | FusionFinisherTurn | at the motion's end motion D_800D4DD4, next state | L | e58E0 |
+| 0x80155C64 | func_80155C64 | FusionFinisherFall | falls (0x30000); a fall step that lands: ResetPlayerKind; else the ground check func_8014FA04 (as in MovePlayerObj): steep slope 0x4000: SetPlayerKind4; floor 0x2000: landing motion D_800D4DF4 and dust; else RunAttackHit(+0x1AA) | M | e58E0 |
+| 0x80155D70 | func_80155D70 | FusionFinisherLand | at the motion's end: square held: func_8015E880 (the hold-attack kind), else ResetPlayerKind; ground lost: StartPlayerFall | M | e58E0; func_80149CD4 also leads to func_8015E880 |
+| 0x80155E30 | func_80155E30 | FusionSwingHoldStep | +0x44 \|= 2; RunAttackHit(+0x1AA) until the motion's end, then ResetPlayerKind | M | e58E0; the state FusionSwingStart sets for step 5 (state 7) |
+| 0x80155EA4 | func_80155EA4 | FusionDashSlashStep | step 7: forward drive (func_80147AD4 0x8000), dust every 4th frame, RunAttackHit; ends when the forward speed +0x2C reaches 0 or something was hit (+0x1C0) | M | e58E0; state 8 |
+| 0x80155F58 | func_80155F58 | FusionComboNop | empty | L | e58E0; sits among kind 5's states (a table slot) |
+| 0x80155F60 | func_80155F60 | EndFusionComboKind | kind 5's exit handler (RunPlayerKindHandler is called before every kind change): EndSwordSwing | M | e58E0 |
+| 0x80155F80 | func_80155F80 | EndSwordSwing | +0x44 &= ~2 (the swinging bit set by every attack step), face 0x11 | M | e58E0; 3 calls (FusionSwingStep twice, EndFusionComboKind) |
+
+#### Attack hit tests and damage (attack records of 20 bytes, damage records of 12)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80155FB0 | func_80155FB0 | RunAttackHitSet1 | RunAttackHit with record set 1 (D_8018F534) | M | e58E0; abil ovl30 `func_80155FB0(o, (AF(g, u8, 0x48) & 0x7F) - 1)` |
+| 0x80155FD4 | func_80155FD4 | RunAttackHitSet2 | RunAttackHit with record set 2 (D_8018F548) | M | e58E0; abil ovl26 / ovl13 `func_80155FD4(o, AF(o, u8, 0x1AA))` |
+| 0x80155FF8 | func_80155FF8 | RunAttackHit | AttackHitStep(o, record) on the scratchpad stack (SetSpadStackNested / ResetSpadStack); record = attack step, bit 16 / 17 pick set 1 / 2 | M | e58E0; 16 engine calls, nearly all `(o, AF(o, u8, 0x1AA))` from the attack steps; abil ovl27 1 call, same form |
+| 0x80156044 | func_80156044 | AttackHitStep | picks the record (D_8018F3CC + n*20, 18 of them: the +0x1AA steps 0..0x11), rolls its damage; while the hit window +0x1A8 is open: TraceAttackPoints, TurnToAttackHit (record +0x10), SpawnAttackHitEffects, PlayAttackHitSe, +0x1C0 = 1 on a hit | M | e58E0; 1 call (RunAttackHit). Motion op 20 toggles +0x1A8 |
+| 0x8015616C | func_8015616C | RollAttackDamage | damage record +0's damage: base + rand(range), or the level formulas func_80029B4C / func_80029BC8 / func_80029C44 (flags 0x4000 / 0x2000); D_8012693A = knock value (doubled with flag 0x81); D_801152B8 = +0xA plus 1-5 by flags 0x16-0x1A; flag 0x8000: ApplyCriticalDamage | M | e58E0; 1 call (AttackHitStep) |
+| 0x80156370 | func_80156370 | RollDamage | base (low 12 bits) + rand(0..range) of damage record n | M | e58E0; 4 engine calls (func_8014A1B0 `(0xA)`, func_8014C43C, func_80163C2C `(0xD)`, func_80163EC8 `(0xE)`); abil ovl29 `func_8014C4AC(a, 0x29, func_80156370(0x29) & 0xFFFF, ...)` |
+| 0x801563EC | func_801563EC | GetDamageRecord | D_8018F570 + n * 0xC | H | e58E0; 2 calls (RollAttackDamage, RollDamage) |
+| 0x8015640C | func_8015640C | ApplyCriticalDamage | when RollCriticalHit says so: damage x 1.75 (flag 0x1C) or x 1.5, marked 0x8000 | M | e58E0; 1 call; func_801571C4 hands 0x8000 on as the hit's critical mark (v.pad = 1) |
+| 0x801564B0 | func_801564B0 | RollCriticalHit | 0x8000 by chance: 1/2 with +0x44 & 0x200, 1/4 when any of func_8002A1B4 / A400 / A670 / A8E0, else 1/4 * a roll in 81..stats+0x2E | M | e58E0; 1 call (ApplyCriticalDamage) |
+| 0x801565C0 | func_801565C0 | AnyAttackPointHit | 1 when any of the three point results D_801151E0[0..2] has bit 0 (an actor hit) | M | e58E0; 1 call (AttackHitStep sets +0x1C0) |
+| 0x80156600 | func_80156600 | GetAttackHitPoint | the first attack point (D_80126AF0[i]) whose result has bit 0, else 0 | M | e58E0; 1 call (SkillAStep spawns effect 0x54 there) |
+| 0x80156648 | func_80156648 | ResetAttackHit | +0x1A8 (hit window), +0x1A9 (swing frame), +0x1C0 (hit landed) = 0, ResetClankSe | M | e58E0; 9 engine calls (every attack start); abil ovl30 / ovl27 / ovl26 / ovl13 `func_80156648(o)` |
+| 0x80156670 | func_80156670 | TraceAttackPoints | ComputeAttackPoints, then TraceAttackPath for each of the three points whose pad is 0, results in D_801151E0[i], the actor hit in D_801150E0[i] | M | e58E0; 1 call (AttackHitStep) |
+| 0x801567BC | func_801567BC | TurnToAttackHit | for each point that hit an actor: model heading = func_8014C568(o, D_8011DAD8[i]) (doc1: the heading to a point) | M | e58E0; 1 call (AttackHitStep when record +0x10) |
+| 0x80156848 | func_80156848 | SpawnAttackHitEffects | per point: an actor hit spawns the record's effect (+8, value +9) at the point; a wall / guarded hit (bits 6) plays PlayClankSeOnce and spawns sparks (kind 6), plus kind 0x53 on surface 0x24 | M | e58E0; 1 call (AttackHitStep) |
+| 0x80156A14 | func_80156A14 | ResetClankSe | +0xDA = 0 | M | e58E0; 1 call (ResetAttackHit); also cleared by TryAirFusionSlash / TryAirLuminaSlash |
+| 0x80156A1C | func_80156A1C | PlayClankSeOnce | once per swing (+0xDA): PlaySe(D_8018F7E0[material of point i]) | M | e58E0; 1 call (SpawnAttackHitEffects); the material comes from the wall polygon's pad >> 13 or func_8014C918 |
+| 0x80156A88 | func_80156A88 | PlayAttackHitSe | record +0xC for each point that hit: 0x01000000 a plain PlaySe, 0x02000000 func_8014CA88 (the actor's sound), else func_8014CA14; 0x80000000 = none | M | e58E0; 1 call (AttackHitStep) |
+| 0x80156B74 | func_80156B74 | ComputeAttackPoints | the attack segment for the record's point source: 0 = weapon A's two points (func_801484B0 / func_801484E8), 1 = weapon B's (func_80148534 / func_8014856C), 2 = a fixed point ahead turned by +0x24A, else a table of s8 triples indexed by the swing frame +0x1A9 (advanced unless flagged); then AttackPointsToWorld | M | e58E0; 1 call; doc2: UpdateSwordTrail takes the same weapon points (func_801484B0 / func_80148534) |
+| 0x80156ECC | func_80156ECC | AttackPointsToWorld | SplitAttackSegment, then the origin D_801270A8 and each used point through ObjLocalToWorld | M | e58E0; 1 call |
+| 0x80156FA8 | func_80156FA8 | SplitAttackSegment | from segment a-b makes three points a, a+d, b-d (d = (b-a)/3) when a is longer than 0x40; pad 1 marks an unused point | M | e58E0; 1 call |
+| 0x80157158 | func_80157158 | TraceAttackPath | u16 wrapper of TraceAttackPathBody | M | e58E0; 2 calls: TraceAttackPoints, func_80163664 (a second user of the same test) |
+| 0x801571C4 | func_801571C4 | TraceAttackPathBody | from origin to point: a map hit (RaycastMapTwoCells) gives 2 with the material; each live hittable actor (96 of D_801202A0, not kind 0xA, not the same damage type unless arg9 & 0x80) whose model the path crosses (PathHitsModelTwoCells): guarded (+0x5C & 0x4000 or +0xAE & mask) gives 4, else damage via func_8014C4AC (type, amount, the critical mark) and 1 | H | e58E0; 1 call |
+
+#### Kind 6: the Lumina (triangle button) slash
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801574DC | func_801574DC | StartLuminaSlash | SetKindAndState(6), then LuminaSlashStart at once | M | e58E0; no C callers. Kind 6 needs Lumina: func_80149B54 (triangle 0x10 pressed and TestFlag80, the flag that also shows weapon part 24 in UpdateWeaponParts) leads to func_80149BAC |
+| 0x80157510 | func_80157510 | EnterLuminaSlash | SetKindAndState(6), then its state handler | M | e58E0; 1 call: func_80149BAC (+0x1AA = 1 first) |
+| 0x80157544 | func_80157544 | RunLuminaSlashState | kind 6's state handler, D_8018F7F0[+2] | M | e58E0 |
+| 0x80157580 | func_80157580 | LuminaSlashEnter | state 0: fall and ground steps; no ground: StartPlayerFall; else LuminaSlashStart | M | e58E0 |
+| 0x801575E4 | func_801575E4 | LuminaSlashStart | face 0x15, step 0xA / 0xB alternating on +0x1AB, motion D_800D4F14, PlaySe(0x455), ResetAttackHit, trail effect kind 5, func_8014B768(o, 0x333), voice 0x5F3, D_8011F730 \|= 4 | M | e58E0; 2 calls; effect 5 is doc2's TrailFx B (weapon points func_80148534) |
+| 0x801576A8 | func_801576A8 | LuminaSlashStep | +0x44 \|= 2; RunAttackHit(+0x1AA) until the motion's end, then ResetPlayerKind | M | e58E0 |
+| 0x8015771C | func_8015771C | EndLuminaSlashKind | kind 6's exit: +0x1AA = 0, EndLuminaSlash | M | e58E0 |
+| 0x8015773C | func_8015773C | EndLuminaSlash | +0x44 &= ~2, face 0x11, UpdateFlag10Part21, ClearDisplayFlag20 | M | e58E0; 1 call |
+
+#### Kind 7: the air slash (from the second jump, flag 0x89)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80157788 | func_80157788 | StartAirSlash | D_801ED510 = 300, SetKindAndState(7), AirSlashStart | M | e58E0; no C callers |
+| 0x801577C8 | func_801577C8 | EnterAirSlash | D_801ED510 = 300, SetKindAndState(7), RunAirSlashState | M | e58E0; 2 calls: func_80149C94, PlayerAirborneStep (during the double-jump motion D_800D4BE0 when func_80149C08: flag 0x89, Lumina, triangle, no cooldown +0x223) |
+| 0x80157808 | func_80157808 | RunAirSlashState | D_8018F818[+2], and a 300-frame safety: when D_801ED510 runs out, exit and ResetPlayerKind | M | e58E0; 1 call (EnterAirSlash) |
+| 0x80157880 | func_80157880 | AirSlashEnter | state 0: func_8014ED28, func_8014D3E0, func_8014FA04 (the move steps), AirSlashStart | M | e58E0 |
+| 0x801578C0 | func_801578C0 | AirSlashStart | ResetAttackHit, step 9, motion D_800D5128, face 0x15, PlaySe(0xC20), drive D_8018F7F8, both trails (kind 4 value 7, kind 5 value 9), func_801725A4 (+0x1F4 \|= 2) | M | e58E0; 2 calls |
+| 0x8015795C | func_8015795C | AirSlashStep | forward drive, gravity 0x1A000; landing (func_80161450 & 5): SpawnLandingFx, timer 8, next; while airborne RunAttackHit and, after a hit (+0x1C0): face 0x17, motion D_800D5178, rebound drive D_8018F808 and SetFallSpeed(-0xC0000), state 4 | M | e58E0 |
+| 0x80157A8C | func_80157A8C | SpawnLandingFx | func_80161D20(o, +0x16E) and SpawnEffect2(o, 1) (dust) | M | e58E0; 1 call; AirSlashRebound does the same inline on landing |
+| 0x80157AC8 | func_80157AC8 | AirSlashSkidStep | after landing: decelerating drive (0x10000); once +0x2C turns positive: both trails freed (func_8016706C 4 / 5), motion D_800D51AC, next; else RunAttackHit | M | e58E0 |
+| 0x80157B74 | func_80157B74 | AirSlashEndStep | at the motion's end exit and ResetPlayerKind | M | e58E0 |
+| 0x80157BC8 | func_80157BC8 | AirSlashReboundStep | after the rebound: drive and gravity; landing: dust, trails freed, ResetPlayerKind; falling with nothing below: EnterPlayerFall | M | e58E0 |
+| 0x80157CCC | func_80157CCC | EndAirSlash | kind 7's exit: +0x223 = 0x10 (the cooldown func_80149BEC counts down and func_80149C08 checks), +0x44 &= ~2, face 0x11, parts, ClearDisplayFlag20 | M | e58E0 |
+
+#### Sword skills (kinds from D_8018F848: 0x24, 0x25 and a third)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80157D20 | func_80157D20 | StartSwordSkill | ResetAttackHit, SetKindAndState(o, D_8018F848[n]), RunSwordSkillState | M | e58E0; 1 call: func_80149CB4(o, n), called with 2 / 3 (CheckFusionSkillInput) and 5 (CheckSkillAFollowUp) |
+| 0x80157D74 | func_80157D74 | RunSwordSkillState | kind 0x24: RunSkillAState, 0x25: RunSkillBState | M | e58E0; 1 call |
+| 0x80157DC4 | func_80157DC4 | RunSkillAState | kind 0x24's state handler, D_8018F858[+2] | M | e58E0 |
+| 0x80157E00 | func_80157E00 | SkillAWait | state 0: after the motion's end SkillAStart | M | e58E0 |
+| 0x80157E38 | func_80157E38 | SkillAStart | step 0xD, motion D_800D4F14 (the Lumina slash's), face 0x15, trail kind 5, PlaySe(0x455), +0x244 = 0, next | M | e58E0; 2 calls |
+| 0x80157EA4 | func_80157EA4 | SkillAStep | +0x44 \|= 2; at the motion's end ResetPlayerKind; else unless CheckSkillAFollowUp: RunAttackHit and on the first hit effect 0x54 at GetAttackHitPoint | M | e58E0 |
+| 0x80157F64 | func_80157F64 | CheckSkillAFollowUp | flag 0x87 and square (0x80) pressed: StartSwordSkill(5), 1 | M | e58E0; 1 call |
+| 0x80157FC4 | func_80157FC4 | RunSkillBState | kind 0x25's state handler, D_8018F860[+2] | M | e58E0 |
+| 0x80158000 | func_80158000 | SkillBWait | state 0: after the motion's end SkillBStart | M | e58E0 |
+| 0x80158038 | func_80158038 | SkillBStart | step 0xE, motion D_800D51E0, face 0x15, drive D_8018F82C, +0x234 = 0, trail kind 5 (value 0xC), PlaySe(0x455), next | M | e58E0; 2 calls |
+| 0x801580B4 | func_801580B4 | SkillBLeapStep | motion flag 0x4000: SetFallSpeed(-0xC0000) (a hop); then gravity; at the motion's end step 0xF, motion D_800D524C, PlaySe(0x455), next; else RunAttackHit | M | e58E0 |
+| 0x801581AC | func_801581AC | SkillBFinishStep | gravity and move; RunAttackHit until the motion's end, then ResetPlayerKind | M | e58E0 |
+| 0x8015824C | func_8015824C | RunSkillCState | a third skill kind's state handler, D_8018F86C[+2] (its kind number is in data) | M | e58E0 |
+| 0x80158288 | func_80158288 | SkillCWait | state 0: after the motion's end SkillCStart | M | e58E0 |
+| 0x801582C0 | func_801582C0 | SkillCStart | step 0x10, +0x44 \|= 2, motion D_800D52A8, face 0x15, ClearSkillInput, Lumina trails freed (func_8016706C(5)), Fusion trail (kind 4 value 8), PlaySe(0x446), next | M | e58E0; 2 calls |
+| 0x80158344 | func_80158344 | SkillCStep | RunAttackHit until the motion's end; triangle latched (LatchSkillInput): step 0x11, motion D_800D52E8, both trails, timer 300, next | M | e58E0 |
+| 0x80158434 | func_80158434 | SkillCLeapStep | motion flag 0x4000: unlink (func_8014CBF8, func_801474EC), SetFallSpeed(-0x60000), drive D_8018F83C; gravity; landing or the timer: motion D_800D533C, next; else RunAttackHit | M | e58E0 |
+| 0x80158548 | func_80158548 | SkillCEndStep | at the motion's end ResetPlayerKind, else func_80161208 | M | e58E0 |
+| 0x801585A4 | func_801585A4 | ClearSkillInput | +0x244 = 0 | M | e58E0; 1 call (SkillCStart) |
+| 0x801585AC | func_801585AC | LatchSkillInput | +0x244 \|= the pressed buttons; 1 when triangle (0x10) has been pressed | M | e58E0; 1 call (SkillCStep) |
+| 0x801585EC | func_801585EC | EndSwordSkill | a skill kind's exit: +0x44 &= ~2, face 0x11, UpdateFlag10Part21, ClearDisplayFlag20 | M | e58E0; same body as EndLuminaSlash |
+
+#### Death (kind 0x1A) and the continue / game-over choice
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80158638 | func_80158638 | CheckPlayerDeath | hp (0x80078EB4) at 0, outside kinds 0x1A / 0x1E and actions: with the revive item (func_800D0F8C(0xA)) and a map rule that allows it: use it (func_800D0F4C), FillHp, FillBp, ClearStatsWords, message D_80110EC0; else end the action and StartPlayerDeath | H | e58E0; 1 call (UpdatePlayerKind, every frame) |
+| 0x80158794 | func_80158794 | DeathNop | empty | L | e58E0; sits between CheckPlayerDeath and the death starters (a table slot) |
+| 0x8015879C | func_8015879C | StartPlayerDeathNoReset | as StartPlayerDeath but enters at state 1, skipping DeathResetStep | M | e58E0; no C callers |
+| 0x80158814 | func_80158814 | StartPlayerDeath | game-over sequencer D_801ED518 = 0, D_801ED524 = 1, D_801ED528 = 0, +0xA8 = 0, ShowPlayerScene / Sys / Ability, SetKindAndState(0x1A), RunPlayerDeath | H | e58E0; 1 call (CheckPlayerDeath) |
+| 0x80158880 | func_80158880 | RunPlayerDeath | ClearHitPending, then D_8018F8A8[+0x4F] (the word before RunDeathState's table) | M | e58E0; 2 calls (the starters) |
+| 0x801588CC | func_801588CC | RunDeathState | D_8018F8AC[+2], then the sequencer D_801ED518: fade func_800D0CA0(2), waits (func_8001BD80, 0x46 frames), func_8001AAA0(0x83), opens the message gate D_801ED524 = 0, waits 0xD2 frames or a skip (D_801ED528), fade func_800D0CA0(1), done D_801ED520 = 1 | M | e58E0; no C callers (kind 0x1A's handler) |
+| 0x80158AB4 | func_80158AB4 | DeathResetStep | state 0: ResetPlayerForDeath, next | M | e58E0 |
+| 0x80158AE4 | func_80158AE4 | ResetPlayerForDeath | D_800AE6B0 = D_800AE6AC \| 0x1000000, ClearPlayerActionFlag01, ability parts and the held ability ended (func_80165840 / func_801658DC / func_80165A20 / func_80165A78), ClearVarCF, unlink, ClearHitPending, every scale word (+0x60..+0x74, +0xF6, +0x1B8, +0x1BA) = 0x1000, D_80078EC8 = 0, +0x1C8 = 0, next | M | e58E0; 1 call |
+| 0x80158BB0 | func_80158BB0 | DeathStart | starts the sequencer (D_801ED518 = 1), PlaySe(0x456), motion D_800D58D8, face 0x16, spin speed +0x234 = 0xE30000, model +0x10 = 0, SetPlayerFlag7E2, next | M | e58E0 |
+| 0x80158C40 | func_80158C40 | DeathSpinStep | SpinPlayerModel by 0x3C000 a frame (x4 with a face button held) until the spin speed is below 0: timer 4, next | M | e58E0 |
+| 0x80158CD8 | func_80158CD8 | DeathPauseStep | the timer (x4 with a face button held); then PlaySe(0x453), tip speed +0x238 = 0x5B0000, next | M | e58E0 |
+| 0x80158D60 | func_80158D60 | DeathToppleStep | TipPlayerModel by 0x4C000 until the model's x angle is below 0xC00: PlaySe(0x454), bounce +0x238 = -0x160000, next | M | e58E0 |
+| 0x80158E24 | func_80158E24 | DeathFallStep | the same until it lands again: motion D_800D5904, face 0x20, func_8002D4C8 0x2A and 0x1C, next | M | e58E0 |
+| 0x80158F00 | func_80158F00 | DeathQuoteStep | model heading += 0x16; once the gate D_801ED524 opens: one of 11 messages (D_8018F87C[rand() % 11]), next | M | e58E0 |
+| 0x80158FA4 | func_80158FA4 | DeathQuoteWaitStep | turning; a face button sets the skip D_801ED528; after the answer: a map rule (GetGameOverRule) nonzero: ApplyGameOverRule and state 0xC; else the question D_80110C3C, next | M | e58E0 |
+| 0x80159070 | func_80159070 | ContinueChoiceStep | turning; the answer kept in +0x244, the confirm message D_80110C94 (1) or D_80110CD4 (2), next | M | e58E0 |
+| 0x80159120 | func_80159120 | ContinueConfirmStep | answer 1: choice 1 reloads the save when func_80029A94(1) (money 0x80078E8C halved), choice 2 func_80029A94(0) / func_8002992C(0) / func_80145A2C; then state 0xC; no save: message D_80110D0C and state 0xB; answer 2: back to the question (state 9) | M | e58E0 |
+| 0x801592CC | func_801592CC | ContinueRetryStep | after the "no save" message: the question D_80110C3C again, state 9 | M | e58E0 |
+| 0x8015934C | func_8015934C | DeathExitStep | lets the sequencer pass step 4; when it is done (D_801ED520): func_80145BF8, next, D_800AE6BD += 1 | M | e58E0 |
+| 0x801593E4 | func_801593E4 | DeathIdleStep | model heading += 0x16 | M | e58E0 |
+| 0x80159404 | func_80159404 | SpinPlayerModel | model heading += +0x236 (the speed's whole part); +0x234 -= step; the new speed | M | e58E0; 1 call (DeathSpinStep) |
+| 0x80159434 | func_80159434 | TipPlayerModel | model x angle -= +0x23A; +0x238 += step; the new speed | M | e58E0; 2 calls (DeathToppleStep, DeathFallStep) |
+| 0x80159464 | func_80159464 | GetGameOverRule | the rule listed for the current map (D_8018F8E4 pairs, map D_800B9A08); else -1 when func_80029A94(1) and (0) both fail, else 0 | M | e58E0; 3 calls (CheckPlayerDeath: revive only when <= 0 or >= 6; RunDeathState: wait length; DeathQuoteWaitStep) |
+| 0x801594E8 | func_801594E8 | ApplyGameOverRule | -1: a fresh start keeping flags 0xB-0xD, 0x2C/0x2D and stats +4 (func_80029274 ...), SetFlag80, func_800D185C(D_800D3A44); 1: hp = bp = 150, money = D_80128150; 2-6: func_800D1F90, 5/6 also a jump (func_800D185C) and func_80029514(0x636) | M | e58E0; 1 call (DeathQuoteWaitStep) |
+
+#### A scene task (+0x15 step list D_8018FAF8, five steps)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80159698 | func_80159698 | RunSceneTaskStep | D_8018FAF8[+0x15] | L | e58E0; no C callers; the step functions return 0 and advance +0x15 like the stage tasks (e.g. sc06_000 `D_sc06_000_8018C040[AF(o, u8, 0x15)]()`) |
+| 0x801596D4 | func_801596D4 | SceneTaskStartTimer | +0x28 = 0x10, next step | L | e58E0 |
+| 0x801596F0 | func_801596F0 | SceneTaskHideAll | after the timer: func_80174B6C, D_800B9AAC = D_800B9B00 = 0x7FFF, every sprite (0x38 records) and every model (0x84 records) but the one at 0x800AFAE8 hidden, D_801270C0 = 3, SetPropsActive(0), StartSeqPlayer, func_8013CB20, InitCameraShake, light colours (func_8002850C / func_80028620 from D_8018F918); +0x28 = 0xFF, next | L | e58E0 |
+| 0x80159874 | func_80159874 | SceneTaskIdle | returns 0 (stays) | L | e58E0 |
+| 0x8015987C | func_8015987C | SceneTaskStartFade | func_800167B8(4) (a fade towards 0), next step | L | e58E0 |
+| 0x801598BC | func_801598BC | SceneTaskFadeStep | func_800167F0(4) != 0 (the fade still moving) | L | e58E0 |
+
+#### The player's per-frame kind update
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801598E0 | func_801598E0 | UpdatePlayerNoVertical | drops up / down from the pad (digital: held and pressed &= 0xAFFF; analog: stick y centred), then RunPlayerUpdatePhase | M | e58E0; no C callers |
+| 0x80159968 | func_80159968 | RunPlayerUpdatePhase | D_8018FB9C[+0x4D] (three entries) | M | e58E0; 1 call (UpdatePlayerNoVertical) |
+| 0x801599E0 | func_801599E0 | PlayerUpdateFirstPhase | UpdatePlayerKind, then +0x4D += 1 | M | e58E0 |
+| 0x80159A18 | func_80159A18 | PlayerUpdateNop | empty | L | e58E0; next to the phase functions (likely a D_8018FB9C slot) |
+| 0x80159A20 | func_80159A20 | UpdatePlayerKind | func_80150B28, CheckPlayerDeath, func_8015126C (doc1: the attacker bookkeeping), +0x3C \|= 0x8000 (func_8014900C), the per-kind step D_8018FC4C[kind & 0x7FFF]; +0x44 \|= 0x08000000 except for kinds 2, 3, 11, 12 and kind 25 in some states | M | e58E0; 1 call (PlayerUpdateFirstPhase) |
+
+#### Kind 0: standing
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80159B08 | func_80159B08 | StartPlayerStand | SetKindAndState(0), StandStart | M | e58E0; no C callers (ResetPlayerKind is the form that runs the state handler) |
+| 0x80159BAC | func_80159BAC | StandWait | state 0: after the motion's end StandStart | M | e58E0 |
+| 0x80159BE4 | func_80159BE4 | StandStart | drive D_8018FB0C, motion index 4 with face 0x11 (or 5 / face 0x1C when +0x44 & 0x200), idle counters +0x234 / +0x238 = 0, UpdateFlag10Part21, ClearDisplayFlag20, func_80172590 (doc2 SetPlayerEvent01), next | H | e58E0; 5 calls (StartPlayerStand, StandWait, func_8015C32C, func_8015E344, func_8015E698) |
+| 0x80159C84 | func_80159C84 | PlayerStandStep | the standing state: action / skill / attack (square: func_80149AD4, triangle: func_80149BAC) / jump (EnterPlayerJump) / direction (EnterPlayerRunning) checks, each after the kind's exit; random idle faces; the idle motion cycle (indices 0-3, PlaySe(0x445), face 0x13 at the end); records the safe point (func_801483E8) | H | e58E0; kind 0's main state (D_8018FCF0) |
+| 0x8015A1C8 | func_8015A1C8 | EndStandKind | kind 0's exit: UpdateFlag10Part21, face 0x11 | M | e58E0 |
+
+#### Kind 1: running
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015A1FC | func_8015A1FC | StartPlayerRunning | SetKindAndState(1), RunningStart | M | e58E0; no C callers |
+| 0x8015A230 | func_8015A230 | EnterPlayerRunning | SetKindAndState(1), RunPlayerRunningState | M | e58E0; 2 calls: FusionSwingStep, PlayerStandStep (`if (ObjDirHeld(o)) { exit; func_8015A230(o); }`) |
+| 0x8015A264 | func_8015A264 | RunPlayerRunningState | kind 1's state handler, D_8018FCF8[+2] | M | e58E0; 2 calls (EnterPlayerRunning, PlayerLandStep) |
+| 0x8015A2A0 | func_8015A2A0 | RunningWait | state 0: after the motion's end RunningStart | M | e58E0 |
+| 0x8015A2D8 | func_8015A2D8 | RunningStart | drive D_8018FB1C; motion index 0xA / face 0x1C / speed -0x40000 when +0x44 & 0x200, else 7 (digital pad 0x41) or 6 (analog 0x53 / 0x73) with face 0x21; +0x23C = 0, dust, func_80172608 (doc2 SetPlayerEvent40), next | M | e58E0; 2 calls |
+| 0x8015A3C8 | func_8015A3C8 | PlayerRunningStep | the running state: the same action checks as standing; stick released: stand (with StartSkidStop at full speed); speed +0x2C by pad type (digital accelerates by 0x1000, 0x4000 on map 0x302A; analog by stick tilt), capped -0xB0000 and lower when stats +0x26 / +0x2E are low; motions 6 / 7 / 8 by speed; wall: push motion 0x12 and face 0x17; func_8014D738: func_8015C6E0 | H | e58E0; kind 1's main state |
+| 0x8015AB7C | func_8015AB7C | GetRunBlendFrames | the blend count for switching to motion 7: by the frame +0xDC of motion D_800D48DC (0x10 / 0x12 / 7 / 9), else the current index +0xBC | M | e58E0; 2 calls (PlayerRunningStep, both pad branches: `SetPlayerMotionIndexBlend(o, 7, func_8015AB7C(o))`) |
+| 0x8015ABD4 | func_8015ABD4 | ShouldSkidStop | no action running and the saved speed at the limit, or on a slippery floor (D_8011F9C4) without flag 0x21 | M | e58E0; 1 call (PlayerRunningStep; PlayerLandStep inlines the same test) |
+| 0x8015AC48 | func_8015AC48 | StartSkidStop | motion index 9, drive D_8018FB3C, func_80161CD0(o, +0x16E) | M | e58E0; 1 call |
+| 0x8015AC90 | func_8015AC90 | EndRunningKind | kind 1's exit: UpdateFlag10Part21, face 0x11 | M | e58E0 |
+
+#### Kind 2: jumping (and kind 3 falling, which shares the air steps)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015ACC4 | func_8015ACC4 | StartPlayerJump | SetKindAndState(2), func_8014ED28, func_8014FA04, JumpStart | M | e58E0; 1 call: func_80149724 |
+| 0x8015AD08 | func_8015AD08 | EnterPlayerJump | SetKindAndState(2), RunPlayerJumpState | M | e58E0; 1 call: func_80149704, called after func_801496D4 (cross 0x40 pressed) from the stand / run / land / swing states |
+| 0x8015AD3C | func_8015AD3C | RunPlayerJumpState | kind 2's state handler, D_8018FD00[+2] | M | e58E0 |
+| 0x8015AD78 | func_8015AD78 | JumpWait | state 0: after the motion's end JumpStart | M | e58E0 |
+| 0x8015ADB0 | func_8015ADB0 | JumpStart | +0xA8 capped at 0x18, func_80161124 (airborne set-up), SetFallSpeed(-0x120000), dust, D_8011F730 \|= 1, next | M | e58E0; 2 calls |
+| 0x8015AE2C | func_8015AE2C | PlayerAirborneStep | the air state: glide while cross is held when func_80161A60 (+0x1C8 set and ability mode 0x80078EC0 & 0x7F == 6; momentum +0x50..+0x58, effects 0x3B / 0x3C), longer jump while cross is held rising, air attacks (TryAirFusionSlash / TryAirLuminaSlash), TryDoubleJump, EnterAirSlash from the double jump, vertical control by cross while +0x1C6 is set (speed limits 0x40000 / 0xC0000), steering, landing (func_80161488: motion 0xE / 0x10, next), two more exits (func_8014A674 + func_8014E434: func_8015CC40; func_8014A69C + func_8014E6A0: func_8015CF8C) | M | e58E0; 2 calls: func_8015BEC4 (kind 3) and the jump table; doc2's PlayerAirStep (0x80172414) is a smaller helper, hence the different name |
+| 0x8015B6F4 | func_8015B6F4 | TryAirFusionSlash | square pressed (func_80149AA8): ResetAttackHit, step 6, swing flag, saves the motion at +0x23C / +0x244, motion index 0xB or 0xC, face 0x22, trail kind 4 (value 5), PlaySe(0x400), voice 0x5F3; 1 | M | e58E0; 1 call (PlayerAirborneStep) |
+| 0x8015B7B4 | func_8015B7B4 | TryAirLuminaSlash | triangle with Lumina (func_80149B54): step 0xC, motion D_800D4F8C, trail kind 5, PlaySe(0x455); 1 | M | e58E0; 1 call |
+| 0x8015B858 | func_8015B858 | TryDoubleJump | once per jump (+0x240), not when +0x1C6: with flag 0x1E and cross pressed (func_8014A51C): saves the motion, SetFallSpeed(-0xE0000), motion D_800D4BE0, D_8011F730 \|= 2; 1 | M | e58E0; 1 call (PlayerAirborneStep increments +0x240 on success; func_80161124 clears it) |
+| 0x8015B8F8 | func_8015B8F8 | RestoreAirMotion | after an air attack: back to the saved jump motion (D_800D4A9C / D_800D4B48 with the saved index as blend), else motion index 0xF (falling) | M | e58E0; 2 calls (PlayerAirborneStep) |
+| 0x8015B950 | func_8015B950 | PlayerLandStep | the landed state: action / attack / charge (func_80149744) / jump / direction (to kind 1 keeping speed) checks; at the motion's end stand; at full speed or on a slippery floor stand with the skid motion 9 | M | e58E0; 2 calls: func_8015BEE4 (kind 3) and the jump table |
+| 0x8015BD8C | func_8015BD8C | EndJumpKind | kind 2's exit: ClearDisplayFlag20, face 0x11, +0x44 &= ~2 | M | e58E0 |
+| 0x8015BDD0 | func_8015BDD0 | StartPlayerFall | SetKindAndState(3), FallStart | M | e58E0; 5 calls (func_80151AE4, FusionFinisherLand, LuminaSlashEnter, func_8016130C, func_80161374): every "no ground below" exit |
+| 0x8015BE04 | func_8015BE04 | EnterPlayerFall | SetKindAndState(3), RunPlayerFallState | M | e58E0; 1 call (AirSlashReboundStep) |
+| 0x8015BE38 | func_8015BE38 | RunPlayerFallState | kind 3's state handler, D_8018FD1C[+2] | M | e58E0 |
+| 0x8015BE74 | func_8015BE74 | FallEnter | state 0: FallStart | M | e58E0 |
+| 0x8015BE94 | func_8015BE94 | FallStart | func_80161124 (airborne set-up), next | M | e58E0; 5 calls (StartPlayerFall, FallEnter, func_8015C128, func_8015C32C, func_8015FAE8) |
+| 0x8015BEC4 | func_8015BEC4 | FallAirStep | PlayerAirborneStep for kind 3 | M | e58E0 |
+| 0x8015BEE4 | func_8015BEE4 | FallLandStep | PlayerLandStep for kind 3 | M | e58E0 |
+| 0x8015BF04 | func_8015BF04 | EndFallKind | kind 3's exit: ClearDisplayFlag20, face 0x11, +0x44 &= ~2 | M | e58E0 |
+
+#### Kind 4: sliding down a steep slope
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015BF7C | func_8015BF7C | EnterPlayerSlide | SetKindAndState(4), RunPlayerSlideState | M | e58E0; no C callers; SetPlayerKind4 (doc1) is the form used after a 0x4000 slope result (FusionFinisherFall) |
+| 0x8015BFB0 | func_8015BFB0 | StartPlayerSlideDir | SetKindAndState(4), then func_8015C030(o, v): slide speed from the vector's x / z (<< 7), motion index 0x11 | M | e58E0; no C callers |
+| 0x8015BFF4 | func_8015BFF4 | RunPlayerSlideState | kind 4's state handler, D_8018FD28[+2] | M | e58E0; 1 call (EnterPlayerSlide) |
+
+Rows: 193 (H 17, M 164, L 12); skipped (already known): 34 (19 doc1 names still func_ in symbol_addrs_engine.txt, 15 existing symbols)
+
+### 0x8015C000-0x80166000: the kinds (slide, push, pole, bar, carry, guard, climb, assimilate, abilities), ground checks, Obj68 handlers
+
+The slice is mostly Musashi's kind ("mode") state machine: each player kind K has the same set of
+functions - EnterX (SetKindAndState(p, K) + StartX), SwitchToX (SetKindAndState + RunXState), RunXState
+(D_8018Fxxx[p->sub]), TryStartX (state 0: StartX unless the ground check changed the kind), StartX, the step
+handlers, and ExitX (its entry in the exit table D_8018FBA8 that RunPlayerKindHandler calls before every switch).
+Kinds found: 4 slope slide, 9 push block (+0x170), 0xB pole (+0x17C), 0xC bar swing (+0x180), 0xD carry / 0xE, 0xF
+throw (+0x178), 0x10 grab (+0x18C), 0x11 guard + charge (R1, gauge D_80078EBF), 0x12 guard hop, 0x13 counter burst,
+0x14 wall climb (surface 0x15, flag 0x1F), 0x15 charged attack, 0x16 assimilate (ability from +0x184), 0x17 use ability,
+0x18, 0x1B guard recoil, 0x1C, 0x1D lie down, 0x1E recover. Then the ground / landing checks, footstep sounds, the two
+clock deadlines (game vars 8 and 0x12), a shadow decal object, Obj68 helpers (matrix orders, accel, sweep hit tests,
+map traces), the Fusion-throw (assimilate) Obj68 and two effect Obj68s, and the ability bookkeeping (cost table,
+timers, status save / restore, clone counters).
+
+Conventions used in the evidence: +0xB8 = motion event bits (0x8000 motion ended, 0x4000 / 0x2000 / 0x1000 markers),
++0x3C bit 0x4000 = guarding (func_80149034 sets, func_80149048 clears, func_8014A454 tests it against the hit facing),
++0x44 bit 0 = guard/charge held, bit 2 = sword thrown, bit 0x10 = assimilate pending.
+
+#### Ground checks and landing
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80161104 | func_80161104 | StayedGrounded | 1 when CheckPlayerGround did not switch the kind (so a state may start) | M | e58E0: `return func_80161208(a) == 0`; 38 calls, every TryStartX (`if (func_80161104(p)) StartX(p)`) |
+| 0x80161124 | func_80161124 | StartFall | kind 3 start: fall speed capped at -0xBA000, motion 0xF (moving) or 0xD, face 0x22, timer 4, guard heading saved (D_801152A0), SE 0x8E1 in EC0 mode 6 | M | e58E0; called by func_8015BE94 (kind 3 start, then NextEffectState) and func_8015ADB0 |
+| 0x80161208 | func_80161208 | CheckPlayerGround | collide, fall and ground steps; on no floor / wall start falling (kind 3), on a steep slope slide (kind 4); 1 when it switched | M | e58E0: FallOrSlideOnResult(p, RunPlayerGroundSteps(p, 0)); 55 calls, the last line of most state steps |
+| 0x80161240 | func_80161240 | CheckPlayerGroundNoCollide | the same without CollidePlayerMove | M | e58E0: RunPlayerGroundSteps(p, 1); push-block steps func_8015C7E4 / C944 / CA28 |
+| 0x80161278 | func_80161278 | CheckPlayerGroundUphill | the same, but a steep hit only slides when D_801152BC is set or he is not below +0x8A; else the position goes back to +0x88 | M | e58E0: D_801152BC = 0 then func_80161374; 1 call (func_8015A3C8) |
+| 0x801612B8 | func_801612B8 | RunPlayerGroundSteps | (arg1 bit 0 clear: CollidePlayerMove) then PlayerObjFallStep \| PlayerObjGroundStep; returns the TraceMap bits | M | e58E0; also 2 ovl34 calls |
+| 0x8016130C | func_8016130C | FallOrSlideOnResult | result 0 / 0x8000: exit kind, fall (func_8015BDD0); 0x4000: exit kind, SetPlayerKind4; returns 1 when switched | M | e58E0; called by CheckPlayerGround(NoCollide) |
+| 0x80161374 | func_80161374 | FallOrSlideBlockUphill | as FallOrSlideOnResult, but a steep hit while climbing restores the position from +0x88 instead | M | e58E0; called by func_80161278 |
+| 0x80161418 | func_80161418 | CheckLanding | air steps, then HandleLandingToNormal | M | e58E0; 4 calls (func_801580B4, func_801581AC, GuardHopStep, ovl26) |
+| 0x80161450 | func_80161450 | CheckLandingKeepKind | air steps, then HandleLandingKeepKind | M | e58E0; 4 stage calls (sc03_003, sc03_126, sc04_021, sc05_019), ovl31, func_8015795C |
+| 0x80161488 | func_80161488 | CheckLandingBy1C6 | air steps; +0x1C6 == 0: HandleLandingKeepKind, else only the bits (& ~7) | M | e58E0; 1 call (func_8015AE2C, `if (r & 5)`) |
+| 0x801614E4 | func_801614E4 | CheckLandingFx | air steps, then HandleLandingFx (dust and landing SE only) | M | e58E0; no caller found |
+| 0x8016151C | func_8016151C | CheckLandingDust | air steps, then HandleLandingDust | M | e58E0; 5 ability calls (ovl1a Hop, ovl31, ovl34) |
+| 0x80161554 | func_80161554 | CheckLandingNoBump | as CheckLanding with RunPlayerAirSteps(p, 1) (no accel clear on a bump) | M | e58E0; no caller found |
+| 0x8016158C | func_8016158C | CheckLandingKeepKindNoBump | as CheckLandingKeepKind with RunPlayerAirSteps(p, 1) | M | e58E0; 1 call (func_80157BC8) |
+| 0x801615C4 | func_801615C4 | RunPlayerAirSteps | (bit 0 clear and func_8014ED28: ClearEffectAccel), fall step while +0x34 > 0, \| func_8014FA04; returns the bits | M | e58E0; 9 callers, all landing checks plus func_80158434 |
+| 0x8016163C | func_8016163C | HandleLandingToNormal | bit 0 / 0x2000: ResetPlayerKind + SpawnEffect2(p, 1) + PlayLandSe, returns 1 / 4; 0x4000: slope slide (2); 0x8000 on surface 0x15 with func_8014A6C4: wall climb facing g_WallNormal (8) | M | e58E0; calls func_8015F2F0 (kind 0x14) |
+| 0x80161774 | func_80161774 | HandleLandingKeepKind | as HandleLandingToNormal but the kind is kept on a floor (only dust and SE) | M | e58E0; 3 callers |
+| 0x80161888 | func_80161888 | HandleLandingFx | bits 1 / 0x4000 / 0x2000: SpawnEffect2(p, 1) + PlayLandSe, returns 1 / 2 / 4 | M | e58E0; called by func_801614E4 |
+| 0x8016191C | func_8016191C | HandleLandingDust | the same with the dust only | M | e58E0; called by func_8016151C |
+| 0x8016197C | func_8016197C | LandingResultCode | bits 1 / 0x4000 / 0x2000 to 1 / 2 / 4 | M | e58E0; called by func_80161488 |
+
+#### Kind 4: slope slide
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015C030 | func_8015C030 | StartSlopeSlideVec | kind 4 start with a given vector: +0x234/+0x23C = v.x / v.z << 7, +0x238 = 0x80000, motion 0x11 | M | e58E0; called by func_8015BFB0 (SetKindAndState(p, 4) + this, a vector argument) |
+| 0x8015C08C | func_8015C08C | TryStartSlopeSlide | state 0: StartSlopeSlide when StayedGrounded | M | e58E0; table entry (no direct caller) |
+| 0x8015C0C4 | func_8015C0C4 | StartSlopeSlide | +0x234/+0x23C = g_WallNormal x / z << 6 (down the steep plane), +0x238 = 0x80000, motion 0x11, display flag 20 off | H | e58E0; SetPlayerKind4 (doc1) calls it; FallOrSlideOnResult uses it on a 0x4000 (steep) result |
+| 0x8015C128 | func_8015C128 | SlopeSlideStep | slide by +0x234 (stick adds forward), dust + SE 0x65F every 4 frames; push -> kind 9; non-steep ground: timer 6, next; steep: restart; airborne: fall | M | e58E0; table entry; PlayerObjGroundStep result 0x4000 |
+| 0x8015C32C | func_8015C32C | SlopeSlideEndStep | the same with input allowed (jump, attacks, EC0 modes); timer out on flat ground -> kind 0 (func_80159BE4) | M | e58E0; table entry (state after SlopeSlideStep's NextEffectState) |
+| 0x8015C6A4 | func_8015C6A4 | NopC6A4 | empty (a handler-table entry, likely kind 4's exit) | L | e58E0 |
+
+#### Kind 9: push block (+0x170 the pushed actor)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015C6AC | func_8015C6AC | EnterPushBlock | SetKindAndState(p, 9) + StartPushBlock | M | e58E0; table entry |
+| 0x8015C6E0 | func_8015C6E0 | SwitchToPushBlock | SetKindAndState(p, 9) + RunPushBlockState | M | e58E0; 3 calls, each after func_8014D738 (the push test that sets +0x170 to an actor with flags5C 0x1000) |
+| 0x8015C714 | func_8015C714 | RunPushBlockState | D_8018FD34[p->sub] | H | e58E0; also called after SetKindAndState(p, 9) in func_8015D738 / EA3C / 60534 |
+| 0x8015C750 | func_8015C750 | TryStartPushBlock | state 0: StartPushBlock when StayedGrounded | M | e58E0; table entry |
+| 0x8015C788 | func_8015C788 | StartPushBlock | motion 0x12, face 0x17, display flags 20 / 10 off, timer 0xA | M | e58E0 |
+| 0x8015C7E4 | func_8015C7E4 | PushBlockReadyStep | jump / no input -> kind 0; timer out: turn to stick, push accel D_8018FB4C, timer 0x14, next; footstep + dust on marker 0x2000 | M | e58E0; table entry |
+| 0x8015C944 | func_8015C944 | PushBlockShoveStep | moves with the block (func_8014D738); +0x170 lost -> kind 0; timer out -> next | M | e58E0; table entry |
+| 0x8015CA28 | func_8015CA28 | PushBlockHoldStep | stick held: turn and push again (accel, timer 0x14, SetEffectState(2)); +0x170 lost -> kind 0 | M | e58E0; table entry |
+| 0x8015CB94 | func_8015CB94 | ExitPushBlock | +0x170 = 0, UpdateFlag10Part21, face 0x11 | M | e58E0; exit-table entry (same shape as the other ExitX) |
+| 0x8015CBCC | func_8015CBCC | NopCBCC | empty table entry | L | e58E0 |
+| 0x8015CBD4 | func_8015CBD4 | NopCBD4 | empty table entry | L | e58E0 |
+| 0x8015CBDC | func_8015CBDC | NopCBDC | empty table entry | L | e58E0 |
+| 0x8015CBE4 | func_8015CBE4 | NopCBE4 | empty table entry | L | e58E0 |
+| 0x8015CBEC | func_8015CBEC | NopCBEC | empty table entry | L | e58E0 |
+| 0x8015CBF4 | func_8015CBF4 | NopCBF4 | empty table entry | L | e58E0 |
+| 0x8015CBFC | func_8015CBFC | NopCBFC | empty table entry | L | e58E0 |
+| 0x8015CC04 | func_8015CC04 | NopCC04 | empty table entry | L | e58E0 |
+
+#### Kind 0xB: pole (+0x17C the pole actor, flags5C 0x40)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015CC0C | func_8015CC0C | EnterPole | SetKindAndState(p, 0xB) + StartPole | M | e58E0; table entry |
+| 0x8015CC40 | func_8015CC40 | SwitchToPole | SetKindAndState(p, 0xB) + RunPoleState | M | e58E0; func_8015AE2C when +0x1BC == 0 and func_8014E434 (actor with flags5C 0x40 hit, x / z snapped to it, +0x17C set) |
+| 0x8015CC74 | func_8015CC74 | RunPoleState | D_8018FD44[p->sub] | H | e58E0 |
+| 0x8015CCB0 | func_8015CCB0 | PoleState0 | StartPole (no ground check) | M | e58E0; table entry |
+| 0x8015CCD0 | func_8015CCD0 | StartPole | motion 0x14, +0xB8 = 0, state bit 0x10, +0x234 = 0xF frames delay, SE 0x6A7 | M | e58E0 |
+| 0x8015CD20 | func_8015CD20 | PoleStep | jump off (+0x1BC = 10, func_80149724); after the delay: down = motion 0x15 spinning, up = climb accel D_8018FD5C, left / right turn by 0x71; off the pole -> kind 0 | M | e58E0; table entry |
+| 0x8015CF24 | func_8015CF24 | ExitPole | UpdateFlag10Part21, face 0x11 | M | e58E0; exit-table entry |
+
+#### Kind 0xC: bar swing (+0x180 the bar actor, flags5C 0x20)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015CF58 | func_8015CF58 | EnterBarSwing | SetKindAndState(p, 0xC) + StartBarSwing | M | e58E0; table entry |
+| 0x8015CF8C | func_8015CF8C | SwitchToBarSwing | SetKindAndState(p, 0xC) + RunBarSwingState | M | e58E0; func_8015AE2C when +0x1BD == 0 and func_8014E6A0 (a bar 0x54 above him, +0x180 set) |
+| 0x8015CFC0 | func_8015CFC0 | RunBarSwingState | D_8018FD7C[p->sub] | H | e58E0 |
+| 0x8015CFFC | func_8015CFFC | BarSwingState0 | StartBarSwing | M | e58E0; table entry |
+| 0x8015D01C | func_8015D01C | StartBarSwing | motion D_800D550C, pitch 0, facing = the bar's facing or its opposite (the nearer), hitData = D_8018FD6C \| 0x40000000, state bit 0x20 | M | e58E0 |
+| 0x8015D104 | func_8015D104 | BarSwingWindupStep | still on the bar: spin speed (+0x236) = -0xE3, pitch 0x600 (kept at +0x244), next; off -> kind 0 | M | e58E0; table entry |
+| 0x8015D1B8 | func_8015D1B8 | BarSwingStep | pitch += speed, SE 0x5E9 each turn; jump (pad 0x40): launch by the pitch sector (D_8018FD88 / D_8018FD8C), SE 0x5EA; off -> kind 0 | M | e58E0; table entry |
+| 0x8015D380 | func_8015D380 | UpdateBarSwingPoint | +0x138 = D_8018FDD8 turned by his facing and pitch | M | e58E0; called by BarSwingStep; ExitBarSwing zeroes +0x138..+0x13E |
+| 0x8015D414 | func_8015D414 | ExitBarSwing | +0x1BD = 8 (regrab delay), hitData = D_8018EEBC, +0x138 zeroed, y += 0x48, pitch 0, face 0x11 | M | e58E0; exit-table entry |
+
+#### Kinds 0xD-0xF: carry and throw (+0x178 the carried actor)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015D480 | func_8015D480 | EnterCarry | SetKindAndState(p, 0xD) + StartCarry | M | e58E0; table entry |
+| 0x8015D4B4 | func_8015D4B4 | SwitchToCarry | SetKindAndState(p, 0xD) + RunCarryState | M | e58E0; func_8014A218 (after func_8014A048 picked an actor into +0x178); func_801723C4 does the same by hand |
+| 0x8015D4E8 | func_8015D4E8 | RunCarryState | D_8018FDE0[p->sub] | H | e58E0 |
+| 0x8015D524 | func_8015D524 | ExitCarry | face 0x11 | M | e58E0; exit-table entry |
+| 0x8015D544 | func_8015D544 | TryStartCarry | state 0: StartCarry when StayedGrounded | M | e58E0; table entry |
+| 0x8015D57C | func_8015D57C | StartCarry | motion 0x19 (lift), display flags off, +0x234 = 0; a carried kind-0x1F8 actor gets +0xFC = 1 and TakePlayerControlNoStop | M | e58E0 |
+| 0x8015D5E8 | func_8015D5E8 | CarryLiftStep | while lifting, the carried actor follows the D_8018FDEC offsets (3 per frame); motion end: motion 0x1A, +0x234 -= 3, next | M | e58E0; table entry |
+| 0x8015D738 | func_8015D738 | CarryStep | carrying: square -> throw (kind 0xE), triangle with TestFlag80 -> kind 0xF, circle with ability 10 (Hurl): func_800CAF14, or drop and the no-bp motion when LacksAbilityBp; walk (motion 0x1B) / stand (0x1A) with the actor held | M | e58E0; table entry; carried actor gone -> kind 0 |
+| 0x8015DA5C | func_8015DA5C | DropCarried | face 0x11, ReleaseCarriedAlt | M | e58E0; called by CarryStep when Hurl lacks bp |
+| 0x8015DA90 | func_8015DA90 | EnterThrowCarried | SetKindAndState(p, 0xE) + StartThrowCarried | M | e58E0; table entry |
+| 0x8015DAC4 | func_8015DAC4 | SwitchToThrowCarried | SetKindAndState(p, 0xE) + RunThrowCarriedState | M | e58E0; 3 calls: func_80149AD4 / func_80149B14 (square when +0x178 set), CarryStep |
+| 0x8015DAF8 | func_8015DAF8 | RunThrowCarriedState | D_8018FE20[p->sub] | H | e58E0 |
+| 0x8015DB34 | func_8015DB34 | TryStartThrowCarried | state 0: StartThrowCarried when StayedGrounded | M | e58E0; table entry |
+| 0x8015DB6C | func_8015DB6C | StartThrowCarried | motion 0x1C, face 0x19, +0x234 = 0, first throw offset, PlaySeNow(0x5F5), SpendBp(p, 4) | M | e58E0 |
+| 0x8015DBD4 | func_8015DBD4 | ThrowCarriedStep | marker 0x4000: ReleaseCarried; motion end -> kind 0; else the actor follows the throw offsets | M | e58E0; table entry |
+| 0x8015DC84 | func_8015DC84 | ExitThrowCarried | face 0x11, ReleaseCarried (if still held) | M | e58E0; exit-table entry |
+| 0x8015DCB8 | func_8015DCB8 | MoveCarriedAlongThrow | carried actor = its origin offset + D_8018FE28[+0x234..] (3 per frame), into his frame | M | e58E0; called by StartThrowCarried / ThrowCarriedStep |
+| 0x8015DD74 | func_8015DD74 | ReleaseCarried | hit the carried actor with kind 9 (thrown) at its position, his facing; +0x178 = 0 | M | e58E0: `func_8014C4AC(o, 9, func_80029AAC(), &v, facing)` |
+| 0x8015DDF0 | func_8015DDF0 | EnterThrowCarriedAlt | SetKindAndState(p, 0xF) + StartThrowCarriedAlt | M | e58E0; table entry |
+| 0x8015DE24 | func_8015DE24 | SwitchToThrowCarriedAlt | SetKindAndState(p, 0xF) + RunThrowCarriedAltState | M | e58E0; func_80149BAC (triangle when +0x178 set), CarryStep |
+| 0x8015DE58 | func_8015DE58 | RunThrowCarriedAltState | D_8018FE40[p->sub] | H | e58E0 |
+| 0x8015DE94 | func_8015DE94 | TryStartThrowCarriedAlt | state 0: StartThrowCarriedAlt when StayedGrounded | M | e58E0; table entry |
+| 0x8015DECC | func_8015DECC | StartThrowCarriedAlt | as StartThrowCarried (motion 0x1C, face 0x19, SE 0x5F5, SpendBp 4) | M | e58E0 |
+| 0x8015DF34 | func_8015DF34 | ThrowCarriedAltStep | as ThrowCarriedStep with ReleaseCarriedAlt | M | e58E0; table entry |
+| 0x8015DFE4 | func_8015DFE4 | ExitThrowCarriedAlt | face 0x11, ReleaseCarriedAlt | M | e58E0; exit-table entry |
+| 0x8015E018 | func_8015E018 | MoveCarriedAlongThrowAlt | the same offsets walk as MoveCarriedAlongThrow (a second copy) | M | e58E0; byte-for-byte the same body |
+| 0x8015E0D4 | func_8015E0D4 | ReleaseCarriedAlt | hit the carried actor with kind 0x11; +0x178 = 0 | M | e58E0: `func_8014C4AC(o, 0x11, ...)` |
+
+#### Kind 0x10: grab (+0x18C the grabbed actor)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015E150 | func_8015E150 | EnterGrab | SetKindAndState(p, 0x10) + StartGrab | M | e58E0; table entry |
+| 0x8015E184 | func_8015E184 | SwitchToGrab | SetKindAndState(p, 0x10) + RunGrabState | M | e58E0; func_8014A830, chosen on triangle when func_8014A738 (flag 0x83 and an actor in reaction 7 within 0x40) |
+| 0x8015E1B8 | func_8015E1B8 | RunGrabState | D_8018FE60[p->sub] | H | e58E0 |
+| 0x8015E1F4 | func_8015E1F4 | TryStartGrab | state 0: StartGrab when StayedGrounded | M | e58E0; table entry |
+| 0x8015E22C | func_8015E22C | StartGrab | motion D_800D4FF4, effect 5 (value 0xA), +0x44 \|= 2 | M | e58E0 |
+| 0x8015E288 | func_8015E288 | GrabReachStep | func_8014A850 caught one (+0x18C, hit 0x1B): motion D_800D5098, hold it, camera shake, effects 0x1F and 0xB, next; motion end: miss motion D_800D5060, state 3 | M | e58E0; table entry |
+| 0x8015E344 | func_8015E344 | GrabHoldStep | hold it at his hands; marker 0x4000: ReleaseGrabbed (+0x234 = 1); motion end -> kind 0 | M | e58E0; table entry |
+| 0x8015E40C | func_8015E40C | HoldGrabbedAtHands | +0x18C actor = its origin offset + the hand point (func_80148534), into his frame | M | e58E0 |
+| 0x8015E4B0 | func_8015E4B0 | SpawnGrabEffect | effect 0x1F at the grabbed actor (D_8018FE70 + its origin offset, y doubled) | M | e58E0; called by GrabReachStep |
+| 0x8015E588 | func_8015E588 | ShakeCameraForGrab | StartCameraShake(D_8018FE80) | H | e58E0 |
+| 0x8015E5B0 | func_8015E5B0 | ReleaseGrabbed | trace from his chest to the actor (TraceMap, moved back on a hit), hit it with kind 0x1C, +0x18C = 0 | M | e58E0 |
+| 0x8015E698 | func_8015E698 | GrabMissStep | motion end -> kind 0 | M | e58E0; state 3 (SetEffectState(p, 3) in GrabReachStep) |
+| 0x8015E714 | func_8015E714 | ExitGrab | release the actor if not yet (+0x234 == 0), parts back, +0x44 &= ~2, face 0x11 | M | e58E0; exit-table entry |
+
+#### Guard and charge (R1): kinds 0x11, 0x12, 0x13, 0x15, 0x1B
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015E84C | func_8015E84C | EnterGuard | SetKindAndState(p, 0x11) + StartGuardWithFx | M | e58E0; table entry |
+| 0x8015E880 | func_8015E880 | SwitchToGuard | SetKindAndState(p, 0x11) + RunGuardState | M | e58E0; 4 calls, after func_80149CD4 (R1 (+0xAA & 8) held, no +0x1C8) in func_80159C84 / A3C8 / B950, and func_80155D70 |
+| 0x8015E8B4 | func_8015E8B4 | EnterGuardNoFx | SetKindAndState(p, 0x11) + StartGuard (no aura effect) | M | e58E0; table entry |
+| 0x8015E8E8 | func_8015E8E8 | RunGuardState | D_8018FE94[p->sub] | H | e58E0 |
+| 0x8015E924 | func_8015E924 | TryStartGuard | state 0: StartGuardWithFx when StayedGrounded | M | e58E0; table entry |
+| 0x8015E95C | func_8015E95C | StartGuardWithFx | effect 0x14 on him (unless D_80078EC0 bit 0x80), then StartGuard | M | e58E0 |
+| 0x8015E9B8 | func_8015E9B8 | StartGuard | D_80078EC0 bit 0x80: kind 0x1C instead; else motion 0x1D, +0x44 \|= 1 (the gauge D_80078EBF fills while R1 is held, func_8014A59C), hitFlags \|= 0x4000 (blocks frontal hits, func_8014A454), heading saved | M | e58E0; also called from GuardRecoilStep with R1 still held |
+| 0x8015EA3C | func_8015EA3C | GuardStep | R1 released -> kind 0; full gauge + square -> charged attack; guard hop, attacks, lock-on turn; strafe in stick direction (motion 0x1E) else stand (0x1D); push -> kind 9 | M | e58E0; table entry |
+| 0x8015ED6C | func_8015ED6C | ExitGuard | gauge D_80078EBF = 0, +0x44 &= ~1, guard bit cleared (func_80149048) | M | e58E0; exit-table entry |
+| 0x8015EDA0 | func_8015EDA0 | EnterGuardHop | SetKindAndState(p, 0x12) + StartGuardHop | M | e58E0; table entry |
+| 0x8015EDD4 | func_8015EDD4 | SwitchToGuardHop | SetKindAndState(p, 0x12) + RunGuardHopState | M | e58E0; func_8014A4FC, taken in GuardStep when func_8014A4B4 (flag 0x1E and pad 0x40 pressed) |
+| 0x8015EE08 | func_8015EE08 | RunGuardHopState | D_8018FE9C[p->sub] | H | e58E0 |
+| 0x8015EE44 | func_8015EE44 | TryStartGuardHop | state 0: StartGuardHop when StayedGrounded | M | e58E0; table entry |
+| 0x8015EE7C | func_8015EE7C | StartGuardHop | motion D_800D4C48, accel D_8018FB8C, SetFallSpeed(-0xC0000) (upward) | M | e58E0 |
+| 0x8015EEE0 | func_8015EEE0 | GuardHopStep | gravity 0x10000, move; motion end -> kind 0; CheckLanding | M | e58E0; table entry |
+| 0x8015EF9C | func_8015EF9C | NopEF9C | empty table entry (kind 0x12 exit) | L | e58E0 |
+| 0x8015EFA4 | func_8015EFA4 | EnterCounterBurst | SetKindAndState(p, 0x13) + StartCounterBurst | M | e58E0; table entry |
+| 0x8015EFD8 | func_8015EFD8 | SwitchToCounterBurst | SetKindAndState(p, 0x13) + RunCounterBurstState | M | e58E0; table entry |
+| 0x8015F00C | func_8015F00C | RunCounterBurstState | D_8018FEA4[p->sub] | H | e58E0; GuardRecoilStep calls it after SetKindAndState(p, 0x13) at full gauge with square / triangle |
+| 0x8015F048 | func_8015F048 | TryStartCounterBurst | state 0: StartCounterBurst when StayedGrounded | M | e58E0; table entry |
+| 0x8015F080 | func_8015F080 | StartCounterBurst | motion 0x17, face 0x15, effect 5 (value 7), guard off, func_80156648, +0x1AA = 8, ClearHitPending, +0xF6 = 0x19EB | M | e58E0 |
+| 0x8015F118 | func_8015F118 | CounterBurstStep | marker 0x4000: two Obj68 0x19 rings and an Obj68 0x1D, rumble D_80062BE8, SE 0x9DA; motion end -> kind 0 | M | e58E0; table entry |
+| 0x8015F260 | func_8015F260 | ExitCounterBurst | flags 1 / 2 off, guard bit off, +0xF6 = 0x1000, face 0x11 | M | e58E0; exit-table entry |
+| 0x8015F76C | func_8015F76C | EnterChargedAttack | SetKindAndState(p, 0x15) + StartChargedAttack | M | e58E0; table entry |
+| 0x8015F7A0 | func_8015F7A0 | SwitchToChargedAttack | SetKindAndState(p, 0x15) + RunChargedAttackState | M | e58E0; func_80149788, when func_80149744 (gauge D_80078EBF >= 0x80 and square pressed) |
+| 0x8015F7D4 | func_8015F7D4 | RunChargedAttackState | D_8018FEE4[p->sub] | H | e58E0 |
+| 0x8015F810 | func_8015F810 | TryStartChargedAttack | state 0: StartChargedAttack when StayedGrounded | M | e58E0; table entry |
+| 0x8015F848 | func_8015F848 | StartChargedAttack | motion 0x1F, D_8011F730 \|= 5 | M | e58E0 |
+| 0x8015F89C | func_8015F89C | ChargedAttackStep | marker 0x4000: Obj68 kind 1 at (0, -0x1E); motion end -> kind 0 | M | e58E0; table entry |
+| 0x8015F948 | func_8015F948 | StartNoBpMotion | SetKindAndState(p, 0x15), then (StayedGrounded) motion 0x22, face 0x1A, state 2 | M | e58E0; CarryStep when Hurl lacks bp; motion 0x22 / face 0x1A is also the ability-fail motion (func_80165BB4) |
+| 0x8015F9A4 | func_8015F9A4 | NoBpMotionStep | motion end -> kind 0, else CheckPlayerGround | M | e58E0; kind 0x15 state 2 |
+| 0x8015FA24 | func_8015FA24 | ExitChargedAttack | face 0x11 | M | e58E0; exit-table entry |
+| 0x80160334 | func_80160334 | EnterGuardRecoil | SetKindAndState(p, 0x1B) + StartGuardRecoil | M | e58E0; table entry |
+| 0x80160368 | func_80160368 | SwitchToGuardRecoil | SetKindAndState(p, 0x1B) + RunGuardRecoilState | M | e58E0; func_8015126C (hit handling) when +0x44 bit 0 and func_8014A454 (hit from the front while guarding) |
+| 0x8016039C | func_8016039C | RunGuardRecoilState | D_8018FF90[p->sub] | H | e58E0 |
+| 0x801603D8 | func_801603D8 | TryStartGuardRecoil | state 0: StartGuardRecoil when StayedGrounded | M | e58E0; table entry |
+| 0x80160410 | func_80160410 | StartGuardRecoil | rumble, ClearHitPending, effect 6 at the hit point (+0xE0), SE 0x43D, pushed back along the hit facing, timer 8 | M | e58E0 |
+| 0x80160534 | func_80160534 | GuardRecoilStep | full gauge + square / triangle -> counter burst; attacks; timer out: R1 held -> guard again, else kind 0; slide back | M | e58E0; table entry |
+| 0x801607B8 | func_801607B8 | DropGuard | +0x44 &= ~1, guard bit off | M | e58E0; func_8015126C when a hit lands (not blocked) |
+
+#### Kind 0x14: wall climb (surface 0x15 walls, flag 0x1F)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015F2BC | func_8015F2BC | EnterWallClimb | SetKindAndState(p, 0x14) + StartWallClimb | M | e58E0; table entry |
+| 0x8015F2F0 | func_8015F2F0 | SwitchToWallClimb | SetKindAndState(p, 0x14) + RunWallClimbState | M | e58E0; HandleLandingToNormal / KeepKind on a 0x8000 hit with surface (+0x16C) 0x15 and func_8014A6C4 (flag 0x1F), facing set to g_WallNormal |
+| 0x8015F324 | func_8015F324 | RunWallClimbState | D_8018FEAC[p->sub] | H | e58E0 |
+| 0x8015F360 | func_8015F360 | WallClimbState0 | StartWallClimb | M | e58E0; table entry |
+| 0x8015F380 | func_8015F380 | StartWallClimb | motion 0x18, +0x244 / +0x245 = 0, two effects 0x25 at his chest, SE 0x56D, state bit 4 | M | e58E0 |
+| 0x8015F448 | func_8015F448 | WallClimbStep | triangle / square queue the next stab (+0x244 side, +0x245); markers 0x2000 / 0x1000: hand point, SE 0x56D / 0x56E, rumble, effects; motion end: next stroke up (or down with down held); jump or off the wall -> fall | M | e58E0; table entry |
+| 0x8015F738 | func_8015F738 | ExitWallClimb | display flag 20 off, face 0x11 | M | e58E0; exit-table entry |
+
+#### Kind 0x16: assimilate (+0x184 the ability won, bit 31 = failed; +0x1A0 the new ability)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8015FA44 | func_8015FA44 | EnterAssimilate | SetKindAndState(p, 0x16) + StartAssimilate | M | e58E0; table entry |
+| 0x8015FA78 | func_8015FA78 | SwitchToAssimilate | SetKindAndState(p, 0x16) + RunAssimilateState | M | e58E0; CheckAssimilatePending (+0x44 bit 0x10, set by the Fusion throw's catch step) |
+| 0x8015FAAC | func_8015FAAC | RunAssimilateState | D_8018FEF0[p->sub] | H | e58E0 |
+| 0x8015FAE8 | func_8015FAE8 | AssimilateState0 | ground check: falling or sliding cancels (CancelAssimilate, +0x184 \|= 0x80000000, kind 3 / 4), else StartAssimilate | M | e58E0; table entry |
+| 0x8015FBE0 | func_8015FBE0 | StartAssimilate | failed (+0x184 < 0) -> kind 0; else D_80078EC1 = 0, motion 0x20, face 0x18, effect 0x16, SE 0x44F, g_UpdateAllActors = 2 (others frozen), D_800B9A17 = 0 | M | e58E0 |
+| 0x8015FCC8 | func_8015FCC8 | AssimilateTakeStep | an event running: cancel -> kind 0; else +0x1A0 = the new ability (+0x184), +0x197 / +0xBE / +0xBF = 0, func_8014BFF4(p, 1) | M | e58E0; table entry |
+| 0x8015FD74 | func_8015FD74 | OpenAbilityNameMessage | PlaySe(0x18), +0x198 = OpenMessage(D_8018FF04[+0x1A0]) | M | e58E0; table entry |
+| 0x8015FDCC | func_8015FDCC | WaitAbilityNameMessage | answer given: SE 0x19, CloseMessage; GetAbilityFanfare: Obj68 0x24 + SE 0x989 | M | e58E0; table entry |
+| 0x8015FE70 | func_8015FE70 | AssimilateEndStep | motion end: chain to +0xBA or -> kind 0; marker 0x4000: face 0x11 | M | e58E0; table entry |
+| 0x8015FF20 | func_8015FF20 | ExitAssimilate | failed: bp bonus (func_80150820(p, GetAbilityBpBonus)); else hold the ability (D_80078EC1 = EC2 = +0x1A0), SetAbilityTimer, RestoreStatusOnce, ClearAbilityUsed, unfreeze; then ClearAssimilateState | M | e58E0; exit-table entry |
+| 0x8016004C | func_8016004C | ClearAssimilateState | +0x184 = 0, +0x188 / +0x18A = 0, +0x44 &= ~0x10, D_800B9A17 = 1 | M | e58E0 |
+| 0x8016007C | func_8016007C | CancelAssimilate | ClearAssimilateState plus face 0x11, g_UpdateAllActors = 1 | M | e58E0; 4 calls (AssimilateState0 x2, AssimilateTakeStep, ExitAssimilate) |
+
+#### Kind 0x17 and the ability tables (D_80078EC1 = the held ability)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8016533C | func_8016533C | RestoreAbilityOnLoad | D_80126CF8 = D_80078EC1, then RunAbilityInitHandler(Musashi) | M | e58E0; called by the stage init func_80145CEC |
+| 0x80165374 | func_80165374 | EnterUseAbility | CheckAbilityFails, SetKindAndState(p, 0x17), +0x197 = 1, RunAbilityUse | M | e58E0; table entry |
+| 0x801653B8 | func_801653B8 | SwitchToUseAbility | CheckAbilityFails, SetKindAndState(p, 0x17), RunAbilityUse | M | e58E0; func_80149864 (circle, func_801497A8) |
+| 0x801653F4 | func_801653F4 | CheckAbilityFails | D_80078EC5 = 0x80 when LacksAbilityBp, or ability 0x1A (Map) outside maps 0x305C-0x3066 | M | e58E0 |
+| 0x801654A8 | func_801654A8 | RunPassiveAbility | each frame (not in kinds 0x16 / 0x1A, no action): abilities with info bit 0x80 run D_80190170[ability]; ability 0x19 (Acid): func_800CAE0C | M | e58E0; called by the player update func_80146128 |
+| 0x80165580 | func_80165580 | RunAbilityUse | D_80078EC5 bit 0x80: RunAbilityFailState; else D_80190170[ability] | M | e58E0 |
+| 0x801655E4 | func_801655E4 | SpendAbilityBp | SpendBp(p, GetAbilityInfo & 0x7F) | H | e58E0; 29 ability calls (one per package) |
+| 0x80165624 | func_80165624 | LacksAbilityBp | bp (D_80078EB8) < the ability's cost | H | e58E0; CarryStep, CheckAbilityFails, ovl2c / ovl15 |
+| 0x80165658 | func_80165658 | GetAbilityInfo | D_801901EC[a & 0x7F]: cost in bits 0-6, 0x80 = runs every frame (not on circle) | M | e58E0; 4 callers (func_801497A8 refuses circle when bit 0x80) |
+| 0x80165670 | func_80165670 | SetAbilityTimer | D_80078EC8 = D_8019020C[a & 0x7F] | M | e58E0; ExitAssimilate; func_80146128 reads EC8 for ability 0x10 (Steel) |
+| 0x80165694 | func_80165694 | TickAbilityTimer | D_80078EC8-- while no action runs | H | e58E0; called by func_80146128 |
+| 0x801656D0 | func_801656D0 | GetAbilityAssimilateRate | D_80190288[a]: gauge added per square press | M | e58E0; FusionThrowStuckStep adds it to +0x188 |
+| 0x801656E8 | func_801656E8 | GetAbilityBpBonus | D_801902A8[a]: bp given when assimilating fails | M | e58E0; ExitAssimilate: func_80150820 (AddBp + a number effect) |
+| 0x80165700 | func_80165700 | GetAbilityFanfare | D_801902C8[a]: nonzero = the Obj68 0x24 and SE 0x989 after the name | L | e58E0; WaitAbilityNameMessage |
+| 0x801657A0 | func_801657A0 | SaveStatusOnce | when D_80078EC3 == 0: set it, SaveStatus | M | e58E0; 3 ability calls (ovl1b Mint, ovl24 Toxin, ovl17 Sleepy) |
+| 0x801657D8 | func_801657D8 | SaveStatus | the words 0x80078E94 / E9C / EA0 / EA4 / EA8 and byte EBB copied to 0x80078ECC.. | M | e58E0 |
+| 0x80165840 | func_80165840 | RestoreStatusOnce | when D_80078EC3: clear it, RestoreStatus | M | e58E0; func_80158AE4, ExitAssimilate, the same three packages |
+| 0x80165874 | func_80165874 | RestoreStatus | the copies back | M | e58E0 |
+| 0x801658DC | func_801658DC | ClearAbilityUsed | D_80078EC4 = 0 | M | e58E0 |
+| 0x801658EC | func_801658EC | SetAbilityUsed | D_80078EC4 = 1 | M | e58E0; no caller found |
+| 0x80165900 | func_80165900 | GetAbilityUsed | D_80078EC4 | M | e58E0; no caller found |
+| 0x80165910 | func_80165910 | TestAndSetAbilityUsed | returns D_80078EC4, sets it | M | e58E0; 12 ability calls |
+| 0x80165938 | func_80165938 | ResetCloneCounters | D_8012672C, D_8012811C, D_80126B08 = 0 | L | e58E0; stage init func_80145CEC |
+| 0x80165958 | func_80165958 | IncCloneUseCount | D_8012672C++ | L | e58E0; ovl2a (Clone) after SpendAbilityBp |
+| 0x80165978 | func_80165978 | GetCloneUseCount | D_8012672C | L | e58E0; no caller found |
+| 0x80165988 | func_80165988 | IncStageCount811C | D_8012811C++ | L | e58E0; 6 stage calls (sc04_002 / 004 / 005 / 007, sc02_041) |
+| 0x801659A8 | func_801659A8 | GetStageCount811C | D_8012811C | L | e58E0; 3 stage calls (sc04_003 / 005 / 007: `if (func_801659A8() <= 0)`) |
+| 0x801659B8 | func_801659B8 | SetCloneFlag6B08 | D_80126B08 = 1 | L | e58E0; ovl2a func_ovl2a_800CB3B4 |
+| 0x801659CC | func_801659CC | GetCloneFlag6B08 | D_80126B08 | L | e58E0; 6 stage calls (sc04_*, sc02_041) |
+| 0x801659DC | func_801659DC | RunAbilityInitHandler | D_801902E8[+0x1A0](p) | M | e58E0; func_801554B8 once the ability's overlay is in (+0x196 = +0x1A0), RestoreAbilityOnLoad |
+| 0x80165A18 | func_80165A18 | NopA18 | empty table entry | L | e58E0 |
+| 0x80165A20 | func_80165A20 | EndHeldAbility | StopAbility, then ClearHeldAbility | H | e58E0; 21 calls (DropTimedAbility, 17 ability packages, sc06_027) |
+| 0x80165A78 | func_80165A78 | StopAbility | the ability's end handler, +0x197 = 0, +0x44 &= ~8, model flag 0x20 off | M | e58E0; also ovl19 / ovl25 |
+| 0x80165AC8 | func_80165AC8 | RunAbilityEndHandler | D_80190364[ability & 0x7F] | M | e58E0 |
+| 0x80165B08 | func_80165B08 | NopB08 | empty table entry | L | e58E0 |
+| 0x80165B10 | func_80165B10 | NopB10 | empty table entry | L | e58E0 |
+| 0x80165B18 | func_80165B18 | NopB18 | empty table entry | L | e58E0 |
+| 0x80165B20 | func_80165B20 | NopB20 | empty table entry | L | e58E0 |
+| 0x80165B28 | func_80165B28 | RunAbilityFailState | +0x44 \|= 8, D_801903E0[+0x197] | M | e58E0; RunAbilityUse when CheckAbilityFails said so |
+| 0x80165B6C | func_80165B6C | AbilityFailState0 | StayedGrounded: StartAbilityFailMotion, +0x197++ | M | e58E0; table entry |
+| 0x80165BB4 | func_80165BB4 | StartAbilityFailMotion | motion 0x22, face 0x1A, +0x197++ | M | e58E0 |
+| 0x80165BFC | func_80165BFC | AbilityFailStep | motion end: face 0x11, exit kind, ResetPlayerKind | M | e58E0; table entry |
+| 0x80165C58 | func_80165C58 | EndAbilityFailFace | StartFace(p, 0x11) | M | e58E0; called by AbilityFailStep |
+
+#### Kinds 0x18, 0x1C, 0x1D, 0x1E
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801600D0 | func_801600D0 | EnterKind18 | SetKindAndState(p, 0x18) + StartKind18 | L | e58E0; table entry |
+| 0x80160104 | func_80160104 | SwitchToKind18 | SetKindAndState(p, 0x18) + RunKind18State | L | e58E0; no caller found |
+| 0x80160138 | func_80160138 | RunKind18State | D_8018FF80[p->sub] | H | e58E0 |
+| 0x80160174 | func_80160174 | TryStartKind18 | state 0: StartKind18 when StayedGrounded | M | e58E0; table entry |
+| 0x801601AC | func_801601AC | StartKind18 | motion 0x21, state 1 | L | e58E0 |
+| 0x801601E4 | func_801601E4 | Kind18Step1 | motion end: motion 0x22, face 0x1A, next | L | e58E0; table entry |
+| 0x80160244 | func_80160244 | Kind18Step2 | motion end: motion 0x23, face 0x1B, next | L | e58E0; table entry |
+| 0x801602A4 | func_801602A4 | Kind18Step3 | motion end: exit, face 0x11, kind 0 | L | e58E0; table entry |
+| 0x8016032C | func_8016032C | Nop0032C | empty table entry (kind 0x18 exit) | L | e58E0 |
+| 0x801607E4 | func_801607E4 | EnterKind1C | SetKindAndState(p, 0x1C) + StartKind1C | L | e58E0; table entry |
+| 0x80160818 | func_80160818 | SwitchToKind1C | SetKindAndState(p, 0x1C) + RunKind1CState | M | e58E0; StartGuard when D_80078EC0 bit 0x80 (toggled by select in func_80149FB0) |
+| 0x8016084C | func_8016084C | RunKind1CState | D_8018FF98[p->sub] | H | e58E0 |
+| 0x80160888 | func_80160888 | TryStartKind1C | state 0: StartKind1C when StayedGrounded | M | e58E0; table entry |
+| 0x801608C0 | func_801608C0 | StartKind1C | +0x44 \|= 0x41 (bit 0: the gauge fills), display flags off, motion 0x24, face 0x1D | L | e58E0 |
+| 0x80160920 | func_80160920 | Kind1CStep1 | R1 released: EndKind1C; motion end: motion 0x25, next | L | e58E0; table entry |
+| 0x801609B8 | func_801609B8 | Kind1CStep2 | R1 released: EndKind1C | L | e58E0; table entry |
+| 0x80160A28 | func_80160A28 | ExitKind1C | parts back, +0x44 &= ~0x41, face 0x11 | L | e58E0; exit-table entry |
+| 0x80160A74 | func_80160A74 | EndKind1C | full gauge (D_80078EBF == 0x80): lie down (kind 0x1D), else kind 0 | M | e58E0; called by both steps after the exit handler |
+| 0x80160ACC | func_80160ACC | EnterLieDown | SetKindAndState(p, 0x1D) + StartLieDown | L | e58E0; table entry |
+| 0x80160B00 | func_80160B00 | SwitchToLieDown | SetKindAndState(p, 0x1D) + RunLieDownState | M | e58E0; EndKind1C, func_801498C0 (from CheckLieDownFlag) |
+| 0x80160B34 | func_80160B34 | RunLieDownState | D_8018FFA4[p->sub] | H | e58E0 |
+| 0x80160B70 | func_80160B70 | TryStartLieDown | state 0: StartLieDown when StayedGrounded, else +0x1AC = 0 | M | e58E0; table entry |
+| 0x80160BB4 | func_80160BB4 | StartLieDown | +0x44 \|= 0x80, motion 0x26, face 0x1E, pitch 0xFE9, +0x234 / +0x238 = 0 | M | e58E0 |
+| 0x80160C28 | func_80160C28 | LieDownTiltStep | pitch falls back with growing speed (+0x238 += 0x1C000) to 0xC00 (on his back), then next | M | e58E0; table entry |
+| 0x80160CB4 | func_80160CB4 | LieDownSettleStep | motion end: motion 0x27, face 0x1F, next | M | e58E0; table entry |
+| 0x80160D10 | func_80160D10 | LieDownStep | assimilate pending -> kind 0; +0x1AC == 0: a face button gets up; else +0x1AC -= 0xAAA8 until below 0 | M | e58E0; table entry |
+| 0x80160DEC | func_80160DEC | ExitLieDown | +0x1AC = 0, pitch 0, parts back, +0x44 &= ~0x180, face 0x11 | M | e58E0; exit-table entry |
+| 0x80160E3C | func_80160E3C | EnterRecover | SetKindAndState(p, 0x1E) + StartRecover | M | e58E0; table entry |
+| 0x80160E70 | func_80160E70 | SwitchToRecover | SetKindAndState(p, 0x1E) + RunRecoverState | M | e58E0; no caller found |
+| 0x80160EA4 | func_80160EA4 | RunRecoverState | D_8018FFB4[p->sub] | H | e58E0 |
+| 0x80160EE0 | func_80160EE0 | RecoverState0 | StartRecover | M | e58E0; table entry |
+| 0x80160F00 | func_80160F00 | StartRecover | ClearHitPending, motion 4, face 0x11, g_UpdateAllActors = 2, SetPropsActive(0), timer 0x10 | M | e58E0 |
+| 0x80160F70 | func_80160F70 | RecoverHealStep | timer out: func_800D0F4C(0xA), AddHp(p, 150), AddBp(p, 150), +0x198 = OpenMessage(D_80110EC0) | M | e58E0; table entry |
+| 0x80160FE0 | func_80160FE0 | RecoverMessageStep | answer given: CloseMessage, next | M | e58E0; table entry |
+| 0x80161034 | func_80161034 | RecoverEndStep | ClearHitPending, exit, kind 0 | M | e58E0; table entry |
+| 0x80161094 | func_80161094 | ExitRecover | close the window, g_UpdateAllActors = 1, SetPropsActive(1), D_800B9A17 = 1 | M | e58E0; exit-table entry |
+| 0x801610FC | func_801610FC | Nop10FC | empty table entry | L | e58E0 |
+
+#### Kind switches from flags, EC0 modes
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80161B18 | func_80161B18 | CheckAssimilatePending | no event (D_800AE6B0) and +0x44 bit 0x10: exit kind, SwitchToAssimilate, 1 | M | e58E0; 8 state steps call it first |
+| 0x80161B84 | func_80161B84 | CheckLieDownFlag | +0x44 bit 0x100 and func_80149884 (no player action, not map 0x308F): exit kind, kind 0x1D, 1 | M | e58E0; 8 state steps |
+| 0x80161BE0 | func_80161BE0 | CheckUseAbility | func_801497A8 (circle, a usable ability): exit kind, SwitchToUseAbility, 1 | M | e58E0; func_80159C84, func_8015A3C8 |
+| 0x801619A4 | func_801619A4 | GetActiveEC0Mode | D_80078EC0 & 0x7F while +0x1C8 (its timer) runs, else 0 | M | e58E0; 5 callers switch on it (3 / 4 / 5 / 6) |
+| 0x801619D0 | func_801619D0 | IsEC0Mode3 | +0x1C8 and mode 3 | M | e58E0; func_80150BC8, func_8015126C, ovl32 x2 |
+| 0x80161A00 | func_80161A00 | IsEC0Mode4 | +0x1C8 and mode 4 | M | e58E0; func_8015126C, ovl33 x3 |
+| 0x80161A30 | func_80161A30 | IsEC0Mode5 | +0x1C8 and mode 5 | M | e58E0; func_8015126C, ovl34 x3, sc03_092 |
+| 0x80161A60 | func_80161A60 | IsEC0Mode6 | +0x1C8 and mode 6 | M | e58E0; StartFall (SE 0x8E1), func_8015126C, func_8015AE2C |
+| 0x80161A90 | func_80161A90 | TickEC0Mode6Timer | mode 6 active: +0x1C8--; mode 6 with the timer out: func_8014AC10(0x3B) (frees those effects) | M | e58E0; called by func_80146128 |
+
+#### Footstep and surface sounds (+0x16E = the surface under him)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80161C24 | func_80161C24 | PlayFootstep | surface < 8: PlaySe of D_8018FFC4 / D_8018FFC6 by the +0xDA left / right toggle | M | e58E0; 4 calls on motion marker 0x2000 (`func_80161C24(p, p->+0x16E)`) |
+| 0x80161C98 | func_80161C98 | PlaySurfaceSeE4 | surface < 8: PlaySe(D_8018FFE4[surface]) | L | e58E0; no caller found |
+| 0x80161CD0 | func_80161CD0 | PlayJumpSe | surface < 8 and func_800CF8B4: PlaySe(D_8018FFF4[surface]) | M | e58E0; func_8015AC48 (motion 9, the jump) and func_8015B950 |
+| 0x80161D20 | func_80161D20 | PlayLandSe | surface < 8: PlaySe(D_80190004[surface]) | M | e58E0; 11 calls, all with the landing dust (HandleLanding*, func_80157A8C / 7BC8) |
+
+#### Clock deadlines (game vars 8 and 0x12: 0x8000 \| hour << 8 \| minute, against the clock 0x80078EB0)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80161D58 | func_80161D58 | UpdateDeadlines | UpdateDeadline8, then UpdateDeadline12 | M | e58E0; called by the player update func_80146128 |
+| 0x80161D88 | func_80161D88 | StartDeadlineEvent | no event running and flag 0x141: clear it, set flag 0x95, func_800D1734(D_80190048) | M | e58E0; called by func_801463A0 |
+| 0x80161E08 | func_80161E08 | UpdateDeadline8 | var 8 active: build the three on-screen sprites once (two labels, the time left), refresh the digits; time reached: ExpireDeadline8 | M | e58E0; skipped for kind 0x1A and maps 0x3012 / 3054 / 3079 / 3096 |
+| 0x801620C4 | func_801620C4 | GetDeadline8Left | the time left (func_800D0E30) as hours * 100 + minutes | M | e58E0; UpdateDeadline8 x2 |
+| 0x80162120 | func_80162120 | StartDeadline8 | var 8 unset: var 8 = func_800D0D7C(0, 1) \| 0x8000 | M | e58E0; sc03_011 (`func_80162120()`), func_80145B24 |
+| 0x8016216C | func_8016216C | ClearDeadline8 | var 8 = 0, the three sprite records zeroed (0x38 each) | M | e58E0; sc03_010, sc03_013 |
+| 0x801621CC | func_801621CC | GetDeadline8Passed | D_80190048 when var 8's time has passed within the last n hours (hour 0x80078EB1, wrap at 0x17), else 0 | M | e58E0; 7 stage calls, all `if (... func_801621CC(8) != 0) func_801622C4();` |
+| 0x801622C4 | func_801622C4 | ExpireDeadline8 | flag 0x141 = 1 (StartDeadlineEvent picks it up), var 8 = 0, sprites zeroed | M | e58E0; 8 calls (UpdateDeadline8, the 7 stage callers above) |
+| 0x80162438 | func_80162438 | UpdateDeadline12 | the same for var 0x12 (labels D_80190078 / D_80190090); time reached: ClearDeadline12 | M | e58E0; called by UpdateDeadlines |
+| 0x801626B8 | func_801626B8 | GetDeadline12Left | var 0x12's time left as hours * 100 + minutes | M | e58E0 |
+| 0x80162714 | func_80162714 | StartDeadline12 | var 0x12 unset: var 0x12 = func_800D0D7C(0xC, 0) \| 0x8000 | M | e58E0; sc02_021 |
+| 0x80162760 | func_80162760 | ClearDeadline12 | var 0x12 = 0, its three sprite records zeroed | M | e58E0; UpdateDeadline12, sc02_021 |
+
+#### A three-step scene-exit object (D_8019006C by +0x15)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80162330 | func_80162330 | RunSceneExitStep | D_8019006C[+0x15](o) | M | e58E0; no caller found (a handler) |
+| 0x8016236C | func_8016236C | SceneExitStart | EndScene(Musashi), +0x28 = 10, step++ | M | e58E0; table entry |
+| 0x801623B8 | func_801623B8 | SceneExitWait | after 10 frames: func_800D0C48(1), func_800167B8(4), step++ | L | e58E0; table entry |
+| 0x80162414 | func_80162414 | SceneExitBusy | func_800167F0(4) != 0 | L | e58E0; table entry |
+
+#### Shadow decal object (D_8011F750, 0x58 bytes: +0 kind, +1 step, +4 owner, +8 sprite)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x801627C0 | func_801627C0 | ClearShadow | zero the 0x58 bytes at D_8011F750 | M | e58E0; stage init func_80145CEC |
+| 0x801627E8 | func_801627E8 | UpdateShadow | kind != 0: D_801900B0[kind - 1](obj) | M | e58E0; the stage frame func_801287B8 (e.c) |
+| 0x80162834 | func_80162834 | RunShadowStep | D_801900B4[+1](o) | M | e58E0; table entry |
+| 0x80162870 | func_80162870 | InitShadow | sprite D_800B5CB8 from texture D_801900A4 (0x250, 0x1A0), its matrix at +0xC, flags 0x60000000, UpdateShadowMatrix, next step | M | e58E0; table entry |
+| 0x801628F4 | func_801628F4 | ShadowStep | hidden while the owner's +0x7E is set; +0x20..+0x28 = the owner's ground point (+0x78..+0x7C); UpdateShadowMatrix | M | e58E0; table entry |
+| 0x80162968 | func_80162968 | UpdateShadowMatrix | tilt to the owner's ground normal (+0x80..+0x84), turn to his facing; scale shrinks with his height above the point (0x300 range, a third with +0x44 bit 0x400) | M | e58E0 |
+| 0x80162AC0 | func_80162AC0 | SetShadowKind | +0 = kind, +1 = 0 | M | e58E0; no caller found |
+| 0x80162ACC | func_80162ACC | NextShadowStep | +1++ | M | e58E0; InitShadow |
+| 0x80162AE0 | func_80162AE0 | PrevShadowStep | +1-- | M | e58E0; no caller found |
+
+#### Obj68 helpers: matrices, accel, sweep hits, map traces
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80162CC4 | func_80162CC4 | DefaultObj68Handler | empty; UpdateObj68s calls it for a kind whose table entry is NULL | H | e58E0: func_80162B1C `else func_80162CC4(o)` |
+| 0x80162D88 | func_80162D88 | UpdateObj68MatrixYXZ | model matrix from its rotation in Y, X, Z order | M | e58E0; 3 calls (Fusion throw) |
+| 0x80162DE8 | func_80162DE8 | UpdateObj68MatrixZXY | the same in Z, X, Y order | M | e58E0; no caller found |
+| 0x80162E48 | func_80162E48 | UpdateObj68MatrixZYX | the same in Z, Y, X order | M | e58E0; no caller found |
+| 0x80162EA8 | func_80162EA8 | UpdateObj68MatrixYZX | the same in Y, Z, X order | M | e58E0; no caller found |
+| 0x80162F08 | func_80162F08 | AddObj68Accel | +0x24 / +0x28 / +0x2C += (x, y, z), each clamped to +-0x7F0000 | M | e58E0; ovl2a, ovl25 |
+| 0x80162F60 | func_80162F60 | AddObj68AccelX | func_80147948(o, x, 0x7F0000) | M | e58E0; 5 callers here |
+| 0x80162F80 | func_80162F80 | AddObj68AccelY | func_801479BC(o, y, 0x7F0000) | M | e58E0 |
+| 0x80162FA0 | func_80162FA0 | AddObj68AccelZ | func_80147A30(o, z, 0x7F0000) | M | e58E0 |
+| 0x80162FF4 | func_80162FF4 | AddObj68AccelLocal | AddObj68Accel, then velocity = the accel turned by the model's XYZ rotation (via g_PushVel / SetPushVel) | M | e58E0; 6 calls (sc02_000, sc02_003, ovl21, ovl2b, ovl2e, ovl2f) |
+| 0x801630C4 | func_801630C4 | AddObj68AccelLocalYXZ | the same with the YXZ rotation order | M | e58E0; HomeFusionThrow |
+| 0x80163194 | func_80163194 | AddObj68AccelByMatrix | the same turned by a given matrix | M | e58E0; 9 calls (Fusion throw, 8 ability packages) |
+| 0x80163234 | func_80163234 | SetObj68VelFromAccel | AddObj68AccelWorld(o, 0, 0, 0) | M | e58E0; no caller found |
+| 0x8016325C | func_8016325C | AddObj68AccelWorld | AddObj68Accel, then velocity = the accel unturned | M | e58E0; 9 stage calls (sc03_006, sc05_010, sc03_119, sc03_015, ...) |
+| 0x801632E0 | func_801632E0 | GetSweepHitActor | D_80115100 (the first actor the last sweep hit) | M | e58E0; Fusion throw, ovl1f, ovl32 |
+| 0x801632F0 | func_801632F0 | GetSweepHitResult | the first nonzero of the three sweep results D_80115200 | M | e58E0; 11 calls (`if (r & 1)` hit an actor, `r & 6` a wall) |
+| 0x80163328 | func_80163328 | MarkSweepHitPoints | each result with bit 0: the actor's hitPos (+0x7C) = the hit point D_80126B18[i], +0x82 = 0 | M | e58E0; 12 ability calls |
+| 0x801633A8 | func_801633A8 | GetSweepHitSoft | the first result whose actor lacks flags5C 0x400 | L | e58E0; ovl1f |
+| 0x80163408 | func_80163408 | SweepHitObj68 | SweepHitObj68Rolled with a zero offset | M | e58E0; 11 ability calls |
+| 0x8016345C | func_8016345C | SweepHitObj68Rolled | damage rolled for the hit kind (func_80156370), then SweepHitObj68Full | M | e58E0; ovl1f |
+| 0x801634D8 | func_801634D8 | SweepHitObj68Dmg | SweepHitObj68Full with the damage given and a zero offset | M | e58E0; FusionThrowFlyStep (kind 0xD) |
+| 0x80163534 | func_80163534 | SweepHitObj68Full | clear the results; segment from last frame's position (+0x44) to now (+6), plus the offset; D_80115200[0] = CallSweepHit(...) | M | e58E0 |
+| 0x80163664 | func_80163664 | CallSweepHit | func_80157158 with the 13 arguments (kind / damage masked to u16) | M | e58E0; called by SweepHitObj68Full |
+| 0x801636D0 | func_801636D0 | SpawnSweepHitSparks | each result with bit 0: func_8014AD30 (effect 0x1D) at its hit point | M | e58E0; no caller found |
+| 0x80163764 | func_80163764 | CollectPickupsNear | the first live actor with flags5C 0x100 within 0x40: func_801506A4 (pickups 0x31 money? 0x32 hp, 0x33 bp, 0xC5, 0x27B) for the owner (+0x4C), 1 | M | e58E0; Fusion throw fly / return steps |
+| 0x8016380C | func_8016380C | TraceObj68Move | TraceMap(1) from +0x44 to the position; on a hit the position takes the moved end; returns the bits | M | e58E0; ovl1f, ovl2b |
+| 0x801638A0 | func_801638A0 | RaycastObj68Move | RaycastMapTwoCells the same way; hit classed by the normal's y (D_801152AA): 0x8000 wall, 0x4000 steep, 0x2000 floor | M | e58E0; ovl2f, ovl2e |
+| 0x80163950 | func_80163950 | LandObj68OnActor | a vertical segment (y-0x20 to y+8) against actors with flags5C 0x400 and hitData (PathHitsMovingModel); snaps the position, 1 | M | e58E0; ovl1f, ovl2b, ovl2e |
+
+#### Obj68: the Fusion throw (assimilate; +0x4C the owner Musashi)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80163A58 | func_80163A58 | RunFusionThrowState | D_801900BC[o->sub](o) | M | e58E0; an Obj68 kind handler (no direct caller) |
+| 0x80163A94 | func_80163A94 | StartFusionThrow | owner +0x44 \|= 4 (sword out: attacks blocked), sword model D_800DE5A0 at his hand matrix, SE 0x448, timer 0x10, effect 0xD, forward accel -0x200000 | M | e58E0; table entry |
+| 0x80163C2C | func_80163C2C | FusionThrowFlyStep | spin, aim (AimFusionThrow), move; sweep hit kind 0xD: an actor -> owner +0x184 = it, +0x44 \|= 0x20, +0x194 = its id, effect 0x30, stick; a wall or range end -> return | M | e58E0; table entry |
+| 0x80163EC8 | func_80163EC8 | FusionThrowStuckStep | stuck in the actor: each square press adds GetAbilityAssimilateRate to the gauge (+0x188, decays); 0x80: hit 0xE, effect 0x33, +0x184 = its ability; 0x80 frames or kind 0x19: hit 0x21; then return (SE 0x449) | M | e58E0; table entry |
+| 0x80164270 | func_80164270 | FusionThrowReturnStart | UpdateObj68MatrixYXZ, timer 0x20, next | M | e58E0; table entry |
+| 0x801642AC | func_801642AC | FusionThrowReturnStep | home to the owner; within 0x28 or timer out: timer 8, SE 0x44A, next; picks up items on the way | M | e58E0; table entry |
+| 0x8016432C | func_8016432C | FusionThrowCatchStep | timer out: owner caught it: a target and no action -> +0x44 \|= 0x10 (assimilate pending; +0x184 bit 31 when the gauge was short), else +0x184 = 0; +0x44 &= ~4, SE 0x44B, FreeObj68 | M | e58E0; table entry |
+| 0x80164410 | func_80164410 | Nop4410 | empty table entry | L | e58E0 |
+| 0x80164418 | func_80164418 | HomeFusionThrow | turn toward the owner's chest (+0x1E) by halves, spin, AddObj68AccelLocalYXZ(0, 0, 0x8000), move | M | e58E0; return and catch steps |
+| 0x80164530 | func_80164530 | AimFusionThrow | turn (10 steps) to the actor with flags5C 0x2000 nearest its heading (within 0x200); on map 0x30A0 also pitch to its box centre | M | e58E0; FusionThrowFlyStep |
+
+#### Obj68 effects: ring (kind 0x19), flash, trail sprite
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80164744 | func_80164744 | RunRingState | D_80190110[o->sub](o), then UpdateObj68Matrix if it has a model | M | e58E0; Obj68 kind 0x19 (FadeRing frees every kind 0x19) |
+| 0x801647A4 | func_801647A4 | StartRing | model D_800DF2E0 (colour D_80190108.. = 0x80), +0x60 = 0, +0x62 = 0x200, at his hand; else FadeRing | M | e58E0; spawned by CounterBurstStep (`func_801466F0(0x19, p, ..., 0 / 1, ...)`) |
+| 0x80164864 | func_80164864 | RingGrowStep | spin and grow; value 0 (+0x50): hits actors (RingHitActors); next past 0x4000 (0x2000 for value 1) | M | e58E0; table entry |
+| 0x80164930 | func_80164930 | FadeRing | value 0: fade the colour by 8, at -0x80 free every kind-0x19 Obj68 with +0x50 and itself; value 1: shrink | M | e58E0; table entry, StartRing |
+| 0x80164A74 | func_80164A74 | PlaceAtHand | position = the hand point (func_80148534) into the owner's frame | M | e58E0; StartRing |
+| 0x80164ACC | func_80164ACC | RingHitActors | actors within 0x50 that take hit kind 0xB (func_8014C308): func_8014C3A4 hit, their +0x60 halved | M | e58E0; RingGrowStep, FadeRing |
+| 0x80164BA0 | func_80164BA0 | RunFlashState | D_8019011C[o->sub](o) | L | e58E0; an Obj68 kind handler |
+| 0x80164BDC | func_80164BDC | StartFlash | model from func_80146578, colour D_801ED5E8 = (0xF0, 0xF0, 0xC0), scale 0xCCC, pitch 0x400, at his hand 0x40 up; else FreeFlash | L | e58E0; table entry |
+| 0x80164CD4 | func_80164CD4 | FlashGrowStep | fade, scale += growing speed; next when the speed turns negative | L | e58E0; table entry |
+| 0x80164D4C | func_80164D4C | FlashFadeStep | fade until black (then next), scale += 0x100 | L | e58E0; table entry |
+| 0x80164DB0 | func_80164DB0 | FreeFlash | FreeObj68 | M | e58E0 |
+| 0x80164DD0 | func_80164DD0 | PlaceFlashAtHand | hand point into the owner's frame, y -= 0x40 | M | e58E0 |
+| 0x80164E40 | func_80164E40 | FadeFlashColour | D_801ED5E8..EA each -= 0x10 while nonzero; 1 when all are 0 | M | e58E0 |
+| 0x80164EA4 | func_80164EA4 | RunTrailSpriteState | D_8019012C[o->sub](o) | L | e58E0; an Obj68 kind handler |
+| 0x80164EE0 | func_80164EE0 | StartTrailSprite | clear the 8 trail copies (D_801ED628), scale 0x4000, colour 0, next | L | e58E0; table entry |
+| 0x80164F44 | func_80164F44 | TrailSpriteShrinkStep | colour up, scale down to 0x1000 (then timer 0xE, next); a trail copy every 2-3 frames; draw | L | e58E0; table entry |
+| 0x80165024 | func_80165024 | TrailSpriteHoldStep | timer out: next; draw | L | e58E0; table entry |
+| 0x80165064 | func_80165064 | TrailSpriteBrightenStep | colour += 0x10 up to 0xFF, then next; draw | L | e58E0; table entry |
+| 0x801650C4 | func_801650C4 | TrailSpriteFadeStep | colour -= 0x10; below 0: FreeObj68 | L | e58E0; table entry |
+| 0x80165124 | func_80165124 | SetTrailSpriteColour | +0x50..+0x52 = +0x62 (grey level) | M | e58E0; 4 callers |
+| 0x80165140 | func_80165140 | AddTrailCopy | a free slot of D_801ED628 (8): 8 frames, the rotation (+0x2C) and colour | M | e58E0 |
+| 0x801651B8 | func_801651B8 | DrawTrailSprite | DrawTrailQuad for itself and each live copy (counting it down) | M | e58E0 |
+| 0x80165240 | func_80165240 | DrawTrailQuad | a textured quad (D_80190140 corners, D_80190160 uvs, tpage 0x2C, semi-transparent) turned by a rotation, coloured, added with func_80016ED4 | M | e58E0 |
+
+#### Other
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80165E2C | func_80165E2C | DebugPrintWord | func_8001534C / func_800153CC: a label and *arg at (0xA8, 0x80) | L | e58E0; no caller found |
+| 0x80165E90 | func_80165E90 | UpdateSwordTrails | +0x44 bits 0x10000000 / 0x20000000 (and the model shown): the two hand points (func_801484B0 / func_80148534) to world, func_80167DBC / func_80167AE0 draw the trail | M | e58E0; the stage frame func_801287B8 (e.c) |
+| 0x80165FA4 | func_80165FA4 | ModelPointsToWorld | two points through the model's matrix (+0x18, func_80020F34) | M | e58E0; UpdateSwordTrails x2, func_80166994, ovl35 |
+
+
+Rows: 340 (H 25, M 262, L 53); skipped (already known): 10
+
 ### 0x80166000-0x8016F000: engine effect kinds, sword trails, HUD slots
 
-Overview: 0x80166000-0x8016F000 is the engine's own effect kinds (the handlers that g_Effects entries run: a
+0x80166000-0x8016F000 is the engine's own effect kinds (the handlers that g_Effects entries run: a
 per-kind state dispatcher `D_801903xx[e->+2](e)` followed by that kind's set-up, step and draw), the sword-trail
 buffers at D_801ED6A8, the HUD slots at D_80115218, and the first few of Musashi's scripted-action helpers.
 Which effect kind number each dispatcher serves is room data (the table g_EffectHandlers points at), so most kinds
@@ -687,3 +1446,9 @@ Not new proposals: better evidence for names part 1 gave, for the local card to 
 * Stats (0x80078E78) fields found in (b): +0x1A minutes of the day (0x80078E92), +0x1C poison timer, +0x20 shrink
   timer (bit 31 = active), +0x24 a draining gauge, +0x2C the wake gauge, +0x34 the day count, +0x42 the weekday,
   +0x54..+0x68 saved copies of +0x1C..+0x30.
+* 0x801599A4 (part 1: RunPlayerKindHandler, M): D_8018FBA8[kind] is each kind's **exit** handler, run just before
+  every kind change (exit, SetKindAndState, then the new kind's start); the functions it reaches only clean up
+  (EndSwordSwing, EndStandKind, ...). **RunPlayerKindExit** says what it does. Both (b) slices found this
+  independently.
+* 0x8012E364 / g_PlayerSquash (part 1): Player +0x188 is also the assimilate gauge (filled by square-mashing in the
+  Fusion throw), not only a squash value; the squash reading of func_8012E364 stands for what it does with it.
