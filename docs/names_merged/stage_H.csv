@@ -603,10 +603,10 @@ address,scope,current,proposed,confidence,source,note
 0x8017CFD0,stage:sc06_027,func_sc06_027_8017CFD0,EntrySpawn3BA,H,r275:stage_survey_3.md:557,
 0x8017D5BC,stage:sc06_027,func_sc06_027_8017D5BC,EventRun,H,r275:stage_survey_3.md:558,
 0x8017E494,stage:sc06_029,func_sc06_029_8017E494,EventGrantFinalState,H,r275:stage_survey_3.md:601,
-0x8017EBC4,stage:sc06_029,func_sc06_029_8017EBC4,BossCoreInit,H,r275:stage_survey_3.md:604,
+0x8017EBC4,stage:sc06_029,func_sc06_029_8017EBC4,BossCoreInit,H,r275:stage_survey_3.md:604,"r278: evidence corrected, name kept: the core's state 0 (model, HP +0x76 = 0x1E0, StoreImage x2) spawns the five weak points (5 x SpawnActorArg(0x294, i)), the evidence r275 gave to 0x80180A70; kind 0x2EF is spawned by 0x80180030, not here"
 0x8017EDA8,stage:sc06_029,func_sc06_029_8017EDA8,BossIntro,H,r275:stage_survey_3.md:605,
 0x801809D4,stage:sc06_029,func_sc06_029_801809D4,EventAfterBoss,H,r275:stage_survey_3.md:611,
-0x80180A70,stage:sc06_029,func_sc06_029_80180A70,SpawnWeakPoints,H,r275:stage_survey_3.md:608,
+0x80180A70,stage:sc06_029,func_sc06_029_80180A70,BossCollapseSequence,H,r275:stage_survey_3.md:608,"r278: was SpawnWeakPoints; WRONG (r277): no SpawnActorArg(0x294) here; state 0xE of the core after EventAfterBoss: 3 x 8 debris of kind 0x32B, kinds 0x32C / 0x32D, SoundCmd1(1), sounds 0xB35 / 0x9C8 / 0x9C9, then on the event's end EndEvent, state 0xF, GiveItem(0x24)"
 0x80183B1C,stage:sc06_029,func_sc06_029_80183B1C,WeakPointHit,H,r275:stage_survey_3.md:609,
 0x80185F4C,stage:sc06_029,func_sc06_029_80185F4C,FinalStateInit,H,r275:stage_survey_3.md:602,
 0x801862C0,stage:sc06_029,func_sc06_029_801862C0,Spawn353IfFlag8E,H,r275:stage_survey_3.md:612,

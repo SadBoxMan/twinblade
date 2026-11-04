@@ -1,0 +1,3 @@
+address,scope,old,new,reason
+0x80180A70,stage:sc06_029,SpawnWeakPoints,BossCollapseSequence,"WRONG (r277): no SpawnActorArg(0x294) here; state 0xE of the core after EventAfterBoss: 3 x 8 debris of kind 0x32B, kinds 0x32C / 0x32D, SoundCmd1(1), sounds 0xB35 / 0x9C8 / 0x9C9, then on the event's end EndEvent, state 0xF, GiveItem(0x24)"
+0x8017EBC4,stage:sc06_029,BossCoreInit,BossCoreInit,"evidence corrected, name kept: the core's state 0 (model, HP +0x76 = 0x1E0, StoreImage x2) spawns the five weak points (5 x SpawnActorArg(0x294, i)), the evidence r275 gave to 0x80180A70; kind 0x2EF is spawned by 0x80180030, not here"
