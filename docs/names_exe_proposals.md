@@ -269,3 +269,185 @@ same pack being a no-op suggest the music (BGM) packs; the names keep "SoundPack
 | 0x8001BFE8 | func_8001BFE8 | LicenceShown | the licence screen has been shown since boot | M | c23F0: D_800747D8. 1 call: ovl38 skips to step 3 when set |
 | 0x8001BFF8 | func_8001BFF8 | SetLicenceShown | set it | M | c23F0. 1 call: ovl38 |
 | 0x8002C410 | func_8002C410 | ForceLibraryLink | a never-called function that references ~70 PsyQ functions with zero arguments, so the linker keeps them for the overlays | H | src/code_8002C410.c (its own -O0 file). no callers |
+
+## Game state: flags, variables, options, clock, progress (0x80028D58-0x80029A94)
+
+The game's persistent state: 512 flag bits (D_800AE648, 0x40 bytes), 256 byte variables (D_800BA1B8, also read as
+s16 / s32 at byte offsets), the 0x98-byte status block D_80078E78 (`DbgStats` in ovl37, `FieldStats` in ovl36; the
+default copy is D_80072C84), 64 item values (D_800A6588, u16) and a 0x60-byte block D_800BA2B8. Two **state slots**
+of 0x2DC bytes at D_80078F28 hold a copy of all of it: +0 a 0x24-byte map record, +0x24 the status block, +0xBC the item
+values, +0x13C the flags, +0x17C the variables, +0x27C the 0x60 block. Slot 1 is the continue point (the engine
+restores it on Continue and halves the money), slot 0 the other restore point.
+
+Status block fields used below (address = D_80078E78 + offset): +4 D_80078E7C the play time (frames, s, min, h bytes),
++8 D_80078E80 the story progress value, +0xC D_80078E84 a count, +0x10 D_80078E88 a second count, +0x14 D_80078E8C the
+money (stage code caps it at 99999), +0x18 D_80078E90 the clock (minutes of the day in 16.16; D_80078E92 its integer),
++0x36 D_80078EAE daytime (7:00-19:00), +0x37 the day period 0-4, +0x38 / +0x39 minutes / hours, +0x6C.. the four
+stat levels and experience (next section).
+
+Flags 0xB-0x13 are the options block, vars 0x2C / 0x2D the two volumes: the options screen (eC98C func_80140608)
+toggles flags 0xB, 0xD, 0xC and steps vars 0x2C / 0x2D through 0-7; ApplySoundOptions sends vars 0x2C / 0x2D as sound
+commands 0x21 / 0x22 and flag 0xC as command 0xB / 0xC.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80029124 | func_80029124 | SetFlag | set or clear bit n of the flag array | H | c23F0: D_800AE648[n >> 3] \|= / &= ~(1 << (n & 7)). 640 calls / 87 files: `func_80029124(0x11D, 1)`. GetFlag (0x80029178) is its reader |
+| 0x800291A0 | func_800291A0 | SetVar | byte variable i = v | H | c23F0: D_800BA1B8[i] = v. 369 calls / 53 files: `func_800291A0(0x2E, 1)` |
+| 0x800291B4 | func_800291B4 | GetVar | byte variable i | H | c23F0. 400 calls / 58 files: `if ((func_800291B4(0x56) & 0xFF) >= 2)` |
+| 0x800291C8 | func_800291C8 | SetVar16 | the s16 at byte offset i of the variables | H | c23F0. 45 calls / 9 files |
+| 0x800291DC | func_800291DC | GetVar16 | the s16 at byte offset i | H | c23F0. 18 calls / 8 files |
+| 0x800291F0 | func_800291F0 | SetVar32 | the s32 at byte offset i | H | c23F0. 20 calls / 12 files |
+| 0x80029204 | func_80029204 | GetVar32 | the s32 at byte offset i | H | c23F0. 2 calls / 2 files |
+| 0x80029044 | func_80029044 | ClearFlags | all 512 flags off | H | c23F0: 0x40 bytes. ResetGameState, ResetGameProgress |
+| 0x8002906C | func_8002906C | ClearVars | all 256 variables 0 | H | c23F0 |
+| 0x80029094 | func_80029094 | ClearVarBlock60 | zero the 0x60-byte block D_800BA2B8 (saved with the slots) | L | c23F0. Only stg/sc03_011 writes into it (D_800BA2BE) |
+| 0x80028D58 | func_80028D58 | GetVibrationOff | option flag 0xB: vibration off | H | c23F0. PollPad sends the motors only when it is 0; CheckSelectHold sets it; eC98C toggles it and rumbles (StartRumbleScript) when it turns on |
+| 0x80028D78 | func_80028D78 | SetVibrationOff | set flag 0xB | H | c23F0. 1 call (eC98C) |
+| 0x80028D9C | func_80028D9C | GetSoundMode | option flag 0xC (0: sound command 0xC, 1: command 0xB; stereo / mono) | M | c23F0; ApplySoundOptions and e58E0 send the command from it. Which value is mono needs the driver (sound section) |
+| 0x80028DBC | func_80028DBC | SetSoundMode | set flag 0xC | M | c23F0. 1 call (eC98C); ResetGameState clears it |
+| 0x80028DE0 | func_80028DE0 | GetOptionD | option flag 0xD (the options screen's second entry) | L | c23F0. 3 calls / 2 files: e58E0 func_8015FDCC spawns effect 0x24 and plays sound 0x989 only while it is 0 (a hint / help option?) |
+| 0x80028E00 | func_80028E00 | SetOptionD | set flag 0xD | L | c23F0. 1 call (eC98C) |
+| 0x80028E24 | func_80028E24 | GetOptionE | flag 0xE | L | c23F0; part of the 0xB-0x13 getter / setter run. no callers |
+| 0x80028E44 | func_80028E44 | SetOptionE | flag 0xE | L | as above |
+| 0x80028E68 | func_80028E68 | GetOptionF | flag 0xF | L | as above |
+| 0x80028E88 | func_80028E88 | SetOptionF | flag 0xF | L | as above |
+| 0x80028EAC | func_80028EAC | GetOption10 | flag 0x10 | L | as above |
+| 0x80028ECC | func_80028ECC | SetOption10 | flag 0x10 | L | as above |
+| 0x80028EF0 | func_80028EF0 | GetOption11 | flag 0x11 | L | as above |
+| 0x80028F10 | func_80028F10 | SetOption11 | flag 0x11 | L | as above |
+| 0x80028F34 | func_80028F34 | GetOption12 | flag 0x12 | L | as above |
+| 0x80028F54 | func_80028F54 | SetOption12 | flag 0x12 | L | as above |
+| 0x80028F78 | func_80028F78 | GetOption13 | flag 0x13 | L | as above |
+| 0x80028F98 | func_80028F98 | SetOption13 | flag 0x13 | L | as above |
+| 0x80028FBC | func_80028FBC | GetMusicVolume | var 0x2C, 0-7 | M | c23F0; ApplySoundOptions sends it as command 0x21; eC98C steps it 0-7. "Music" is the usual first volume; check against the driver's command 0x21 |
+| 0x80028FDC | func_80028FDC | SetMusicVolume | set var 0x2C | M | c23F0. ResetGameState sets 7 |
+| 0x80029000 | func_80029000 | GetEffectsVolume | var 0x2D, 0-7 (command 0x22) | M | c23F0, as above |
+| 0x80029020 | func_80029020 | SetEffectsVolume | set var 0x2D | M | c23F0 |
+| 0x800290BC | func_800290BC | SetFlag7F | flag 0x7F on | L | c23F0. 2 calls / 2 files (stg/sc04_015 sets it, then clears it with func_800290E0) |
+| 0x800290E0 | func_800290E0 | ClearFlag7F | flag 0x7F off | L | c23F0. 1 call |
+| 0x80029104 | func_80029104 | GetFlag7F | flag 0x7F | L | c23F0. 1 call |
+| 0x80029218 | func_80029218 | ClearEntryPoint | zero the 0x3C-byte map-entry record D_800AE6A8 (where Musashi is placed on entry) | M | c23F0; work.h: mapGroup 0x1000 places Musashi from D_800AE6A8. ResetGameState |
+| 0x80029240 | func_80029240 | SetEndingPending | D_80075838 = 1 | L | c23F0. 1 call: stg/sc07_002 after FadeWhiteStep(4); ovl36 field init (func_800CEE84) then goes to game state 0x12 when it is set |
+| 0x80029254 | func_80029254 | ClearEndingPending | D_80075838 = 0 | L | c23F0. 2 calls (ovl36) |
+| 0x80029264 | func_80029264 | GetEndingPending | D_80075838 | L | c23F0. 1 call (ovl36) |
+| 0x80029274 | func_80029274 | LoadDefaultStatus | the status block D_80078E78 from its default copy D_80072C84 | H | c23F0 (ResetGameProgress comment: "copy the default stats block"); ModeReset |
+| 0x8002931C | func_8002931C | SetClock | set the clock (16.16 minutes) and update the period | H | c23F0: D_80078E90 = a; UpdateClockPeriod. 36 calls / 24 files: `func_8002931C(0x01A40000)` (7:00), `(0x04740000)` (19:00) |
+| 0x80029344 | func_80029344 | UpdateClockPeriod | from the clock: daytime flag (7:00-19:00), period 0-4 (5:00, 7:00, 16:00, 19:00, 22:00 bounds), hours and minutes | H | c23F0: 0x12C / 0x1A4 / 0x3C0 / 0x474 / 0x528 minutes, v / 60, v % 60. 6 calls / 4 files; e58E0 advances D_80078E92 and wraps at 0x5A0 (24 h) |
+| 0x8002941C | func_8002941C | ClearItemValue0 | zero the first item value | L | c23F0: ZeroFill(D_800A6588, 2). ModeReset; e58E0's load path |
+| 0x80029444 | func_80029444 | TickPlayTime | play time + 1 frame (30 a second), capped at 99:59:59 | H | c23F0: D_80078E7C..7F bytes, 0x1E / 0x3C / 0x3C / 0x64, cap 0x633B3B00. 12 calls / 12 files |
+| 0x80029504 | func_80029504 | GetProgress | the story progress value D_80078E80 | H | c23F0. 433 calls / 58 files: `r = func_80029504();` then range tests; GetLevelCap and the time chime key on it |
+| 0x80029514 | func_80029514 | SetProgress | set it | H | c23F0. 161 calls / 73 files: `func_80029514(0x5A)`, `(0x3AC)` at story events |
+| 0x80029524 | func_80029524 | IsProgress200To599 | progress in 200..599 | L | c23F0. 5 calls / 5 files: `!(var 0xCE) && func_80029524() == 0` |
+| 0x8002953C | func_8002953C | GetFoundCount | the count D_80078E84 | M | c23F0. 28 calls / 28 files: after setting var 0x3A + n and IncFoundCount, `if (func_8002953C() >= 0x23) GiveItem(0x25)` |
+| 0x8002954C | func_8002954C | SetFoundCount | set it | M | c23F0. no callers |
+| 0x8002955C | func_8002955C | IncFoundCount | count + 1 | M | c23F0. 27 calls / 27 files (one per room with such a find) |
+| 0x8002957C | func_8002957C | GetBonusCount | the count D_80078E88 | L | c23F0. no callers |
+| 0x8002958C | func_8002958C | SetBonusCount | set it | L | c23F0. no callers |
+| 0x8002959C | func_8002959C | GainBonus | GainStat3(0x32), then D_80078E88 + 1 | L | c23F0. 10 calls / 9 files (stg/sc03_006, sc05_010 ...) |
+| 0x800295D4 | func_800295D4 | SetupDemoStatus | the attract demo's status: four values 0xFA (D_80078EB2..EB8), flags 0x1E / 0x80 / 0x82 / 0x83 / 0x85, money 100 | H | c23F0; ModeDemoRun step 0 |
+| 0x80029664 | func_80029664 | SetClockNight | clock = 22:00 (0x528) | M | c23F0; ModeDemoRun for demo 0 |
+| 0x80029690 | func_80029690 | ClearStateSlots | both state slots zeroed and marked empty | H | c23F0: 2 x 0x2DC (as 0x5B8 each), D_800A5E58[i] = 0. ModeReset |
+| 0x800296F8 | func_800296F8 | SaveContinuePoint | copy the game into slot 1 with a 0x24-byte map record | H | c23F0: SaveStateSlot(1), D_80079204 = *rec. 7 calls / 7 files: `func_800296F8(a->messages[0])` (the record hangs off the save object) |
+| 0x80029774 | func_80029774 | SaveStateSlot | copy status, item values, flags, variables and the 0x60 block into slot a; mark it used | H | c23F0 |
+| 0x800298BC | func_800298BC | LoadContinuePoint | slot 1 back, and its map record out | H | c23F0. 1 call: e58E0 Continue (`func_800298BC(&D_80078E50)`, then money / 2) |
+| 0x8002992C | func_8002992C | LoadStateSlot | slot a back into the game | H | c23F0. 1 call: e58E0 (`func_8002992C(0)`) |
+| 0x80029A58 | func_80029A58 | HalveSlotMoney | slot i's saved money / 2 | M | c23F0: slot word 0xE = +0x38 = status +0x14 = the money. no callers |
+| 0x80029A94 | func_80029A94 | IsStateSlotUsed | slot a holds a state | H | c23F0: D_800A5E58[a]. 4 calls / 1 file (e58E0 picks Continue / restart by it) |
+
+## Stats, experience, items and the save request (0x80029AAC-0x8002AF08)
+
+Musashi has four stats, each with a level (0-30), experience, and a 16-byte-per-level table at D_800638F8 (u16 pairs:
++0 / +2 experience needed and value of stat 0, +4 / +6 stat 1, +8 / +0xA stat 3, +0xC / +0xE stat 2). Gaining
+experience is capped by GetLevelCap (by story progress); a level-up shows message k with the gain (stage engine
+func_8016E918(k, value - previous)) and plays sound 0xB2C. Stat 0 grows from finished enemies (their init record's
++0x2E), stat 1 from distance walked (D_80078F04 / odometer D_80078F08), stats 3 and 2 from the bytes +0xC8 / +0xC9 of
+an enemy Musashi hits. The status screen (eC98C ~line 2220) prints the average level + 1, a rank title, each level + 1
+and the stat values. Which in-game stat each is (HP, BP, strength ...) is not settled by the C, so the names are
+numbered by the message index k; the local card may rename them once checked in game.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80029AAC | func_80029AAC | CalcStat0Power | stat 0 value x 75 / 100 | M | c23F0. 2 calls / 1 file: e* func_8014C4AC(o, 9 / 0x11, power, ...) (an attack's strength) |
+| 0x80029AF4 | func_80029AF4 | CalcPowerRand40 | CalcStat2Power x (200 + rand 40) / 100 | M | c23F0. 1 call: func_8014C4AC(o, 0x1B, ...) |
+| 0x80029B4C | func_80029B4C | CalcStat3PowerRand | CalcStat3Power x (a + rand b) / 100 | M | c23F0. 1 call |
+| 0x80029BC8 | func_80029BC8 | CalcStat2PowerRand | CalcStat2Power x (a + rand b) / 100 | M | c23F0. 1 call |
+| 0x80029C44 | func_80029C44 | CalcComboPowerRand | (CalcStat3Power + CalcStat2Power) x (a + rand b) / 100 | M | c23F0. 1 call |
+| 0x80029D3C | func_80029D3C | ReduceByStat1 | v - v x (stat 1 value x 60) / 4800, at least 1 | M | c23F0. 3 calls / 2 files: on D_8011DB1A and an actor's +0xF2 (a drain or damage taken) |
+| 0x80029DB4 | func_80029DB4 | CalcStat3Power | (stat 2 value + stat 0 value) x 125 / 100 (150 with flag 0x81) | M | c23F0: GetStat2Value + GetStat0Value. 8 calls / 4 files: stg/sc04_005 / sc04_007 `(o, &tbl, 7, func_80029DB4())` |
+| 0x80029E30 | func_80029E30 | CalcStat2Power | (stat 3 value + stat 0 value) x 175 / 100 | M | c23F0. 8 calls / 4 files: `(o, &tbl, 6, func_80029E30())`. The two Calc names follow the stat each adds to stat 0; rename together with the stats |
+| 0x80029E94 | func_80029E94 | ScaleByActorInit30 | (an actor's init record +0x30 x k) >> 12 | L | c23F0. no callers |
+| 0x80029EC0 | func_80029EC0 | GetActorExp | an actor's init record +0x2E (the experience it gives) | M | c23F0. no callers; GainStat0FromActor reads the same field |
+| 0x80029ED4 | func_80029ED4 | AddWalkDistance | add to the step count; every 102 the odometer + 1 (cap 9999999), every 10 odometer units GainStat1 | H | c23F0: D_80078F04 / F08 / F0C, only from progress 10. 1 call: e* `func_80029ED4(SVecDist(&a, &b))` |
+| 0x80029FD4 | func_80029FD4 | GetOdometer | D_80078F08 | M | c23F0. 1 call: the status screen |
+| 0x80029FE4 | func_80029FE4 | GetAverageLevel | the four stat levels' mean | H | c23F0. 6 calls / 6 files: `if (func_80029FE4() >= 0x1B)`; the status screen prints it + 1 |
+| 0x8002A04C | func_8002A04C | GainStat0FromActor | GainStat0 with the actor's init +0x2E | H | c23F0. 166 calls / 61 files; r272 FinishEnemy calls it before FreeActor |
+| 0x8002A088 | func_8002A088 | GainStat0 | add stat 0 experience (the argument passes through in a0); on a level-up the message, sound 0xB2C | H | c23F0. 8 calls / 4 files: `func_8002A088(0x64)` |
+| 0x8002A108 | func_8002A108 | AddStat0Exp | add experience under the cap; 1 on a level-up | H | c23F0 |
+| 0x8002A1B4 | func_8002A1B4 | IsStat0Full | at the cap with full experience | M | c23F0. 2 calls / 2 files |
+| 0x8002A200 | func_8002A200 | Stat0ExpReached | experience >= needed | H | c23F0 |
+| 0x8002A234 | func_8002A234 | Stat0LevelUp | level + 1 (max 30), experience 0 | H | c23F0 |
+| 0x8002A26C | func_8002A26C | GetStat0Level | D_80078EE4 | H | c23F0. status screen |
+| 0x8002A27C | func_8002A27C | GetStat0Exp | D_80078EE8 | H | c23F0 |
+| 0x8002A28C | func_8002A28C | GetStat0ExpNeeded | table +0 for the level | H | c23F0 |
+| 0x8002A2B0 | func_8002A2B0 | GetStat0Value | table +2 for the level | H | c23F0. status screen |
+| 0x8002A2D4 | func_8002A2D4 | GainStat1 | as GainStat0 for stat 1 (message 1) | H | c23F0. 7 calls / 3 files |
+| 0x8002A354 | func_8002A354 | AddStat1Exp | | H | c23F0 |
+| 0x8002A400 | func_8002A400 | IsStat1Full | | M | c23F0. 2 calls / 2 files |
+| 0x8002A44C | func_8002A44C | Stat1ExpReached | | H | c23F0 |
+| 0x8002A480 | func_8002A480 | Stat1LevelUp | | H | c23F0 |
+| 0x8002A4B8 | func_8002A4B8 | GetStat1Level | D_80078EEC | H | c23F0 |
+| 0x8002A4C8 | func_8002A4C8 | GetStat1Exp | D_80078EF0 | H | c23F0 |
+| 0x8002A4D8 | func_8002A4D8 | GetStat1ExpNeeded | table +4 | H | c23F0 |
+| 0x8002A4FC | func_8002A4FC | GetStat1Value | table +6 | H | c23F0. 3 calls / 2 files: r272 ScaleByDifficulty `x - x * func_8002A4FC() * 100 / 7680` (its "meaning not known" is this stat) |
+| 0x8002A520 | func_8002A520 | GainStat3FromActor | GainStat3 with the actor's byte +0xC8 | H | c23F0. 52 calls / 17 files; r272 TakeDamageAndRecoil (its "status effects" are these two gains) |
+| 0x8002A544 | func_8002A544 | GainStat3 | as GainStat0 for stat 3 (message 3) | H | c23F0. 7 calls / 3 files |
+| 0x8002A5C4 | func_8002A5C4 | AddStat3Exp | | H | c23F0 |
+| 0x8002A670 | func_8002A670 | IsStat3Full | | M | c23F0 |
+| 0x8002A6BC | func_8002A6BC | Stat3ExpReached | | H | c23F0 |
+| 0x8002A6F0 | func_8002A6F0 | Stat3LevelUp | | H | c23F0 |
+| 0x8002A728 | func_8002A728 | GetStat3Level | D_80078EFC | H | c23F0 |
+| 0x8002A738 | func_8002A738 | GetStat3Exp | D_80078F00 | H | c23F0 |
+| 0x8002A748 | func_8002A748 | GetStat3ExpNeeded | table +8 | H | c23F0 |
+| 0x8002A76C | func_8002A76C | GetStat3Value | table +0xA | H | c23F0 |
+| 0x8002A790 | func_8002A790 | GainStat2FromActor | GainStat2 with the actor's byte +0xC9 | H | c23F0. 50 calls / 16 files |
+| 0x8002A7B4 | func_8002A7B4 | GainStat2 | as GainStat0 for stat 2 (message 2) | H | c23F0. 7 calls / 3 files |
+| 0x8002A834 | func_8002A834 | AddStat2Exp | | H | c23F0 |
+| 0x8002A8E0 | func_8002A8E0 | IsStat2Full | | M | c23F0 |
+| 0x8002A92C | func_8002A92C | Stat2ExpReached | | H | c23F0 |
+| 0x8002A960 | func_8002A960 | Stat2LevelUp | | H | c23F0 |
+| 0x8002A998 | func_8002A998 | GetStat2Level | D_80078EF4 | H | c23F0 |
+| 0x8002A9A8 | func_8002A9A8 | GetStat2Exp | D_80078EF8 | H | c23F0 |
+| 0x8002A9B8 | func_8002A9B8 | GetStat2ExpNeeded | table +0xC | H | c23F0 |
+| 0x8002A9DC | func_8002A9DC | GetStat2Value | table +0xE | H | c23F0 |
+| 0x8002AA00 | func_8002AA00 | IsLevelCapped | -1 before progress 10 (no gains), else level >= GetLevelCap | H | c23F0 |
+| 0x8002AA3C | func_8002AA3C | GetLevelCap | the level cap by progress: 0 / 8 / 16 / 22 / 27 / 99 at 10 / 200 / 600 / 900 / 1200 | H | c23F0 |
+| 0x8002AAAC | func_8002AAAC | LevelUpHook | empty, called after each level-up | M | c23F0 |
+| 0x8002AAB4 | func_8002AAB4 | GetRankTitle | the rank string for the average level (threshold / string pairs at D_800638A0) | H | c23F0. 1 call: eC98C `strcpy(dst + 0xA, func_8002AAB4())` |
+| 0x8002AB64 | func_8002AB64 | IncStartCount | var 0x2E + 1; the first time, items 1-6 and vars 0x3B-0x3F = 3 | L | c23F0. 3 calls / 3 files: e58E0 after restoring the options from a save, stg/sc02_005 |
+| 0x8002AC00 | func_8002AC00 | GiveItem | item n: var 0x62 + n = the item table's kind \| 0x80 (owned), its value from the table (D_8010F46C, 8 bytes an item) | M | c23F0. 196 calls / 80 files: `func_8002AC00(0x26)`; ovl37's debug "give all" writes the same vars |
+| 0x8002AC98 | func_8002AC98 | AgeItemValues | for each owned item with a kind (var 0x63 + i low nibble), move its value by rand 0-31 - 11 (kind 1 halves it, kind 3 doubles it on the 0 / 11 draws), clamped to 1-4 x the table value | L | c23F0. 1 call. Fits food that spoils or ripens over time |
+| 0x8002AE60 | func_8002AE60 | AllItemsMarked | all 43 item vars 0x63-0x8D have bit 0x40 | L | c23F0. 4 calls / 3 files, with flag 0x123 (game cleared) |
+| 0x8002AED0 | func_8002AED0 | RequestSave | D_800760C8 = 1 | M | c23F0. 4 calls / 4 files. The field picks game state 0xD (save screen hook) when it is set |
+| 0x8002AEE4 | func_8002AEE4 | RequestClearSave | D_800760C8 = 2 | M | c23F0. 3 calls: stg/sc07_007 / sc07_009 after flags 0x11D / 0x123 (the ending) |
+| 0x8002AEF8 | func_8002AEF8 | ClearSaveRequest | D_800760C8 = 0 | M | c23F0. 3 calls / 2 files (ovl36 field init) |
+| 0x8002AF08 | func_8002AF08 | GetSaveRequest | D_800760C8 | M | c23F0. 2 calls: ovl36 `else if (func_8002AF08() != 0) SetGameState(0xD);` |
+
+## Memory card (0x8002AF18-0x8002C3B0)
+
+None of these has a caller in the C (the save screen is in code not yet split, or reached by pointer). The card file:
+a 0x200-byte header (`SC` + icon, title from D_80072E10, icon data from D_80063AEC), a 0x280 directory of four 0x80
+slot headers (D_80075A40: +2 checksum of the 0x70 bytes from +0x10, which hold a copy of the status block), and the
+0x300-byte saves (D_80075CC0, a state slot) at 0x480 + slot x 0x300.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8002AF18 | func_8002AF18 | ResetCardState | the card state machine's step and slot status words to 0 | H | c23F0: D_800760AC, D_8007609C..A8 |
+| 0x8002AF48 | func_8002AF48 | GetCardSlotHeader | the 0x80-byte header of save slot i in the directory copy | H | c23F0: D_80075A50 + (i + 1) x 0x80 |
+| 0x8002AF60 | func_8002AF60 | GetCardDirWord | the directory's first word (D_80075A40) | L | c23F0 |
+| 0x8002AF70 | func_8002AF70 | SetCardSaveData | the 0x300 save buffer from a 0x2DC state slot, plus its tag word | H | c23F0: ZeroFill 0x300, copy, D_80076040 = v |
+| 0x8002B00C | func_8002B00C | GetCardSaveData | the save buffer back into a state slot | H | c23F0 |
+| 0x8002B064 | func_8002B064 | ChecksumSlotHeader | 16-bit sum of 0x70 bytes | H | c23F0; the save step stores it at header +2 |
+| 0x8002B08C | func_8002B08C | ChecksumSaveData | 16-bit sum of 0x300 bytes | H | c23F0; stored at header +4 |
+| 0x8002B0B4 | func_8002B0B4 | SaveCardStep | the card state machine (mode & 7: 0 check / read the directory, 1 save (creating the file), 2 load, 3 a further mode), MemCardSync-driven; status per port in D_8007609C | H | c23F0: MemCardExist / Open / CreateFile / ReadData / WriteData / Close, 533 lines |
+| 0x8002C320 | func_8002C320 | CheckCardSlots | two bits per used slot header: 1 checksum good, 2 bad | H | c23F0: the 0x70-byte sum against header +2 |
+| 0x8002C3B0 | func_8002C3B0 | CountCardBlocks | blocks (0x2000 bytes, rounded up) used by n directory entries | H | c23F0: DIRENTRY stride 0x28, size at +0x18 |
