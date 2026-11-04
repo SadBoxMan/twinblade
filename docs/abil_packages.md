@@ -3,7 +3,8 @@
 Phase 2 (understanding) for the 35 packages in src/abil/ (MAIN.CD entries 13-47, docs/overlays.md "The ability
 packages"). Written from the matched C, the splat configs (abil/ovlNN.yaml), the package symbol files
 (abil/symbol_addrs_ovlNN.txt) and the engine C (src/stage/, src/ovl36/, src/code_800123F0.c) of the 4 Nov
-snapshot (main fab5bf5a). Nothing was built or run: the snapshot has no disc, no asm and no package data, so table
+snapshot (main fab5bf5a); the 24 functions that were still `INCLUDE_ASM` there were re-read from the C of the
+a75e323 snapshot, which matches them. Nothing was built or run: the snapshot has no disc, no asm and no package data, so table
 contents (step tables, palettes, vertex lists) are known only from how the code indexes them. Nothing in src/,
 include/, the configs or the symbol files was changed; the names proposed in section 6 are proposals only.
 
@@ -310,17 +311,19 @@ that needs flag 0x80 (func_80149B54), 0x40 jump (func_801496D4), 0x08 the hold b
 
 ## 4. Shared shapes and clones
 
-Measured over the C (636 functions in C, 24 still `INCLUDE_ASM` on 4 Nov): each function's body with the package's
+Measured over the C of fab5bf5 (636 functions in C, 24 then still `INCLUDE_ASM`; a75e323 matches those 24 too, the
+groups were not re-measured): each function's body with the package's
 own symbols numbered by first use (`func_ovlNN_x` -> F0, F1 ...; `D_ovlNN_x` -> D0 ...) and whitespace and types
 dropped; equal bodies in two or more packages form a group. 33 groups are exact (constants equal too); with
 constants also blanked there are 54. These are C-level clones of one source template, not just the same idea.
 
-* **The package's own ability number.** 23 of the 29 slot-2 packages compare D_80078EC1 with a constant, and the
-  constant is always the package's own ability number (ovl13 7, ovl14 5, ovl15 8, ovl16 1, ovl17 0x11, ovl19 0xD,
-  ovl1b 2, ovl1c 4, ovl1f 0xF, ovl20 0x16, ovl21 0x18, ovl22 0x15, ovl24 0x13, ovl25 0x1A, ovl26 9, ovl27 0xB, ovl28
-  0x10, ovl2a 0x17, ovl2b 0x19, ovl2c 0x1B, ovl2d 0x1C, ovl2e 0x1D, ovl2f 0x1E). This confirms docs/overlays.md's
-  ability -> package table from the code side, independently of the field's load switch. (H) ovl18, ovl1a, ovl1d,
-  ovl1e, ovl23 and ovl29 never test it; the slot-3 packages never do.
+* **The package's own ability number.** 25 of the 29 slot-2 packages compare D_80078EC1 with a constant, and the
+  constant is always the package's own ability number (ovl13 7, ovl14 5, ovl15 8, ovl16 1, ovl17 0x11, ovl18 3,
+  ovl19 0xD, ovl1b 2, ovl1c 4, ovl1f 0xF, ovl20 0x16, ovl21 0x18, ovl22 0x15, ovl23 0x14, ovl24 0x13, ovl25 0x1A,
+  ovl26 9, ovl27 0xB, ovl28 0x10, ovl2a 0x17, ovl2b 0x19, ovl2c 0x1B, ovl2d 0x1C, ovl2e 0x1D, ovl2f 0x1E; ovl18 and
+  ovl23 only in the master / piece states matched in a75e323). This confirms docs/overlays.md's ability -> package
+  table from the code side, independently of the field's load switch. (H) ovl1a, ovl1d, ovl1e and ovl29 never test
+  it; the slot-3 packages never do.
 
 | Shape | Members | What it is | Conf. |
 |---|---|---|---|
@@ -399,7 +402,9 @@ The four read-throughs listed the shapes they met; kept here as written (they ov
 * **Puff on expiry** func_80146A6C(3, o, pos, 0, 0x80001C00): ovl15 CB2E0, ovl19 CB3FC; other kind-3 puffs with
   packed d / e: ovl17 CAFA0, engine func_8016629C (ovl1a).
 * **Icon child init** (sprite from D_800D387C at a pair-table entry, `+0x27 = (i >> 1) + 0x19`): ovl18 CAFE0 =
-  ovl23 CAF90; their asm master states ovl18 CB168 = ovl23 CB0D0 (docs).
+  ovl23 CAF90; their master states ovl18 CB168 = ovl23 CB0D0 (random angle, a burst of 2-3 children, a pause, Musashi's
+  scale relaxed to 0x1000, sound 0x5FB every 16 frames) and child states ovl18 CB328 = ovl23 CB2AC (a spiral about
+  Musashi, angle step 0xA00000 / (r * 804)), each pair with the direction reversed.
 
 **B (ovl1f-ovl26).**
 
@@ -426,10 +431,12 @@ The four read-throughs listed the shapes they met; kept here as written (they ov
 * **Parent / child effect split on d & 0x8000**: ovl23 CAF90, ovl24 CAFA8, ovl22 CBAD0 (and ovl18 CAFE0).
 * **Stack primitive draws**: ovl22 CB8A0 (= func_ovl16_800CAF84 shape, model matrix, G4); screen-space variants
   ovl20 CB900 (GT3), ovl25 CB6A0 (FT4), ovl25 CB964 (G4), ovl21 CBA44 + CBBF8 (GT4).
-* **Screen projection helpers** on func_8012EFB8: ovl1f CB7B0 (off-screen test), ovl20 CB8C4.
+* **Screen projection helpers** on func_8012EFB8: ovl1f CB7B0 (off-screen test), ovl20 CB8C4; ovl21 CB82C
+  (func_8012EF34); ovl2d CB6F4 does its own RTPS through the same world-to-screen matrix (D_800AF648, on-screen test).
 * **Accelerated grow / shrink to a clamp** (+rate += k; value += rate; clamp): ovl20 CB3C0, ovl21 CB06C, ovl25
   CB0B0 / CB288.
-* **Whole-package twin**: ovl23 (Rip-off) = ovl18 (Satiate) shape.
+* **Whole-package twin**: ovl23 (Rip-off) = ovl18 (Satiate) shape, run the other way (ovl18 draws icons in and swells
+  Musashi; ovl23 throws pieces out and thins him).
 
 **C (ovl27-ovl2d).**
 
@@ -498,13 +505,13 @@ The four read-throughs listed the shapes they met; kept here as written (they ov
 
 Each package: what it does (with the C evidence), how it is entered, then every function in address order with a
 one-line purpose and a confidence. Addresses are VRAM; `CB370` is short for 0x800CB370 inside the package named in the
-heading. Functions still `INCLUDE_ASM` (24 on 4 Nov) are described from their callers and outside symbols and marked
-"asm, not matched". The sections were written from four read-throughs (ovl13-ovl1e, ovl1f-ovl26, ovl27-ovl2d,
+heading. The 24 functions that were still `INCLUDE_ASM` in fab5bf5 were first described from their callers; their
+rows and paragraphs were redone from the C matched in a75e323. The sections were written from four read-throughs (ovl13-ovl1e, ovl1f-ovl26, ovl27-ovl2d,
 ovl2e-ovl35) and checked against the shapes in section 4.
 
 Slot 2 first (ovl13-ovl2f, by package ID), then slot 3 (ovl30-ovl35).
 
-### ovl13: ability 7, Stun (MAIN.CD entry 13, slot 2, code 2596 B, 16 functions, 2 still asm)
+### ovl13: ability 7, Stun (MAIN.CD entry 13, slot 2, code 2596 B, 16 functions, 0 still asm)
 
 **What it does.** A special sword swing. Step 1 (func_ovl13_800CAEE0) sets animation record D_ovl13_800CB830
 directly (func_80154274), face 0x15, plays sound 0x477, pays the BP cost (func_801655E4, every use), clears
@@ -519,12 +526,12 @@ they scale (the blade?) and what a+0xC0 feeds are unknown. The "stun" itself mus
 the struck actor's reaction (not in this package). Effect kind 0x15 (two spawners, below) puts sprite effects over
 an actor: func_ovl13_800CB0E8(x) spawns one owned by x and records x+0x36; its follower state
 (func_ovl13_800CB6E4) tracks the owner's head (model box at owner+0x58 or -0x30) and for 0x18 frames spawns 14
-children (kind 0x15, d 0x8000, e = frame). Nothing in the package's C calls func_ovl13_800CB0E8; the stage engine does: func_80130438 (src/stage/engine_8012F5F4.c ~1075), an enemy reaction step, calls it on the reacting actor when its +0xB4 has bit 0x40, with sounds 0x47B and 0x478 and a count of 0x78 frames: the stun effect on an enemy Stun hit (H for the call, M for the reading).
+children (kind 0x15, d 0x8000, e = frame). Kind 0x15's state 0 (CB138) turns the master's matrix o+0x38 to face the camera (func_800D20C0 / func_800D23D0, RotMatrixYXZ) and goes to state 2, CB6E4, which keeps that matrix's translation (+0x4C..+0x54) on the head; a child (d & 0x8000) becomes a sprite (D_ovl13_800CB8FC, func_800D222C, byte 0x1A, scale 0x2000, frame list D_ovl13_800CB88C) at radius e * 4 and a random angle in that camera-facing plane, 0x30 toward the camera, turned 0x200 more, and goes to state 1, CB56C, which keeps it there as the head moves and frees it when its frame animation ends: a widening spiral of 14 sprites over the stunned head (H; "stars" is L). Nothing in the package's C calls func_ovl13_800CB0E8; the stage engine does: func_80130438 (src/stage/engine_8012F5F4.c ~1075), an enemy reaction step, calls it on the reacting actor when its +0xB4 has bit 0x40, with sounds 0x47B and 0x478 and a count of 0x78 frames: the stun effect on an enemy Stun hit (H for the call, M for the reading).
 
 **Entry and dispatch.** Entry func_ovl13_800CAE0C queues three image records (D_ovl13_800CC57C, D_ovl13_800CC5BC,
 D_ovl13_800CB93C), so the template sits at **0x800CAE54** (not 0x800CAE34): func_ovl13_800CAE54 dispatches
 D_ovl13_800CB880[a+0x197]. Steps: [0] func_ovl13_800CAE98 (wait until func_80161104, start, ++ -> 2), [1]
-func_ovl13_800CAEE0 (start), [2] func_ovl13_800CAF68 (swing); 3 used / room 15. Cleanup hook (D_80190364[7])
+func_ovl13_800CAEE0 (start), [2] func_ovl13_800CAF68 (swing); 3 / 3 (D_ovl13_800CB88C follows). Cleanup hook (D_80190364[7])
 probably func_ovl13_800CB018. Effect handlers (both test D_80078EC1 == 7): func_ovl13_800CB370 (table
 D_ovl13_800CB908, room 3) and func_ovl13_800CB510 (table D_ovl13_800CB914, room 10). Called from outside: the
 template, the cleanup, the two effect handlers (through D_80126728), func_ovl13_800CB0E8 (called by the engine's enemy reaction step func_80130438).
@@ -540,11 +547,11 @@ template, the cleanup, the two effect handlers (through D_80126728), func_ovl13_
 | 0x800CB054 | func_ovl13_800CB054 | a+0xC0 = 0 | H |
 | 0x800CB05C | func_ovl13_800CB05C | phase 1: ramp a+0xC0 (cap 0x2000) and 1B8/1BA up 0x800; phase 2: down | H |
 | 0x800CB0E8 | func_ovl13_800CB0E8 | spawn effect 0x15 owned by arg, o+0x30 = arg+0x36 | H |
-| 0x800CB138 | func_ovl13_800CB138 | asm, not matched: an effect state that copies the identity matrix twice (docs r165 note); likely a state-0 initialiser like CB56C | L |
+| 0x800CB138 | func_ovl13_800CB138 | kind-0x15 state 0: master faces its matrix to the camera -> state 2; child (d & 0x8000): sprite at radius e * 4, random angle, frame anim -> state 1 | H |
 | 0x800CB370 | func_ovl13_800CB370 | effect handler: ability 7 ? D_ovl13_800CB908[o+2] : free | H |
 | 0x800CB3CC | func_ovl13_800CB3CC | effect init: angles from packed d, offset (0,-8,-0x10), toward camera, sprite + frame anim | H |
 | 0x800CB510 | func_ovl13_800CB510 | effect handler: ability 7 ? D_ovl13_800CB914[o+2] : free | H |
-| 0x800CB56C | func_ovl13_800CB56C | asm, not matched: effect state with identity-matrix copies (docs); likely kind 0x15's state 0 (child sprite / master split) | L |
+| 0x800CB56C | func_ovl13_800CB56C | kind-0x15 child state 1: keep the sprite on the master's matrix, free at its frame-anim end | H |
 | 0x800CB6E4 | func_ovl13_800CB6E4 | follower: track owner's head, spawn 14 kind-0x15 children over 0x18 frames, free | H |
 | 0x800CB7F0 | func_ovl13_800CB7F0 | advance the sprite frame animation, free when it ends | H |
 
@@ -552,13 +559,13 @@ template, the cleanup, the two effect handlers (through D_80126728), func_ovl13_
 ovl19 CAE78 / CAEC0, engine func_80165B6C / B6C / BB4 / BFC); func_ovl13_800CB018 = ovl15 CB190 / ovl19 CB170 plus
 the 1B8/1BA reset; the two effect handlers are the standard `if (D_80078EC1 == N)` shape; CB3CC + CB7F0 use the
 func_80128EA8 / ED8 pair like ovl17 CB1CC / CAFA0 and engine_8013C98C.c lines 3205-3256. Data: D_ovl13_800CB830
-(0x50) the swing animation record (H); D_ovl13_800CB880 step table (H); D_ovl13_800CB8BC (0x40) the sprite frame
-list (M); D_ovl13_800CB8FC (0xC) sprite definition for func_800D21C4 (M); D_ovl13_800CB908 / CB914 effect state
+(0x50) the swing animation record (H); D_ovl13_800CB880 step table (3, H); D_ovl13_800CB88C (0x30) the child
+sprites' frame list (CB138, H for use); D_ovl13_800CB8BC (0x40) CB3CC's sprite frame list (M); D_ovl13_800CB8FC (0xC)
+sprite definition for func_800D21C4 (CB3CC) and func_800D222C (CB138) (M); D_ovl13_800CB908 / CB914 effect state
 tables (H); D_ovl13_800CB93C (0xC40), CC57C (0x40), CC5BC (0x20) image records (+ pixel data) (H for being queued).
-Open: which states go in which table (CB3CC must be followed by a sprite-anim state, CB7F0 fits; CB6E4 is kind
-0x15's follower, so CB510's table is probably {CB56C, CB6E4, CB7F0}); (CB0E8's caller is now known: section 2);
-what 0xC0 / 0x1B8 / 0x1BA do. Outside symbols used only by the asm: func_800D222C, func_800D20C0, func_8012F14C,
-D_800AE620 (plus RotMatrixYXZ, ApplyMatrixSV, MulMatrix0, RotMatrixZ, rand declared).
+State tables (M, from the state numbers each state sets): D_ovl13_800CB914 (kind 0x15, CB510) = {CB138, CB56C,
+CB6E4}; D_ovl13_800CB908 (CB370) = {CB3CC, CB7F0}. (CB0E8's caller is now known: section 2.) Open: what 0xC0 /
+0x1B8 / 0x1BA do; who spawns CB370's kind.
 
 ### ovl14: ability 5, Perfume (MAIN.CD entry 14, slot 2, code 1968 B, 13 functions, 0 still asm)
 
@@ -736,23 +743,29 @@ step table (H), D_ovl17_800CB324 (0xC) sprite definition (M), D_ovl17_800CB330 (
 D_ovl17_800CB350 effect state table (H), D_ovl17_800CB37C (0x40) / CB3BC (0x20) image records (H). Open: the
 in-game meaning of D_80078EA4 (it is what both Sleepy and Mint pin).
 
-### ovl18: ability 3, Satiate (MAIN.CD entry 18, slot 2, code 2012 B, 11 functions, 2 still asm)
+### ovl18: ability 3, Satiate (MAIN.CD entry 18, slot 2, code 2012 B, 11 functions, 0 still asm)
 
-**What it does.** A timed ability with icon effects. Step 1 (CAF30) pays BP once and calls CAFB4, which spawns
-effect kind 0x23 (d 0x8000); step 2 (CAF80) ends the ability when D_80078EC8 == 0. The engine also ends it when
-Musashi is hit (func_80165718, case 3). The 0x23 master (state 0, CAFE0) fills the ring block D_ovl18_800CB860
-(colours 0xA0,0xA0,0x70 / 0,0,0; circle radius 0x1E), sets o+0x12 = 0x1C0 and goes to state 1, the asm
-func_ovl18_800CB168 (docs: twin of ovl23 CB0D0; a counter `AF(0x28)++ & 7` packed into a spawn argument as
-`<< 16`, a u32 switch, `x -= 0xE0`). A child (state 0 without 0x8000) takes index i = e >> 15, makes an icon sprite
-(kind 3 from the shared sheet D_800D387C at the s16 pair D_ovl18_800CB5F4[i] / [i+1], scale 0x2000, palette byte
-+0x27 = (i >> 1) + 0x19) plus a ring sprite (kind 6, D_ovl18_800CB860, +0x2C 0xC001) stored in o+0x34, and goes to
-state 2, the asm func_ovl18_800CB328. So the master cycles through 8 icons ((counter & 7) << 16 gives i = 2k, and
-the pair table holds exactly 8 pairs); 8 image records D_ovl18_800CB680..CB840 (+ CB640) are queued at load. The
-outside symbols that only the asm can use are Musashi's position halves (D_80126B5E / 62 / 66), his scale fields
-a+0x70 / 72 / 74 (D_80126BC8 / BCA / BCC; ovl23's twin child init squashes them: BCC -= 0x300, BC8 = BCC,
-BCA += 0xC0), func_8002D4C8 (sound), rand, RotMatrixY, func_8012F14C, D_800AE620, D_800B99DA, func_80016714 and
-func_80146A6C / func_80146AB4. So icons probably fly at Musashi and his model swells (L, from the twin); the stat
-effect of "Satiate" is not in the package and not found in the engine (no `== 3` test besides func_80165718).
+**What it does.** A timed ability: icons spiral into Musashi and each one that reaches him swells him for a moment.
+Step 1 (CAF30) pays BP once and calls CAFB4, which spawns effect kind 0x23 (d 0x8000); step 2 (CAF80) ends the
+ability when D_80078EC8 == 0. The engine also ends it when Musashi is hit (func_80165718, case 3). The 0x23 master
+(state 0, CAFE0) fills the ring block D_ovl18_800CB860 (colours 0xA0,0xA0,0x70 / 0,0,0; circle radius 0x1E), sets
+o+0x12 = 0x1C0 and goes to state 1, CB168 (while D_80078EC1 == 3; u32 phase o+0x30): phase 0 picks an angle
+rand & 0xFFF and a count of 2 or 3; phase 1 spawns a child every 4 frames (func_80146AB4(0x23, o, 0, 0, 0,
+d = 0x1C0, e = angle | ((o+0x28++ & 7) << 16)); a failed spawn ends the burst); phase 2 waits 0x10 frames and
+starts again. Every frame it relaxes Musashi's scale (his +0x70 / 72 / 74 = D_80126BC8 / BCA / BCC: while BCC >
+0x1000, BCC -= 0xE0, BC8 = BCC, BCA += 0x38) and every 16 frames plays sound 0x5FB (func_8002D4C8); when the
+ability is no longer 3 it resets the three scales to 0x1000 and frees itself. A child (state 0 without 0x8000)
+takes index i = e >> 15, makes an icon sprite (kind 3 from the shared sheet D_800D387C at the s16 pair
+D_ovl18_800CB5F4[i] / [i+1], scale 0x2000, palette byte +0x27 = (i >> 1) + 0x19) plus a ring sprite (kind 6,
+D_ovl18_800CB860, +0x2C 0xC001) stored in o+0x34, and goes to state 2, CB328: radius o+0x2C (from d = 0x1C0) -= 4
+a frame, angle o+0x30 += 0xA00000 / (r * 804) (faster as it closes in), position = Musashi's position (D_80126B5E /
+62 / 66, y - 0x1C) + RotY(angle) (0, -r / 2, r), so it spirals down and in; icon and ring scale -= 0x2C a frame.
+Below r 0x1C (about 105 frames) it spawns a kind-3 puff (0x0CCCFFFC, 0xE0009C00), swells Musashi (BCC += 0x400,
+BC8 = BCC, BCA -= 0x100: wider and shorter), clears the ring sprite (func_80016714(ring, 0x38)) and frees itself.
+So the master cycles through 8 icons ((counter & 7) << 16 gives i = 2k, and the pair table holds exactly 8 pairs);
+8 image records D_ovl18_800CB680..CB840 (+ CB640) are queued at load. Icons drawn in and Musashi fattened fit
+"Satiate" (eating, M); the stat effect is not in the package and not found in the engine (no `== 3` test besides
+func_80165718).
 
 **Entry and dispatch.** Entry CAE0C queues 9 image records (CB680, CB6C0, CB700, CB740, CB780, CB7C0, CB800,
 CB840, then CB640), so the template is at **0x800CAEB4** -> D_ovl18_800CB5E8: [0] CAEF8, [1] CAF30, [2] CAF80
@@ -769,8 +782,8 @@ CB840, then CB640), so the template is at **0x800CAEB4** -> D_ovl18_800CB5E8: [0
 | 0x800CAFAC | func_ovl18_800CAFAC | empty (cleanup hook) | M |
 | 0x800CAFB4 | func_ovl18_800CAFB4 | spawn effect 0x23, d 0x8000 | H |
 | 0x800CAFE0 | func_ovl18_800CAFE0 | state 0: master sets ring colours; child makes icon + ring sprites | H |
-| 0x800CB168 | func_ovl18_800CB168 | asm, not matched: master state, spawns the 8 cycling icon children (twin of ovl23 CB0D0) | M |
-| 0x800CB328 | func_ovl18_800CB328 | asm, not matched: child state, moves / draws the icon and its ring (o+0x34); likely the Musashi scale writes | L |
+| 0x800CB168 | func_ovl18_800CB168 | master state 1: bursts of 2-3 icon children (one every 4 frames, 8 icons in turn), relax Musashi's scale, sound 0x5FB every 16 frames; reset scales and free when the ability ends | H |
+| 0x800CB328 | func_ovl18_800CB328 | child state 2: spiral in to Musashi (r -= 4 from 0x1C0), shrink icon + ring; at r < 0x1C puff, swell Musashi, free | H |
 | 0x800CB5AC | func_ovl18_800CB5AC | effect handler: D_ovl18_800CB614[o+2](o) | H |
 
 **Notes.** CAFE0 is the shape of ovl23 CAF90 (icon sprite from D_800D387C, `+0x27 = (i >> 1) + 0x19`, state 2,
@@ -778,9 +791,10 @@ CB840, then CB640), so the template is at **0x800CAEB4** -> D_ovl18_800CB5E8: [0
 D_ovl18_800CB5E8 step table (H); D_ovl18_800CB5F4 / CB5F6 one s16 pair table of 8 (x, y) sprite-sheet coordinates
 (H for 8 pairs); D_ovl18_800CB614 effect state table (H); D_ovl18_800CB640..CB840 image records (H, 8 of them
 0x40 apart probably the 8 icons, M); D_ovl18_800CB860 ring block (two colours + 12-point circle, func_800233CC) (H).
-Open: the icons' meaning (food?), the asm bodies, the actual effect of Satiate.
+Open: what the 8 icons are (data; food fits, L) and what Satiate does to Musashi's stats (nothing in the package;
+the engine's only `== 3` test is func_80165718).
 
-### ovl19: ability 13, Shrink (MAIN.CD entry 19, slot 2, code 4512 B, 22 functions, 3 still asm)
+### ovl19: ability 13, Shrink (MAIN.CD entry 19, slot 2, code 4512 B, 22 functions, 0 still asm)
 
 **What it does.** As written, a projectile attack; nothing scales Musashi. Step 1 (CAEC0): animation
 D_ovl19_800CC01C, pay BP. Step 2 (CAF08): if interrupted, reset (CB170); at the animation end: sound 0x479,
@@ -791,19 +805,26 @@ the frame counter (directions rsin / rcos of (frame & 7) << 9, colours red, blue
 counts a+0xBE down 16 frames, then resets the face, runs func_80165A78 (cleanup, step 0, model flag 0x20 off; the
 ability number stays) and hands control back. Kind-4 shots: copy Musashi's model matrix, fill a 20-point history
 (D_ovl19_800CC5B0 + d * 0xA0), o+0x64 = d << 10 (0 / 0x400 / 0x800 / 0xC00, a quarter turn apart), 0x40 frames;
-each frame z -= 6 in that matrix's frame, the asm CB578 (trail update / draw), then CBC0C hits every actor that
+each frame z -= 6 in that matrix's frame, CB578 (draw the trail, then push the new point into the history), then
+CBC0C hits every actor that
 func_8014C308 accepts (type 0x1E, mask 0x2000, +0xAA == 0) within 0x40 with hit type 0x1E (func_8014C3A4); at
-timeout a puff (kind 3, e 0x80001C00) and free. The kind-0xF object is a ring sprite (kind 6, D_ovl19_800CC830,
+timeout a puff (kind 3, e 0x80001C00) and free. The trail (CB578): the model matrix times a roll o+0x64 (+0x71 a
+frame, the four shots a quarter turn apart), the head point o+0x10 plus a wobble (radius rsin(o+0x62) / 128 at angle
+o+0x60; +0x38 / +0xE3 a frame), then 11 gouraud quads 16 wide (CB9F8: APrim code 0x50000000, matrix x scale,
+func_80017758) from the head along every second history point, colour D_ovl19_800CC114[d] fading toward black
+(func_800130D0, step 0xC a segment, 0xA for the last) and scale falling 0x100 a segment from 0x1000: four coloured
+ribbons twisting about the firing direction. The kind-0xF object is a ring sprite (kind 6, D_ovl19_800CC830,
 radius 0x60, scale 0x3000) at Musashi, pulled toward the camera, colour flickering 0xFF0000 / 0xFFFF (every 4th
-frame), whose scale falls 0x100 per frame (halved on odd frames) until its timer ends. Whether hit type 0x1E shrinks
+frame), whose scale drops 0x600 a frame from 0x3000 to 0x1000 (CBE38), then falls 0x100 a frame (halved on odd
+frames) for 0x10 frames (CBEC0). Whether hit type 0x1E shrinks
 the target is up to the target (func_80156370 / the actor code): not in this package. The engine has a Musashi
 scale 0x555 path (func_8014B190, stats +0x22 bit 15) that this package never touches. The name is not supported
 by the package's C.
 
 **Entry and dispatch.** Entry CAE0C (D_ovl19_800CC160); template CAE34 -> D_ovl19_800CC104: [0] CAE78, [1] CAEC0,
-[2] CAF08, [3] CB0C8 (4 used / room 8). Cleanup unknown (CB170 is called directly; the engine's hook could be it
+[2] CAF08, [3] CB0C8 (4 / 4; D_ovl19_800CC114 follows). Cleanup unknown (CB170 is called directly; the engine's hook could be it
 too). 0x68 kind-4 handler CB2C8 (ability 0xD, else free) -> D_ovl19_800CC124: [0] CB324, [1] CB3FC, [2] CB4A8
-(3 / 3). 0x68 kind-0xF handler CBD0C (ability 0xD, else free) -> D_ovl19_800CC130: [0] CBD68, [1] CBE38 (asm),
+(3 / 3). 0x68 kind-0xF handler CBD0C (ability 0xD, else free) -> D_ovl19_800CC130: [0] CBD68, [1] CBE38,
 [2] CBEC0, maybe [3] CBF60 (room 12).
 
 | Address | Current name | Purpose | Conf. |
@@ -821,12 +842,12 @@ too). 0x68 kind-4 handler CB2C8 (ability 0xD, else free) -> D_ovl19_800CC124: [0
 | 0x800CB3FC | func_ovl19_800CB3FC | shot flight: z -= 6, trail (CB578), hit test; puff + next at timeout | H |
 | 0x800CB4A8 | func_ovl19_800CB4A8 | free the 0x68 object | H |
 | 0x800CB4C8 | func_ovl19_800CB4C8 | trail init: fill 20 history points, place, o+0x60 = 0, o+0x64 = d << 10 | H |
-| 0x800CB578 | func_ovl19_800CB578 | asm, not matched: trail update and draw (docs: "the colour table / the slot index"; the GTE handwritten entry) | M |
-| 0x800CB9F8 | func_ovl19_800CB9F8 | asm, not matched: a helper taking 5 args that builds a scale matrix (func_80017DC4); likely the trail-segment draw | L |
+| 0x800CB578 | func_ovl19_800CB578 | trail: model matrix x roll o+0x64, head + wobble, 11 tapering fading quads along the history (CB9F8), then shift the 20-point history | H |
+| 0x800CB9F8 | func_ovl19_800CB9F8 | draw one trail quad: a -> b, 16 wide, colours c[0] / c[1], through matrix x scale (func_80017DC4, func_80017758) | H |
 | 0x800CBC0C | func_ovl19_800CBC0C | hit test: actors within 0x40 get hit type 0x1E | H |
 | 0x800CBD0C | func_ovl19_800CBD0C | ring handler: ability 0xD ? table : free | H |
 | 0x800CBD68 | func_ovl19_800CBD68 | ring init: kind-6 sprite radius 0x60, scale 0x3000, at Musashi, toward camera | H |
-| 0x800CBE38 | func_ovl19_800CBE38 | asm, not matched: ring state 1 (docs: arg0 and a clamped value); likely sets o+0x60 / the timer | L |
+| 0x800CBE38 | func_ovl19_800CBE38 | ring state 1: flicker, scale -0x600 a frame to 0x1000, then o+0x60 = 0x1000, timer 0x10, next | H |
 | 0x800CBEC0 | func_ovl19_800CBEC0 | ring: flicker, scale = o+0x60 - 0x100 per frame (half on odd frames), free at timer end | H |
 | 0x800CBF60 | func_ovl19_800CBF60 | free the 0x68 object | H |
 | 0x800CBF80 | func_ovl19_800CBF80 | ring colour word: 0xFFFF every 4th frame, else 0xFF0000 | H |
@@ -836,9 +857,10 @@ too). 0x68 kind-4 handler CB2C8 (ability 0xD, else free) -> D_ovl19_800CC124: [0
 CC0D8 (0x2C) animation records (H); D_ovl19_800CC104 step table (H); CC124 / CC130 state tables (H);
 D_ovl19_800CC160 (0x420) image record + data (H); D_ovl19_800CC580..CC5AE three lights of {s32 x, y, z; u8 r, g, b}
 given to the model at +0x80 (M); D_ovl19_800CC5B0 (0x280) the four 20-point SVECTOR trail histories (H, size exact);
-D_ovl19_800CC830 / CC834 the ring block's two colour words (H); 0x800CBFAC-0x800CC01B unreferenced from C (asm
-data). Open: what hit 0x1E does; the asm trail; D_80126720 (an SVECTOR in the engine's collision code, only the asm
-uses it).
+D_ovl19_800CC830 / CC834 the ring block's two colour words (H); D_ovl19_800CC114 the four shots' trail colours
+(4 ACol, indexed by d, H); 0x800CBFAC-0x800CC01B (the first 0x70 data bytes) still unreferenced with every function
+in C (unknown). D_80126720 (in the symbol file) is the end of the actor array, D_801202A0 + 96 x 0x10C: CBC0C's
+loop bound (H). Open: what hit 0x1E does.
 
 ### ovl1a: ability 12, Hop (MAIN.CD entry 20, slot 2, code 1000 B, 14 functions, 0 still asm)
 
@@ -883,7 +905,7 @@ loop animation (H), D_ovl1a_800CB260 step table (H), D_ovl1a_800CB26C kind-0x1F 
 D_ovl1a_800CB294 (0x820) image record + data (H). Open: which of CAF18 / CB148 is D_80190364[12]; pad bit 0x20's
 in-game button.
 
-### ovl1b: ability 2, Mint (MAIN.CD entry 21, slot 2, code 1776 B, 11 functions, 2 still asm)
+### ovl1b: ability 2, Mint (MAIN.CD entry 21, slot 2, code 1776 B, 11 functions, 0 still asm)
 
 **What it does.** A timed state, the mirror of Sleepy. Step 1 (CAEB0) saves the stats; on the first use (cost
 latch) plays sound 0x7A3, adds 0x10 to the D_80078EA4 meter (func_8014B944(a, 0x100000, 1), forced, cap 0xA0) and
@@ -892,14 +914,17 @@ D_80078EC8 == 0, then restores the saved stats and ends the ability. The engine 
 (a+0x1AC = 0x3C0000, a+0x44 |= 0x100) while D_80078EC1 == 2 (func_80152714). The 0x21 master (d without 0x8000)
 fills the ring block D_ovl1b_800CB558 (colours 0,0xA0,0xA0 / 0: cyan, radius 0x60) and becomes the emitter
 (state 3, CB478), which spawns a child (kind 0x21, owner Musashi, d 0x8000) at once and every 0x20 frames. A child
-makes a kind-5 ring sprite tied to its matrix o+0x38 (sprite+0x34), scale 0, timer 0x10, and runs the two asm
-states (CAF94, CB0C8; their outside calls are the camera-facing pair func_800D20C0 / 800D23D0, func_80017DC4,
-func_8012F14C, D_800AE620, D_800B99DA, RotMatrixZ / YXZ, ApplyMatrixSV, MulMatrix): an expanding mint ring
-(M). Supports "Mint" as a refresh: the meter Sleepy empties is kept full.
+makes a kind-5 ring sprite tied to its matrix o+0x38 (sprite+0x34), scale 0, timer 0x10. State 1 (CAF94, 17 frames): the ring grows (scale
++0xC0 a frame) at Musashi's model point (0, -0x2C, 0), pulled 128 units toward the camera, facing it and rolling
+((frame & 0x1F) << 7). State 2 (CB0C8): it keeps following while its sprite +0x1E rises 0x100 a frame (the ring
+renderer func_800226C0 reads +0x1E & 0x1FFF as the inner edge's fraction of the radius: 0 a disc, 0x1000 nothing,
+M), and at 0x1000 it spawns 16 engine effects of kind 0xE (d 1) on a circle of radius 0x48 in its plane, each
+with its matrix, and frees itself: every 0x20 frames a cyan disc rises in front of Musashi, hollows out and
+scatters (H). Supports "Mint" as a refresh: the meter Sleepy empties is kept full.
 
 **Entry and dispatch.** Entry CAE0C (D_ovl1b_800CB538); template CAE34 -> D_ovl1b_800CB4FC: [0] CAE78, [1] CAEB0,
 [2] CAF38 (3 / 3). Cleanup probably the empty CAF8C. Effect handler CB33C (no ability test) -> D_ovl1b_800CB508:
-[0] CB378, [1] CAF94, [2] CB0C8, [3] CB478 (4 used / room 12; [1] / [2] by elimination).
+[0] CB378, [1] CAF94, [2] CB0C8, [3] CB478 (4 used / room 12; [1] / [2] by the state steps, M).
 
 | Address | Current name | Purpose | Conf. |
 |---|---|---|---|
@@ -909,8 +934,8 @@ func_8012F14C, D_800AE620, D_800B99DA, RotMatrixZ / YXZ, ApplyMatrixSV, MulMatri
 | 0x800CAEB0 | func_ovl1b_800CAEB0 | step 1: save stats, first use: sound 0x7A3, meter +0x10, pay; spawn 0x21 | H |
 | 0x800CAF38 | func_ovl1b_800CAF38 | step 2: D_80078EA4 = 0xA00000 each frame; at end restore, end | H |
 | 0x800CAF8C | func_ovl1b_800CAF8C | empty (cleanup hook) | M |
-| 0x800CAF94 | func_ovl1b_800CAF94 | asm, not matched: child state 1, grow / orient the ring (AVec v, r, AMtx m; docs) | L |
-| 0x800CB0C8 | func_ovl1b_800CB0C8 | asm, not matched: child state 2, ring with three uses of one angle vector (docs); fade and free? | L |
+| 0x800CAF94 | func_ovl1b_800CAF94 | child state 1: grow +0xC0 a frame at Musashi (0, -0x2C, 0), toward camera, rolling; 17 frames | H |
+| 0x800CB0C8 | func_ovl1b_800CB0C8 | child state 2: follow, inner edge +0x1E += 0x100; at 0x1000 16 kind-0xE effects on a 0x48 circle, free | H |
 | 0x800CB33C | func_ovl1b_800CB33C | effect handler: D_ovl1b_800CB508[o+2](o) | H |
 | 0x800CB378 | func_ovl1b_800CB378 | state 0: master sets ring block -> 3; child makes ring sprite -> 1 | H |
 | 0x800CB478 | func_ovl1b_800CB478 | state 3: emitter, a child every 0x20 frames | H |
@@ -919,7 +944,7 @@ func_8012F14C, D_800AE620, D_800B99DA, RotMatrixZ / YXZ, ApplyMatrixSV, MulMatri
 split on d & 0x8000, kind-5 ring sprite tied to o+0x38, timer 0x10). Data: D_ovl1b_800CB4FC step table (H),
 D_ovl1b_800CB508 effect state table (H), D_ovl1b_800CB538 image record (H), D_ovl1b_800CB558 ring block (H).
 
-### ovl1c: ability 4, Antidote (MAIN.CD entry 22, slot 2, code 3716 B, 33 functions, 2 still asm)
+### ovl1c: ability 4, Antidote (MAIN.CD entry 22, slot 2, code 3716 B, 33 functions, 0 still asm)
 
 **What it does.** Cures poison. Step 1 (CAEB0) pays BP (no latch). Step 2 (probably CAEE8) calls func_8014B2F8,
 which clears D_80078E94 (bit 31 = poisoned; func_8014B350 deals 8 damage per tick while set) and its saved copy,
@@ -929,7 +954,8 @@ package): state 0 sets his animation 0 (func_80154150(a, 0)), state 1 waits unti
 effect of kind 0x3E exists, then spawns 0x41 + sound 0x836, state 2 waits until no 0x41 effect remains, then ends
 the ability and hands back; this path does not call the cure in C. Effect 0x41: the master makes a magenta ring
 (D_ovl1c_800CBDB0, radius 0x40, kind-5 sprite on o+0x38) at Musashi's chest (-0x28, toward the camera, CBAA4),
-runs two asm states (which per the docs spawn 0x41 children with d | 0x8000), then shrinks the ring (x -0x100,
+spawns a child (0x41, d 0x8000) every frame for 15 frames while the ring grows from 0 (x +0x100, y +0x140 a
+frame, CB8A4) and for 31 more (CB944; 46 sparkles in all), then shrinks the ring (x -0x100,
 y -0x120 per frame) for 0x10 frames and frees; a child appears at a random point within 0x20 around Musashi (height
 minus 0..0x3F), takes the master's matrix and for 0x10 frames rises (y velocity -3 per frame), fades (0x30 -=
 0xE) and draws a pink four-pointed sparkle (CBB38: two diamonds 7 x 3). The 0x68 kind-0x1C objects (spawned
@@ -976,8 +1002,8 @@ CB630 are M (0x3E is the only other kind spawned; CB68C's child path fits 0x41).
 | 0x800CB5E4 | func_ovl1c_800CB5E4 | 0x3E: scale = timer << 9, free at 0 | H |
 | 0x800CB630 | func_ovl1c_800CB630 | effect 0x41 handler (ability 4) | M |
 | 0x800CB68C | func_ovl1c_800CB68C | 0x41 state 0: master ring at the chest; child at a random point -> state 4 | H |
-| 0x800CB8A4 | func_ovl1c_800CB8A4 | asm, not matched: master state 1, spawns 0x41 children (d \| 0x8000, docs) | M |
-| 0x800CB944 | func_ovl1c_800CB944 | asm, not matched: master state 2, also spawns 0x41 children (docs) | M |
+| 0x800CB8A4 | func_ovl1c_800CB8A4 | master state 1: follow, a child (0x41, d 0x8000) a frame for 15 frames, ring x +0x100 / y +0x140; then timer 0x20 | H |
+| 0x800CB944 | func_ovl1c_800CB944 | master state 2: follow, a child a frame for 31 frames; then timer 0x10 | H |
 | 0x800CB9C0 | func_ovl1c_800CB9C0 | master state 3: follow, shrink ring 0x10 frames, free | H |
 | 0x800CBA30 | func_ovl1c_800CBA30 | child state 4: rise, fade, draw sparkle, free at timer end | H |
 | 0x800CBAA4 | func_ovl1c_800CBAA4 | place at owner - 0x28 toward camera, billboard matrix | H |
@@ -1033,7 +1059,7 @@ ends it (its duration D_80078EC8 counts down in func_80165694, but no step here 
 D_ovl1e_800CAF08 step table (H), D_ovl1e_800CAF34 image record (H). Open: whether the engine ends a timed ability by
 itself when D_80078EC8 runs out (func_80165694 only counts it).
 
-### ovl1f: ability 15, Bowl (MAIN.CD entry 25, slot 2, code 3696 B, 30 functions, 1 still asm)
+### ovl1f: ability 15, Bowl (MAIN.CD entry 25, slot 2, code 3696 B, 30 functions, 0 still asm)
 
 **What it does.** Musashi throws a ball that rolls away from him, with a power gauge. Start (CAED8): animation
 record D_ovl1f_800CBD2C (func_80154274), a gauge object is spawned (0x68 kind 0x27, CBB70), power a+0xBE = 0 and
@@ -1046,7 +1072,7 @@ the gauge is told to close (CBBA0), next step. Step 4 (CB068): on the animation 
 Step 6 (CB138) waits for the animation end and hands Musashi back (func_801599A4 + func_80159B3C). The ball
 (kind 0xA): a model slot initialised with func_8001CA1C(m, &D_ovl1f_800CBE98) (model kind 3), placed at Musashi's
 model point (func_80149374), model rot.x / rot.z from Musashi +0x100 / +0x104 and rot.y from his model's, three
-words +0x24.. = (0, 0x80000, -0x100000) (forward speed, M), timer 0x60, then the rolling state (CB300, asm). Its
+words +0x24.. = (0, 0x80000, -0x100000) (forward speed, M), timer 0x60, then the rolling state (CB300). Its
 handler deletes it when the ability is no longer 15, when its y passes 0x400, and stops sound 0x649
 (func_80147364(4, 0x649)) when it leaves the screen (CB7B0). Deletion (CB6CC) spawns a kind-3 puff
 (func_8016634C) and stops the sound. The engine refuses to start Bowl while a kind-0xA object exists
@@ -1054,10 +1080,18 @@ handler deletes it when the ability is no longer 15, when its y passes 0x400, an
 D_ovl1f_800CBECC) whose x follows the power (x = D_80126C16 - 40; D_80126C16 is Musashi + 0xBE) and a frame
 sprite (kind 1, D_ovl1f_800CBF20) that opens with x scale +0x2AA a frame for 6 frames and closes with y scale
 -0x400 a frame for 4 frames. The name fits: Musashi bowls a ball whose power is set by timing; Musashi himself
-does not roll (he holds his pose until the ball is gone). How the ball moves and hits is in the asm CB300:
-its outside symbols (hit probe func_8016345C / func_801633A8 / func_80163328, wall and floor checks
-func_8016380C / func_80163950, velocity from angles func_80163194, rotate-matrix calls, two func_80146A6C spawns
-per docs/overlays.md) say it rolls, collides and hits targets (M).
+does not roll (he holds his pose until the ball is gone). How it rolls (CB300): each frame the model matrix is rebuilt
+from its angles (X, Z, Y), a sideways acceleration -((d - 0x28) << 14) / 40 (0 at mid power 0x28, +-0x4000 at the
+ends) is added to the speed words and the velocity is those words through that matrix (func_80163194), so the
+power byte curves the ball left or right rather than speeding it up (H for the arithmetic, M for "curve"); the
+ball grows +0x200 a frame to scale 0x2000 and two halfwords of its model data (D_ovl1f_800CBEA0 / CBEA2 = -0x10 /
+-0x20) shift by 1 on odd frames. It tests hit type 0x26 every frame (func_8016345C with the AVec D_ovl1f_800CAE0C,
+func_80163328, func_801633A8): an actor hit (1) rumbles (D_ovl1f_800CBEB0), spawns effect 0x1F at the hit point
+(D_80126B18, packed D_80114EB0) and, on screen, plays 0x7B3 for actor kind 0x151, else 0x648, and the ball rolls
+on; result 4 spawns effect 7 there and ends the ball. Then the map line test (func_8016380C): flag 0x8000 ends it;
+flag 0x2000 with surface byte 0x19 ends it (sound 0x6DE when D_801151D8 and on screen); with surface byte 2 it
+spawns effect 0x10, stops 0x649, plays 0x441, sets timer 0x1E and goes to state 3 (CB708: sinks 2 a frame, then
+frees). The timer (0x60 frames) also ends it; "ends" = state 2 (CB6CC, puff and free, M).
 
 **Entry and dispatch.** Image entry func_ovl1f_800CAE14 (three records; the package has two data words at 0x4/0x8
 before the code, so it starts 8 bytes later than usual). Template func_ovl1f_800CAE5C over D_ovl1f_800CBE7C (0x1C
@@ -1081,9 +1115,9 @@ and CB180 (no caller in the package; it kills the gauges: the stop hook, M).
 | 0x800CB180 | func_ovl1f_800CB180 | kill all gauges (CBBF8); no package caller: the stop hook | M |
 | 0x800CB1A0 | func_ovl1f_800CB1A0 | ball handler: delete unless ability 15; run state; stop sound off-screen; delete below y 0x400 | H |
 | 0x800CB23C | func_ovl1f_800CB23C | ball state 0: model kind 3, at Musashi's model point, his facing, speed words, timer 0x60 | H |
-| 0x800CB300 | func_ovl1f_800CB300 | ball state 1: rolling, collision and hits (asm, not matched) | M |
+| 0x800CB300 | func_ovl1f_800CB300 | ball state 1: roll (matrix from its angles, power-set sideways curve), grow to 0x2000, hit 0x26 (actor: effect 0x1F + sound; 4: effect 7, end), map test (surface 2: effect 0x10 -> sink; 0x19 / 0x8000: end), end at the timer | H |
 | 0x800CB6CC | func_ovl1f_800CB6CC | delete ball: kind-3 puff (func_8016634C), stop sound 0x649, free | H |
-| 0x800CB708 | func_ovl1f_800CB708 | ball state: y += 2 a frame until the timer ends, then free | H |
+| 0x800CB708 | func_ovl1f_800CB708 | ball state 3 (after surface 2): y += 2 a frame for 0x1E frames, then free | H |
 | 0x800CB758 | func_ovl1f_800CB758 | clear the ball's last-sound latch +0x60 | H |
 | 0x800CB760 | func_ovl1f_800CB760 | play sound id only if it differs from the latch +0x60 | H |
 | 0x800CB7B0 | func_ovl1f_800CB7B0 | 1 if the object projects off screen (GTE error, |x| > 200 or |y| > 160) | H |
@@ -1104,16 +1138,17 @@ and CB180 (no caller in the package; it kills the gauges: the stop hook, M).
   CAFD0); CB1A0 and CB848 are the effect-handler shape (`D_80078EC1 != 0xF` -> delete); CB6CC is the "puff and
   free" shape of ovl21 CB7FC (with a sound stop added).
 * Data: D_800CBD2C animation record (func_80154274) H; D_800CBE7C step table (7) H; D_800CBE98 the ball's model
-  data for func_8001CA1C (0x24 bytes before the next symbol, so a descriptor rather than the mesh) M;
-  D_800CBEBC ball state table (4 entries: CB23C, CB300, CB708 and one more, maybe CB6CC) M; D_800CBECC the marker's
+  data for func_8001CA1C (0x18 bytes up to D_800CBEB0, so a descriptor rather than the mesh; CB300 rewrites its
+  halfwords +8 / +0xA, D_800CBEA0 / CBEA2) M; D_800CBEB0 the ball-hit rumble script (StartRumbleScript) H;
+  D_800CBEBC ball state table (4: CB23C, CB300, then by CB300's state steps CB6CC (end) and CB708 (sink)) M; D_800CBECC the marker's
   kind-0xA sprite data H; D_800CBF20 the frame's sprite record (0xC bytes) H; D_800CBF2C gauge state table
   (CB8A4, CB968, CBA14, CBA2C, CBA60, CBAF4; 0x38 bytes, the last 8 words unknown) H for the 6; D_800CBF64,
   D_800CC6A4, D_800CC6E4 image records (D_800CBF64 0x740 bytes: a texture) H; the two words at 0x800CAE0C /
-  0x800CAE10 (yaml ovl1f_rodata) have no C reference: probably constants of the asm CB300, unknown.
-* Open: which state follows CB300 (CB708's y += 2 looks like sinking or falling into a hole); what +0xBA holds
-  (the animation flags to restart with); what the ball's d (power) changes in CB300.
+  0x800CAE10 (yaml ovl1f_rodata) are the AVec D_ovl1f_800CAE0C, CB300's hit-probe vector for func_8016345C (H).
+* Open: what +0xBA holds (the animation flags to restart with); which surfaces the bytes 2 (the ball sinks: water?
+  L) and 0x19 are; what effects 0x1F, 7 and 0x10 look like.
 
-### ovl20: ability 22, Firefly (MAIN.CD entry 26, slot 2, code 3332 B, 24 functions, 2 still asm)
+### ovl20: ability 22, Firefly (MAIN.CD entry 26, slot 2, code 3332 B, 24 functions, 0 still asm)
 
 **What it does.** A timed ability (D_80078EC8) that makes a glowing object appear at Musashi and points a stage
 actor of kind 0x15C at him. Start (CAEC0): pay once, sound 0x7B8. Step 2 (CAF10): spawn a 0x68 object kind 0xB
@@ -1124,10 +1159,12 @@ with d = 1 (vanish), sound 0x7DE, +0xBE = 0, next. Step 4 (CB010): once +0xBE is
 +0xCC (CB108); when no kind-0xB object is left, it ends the ability (func_80165A20). The kind-0xB object keeps
 itself at a point of Musashi's model plus a camera-relative offset (func_80146EC0 with D_800CBB40 / D_800CBB38).
 State 0: with d = 0 it spawns three kind-0xC rays at a random base angle and +0x555 / +0xAAA (120 degrees apart),
-timer 8. State 1 (asm CB278) builds its sprite (its outside symbols: func_80146578, func_8001CD9C ring sprite,
-func_800233CC ring, M). State 2 (CB3C0): scale +0x18/+0x1A grows with an accelerating step (+0x60 += 0x40) to
-0x1000, spinning (+0x1E += 0x100) when d != 0; at full size it sets Musashi +0xBE = 1 (the signal steps 3 / 4
-read). State 3 asm (CB470). The rays (kind 0xC) are screen-space gouraud textured triangles (func_800174DC =
+timer 8. State 1 (CB278) waits the timer, then makes a kind-6 ring sprite (D_800CBBD8, radius 0x80,
+scale 0, flags |= 0x50000000): white centre / blue edge (0, 0, 0xFF) for d 0, (0, 0, 0xC0) / (0, 0, 0x80) for d 1. State 2 (CB3C0): scale +0x18/+0x1A grows with an accelerating step (+0x60 += 0x40) to
+0x1000, hollowing (+0x1E += 0x100: the ring's inner edge, see ovl1b, M) when d != 0; at full size it sets Musashi +0xBE = 1 (the signal steps 3 / 4
+read). State 3 (CB470): it follows, fades all six colour bytes toward 0 by 0xA a frame
+(func_80012F74), for d != 0 keeps hollowing (+0x1E += 0x20 to 0x1000), and when both colours are black goes to
+state 4 (free). The rays (kind 0xC) are screen-space gouraud textured triangles (func_800174DC =
 func_8001751C, SetPolyGT3) drawn around the parent's projected position (CB8C4, func_8012EFB8), white tip
 (+0x58) and blue base (+0x5C = 00 00 FF), UVs scrolled with the frame counter: the tip runs in from -0x100 to -8
 (+0x18 a frame) while turning 0xB a frame, then the base widens by 8 a frame, both colours fade by 0xA a frame
@@ -1154,9 +1191,9 @@ From outside: template, CB134, CB62C, and CB078 (no package caller; clears the a
 | 0x800CB108 | func_ovl20_800CB108 | 0x15C actor +0xCC = 0; returns the actor | H |
 | 0x800CB134 | func_ovl20_800CB134 | glow handler (ability 0x16), else free | H |
 | 0x800CB190 | func_ovl20_800CB190 | glow state 0: follow; d 0: three rays 120 deg apart, timer 8 (else 0) | H |
-| 0x800CB278 | func_ovl20_800CB278 | glow state 1: wait the timer, make the sprite (asm, not matched) | L |
-| 0x800CB3C0 | func_ovl20_800CB3C0 | glow state 2: follow, grow to 0x1000 (spin if d), then Musashi +0xBE = 1 | H |
-| 0x800CB470 | func_ovl20_800CB470 | glow state 3 (asm, not matched): the lit / fading phase, unknown | L |
+| 0x800CB278 | func_ovl20_800CB278 | glow state 1: wait the timer, make the kind-6 ring (r 0x80, scale 0; white / blue for d 0, dark blue for d 1) | H |
+| 0x800CB3C0 | func_ovl20_800CB3C0 | glow state 2: follow, grow to 0x1000 (hollow if d), then Musashi +0xBE = 1 | H |
+| 0x800CB470 | func_ovl20_800CB470 | glow state 3: follow, fade colours by 0xA (hollow to 0x1000 if d), next at black | H |
 | 0x800CB5D4 | func_ovl20_800CB5D4 | free the object | H |
 | 0x800CB5F4 | func_ovl20_800CB5F4 | place at Musashi's model point + camera-relative offset (func_80146EC0) | H |
 | 0x800CB62C | func_ovl20_800CB62C | ray handler (ability 0x16), else free | H |
@@ -1172,11 +1209,12 @@ From outside: template, CB134, CB62C, and CB078 (no package caller; clears the a
   are the free wrapper `f(o) { func_80162CCC(o); }` (also ovl21 CC004, ovl22 CB600, ovl25 CBEB8, ovl26 CB24C).
 * Data: D_800CBB10 step table (5) H; D_800CBB24 glow states (5) H; D_800CBB38 SVECTOR, camera-relative offset
   (func_80146F58) H; D_800CBB40 SVECTOR, model-point offset (func_80015954 + func_80149374) H; D_800CBB48 ray
-  states (4 used of 12 words) H; D_800CBB78, D_800CBBB8 image records H.
+  states (4 used of 12 words) H; D_800CBB78, D_800CBBB8 image records H; D_800CBBD8 the glow's ring block (colours
+  set by CB278, faded by CB470) H.
 * Open: actor kind 0x15C (what its +0xCC drives); the kind-1 0x68 object (spawned by Musashi's state
-  func_8015F89C at an animation marker, engine 13664) that the actor prefers when active; CB278 / CB470.
+  func_8015F89C at an animation marker, engine 13664) that the actor prefers when active.
 
-### ovl21: ability 24, Sublime (MAIN.CD entry 27, slot 2, code 4904 B, 29 functions, 4 still asm)
+### ovl21: ability 24, Sublime (MAIN.CD entry 27, slot 2, code 4904 B, 29 functions, 0 still asm)
 
 **What it does.** Musashi lies down and a spirit object rises from him and is steered around until the button
 or the duration ends it. Start (CAEC0): func_801599A4 (the current kind's D_8018FBA8 hook), then Musashi becomes
@@ -1191,10 +1229,23 @@ end the ability, hand Musashi back. In all four states a func_80161208 hand-over
 model (func_8001C2C4, kind 0) with Musashi's Y facing, scale (0, 0, 0x1000), at his model point; two children
 (0x68 kind 0x28, d 0 / 1, upper pool); Musashi's +0x154 SVECTOR copied to D_800CC298; quad table D_800CC150 at
 +0x58. State 1 (CB3E0): rises 1 a frame, x / y scale +0x100 to 0x1CCC, for 0x20 frames, then zeroes +0x24.. and
-goes on. State 2 (CB4A4, asm) moves it (outside symbols func_801488A8 / func_80148D44 stick direction,
-func_80162FC0 / FF4 movement, M), and CBCB4 clamps its position to a box on maps 0x3035, 0x3037, 0x3038 and 0x3039
-(X/Z boxes, X/Y on 0x3038). It draws itself from projected quads (CB82C asm, CBA44, CBBF8 -> func_800178EC GT4).
-"Sublime" as an out-of-body spirit: the lying-down pose, a separate stick-steered object and map-specific bounds
+goes on. State 2 (CB4A4) steers it: while the stick is held (func_801488A8) its heading is the stick
+direction (func_80148D44, camera-relative) and it accelerates 0x1C000 a frame along it (func_80162FF4; on map
+0x3038 the vector is turned 0x400 about X, so the stick moves it up and down), each axis clamped to +-0xE0000;
+released, each axis decays 0x8000 a frame. In the last 0x28 frames of the duration it shrinks (x / y scale -0x40 a
+frame). CBCB4 clamps its position to a box on maps 0x3035, 0x3037, 0x3038 and 0x3039 (X/Z boxes, X/Y on 0x3038).
+Each frame the copy D_800CC298 eases toward the spirit (func_80012F74, at most 0xA an axis) and is written to
+Musashi +0x154: the engine (func_8014C6F4) sets +0x154 to his position every frame unless +0x15A is set, and state
+3 sets +0x15A every frame, so while Sublime runs the point the stage code reads as Musashi's position (D_80126CAC,
+15 stage files) trails the spirit (H for the writes, M for the reading). It draws itself (CB82C) as two
+screen-space GT4 quads at its projected point (func_8012EF34 into D_800CC290), sized by its model scale, grey
+0x808080: the first from corner table D_800CC190 with its UVs stepped through 4 frames (D_800CC1B0[+0x60 & 3]), the
+second from D_800CC1A0 with its lower edge swaying (rcos(+0x62 << 8) / 1024, a 16-frame cycle); quad records
+D_800CC150 (+0x58) and +0x18 (CBA44, CBBF8 -> func_800178EC). The two kind-0x28 children (CBF28 / CC024) are kind-4
+ring sprites (D_800CC250: radius 0x20, colour 0x202000 / 0, built by the d = 0 child) placed 0x10 above the
+spirit's projected point (screen coordinates, M), bobbing (x +0..4 in opposite phase for d 0 / 1, y +-8, 32 frames
+a cycle) at the spirit's scale.
+"Sublime" as an out-of-body spirit: the lying-down pose, a separate stick-steered object that carries Musashi's reference point, and map-specific bounds
 support it (M); docs section 2 also lists 24 among the abilities Musashi's state code ends.
 
 **Entry and dispatch.** Image entry CAE0C (two records). Template CAE44 over D_800CC134 (3 entries: CAE88, CAEC0,
@@ -1223,29 +1274,32 @@ handler CBECC (kind 0x28, states D_800CC1C4). Stop hook CB234 (M).
 | 0x800CB270 | func_ovl21_800CB270 | spirit handler (ability 0x18), else free with puff | H |
 | 0x800CB2CC | func_ovl21_800CB2CC | spirit state 0: empty model, Musashi's facing, two kind-0x28 children, save +0x154 | H |
 | 0x800CB3E0 | func_ovl21_800CB3E0 | spirit state 1: rise, grow to 0x1CCC for 0x20 frames, stop | H |
-| 0x800CB4A4 | func_ovl21_800CB4A4 | spirit state 2: steering with decay and clamps (asm, not matched) | M |
+| 0x800CB4A4 | func_ovl21_800CB4A4 | spirit state 2: stick steering (accel 0x1C000, clamp 0xE0000, decay 0x8000), shrink at the end, box clamp, Musashi +0x154 eased after it | H |
 | 0x800CB7FC | func_ovl21_800CB7FC | free with a kind-3 puff (func_801662F4) | H |
-| 0x800CB82C | func_ovl21_800CB82C | draw the spirit from the quad table at +0x58 (asm, not matched) | M |
+| 0x800CB82C | func_ovl21_800CB82C | draw the spirit: project it, two screen GT4 quads (4-frame UVs; swaying lower edge) | H |
 | 0x800CBA44 | func_ovl21_800CBA44 | project a 4-corner quad (RTPT + RTPS) into a stack prim; 1 on GTE error | H |
 | 0x800CBBF8 | func_ovl21_800CBBF8 | shift a projected quad's 4 xy by (dx, dy), draw it (GT4) | H |
 | 0x800CBCB4 | func_ovl21_800CBCB4 | clamp position to a per-map box (maps 0x3035/37/38/39) | H |
 | 0x800CBECC | func_ovl21_800CBECC | child handler (kind 0x28, ability 0x18), else free | H |
-| 0x800CBF28 | func_ovl21_800CBF28 | child state 0: set up, then CC024 (asm, not matched) | L |
-| 0x800CBFE4 | func_ovl21_800CBFE4 | child state 1: CC024 | M |
+| 0x800CBF28 | func_ovl21_800CBF28 | child state 0: kind-4 ring sprite (D_800CC250; d 0 builds it: r 0x20, 0x202000 / 0), CC024, next | H |
+| 0x800CBFE4 | func_ovl21_800CBFE4 | child state 1: CC024 | H |
 | 0x800CC004 | func_ovl21_800CC004 | free the object | H |
-| 0x800CC024 | func_ovl21_800CC024 | child per-frame: rsin-driven motion `(t & 0x1F) << 7` (asm, not matched) | L |
+| 0x800CC024 | func_ovl21_800CC024 | child per-frame: at the spirit's projected point - 0x10, bob (rcos / rsin of (t & 0x1F) << 7), spirit's scale | H |
 
 **Notes.**
 * Clones: CB270 / CBECC effect-handler shape; CC004 free wrapper; CB7FC "puff and free" (ovl1f CB6CC).
-* Data: D_800CC134 step table (3) H; D_800CC140 kind-0x20 states (4) H; D_800CC150 quad offset table read by
-  CBA44 (8 s16 per quad, 0x30 bytes = 3 quads) M; D_800CC180 spirit states (CB2CC, CB3E0, CB4A4, then unknown;
-  0x44 bytes) M; D_800CC1C4 child states (CBF28, CBFE4, ...) M; D_800CC1EC, D_800CC22C image records H;
-  D_800CC250 used by CBF28 (docs/overlays.md) unknown; D_800CC298 saved copy of Musashi +0x154 H (what +0x154 is:
-  unknown).
-* CBA44 also writes b+0..+0xC plus *z into o+0x20..+0x2C (the GT4 stack prim's next words, likely its UVs with a
-  scroll) L.
-* Open: Musashi +0x15A = 1 every frame of state 3; what the two kind-0x28 children are; which engine tables hold
-  CAF20 / CAF28 / CAFCC.
+* Data: D_800CC134 step table (3) H; D_800CC140 kind-0x20 states (4) H; D_800CC150 two 0x18-byte quad records
+  read by CBA44 (four UV words, an xy offset at +0x10, a byte +0x14 and a u16 +0x16 for the prim) M; D_800CC180
+  spirit states (4 words to D_800CC190: CB2CC, CB3E0, CB4A4, one unknown) M; D_800CC190 / CC1A0 the two quads'
+  corner tables (8 s16) H; D_800CC1B0 4 UV-offset words (frame & 3) H; D_800CC1C0 one word, the first quad's
+  lower-corner offset and the second quad's UV offset H; D_800CC1C4 child states (CBF28, CBFE4, ...) M;
+  D_800CC1EC, D_800CC22C image records H; D_800CC250 the children's ring block H; D_800CC290 the spirit's
+  projected point (CB82C writes, CC024 reads) H; D_800CC298 the eased copy of Musashi +0x154 (his reference point,
+  above) H.
+* CBA44 also writes b+0..+0xC plus *z into o+0x20..+0x2C (the GT4 stack prim's UV words; *z is the 4-frame
+  offset D_800CC1B0[i] for the first quad) M.
+* Open: which engine tables hold CAF20 / CAF28 / CAFCC; what each stage does with +0x154 while it trails the
+  spirit.
 
 ### ovl22: ability 21, B.O. (MAIN.CD entry 28, slot 2, code 4232 B, 22 functions, 0 still asm)
 
@@ -1308,24 +1362,30 @@ package caller, M).
 * The fan quads use code 0x50000000 with func_80017758 (meaning of the code word not checked).
 * Open: func_8014964C (h_8014964C) placement for e = 1 flies, i.e. whether they are screen-space.
 
-### ovl23: ability 20, Rip-off (MAIN.CD entry 29, slot 2, code 1680 B, 11 functions, 2 still asm)
+### ovl23: ability 20, Rip-off (MAIN.CD entry 29, slot 2, code 1680 B, 11 functions, 0 still asm)
 
-**What it does.** A timed ability (no animation, Musashi keeps control: continuous, M). Start (CAEE0): pay once,
-spawn effect kind 0x38 with d = 0x8000 (the parent). Step 2 (CAF30): end the ability at D_80078EC8 == 0. The
-parent (state 0, d & 0x8000): +0x12 = 0x14, state 1 (CB0D0, asm: by its twin in ovl18 it emits pieces with a
-counter, M). A piece (state 0 without 0x8000): index i = e >> 15; a sprite (kind 3, func_8001CC3C) of the field
+**What it does.** A timed ability (no animation, Musashi keeps control: continuous, M): pieces spiral out of
+Musashi and each one leaves him thinner and taller for a moment; Satiate (ovl18) run the other way. Start (CAEE0):
+pay once, spawn effect kind 0x38 with d = 0x8000 (the parent). Step 2 (CAF30): end the ability at D_80078EC8 == 0.
+The parent (state 0, d & 0x8000): +0x12 = 0x14, state 1, CB0D0 (while D_80078EC1 == 0x14): a burst of 2 or 3
+pieces at a random angle (rand & 0xFFF), one every 2 frames (func_80146AB4(0x38, o, 0, 0, 0, d = 0x14, e = angle |
+(h << 16)), h cycling 0, 1, 2; a failed spawn ends the burst), then a pause of 0xE frames; every frame it relaxes
+Musashi's scale (while +0x74 < 0x1000: +0x74 += 0xE0, +0x70 = +0x74, +0x72 -= 0x38) and every 16 frames plays
+sound 0x5FB (func_8002D4C8); when the ability changes it resets the three scales to 0x1000 and frees itself. A
+piece (state 0 without 0x8000): index i = e >> 15 (0, 2, 4); a sprite (kind 3, func_8001CC3C) of the field
 overlay's shared image D_800D387C at the (x, y) pair D_800CB4A8[i], [i + 1], page byte (i >> 1) + 0x19, flags
-|= 0x50000000; e keeps its low half; CB2AC (asm) places it; a kind-3 effect is spawned at it (0x0CCCFFFC,
-0xE000C000); Musashi +0x74 and +0x70 = +0x74 - 0x300 and +0x72 += 0xC0 (three halfwords the engine sets to
-0x1000 with his model's scale at reset, engine 1364: a scale, M), sound 0x8E9; state 2 (CB2AC asm: moves relative
-to Musashi's position D_80126B5E/62/66 with a scale from a 4-entry table, docs/overlays.md, M). What "Rip-off" does
-in the game is not visible in the C: pieces pop out of Musashi with a puff and a sound and he is squashed thinner
-and taller each time; whether the pieces are items taken from enemies is unknown. The image D_800D387C is the one
-ovl18 (Satiate) pops pieces from as well.
+|= 0x50000000; e keeps its low half (the angle); CB2AC places it; a kind-3 effect is spawned at it (0x0CCCFFFC,
+0xE0009C00); Musashi +0x74 and +0x70 = +0x74 - 0x300 and +0x72 += 0xC0 (his scale halfwords D_80126BC8 / BCA /
+BCC: thinner and taller), sound 0x8E9; state 2, CB2AC: radius o+0x2C (from d = 0x14) += 4 a frame up to 0x1C0
+(about 107 frames, then free), angle += 0xA00000 / (r * 0x324), position = Musashi's position (D_80126B5E / 62 /
+66, y - 0x1C) + RotY(angle) (0, -r, r - r / 4), so it spirals up and out; sprite scale from the 4-entry table
+D_800CB4B4[t & 3] (a flicker; t its frame count +0x1C). What "Rip-off" does in the game beyond this is not in the
+C; whether the pieces are items taken from enemies is unknown. The image D_800D387C is the one ovl18 (Satiate)
+draws its icons from as well.
 
 **Entry and dispatch.** Image entry CAE0C (four records). Template CAE64 over D_800CB49C (3: CAEA8, CAEE0,
-CAF30) H. Effect handler CB460 (kind 0x38; states D_800CB4BC: CAF90, CB0D0, CB2AC) with NO ability test in it
-(the asm states may test). Stop hook: the empty CAF5C (M).
+CAF30) H. Effect handler CB460 (kind 0x38; states D_800CB4BC: CAF90, CB0D0, CB2AC) with no ability test in it
+(CB0D0 and CB2AC test 0x14 themselves). Stop hook: the empty CAF5C (M).
 
 | Address | Current name | Purpose | Conf. |
 |---|---|---|---|
@@ -1337,18 +1397,21 @@ CAF30) H. Effect handler CB460 (kind 0x38; states D_800CB4BC: CAF90, CB0D0, CB2A
 | 0x800CAF5C | func_ovl23_800CAF5C | empty (the stop hook, M) | M |
 | 0x800CAF64 | func_ovl23_800CAF64 | spawn effect kind 0x38, d 0x8000 | H |
 | 0x800CAF90 | func_ovl23_800CAF90 | effect state 0: parent -> state 1; piece: sprite, puff, squash Musashi, sound 0x8E9 | H |
-| 0x800CB0D0 | func_ovl23_800CB0D0 | parent state 1: emit pieces (asm, not matched) | M |
-| 0x800CB2AC | func_ovl23_800CB2AC | piece state 2: move about Musashi, scale table (asm, not matched) | M |
+| 0x800CB0D0 | func_ovl23_800CB0D0 | parent state 1: bursts of 2-3 pieces (one every 2 frames, 3 images in turn), relax Musashi's scale, sound 0x5FB every 16 frames; reset scales and free when the ability ends | H |
+| 0x800CB2AC | func_ovl23_800CB2AC | piece state 2: spiral up and out from Musashi (r += 4 from 0x14 to 0x1C0), scale flicker D_800CB4B4[t & 3]; then free | H |
 | 0x800CB460 | func_ovl23_800CB460 | effect handler: D_800CB4BC[o+2](o), no ability test | H |
 
 **Notes.**
 * Clone: the whole package is the twin of ovl18 (Satiate): CAEA8 / CAEE0 / CAF30 / CAF5C / CAF64 / CAF90 / CB0D0 /
   CB2AC / CB460 have the shape of ovl18 CAEF8 / CAF30 / CAF80 / CAFAC / CAFB4 / CAFE0 / CB168 / CB328 / CB5AC (same
-  D_800D387C sprites with a (x, y) table, docs/overlays.md calls CB0D0 the twin of ovl18 CB168).
-* Data: D_800CB49C step table (3) H; D_800CB4A8 s16 (x, y) pairs into D_800D387C, 5 pairs, indexed by an even i H;
-  D_800CB4BC state table (3 used of 11 words; the rest may hold CB2AC's scale table) M; D_800CB4E8, D_800CB528,
-  D_800CB568, D_800CB5A8 image records H.
-* Open: how many pieces CB0D0 emits (+0x12 = 0x14 is its counter, M), what restores Musashi's +0x70.. scale.
+  D_800D387C sprites with a (x, y) table); CB0D0 / CB2AC are CB168 / CB328 run the other way (pieces out from r 0x14
+  instead of icons in from 0x1C0, Musashi thinned instead of fattened, every 2 frames instead of 4, 3 images
+  instead of 8).
+* Data: D_800CB49C step table (3) H; D_800CB4A8 s16 (x, y) pairs into D_800D387C, 3 pairs (0xC bytes, i = 0, 2, 4)
+  H; D_800CB4B4 the pieces' 4 u16 scales (CB2AC) H; D_800CB4BC state table (3 used of 11 words) H; D_800CB4E8,
+  D_800CB528, D_800CB568, D_800CB5A8 image records H.
+* Settled by the C: +0x12 = 0x14 is the pieces' start radius, not a count (bursts go on until the ability ends);
+  CB0D0 restores Musashi's +0x70.. scale. Open: what the three piece images are (data).
 
 ### ovl24: ability 19, Toxin (MAIN.CD entry 30, slot 2, code 1612 B, 10 functions, 0 still asm)
 
@@ -1687,7 +1750,7 @@ D_ovl29_800CB290 s8 lift path, 3 bytes a frame, 0x38 bytes (H); D_ovl29_800CB2C8
 template table's contents and the role of CAEC4 / CAED8; which engine table holds CAEE0 / CB108 / CAF48; what an
 enemy does on hit 0x29 (the actual hurl flight).
 
-### ovl2a: ability 23, Clone (first function 0x800CAE0C, slot 2, code 4488 B, 28 functions, 1 still asm)
+### ovl2a: ability 23, Clone (first function 0x800CAE0C, slot 2, code 4488 B, 28 functions, 0 still asm)
 
 **What it does.** Clone drops two decoy models next to Musashi that later burst. Button steps (3): step 0
 (CAE98) waits for func_80161104 and starts; the start (CAEE0) refuses (hands back) if a 0x68 object kind 0x22 already
@@ -1734,7 +1797,7 @@ CB634, CB708, CB774). Effect 0x46: handler func_ovl2a_800CB8B4, states D_ovl2a_8
 | 0x800CB5A8 | func_ovl2a_800CB5A8 | Free the object and end the ability (func_80165A20) | H |
 | 0x800CB5D8 | func_ovl2a_800CB5D8 | Handler of an unknown 0x68 kind (ability 23 check) | H |
 | 0x800CB634 | func_ovl2a_800CB634 | Its init: model from part list d, random upward velocity, timer 0x40 | H |
-| 0x800CB708 | func_ovl2a_800CB708 | Its flight (asm, not matched; uses func_80162F08, three word copies) | L |
+| 0x800CB708 | func_ovl2a_800CB708 | Its flight: velocity = the +0x24 words (func_80162F08(o, 0, 0, 0) only clamps them), move, next state at the timer end | H |
 | 0x800CB774 | func_ovl2a_800CB774 | Free the 0x68 object | H |
 | 0x800CB794 | func_ovl2a_800CB794 | Blast: hit 0x33 on actors within 0xC0; actor kind 0x219 gets +0x60 set | H |
 | 0x800CB8B4 | func_ovl2a_800CB8B4 | Effect 0x46 handler (ability 23 check) | H |
@@ -1750,9 +1813,8 @@ CB634, CB708, CB774). Effect 0x46: handler func_ovl2a_800CB8B4, states D_ovl2a_8
 **Notes.** Clones: template; CAE98 wait step; CAFD4 / CB5D8 the effect-handler template with a local free; CB8B4
 the plain one; CB774 free wrapper; CB910 has the same structure as ovl2d CB860 (AVec direction table [d], ALVec base
 velocity, random jitter when e != 0, RotMatrixZYX + ApplyMatrixLV); CB794 is a radius-hit loop like ovl2b CB378
-(different radius, type, hit call). CB708 (asm): the symbol file lists func_80162F08, used by no C function, and
-docs/overlays.md describes it as three word assignments plus a call with AF(a, s32, 0x18): probably accelerate,
-copy the three words to the velocity, move, and advance on the timer (L). Data: D_ovl2a_800CBF94 step table (H);
+(different radius, type, hit call). CB708: func_80162F08(o, 0, 0, 0) (adds nothing, clamps), velocity = +0x24..+0x2C, move (func_80162FC0),
+next state (CB774, free) when the timer ends: a straight flight of 0x40 frames with no gravity (H). Data: D_ovl2a_800CBF94 step table (H);
 D_ovl2a_800CBFA0 two 12-byte model part lists (H); D_ovl2a_800CBFB8 / CBFD4 / CC01C state tables (H);
 D_ovl2a_800CBFE0 shard primitive with colour D_ovl2a_800CC010 (bytes CC010-CC012 r, g, b; CC013 the fade level) (M);
 D_ovl2a_800CC028 six AVec shard directions (H); D_ovl2a_800CC058 ALVec base shard velocity (H); D_ovl2a_800CC068 u16
@@ -1879,7 +1941,7 @@ outline, 9 (x, y) pairs shared between neighbouring quads (H); D_ovl2c_800CBC18 
 D_ovl2c_800CCA00 muzzle-flash part list (H). Open: what +0x4C..+0x54 (the muzzle world point CB574 stores) is used
 for; effect 7 vs 0x1F (probably map vs actor sparks).
 
-### ovl2d: ability 28, Homing (first function 0x800CAE14, slot 2, code 4128 B, 26 functions, 1 still asm)
+### ovl2d: ability 28, Homing (first function 0x800CAE14, slot 2, code 4128 B, 26 functions, 0 still asm)
 
 **What it does.** A homing missile. Button steps (3): step 0 (CAE90) waits and starts; the start (CAED8) refuses if
 6 or more 0x68 objects kind 0x25 exist, else sets the shared animation D_800D57F4 and pays BP; step 2 (CAF80) sets
@@ -1894,7 +1956,7 @@ target (func_8014C59C) and its pitch toward the target + D_ovl2d_800CAE0C (vy -0
 16 units a step (CB61C), drops a trail puff effect 0x50 on even frames, and tests hit type 0x2B (func_80163408(o,
 0x2B, 0, 0x40)); a hit (result 1, 2 or 4) hides the model, plays 0xA7D and starts the burst; after 0x28 frames it
 bursts anyway. The burst (CB424) spawns four spark effects 0x4E a frame for 8 frames (4 after a hit), then the
-object frees itself; it also dies if CB6F4 (asm) returns 0, if its y passes 0x400, or if the ability changes. Sparks
+object frees itself; it also dies if CB6F4 returns 0 (it left the screen), if its y passes 0x400, or if the ability changes. Sparks
 (effect 0x4E, states D_ovl2d_800CBEAC) are animated sprites (type 3, D_ovl2d_800CBE50, frames D_ovl2d_800CBE5C,
 yellow (0xC0, 0xC0, 0x40)) thrown along D_ovl2d_800CBEB8[d] with jitter, shrinking, then slowing, fading and
 rising. Trail puffs (effect 0x50, states D_ovl2d_800CBEF8) are animated sprites from the field overlay (D_800D387C,
@@ -1926,7 +1988,7 @@ is inferred from the spawn arguments each init reads: M.)
 | 0x800CB4D4 | func_ovl2d_800CB4D4 | Find the nearest on-screen hittable actor | H |
 | 0x800CB5CC | func_ovl2d_800CB5CC | Steer if the target is still hittable | H |
 | 0x800CB61C | func_ovl2d_800CB61C | Turn yaw and pitch toward the target + aim offset | H |
-| 0x800CB6F4 | func_ovl2d_800CB6F4 | Keep-alive test, 0 drops the missile (asm, not matched) | L |
+| 0x800CB6F4 | func_ovl2d_800CB6F4 | On-screen test: position through the world-to-screen matrix D_800AF648, 1 within +-0xAA x +-0x80 | H |
 | 0x800CB804 | func_ovl2d_800CB804 | Effect 0x4E handler | H |
 | 0x800CB860 | func_ovl2d_800CB860 | Spark init: animated sprite, direction d, jitter, yellow | H |
 | 0x800CBAAC | func_ovl2d_800CBAAC | Spark fly and shrink, then velocity / 4 | H |
@@ -1941,12 +2003,12 @@ is inferred from the spawn arguments each init reads: M.)
 **Notes.** Clones: template; CAE90 wait step; CAF80 marker-spawn step; CB02C bit-2 stop hook; CB040 same shape as
 ovl2b CB028; CB804 / CBC60 effect-handler template; CB4AC free wrapper; CB860 same structure as ovl2a
 CB910 (spark/shard spawn with direction table and jitter); CB4D4 is a best-of loop over the actor array (written
-with a goto loop). CB6F4 (asm, 0x110 bytes): docs/overlays.md says it returns 0 at its end and 1 from two halves;
-called once per flight frame before steering, 0 sets state 3 (free): a range / lifetime / validity test, details
-unknown. Data: D_ovl2d_800CAE0C aim offset AVec (H); D_ovl2d_800CBE34 step table (H); D_ovl2d_800CBE40 / CBEAC /
+with a goto loop). CB6F4: the position (+6 / +0xA / +0xE as a long vector) through the Work block's world-to-screen matrix
+D_800AF648 (D_800AF630.wsm), RTPS; 1 when |sx| <= 0xAA and |sy| <= 0x80 (no GTE flag test); called once per
+flight frame before steering, 0 sets state 3 (free): a missile that leaves the screen is dropped (H). Data: D_ovl2d_800CAE0C aim offset AVec (H); D_ovl2d_800CBE34 step table (H); D_ovl2d_800CBE40 / CBEAC /
 CBEF8 state tables (H); D_ovl2d_800CBE50 spark sprite record (M); D_ovl2d_800CBE5C spark animation frames (H);
 D_ovl2d_800CBEB8 six AVec spark directions (H); D_ovl2d_800CBEE8 ALVec base spark velocity (H); D_ovl2d_800CBF20 /
-CBF60 image records (H); D_ovl2d_800CC444 missile part list (H). Open: CB6F4's test; why the spawn passes d = 1 when
+CBF60 image records (H); D_ovl2d_800CC444 missile part list (H). Open: why the spawn passes d = 1 when
 d only offsets the yaw (a multi-missile variant left over?).
 
 ### ovl2e: ability 29, Grenade (first function 0x800CAE0C, slot 2, code 0xABC = 2748 B, 19 functions, 0 still asm)
@@ -2410,7 +2472,7 @@ entries. CD1F4 has the shape of the engine's kind-8 cleanup func_801752BC (engin
 D_ovl34_800CE08C 4 rotation vectors, D_ovl34_800CE0B8 orbit offset, D_ovl34_800CE8D4 shared yaw. Open: the
 spawner and kind of the CDD34 shot (dead code copied from ovl33's kind 0x12?), and CCC8C / CDA44's callers.
 
-### ovl35: slot-3 package, selection 6: a timed glide with a light trail (Sky scroll candidate) (first function 0x800CCB20, slot 3, code 0xBA8 = 2984 B, 12 functions, 2 still asm)
+### ovl35: slot-3 package, selection 6: a timed glide with a light trail (Sky scroll candidate) (first function 0x800CCB20, slot 3, code 0xBA8 = 2984 B, 12 functions, 0 still asm)
 
 **What it does.** Per-frame first call (CCB28): effect kind 0x3B on Musashi, a+0x1C8 = 0xBA (186 frames), hand back.
 The glide itself is engine code: in the jump/fall state func_8015AE2C (engine 11715), when func_80161A60 (selection 6
@@ -2421,15 +2483,25 @@ while active plays 0x8E1 (engine ~14290). func_80161A90 (engine 14565, every fra
 selection 6 and deletes all 0x3B effects at 0 (func_8014AC10); any hit ends it (engine 7060). The 0x3B effect is a
 trail: its init deletes other 0x3B effects and clears a 0xC4-byte ring buffer D_ovl35_800CD6E0 (4 header bytes:
 active, head index, count, brightness; 16 entries of two points); on a frame where CCB78 flagged it (+0x2C) it adds
-a segment (CCDE8(o, 1, 0x37), asm) and draws the trail (CCBC0: POLY_G4 strips between consecutive entries,
+a segment (CCDE8(o, 1, 0x37)) and draws the trail (CCBC0: POLY_G4 strips between consecutive entries,
 brightness falling by 0x10 per segment, red = b, green = blue = b / 2, identity matrix), otherwise it clears the buffer
-and resets (CCDE8(o, 0, 0)). A second effect (handler CD494) is a ring sprite (type 5, ring data D_ovl35_800CD7A4,
-colours 0 / 0x40 / 0x50, its matrix at o+0x38, sprite +0x1E = -0x7400) updated by CD314 (asm): probably the 0x3C
-spawned every 32 frames.
+and resets (CCDE8(o, 0, 0)). CCDE8 samples two points of Musashi's model (func_80148534, then func_80165FA4 and his
+model matrix: func_80149350 / RotTransSV): mode 0 resets the header (active 1, head 0, count 0, brightness 0xF4)
+and stores the pair at the head; mode 1 advances the head (16 entries, count capped at 0xF), stores a smoothed pair
+(midpoints of the new and the previous pair, the first point set 0x1000 / n = 74 units from the second along their
+line, n = 0x37), advances again and stores the new pair: two entries a flagged frame; mode 2 (brightness -0x10 a
+call, count trimmed to brightness >> 4, returns 1 and goes inactive below 0x10) has no caller in the package. A
+second effect (handler CD494) is a ring sprite (type 5, ring data D_ovl35_800CD7A4, colours 0 / 0x40 / 0x50, its
+matrix at o+0x38, sprite +0x1E = -0x7400: inner edge at 0xC00 of the radius, M) run by CD314 for 0x20 frames:
+every 8 frames it copies the matrix D_8011F75C (entry 0 of the engine's 2 x 0x2C list D_8011F750, registered at
+Musashi's reset by func_801468C8(&D_80126B58, 1)) into o+0x38, takes that entry's model visibility bit and x / y
+scale (D_8011F758[0]), sits at its translation (y - 8) with radius 0 and plays 0x8E2; the radius grows 0x10 a
+frame (func_800233CC); then it frees itself: four expanding band pulses, probably the 0x3C spawned every 32
+frames (M).
 
 **Entry and dispatch.** Start func_ovl35_800CCB20 (empty), per-frame func_ovl35_800CCB28 (no table). Engine-called:
 func_ovl35_800CCB78 (engine 11916, on the effect of kind 0x3B). Handlers: 0x3B func_ovl35_800CCB84 /
-D_ovl35_800CD6C8 = {CD4D0, CD58C}; func_ovl35_800CD494 / D_ovl35_800CD6D8 = {CD5F8, ?} (ring; 2 entries);
+D_ovl35_800CD6C8 = {CD4D0, CD58C}; func_ovl35_800CD494 / D_ovl35_800CD6D8 = {CD5F8, CD314} (ring; 2 entries; [1] by CD5F8's state++, M);
 func_ovl35_800CD458 / D_ovl35_800CD6D0 (2 entries, contents and kind unknown).
 
 | Address | Current name | Purpose | Conf. |
@@ -2439,20 +2511,19 @@ func_ovl35_800CD458 / D_ovl35_800CD6D0 (2 entries, contents and kind unknown).
 | 0x800CCB78 | func_ovl35_800CCB78 | engine-called on the 0x3B effect each gliding frame: +0x2C = 1 | H |
 | 0x800CCB84 | func_ovl35_800CCB84 | trail effect 0x3B handler | H |
 | 0x800CCBC0 | func_ovl35_800CCBC0 | draw the trail ring buffer as fading quads; returns the segment count | H |
-| 0x800CCDE8 | func_ovl35_800CCDE8 | asm, not matched: add (1, brightness) or reset (0, 0) a trail segment | M |
-| 0x800CD314 | func_ovl35_800CD314 | asm, not matched: update the ring sprite (init calls it, then probably state 1) | L |
+| 0x800CCDE8 | func_ovl35_800CCDE8 | trail buffer: mode 0 reset + store the sampled pair; 1 add a smoothed pair and the new pair (width 0x1000 / n); 2 fade (no caller) | H |
+| 0x800CD314 | func_ovl35_800CD314 | ring state 1: 4 pulses in 0x20 frames on the D_8011F750 entry-0 matrix, radius +0x10 a frame, sound 0x8E2 each; free | H |
 | 0x800CD458 | func_ovl35_800CD458 | effect handler over D_ovl35_800CD6D0 (kind unknown) | M |
 | 0x800CD494 | func_ovl35_800CD494 | ring effect handler over D_ovl35_800CD6D8 (probably 0x3C) | M |
 | 0x800CD4D0 | func_ovl35_800CD4D0 | trail init: delete other 0x3B, clear buffer, reset, state++ | H |
 | 0x800CD58C | func_ovl35_800CD58C | trail step: flagged -> add segment and draw, clear flag; else clear buffer | H |
 | 0x800CD5F8 | func_ovl35_800CD5F8 | ring init: sprite type 5, ring data, matrix at o+0x38, CD314, state++ | H |
 
-**Notes.** The asm pair uses what the C does not (abil/symbol_addrs_ovl35.txt): func_80148534 (two points of
-Musashi's model, as the engine's charge effect func_8016A08C uses it), func_80149350, func_80165FA4 (rotate two
-vectors by a model's scale matrix), func_800233CC (ring), D_800AE620, D_8011F758 / D_8011F75C (the 2 x 0x2C list
-at D_8011F750, func_801468C8), func_80147324 (a sound). That fits CCDE8 = sample two model points into the trail and
-CD314 = build the ring. ovl35 is the only package whose technique is mostly engine code. Open: the D_ovl35_800CD6D0
-handler's kind and entries.
+**Notes.** CCDE8 uses func_80148534 (two points of Musashi's model, as the engine's charge effect func_8016A08C
+uses it), func_80165FA4 (rotate two vectors by a model's scale matrix) and func_80149350; CD314 uses D_8011F758 /
+D_8011F75C (the 2 x 0x2C list at D_8011F750, func_801468C8), func_800233CC (ring) and func_80147324. ovl35 is the
+only package whose technique is mostly engine code. Open: the D_ovl35_800CD6D0 handler's kind and entries; what
+entry 0 of D_8011F750 is (kind 1, owner Musashi; a shadow would fit the ring at y - 8, L).
 
 ## 6. Naming proposals
 
@@ -2828,7 +2899,7 @@ proposed a name for the same engine symbol, the first is kept and the other note
 
 ## 7. Open questions and what is left
 
-**Covered.** All 35 packages, every function (660: 636 in C, 24 still `INCLUDE_ASM` and described from their callers),
+**Covered.** All 35 packages, every function (660, all in C since a75e323; the 24 matched there were re-read from it),
 the entry and dispatch shape, the engine side of starting, paying for, timing and ending an ability, the clone
 groups, and 276 package plus 75 engine naming proposals.
 
@@ -2840,6 +2911,13 @@ groups, and 276 package plus 75 engine naming proposals.
 * Steel's lasting effect is in the engine: 450 frames of model kind 6 drawn by ovl28's renderer, damage halved.
 * Stun's func_ovl13_800CB0E8 is called by the engine's enemy reaction step func_80130438.
 * Map works only on maps 0x305C-0x3066 (the engine's fizzle check).
+* From the 24 functions matched in a75e323: Satiate draws 8 icons into Musashi and swells him, Rip-off throws 3
+  pieces out and thins him (ovl18 / ovl23); Bowl's power byte curves the ball sideways (0x28 = straight) and the
+  ball sinks on surface byte 2; Homing drops a missile that leaves the screen; Sublime's spirit is stick-steered and
+  drags Musashi's reference point +0x154 (D_80126CAC, what stage code reads as his position) after it; Shrink's
+  trail is four twisting ribbons; Stun's kind-0x15 effect is a spiral of 14 sprites over the stunned head.
+* Ring sprites' +0x1E & 0x1FFF is the inner edge's fraction of the radius (func_800226C0: 0 a disc, 0x1000
+  nothing; bit 0x8000 per-segment depth) (M): Mint, Firefly and ovl35 rings hollow out with it.
 
 **Open (data that is not in the repository would settle most of them).**
 * The per-ability tables in the stage data: D_80190170 (frame handler), D_80190364 (stop hook), D_801902E8 (after-load
@@ -2851,14 +2929,16 @@ groups, and 276 package plus 75 engine naming proposals.
   charging).
 * Names the C does not back: ovl19 "Shrink" never scales Musashi in this package (it fires four trail shots with hit
   type 0x1E: if anything shrinks, it is the struck enemy, in its own reaction to hit type 0x1E, not traced; Musashi's
-  own small state is the engine's stats +0x22 bit 15 -> scale 0x555 in func_8014B190); Satiate's (ovl18) and Rip-off's (ovl23) in-game effects are not visible (ovl23 is ovl18's twin); the
+  own small state is the engine's stats +0x22 bit 15 -> scale 0x555 in func_8014B190); Satiate's (ovl18) and Rip-off's (ovl23) effects beyond their visuals (icons drawn in, pieces thrown out, Musashi's scale) are not in the C; the
   cut abilities 6 and 18 (ovl1d, ovl1e). Which stat D_80078EA4 is (Sleepy drains it, Mint holds it full).
 * Objects whose spawner is not in any C: Map's kind-0x17 trail sprites, ovl1c's kind-0x1C rings, ovl2a's
   CB5D8 object; what stage actor kind 0x15C does with the +0xCC target Firefly gives it; Hurl's button step table.
-* The 24 asm functions (ovl13 CB138 / CB56C, ovl18 CB168 / CB328, ovl19 CB578 / CB9F8 / CBE38, ovl1b CAF94 / CB0C8,
-  ovl1c CB8A4 / CB944, ovl1f CB300, ovl20 CB278 / CB470, ovl21 CB4A4 / CB82C / CBF28 / CC024, ovl23 CB0D0 / CB2AC,
-  ovl2a CB708, ovl2d CB6F4, ovl35 CCDE8 / CD314): their rows are M or L until they are matched.
-* docs/overlays.md's counts are behind the C (ovl22 22 / 22 matched, not 21; 24 asm left, not 29) and its "31-entry"
+* Left by the 24 functions matched in a75e323 (ovl13 CB138 / CB56C, ovl18 CB168 / CB328, ovl19 CB578 / CB9F8 /
+  CBE38, ovl1b CAF94 / CB0C8, ovl1c CB8A4 / CB944, ovl1f CB300, ovl20 CB278 / CB470, ovl21 CB4A4 / CB82C / CBF28 /
+  CC024, ovl23 CB0D0 / CB2AC, ovl2a CB708, ovl2d CB6F4, ovl35 CCDE8 / CD314; all rows now H): data only (Bowl's
+  surface bytes 2 / 0x19, Shrink's trail colours D_ovl19_800CC114, the Satiate / Rip-off images) and what entry 0 of
+  the engine's D_8011F750 list is (ovl35's ring sits on it).
+* docs/overlays.md's counts are behind the C (ovl22 22 / 22 matched, not 21; 660 / 660 matched since a75e323, while it still says 631 with 29 left) and its "31-entry"
   table before ovl28's code is 29 words.
 
 **Not done in this card.** Nothing was checked against the running game or the package data. The package sections
