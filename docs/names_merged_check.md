@@ -9,12 +9,11 @@ verdict).
 
 | batch | sampled | CORRECT | VAGUE | WRONG | UNSURE | WRONG % (95%) | VAGUE % (95%) | recommendation |
 |---|---|---|---|---|---|---|---|---|
-| exe_H | 60 | 58 | 1 | 0 | 1 | 0.0 (0-6) | 1.7 (0-9) | (pending) |
-| engine_H | 60 | 57 | 1 | 0 | 2 | 0.0 (0-6) | 1.7 (0-9) | (pending) |
-| stage_H | 60 | 53 | 2 | 1 | 4 | 1.7 (0-9) | 3.3 (1-11) | (pending) |
-| abil_H | 60 | 59 | 0 | 0 | 1 | 0.0 (0-6) | 0.0 (0-6) | (pending) |
-
-Not yet checked: ovl.
+| exe_H | 60 | 58 | 1 | 0 | 1 | 0.0 (0-6) | 1.7 (0-9) | apply as is (take the one VAGUE fix) |
+| engine_H | 60 | 57 | 1 | 0 | 2 | 0.0 (0-6) | 1.7 (0-9) | apply with review (the SetEffect* / ClearEffect* helper family) |
+| stage_H | 60 | 53 | 2 | 1 | 4 | 1.7 (0-9) | 3.3 (1-11) | apply with review (grep-check r275 evidence; re-check sc06_029) |
+| abil_H | 60 | 59 | 0 | 0 | 1 | 0.0 (0-6) | 0.0 (0-6) | apply as is |
+| ovl_H | 60 | 59 | 0 | 0 | 1 | 0.0 (0-6) | 0.0 (0-6) | apply as is |
 
 ## Method
 
@@ -315,3 +314,133 @@ Counts: CORRECT 53, VAGUE 2, WRONG 1, UNSURE 4. WRONG 1.7% (95% Wilson 0-9%), VA
 
 Counts: CORRECT 59, VAGUE 0, WRONG 0, UNSURE 1. WRONG 0.0% (95% Wilson 0-6%), VAGUE 0.0% (0-6%), WRONG + VAGUE 0.0% (0-6%).
 
+## ovl_H.csv
+
+290 rows, 219 eligible, 60 sampled (0 of them comment-only evidence; 3 comment-only rows were eligible).
+
+| # | address | current | proposed | verdict | reason | better name |
+|---|---|---|---|---|---|---|
+| 0 | 0x800CEE2C | func_800CEE2C | CutLogoMain | CORRECT | debug text for the cut number, then g_CutLogoSteps[step] for steps < 4; the ovl3a mode entry |  |
+| 1 | 0x800CEF00 | func_800CEF00 | DebugMenuInit | CORRECT | ClearObjectPools, debug labels, selector / pad state reset, SetProgress, NextStep |  |
+| 2 | 0x800CEF04 | func_800CEF04 | TitleInit | CORRECT | (ovl39 body) clears pools, sound, title brightness 0x80, cursor / idle / result / menu state, movie check; step 0 |  |
+| 3 | 0x800CEF60 | func_800CEF60 | CutLogoFadeIn | CORRECT | FadeDone(0) then NextStep |  |
+| 4 | 0x800CF068 | func_800CF068 | CutPrologueInit | CORRECT | LoadPatPicture(pic 1), y 0, sub-step 0, StartFade(0) |  |
+| 5 | 0x800CF0F4 | func_800CF0F4 | CutPic1FadeIn | CORRECT | draws picture 1 at its y, next sub-step when the fade is done |  |
+| 6 | 0x800CF0FC | D_800CF0FC | g_TrialEndSteps | CORRECT | ovl3b's entry indexes it by Work.step |  |
+| 7 | 0x800CF114 | func_800CF114 | LicenceLoadEntry2 | CORRECT | once: RequestLoad of the next archive entry into the sound load table, sets g_LicenceEntry2Loaded; the boot logo steps call it |  |
+| 8 | 0x800CF13C | D_800CF13C | g_TrialEndTimer | CORRECT | TrialEndInit zeroes it, TrialEndHold leaves at > 300 or a button |  |
+| 9 | 0x800CF148 | func_800CF148 | CutPic1Scroll | CORRECT | picture 1 y -1 per frame, fade out at -0x110; skip test first |  |
+| 10 | 0x800CF180 | func_800CF180 | DrawBootLogo | CORRECT | two prebuilt SPRT packets linked at OT 0xFFF; every boot-logo step calls it |  |
+| 11 | 0x800CF300 | func_800CF300 | TitleFadeOut | CORRECT | brightness -4, at < 0 ClearImage the whole VRAM page and NextStep |  |
+| 12 | 0x800CF33C | func_800CF33C | CutPic2FadeOut | CORRECT | draws picture 2 at x, next sub-step when the fade out is done |  |
+| 13 | 0x800CF3B8 | func_800CF3B8 | FieldLoadLoopPlain | CORRECT | runs the state-16 loader without a screen wipe until D_80114E98, then state 7 |  |
+| 14 | 0x800CF510 | func_800CF510 | FieldLoadReset | CORRECT | ResetMallocHeap, ClearObjectPoolsAlt, ResetBgmPackStep; full reload -> next sub-step, else 3 |  |
+| 15 | 0x800CF584 | func_800CF584 | FieldLoadReloadAbility | CORRECT | full reload: LoadAbilityPackage(D_80078EC1) (or none) then next sub-step |  |
+| 16 | 0x800CF714 | func_800CF714 | FieldLoadBaseStage | CORRECT | ForgetStageImage, LoadMapStage, mark loaded, map id = base, next sub-step |  |
+| 17 | 0x800CFCBC | func_800CFCBC | DebugApplyPresets | CORRECT | DebugPresetBase .. DebugPreset5 called up to the level |  |
+| 18 | 0x800CFDB4 | func_800CFDB4 | DebugSceneSelect | CORRECT | pad on the area / scene selector, sets Work.mapId / mapGroup, presets, progress |  |
+| 19 | 0x800D0214 | func_800D0214 | LoadMapFileAt | CORRECT | the map's archive entry via LoadFileStep with its sound id; FieldLoadSubRoom |  |
+| 20 | 0x800D0440 | func_800D0440 | AltTitleFadeOutFinish | CORRECT | after the fade: done + result by cursor, ClearImage |  |
+| 21 | 0x800D0450 | func_800D0450 | DebugRowDispatch | CORRECT | g_DebugRowTable[cursor].fn() for cursor < 5 |  |
+| 22 | 0x800D05E8 | func_800D05E8 | PickMapMusic | CORRECT | g_MusicPicker(progress) or 0; LoadMapMusic |  |
+| 23 | 0x800D065C | func_800D065C | ClearSoundStates | UNSURE | zeroes six globals (D_801151F8, D_80126AE8, D_80127500, D_8012704C, D_801201F0, D_80127050); ResetFieldSound calls it, but none of the six is shown to be sound state in the C here |  |
+| 24 | 0x800D06BC | func_800D06BC | AltTitleFadeIn | CORRECT | brightness +4 to 0x80, NextStep |  |
+| 25 | 0x800D12D0 | func_800D12D0 | DrawAltTitleHigh | CORRECT | five 640x480 SPRT strips at the title brightness plus text and cursor |  |
+| 26 | 0x800D1368 | D_800D1368 | g_CutPic1Y | CORRECT | set 0 at init, decremented by the scroll to -0x110 |  |
+| 27 | 0x800D136C | D_800D136C | g_CutPic2X | CORRECT | set -0x340 after the fade, incremented to 0x140 by the scroll |  |
+| 28 | 0x800D1938 | func_800D1938 | MapEnterBegin | CORRECT | SaveEntryVitals, clear Work A3E1, step++, then MapEnterRun |  |
+| 29 | 0x800D1D14 | func_800D1D14 | AltTitleSetOptionText | CORRECT | SetDebugText with the option's label or the off text; the blink step alternates |  |
+| 30 | 0x800D1DB0 | func_800D1DB0 | GetMapChangeKind | CORRECT | 1 or 2 from sub-room kind / stage-load need; FinishMapChange switches on it |  |
+| 31 | 0x800D1F58 | func_800D1F58 | SaveEntryVitals | CORRECT | HP / BP / money copied aside; MapEnterBegin |  |
+| 32 | 0x800D1F90 | func_800D1F90 | RestoreEntryVitals | CORRECT | the reverse copy; ApplyGameOverRule continue cases |  |
+| 33 | 0x800D1FC8 | func_800D1FC8 | PullTowardCamera | CORRECT | adds the normalised direction to the active camera >> sh to the point |  |
+| 34 | 0x800D20C0 | func_800D20C0 | PullTowardCameraDir | CORRECT | same, writing the direction to out; callers then AnglesFromVector |  |
+| 35 | 0x800D222C | func_800D222C | SpawnSpriteType2 | CORRECT | AllocSprite16To3E + InitSpriteKind2, +0x27 = c |  |
+| 36 | 0x800D2294 | func_800D2294 | SpawnSpriteType6 | CORRECT | AllocSprite16To3E + InitShapeSpriteKind6 |  |
+| 37 | 0x800D23D0 | func_800D23D0 | AnglesFromVector | CORRECT | pitch = -ratan2(y, /xz/), yaw = ratan2(x, z), roll 0 |  |
+| 38 | 0x800D2468 | func_800D2468 | ClearStageMenu | CORRECT | ZeroFill of the 0xC4-byte block at D_80115110 (engine batch: g_StageMode) and two words; see the note on Menu / Mode |  |
+| 39 | 0x800D24A0 | func_800D24A0 | OpenStageMenu | CORRECT | copies the other OT header, mode into D_80115110, D_800B9A13 = mode + 1, prim buffers, sound 0x14; shops call it with 3 / 4 |  |
+| 40 | 0x800D2CA8 | func_800D2CA8 | DecDCTinSync | CORRECT | (ovl39 body) a != 0: MDEC status bit 29, else MdecInSync: the LIBPRESS DecDCTinSync shape |  |
+| 41 | 0x800D30D0 | func_800D30D0 | MdecTimeout | CORRECT | prints the MDEC registers and resets the MDEC; both sync loops call it on time-out |  |
+| 42 | 0x800D3274 | func_800D3274 | MessageEventOpen | CORRECT | OpenMessage when +0x198 is set (step + 1), else step + 2 |  |
+| 43 | 0x800D334A | D_800D334A | g_DebugClock | CORRECT | debug options add / subtract 60 and 15 minutes; copied to the status clock on select |  |
+| 44 | 0x800D3624 | D_800D3624 | g_AltTitleOptionText | CORRECT | label pointers indexed by option |  |
+| 45 | 0x800D3630 | D_800D3630 | g_AltTitleOptionSlot | CORRECT | debug-text slot records indexed by option |  |
+| 46 | 0x800D375C | D_800D375C | g_MusicPicker | CORRECT | SetMusicPicker stores it, PickMapMusic calls it with progress |  |
+| 47 | 0x800D3764 | D_800D3764 | g_AbilityPackageTable | CORRECT | LoadAbilityPackage reads file and sound id per package |  |
+| 48 | 0x800D3C0C | D_800D3C0C | g_LicenceEntry2Loaded | CORRECT | cleared at init, set when the load request is taken, the logo wait needs it |  |
+| 49 | 0x800D3C10 | D_800D3C10 | g_LicenceBrightness | CORRECT | 0 at init, +16 to 0x80 in the fade-in |  |
+| 50 | 0x800D4B64 | D_800D4B64 | g_DebugAreaTable | CORRECT | { name, items } read by the selector and init |  |
+| 51 | 0x800D4C68 | D_800D4C68 | g_DebugRowTable | CORRECT | DebugRowDispatch indexes it |  |
+| 52 | 0x800D4C88 | D_800D4C88 | g_DebugArea | CORRECT | selector area index, reset at init |  |
+| 53 | 0x800D4CA0 | D_800D4CA0 | g_DebugPadLastHeld | CORRECT | key-repeat: compared with the held pad, counter reset to 6 on change |  |
+| 54 | 0x800D942C | D_800D942C | g_TitleMovies | CORRECT | CdSearchFile / StrPlayMovie on [GetTitleMovieIndex()] |  |
+| 55 | 0x800D946C | D_800D946C | g_StrRingBuf | CORRECT | StSetRing(buffer, 0x20) in strInit |  |
+| 56 | 0x800EC67C | D_800EC67C | g_TitleIdleFrames | CORRECT | zeroed on input, incremented while idle |  |
+| 57 | 0x800EC690 | D_800EC690 | g_TitleMenuState | CORRECT | 0 at init, 1 after the white fade-in, switched on in the title loop |  |
+| 58 | 0x800EC6A0 | D_800EC6A0 | g_TitleFadeInDone | CORRECT | set when ClutListFadeIn returns 0 |  |
+| 59 | 0x800EC9E0 | D_800EC9E0 | g_StrSkipRequested | CORRECT | cleared before the movie, set on Start (with the skip countdown and sound fade) |  |
+
+Counts: CORRECT 59, VAGUE 0, WRONG 0, UNSURE 1. WRONG 0.0% (95% Wilson 0-6%), VAGUE 0.0% (0-6%), WRONG + VAGUE 0.0% (0-6%).
+
+## Error patterns
+
+Overall: 300 rows, 286 CORRECT, 4 VAGUE, 1 WRONG, 9 UNSURE. WRONG + VAGUE = 5 / 300 = 1.7% (95% Wilson
+0.7-3.8%). No batch shows a high error rate; the errors cluster in two places, not spread by model or card.
+
+1. **r272 (engine): the `*Effect*` object helpers are named too narrowly.** `SetEffectAccel` (0x80146DE8, VAGUE)
+   writes +0x24..+0x2C on whatever it is given: stage player-motion handlers call it next to `SetPlayerMotion` /
+   `SetFallSpeed`, `StepToward` calls `ClearEffectAccel` on any walker, and ability packages call it on Obj68
+   bullets (abil rows 24 / 25 here). The same holds for the whole run 0x80146C98-0x80146E98 in engine_H.csv
+   (10 rows: `SetEffectState`, `NextEffectState`, `PrevEffectState`, `ClearEffectVel`, `ClearEffectAccel`,
+   `SetEffectAccelV`, `SetEffectAccel`, `SetEffectAccelClamped`, `SetEffectTimer`, `TickEffectTimer`; 400+ calls
+   in stg/ alone). They are generic object-record helpers (effects, Obj68s, the player's action records). Rename
+   the family together (`SetObj*` / `NextObjState` / `TickObjTimer` or similar) rather than one by one; also the
+   "accel" reading of +0x24 is not shown by the C (the `Mover` struct has accel at +0x44), so the local card should
+   check one effect-record layout before choosing the word.
+2. **r275 (stage): short evidence that names a neighbour's call.** The one WRONG row, `SpawnWeakPoints`
+   (sc06_029 0x80180A70), has evidence "5 x SpawnActorArg(0x294)", but that loop is in func_sc06_029_8017EBC4,
+   whose own row says `BossCoreInit` "spawns 0x2EF" (not in the sample; also H in stage_H.csv). 0x80180A70 is the
+   post-boss sequence (debris rings of 0x32B, camera shake, EndEvent, GiveItem(0x24)). The two rows look swapped
+   or shifted in r275's sc06_029 table, so that table should be re-read as a whole. r275 evidence is a few words
+   per row ("SetFlag, TakeItem, OpenMessage"), and the C usually confirms it, but a cell that names a specific
+   call can be checked mechanically (grep the body for that call / constant) before applying.
+3. **r275 (stage): names that leave out the point.** Two VAGUE rows name a function after its flag / var
+   (`TalkerFlag106`, `SetFlag124Var8A`) when the body is an item hand-over or a gift. Not misleading, just weak;
+   the r275 doc already uses this "Thing + flag number" style for many rows, so expect more of them.
+4. **UNSURE rows** (9) are mostly one-word claims the C in reach cannot test: "Tough" enemy, "Bgm" pack,
+   "Glow" effect, "Face" script, a "Scale" ramp, whether `BossHit*` is the boss or the thing hitting it, which
+   ovl36 globals are sound state. None of them reads as wrong; they rest on other evidence (actor data, sibling
+   functions) the local card can keep or downgrade to M.
+5. **exe (r274)**: one VAGUE: `SaveCardStep` runs check / save / load / mode 3 (`MemCardStep`). Otherwise the
+   r274 rows were the most precise in the sample (their evidence quotes the C).
+6. **abil / ovl (r271)**: no WRONG or VAGUE. Style only, not counted: some ovl32-ovl35 / ovl2e / ovl2f names lack
+   the `Pkg_` prefix the r271 convention gives the other packages (`GlideStart`, `BarrierStart`, `FlameStart`,
+   `GrenadeObjUpdate`, `JavelinGlowUpdate`); and ovl36 calls the 0xC4-byte block at 0x80115110 the "stage menu"
+   (`OpenStageMenu`, `ClearStageMenu`) while engine_H calls it `g_StageMode`. Both names fit the C (shops open it);
+   pick one word for both batches.
+
+## Recommendation per batch
+
+| batch | recommendation | why |
+|---|---|---|
+| exe_H (466) | apply as is | 0 WRONG / 1 VAGUE in 60; apply `MemCardStep` from the fixes file |
+| engine_H (508) | apply with review | 0 WRONG; the one VAGUE is a 10-row family (see pattern 1): hold those 10 rows, apply the rest. Comment-only rows (94 eligible) were sampled at 5 of 60 by design; the 5 sampled were all CORRECT, but that is too few to clear them: if time allows, spot-check 10 more of them before a bulk apply |
+| stage_H (631) | apply with review | 1 WRONG / 2 VAGUE / 4 UNSURE in 60 (the highest share of doubts). Re-read the sc06_029 table before applying it; grep-check rows whose evidence names a specific spawn kind, flag or call; flag-number names can go in as is and be improved later |
+| abil_H (267) | apply as is | 0 / 0 in 60 (upper bound about 6% each) |
+| ovl_H (290) | apply as is | 0 / 0 in 60; settle the stage menu / mode word with the engine batch |
+
+None of the five batches needs a full re-check before applying. A 0-of-60 result still allows an error rate up to
+about 6% at 95% confidence, so "apply as is" means applying with the usual match check, not as proven.
+
+## Limits of this check
+
+* The sampler finds a definition by its current name across `src/`; two ovl:39 rows (`func_800CEF04`,
+  `func_800D2CA8`) share their current name with ovl36 functions, and the dump showed the ovl36 body. Both were
+  re-read in `src/ovl39/` by hand before judging (noted in their rows). The callee annotations had the same
+  collision for a few ovl38 / ovl39 names; they were ignored where they did not match the overlay.
+* Bodies over 34 lines were read in part (first 28, last 6) unless the verdict needed more, in which case the
+  rest was read in `src/`.
+* Up to three uses per row were read, often from one file; a name that is right in the sampled uses but wrong
+  somewhere else would be missed.
+* Stage functions are mostly called through tables (1 use = the definition), so their check is the body alone.
