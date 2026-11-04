@@ -130,3 +130,88 @@ Two families of three-part copies; several are byte-identical twins.
 | 0x80014564 | func_80014564 | ZeroRect | zero 16 bytes (libc memset) | L | c23F0: memset(a, 0, 0x10). no callers; "16 bytes" fits a RECT pair or an SVECTOR pair |
 | 0x800166E8 | func_800166E8 | ZeroBytes | zero n bytes one at a time | H | c23F0. no callers |
 | 0x80016714 | func_80016714 | ZeroFill | zero n bytes, word stores between unaligned head and tail | H | c23F0 (its extern already says "zero-fills size bytes"). 273 calls / 86 files plus 22 in the EXE (ResetSystems clears Work with it) |
+
+## Screen primitives, fades and the image queue (0x80015AD0-0x80018450)
+
+Two ordering tables are drawn each frame: the world OT (GsOT headers D_800A6518[2], 0x14 bytes each, `.org` at
+D_800A651C, 4096 entries in g_WorldOtTable) and a small front OT (D_800AE7B8[2] / D_800AE7BC). Screen coordinates are
+centred (-160..160, -120..120); the screen size is D_800AF7BC / D_800AF7BE (SetScreenMode writes them).
+
+The **DrawPrim** family takes a shape record (vertices as s16 x, y, z, pad at +0, +8, +0x10, +0x18, then colours, UVs,
+a flags word and a CLUT byte) and an optional matrix: with a matrix the vertices are transformed (SetGteLocalMatrix,
+RotTransPers3/4 or inline RTPT) and the OT depth is the GTE's; without one ("Screen") they are screen x, y with the
+depth in the first vertex's z. The flags word: bit 30 semi-transparent, bits 28-29 the blend mode, bits 24-25 the
+texture depth. Each core function has thin wrappers; the wrapper names say which arguments they fix.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80015B6C | func_80015B6C | DrawGradientRect | a vertical-gradient POLY_G4 (two colours) at the back of the world OT, with its draw-mode packets | H | c23F0: code 0x38, top two vertices colour 0, bottom two colour 1, OT entry 0xFFF. 4 calls / 1 file (ovl36 sky bands: `(-0xA0, y, 0x140, h, colours...)`) |
+| 0x80015D4C | func_80015D4C | DrawRect | a flat POLY_F4 rectangle at OT depth z, semi-transparent with blend mode m when m < 4 | H | c23F0: code 0x28 / 0x2A, then AddDrawModeAbr. 8 calls / 4 files: `(-0xA0, -0x78, 0x140, 0xF0, c, c, c, 0x20, 2)` |
+| 0x80015F04 | func_80015F04 | DrawRectOutline | a rectangle outline of four LINE_F2 | H | c23F0: code 0x40 / 0x42, four corners. 2 calls / 1 file (menu frames, with DrawRect) |
+| 0x80016110 | func_80016110 | DrawScreenHalfDark | a full-screen black blend-mode-0 quad at OT 0 | M | c23F0. no callers |
+| 0x80016224 | func_80016224 | DrawFadeBlack | a full-screen grey quad in subtract mode (abr 2): colour 0xFF is black, 0 no change; z 0 puts it in the front OT | H | c23F0: code 0x2A, abr 2. 19 calls / 8 files; StartFade / FadeStep draw with it |
+| 0x80016450 | func_80016450 | DrawFadeWhite | the same in add mode (abr 1): 0xFF is white | H | c23F0: abr 1. 30 calls / 14 files: `func_80016450(0xFF, 0)` (flashes) |
+| 0x80016638 | func_80016638 | AddDrawModeAbr | link a draw-mode packet selecting blend mode abr at OT depth z | H | c23F0: an 8-byte packet 0xE1000000 \| abr << 5. 35 calls / 18 files: `func_80016638(&D_800A6518[frame], 0x10, 1)` |
+| 0x800167B8 | func_800167B8 | StartFade | start a fade to / from black: kind < 4 starts black (fade in), >= 4 starts clear (fade out) | H | c23F0: level (Work+0x19E, D_800AF7CE) = 0, DrawFadeBlack(kind < 4 ? 0xFF : 0). 222 calls / 147 files (every stage: `func_800167B8(0)` on entry, `(4)` before leaving) |
+| 0x800167F0 | func_800167F0 | FadeStep | advance the fade by speed D_80062BA0[kind & 3] (index 0: by Work.vsyncMode) and draw it; 1 when finished | H | c23F0. 197 calls / 147 files: `return (func_800167F0(0) & 0xFFFF) != 0;` |
+| 0x800168B4 | func_800168B4 | ResetFade | fade level = 0 | H | c23F0. no callers |
+| 0x800168C4 | func_800168C4 | FadeTimerStep | advance the fade level without drawing; 1 when it is full and Work.dispIdx is set | M | c23F0. no callers |
+| 0x80016940 | func_80016940 | StartFadeWhite | StartFade toward white (DrawFadeWhite) | H | c23F0. 5 calls / 5 files |
+| 0x80016978 | func_80016978 | FadeWhiteStep | FadeStep toward white | H | c23F0. 7 calls / 5 files: `if (func_80016978(4) & 0xFFFF)` |
+| 0x80016A7C | func_80016A7C | DrawPrimLineG2 | a gouraud line from a shape record, optional matrix | H | c23F0: SetLineG2, RotTransPers3, AddPrimFlat |
+| 0x80016A3C | func_80016A3C | DrawPrimLineG2Screen | DrawPrimLineG2(a, 0) | H | c23F0. 1 call |
+| 0x80016A5C | func_80016A5C | DrawPrimLineG2Mtx | DrawPrimLineG2(a, m) (declared `(void)`, passes its registers on) | H | c23F0. 41 calls / 39 files: `func_80016A5C(&line, &m)` |
+| 0x80016B60 | func_80016B60 | DrawPrimLineG3Mtx | a three-point gouraud line, transformed | H | c23F0: SetLineG3, RotTransPers3. no callers |
+| 0x80016C28 | func_80016C28 | DrawPrimLineG4Mtx | a four-point gouraud line, transformed | H | c23F0: SetLineG4, RTPT + RTPS. no callers |
+| 0x80016D78 | func_80016D78 | DrawPrimFT3Mtx | a textured triangle, transformed | H | c23F0: SetPolyFT3, GetTPage / GetClut from the record. no callers |
+| 0x80016F18 | func_80016F18 | DrawPrimFT4 | a textured quad from a shape record, optional matrix; direct != 0 uses a 15-bit texture page | H | c23F0: SetPolyFT4, GetTPage(direct ? 2 : 0, ...) |
+| 0x80016EB0 | func_80016EB0 | DrawPrimFT4Screen16 | DrawPrimFT4(a, 0, 1) | H | c23F0. no callers |
+| 0x80016ED4 | func_80016ED4 | DrawPrimFT4Screen | DrawPrimFT4(a, 0, 0) | H | c23F0. 18 calls / 14 files |
+| 0x80016EF8 | func_80016EF8 | DrawPrimFT4Mtx | DrawPrimFT4(a, m, 0) | H | c23F0. 11 calls / 6 files: `func_80016EF8(&q, &m)` |
+| 0x80017168 | func_80017168 | DrawPrimF3 | a flat triangle, optional matrix | H | c23F0: SetPolyF3. 16 calls / 4 files (called with two arguments) |
+| 0x80017294 | func_80017294 | DrawPrimF4 | a flat quad, optional matrix | H | c23F0: SetPolyF4, RotTransPers4 |
+| 0x80017254 | func_80017254 | DrawPrimF4Screen | DrawPrimF4(a, 0) | H | c23F0. 21 calls / 13 files |
+| 0x80017274 | func_80017274 | DrawPrimF4Mtx | DrawPrimF4(a, m) | H | c23F0. 12 calls / 11 files |
+| 0x800173DC | func_800173DC | DrawPrimG3 | a gouraud triangle, optional matrix | H | c23F0: SetPolyG3 |
+| 0x8001739C | func_8001739C | DrawPrimG3Screen | DrawPrimG3(a, 0) | H | c23F0. 18 calls / 6 files |
+| 0x800173BC | func_800173BC | DrawPrimG3Mtx | DrawPrimG3(a, m) (declared `(void)`) | H | c23F0. 2 calls / 2 files |
+| 0x8001751C | func_8001751C | DrawPrimGT3 | a textured gouraud triangle, optional matrix | H | c23F0: SetPolyGT3, gte_RotTransPers3 |
+| 0x800174DC | func_800174DC | DrawPrimGT3Screen | DrawPrimGT3(a, 0) | H | c23F0. 2 calls / 1 file |
+| 0x800174FC | func_800174FC | DrawPrimGT3Mtx | DrawPrimGT3(a, m) | H | c23F0. no callers |
+| 0x80017778 | func_80017778 | DrawPrimG4 | a gouraud quad, optional matrix; noDither != 0 wraps it in dither-off draw modes | H | c23F0: SetPolyG4, RotTransPers4, AddPrimNoDither or AddPrimFlat |
+| 0x800176F0 | func_800176F0 | DrawPrimG4ScreenNoDither | DrawPrimG4(a, 0, 1) | M | c23F0. 44 calls / 13 files |
+| 0x80017714 | func_80017714 | DrawPrimG4Screen | DrawPrimG4(a, 0, 0) | H | c23F0. 82 calls / 37 files |
+| 0x80017738 | func_80017738 | DrawPrimG4MtxNoDither | DrawPrimG4(a, m, 1) | M | c23F0. 7 calls / 3 files |
+| 0x80017758 | func_80017758 | DrawPrimG4Mtx | DrawPrimG4(a, m, 0) | H | c23F0. 244 calls / 66 files: `func_80017758(&quad, &m)` (effects: glows, trails) |
+| 0x80017930 | func_80017930 | DrawPrimGT4 | a textured gouraud quad, optional matrix; noDither as DrawPrimG4 | H | c23F0: SetPolyGT4, RTPT + RTPS + AVSZ4 |
+| 0x800178C8 | func_800178C8 | DrawPrimGT4ScreenNoDither | DrawPrimGT4(a, 0, 1) | M | c23F0. 2 calls / 1 file |
+| 0x800178EC | func_800178EC | DrawPrimGT4Screen | DrawPrimGT4(a, 0, 0) | H | c23F0. 12 calls / 9 files |
+| 0x80017910 | func_80017910 | DrawPrimGT4Mtx | DrawPrimGT4(a, m, 0) | H | c23F0. 1 call |
+| 0x80017B98 | func_80017B98 | DrawSpriteRec | a SPRT and its draw-mode packet from a sprite record (centre x, y, depth, w, h, u, v, CLUT, flags) | M | c23F0: code 0x64, position minus half the size, depth clamped to 0xFFF. 2 calls / 1 file |
+| 0x80017F14 | func_80017F14 | AddPrimNoDither | add an untextured packet at depth z between dither-off / dither-on draw modes (semi-transparent when flag bit 30) | M | c23F0: SetDrawMode(.., dtd 0, ..) before, dtd 1 after, tpage abr from bits 28-29 |
+| 0x80018094 | func_80018094 | AddPrimFlat | add an untextured packet at depth z (clamped to 0xFFF); semi-transparent ones get a blend-mode packet | H | c23F0: sets the code's bit 1 and adds a SetDrawMode with GetTPage(2, abr..). 7 internal calls |
+| 0x80018194 | func_80018194 | AddPrimTextured | add a textured packet at depth z (its own tpage holds the blend mode); semi-transparent sets the code bit | H | c23F0 |
+| 0x8001820C | func_8001820C | AddPrimTexturedNoDither | AddPrimTextured between dither-off / dither-on draw modes | M | c23F0 |
+| 0x80018384 | func_80018384 | AddPrimChecked | addPrim, hanging when the OT pointer is past D_800AE610 | H | c23F0: `while (1) {}` guard. no callers |
+| 0x800183E0 | func_800183E0 | QueueImage | put an image list into a free slot of the 32-slot upload queue (Work+0xA1A8 = D_800B97D8) for FlushImageQueue; 0 when full | H | c23F0. 263 calls / 104 files: `func_800183E0(&tim_list)` in stage set-up |
+| 0x80018450 | func_80018450 | QueueImageAt | QueueImage with the slot's x, y and CLUT row taken from a record (+0x28, +0x2A, +0x27) | M | c23F0. 2 calls / 1 file (ovl36). The "at" fields are only used when the slot's +0xD is set, which this leaves 0 |
+
+## Debug text (0x800152F4-0x80015A74)
+
+64 records of 0x10 bytes at Work+0x9DA8 (D_800B93D8): +0 kind (0 free, 1 a string, 2 a number), +2 x, +4 y, +8 the
+string pointer or the value, +0xC flags (0x80 16-pixel font, 0x40 decimal, low nibble the digit count), +0xD a byte.
+DrawDebugText (named) draws them.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x800152F4 | func_800152F4 | ClearDebugTextLine | free record n | H | c23F0. 1 call (ovl37) |
+| 0x80015310 | func_80015310 | ClearDebugText | free all 64 records | H | c23F0: walks D_800B93D8 to D_800B97D8. 17 calls / 8 files; ModeReset calls it |
+| 0x8001534C | func_8001534C | SetDebugText | record n = a string at x, y with flags | H | c23F0: via SetDebugTextRec. 43 calls / 6 files: ovl37 `func_8001534C(0xC, menu->name, 0xA4, 0x46, 0x44, 0)` (the CHECK LIST menu) |
+| 0x800153A4 | func_800153A4 | SetDebugTextRec | fill a record as a string (kind 1) | H | c23F0 |
+| 0x800153CC | func_800153CC | SetDebugNumber | record n = a number at x, y (hex, or decimal with flag 0x40) | H | c23F0. 11 calls / 4 files: `func_800153CC(5, *n, 0xA8, 0x90, 0x40, 0)` |
+| 0x80015424 | func_80015424 | SetDebugNumberRec | fill a record as a number (kind 2) | H | c23F0 |
+| 0x8001544C | func_8001544C | FindFreeDebugText | the first free record, or 0 | H | c23F0. no callers |
+| 0x80015608 | func_80015608 | DrawDebugString | one string record as 8 / 16-pixel SPRTs (codes 0x74 / 0x7C) | H | c23F0: one 4-word packet per character from DebugFontUV |
+| 0x80015760 | func_80015760 | DrawDebugNumber | one number record, digit by digit through the digit table D_80062B78 | H | c23F0: nibbles of the value (BcdFromInt first with flag 0x40) |
+| 0x80015908 | func_80015908 | DebugFontUV | the UV word of a character (c - 0x20) in the 8- or 16-pixel font table | H | c23F0: D_80062A78 / D_80062AF8 |
+| 0x80015A74 | func_80015A74 | BcdFromInt | an unsigned value as 10 packed BCD digits | H | c23F0: divides by 10^9 .. 1, four bits a digit |
