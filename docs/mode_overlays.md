@@ -67,12 +67,6 @@ proposals. 5. Open questions.
 
 ### 2a. EXE helpers and state the overlays use (from the reads)
 
-Written from the matched C (src/ovl38/ovl38.c, src/ovl39/*.c), ovl38.yaml / ovl39.yaml, symbol_addrs_ovl39.txt,
-src/main.c (the mode handlers), the EXE callees in src/code_800123F0.c / src/code_8002C8BC.c, and docs/mode_dispatcher.md,
-docs/overlays.md, docs/stage_loader.md. Nothing was built or run. The overlays' data (step tables, image lists,
-strings, pictures) is not in the repository, so a table's contents are known only from how the code uses it.
-Confidence: **H** the C shows it; **M** strong inference; **L** a guess (reason given).
-
 Shared facts used below (all H, from the EXE C unless marked):
 
 * Work (0x800AF630, include/work.h): `step` 0x800B99E4, `done` 0x800B99E6, `timer` 0x800B99E8, `unkA3E1` 0x800B9A11
@@ -101,13 +95,6 @@ Shared facts used below (all H, from the EXE C unless marked):
 * g_ArchiveFileLoc (8 bytes per MAIN.CD entry, base 0x800AE830): D_800AE840 = entry 2, D_800AE858 = entry 5.
 
 ---
-
-Written from the matched C (src/ovl37/ovl37.c, src/ovl3a/ovl3a.c, src/ovl3b/ovl3b.c), the three yaml files, the EXE
-callees in src/code_800123F0.c / src/main.c / src/stage/engine_8012F5F4.c, docs/mode_dispatcher.md and
-docs/overlays.md. Nothing was built or run. The overlays' data (strings, tables, pictures) is not in the repository:
-a table's contents are known only from how the code uses it, its size from the gap to the next symbol, and (for the
-debug menu) from the user's report of the first screen (docs/mode_dispatcher.md, "The debug menu works").
-Confidence: H the C shows it; M strong inference; L guess, reason given.
 
 Pad bits used below: the EXE's pad word has the stick-as-d-pad bits Up 0x1000, Right 0x2000, Down 0x4000, Left 0x8000
 (H: GetPadPressedDir / GetPadHeldDir build them from the stick), Select 0x0100, R3 0x0400 (docs) and so the standard
