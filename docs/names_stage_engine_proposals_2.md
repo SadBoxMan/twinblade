@@ -23,8 +23,7 @@ Counts: stage calls / stage files, then abil calls where there are any.
 | 0x8013001C | func_8013001C | PlayApproachSound | the same with parameters 0x30 / 0x31 | M | e5F4 comment; inline |
 | 0x80132EC4 | func_80132EC4 | SetParamValues | every value's low half in a key / value list = v | H | e5F4 comment; 4 / 2: `func_80132EC4(p->a, k)` |
 | 0x80132F40 | func_80132F40 | PushPlayerOntoBox | when Musashi's path from his last position (+0x88) crosses the actor's model, put him on the box's top in its frame | M | e5F4 (PathHitsModel, WorldToLocal, the box's lower y, LocalToWorld into D_80126B5E..66); 1 / 1 |
-| 0x80142414 | func_80142414 | SpawnHeadMarker | SpawnActor kind 0x13 for an actor with +0x52 = a height offset | L | eC98C; 37 / 22: `func_80142414(a, -0x90)`, `(a, -0x96)`. Kind 0x13 (func_80142608 set-up, func_801424E4 step) follows its parent at that height and grows in: a marker over a head |
-| 0x80142454 | func_80142454 | SpawnHeadMarkerOnPlayer | the same over Musashi (parent g_Player, n 1) | L | eC98C; 7 / 5: `func_80142454(-0x80)` |
+| 0x80142454 | func_80142454 | SpawnHeadMarkerOnPlayer | SpawnKind13 (part 1) over Musashi (parent g_Player, n 1), +0x52 = a height offset | L | eC98C; 7 / 5: `func_80142454(-0x80)` |
 | 0x80142608 | func_80142608 | HeadMarkerSetup | kind 0x13's set-up: a model (own, or the parent's next free one), scale 0x200, height 0x40, the parent's id kept at +0xFE | M | eC98C |
 | 0x801424E4 | func_801424E4 | HeadMarkerStep | its state handler, then follow the parent (or free itself when the parent's id changed) | M | eC98C |
 
@@ -120,3 +119,10 @@ Counts: stage calls / stage files, then abil calls where there are any.
 | 0x80174ED4 | func_80174ED4 | CameraPanDone | D_80126980 bit 15 (as s16) | L | e58E0; 4 / 3 |
 | 0x80175014 | func_80175014 | SetCameraViewFromList | a camera's view (+0x3C..+0x54) from record i of a 14-byte list; 1 at the end mark (+0xC = 0x7FFF) | H | e58E0; 4 / 3 |
 | 0x80175494 | func_80175494 | LockHudPanel | D_8011F7A8 = 2 | L | e58E0; 2 / 2 (OpenHudPanel / CloseHudPanel only act on states 0 / 1) |
+
+## Refinements to part 1
+
+Not new proposals: better evidence for names part 1 gave, for the local card to pick from.
+
+* 0x80142414 (part 1: SpawnKind13, L): kind 0x13 (set-up func_80142608, step func_801424E4) follows its parent at the
+  +0x52 height (stage: -0x90, -0x96) and grows in from scale 0x200, so **SpawnHeadMarker** reads better (still L).
