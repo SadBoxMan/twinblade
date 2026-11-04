@@ -259,7 +259,7 @@ n more own functions not proposed: about 12 (small state glue).
 * **Actors:**
   * F025 item / reward handler (flag table D_80190450, sounds 0x828 / 0x829) and F021 / F013 / F023 / F024 / F043 /
     F044 / F056 (other groups).
-  * Flag holders (0x80186F14 .. 0x80187180, own): pick a script by whether flag 0x1D is set and the holder's +8 bits,
+  * Flag holders (0x80186F14 .. 0x80187180, F023 = other group; it is also where SC03_029 sets 0x5A): pick a script by whether flag 0x1D is set and the holder's +8 bits,
     set a flag from table D_801C9634 / D_801C94EC; flag 0x54 -> progress 0x5A + flag 0xEA; with flag 0x1D calls
     UploadFlagImages(0); a full set calls func_8002AC00(0x26) (H). M: collectibles / chests whose contents are data.
   * Set-piece (A at 0x80182290, func_801822CC / func_801823B8, own): near Musashi starts event D_80190C14 (boss flag
@@ -296,8 +296,6 @@ n more own functions not proposed: about 12 (small state glue).
 | 0x80182A44 | func_sc03_006_80182A44 | RoomFrame | set-piece motion + camera shake + lighting | H |
 | 0x80183774 | func_sc03_006_80183774 | SetFlag138 | SetFlag(0x138) + music restart | H |
 | 0x801837C4 | func_sc03_006_801837C4 | Event138Run | StartEvent D_80190DC8 | H |
-| 0x80186F14 | func_sc03_006_80186F14 | FlagHolderTalk | picks script by flag 0x1D | H |
-| 0x80187060 | func_sc03_006_80187060 | FlagHolderTake | sets progress 0x5A on flag 0x54 | H |
 | 0x8018A1B4 | func_sc03_006_8018A1B4 | Enemy3Chase | TargetInSight, SpawnKind13, sound 0x6A9 | M |
 | 0x8018ACD0 | func_sc03_006_8018ACD0 | Enemy3Init | SetupActor, shadow, hidden | M |
 | 0x8018B9F8 | func_sc03_006_8018B9F8 | SetFlagF0 | SetFlag(0xF0, 1) | H |
@@ -577,6 +575,53 @@ Same code as SC03_014 (H: identical shapes; 315 functions, two more S-shapes); d
 | 0x80184700 | func_sc03_024_80184700 | SceneHostInit | SetupActor, progress 0x460 | M |
 
 n more own functions not proposed: about 55.
+
+### SC03_028
+* **Place:** a **boss arena** (H: boss actor with an HP value, damage numbers, defeat sound / music command, and the
+  boss flag 0x8A set: func_80186790 = SetFlag(0x8A, 1) + SetFlag(0xF3, 1)). The boss exists only while progress < 200
+  (0xC8) (func_80186894, H); progress 0x118 and 200 also tested (H). Brief: SC03_028 is where 0x8A is set (H agrees).
+  So this is the first boss, before chapter progress 200 (M). One-time flag 0x118 on the first exit (SoundCmd1(1)) (H).
+* **Size:** 293 functions (own 156 + dup 32, stubs 8, 25 dispatchers, S 33; F025 10, F017 8, F018 5, F006 4, F019 3,
+  F087 3; P01 x5, P02). F017 / F018 / F019 / F087 are shared with other boss stages (sc03_105, sc04_011, sc05_010,
+  sc06_029, sc07_002) (H): M: shared boss-arena code.
+* **Boss:** set-up func_80186894 (SetupActor D_8018F924, HP at +0x76 starts at the def's value, bar max 0x78 by
+  func_8017BF08 / func_8017C010; spawns a linked part from def D_8018F870; state 0x27) (H).
+  * Damage: weak-point part takes 0x28 per hit (func_80182F3C: ShowDamage(0x28), ShowDefeatAlt, sound 0xB08, bar
+    update), other hits 0xA / 0x64 / 0x28 (func_80184C90 / 80185158 / 80185344) (H).
+  * Speed by HP: D_801EC448 = 0x10 when HP > 0x50, 0x18 for 0x29-0x50, 0x20 below 0x29 (func_801879AC, H): it gets
+    faster as it weakens (M).
+  * Attacks (own, H for calls): charges with MoveCollide + StartCameraShake + sound 0x560 and spawns kind 0xB8 on
+    impact; segment attacks ActorSegmentDamagesPlayer with sounds 0x55D / 0x55E / 0x55F / 0x561 and kind 0xFE /
+    0xD1 spawns; throws kind 0x138 x3 (sound 0x627), 0xC8 x3, 0x142 x4 (sounds 0x628 / 0x629), 0xCC (0x62A / 0x62B);
+    a part spawning kind 0x8A with sounds 0x55B / 0x55C; spin 0x640 (H). States 0x1C / 0x1F / 0x20 pulse a colour
+    (rcos) (H).
+  * End: HP <= 0 -> state 0x29, SoundCmd1(4), sound 0x5E0 (func_801879AC); later state calls func_80186790 (flag
+    0x8A, 0xF3) (H). Event D_8018FB48 with TakePlayerControlNoStop (intro or ending, M); SoundCmd1(1) + EndEvent +
+    CloseHudPanel at scene ends (H).
+* **Actors:** F025 reward handler (flag table D_8018F6E4); ambient kind-0x82 followers (sound 0x599); kind 0xCB
+  tracker (PathHitsModel) (H).
+* **Exits:** P01 exits (flag 0x118 one-time), action marks by progress 0xC8 (H).
+* **Sound:** 0x55B-0x566, 0x598-0x59A, 0x5E0, 0x627-0x62B, 0x640, 0xB08, 0xB21 / 0xB22, 0xBF2; SoundCmd1(4) at the
+  defeat (L: victory music).
+
+#### Names: SC03_028
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x80186894 | func_sc03_028_80186894 | BossInit | progress < 200, HP def, part spawn | H |
+| 0x80186754 | func_sc03_028_80186754 | BossMain | own dispatcher D_80190C78 | M |
+| 0x80186790 | func_sc03_028_80186790 | BossSetDefeatFlags | SetFlag 0x8A, 0xF3 | H |
+| 0x80182F3C | func_sc03_028_80182F3C | BossWeakPointHit | HP -= 0x28, ShowDamage, sound 0xB08 | H |
+| 0x80184C90 | func_sc03_028_80184C90 | BossHitSmall | ShowDamage(0xA) | H |
+| 0x80185158 | func_sc03_028_80185158 | BossHitBig | ShowDamage(0x64) | H |
+| 0x80185344 | func_sc03_028_80185344 | BossHitMid | ShowDamage(0x28) | H |
+| 0x801879AC | func_sc03_028_801879AC | BossCheckDefeat | HP <= 0 -> SoundCmd1(4); speed by HP | H |
+| 0x80186D84 | func_sc03_028_80186D84 | BossRecover | HP > 0 -> state 0x1E, speed by HP | H |
+| 0x80186D0C | func_sc03_028_80186D0C | BossSpinLand | MoveCollide hit -> state 0x11, sound 0x640 | M |
+| 0x8017C010 | func_sc03_028_8017C010 | UpdateBossHpBar | called with HP, max 0x78 | M |
+| 0x8017BF08 | func_sc03_028_8017BF08 | InitBossHpBar | HP, 1, 0x78 | M |
+| 0x80182E2C | func_sc03_028_80182E2C | BossPartMain | dispatcher D_8018FF60, colour pulse | M |
+
+n more own functions not proposed: about 140 (attack sub-states).
 
 Common pieces of this run of stages (described once in G4_families.md): F045 (the kind-0x12C foot soldier enemy),
 F048 + F051 (a bundle of small actors: hazard segments, hopper with three spinning parts, shuttling platform,
@@ -1549,6 +1594,46 @@ merged); differs only in data (H). Names as SC03_118.
 | 0x8017F998 | func_sc03_121_8017F998 | BigFoeHurt | TakeDamageAndRecoil, 0xA99 | M |
 About 35 more own functions not proposed.
 
+### SC03_124
+* **Place:** a version of the village (shares 165-259 shapes with sc03_001; F068 / F069 / F071 village families) (H);
+  its roaming-object code sets progress 0x1D6 on map 0x1052 (H), so this image likely serves village version 2 (M).
+  Own story steps: sets progress 0xD2 (210, with flag 0x114), 0xDC (220), 0xF0 (240), 0x136 (310), 0x186 (390),
+  0x190 (400), 0x19A (410), 0x1AE (430), 0x1E0 (480), 0x3AC (940, F068) and 0x1D6 (470) (H); tests many bands
+  (0x64-0x3A2) (H). Most setters are tiny functions called by event scripts or after IsEventDone (H).
+* **Size:** 368 functions (own 78, lone-shared 65, family 161: F068 x68, F069 x34, F071 x17, F100 x19, F101 x6, F095 x6,
+  F007, F072, F009; 37 actor dispatchers, 2 player-action dispatchers, 20 stubs; P01, P02).
+* **Actors / events (main points):**
+  * Progress-staged NPC 0x8017E098 (own): picks a stage 0-6 from progress (< 0xD2, < 0xE6, < 0xF0, == 0xFA, >= 0x12C,
+    flag 0xF7); in stages 2-3 a two-way answer of its script (UpdateScript 1 / 2) runs D_8018EE04 (flag 0xF7 = 1,
+    0xF8 = 0) or D_8018EE2C (0xF7 = 0, 0xF8 = 1), sets progress 0xF0 and takes item 0x56 from Musashi's bag
+    (func_800D0F4C(0x56)) (H). M: a trade / choice scene.
+  * Event triggers 0x8017FD70 / 0x8017FEB4 (own): when g_PlayerFlags & 0x08000000 they start D_8018F7C8 / D_8018FA9C
+    and afterwards set progress 0x1AE / 0x1E0 (H). 0x8017F054: after an event, progress 0x136 (H).
+  * Flag-0x106 talker 0x80180734 / 0x80180828 (own): first talk sets flag 0x106 (scripts D_8018FD84 / D_8018FC54 /
+    D_8018FCB4) (H); F101 actors appear for progress 0xC8-0x275 depending on flag 0x106 (H).
+  * Village clock lights: F100 (time-of-day windows drawn per slot from the game clock) (M).
+  * Roaming object (0x8018A250 set-up, S2 with sc03_107; F095 dispatcher) (H). F068 / F069 / F071 / F072 / F007:
+    village families (owned elsewhere).
+  * Master set-up 0x80183364 (F100): SpawnActor kinds 0x13F, 0x66, 0x65, 0x14C, 0x335, 0x3D9 (H).
+* **Exits:** RequestMapChange(D_8018E894) in 0x80180704 (S10) (H); P01 exits; destinations unknown (data).
+* **Sound:** village shop / mini-game sounds 0x45F-0x474, 0x5EE in 0x80188C68 (S4) (H).
+* **Unknown / notes:** 0x80185394 (S9) tests map 0x3069 (H). Many own helpers not read in detail.
+
+#### Names: SC03_124
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017E098 | func_sc03_124_8017E098 | EventTradeChoice | progress stages, answer 1 / 2, SetProgress(0xF0), item 0x56 | H |
+| 0x8017E4E4 | func_sc03_124_8017E4E4 | ScriptSetProgressD2 | SetProgress(0xD2), SetFlag(0x114) | H |
+| 0x8017E914 | func_sc03_124_8017E914 | ScriptSetProgressDC | SetProgress(0xDC) | H |
+| 0x8017F054 | func_sc03_124_8017F054 | EventEndSetProgress136 | EndEvent, SetProgress(0x136) | H |
+| 0x8017F248 | func_sc03_124_8017F248 | ScriptSetProgress186 | SetProgress(0x186) | H |
+| 0x8017F380 | func_sc03_124_8017F380 | ScriptSetProgress19A | hit box + SetProgress(0x19A) | H |
+| 0x8017FA34 | func_sc03_124_8017FA34 | ScriptSetProgress190 | SetProgress(0x190) | H |
+| 0x8017FD70 | func_sc03_124_8017FD70 | EventFlagTrigger1AE | player flag 0x08000000 -> event, progress 0x1AE | H |
+| 0x8017FEB4 | func_sc03_124_8017FEB4 | EventFlagTrigger1E0 | player flag 0x08000000 -> event, progress 0x1E0 | H |
+| 0x80180734 | func_sc03_124_80180734 | TalkerFlag106 | scripts by flag 0x106, sets it | H |
+About 65 more own functions not proposed.
+
 ## Chapter: archive SC04
 
 Progress about 640-780.
@@ -1976,7 +2061,7 @@ About 245 more own functions not proposed.
 * **Place:** a village version (H: shares F068 / F071 / F007 / F009 with the village SC03_001 and F100 with the
   village variants; mapid test 0x3069 in shared code). Story: **sets progress 0x29E (670)** after an event and
   **0x2A8 (680)** in a map-change helper (H); the shared village code sets 0x3AC at >= 0x3A2 (F068, H).
-* **Size:** 266 functions (own 49; shared: F007, F009, F068 (67 shapes), F071, F100, S-shapes; dup3 villager
+* **Size:** 244 functions (own 49; shared: F007, F009, F068 (67 shapes), F071, F100, S-shapes; dup3 villager
   pairs). Compared with SC03_001: the village core (F068, F071) is the same code; the own part is this version's
   villagers and events (H).
 * **Actors:**
@@ -2053,7 +2138,7 @@ About 30 more own functions not proposed.
   (690)** after an event (0x8017FF70) and **0x2BC (700)** (0x8017E950) (H); villagers appear only from progress
   0x2A8 (H), so this version follows SC04_015 (0x29E / 0x2A8) (M). Shared village code also sets progress 100 and
   0x3AC (shop / item code S4 0x80189540, F068) (H; not specific to this map).
-* **Size:** 525 functions (own code is F111, 52 shapes shared only with SC04_019; F112 with SC05_017; F067 (109
+* **Size:** 484 functions (own code is F111, 52 shapes shared only with SC04_019; F112 with SC05_017; F067 (109
   shapes), F068, F069, F070, F071, F100, F101, S-shapes). Compared with SC03_001 the village core is the same; F111 /
   F112 are this version's villagers (H).
 * **Actors:**
@@ -2083,7 +2168,7 @@ Own code is the family F111 (see G6_families.md); no other own functions.
 * **Place:** a village version of the smaller kind (H: shares F068 / F072 / F073 with SC03_001 / SC03_002, the ~95-shape
   group with SC03_002 / SC03_125 / SC05_018; mapid test 0x3069 in shared code). No progress set in own code; shared
   code tests 0x85, 0xF0, 0x492 (F073) and sets 0x3AC at >= 0x3A2 (F068) (H).
-* **Size:** 213 functions (own 5; shared: F025, F068, F072, F073, S-shapes; P01).
+* **Size:** 197 functions (own 5; shared: F025, F068, F072, F073, S-shapes; P01).
 * **Actors:**
   * S2 0x8017C61C (+ F025 0x8017C9BC-0x8017D4CC): a flag-indexed creature (flag table D_801870BC by +0x70; variant 4
     also needs progress >= 200); it uses one set-up when the clock word D_80078E78+0x1A is < 300 or >= 1320 and

@@ -560,6 +560,60 @@ About 30 more own helpers (sprite effects, part set-ups 0x80182638..0x80182B4C) 
 | 0x8017D708 | func_sc06_027_8017D708 | CastInit | SetupActor | M |
 | 0x8017D030 | func_sc06_027_8017D030 | SetRoomCamera | SetCameraUpdate + SnapCamera | M |
 
+### SC06_029
+* **Place:** a boss arena late in the chapter (H: a boss core with HP 0x1E0 and weak points; the closing event sets
+  progress 0x636 (1590) and changes map, 0x801867D0). It is also the map that forces the end-game state: two own
+  routines set flags 0x16-0x1A **and** all five boss flags 0x8A-0x8E (H, see below).
+* **Size:** 294 functions (own 165 + 17 dup + 26 lone-shared; F041 x11, F017 x8, F033 x5, F018 x5, F087 x3, F010 x3;
+  24 actor kinds; P01, P02 (three camera dispatchers)).
+* **Why it sets 0x8A-0x8E:** 0x8017E494 (a step of the player action script 0x8017E458) and 0x80185F4C (state of the
+  actor 0x80185F08) both do: SetFlag80(Musashi), D_80078EC0 = 6, SetFlag(0x16..0x1A, 1), SetFlag(0x8A..0x8E, 1),
+  func_8014C6E0, SpawnEffectOn(0x3B, Musashi); 0x8017E494 also sets player action flags (clear 01, set 02 / 08,
+  SetWorkA3E7) (H). Every later frame 0x80186044 keeps D_80126D20 = 0xBA, replaces effect 0x3B by spawning effect
+  0x3C on Musashi every 32 frames, and clamps his y (D_80126B62) to -0x100..-0x580 (H). Reading: this is a scripted
+  transformation / power-up of Musashi for the final part, and the flags are set together so the state is the same
+  whatever order the player cleared things in (M); the five flags 0x16-0x1A are the ones F020 sets one at a time
+  after its five-way choice in earlier stages (H, SC06_000 F020 0x8017DE8C), so 0x16-0x1A plausibly mark five
+  collected items / powers and 0x8A-0x8E the five bosses beaten (L). D_80078EC0 = 6 is also set by SC06_027's exit
+  (H), so the two maps hand over into the same mode (M). The y clamp suggests Musashi flies or floats in this mode
+  (L).
+* **Boss:** core set-up 0x8017EBC4: sprite, HP (+0x76) = 0x1E0, StoreImage x2 (palette copies for flashing),
+  D_801DDB28 = core, SpawnActorArg(0x2EF) (H). 0x8017EDA8: when Musashi has no action (GetPlayerAction()==0),
+  TakePlayerControlNoStop and event D_sc06_029_80190534 (H: intro). Attack states 0x8017EF34 (99 lines) and
+  0x8017F330 (162 lines; spawns 12 x SpawnActorArg(0x2C1), sound 0x936 loop) (H; M: a volley of 12 projectiles).
+  0x80180A70 spawns five weak points SpawnActorArg(0x294, i); each (0x80183B1C) rides the core rotated +0xE00 and,
+  when hit (+0x5C & 1), deals a fixed 0x28 to the core's HP with TakeDamage / ShowDefeatAlt / sound 0xB7C; at 0 the
+  core goes to state 0xC and it and its five parts get +0xE0 |= 0x1000 (H: 12 hits of 0x28 = 480). Score-like value
+  +0xEC = (part index + 1) * 100 (H). 0x80182ED8 (145 lines) part motion. 0x801809D4: once kind 0x2EF is gone,
+  state 0xE and event D_sc06_029_8019060C, with flag 0x11D choosing one of two follow-ups (func_8002959C when clear)
+  (H).
+* **Events / scripted scenes:** 0x801862C0: when flag 0x8E is set and a check passes, SpawnActor(0x353) (H).
+  0x80186688-ish set-up spawns 0x354, 0x355, 0x356, 0x35F, 0x330, 0x38B x2, 0x39A and starts event
+  D_sc06_029_80191474; 0x801867D0 shows / moves five of them (sound 0xBD2) and when the script ends sets progress
+  0x636, EndEvent, RequestMapChange(D_sc06_029_8018FFFC) (H).
+* **Exits:** RequestMapChange(D_8018FFFC) at the end of the closing event (H); destination unknown (data).
+* **Sound:** 0x936 loop (stop cmd 4), 0x9CF with a two-channel volume, 0xBD2-0xBD7, 0xB5C / 0xB5F, 0xB96 / 0xB97,
+  0xCA1, SoundCmd1(1) with an argument in one place.
+
+#### Names: SC06_029
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017E494 | func_sc06_029_8017E494 | EventGrantFinalState | sets 0x16-0x1A, 0x8A-0x8E, D_80078EC0 = 6, effect 0x3B | H |
+| 0x80185F4C | func_sc06_029_80185F4C | FinalStateInit | same flag set from an actor | H |
+| 0x80186044 | func_sc06_029_80186044 | FinalStateUpdate | effect 0x3C, y clamp | M |
+| 0x8017EBC4 | func_sc06_029_8017EBC4 | BossCoreInit | HP 0x1E0, spawns 0x2EF | H |
+| 0x8017EDA8 | func_sc06_029_8017EDA8 | BossIntro | StartEvent(D_80190534) | H |
+| 0x8017EF34 | func_sc06_029_8017EF34 | BossAttackA | attack state | M |
+| 0x8017F330 | func_sc06_029_8017F330 | BossVolley | 12 x 0x2C1, sound 0x936 | M |
+| 0x80180A70 | func_sc06_029_80180A70 | SpawnWeakPoints | 5 x SpawnActorArg(0x294) | H |
+| 0x80183B1C | func_sc06_029_80183B1C | WeakPointHit | 0x28 to core HP, defeat at 0 | H |
+| 0x80182ED8 | func_sc06_029_80182ED8 | WeakPointMove | part motion | M |
+| 0x801809D4 | func_sc06_029_801809D4 | EventAfterBoss | kind 0x2EF gone -> StartEvent(D_8019060C) | H |
+| 0x801862C0 | func_sc06_029_801862C0 | Spawn353IfFlag8E | GetFlag(0x8E) -> SpawnActor(0x353) | H |
+| 0x801867D0 | func_sc06_029_801867D0 | EventClosing | SetProgress(0x636), RequestMapChange | H |
+
+About 140 more own functions (camera modes, effects, part helpers) not proposed.
+
 ## The end of the game (archive SC07)
 
 Progress 1600-1700.

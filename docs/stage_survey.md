@@ -203,6 +203,74 @@ one constant changed (0x200 for 0x20, docs/decomp_recipes.md r152). Proposed: `D
 | 0x8017EB30 | MenuSelect | page actions, refusals | H |
 | 0x8017EF8C | MenuEntryLocked | var tests | M |
 
+### F002: SC01_005 / SC01_006 room code (2 stages, 47 shapes)
+* **Stages:** sc01_005 sc01_006 (the identical-code pair).
+* **What it is:** nearly all of the pair's own code (H): the room host (first-visit event D_801BBE98 with progress
+  0xA / 2 and script-signal flags 0x125-0x129 driving Musashi's moves; Start skip), the rest point (AddHp / AddBp 999
+  with a colour overlay 0x8017FD50), three F001 menu openers, path-walking cast members, and the item display that
+  unwraps item n (SetVar(0x63 + n, | 0x20), sound 0xC86, white flash). Details in the SC01_005 entry.
+  **Where in the first stage:** sc01_005 0x8017D220-0x801822B0.
+| shape (sc01_005) | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80180010 | HostStartFirstEvent | SetProgress(0xA), flags 0x125-0x128 = 0, StartEvent | H |
+| 0x801800C0 | HostRunFirstEvent | signal flags -> player moves, Start skip, SetProgress(2) | H |
+| 0x801803AC | HostEventExit | SetProgress(2), RequestMapChange | H |
+| 0x80180808 | RestInit | progress < 5 or 0x294: AddHp / AddBp 999 | H |
+| 0x8017FD50 | DrawRestOverlay | AllocPrim full-screen colour quads | M |
+| 0x8018041C | HostStartSecondEvent | StartEvent(D_801BC348) | H |
+| 0x801812B0 | DisplayInit | item model D_801C339C[n], opened bit 0x20 | H |
+| 0x8018165C | DisplayTalk | message D_801C37D4[n] | H |
+| 0x80181894 | DisplayUnwrap | parts fly off, scale up, sound 0xC86, SetVar bit 0x20 | H |
+| 0x80181B00 | DisplayPlaySound | SoundRequest(id) per item | M |
+| 0x8017F790 | RoomMusicCheck | GetVar(0x7E), SoundCmd1(1) | M |
+
+### F003: room-event player action phases (3 stages, 8 shapes)
+* **Stages:** sc01_005 sc01_006 sc03_006. **What it is:** the PLAYER-ACTION-MAIN phases the F002 host starts (one
+  with sound 0xA05) (M). **Where:** sc01_005 0x8017BF00-0x801807D8.
+
+### F004: ground enemy (3 stages, 36 shapes)
+* **Stages:** sc01_077 sc02_000 sc02_003.
+* **What it is:** one enemy kind's full state set (H for the calls): init 0x80183324 (SetupActor, SpawnShadow,
+  SnapToGround), random wander (0x8018281C / 0x80182E7C: rand, SetLocalVelocity, StopWithGravity), push-out from walls
+  and the player (0x801809BC: CollidePath, RestorePrevPos; 0x80180AD4 UndoMoveIntoPlayer), chase / attack
+  (0x80181BE4: TurnStepToTarget, ActorSegmentDamagesPlayer, SpawnActorFromDef, F010's debris spawn), hurt
+  (0x80181F08: StartRumbleScript, TakeDamage, knock-back states 0x80182338-0x801827A4), death (0x801827A4:
+  SpawnKind39Trio, sounds 0x47B / 0x478), drop (0x80183AF0 / 0x80183CF4 DropItem), group attack 0x801824D0
+  (DamageActorsNear, SpawnHitSpark), call to kind 0x298 (0x80182A24) with sound 0x436 (0x8018301C).
+  **Where:** sc01_077 0x8017EF50-0x80183CF4. Names: EnemyInit (0x80183324), EnemyWander (0x8018281C), EnemyChase
+  (0x80181BE4), EnemyHurt (0x80181F08), EnemyDie (0x801827A4), EnemyDropItem (0x80183CF4), EnemyPushOut (0x801809BC)
+  (M each).
+
+### F005: four-switch mechanism (2 stages, 11 shapes)
+* **Stages:** sc01_077 sc01_080. **What it is:** switch actors that, on approach, signal kind 0x161 and then on
+  Musashi's action (StartActionTable, sounds 0x49E / 0x4A2) move and count D_801270C8; four sets D_801270CC = 2 (H);
+  a draw helper 0x80185BA4 (rsin, RotTransPers x4: a rotating quad) and a spawner of kind 0x24 (0x80186078) (H).
+  **Where:** sc01_077 0x80185BA4-0x80186A04. Names: SwitchApproach (sc01_080 0x8017E124), SwitchActivate
+  (0x8017DC78), SwitchMove (0x8017E1FC) (H).
+
+### Minor families
+* **F006** (16 stages, 4 shapes; sc01_077 0x8017C294-0x8017C908): turns a screen rectangle into four world points at
+  screen depth (ReadGeomScreen, transpose of the rotation, ApplyMatrixSV, RotTransPers) (H); name ScreenRectToWorld
+  (0x8017C294), helpers UnrotateVector (0x8017C66C), ProjectPoint (0x8017C908) (M).
+* **F007** (9 stages, 4 shapes; sc01_077 0x801858AC-0x80185B5C): ambient prop spawner: SpawnProp(4) with heights from
+  a table and random size, 10 at a time (0x801859AC), prop update / free (H); SpawnAmbientProp (M).
+* **F008** (8 stages, 4 shapes; sc01_077 0x801844AC-0x801846F8): tiny SetScript state helpers, one with
+  SpawnKind13 (H); not worth names beyond SetAnimState (L).
+* **F009** (33 stages, 3 shapes; sc01_077 0x8017C0BC-0x8017C230): effect-owner actors that free their effect
+  (FreeEffect, func_8001CF30) (H); EffectOwnerFree (M).
+* **F010** (17 stages, 3 shapes; sc01_077 0x80184ED8-0x8018514C): SpawnActor(0x85) (0x80184ED8) and that debris
+  actor's init / update (random rotation, FindGround, bone math) (H); SpawnDebris85, DebrisInit, DebrisUpdate (M).
+* **F011** (10 stages, 3 shapes; sc01_077 0x80185428-0x801856F8): a shooter (aims with HeadingPitchTo, sound
+  0x43A / 0x6D6, SpawnActor(0xBC)) and its projectile (MoveCollidePassable, ActorSegmentDamagesPlayer, SpawnEffect /
+  SpawnPropFrom on impact, timed free) (H); ShooterFire, ProjectileFly, ProjectileFall (M).
+* **F012** (4 stages, 3 shapes; sc01_077 0x80183A50-0x80183AA8): squash / recoil helpers (UpdateSquash,
+  EaseScaleNormal + RecoilFromBehind, timer + SetScript) (H).
+* **F013** (37 stages, 15 shapes; sc01_084 0x8017BEBC-0x8017C910): Musashi warp effect pair: an effect actor that
+  hides the player (HidePlayerScene, SetPlayerFlag7E2) and a reverse one that shows him (ShowPlayerScene,
+  ClearPlayerFlag7E2), both tracking a bone point (0x8017C218), with PlaySe and SpawnEffect; plus a random particle
+  (0x8017C800) and its drawer (0x8017C910) (H) (M: warp-out / warp-in). Names: WarpOutEffect (0x8017C064),
+  WarpInEffect (0x8017C610), TrackBonePoint (0x8017C218), WarpSparkle (0x8017C800) (M).
+
 ### F014: the boulder-course code of SC02_000 / SC02_003 (2 stages, 158 shapes)
 * **Stages:** sc02_000 sc02_003 (identical own code, so all their own code is this family).
 * **What it is:** the whole own code of the boulder chase: camera modes, entry / run sequences with messages, the
@@ -546,6 +614,188 @@ Addresses are in the first stage (families.md `first=`). Actor state = +2, subty
   scale 0x600) and per-frame move (MoveProp, spin, freed at end of life) (H). L: smoke / spark puffs.
 * **Where in the first stage:** 0x8017E170-0x8017E94C. Names: ParticleUpdate (0x8017E170), ParticleInit (0x8017E270),
   EmitParticleInBox (0x8017E78C), SpawnParticleFlagged (0x8017E918), SpawnParticle (0x8017E94C) (M).
+
+### F103: respawning spinning enemy (2 stages)
+* **Stages:** sc04_000 sc04_006
+* **What it is:** an enemy that waits hidden, grows in (rcos scale) when Musashi is beyond distance^2 0x18FFF,
+  approaches (distance^2 <= 0x18000), winds up (0x17 frames), then spins along the ground (model yaw -0x71 a frame,
+  sound 0x662 while on screen) turning at walls and other members of its kind, and hits Musashi by box test
+  (HitPlayer(1, 0x2001, ...)) (H). Defeat: anim + sound 0x98A on screen, blink, 1-in-4 DropItem, then it resets to
+  its spawn point hidden (respawns) unless +0xE4 is set (then DespawnActor) (H). A hit of kind 0x24 spawns kind
+  0x35C (H). Uses F077 helpers (scale-in, wait-near) between its own shapes. **Where in the first stage:**
+  0x80180FF8-0x80181BA4 (dispatcher A11 0x80180FBC).
+| shape (address in first stage) | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80180FF8 | SpinnerInit | SetupActor, hidden variant +0x70 bit 0 | M |
+| 0x80181248 | SpinnerWindUp | script, 0x17-frame timer | M |
+| 0x801812BC | SpinnerStartSpin | StopWithGravity, heading pick | M |
+| 0x80181310 | SpinnerSpin | yaw spin, sound 0x662, contact, move | M |
+| 0x801813CC | SpinnerDie | script, sound 0x98A | M |
+| 0x801814A8 | SpinnerDeathBlink | blink, DropItem 1/4, reset | M |
+| 0x8018155C | SpinnerOnHit24 | kind 0x24 hit -> spawn 0x35C | M |
+| 0x8018159C | SpinnerMove | MoveOnGround + bounce rules | M |
+| 0x8018175C | SpinnerHitPlayer | box test, HitPlayer | H |
+| 0x801818E8 | SpinnerPickHeading | random / target heading | M |
+| 0x80181ABC | SpinnerResetOrDespawn | back to spawn point or DespawnActor | H |
+
+### F104: warp flash / sparkle swarm (2 stages; with F105)
+* **Stages:** sc04_000 sc04_011
+* **What it is:** one actor kind with two variants by +0x70 (H). Variant 0: a swarm of 64 textured quads in a
+  stage buffer that fly out from a centre and respawn, drawn by F105 (M: sparkles). Variant 1: a sprite that grows,
+  holds 0x78 frames, plays a table sound (by +0xFC), grows to 0x7000, calls func_80016940(4) / waits func_80016978(4)
+  (L: a white-out fade), despawns the kind-0x3AF actor, hides (+0xFC == 0) or shows Musashi, shrinks and despawns
+  (H). Colour flickers E0E0E0 / FFFFFF on odd frames (0x80182D78, H). Used with SC04_000's player-action handlers that
+  wait for kind 0x3AF (M: a warp in or out). **Where in the first stage:** 0x801822F0-0x80182D78.
+| shape | proposed | evidence | conf |
+|---|---|---|---|
+| 0x801822F0 | WarpFlashMain | two state tables by +0x70 | H |
+| 0x80182374 | SparkleInit | 64 particles, timer | M |
+| 0x80182460 | SparkleUpdate | per-particle steps | M |
+| 0x80182564 | SparkleRespawn | random direction / colour | M |
+| 0x8018298C | FlashInit | AllocActorSprite | M |
+| 0x80182A38 | FlashGrow | scale to 0x1000 | H |
+| 0x80182B20 | FlashGrowLarge | scale to 0x7000, func_80016940(4) | M |
+| 0x80182BA8 | FlashHideShowPlayer | despawn 0x3AF, hide / show Musashi | M |
+| 0x80182C90 | FlashShrinkY | scale y down | H |
+| 0x80182D08 | FlashShrinkOut | scale x down, DespawnActor | H |
+| 0x80182D78 | FlashFlicker | colour by frame parity | H |
+
+### F105: sparkle quad helpers (3 stages)
+* **Stages:** sc04_000 sc04_011 sc07_010. **What it is:** 0x80182724 integrates a particle's velocity
+  (MoveParticle), 0x801827B4 / 0x80182800 build a matrix and draw one textured quad (DrawSparkleQuad) (H).
+  **Where:** 0x80182724-0x80182800.
+
+### F106: block-throwing large enemy, kind 0x1FC (3 stages)
+* **Stages:** sc04_002 sc04_003 sc04_004
+* **What it is:** a large enemy (kind 0x1FC, model scaled 1.5) with wander / turn states, a burst attack firing
+  kind-0x20 projectiles (3 shots 4 frames apart, then a 0x20 pause; sound 0x83A), contact damage 20 by segment test
+  (H). Below HP 0xB5 it spawns kind 0x22D (a piece flying off with smoke, sound 0x83B; 0x80182D2C / 0x80183548) and
+  changes behaviour (+0x86 bit 0) (H). Variant +0x70 != 0 stands and lifts a kind-0x239 block (F107) to its head,
+  then throws it when its animation reaches frame 0x18 (H). Hurt: recoil, FinishEnemy on death, sound 0x853,
+  func_8002AC00(0x13) (H). A knocked-off fall state frees it below y 0 (H). **Where in the first stage:**
+  0x80181C20-0x80183548 (dispatcher A11 0x80182E64).
+| shape | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80182EA0 | BlockThrowerInit | SetupActor, scale 0x1800, variant | M |
+| 0x80181C20 | BlockThrowerStartRoar | script, state 2 | L |
+| 0x80181C7C | BlockThrowerStartWander | state 3 or burst | M |
+| 0x80181CE8 | BlockThrowerStartTurn | heading, state 4 | M |
+| 0x80181D44 | BlockThrowerKnockedOff | fall, sound 0x7E5 | M |
+| 0x80181F40 | BlockThrowerStartBurst | state 5, 3 shots | M |
+| 0x801821C4 | BlockThrowerLiftBlock | SpawnActor(0x239) at head | H |
+| 0x80182424 | BlockThrowerHurt | TakeDamageAndRecoil | H |
+| 0x801828A4 | BlockThrowerBreakPiece | HP < 0xB5 -> kind 0x22D | H |
+| 0x80182A6C | BlockThrowerShoot | kind 0x20 projectile, 0x83A | H |
+| 0x80182BA4 | BlockThrowerContact | damage 20 | H |
+| 0x80182C30 | BlockThrowerDeathSound | 0x853 | H |
+| 0x80182D2C | BrokenPieceInit | model, velocity, smoke | M |
+| 0x801831B8 | BlockThrowerBurst | burst timing | M |
+| 0x80183494 | BlockThrowerThrow | frame 0x18 -> throw | H |
+| 0x80183548 | BrokenPieceFly | MoveObject, smoke, free | M |
+
+### F107: thrown block, kind 0x239 (4 stages)
+* **Stages:** sc04_002 sc04_003 sc04_004 sc04_005
+* **What it is:** a solid block Musashi can stand on (CarryPlayerExact) and is pushed out of (box 0x49) (H); thrown
+  by F106 with speed 0xE0000 along the thrower's heading (sound 0xB3F); on landing spawns a ring of 8 dust props and
+  plays 0xBCB; landing on Musashi hits him (HitPlayer(1, 0x4002, 0, 0x14)); landing on a kind-0x1FC actor gives it a
+  0x1D reaction; frees itself below y 0x80 (H). **Where:** 0x801835E0-0x80183F24.
+| shape | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80183710 | ThrownBlockMain | table + CarryPlayerExact | H |
+| 0x80183648 | ThrownBlockLaunch | velocity, sound 0xB3F | H |
+| 0x80183790 | ThrownBlockOverPlayer | box test above Musashi | M |
+| 0x80183820 | ThrownBlockFindTarget | kinds 0x1FC / 0x239 | H |
+| 0x8018395C | ThrownBlockHitPlayer | HitPlayer | H |
+| 0x80183A88 | ThrownBlockPushPlayer | solid box | M |
+| 0x80183C54 | ThrownBlockDustRing | 8 props | H |
+| 0x80183D94 | ThrownBlockInit | model, shadow | M |
+| 0x80183E68 | ThrownBlockFly | landing, 0xBCB | M |
+| 0x80183F24 | ThrownBlockRest | on ground, hits | M |
+
+### F108: enemy-clear reward light (3 stages)
+* **Stages:** sc04_003 sc04_005 sc04_007
+* **What it is:** a flag-indexed object (flag table D_..90C90 by record index - 9) with a sprite (H). Its condition
+  (variant +0x108): 0 = no actor of kinds 0x1FC / 0x1DC / 0x210 / 0x219 left and Musashi idle; 1 = a counter
+  (GetCounter5210) plus sound 0xB6B; 2 = a timer test (H). Then it sets its flag, starts an event, grows the sprite
+  with sounds 0x7F5 / 0x7F6, spawns kind 0x8E from the stage record, and shrinks (H). If the flag is already set at
+  load it spawns kind 0x8E at once and frees all those enemies (H). A +0x70 bit-0x8000 child (kind 0x1F9) mirrors its
+  sprite (H). Kind 0x8E is likely the reward chest (L). **Where:** 0x8017D698-0x8017E39C; its trigger is an own shape
+  in sc04_003 (0x8017DDDC) and F110 in sc04_005.
+| shape | proposed | evidence | conf |
+|---|---|---|---|
+| 0x8017D698 | TalkCheckNear | distance^2 < 0x1001, idle | H |
+| 0x8017DC20 | RewardLightInit | flag, sprite, child 0x1F9 | M |
+| 0x8017DE58 | RewardLightShow | grow, sounds, spawn reward | M |
+| 0x8017E07C | SpawnRewardChest | SpawnActorFromDef kind 0x8E | M |
+| 0x8017E108 | RewardLightCheck | three condition variants | M |
+| 0x8017E278 | CountRoomEnemies | kinds 0x1FC 0x1DC 0x210 0x219 | H |
+| 0x8017E2E8 | FreeRoomEnemies | same kinds | H |
+| 0x8017E39C | RewardLightWait | child mirror / trigger | M |
+
+### F109: leaping enemy, kind 0x210 (3 stages)
+* **Stages:** sc04_004 sc04_005 sc04_007
+* **What it is:** idle until distance^2 <= 0x40000, then approaches with a bobbing sway; at distance^2 <= 0x9000
+  lunges (forward velocity, upward 0xA0000, sound 0xA9D) with a damaging segment (g_PlayerHitKind 4); on landing
+  recovers; +0xFE set by F110 makes it jump at once (H). Splash sound 0x83C when its feet meet water (TraceMap
+  0x6000, 30-frame cooldown) (M). Hit sound 0x98A; death 0xA9E + func_8002AC00(0x14) (H). Kind 0x210 is inferred from
+  F110 poking +0xFE of kind 0x210 (M). **Where:** 0x801829BC-0x801831FC.
+| shape | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80182B9C | LeaperApproach | bob, head to target | M |
+| 0x80182DC4 | LeaperMain | table + invuln timer | M |
+| 0x80182ED4 | LeaperSplash | TraceMap, 0x83C | M |
+| 0x80182F7C | LeaperDeathSound | 0xA9E | H |
+| 0x8018308C | LeaperIdle | distance wake | M |
+| 0x80183130 | LeaperLunge | velocity, 0xA9D, damage | M |
+| 0x801831FC | LeaperAir | damage until landing | M |
+
+### F110: stomping enemy + reward trigger (2 stages)
+* **Stages:** sc04_005 sc04_007
+* **What it is:** (a) 0x8018093C: the F108 reward-light trigger (SetFlag from table, StartEvent) (H). (b) An enemy
+  (dispatcher A11 0x801831B4, set-up 0x8018323C, big shadow 0x4000): turns to Musashi, when he is within a 0x80 box
+  it jumps (state 4), lands with a stomp that damages by segment, plays 0x84B and sets +0xFE of kind-0x210 actors
+  near it (waking F109) (H); then turns and walks back to its spawn point (H). Hurt: func_8002AC00(0x16),
+  reaction 0x11 (H). (c) 0x80186DCC: a GTE quad drawer (H). **Where:** 0x8018093C-0x80186DCC (scattered).
+| shape | proposed | evidence | conf |
+|---|---|---|---|
+| 0x8018093C | RewardLightTrigger | SetFlag(table), StartEvent | M |
+| 0x80182E54 | StomperLand | wakes kind 0x210, 0x84B, damage | M |
+| 0x8018323C | StomperInit | SetupActor, shadow | M |
+| 0x801832E4 | StomperTurnToTarget | TurnStepToTarget | H |
+| 0x8018334C | StomperWaitNear | 0x80 box -> jump | H |
+| 0x801833BC | StomperAir | sway, wakes kind 0x210 | M |
+| 0x801834E4 | StomperTurnHome | heading to spawn point | H |
+| 0x80183564 | StomperWalkHome | walk to spawn point | H |
+| 0x80186DCC | DrawQuadGte | GTE quad to OT | M |
+
+### F111: SC04_018 / SC04_019 village code (2 stages, 52 shapes)
+* **Stages:** sc04_018 sc04_019 (identical images in code)
+* **What it is:** the own villagers and story hooks of this village version (H): progress-gated villager set-ups
+  (>= 0x2A8; one only for 0x2A8-0x2B1), script choice by progress 0x2BC, the event NPC that sets progress 0x2B2,
+  helper SetProgress(0x280), the 0x2BC raise with kind 0x22B, flag helpers 0x10C / 0x10D / 0x107, a message window
+  routine 0x801877B0 (OpenMessageAt / UpdateMessage0 / CloseMessage0) (H). Range test 0x80184BAC(8, 0x14) gates
+  villagers (L: clock hours). **Where:** 0x8017E628-0x801877B0. Names for the key shapes:
+| shape | proposed | evidence | conf |
+|---|---|---|---|
+| 0x8017E8FC | PickVillagerScript2BC | progress < 0x2BC | H |
+| 0x8017E950 | RaiseProgress2BC | kind 0x22B, SetProgress(0x2BC) | H |
+| 0x8017EAFC | VillagerInitAfter2A8 | progress >= 0x2A8 | M |
+| 0x8017F0D8 | SetFlag10COn | 0x10C = 1, 0x10D = 0 | H |
+| 0x8017F108 | SetFlag10DOn | 0x10C = 0, 0x10D = 1 | H |
+| 0x8017F1A8 | SetProgress280 | SetProgress(0x280) | H |
+| 0x8017FA34 | SetFlag107 | SetFlag(0x107) | H |
+| 0x8017FF70 | EventNpcWait | StartEvent, SetProgress(0x2B2) | M |
+| 0x8018001C | VillagerInit2A8Only | 0x2A8 <= progress < 0x2B2 | M |
+| 0x801877B0 | RunMessageWindow | message open / update / close | M |
+
+### F112: village villager steps (3 stages)
+* **Stages:** sc04_018 sc04_019 sc05_017
+* **What it is:** small villager state steps: show the model, place it at a script point, set its walk / idle
+  script, start a move between points (func 0x80184ED4 with speed 0x40 / 0x60), and switch state on the same range
+  tests as F111 (0x80184BAC / 0x80184BD0) (H). Also 0x8018C278 / 0x8018C494, a progress-gated (< 0xC8) object (H).
+  **Where:** 0x8017E5CC-0x8018C494 (scattered among F111).
+
+Minor: none beyond the above.
 
 ### F113: Musashi's knock-down hurt and its green puff effect (4 stages)
 * **Stages:** sc05_001 sc05_005 sc05_007 sc05_010
@@ -1289,7 +1539,7 @@ Same as SC02_000 (F014).
     0x8018EA04/0x8018EB60, SpawnActor(0x68), SpawnActorArg(0x63/0x64)) (M). 0x8018F72C-0x80190068: a light /
     colour controller (func_80028620 x3, random flicker) (M). 0x80190538: Musashi thrown and hurt by the boss
     (ApplyQueuedHurt, DamagePlayerHp, sound 0x451) (H).
-  * A? F018 (0x80190144..0x80190408: an effect sprite), F019 (0x8018C2B0, 0x8018CE04, 0x8018CEE0: prop helpers).
+  * Shared: F018 (0x80190144..0x80190408: an effect sprite), F019 (0x8018C2B0, 0x8018CE04, 0x8018CEE0: prop helpers).
 * **Events / scripted scenes:** entry 0x8017F04C -> action 0x8017F428: unless the map record byte is set
   (func_800CF854), Musashi walks in and a long dialogue runs: OpenMessage D_80196FE8, D_8019718C, D_80197244,
   D_8019727C, D_801972DC, D_80197300, D_801973D8, D_80197540, D_80197570, D_801975AC, D_801975C8 with camera cuts
@@ -1416,7 +1666,7 @@ Same as SC02_000 (F014).
   * **Lift** (set-up 0x8017F6A4, move 0x8017F78C): a platform model with a prop 0x2A rider; it accelerates up to
     height +0xDE and down to +0xDC (speed +-0x80000, step 0x8000), reversing at each end (0x8017F154) (H).
     0x8017F33C: its motor sound 0x6DF with distance volume, stopped with SoundRequest(4, 0x6DF) (H).
-  * A ambient (0x8017F4A0, 0x8017F4DC): starts loop 0x578, then sets 0x579/0x57A volumes from Musashi's y (H).
+  * Ambience (0x8017F4A0, 0x8017F4DC): starts loop 0x578, then sets 0x579/0x57A volumes from Musashi's y (H).
   * Enemy (0x80180154-0x80181FB8, own + F042): sound 0x6A9 + SpawnKind13 on appear, 0x6AA, 0x660 (H); the same
     sound pair as the F004-variant creature of SC02_000 (M: same enemy kind, separate code).
   * F041 (0x80182224-0x80182874): Musashi knocked down / hurt effect (CollidePlayerMove, sounds 0x92F, 0x930, 0x451).
@@ -1490,7 +1740,7 @@ Same as SC02_000 (F014).
 * **Size:** 69 functions (own 24; shared: F040 (8), F009 (3), 13 lone shared shapes; P01 x3, P02, P03).
 * **Actors:**
   * A1/A2: effects (S27, F009). A3: F040 camera sprite; drip spawner / drop / ripple as SC02_015 (sounds 0x572, 0x1F).
-  * **Hazard** (A? 0x8017D7E0, set-up 0x8017D81C, update 0x8017D980): two bands (tables D_80192CE0, D_80192D04)
+  * **Hazard** (0x8017D7E0, set-up 0x8017D81C, update 0x8017D980): two bands (tables D_80192CE0, D_80192D04)
     whose ends advance by 0x20 per frame and wrap (-0x680/-0xF01, -0x708/-0xF89) at fixed x/z; when a band's test
     (0x8017E4DC) hits Musashi: g_PlayerHitDamage = 0x14 and hit kind |= 0x400 (H). Draw 0x8017DC10 (152 lines);
     sound 0x574 loop on / off (H). M: flowing streams or falling sheets; L: hot water / steam.
@@ -1690,3 +1940,29 @@ No own functions.
 
 #### Names: SC02_039
 No own functions.
+
+### SC02_041
+* **Place:** a field built mostly from code shared with SC04_002 / 004 / 005 / 007 (F060-F066, owners elsewhere) plus
+  F023 / F041 / F030 / F037: a rescue NPC (F023 **sets progress 0x5A (90)**) and two own callbacks that **switch the
+  room's spawn lists** after flag 0xD4 or 0xD5 is set (H). L: an area revisited in SC04 (same code there).
+* **Size:** 192 functions (own 4; shared: F060 (41), F061 (13), F062 (12), F023 (12), F063 (11), F041 (11), F030 (6),
+  F064 (5), F065 (4), F008 (4), F035/F037/F066 (3), 34 lone shared shapes; P01 x5, P02, P03; 7 stubs).
+* **Actors:** shared only (F060-F066 described by their owner): SpawnActorArg(0x1EB x3, 0x23F, 0x244),
+  FindActorByKind(0x245), SpawnKind13; sounds 0x7E4, 0x7EB, 0x7EC, 0x7F4, 0x98A, 0x98B, 0xA9C, 0xB41, 0xB42, 0xB6B,
+  0xAA0, 0x5BF; F041 Musashi knock-down (0x92F, 0x930, 0x451) (H: digest).
+* **Events / scripted scenes:** 0x8017DDEC: D_8011F9C4 = 1, **SetFlag(0xD4)**, func_800291F0(4, 0xD4), sound command 6,
+  g_SpawnListA / B = D_80188E98 / D_801890DC, respawn (0x8017E5AC(0)) (H). 0x8017DE5C: the same with **flag 0xD5** and
+  lists D_801890F0 / D_801893AC (H). Not called from stage code (script callbacks, M). M: two outcomes of an event that
+  repopulate the room.
+* **Puzzles / mechanisms:** camera 0x8017E14C (room start: projection 0x190, distance 0x4B0) and 0x8017E2B8 (pad & 3
+  toggles distance; wider angle when focus x < -0xC38) (H).
+* **Exits:** P01 exits (one with SoundCmd1(1)) (H).
+* **Sound:** sound command 6 at the spawn-list switch (H).
+
+#### Names: SC02_041
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017DDEC | func_sc02_041_8017DDEC | EventSwitchSpawnsD4 | SetFlag(0xD4), new spawn lists, respawn | H |
+| 0x8017DE5C | func_sc02_041_8017DE5C | EventSwitchSpawnsD5 | SetFlag(0xD5), new spawn lists, respawn | H |
+| 0x8017E14C | func_sc02_041_8017E14C | CameraRoomStart | camera targets, SetCameraUpdate, SnapCamera | H |
+| 0x8017E2B8 | func_sc02_041_8017E2B8 | CameraZoneUpdate | pad & 3 toggles distance, focus x test | H |
