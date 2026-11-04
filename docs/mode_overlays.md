@@ -128,9 +128,447 @@ derives +0x36 = daytime (420..1139), +0x37 the time-of-day period 0..4, +0x38 mi
 
 ## 3. Overlay by overlay
 
-### ovl36: not written yet
+### ovl36: the field (MAIN.CD entry 10, slot 0 0x800CEDF8, code 0x4-0x4610 = 17932 B / data 0x4610-0x5935C = 347468 B, 145 functions)
 
-See section 5.
+Sources: src/ovl36/ovl36.c (one -O2 file, all 145 functions matched C), ovl36.yaml, symbol_addrs.txt, the docs named
+in the task, and the engine / EXE C for the callees (src/stage/*.c, src/stg/*.c, src/main.c, src/code_800123F0.c,
+src/code_8002C8BC.c). No asm, disc or build: the overlay's data (tables, records, the picture list) is not readable,
+so a table's contents are known only from how the code indexes it. Conf.: H the C shows it, M strong inference,
+L guess (reason given). Work field names are include/work.h's; the Work block is D_800AF630, so 0x800B99F0 =
+Work.state, 0x800B99F6 = stateStep, 0x800B99FC = stateSubStep, 0x800B9A00 = stateStepTimer, 0x800B9A02 = frame,
+0x800B9A08 = mapId, 0x800B9A0A = mapGroup, 0x800B9A0C = unkA3DC, 0x800B9A0E = unkA3DE, 0x800B9A10 = mapLive,
+0x800B9A11 = unkA3E1, 0x800B9A13 = pauseMenu.
+
+**What it does.**
+
+ovl36 is the mode overlay that is resident for the whole of play: mode 10 (or 15 for the attract demo) loads it with
+NOW LOADING on screen, and mode 11 (ModeFieldRun) / mode 16 (ModeDemoRun) call its entry 0x800CEDFC every frame (H,
+src/main.c). It owns the field's **game-state machine** (Work.state, 20 states, table D_800D3430) and the parts of
+play that sit outside the stage image: loading the stage image and sub-room files for a map, the map-change
+sequence, the two ability-package loaders, the per-map music / ambient sound logic, the inventory helpers and item
+effects, the clock arithmetic, a few camera / sprite / vector helpers, and the 2D primitives the stage engine's pause
+menu draws with. Most frames are handed to the stage engine (the image at 0x80128158, entry 12's engine code), whose
+entries 0x80128158 / 78 / 98 / B8 are game states 7-10. Its data image (0x800D3408-0x80128154) is also where much of
+the engine's RAM lives (Musashi's record D_80126B58, the camera pointer D_801151D4, the stage-menu block
+D_80115110, the pause-menu update pointer D_8011DB24): those addresses are inside the overlay's range (H by
+address; their contents are set at run time).
+
+*The game states* (D_800D3430; 7-10, 12, 14, 17 are stage-engine addresses, H from src/stage/engine.c and
+docs/mode_dispatcher.md):
+
+| State | Handler | What it does / waits for | Next | Conf. |
+|---|---|---|---|---|
+| 0 | func_800CEE40 | steps D_800D3480: func_800CEE84 field init (time-of-day recompute func_80029344, clear the save / picture / state-18 / demo-end requests, `D_80127084 = 1` "full reload" when stateStepTimer is nonzero, sound ids reset, OT depth 0x3E0), func_800CEF04 load slot-3 package 1 (func_800D0488(1)) until done | 1 | H |
+| 1 | func_800CEF34 | func_8001B324 (load-system / sound id reset) | 2 | H |
+| 2 | func_800CEF5C | Work+0xA3E2 = 1, mapLive = 0, pause-allowed D_800B9A17 = 0, sprite / object records cleared (func_8001C0C8), unkA3DE = 0 | 3 | M (by elimination: the only unassigned handlers) |
+| 3 | func_800CEFB0 | nothing | 4 | M (same) |
+| 4 | func_800CF370 | DrawNowLoading(0) | 15 | H |
+| 5 | func_800CEFD0 | blocking load loop with the EXE's screen transition func_8001B86C(0) | 7 | H |
+| 6 | func_800CF104 | the same with func_8001B86C(1) (the EXE ignores the argument) | 7 | H |
+| 7 | 0x80128158 (engine) | the stage start: D_8018D7A4 steps (stage init, map music via func_800D0588, ...), last step NextGameState + stateFlag = 1 | 8 | H |
+| 8 | 0x80128178 -> func_801285E4 | world update + func_800D18DC (the map-enter steps) until they return 1 | 9 | H |
+| 9 | 0x80128198 -> func_80128678 | **play**: play-time tick, world update, func_800D1754 polls the map-change request | 10 | H |
+| 10 | 0x801281B8 -> func_80128714 | the map-leave steps func_800D19F0; when they finish, func_800D1BF8 picks the next state | 5 / 13 / 16 / 18 / 19 | H |
+| 11, 13 | func_800CF94C | LoadFileStep(g_FileLocStageEngine = MAIN.CD entry 12, 0x80128158) | 12 / 14 | H |
+| 12 | 0x80128228 -> func_80128A28 | stage hooks D_8018D4D8 / D_8018D4DC: the Continue / load screen; < 0: state 0 with stateStepTimer = 1, > 0: title | 0 / mode 5 | H (call), M (meaning, docs) |
+| 14 | 0x80128248 -> func_80128AF4 | hooks D_8018D4E4 / D_8018D4E8, chosen when func_8002AF08() != 0: probably the save screen; result 1: state 19 if a picture is pending, else 4 (reload the map); else title | 19 / 4 / mode 5 | H (call), L (save screen: docs' guess) |
+| 15 | func_800CF398 | nothing | 16 | H |
+| 16 | func_800CF3B8 | blocking load loop, no transition drawn | 7 | H |
+| 17 | 0x80128268 -> func_801282EC | clear objects, ModeGoTrialEnd (mode 13) | mode 13 | H |
+| 18 | func_800CF238 | blocking load loop, then runs the stage start (0x80128158) without drawing until stateFlag is set | 8 | H |
+| 19 | func_800CF990 | the picture interlude: load archive entry D_800D3408[index], fade in, draw a 256x144 picture until stateStepTimer reaches 0x5B (91 frames) | 6 | H |
+
+New game: title -> mode 10 -> 11, states 0, 1, 2, 3, 4, 15, 16, 7, 8, 9. Continue: mode 10 + SetGameState(11): 11,
+12 (Continue screen) and, on a choice, state 0 with the full-reload flag (H from docs/mode_dispatcher.md and
+func_80128A28).
+
+*The frame loops (states 5, 6, 16, 18).* Each one clears D_80114E98 ("load steps finished") and D_80114E9C
+("transition finished"), resets the transition (func_8001B85C) and then **does not return to main()** until done: it
+runs its own DrawSync / VSync(Work.vsyncMode) / DrawOTag(world OT + 1) / LoadQueueStep loop (H). Each pass runs the
+load-step table D_800D3488[stateStep]: step 0 func_800CF47C (when D_80114E78 is set, load archive file D_800AF218 =
+LIST.CD global entry 317 by the docs' counts, then clear it), step 1 func_800CF4D4 (the substeps D_800D3490[stateSubStep]):
+
+| Sub | Function | What it does | Conf. |
+|---|---|---|---|
+| 0 | func_800CF510 | ResetMallocHeap, unkA3E1 = 1 (main() draws no sprites / models), clear object and text records, D_801152BA = 0; full reload -> 1, else -> 3 | H |
+| 1 | func_800CF584 | full reload only: reload the current ability's slot-2 package (D_80078EC1) | H |
+| 2 | func_800CF5D4 | full reload only: reload the slot-3 package (D_80078EC0 & 0x7F) | H |
+| 3 | func_800CF628 | pick what to read. A **sub-room** (func_800CFC5C != 0: ids 0x2013-0x201A, 0x2055-0x205B, 0x207A-0x2080, 0x2097-0x209D) is loaded on top of its base map's stage (func_800CFBF8: 0x1010, 0x1052, 0x1077, 0x1094): Work.mapId is switched to the base map (old id in D_80114E94); if the base stage is resident -> 5 (id restored), else -> 4. A normal map: if its stage image must be read -> 6, else done | H |
+| 4 | func_800CF714 | ForgetStageImage, read the base map's stage image (func_800CFE60), mark it resident, restore the sub-room id -> 5 | H |
+| 5 | func_800CF764 | read the sub-room's own archive file to the stage's extra-load address (func_80128218() = D_801EBC68) -> done, full-reload flag cleared | H |
+| 6 | func_800CF7A4 | ForgetStageImage, wait for the load queue not to be busy (func_8001AF04() != 2), read the stage image, mark it resident -> done | H |
+
+States 5 / 6 also wait for the EXE's transition func_8001B86C (it builds 15 x 2 screen bars and ends after 0x2C
+steps; it also calls CdInit / ResetCallback on its third step), state 16 only waits for the steps, and state 18 then
+runs the stage start in a VSync loop with nothing drawn (H; what the player sees in 18 is not known).
+
+*Map change.* A map change is requested by storing a 36-byte map record pointer (bit 0x01000000 = "re-enter the
+current record", bits 24-30 otherwise masked off) in D_800AE6B0 (func_800D1724, called from 61 stage files, the
+engine and main()'s demo end), or queued in D_800AE6A8 (func_800D1734). In state 9, func_800D1754 / func_800D17B8
+copy the record to D_80078E50 (func_800D185C, `SetNextMap`), set the scene task's function (record +4, or the
+engine's D_80159698 for a re-entry), and go to state 10. The block at D_800AE6A8 acts as a scene task: +0 queued
+request, +4 the "return" record (normally &D_80078E50; func_800D1744), +8 the active request, +0xC the task
+function, +0x14 its step, +0x15 the function's own sub-step, +0x16 / +0x19 record bytes 2 and 3, +0x17 the re-entry
+flag (H from the C; the stage loader func_80144B9C clears the request pointer and sets +0xC to the entry's own
+function at state 7). Enter (state 8, D_801141BC = func_800D1938, func_800D1984, func_800D19DC): save HP / BP /
+D_80078E8C for a retry (func_800D1F58), let main() draw again (func_801285D4), run the task function until it returns
+nonzero, then mapLive = 1. Leave (state 10, D_801141C8 = func_800D1B10, func_800D1B80, func_800D1BD8): wait for any
+stream to stop (func_8001BE30) and prefetch the destination's header (func_800CF8E4) unless re-entering or in map
+0x3069; flag 0x119 off, sound command 4 on 0x448, 0x449, 0x8ED, mapLive = 0; run the task function (the record's
+exit transition) until nonzero; then func_800D1BF8: unkA3DE = 0, the record's +0x1C hook (empty func_800D1E20 by
+default), MapStart (func_800D1D24: Work.mapId = record id, previous group saved, group = id & 0xF000, objects cleared,
+stage hooks func_80129258 / func_801378F0), and the next state: demo end -> mode 17; save request -> 13; picture
+request -> 19; flag D_80075838 -> 18; else by func_800D1DB0: 1 (a different stage image, no sub-room, not from
+0x3005) -> 5, 2 (anything else) -> 16 (H). The stage files start and wait for the matching fade with func_800D1E28 /
+func_800D1EBC (134 / 133 stage files call them): black fade-out for kind 2, no black fade for kind 1 (H; the fade
+direction is M, from func_800167F0's levels).
+
+*Packages.* func_800D02D0(n) maps ability n to the 29-entry slot-2 table D_800D3764 and loads it with
+func_8001ABBC to g_LoadAddr[2]; func_800D0488(n) maps n = 1-6 to the slot-3 table D_800D384C and loads it to
+g_LoadAddr[4] (D_80072C7C). Both pass the entry's second word as the sound bank id (`{bank, D_800A2E20}` at
+D_800C7C60) and clear D_800AE7EC when done (H; docs/abil_packages.md section 1). Callers: the field load substeps 1-2,
+field init (n = 1), the engine (func_801554B8, the pause menu when D_80078EC0 changes, the stage item check).
+
+*Music and ambient sound.* The stage loader installs a per-room music picker (func_800D02C0, room record +0xD4);
+func_800D0588 (a stage-start step) / func_800D0CE0 ask the loader for the track it returns for the story counter
+(func_80029504 = D_80078E80). func_800D06E8, called each frame by 12 stage files and SC03_001, runs two small state
+machines: in the four village maps (0x1010/11, 0x1077/78, 0x1094/95) a one-shot sound (0x518 for time phase 1, 0x517
+for phases 3-4) when the time-of-day phase changes, stopped after 0x97 frames, and in 0x3014 / 0x301C sound 0x683 at
+phase 4 (night); and the track: villages 0x89 / 0x65 / 0x28 by story-counter ranges, else 0xF in daytime
+(D_80078EAE) or 0x10 at night; 0x1052 / 0x1053 0x27; 0x3014 / 0x301C / 0x301E / 0x3023 0xA or 0x3C at night;
+on a change, sound command (1, 2), 0x3C frames, then the request (func_8001AAA0 for 0xF / 0x10, sequence ids 0x10C /
+0x13B for 0xA / 0x3C) (H; the phase table is EXE func_80029344: 0 5:00, 1 7:00, 2 16:00, 3 19:00, 4 22:00).
+Stage scripts take the music over with func_800D06CC / func_800D0CA0 (both machines parked in state 3) and
+func_800D0C48 (sound command 1, forget the current track; 145 stage files).
+
+*Items.* The inventory is 12 byte slots 0x2F-0x3A of the EXE's variable array D_800BA1B8 (func_800291A0 /
+func_800291B4), each with a halfword day stamp at 0x14 + 2i taken from the day counter D_80078EAC (1-365, advanced at
+midnight by engine func_8014B084, which then calls func_800D10EC). The item table D_8010EDE8 has 12-byte records
+(+0 word, +4 / +6 halfwords, +8 days to change, +9 the item it changes into): func_800D10EC turns each held item into
+its successor once it has been held that many days (H for the mechanism; what the items are is not in the C).
+func_800D128C(item, days held) applies an item: HP (func_8014BB24), BP (func_8014BD24), HP loss (func_8014BCC0),
+D_80078EA4 (func_8014B944), D_80078EB2 (func_8014BC0C), a status call (func_8014B2A8), with sounds 0x45C / 0x463 /
+0x464 / 0x465 and 0x45F for "cannot use" (returns 0); item 0x6B grows with age ((min(days, 0x12) + 2) * 25) (H).
+The pause menu's item actions are func_800D11F0 (use) and func_800D1658 (removes the item with sound 0x462 when its +4
+field is positive, or 0x8000 for any item but 0x27; else 0x45F) (H for the calls, engine func_801416D4).
+
+*Pause menu and 2D drawing.* CheckPauseStart (EXE) calls engine func_801281D8 -> func_8013E67C ->
+**func_800D24A0(0)**, which opens the stage menu: rumble off, DrawSync, the world OT descriptor copied from the other
+frame (the last world frame stays on screen, M), the menu block D_80115110 reset, its kind stored, Work.pauseMenu =
+kind + 1, the frame's prim buffer split in two (D_801151C8 / D_801151CC), sound command 0x14 (H). While pauseMenu is
+set main() calls func_800D25FC, which calls the pointer D_8011DB24 the engine sets (func_8013E5E8, func_80141788,
+func_80141874, SC03_001's func_80188F6C) (H). func_800D2624 closes it (pauseMenu = 0, command 0x15). The menu draws
+with func_800D2650 (a text line of 8x8 glyph sprites), func_800D27DC (rows of textured quads), func_800D29F8
+(gouraud bars with a highlighted pair) into front-OT slot 2, and the play-time / counters with func_800D2CA8 (binary
+to BCD) and func_800D2D10 (BCD to glyph codes through D_800D38D8) (H, engine_8013C98C.c).
+
+*Picture interlude (state 19).* Stage scripts (8 stage files) call func_800CFBCC(index); at the next map change
+state 19 loads archive entry D_800D3408[index], fades in and shows it as one 256x144 8-bit sprite (texture page
+0xE1000085, CLUT 0x7800 = (0, 480)) for 91 frames (H). What the pictures are is unknown (chapter or title cards would
+fit, L: only the shape is known).
+
+*Transition scripts.* func_800D2DAC-func_800D31FC are step handlers and five dispatchers over D_800D3920,
+D_800D3928, D_800D39C4, D_800D39F0, D_800D3A8C, all indexed by the scene task's sub-step (+0x15 of D_800AE6A8): they
+are the enter / exit functions of the overlay's own map records (D_800D39FC, D_800D3A20, D_800D3A44, D_800D3A68 and
+whatever else the data holds) (M: same object, same calling convention as the task function; the records are data).
+Their shapes: fade in, optionally starting Musashi's message event func_800D3238 (show message p+0x198, wait for its
+answer); or a 10-frame wait, sound commands 0x1C / 0x1D, music fade (func_800D0C48(1)), and a fade out or the
+map-change fade (H for the shapes).
+
+**How it is entered.**
+
+* Loaded by ModeFieldLoad (modes 10 / 15) from MAIN.CD entry 10 to 0x800CEDF8 (ID word 0x36); run by ModeFieldRun
+  (mode 11) and ModeDemoRun (mode 16) through **0x800CEDFC** every frame (H, src/main.c). It stays resident; it
+  leaves only through mode changes: func_800D1BF8 SetMode(17) (demo end), the engine's ModeGoTitle (states 12 / 14),
+  ModeGoTrialEnd (state 17).
+* main() calls **func_800D25FC** every frame while Work.pauseMenu is nonzero, and ModeDemoRun calls
+  **func_800D1724(D_800D3A68)** at the demo's end (H).
+* Function-pointer tables it owns (data, contents not readable except where the C or a doc fixes them): D_800D3430
+  (20 game states), D_800D3480 (2, state 0), D_800D3488 (2, load loop), D_800D3490 (7, load substeps), D_800D3920 /
+  D_800D3928 / D_800D39C4 / D_800D39F0 / D_800D3A8C (transition steps), D_800D3A98 (3) / D_800D3AA4 (2) (Musashi
+  events), D_801141BC (3, map enter) / D_801141C8 (3, map leave) (H for use, M for contents).
+* Called directly from outside (grep of src/stage, src/stg, src/*.c; "N stg" = number of per-stage files in
+  src/stg): func_800CF804 (engine_801458E0, 2 stg), func_800CF818 (engine_801458E0), func_800CF854 (engine.c,
+  engine_80144B9C, 6 stg), func_800CF864 (engine_8012F5F4), func_800CF8B4 (engine_801458E0, 28 stg), func_800CF8CC
+  (engine_801458E0), func_800CFBBC / func_800CFBE8 (engine.c), func_800CFBCC (8 stg), func_800D02C0 (engine_80144B9C),
+  func_800D02D0 (engine_801458E0), func_800D0488 (engine_8012F5F4, engine_8013C98C), func_800D0588 / func_800D0630
+  (engine.c), func_800D0694 (1 stg), func_800D06CC (7 stg), func_800D06E8 (sc03_001, 12 stg), func_800D0C48
+  (engine_801458E0, sc03_001, 145 stg), func_800D0C74 (3 stg), func_800D0CA0 (engine, 4 stg), func_800D0CE0 (engine, 9
+  stg), func_800D0D7C / func_800D0E30 / func_800D10EC (engine_801458E0), func_800D0EC4 (four engine files, 6 stg),
+  func_800D0F0C / D0F4C / D0F8C / D0FE0 / D128C (engine_801458E0, sc03_001, 4-22 stg), func_800D11F0 / func_800D1658
+  (engine_8013C98C), func_800D1724 (main.c, engine, 61 stg), func_800D1734 (engine), func_800D1744 (2 stg),
+  func_800D1754 / func_800D18DC / func_800D19F0 (engine.c), func_800D185C (engine_801458E0), func_800D1D94 (sc03_001, 9
+  stg), func_800D1E28 (134), func_800D1EBC (133), func_800D1F90 (engine), func_800D1FC8 (engine, 5 stg), func_800D20C0
+  (75 stg), func_800D21C4 (22), func_800D222C (40), func_800D22E4 (55), func_800D2318 (engine), func_800D23D0 (78),
+  func_800D24A0 (three engine files, 9 stg), func_800D25FC (main.c), func_800D2624 (engine, 5 stg), func_800D2650 /
+  D27DC / D29F8 (engine_8013C98C, sc03_001, 9 stg), func_800D2CA8 / func_800D2D10 (engine_8013C98C, engine_801458E0).
+* No caller in any C (reached only through data, or unused): the state / step handlers above, func_800CF82C,
+  func_800CF840, func_800D1000, func_800D1028, func_800D1054, func_800D109C, func_800D1E20 (a map record's +0x1C hook,
+  seen in a live dump: docs/stage_loader.md), func_800D2460, func_800D2468, all of func_800D2DAC-func_800D33E0 except
+  through their tables.
+
+#### Game states
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800CEDFC | func_800CEDFC | the entry: `D_800D3430[Work.state]()` for state < 20 | H |
+| 0x800CEE40 | func_800CEE40 | state 0: `D_800D3480[stateStep]()` for step < 2 | H |
+| 0x800CEE84 | func_800CEE84 | state 0 step 0: field init (time phase, requests cleared, full-reload flag from stateStepTimer, sound ids, depth 0x3E0) | H |
+| 0x800CEF04 | func_800CEF04 | state 0 step 1: load slot-3 package 1, then NextGameState | H |
+| 0x800CEF34 | func_800CEF34 | state 1: func_8001B324, NextGameState | H |
+| 0x800CEF5C | func_800CEF5C | state 2: map flags reset (A3E2 = 1, mapLive 0, pause-allowed 0, unkA3DE 0), objects cleared, NextGameState | M (state number by elimination) |
+| 0x800CEFB0 | func_800CEFB0 | state 3: NextGameState only | M (same) |
+| 0x800CF370 | func_800CF370 | state 4: NOW LOADING, SetGameState(15) | H |
+| 0x800CF398 | func_800CF398 | state 15: NextGameState only | H (docs/mode_dispatcher.md) |
+| 0x800CF94C | func_800CF94C | states 11 / 13: load MAIN.CD entry 12 (the engine image) to 0x80128158, then NextGameState | H |
+| 0x800CF990 | func_800CF990 | state 19: picture interlude (load D_800D3408[i], fade in, show 91 frames, -> 6) | H |
+
+#### Frame loops and load steps
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800CEFD0 | func_800CEFD0 | state 5: blocking load loop + transition func_8001B86C(0), -> 7 | H |
+| 0x800CF104 | func_800CF104 | state 6: the same with func_8001B86C(1), -> 7 | H |
+| 0x800CF238 | func_800CF238 | state 18: blocking load loop, then the stage start run undrawn until stateFlag, -> 8 | H |
+| 0x800CF3B8 | func_800CF3B8 | state 16: blocking load loop (VSync only), text records cleared, -> 7 | H |
+| 0x800CF47C | func_800CF47C | load step 0: the pending extra load (D_80114E78, file D_800AF218), NextGameStateStep | H (role), M (table slot) |
+| 0x800CF4D4 | func_800CF4D4 | load step 1: `D_800D3490[stateSubStep]()` | H (role), M (table slot) |
+| 0x800CF510 | func_800CF510 | substep 0: heap reset, drawing off, records cleared; full reload -> 1, else -> 3 | H |
+| 0x800CF584 | func_800CF584 | substep 1: full reload: reload the slot-2 ability package | H |
+| 0x800CF5D4 | func_800CF5D4 | substep 2: full reload: reload the slot-3 package | H |
+| 0x800CF628 | func_800CF628 | substep 3: sub-room / stage decision (-> 4, 5, 6 or done) | H |
+| 0x800CF714 | func_800CF714 | substep 4: read the sub-room's base stage image, restore the sub-room id | H |
+| 0x800CF764 | func_800CF764 | substep 5: read the sub-room file to the stage's extra-load address, done | H |
+| 0x800CF7A4 | func_800CF7A4 | substep 6: read the map's stage image once the queue is free, done | H |
+
+#### Field flags and state queries (stage-engine API)
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800CF804 | func_800CF804 | D_80127084 = 1: next map load is a full reload (packages too); the engine's continue / restart paths | H |
+| 0x800CF818 | func_800CF818 | D_80114E78 = 1: load file D_800AF218 at the next map load | H |
+| 0x800CF82C | func_800CF82C | Work.unkA3DE = 1 (read by func_800CFE60: map 0x300B uses file 0x8A, bank 8) | H (effect), L (callers unknown) |
+| 0x800CF840 | func_800CF840 | Work.unkA3DE = 2 | H (effect), L (callers) |
+| 0x800CF854 | func_800CF854 | the map was entered by a re-entry request (scene task +0x17, the 0x01000000 bit) | H (flag), M (meaning) |
+| 0x800CF864 | func_800CF864 | 1 in map 0x3069 or while Musashi's kind is 0x1A, else state == 9 | H |
+| 0x800CF8B4 | func_800CF8B4 | Work.state == 9 (playing) | H |
+| 0x800CF8CC | func_800CF8CC | Work.state == 10 (leaving the map) | H |
+
+#### Stage loading and the map table
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800CF8E4 | func_800CF8E4 | prefetch the destination map's header when neither map is a sub-room and its stage must be read | H |
+| 0x800CFBF8 | func_800CFBF8 | a sub-room's base map: kind 1-4 -> 0x1010, 0x1052, 0x1077, 0x1094 (default 0x1010) | H |
+| 0x800CFC5C | func_800CFC5C | sub-room kind of a map id: 1 0x2013-0x201A (not 0x2014), 2 0x2055-0x205B, 3 0x207A-0x2080, 4 0x2097-0x209D, else 0 | H |
+| 0x800CFD68 | func_800CFD68 | StageImageNeedsLoad for a map id's table entry | H |
+| 0x800CFDA4 | func_800CFDA4 | SetStageImage for the current map's entry | H |
+| 0x800CFDE8 | func_800CFDE8 | queue a header read (func_8001ABBC kind 2) of a map's archive file | H |
+| 0x800CFE60 | func_800CFE60 | read the current map's stage image to 0x80128158 with its sound bank, with per-map overrides (0x300B, 0x3001, 0x304E, 0x1077, 0x3021 by flag / story counter); installs the map's sound record afterwards | H |
+| 0x800D00E4 | func_800D00E4 | install sound record 1-15 (EXE data D_800C8058-D_800CADE8) with func_8002F5C8 | H (call), L (what the record is) |
+| 0x800D0214 | func_800D0214 | read the current map's archive file to a given address with its sound bank | H |
+
+#### Picture interlude
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800CFAD0 | func_800CFAD0 | build the 256x144 picture SPRT (D_80114E7C, tpage 0xE1000085, CLUT 0x7800) and link it into the world OT | H |
+| 0x800CFBBC | func_800CFBBC | clear the picture request (D_80114E70 = 0) | H |
+| 0x800CFBCC | func_800CFBCC | request picture `a` for the next map change (D_80114E70 = 1, D_80114E74 = a) | H |
+| 0x800CFBE8 | func_800CFBE8 | the picture request flag | H |
+
+#### Package loading
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800D02D0 | func_800D02D0 | load the slot-2 package of ability n (1-30, D_800D3764); 1 when done or nothing to load | H |
+| 0x800D0488 | func_800D0488 | load slot-3 package n (1-6, D_800D384C) | H |
+
+#### Music and ambient sound
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800D02C0 | func_800D02C0 | set the room's music picker D_800D375C (stage loader, room +0xD4) | H |
+| 0x800D0588 | func_800D0588 | stage-start step: request the picker's track (func_8001ABBC kind 1), D_8012704C = 0 when done | H |
+| 0x800D05E8 | func_800D05E8 | the picker's track for the story counter (0 without a picker) | H |
+| 0x800D0630 | func_800D0630 | reset the sound states and D_8011529C = -1 (stage init) | H |
+| 0x800D065C | func_800D065C | clear the six sound-state words | H |
+| 0x800D0694 | func_800D0694 | the same (a second copy; one stage file calls it) | H |
+| 0x800D06CC | func_800D06CC | park both sound machines (state 3) | H |
+| 0x800D06E8 | func_800D06E8 | per-frame time-of-day jingles and per-map track selection | H |
+| 0x800D0C48 | func_800D0C48 | sound command (1, a), forget the current track (D_800A654C = 0) | H (calls), M (command 1 = music fade / stop) |
+| 0x800D0C74 | func_800D0C74 | sound command (1, a), func_8001B34C (sound ids reset) | H |
+| 0x800D0CA0 | func_800D0CA0 | sound command (1, a), forget the track, park both machines | H |
+| 0x800D0CE0 | func_800D0CE0 | start the picker's track now (func_8001AAA0); on success reset the states, 1 | H |
+
+#### Clock
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800D0D7C | func_800D0D7C | the clock (D_80078EB1 hour : D_80078EB0 minute) minus h:m, wrapping at 60 / 24, packed hour << 8 \| minute | H |
+| 0x800D0E30 | func_800D0E30 | a packed time minus the clock, same wrapping | H |
+
+#### Items
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800D0EC4 | func_800D0EC4 | first empty inventory slot (0x2F-0x3A), 0 when full | H |
+| 0x800D0F0C | func_800D0F0C | put item v in slot i and stamp the day | H |
+| 0x800D0F4C | func_800D0F4C | find item a and remove it; its slot or 0 | H |
+| 0x800D0F8C | func_800D0F8C | the slot holding item a, or 0 | H |
+| 0x800D0FE0 | func_800D0FE0 | empty slot i | H |
+| 0x800D1000 | func_800D1000 | the day stamp of slot i | H |
+| 0x800D1028 | func_800D1028 | item record +4 of the item in variable a0 (a0 passed through unprototyped) | H |
+| 0x800D1054 | func_800D1054 | item record +0 of item a | H |
+| 0x800D1078 | func_800D1078 | item record +4 of item a | H |
+| 0x800D109C | func_800D109C | item record +6 of the item in variable a0 | H |
+| 0x800D10C8 | func_800D10C8 | item record +6 of item a | H |
+| 0x800D10EC | func_800D10EC | day change: each held item older than its record's +8 days becomes item +9, restamped | H |
+| 0x800D11F0 | func_800D11F0 | use the item in slot a (effect by days held); empties the slot on success | H |
+| 0x800D128C | func_800D128C | an item's effect (HP / BP / other stats, sound); 0 = cannot use | H |
+| 0x800D1658 | func_800D1658 | the pause menu's second item action: remove the slot's item if its +4 allows (sound 0x462), else sound 0x45F | H (behaviour), M (discard) |
+
+#### Map change
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800D1714 | func_800D1714 | the destination map id (D_80078E50) | H |
+| 0x800D1724 | func_800D1724 | request a map change (D_800AE6B0 = record \| flags) | H |
+| 0x800D1734 | func_800D1734 | queue a second request (D_800AE6A8) | H |
+| 0x800D1744 | func_800D1744 | set the return record (D_800AE6AC) used by re-entry requests | H (store), M (role) |
+| 0x800D1754 | func_800D1754 | state 9 poll: start the active request, else promote the queued one | H |
+| 0x800D17B8 | func_800D17B8 | start a request: copy the record, set the task function, NextGameState; 1 if there was one | H |
+| 0x800D185C | func_800D185C | SetNextMap: copy the 36-byte record to D_80078E50, record bytes 2 / 3 and the pointer into the task | H |
+| 0x800D18DC | func_800D18DC | state 8: run enter step D_801141BC[step] | H |
+| 0x800D1938 | func_800D1938 | enter step 0: save vitals, drawing back on, run step 1 at once | H (body), M (slot) |
+| 0x800D1984 | func_800D1984 | enter step 1: run the task function until nonzero | H (body), M (slot) |
+| 0x800D19DC | func_800D19DC | enter step 2: mapLive = 1, return 1 | H (body), M (slot) |
+| 0x800D19F0 | func_800D19F0 | state 10: stop streams and prefetch once, then leave step D_801141C8[step]; waits while Musashi +0x4E is set | H |
+| 0x800D1B10 | func_800D1B10 | leave step 0: flag 0x119 off, sounds 0x448 / 0x449 / 0x8ED command 4, mapLive = 0 | H (body), M (slot) |
+| 0x800D1B80 | func_800D1B80 | leave step 1: run the task function until nonzero | H (body), M (slot) |
+| 0x800D1BD8 | func_800D1BD8 | leave step 2: func_800D1BF8, return 1 | H (body), M (slot) |
+| 0x800D1BF8 | func_800D1BF8 | finish the change: record +0x1C hook, MapStart, choose mode 17 / state 13 / 19 / 18 / 5 / 16 | H |
+| 0x800D1D24 | func_800D1D24 | MapStart: map id / group / previous group, drawing off, objects cleared, stage hooks | H |
+| 0x800D1D94 | func_800D1D94 | the destination's group (id & 0xF000) | H |
+| 0x800D1DB0 | func_800D1DB0 | map-change kind: 1 (another stage image, no sub-room) or 2 | H |
+| 0x800D1E20 | func_800D1E20 | empty: the default record +0x1C hook | H (empty), M (role, live dump) |
+| 0x800D1E28 | func_800D1E28 | start the map-change fade for that kind (kind 2: func_800167B8(4), else func_800168B4) | H |
+| 0x800D1EBC | func_800D1EBC | step that fade; 1 when finished | H |
+| 0x800D1F58 | func_800D1F58 | save HP, BP and D_80078E8C for a retry | H |
+| 0x800D1F90 | func_800D1F90 | restore them (engine continue paths) | H |
+
+#### Camera, sprite and vector helpers
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800D1FC8 | func_800D1FC8 | move a position toward the frame's camera (D_801151D4 +0x5C) by the unit vector >> sh | H |
+| 0x800D20C0 | func_800D20C0 | the same on an SVECTOR, returning the direction | H |
+| 0x800D21C4 | func_800D21C4 | allocate a sprite record (func_801465C0) as draw type 3 with data b, byte +0x27 = c | H |
+| 0x800D222C | func_800D222C | the same as draw type 2 (func_8001CB6C) | H |
+| 0x800D2294 | func_800D2294 | the same as draw type 6 (func_8001CD9C) | H |
+| 0x800D22E4 | func_800D22E4 | position (+4) += velocity (+0x10) | H |
+| 0x800D2318 | func_800D2318 | pitch / yaw at +0x12 / +0x16 from the packed 10-bit direction at +0x2C | H |
+| 0x800D23D0 | func_800D23D0 | an SVECTOR direction turned into (pitch, yaw, 0) in place | H |
+
+#### Pause menu and 2D drawing
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800D2460 | func_800D2460 | empty, no caller | H |
+| 0x800D2468 | func_800D2468 | clear the stage-menu block (0xC4 bytes) and two words; no caller in the C | H (body) |
+| 0x800D24A0 | func_800D24A0 | open the stage menu of a kind (pauseMenu = kind + 1) | H |
+| 0x800D25FC | func_800D25FC | the pause-menu update main() calls: `D_8011DB24()` | H |
+| 0x800D2624 | func_800D2624 | close the menu (pauseMenu = 0, sound command 0x15) | H |
+| 0x800D2650 | func_800D2650 | draw a text line as 8x8 glyph sprites | H |
+| 0x800D27DC | func_800D27DC | draw a row of textured quads from a u16 list | H |
+| 0x800D29F8 | func_800D29F8 | draw a list of gouraud bars with a selected pair | H |
+| 0x800D2CA8 | func_800D2CA8 | binary to BCD, shifted | H |
+| 0x800D2D10 | func_800D2D10 | BCD digits to glyph codes (leading blanks optional) | H |
+
+#### Transition scripts and Musashi events
+
+| Address | Current name | Purpose | Conf. |
+|---|---|---|---|
+| 0x800D2DAC | func_800D2DAC | start event func_800D3238, fade in, sub-step++ | H |
+| 0x800D2DFC | func_800D2DFC | step the fade in; 1 when done | H |
+| 0x800D2E20 | func_800D2E20 | start event func_800D3348, wait 10, sub-step++ | H |
+| 0x800D2E6C | func_800D2E6C | after the wait: commands 0x1C / 0x1D, music fade, fade out | H |
+| 0x800D2EE8 | func_800D2EE8 | step the fade out; 1 when done | H |
+| 0x800D2F0C | func_800D2F0C | dispatcher over D_800D39C4 | H (which handlers: L) |
+| 0x800D2F48 | func_800D2F48 | start Musashi's script D_800D3AAC (func_800D33B8), fade in, sub-step++ | H |
+| 0x800D2F8C | func_800D2F8C | step the fade in; 1 when done | H |
+| 0x800D2FB0 | func_800D2FB0 | dispatcher over D_800D39F0 | H (which handlers: L) |
+| 0x800D2FEC | func_800D2FEC | start event D_800D3AB0 (func_800D33E0), wait 10 (+0x28) | H |
+| 0x800D302C | func_800D302C | after the wait: commands, music fade, the map-change fade | H |
+| 0x800D30A8 | func_800D30A8 | step the map-change fade (returns func_800D1EBC's answer by tail call) | H |
+| 0x800D30C8 | func_800D30C8 | dispatcher over D_800D3A8C | H (which handlers: L) |
+| 0x800D3104 | func_800D3104 | wait 10, sub-step++ | H |
+| 0x800D3120 | func_800D3120 | after the wait: commands, music fade, fade out | H |
+| 0x800D319C | func_800D319C | step the fade out; 1 when done | H |
+| 0x800D31C0 | func_800D31C0 | dispatcher over D_800D3920 (2 entries) | H (which handlers: L) |
+| 0x800D31FC | func_800D31FC | dispatcher over D_800D3928 | H (which handlers: L) |
+| 0x800D3238 | func_800D3238 | message event: `D_800D3A98[p->step]` (step at +0x214) | H |
+| 0x800D3274 | func_800D3274 | open message window p+0x198 (an id, replaced by the window), or skip two steps | H |
+| 0x800D32D4 | func_800D32D4 | wait for the window's answer, close it | H |
+| 0x800D3328 | func_800D3328 | end the event (func_8016F0E4) | H |
+| 0x800D3348 | func_800D3348 | null event: `D_800D3AA4[p->step]` | H |
+| 0x800D3384 | func_800D3384 | step++ | H |
+| 0x800D3398 | func_800D3398 | end the event (func_8016F0E4) | H |
+| 0x800D33B8 | func_800D33B8 | start Musashi's script D_800D3AAC (func_8016EE40, flag 0x01000000) | H |
+| 0x800D33E0 | func_800D33E0 | start Musashi's script D_800D3AB0 | H |
+
+**Data.**
+
+| Symbol | Role | Conf. |
+|---|---|---|
+| D_800D3408 | the first data word: s16[20], archive entry per picture index (state 19) | H (use), contents unknown |
+| D_800D3430 | the 20 game-state handlers (0x800D3430-0x800D347F) | H |
+| D_800D3480, D_800D3488, D_800D3490 | state 0 steps (2), load-loop steps (2), load substeps (7, ends at 0x800D34AC) | H (use), M (contents by elimination) |
+| D_800D34AC | the map table (MapIdTable), 172 words to 0x800D375C: archive entry (bits 0-11), sound record 1-15 (12-15), sound bank id (16-31), indexed by id & 0xFFF | H |
+| D_800D375C | the room's music picker pointer | H |
+| D_800D3764 | the slot-2 package table, 29 x {archive entry, sound bank} | H |
+| D_800D384C | the slot-3 package table, 6 x {archive entry, sound bank} | H |
+| D_800D387C, D_800D3888 | sprite / animation data the engine hands to func_800D21C4 and func_80128EA8 | M |
+| D_800D38D8 | 11 glyph pointers: digits 0-9, 10 = blank | H |
+| D_800D3918 | an SVECTOR the engine reads (D_800D391C its z) | H (use), meaning unknown |
+| D_800D3920, D_800D3928, D_800D39C4, D_800D39F0, D_800D3A8C | transition step tables (D_800D3920 2 entries, D_800D3A8C 3 by spacing) | H (use), contents unknown |
+| D_800D39FC, D_800D3A20, D_800D3A44, D_800D3A68 | four 36-byte map records, 0x24 apart: the engine's restart / continue outcomes use the first three (func_801594E8), the demo end the fourth | H (use), M (all four are records) |
+| D_800D3A98, D_800D3AA4 | Musashi event steps (3, 2) | H |
+| D_800D3AAC, D_800D3AB0 | two event script words | H (use) |
+| D_800D3AB4 | read by the engine's window text code (func_80138ED0) | H (use), meaning unknown |
+| D_800D43D4 | an image record the engine queues for upload (func_800183E0) | H (use) |
+| D_800D8D10 | the face record FaceSet uses as a default (docs/stage_engine.md) | M |
+| D_801141BC, D_801141C8 | map-enter / map-leave step tables (3 each) | H (use), M (contents) |
+| D_80114E70 / D_80114E74 | picture request flag / index | H |
+| D_80114E78 | pending extra-load flag | H |
+| D_80114E7C | the picture SPRT packet | H |
+| D_80114E94 | the sub-room id saved while its base stage loads | H |
+| D_80114E98 / D_80114E9C | load steps done / transition done | H |
+| D_80114EA0, D_80114EA8 | next track id; the leave sequence's stream-stop step | H |
+| D_80127084 | full-reload flag | H |
+| D_80115110 (0xC4 B), D_801151C8 / D_801151CC, D_8011DB24 | the stage-menu block, its two prim-buffer halves, the pause-menu update pointer | H |
+| D_8011DB14, D_8011DB1C, D_80128150 | HP, BP, D_80078E8C saved at map entry | H |
+| D_801151F8, D_80127500, D_80126AE8, D_801201F0, D_8012704C, D_80127050, D_8011529C | the music / jingle state machines and their counters | H |
+| D_800AE6A8 (EXE) | the scene task / map request block (layout in "What it does") | H |
+| D_80078E50 (EXE) | the 36-byte current map record | H |
+
+**Notes and open questions.**
+
+* Which handler sits in which slot of D_800D3430 is from docs/mode_dispatcher.md (read when the data was available)
+  plus elimination for states 2 and 3; the transition dispatchers' tables cannot be paired with their handlers from
+  the C. By spacing, D_800D3920 has 2 entries and D_800D3A8C 3, which fits the 2-step (fade-in) and 3-step
+  (fade-out) handler groups (L).
+* The meaning of the -1 "size" func_800CFE60 passes to LoadFileStep when the map's sound record is already
+  installed is unknown (0 = a PAC archive).
+* Who calls func_800CF82C / func_800CF840 (unkA3DE), func_800D1000-D109C's unused accessors and func_800D2468: no
+  C caller; probably stage data tables or unused.
+* func_800D06E8's track variable `m` is not set for maps outside its lists (the C leaves it uninitialised, as the
+  original presumably does), so in other maps it compares a stale register value; whether its 13 calling stages
+  are all listed maps was not checked.
+* State 18's trigger (func_80029264, D_80075838) and the save request (func_8002AF08, values 1 / 2) are EXE flags
+  whose setters were not traced here.
+* D_80078E8C is halved on one continue path (engine 10853) and saved / restored with HP / BP: money would fit (L).
+* Map 0x3069 is special in two places (no stream stop at leave; func_800CF864 true); what it is is unknown.
 
 ### ovl37: the developer debug menu "CHECK LIST" (MAIN.CD entry 11, slot 0 0x800CEDF8, ID 4 B + rodata 0x78 = 120 B (a 13-entry jump table and strings) / code 0x4384 = 17284 B (all -O0) / data 0x1AB0 = 6832 B, total 24240 B, 21 functions)
 
@@ -824,6 +1262,129 @@ frame; static, not double-buffered), D_800CF13C (the frame counter). EXE state: 
 Proposals only: nothing was renamed. Only generic names (func_800XXXXX, D_800XXXXX), H or strong M evidence. The
 mode overlays share slot 0, so a name belongs to the overlay of its table.
 
+### 4.1 ovl36
+
+| Address | Current name | Proposed name | Evidence |
+|---|---|---|---|
+| 0x800CEDFC | func_800CEDFC | FieldMain | the mode-11 / 16 entry; `D_800D3430[Work.state]()` |
+| 0x800CEE40 | func_800CEE40 | FieldStateInit | state 0, steps D_800D3480 |
+| 0x800CEE84 | func_800CEE84 | FieldInitSetup | state 0 step 0 resets |
+| 0x800CEF04 | func_800CEF04 | FieldInitLoadSlot3 | func_800D0488(1) then NextGameState |
+| 0x800CEF34 | func_800CEF34 | FieldStateSoundReset | state 1: func_8001B324 |
+| 0x800CF370 | func_800CF370 | FieldStateNowLoading | DrawNowLoading, -> 15 |
+| 0x800CEFD0 | func_800CEFD0 | FieldLoadLoopWipeA | state 5 loop with func_8001B86C |
+| 0x800CF104 | func_800CF104 | FieldLoadLoopWipeB | state 6 loop with func_8001B86C |
+| 0x800CF238 | func_800CF238 | FieldLoadLoopHidden | state 18: undrawn stage start -> 8 |
+| 0x800CF3B8 | func_800CF3B8 | FieldLoadLoopPlain | state 16: no transition -> 7 |
+| 0x800CF47C | func_800CF47C | FieldLoadExtraFile | D_80114E78 / D_800AF218 load |
+| 0x800CF4D4 | func_800CF4D4 | FieldLoadSubSteps | D_800D3490[stateSubStep] |
+| 0x800CF510 | func_800CF510 | FieldLoadReset | substep 0 |
+| 0x800CF584 | func_800CF584 | FieldLoadReloadAbility | func_800D02D0(D_80078EC1) |
+| 0x800CF5D4 | func_800CF5D4 | FieldLoadReloadSlot3 | func_800D0488(D_80078EC0 & 0x7F) |
+| 0x800CF628 | func_800CF628 | FieldLoadPickStage | sub-room / stage decision |
+| 0x800CF714 | func_800CF714 | FieldLoadBaseStage | base stage of a sub-room |
+| 0x800CF764 | func_800CF764 | FieldLoadSubRoom | file to func_80128218()'s address |
+| 0x800CF7A4 | func_800CF7A4 | FieldLoadStage | ForgetStageImage + func_800CFE60 |
+| 0x800CF804 | func_800CF804 | RequestFullReload | D_80127084 = 1, read by CEE84 / CF510-CF5D4 |
+| 0x800CF818 | func_800CF818 | RequestExtraLoad | D_80114E78 = 1 |
+| 0x800CF8B4 | func_800CF8B4 | IsFieldPlaying | state == 9 |
+| 0x800CF8CC | func_800CF8CC | IsFieldLeavingMap | state == 10 |
+| 0x800CF8E4 | func_800CF8E4 | PrefetchNextMap | func_800CFDE8(destination) |
+| 0x800CF94C | func_800CF94C | FieldLoadStageEngine | LoadFileStep(g_FileLocStageEngine) |
+| 0x800CF990 | func_800CF990 | FieldStatePicture | state 19 |
+| 0x800CFAD0 | func_800CFAD0 | DrawFieldPicture | 256x144 SPRT |
+| 0x800CFBBC | func_800CFBBC | ClearPictureRequest | D_80114E70 = 0 |
+| 0x800CFBCC | func_800CFBCC | RequestPicture | D_80114E70 = 1, index |
+| 0x800CFBE8 | func_800CFBE8 | GetPictureRequest | returns D_80114E70 |
+| 0x800CFBF8 | func_800CFBF8 | GetSubRoomBaseMap | kind -> 0x1010 / 0x1052 / 0x1077 / 0x1094 |
+| 0x800CFC5C | func_800CFC5C | GetSubRoomKind | one `if` per id, 0-4 |
+| 0x800CFD68 | func_800CFD68 | MapNeedsStageLoad | StageImageNeedsLoad(table entry) |
+| 0x800CFDA4 | func_800CFDA4 | MarkMapStageLoaded | SetStageImage(table entry) |
+| 0x800CFDE8 | func_800CFDE8 | PrefetchMapHeader | func_8001ABBC kind 2 |
+| 0x800CFE60 | func_800CFE60 | LoadMapStage | LoadFileStep to 0x80128158 with overrides |
+| 0x800D00E4 | func_800D00E4 | SetMapSoundRecord | func_8002F5C8(one of 15 records) |
+| 0x800D0214 | func_800D0214 | LoadMapFileAt | LoadFileStep(entry, a, 0, sound table) |
+| 0x800D02C0 | func_800D02C0 | SetMusicPicker | D_800D375C = f |
+| 0x800D02D0 | func_800D02D0 | LoadAbilityPackage | docs/abil_packages.md section 1 |
+| 0x800D0488 | func_800D0488 | LoadSlot3Package | same |
+| 0x800D0588 | func_800D0588 | LoadMapMusic | picker track, func_8001ABBC kind 1 |
+| 0x800D05E8 | func_800D05E8 | PickMapMusic | D_800D375C(story counter) |
+| 0x800D0630 | func_800D0630 | ResetFieldSound | stage init, D_8011529C = -1 |
+| 0x800D065C | func_800D065C | ClearSoundStates | six words zeroed |
+| 0x800D06CC | func_800D06CC | ParkSoundStates | both machines = 3 |
+| 0x800D06E8 | func_800D06E8 | UpdateFieldSound | the two per-frame machines |
+| 0x800D0CA0 | func_800D0CA0 | MusicCommandPark | command 1 + park |
+| 0x800D0CE0 | func_800D0CE0 | StartMapMusic | func_8001AAA0(picker track) |
+| 0x800D0D7C | func_800D0D7C | ClockSubtract | minutes wrap 60, hours 24 |
+| 0x800D0E30 | func_800D0E30 | ClockDiff | same |
+| 0x800D0EC4 | func_800D0EC4 | FindFreeItemSlot | first zero of 0x2F-0x3A |
+| 0x800D0F0C | func_800D0F0C | SetItemSlot | item + day stamp |
+| 0x800D0F4C | func_800D0F4C | TakeItem | find + clear |
+| 0x800D0F8C | func_800D0F8C | FindItem | slot of item a |
+| 0x800D0FE0 | func_800D0FE0 | ClearItemSlot | slot = 0 |
+| 0x800D1000 | func_800D1000 | GetItemSlotDay | halfword 2i - 0x4A |
+| 0x800D1054 | func_800D1054 | GetItemDefWord0 | D_8010EDE8[a].unk0 |
+| 0x800D1078 | func_800D1078 | GetItemDefField4 | D_8010EDE8[a].unk4 |
+| 0x800D10C8 | func_800D10C8 | GetItemDefField6 | D_8010EDE8[a].unk6 |
+| 0x800D10EC | func_800D10EC | AgeInventoryItems | called by engine func_8014B084 at day change |
+| 0x800D11F0 | func_800D11F0 | UseItemSlot | effect, slot emptied |
+| 0x800D128C | func_800D128C | ApplyItemEffect | per-item stat calls and sounds |
+| 0x800D1658 | func_800D1658 | DiscardItemSlot | menu action 1; removes without effect (M) |
+| 0x800D1714 | func_800D1714 | GetNextMapId | returns D_80078E50 |
+| 0x800D1724 | func_800D1724 | RequestMapChange | D_800AE6B0 = a |
+| 0x800D1734 | func_800D1734 | QueueMapChange | D_800AE6A8 = a, promoted by D1754 |
+| 0x800D1754 | func_800D1754 | PollMapChange | state 9 via engine func_80128678 |
+| 0x800D17B8 | func_800D17B8 | StartMapChange | copy record, NextGameState |
+| 0x800D185C | func_800D185C | SetNextMap | symbol_addrs.txt comment, docs/stage_loader.md |
+| 0x800D18DC | func_800D18DC | RunMapEnterStep | D_801141BC[step] |
+| 0x800D1938 | func_800D1938 | MapEnterBegin | step 0 shape |
+| 0x800D1984 | func_800D1984 | MapEnterRun | runs task fn |
+| 0x800D19DC | func_800D19DC | MapEnterDone | mapLive = 1 |
+| 0x800D19F0 | func_800D19F0 | RunMapLeaveStep | D_801141C8[step] |
+| 0x800D1B10 | func_800D1B10 | MapLeaveBegin | mapLive = 0, sounds off |
+| 0x800D1B80 | func_800D1B80 | MapLeaveRun | runs task fn |
+| 0x800D1BD8 | func_800D1BD8 | MapLeaveDone | calls D1BF8 |
+| 0x800D1BF8 | func_800D1BF8 | FinishMapChange | MapStart + next state |
+| 0x800D1D24 | func_800D1D24 | MapStart | symbol_addrs.txt comment |
+| 0x800D1D94 | func_800D1D94 | GetNextMapGroup | D_80078E50 & 0xF000 |
+| 0x800D1DB0 | func_800D1DB0 | GetMapChangeKind | 1 / 2 -> states 5 / 16 |
+| 0x800D1E20 | func_800D1E20 | MapRecordNop | record +0x1C default (live dump) |
+| 0x800D1E28 | func_800D1E28 | StartMapChangeFade | kind -> fade start |
+| 0x800D1EBC | func_800D1EBC | StepMapChangeFade | kind -> fade step |
+| 0x800D1F58 | func_800D1F58 | SaveEntryVitals | HP / BP / D_80078E8C saved |
+| 0x800D1F90 | func_800D1F90 | RestoreEntryVitals | restored on continue |
+| 0x800D1FC8 | func_800D1FC8 | PullTowardCamera | D_801151D4 "the camera used this frame" |
+| 0x800D20C0 | func_800D20C0 | PullTowardCameraDir | same, direction out |
+| 0x800D21C4 | func_800D21C4 | SpawnSpriteType3 | func_801465C0 + func_8001CC3C |
+| 0x800D222C | func_800D222C | SpawnSpriteType2 | + func_8001CB6C |
+| 0x800D2294 | func_800D2294 | SpawnSpriteType6 | + func_8001CD9C |
+| 0x800D22E4 | func_800D22E4 | MoveByVelocity | pos += vel |
+| 0x800D2318 | func_800D2318 | AnglesFromPackedDir | ratan2 / SquareRoot0 on +0x2C |
+| 0x800D23D0 | func_800D23D0 | AnglesFromVector | same on an SVECTOR |
+| 0x800D2468 | func_800D2468 | ClearStageMenu | func_80016714(D_80115110, 0xC4) |
+| 0x800D24A0 | func_800D24A0 | OpenStageMenu | pauseMenu = kind + 1 |
+| 0x800D25FC | func_800D25FC | StageMenuUpdate | main() while pauseMenu |
+| 0x800D2624 | func_800D2624 | CloseStageMenu | pauseMenu = 0 |
+| 0x800D2650 | func_800D2650 | DrawTextLine | 8x8 glyph SPRTs |
+| 0x800D27DC | func_800D27DC | DrawQuadRow | FT4 list |
+| 0x800D29F8 | func_800D29F8 | DrawBarList | G4 bars |
+| 0x800D2CA8 | func_800D2CA8 | ToBcd | n % 10 per nibble |
+| 0x800D2D10 | func_800D2D10 | BcdToGlyphs | D_800D38D8 lookup |
+| 0x800D3238 | func_800D3238 | MessageEvent | D_800D3A98 steps, window at +0x198 |
+| 0x800D3274 | func_800D3274 | MessageEventOpen | func_8013767C |
+| 0x800D32D4 | func_800D32D4 | MessageEventWait | func_801399F0 / func_80139914 |
+| 0x800D3348 | func_800D3348 | NullEvent | D_800D3AA4: step++, end |
+| 0x800D34AC | D_800D34AC | MapIdTable | symbol_addrs.txt comment |
+| 0x800D3430 | D_800D3430 | g_FieldStateTable | 20 state handlers |
+| 0x800D3490 | D_800D3490 | g_FieldLoadSubSteps | 7 substeps |
+| 0x800D3764 | D_800D3764 | g_AbilityPackageTable | func_800D02D0 |
+| 0x800D384C | D_800D384C | g_Slot3PackageTable | func_800D0488 |
+| 0x800D375C | D_800D375C | g_MusicPicker | func_800D02C0 / D05E8 |
+| 0x800D38D8 | D_800D38D8 | g_DigitGlyphs | func_800D2D10 |
+| 0x80127084 | D_80127084 | g_FullReload | func_800CF804 and readers |
+| 0x8011DB24 | D_8011DB24 | g_StageMenuUpdate | func_800D25FC |
+| 0x80115110 | D_80115110 | g_StageMenu | engine's StageMode block |
+
 ### 4.2 ovl37
 
 | Address | Current name | Proposed name | Evidence |
@@ -1036,3 +1597,42 @@ mode overlays share slot 0, so a name belongs to the overlay of its table.
 | 0x800CF10C | D_800CF10C | g_TrialEndSprtLeft | 256-wide packet at x -160 |
 | 0x800CF124 | D_800CF124 | g_TrialEndSprtRight | 64-wide packet at x 96 |
 | 0x800CF13C | D_800CF13C | g_TrialEndTimer | ++ until 300 |
+
+
+## 5. Open questions and what is left
+
+**Covered.** All six overlays, every function in C on a75e323 (ovl36 145, ovl37 21, ovl38 11, ovl39 58 plus the two
+LIBPRESS asm routines, ovl3a 19, ovl3b 6): what each does, how it is entered, a purpose and a confidence per
+function, and naming proposals. The package sections were written by three read-throughs (ovl36; ovl38 + ovl39;
+ovl37 + ovl3a + ovl3b) and spot-checked (the mode handlers in src/main.c, the uncalled ovl39 -O0 menu, the
+licence-once flag); a reader who renames from section 4 should read the function first.
+
+**Found here.**
+* The licence picture shows once per power-on (EXE flag D_800747D8); MAIN.CD entry 2 loads behind the SQUARESOFT
+  logo that follows (what entry 2 holds: unknown).
+* The title alternates between two logo movies per visit (D_80063074 & 1); its player is PsyQ's movie sample plus a
+  lid check, a CD-audio fade on skip, no skip in the last 15 frames and a slice-width fix. Its step 1 (load MAIN.CD
+  entry 5 as a second picture) and menu state 3 are skipped or never set: the trial version's scene select, disabled
+  (M). The -O0 file ovl39_800D0100.c (16 functions, a three-option menu with preview pictures) is never called: an
+  earlier trial / development title menu (M-L).
+* The field: states 5, 6, 16 and 18 are load loops that run their own VSync / DrawOTag / LoadQueueStep; maps 0x20xx
+  are sub-rooms loaded over one of four village base stages; the inventory's 12 slots are stamped with the day and
+  some items turn into others after N days; the music and time-of-day jingles are per map (func_800D06E8).
+* The debug menu's 13-row option page and five cumulative presets (counter 0x2E = 1..5: the JUMP_ACT_1..5 entries,
+  M); its flags 0-2 (PLAYER DMG, GET IN SEL, PLAYER HP HERANAI) have no reader in src/; the presets read records at
+  0x8010F46C, inside ovl36's data, so they are valid only if the field was loaded before the menu.
+* The cut prologue has two entries and neither is reachable (offset 4, where a runner would jump, is a path
+  string); its pictures come through LoadPatPicture, empty in the retail EXE.
+
+**Open (most need data that is not in the repository).**
+* The step / state tables' contents (ovl36 D_800D3430 states 2 and 3 are placed by elimination; ovl38 D_800CF450,
+  ovl39 D_800D3598 step orders are M from address order and chaining); which handlers the field's transition
+  dispatchers hold; who calls ovl36 func_800CF82C / func_800CF840; map 0x3069; LoadFileStep's -1 argument.
+* The debug menu's texts and scene lists, the meaning of most stats fields, flags and counters it writes, and
+  D_800D4C68.
+* Where ovl3b's picture comes from (probably another block of its PAC package, not traced); which pictures ovl3a's
+  D_800D130C uploads.
+* ovl39: the swap picture's palette row (480) against the background's (483); D_800A5F1C behaves like PsyQ's
+  StCdIntrFlag (M).
+* docs/overlays.md still lists ovl3a func_800CF408 / func_800CF6D0, ovl3b func_800CEF50 and the ovl36 / ovl39 parks
+  as parked; they are C on a75e323.
