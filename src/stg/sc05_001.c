@@ -252,9 +252,9 @@ extern s32 func_8012BD3C();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 typedef struct { s16 vx, vy, vz, pad; } SV;
 typedef struct { u16 v[6]; } U12;
 extern s32 func_800291B4();
@@ -310,8 +310,8 @@ void func_sc05_001_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -533,7 +533,7 @@ void func_sc05_001_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc05_001_8017CD9C(s32 arg0) {
@@ -923,7 +923,7 @@ typedef struct { u8 a, b; } B2;
 typedef struct { u8 type; u8 kind; s16 a[2]; s16 b[2]; s16 x; s16 z; } E14;
 
 extern u8 D_80062BF4;
-extern void func_80019064();
+extern void StartRumbleScript();
 extern s32 func_801511E0();
 extern s32 func_80012A60();
 extern u8 D_800D58AC;
@@ -2050,7 +2050,68 @@ void func_sc05_001_8017FBB0(u8 *o) {
     AF(o, u16, 2)++;
 }
 
-INCLUDE_ASM("asm/stg/sc05_001/nonmatchings/sc05_001", func_sc05_001_8017FE0C);
+void func_sc05_001_8017FE0C(u8 *o) {
+    u8 *p;
+    s16 d;
+    u8 *e;
+    s32 n = 0;
+    p = AF(o, u8 *, 0x2C);
+    switch ((s16)AF(o, u16, 0x34) >> 1) {
+    case 0: {
+        u16 t; s32 k; u8 b; s32 m;
+        AF(o, s16, 6) = AF(p, s16, 6);
+        AF(o, s16, 0xA) = AF(p, s16, 0xA) - 0x70;
+        AF(o, s16, 0xE) = AF(p, s16, 0xE);
+        d = AF(p, s16, 0xA) - AF(o, s16, 0x36);
+        k = d / 32;
+        if (k < 5) {
+            m = k + 4;
+            m <<= 5;
+            t = AF(o, u16, 0x34);
+            t &= 1;
+            e = D_sc05_001_801899C0[t];
+            b = d - k * 32;
+            e += k * 0xC + 0x24;
+            AF(e, u8, 3) = 0x20;
+            AF(e, s16, 0) = 0;
+            AF(e, s16, 6) = 0;
+            AF(e, s16, 0xA) = -m;
+            e += 0xC;
+            AF(e, u8, 3) = b;
+            AF(e, s16, 0) = 0xFF;
+            AF(e, s16, 6) = 0x20 - b;
+            AF(e, s16, 0xA) = -(AF(e, u8, 3) + m);
+        }
+        break;
+    }
+    case 1: {
+        s32 k; s32 j; s32 dd;
+        AF(o, s16, 6) = AF(p, s16, 6);
+        AF(o, s16, 0xA) = AF(p, s16, 0xA) - 200;
+        AF(o, s16, 0xE) = AF(p, s16, 0xE);
+        d = AF(o, s16, 0x36) - AF(p, s16, 0xA);
+        dd = d;
+        k = dd / 32;
+        j = 5 - k;
+        if (dd != 0) {
+            n = j;
+            if (n >= 0) {
+                e = D_sc05_001_80189A70[AF(o, u16, 0x34) & 1];
+                e += n * 0xC;
+                do {
+                AF(e, s16, 0) = 0xFF;
+                AF(e, u8, 3) = (k + 1) * 32 - d;
+                AF(e, s16, 6) = 0x20 - AF(e, u8, 3);
+                AF(e, s16, 0xA) = -(AF(e, u8, 3) + n * 32);
+                } while (0); /* MATCH-TRICK: loop-weighted refs of k, d, n for global-alloc */
+            }
+        }
+        break;
+    }
+    case 2:
+        break;
+    }
+}
 
 void func_sc05_001_8017FFF8(u8 *arg0) {
     D_sc05_001_80189AD4[AF(arg0, u16, 2)]();
@@ -2378,7 +2439,7 @@ void func_sc05_001_80180B28(s32 arg0) {
 }
 
 void func_sc05_001_80180B70(u8 *o) {
-    func_80019064(&D_80062BF4);
+    StartRumbleScript(&D_80062BF4);
     func_80149020(o);
     func_80147324(0x451);
     func_801511E0(o);

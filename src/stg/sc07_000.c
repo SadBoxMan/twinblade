@@ -99,7 +99,7 @@ extern s16 D_80126B66;
 extern void func_8012B200();
 extern s32 func_8012B8A4();
 extern void func_8001AAA0();
-extern s32 func_80014C54();
+extern s32 TestPadAll();
 extern u8 D_sc07_000_801D05A0;
 extern void func_800234E4();
 extern u16 D_80126B58;
@@ -153,9 +153,9 @@ extern s32 func_801290DC();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02[];
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc07_000_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -188,8 +188,8 @@ void func_sc07_000_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -411,7 +411,7 @@ void func_sc07_000_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 s32 func_sc07_000_8017CD9C(s32 arg0) {
@@ -584,8 +584,8 @@ void func_sc07_000_8017CDF0(u8 *obj, u8 *hdr, MtxDCM *m) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(m, &ls);
     GsSetLsMatrix(&ls);
-    ot = D_800A6610[D_800B9A02[0]];
-    pk = D_800A5E60;
+    ot = g_WorldOtTable[D_800B9A02[0]];
+    pk = g_PrimNext;
     n = AF(hdr, s32, 8);
     verts = AF(hdr, u8 *, 0x10);
     c = (ChunkDCM *)(hdr + 0x14);
@@ -740,7 +740,7 @@ void func_sc07_000_8017CDF0(u8 *obj, u8 *hdr, MtxDCM *m) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc07_000_8017D8C4(void) {
@@ -1095,7 +1095,7 @@ s32 func_sc07_000_8017E5B4(void) {
 }
 
 s16 func_sc07_000_8017E5BC(void) {
-    return func_80014C54(1, 0, 0x10);
+    return TestPadAll(1, 0, 0x10);
 }
 
 void func_sc07_000_8017E5E8(void) {
@@ -2619,8 +2619,8 @@ void func_sc07_000_80181BA8(s32 i) {
     u16 cy;
 
     m = D_800AE620;
-    p = D_800A5E60;
-    D_800A5E60 = p + 0x1C;
+    p = g_PrimNext;
+    g_PrimNext = p + 0x1C;
     AF(p, u8, 3) = 6;
     AF(p, u8, 7) = 0x32;
     r = &D_sc07_000_801D0A84 + i * 14;
@@ -2816,9 +2816,9 @@ void func_sc07_000_8018234C(s32 i) {
     u16 cx;
     u16 cz;
 
-    p = D_800A5E60;
+    p = g_PrimNext;
     m = D_800AE620;
-    D_800A5E60 = p + 0x14;
+    g_PrimNext = p + 0x14;
     AF(p, u8, 3) = 4;
     AF(p, u8, 7) = 0x22;
     AF(p, u8, 4) = D_sc07_000_801D0978;

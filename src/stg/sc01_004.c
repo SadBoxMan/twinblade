@@ -90,8 +90,8 @@ extern void func_sc01_004_8017D758();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc01_004_8017BE9C(u8 *obj) {
     s32 tmp[3];
@@ -124,8 +124,8 @@ void func_sc01_004_8017BE9C(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -347,7 +347,7 @@ void func_sc01_004_8017BE9C(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_004_8017CD7C(void) {
@@ -433,7 +433,7 @@ extern s32 D_801151D0;
 extern s32 D_sc01_004_8019024C;
 extern s32 D_801151C8[];
 extern s32 func_801399F0();
-extern s32 func_80014ED4();
+extern s32 GetPadPressedDirWide();
 extern s32 func_8014168C();
 extern s32 func_sc01_004_8017EB30();
 extern void func_80139954();
@@ -509,7 +509,7 @@ extern s32 D_sc01_004_8018BFB8[];
 
 extern u16 D_80115122;
 extern u16 D_80115120;
-extern s32 func_80015018();
+extern s32 GetPadHeldDirWide();
 
 extern u8 D_800B9A13;
 extern s16 D_80115110;
@@ -888,7 +888,7 @@ void func_sc01_004_8017DAB4(void) {
         if (func_801399F0(D_sc01_004_8019024C) != 0) {
             D_sc01_004_80190248 = 0;
         }
-    } else if (func_80014ED4(0) & 0x50) {
+    } else if (GetPadPressedDirWide(0) & 0x50) {
         k = D_8011511A;
         if (D_80115138[k] == 8) {
             func_sc01_004_8017EB30(0xF, (s16) func_8014168C((s16) k));
@@ -929,11 +929,11 @@ s32 func_sc01_004_8017DC38(void) {
     s16 ret;
 
     ret = 0;
-    btn = func_80014ED4(0);
+    btn = GetPadPressedDirWide(0);
     if (btn & 0xFFFF) {
         D_sc01_004_80190248 = 0;
     }
-    rep = func_80015018(0);
+    rep = GetPadHeldDirWide(0);
     r = func_8014168C(*(s16 *)D_80115118.p2);
     cur = *(u16 *)D_80115118.p2;
     kind = D_80115138[cur];

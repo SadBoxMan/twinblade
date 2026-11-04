@@ -378,9 +378,9 @@ extern void func_80131E00();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02[];
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 typedef struct { u16 x, y, z, pad; } UV4;
 typedef void (*VoidFn)();
@@ -895,8 +895,8 @@ void func_sc03_104_8017CA80(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -1118,7 +1118,7 @@ void func_sc03_104_8017CA80(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 typedef struct { s16 x, y; u16 c; s16 pad; } Rec8;
@@ -1276,8 +1276,8 @@ void func_sc03_104_8017D960(u8 *o) {
     y1_3 = cy3 + r3;
     z0_3 = cz3 - r3;
     z1_3 = cz3 + r3;
-    pkt = D_800A5E60;
-    ot = D_800A6610[AF(w, u16, 0xA3D2)];
+    pkt = g_PrimNext;
+    ot = g_WorldOtTable[AF(w, u16, 0xA3D2)];
     bb = AF(o, u32 *, 0xC);
     hdr = AF(o, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -2040,7 +2040,7 @@ void func_sc03_104_8017D960(u8 *o) {
             }
         }
     }
-    D_800A5E60 = pkt;
+    g_PrimNext = pkt;
 }
 
 void func_sc03_104_80180D88(void) {
@@ -3645,7 +3645,7 @@ void func_sc03_104_80184934(u8 *arg0, s32 arg1) {
     s32 d;
     u16 t;
 
-    ot = D_800A6610[D_800B9A02[0]];
+    ot = g_WorldOtTable[D_800B9A02[0]];
     p = AF(arg0, Pts80182FD4 *, 0x20);
     if (p == 0) {
         return;
@@ -3743,7 +3743,7 @@ void func_sc03_104_80184D50(u8 *o, u8 *s, u8 *v, u32 *ot) {
     u16 u1, v1;
     u16 sflag;
 
-    p = (PFT4 *)D_800A5E60;
+    p = (PFT4 *)g_PrimNext;
     sflag = *(u16 *)(o + 0x1E) & 0x8000;
     fl = *(u32 *)(o + 4);
     tp = (fl >> 24) & 3;
@@ -3751,7 +3751,7 @@ void func_sc03_104_80184D50(u8 *o, u8 *s, u8 *v, u32 *ot) {
     x = *(u16 *)(o + 0x28) + (*(s16 *)(s + 4) >> sh);
     y = *(u16 *)(o + 0x2A) + *(u16 *)(s + 6);
     uv = *(FANUV **)(o + 0x20);
-    D_800A5E60 = (u8 *)p + 0xF0;
+    g_PrimNext = (u8 *)p + 0xF0;
     if (fl & 0x40000000) {
         code = 0x2E;
         abr = (fl >> 28) & 3;
@@ -3819,7 +3819,7 @@ void func_sc03_104_80184D50(u8 *o, u8 *s, u8 *v, u32 *ot) {
     if (fl & 0x40000000) {
         m = (PMODE *)p;
         if (sflag) {
-            D_800A5E60 += 0x30;
+            g_PrimNext += 0x30;
             for (i = 0; i < 6; i++, m++) {
                 ((u8 *)m)[3] = 1;
                 m->code = (abr << 5) | 0xE100000A;
@@ -3827,7 +3827,7 @@ void func_sc03_104_80184D50(u8 *o, u8 *s, u8 *v, u32 *ot) {
             }
         } else {
             m->code = (abr << 5) | 0xE100000A;
-            D_800A5E60 += 8;
+            g_PrimNext += 8;
             ((u8 *)m)[3] = 1;
             addPrim(ot, m);
         }
@@ -3987,8 +3987,8 @@ void func_sc03_104_80185690(s32 i) {
     u16 cy;
 
     m = D_800AE620;
-    p = D_800A5E60;
-    D_800A5E60 = p + 0x1C;
+    p = g_PrimNext;
+    g_PrimNext = p + 0x1C;
     AF(p, u8, 3) = 6;
     AF(p, u8, 7) = 0x32;
     r = &D_sc03_104_801C0244 + i * 14;
@@ -4184,9 +4184,9 @@ void func_sc03_104_80185E34(s32 i) {
     u16 cx;
     u16 cz;
 
-    p = D_800A5E60;
+    p = g_PrimNext;
     m = D_800AE620;
-    D_800A5E60 = p + 0x14;
+    g_PrimNext = p + 0x14;
     AF(p, u8, 3) = 4;
     AF(p, u8, 7) = 0x22;
     AF(p, u8, 4) = D_sc03_104_801C0138;

@@ -61,7 +61,7 @@ extern u8 D_sc04_016_80183C54;
 extern u8 D_sc04_016_80183EAC;
 extern u8 D_sc04_016_8018458C;
 extern u8 D_sc04_016_8018492C;
-extern s32 func_800149E0();
+extern s32 GetPadPressedDir();
 extern s32 func_800CF8B4();
 extern s32 func_80029178();
 extern void func_8017B368();
@@ -111,9 +111,9 @@ extern u8 D_sc04_016_801A6B40[];
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
 typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
 typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
@@ -151,8 +151,8 @@ void func_sc04_016_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -374,7 +374,7 @@ void func_sc04_016_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc04_016_8017CD9C(u8 *arg0) {
@@ -671,7 +671,7 @@ void func_sc04_016_8017D118(u8 *o) {
 }
 
 void func_sc04_016_8017D588(s32 arg0) {
-    if (!(func_800149E0(0) & 0x840) || (func_800CF8B4() == 0)) {
+    if (!(GetPadPressedDir(0) & 0x840) || (func_800CF8B4() == 0)) {
         if (func_80029178(0x125) & 0xFF) {
             func_8017B368(arg0, (s32) &D_sc04_016_8018492C);
         }
@@ -1047,8 +1047,8 @@ void func_sc04_016_8017E26C()
 
     GsGetLs(&D_sc04_016_801AC280, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     for (i = 0; i < 0x100; i++) {
         off = i * 0x50;
         if (AF(D_sc04_016_801A6B40, s32, (i * 5) << 4) == 0) {
@@ -1107,7 +1107,7 @@ void func_sc04_016_8017E26C()
         ((PTAG *)otp)->addr = (u32)pk;
         pk += 0x18;
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc04_016_8017E6A0(u8 *o) {
@@ -1181,7 +1181,25 @@ s32 func_sc04_016_8017E6E0(o)
     return 0;
 }
 
-INCLUDE_ASM("asm/stg/sc04_016/nonmatchings/sc04_016", func_sc04_016_8017E960);
+void func_sc04_016_8017E960(V3 *a, V3 *b, V3 *out) {
+    s32 dx, dy, dz;
+    s32 ax, az;
+    s32 m;
+
+    dx = AF(b, s16, 2) - AF(a, s16, 2);
+    dy = AF(b, s16, 6) - AF(a, s16, 6);
+    dz = AF(b, s16, 0xA) - AF(a, s16, 0xA);
+    ax = dx;
+    if (dx < 0) ax = -dx;
+    if (dy >= 0) m = dy; else m = -dy;
+    az = dz;
+    if (dz < 0) az = -dz;
+    if (m < ax) m = ax;
+    if (m < az) m = az;
+    out->x = (dx << 16) / m;
+    out->y = (dy << 16) / m;
+    out->z = (dz << 16) / m;
+}
 
 extern void func_80016714();
 
@@ -1611,7 +1629,7 @@ void func_sc04_016_8017F8A8(u8 *arg0) {
     gte_stszotz(&otz);
     if (flag & ~0x1000) return;
     z = otz + 1;
-    ot = D_800A6610[D_800B9A02];
+    ot = g_WorldOtTable[D_800B9A02];
     h = AF(arg0, u16, 0x2C);
     if ((h & 0xC000) != 0) {
         if ((h & 0xC000) == 0xC000) {
@@ -1646,7 +1664,7 @@ void func_sc04_016_8017F8A8(u8 *arg0) {
     gte_stsxy(&d);
     r = (d.s.x >> 3) & 0xFFFF;
     r |= (d.s.y >> 3) << 16;
-    p = (PF4 *)D_800A5E60;
+    p = (PF4 *)g_PrimNext;
     p1 = p + 1;
     p->tag.len = 5;
     p->code = 0x28;
@@ -1684,11 +1702,11 @@ void func_sc04_016_8017F8A8(u8 *arg0) {
     ((PTAG *)(ot + z))->addr = (u32)p;
     p1->tag.addr = ((PTAG *)(ot + z))->addr;
     ((PTAG *)(ot + z))->addr = (u32)p1;
-    D_800A5E60 += 0x30;
+    g_PrimNext += 0x30;
     if (semi) {
         s32 unused2[2];
-        t = (PTAG *)D_800A5E60;
-        D_800A5E60 += 8;
+        t = (PTAG *)g_PrimNext;
+        g_PrimNext += 8;
         t->len = 1;
         ((u32 *)t)[1] = 0xE1000000 | ((fl >> 23) & 0x60);
         t->addr = ((PTAG *)(ot + z))->addr;

@@ -992,8 +992,8 @@ void func_sc03_006_8017CD18(u8 *arg0) {
 }
 
 typedef struct { u32 wx, wy, wz, count; u32 *faces; } Rec;
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern s32 D_sc03_006_801F7790;
 extern s16 D_sc03_006_801F7794;
 extern s16 D_sc03_006_801F7796;
@@ -2253,14 +2253,14 @@ void func_sc03_006_8017F510(u8 *arg0, u8 *arg1, u8 *arg2) {
         fog = 0;
         col = 0;
     }
-    pkt = D_800A5E60;
+    pkt = g_PrimNext;
     x0 = cx - r;
     x1 = cx + r;
     y0 = cy - r;
     y1 = cy + r;
     z0 = cz - r;
     z1 = cz + r;
-    ot = D_800A6610[AF(w, u16, 0xA3D2)];
+    ot = g_WorldOtTable[AF(w, u16, 0xA3D2)];
     n = AF(arg1, s32, 8);
     base = AF(arg1, u8 *, 0x10);
     bb = (u32 *)(arg1 + 0x14);
@@ -2758,7 +2758,7 @@ void func_sc03_006_8017F510(u8 *arg0, u8 *arg1, u8 *arg2) {
             }
         }
     }
-    D_800A5E60 = pkt;
+    g_PrimNext = pkt;
 }
 
 void func_sc03_006_80180CAC(void) {

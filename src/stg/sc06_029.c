@@ -72,7 +72,7 @@ extern void func_800D0C48();
 extern void func_800D1E28();
 extern u8 D_sc06_029_801D7294;
 extern void (*D_sc06_029_801D72BC[])();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_8014E934();
 extern void func_8014CC28();
 extern void func_8014F3E8();
@@ -627,9 +627,9 @@ extern s32 D_sc06_029_8019EA38[];
 extern void StoreImage();
 extern s32 func_sc06_029_80180030();
 
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 extern s32 D_sc06_029_801909F0[];
 extern s32 func_80135888();
 extern void func_8012F568();
@@ -916,8 +916,8 @@ void func_sc06_029_8017C954(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     al = D_sc06_029_801DCCA0;
     c1 = (al << 16) | (al << 8) | al;
     al2 = al * 2;
@@ -1199,7 +1199,7 @@ void func_sc06_029_8017C954(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc06_029_8017DBFC(u8 *arg0) {
@@ -3456,8 +3456,8 @@ void func_sc06_029_80183534(u8 *o, SV8 *v0, SV8 *v1, s32 *cnt) {
         s32 y;
 
         d = D_80126950 * 48 / (z * 4);
-        p = D_800A5E60;
-        D_800A5E60 = p + 0x28;
+        p = g_PrimNext;
+        g_PrimNext = p + 0x28;
         p[3] = 9;
         AF(p, s32, 4) = 0x808080;
         p[7] = 0x2E;
@@ -3486,8 +3486,8 @@ void func_sc06_029_80183534(u8 *o, SV8 *v0, SV8 *v1, s32 *cnt) {
         AF(p, s16, 0x18) = b.x - r;
         AF(p, s16, 0x1A) = AF(p, s16, 0x22) = b.y;
         AF(p, s16, 0x20) = b.x + r;
-        ((PTag *)p)->addr = ((PTag *)&D_800A6610[AF(w, u16, 0xA3D2)][z + 1])->addr;
-        ((PTag *)&D_800A6610[AF(w, u16, 0xA3D2)][z + 1])->addr = (u32)p;
+        ((PTag *)p)->addr = ((PTag *)&g_WorldOtTable[AF(w, u16, 0xA3D2)][z + 1])->addr;
+        ((PTag *)&g_WorldOtTable[AF(w, u16, 0xA3D2)][z + 1])->addr = (u32)p;
     }
 }
 
@@ -3942,10 +3942,10 @@ void func_sc06_029_80184C68(u8 *v, s32 n) {
     u32 *base;
     s32 c;
 
-    pk = D_800A5E60;
+    pk = g_PrimNext;
     c = D_sc06_029_801909F0[n * 2 + (D_800B99DA & 1)];
-    base = D_800A6610[D_800B9A02];
-    D_800A5E60 = pk + 0x24;
+    base = g_WorldOtTable[D_800B9A02];
+    g_PrimNext = pk + 0x24;
     AF(pk, u8, 3) = 8;
     AF(pk, s32, 4) = c;
     AF(pk, u8, 7) = 0x38;
@@ -3973,9 +3973,9 @@ void func_sc06_029_80184C68(u8 *v, s32 n) {
         ot = (PTag *)((z << 2) + (u32)base);
         AF(pk, u8, 7) |= 2;
         ((PTag *)pk)->addr = ot->addr;
-        pk2 = D_800A5E60;
+        pk2 = g_PrimNext;
         ot->addr = (u32)pk;
-        D_800A5E60 = pk2 + 8;
+        g_PrimNext = pk2 + 8;
         AF(pk2, u8, 3) = 1;
         AF(pk2, u32, 4) = 0xE100012A;
         ((PTag *)pk2)->addr = ot->addr;
@@ -4251,9 +4251,9 @@ s32 func_sc06_029_801857A4(SV8 *v, u32 x0, u32 y0, u32 cx, s32 cy, s32 w0, s32 h
     s32 k;
     s32 u;
 
-    p = (FT4 *)D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
-    D_800A5E60 = (u8 *)(p + 1);
+    p = (FT4 *)g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
+    g_PrimNext = (u8 *)(p + 1);
     *(u32 *)&p->r0 = 0x808080;
     ((u8 *)p)[3] = 9;
     p->code = 0x2C;
@@ -4320,9 +4320,9 @@ void func_sc06_029_801859F4(SV8 *v, u32 x, u32 y, s32 cx0, s32 cy0, s32 w0, s32 
     s32 t;
     s32 k;
 
-    ot = D_800A6610[D_800B9A02];
-    p = D_800A5E60;
-    D_800A5E60 = p + 0x28;
+    ot = g_WorldOtTable[D_800B9A02];
+    p = g_PrimNext;
+    g_PrimNext = p + 0x28;
     p[3] = 9;
     AF(p, s32, 4) = 0x808080;
     p[7] = 0x2C;
@@ -5760,7 +5760,7 @@ void func_sc06_029_80189440(u8 *o, SV8 *w) {
     w[1].x = AF(w, u16, 0x1AA) + r;
     c = AF(o, s32, 0xE0);
     m = D_800AE620;
-    ot = (u32 *)D_800A6610 + (D_800B9A02 << 12);
+    ot = (u32 *)g_WorldOtTable + (D_800B9A02 << 12);
     RotMatrixZ(AF(w, s16, 0x1A8), &m);
     m.t[0] = AF(w, s16, 0x1A4);
     m.t[1] = -0xF2;
@@ -5782,8 +5782,8 @@ void func_sc06_029_80189440(u8 *o, SV8 *w) {
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     for (i = 0, v = w; i < 25; i++, v += 2) {
-        p = D_800A5E60;
-        D_800A5E60 = p + 0x24;
+        p = g_PrimNext;
+        g_PrimNext = p + 0x24;
         p[3] = 8;
         AF(p, s32, 4) = c;
         p[7] = 0x3A;
@@ -5810,8 +5810,8 @@ void func_sc06_029_80189440(u8 *o, SV8 *w) {
             ((PTag *)p)->addr = ((PTag *)z)->addr;
             ((PTag *)z)->addr = (u32)p;
             dm = 0xE100004A;
-            q = D_800A5E60;
-            D_800A5E60 = q + 8;
+            q = g_PrimNext;
+            g_PrimNext = q + 8;
             q[3] = 1;
             AF(q, u32, 4) = dm;
             ((PTag *)q)->addr = ((PTag *)z)->addr;
@@ -6453,7 +6453,7 @@ void func_sc06_029_8018B20C(void) {
 }
 
 void func_sc06_029_8018B250(u8 *arg0) {
-    func_80019064((s32) &D_sc06_029_801D7294);
+    StartRumbleScript((s32) &D_sc06_029_801D7294);
     D_sc06_029_801D72BC[AF(arg0, u16, 2)](arg0);
 }
 
@@ -6772,7 +6772,7 @@ extern u8 D_80062BF4;
 extern s32 func_80012A60();
 extern u8 D_800D58AC;
 void func_sc06_029_8018BE68(s32 arg0) {
-    func_80019064(&D_80062BF4);
+    StartRumbleScript(&D_80062BF4);
     func_80149020(arg0);
     func_80147324(0x451);
     func_801511E0(arg0);

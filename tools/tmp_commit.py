@@ -70,8 +70,11 @@ def main():
         git(['add', '-A', '--'] + paths, env)
         if not git(['diff', '--cached', '--name-only'], env).stdout.strip():
             sys.exit('tmp_commit: nothing to commit in ' + ' '.join(paths))
+        # binaries (numstat '-') are skipped: compressed data contains a \r\n pair by chance (r248's icon)
+        binary = {l.split('\t', 2)[2] for l in git(['diff', '--cached', '--numstat', '--diff-filter=AM'], env).stdout.splitlines()
+                  if l.startswith('-\t-\t')}
         crlf = [p for p in git(['diff', '--cached', '--name-only', '--diff-filter=AM'], env).stdout.split()
-                if b'\r\n' in blob(':' + p, env) and b'\r\n' not in blob('HEAD:' + p, env)]
+                if p not in binary and b'\r\n' in blob(':' + p, env) and b'\r\n' not in blob('HEAD:' + p, env)]
         if crlf:
             sys.exit('tmp_commit: these files would be committed with CRLF line endings (their HEAD copy has none); '
                      'nothing was committed:\n  ' + '\n  '.join(crlf))

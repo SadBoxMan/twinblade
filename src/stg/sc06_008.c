@@ -260,7 +260,7 @@ extern u8 D_sc06_008_8019EFA0;
 extern u8 D_sc06_008_801A4B98;
 extern u8 D_sc06_008_801A693C;
 extern void (*D_sc06_008_801A6964[])();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_8014E934();
 extern void func_8014CC28();
 extern void func_8014F3E8();
@@ -379,9 +379,9 @@ extern s32 D_sc06_008_801AA6C4;
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc06_008_8017C294(u8 *obj) {
     s32 tmp[3];
@@ -414,8 +414,8 @@ void func_sc06_008_8017C294(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -637,7 +637,7 @@ void func_sc06_008_8017C294(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc06_008_8017D174(void) {
@@ -2378,7 +2378,7 @@ void func_sc06_008_801810AC(u8 *o) {
         func_8016AA50(o, d);
         if (AF(o, u16, 0x82) & 1) {
             func_8016B428(o);
-            func_80019064(&D_sc06_008_8019EE30);
+            StartRumbleScript(&D_sc06_008_8019EE30);
         }
     }
     if (st != 0x1D) {
@@ -2758,7 +2758,7 @@ void func_sc06_008_801821F8(u8 *o) {
             func_8016AA50(o, n);
             if (AF(o, u16, 0x82) & 1) {
                 func_8016B428(o);
-                func_80019064(&D_sc06_008_8019EE30);
+                StartRumbleScript(&D_sc06_008_8019EE30);
             }
         }
         if (st != 0x1D) {
@@ -3382,7 +3382,7 @@ kill:
 }
 
 void func_sc06_008_80183D10(u8 *arg0) {
-    func_80019064((s32) &D_sc06_008_801A693C);
+    StartRumbleScript((s32) &D_sc06_008_801A693C);
     D_sc06_008_801A6964[AF(arg0, u16, 2)](arg0);
 }
 
@@ -3685,7 +3685,7 @@ void func_sc06_008_8018451C(u8 *arg0, SV8 *arg1, SV8 *arg2, SV8 *arg3, SV8 *arg4
 }
 
 void func_sc06_008_80184898(u8 *arg0) {
-    func_80019064((s32) &D_sc06_008_801A69DC);
+    StartRumbleScript((s32) &D_sc06_008_801A69DC);
     D_sc06_008_801A6A04[AF(arg0, u16, 2)](arg0);
 }
 

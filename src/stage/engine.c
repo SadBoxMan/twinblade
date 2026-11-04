@@ -3,6 +3,7 @@
 #include "work.h"
 #include "game.h"
 #include "gte.h"
+#define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 extern s32 func_80029178(s32 n);
 #define PARTS(a) (*(s32 *)(*(u8 **)((a) + 0x20) + 0x24))
@@ -37,11 +38,11 @@ extern u8 D_800B9A17;
 extern u8 D_800B9A64;
 extern s16 D_800B99F2;
 extern void (*D_8018D7A4[])(void);
-extern void func_80011B7C(s32 a);
-extern void func_80011C10(void);
-extern void func_80011E24(void);
-extern void func_80011A3C(void);
-extern void func_80010E14(void);
+extern void SetGameState(s32 a);
+extern void NextGameStateStep(void);
+extern void DemoReset(void);
+extern void NextGameState(void);
+extern void ModeGoTrialEnd(void);
 extern void func_80015310(void);
 extern void func_8001C0C8(void);
 extern void func_800285AC(void);
@@ -123,7 +124,7 @@ void func_80128288(void) {
 }
 
 void func_801282CC(void) {
-    func_80011B7C(0x11);
+    SetGameState(0x11);
 }
 
 void func_801282EC(void) {
@@ -131,7 +132,7 @@ void func_801282EC(void) {
     func_80015310();
     func_80129258();
     func_801378F0();
-    func_80010E14();
+    ModeGoTrialEnd();
 }
 
 /* a few maps load an extra file before the stage goes on */
@@ -161,18 +162,18 @@ void func_8012832C(void) {
         }
         break;
     default:
-        func_80011C10();
+        NextGameStateStep();
         return;
     }
     if (r) {
-        func_80011C10();
+        NextGameStateStep();
     }
 }
 
 void func_80128420(void) {
     func_80129220();
     func_801378F0();
-    func_80011E24();
+    DemoReset();
     func_80128C14();
     func_8002AEF8();
     func_800CFBBC();
@@ -185,13 +186,13 @@ void func_80128420(void) {
     func_800D0630();
     func_80145CEC();
     func_80144B9C();
-    func_80011C10();
+    NextGameStateStep();
 }
 
 void func_801284B8(void) {
     if (func_800D0588() != 0) {
         func_80015310();
-        func_80011C10();
+        NextGameStateStep();
     }
 }
 
@@ -201,12 +202,12 @@ void func_801284F0(void) {
     if (D_800B9A64 != 0) {
         func_80175494();
     }
-    func_80011C10();
+    NextGameStateStep();
 }
 
 void func_8012853C(void) {
     func_80146074();
-    func_80011C10();
+    NextGameStateStep();
 }
 
 void func_80128564(void) {
@@ -216,7 +217,7 @@ void func_80128564(void) {
     if (D_800B9A08 == 0x300A) {
         func_8002D4C8(6, 0);
     }
-    func_80011A3C();
+    NextGameState();
     D_800B99F2 = 1;
 }
 
@@ -271,20 +272,20 @@ extern s32 func_800D19F0(void);
 extern void func_800D1754(void);
 extern void func_80029444(void);
 extern void func_8014607C(void);
-extern void func_8001903C(void);
-extern void func_80018FC8(void);
-extern void func_80010DE0(void);
+extern void ClearRumbleScript(void);
+extern void StopPadRumble(void);
+extern void ModeGoTitle(void);
 extern s32 func_8002AF08(void);
 extern s32 func_800CFBE8(void);
-extern void func_80010AE0(s32 n);
+extern void SetOtDepthLimit(s32 n);
 extern void func_80018450(s32 mode, s32 w);
 extern void func_8001534C(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
 extern void func_800153CC(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
 extern void func_80016714(void *p, s32 size);
 extern u8 *func_8001D074(s32 a, s32 b);
 extern void func_8001CC3C(u8 *o, void *p, s16 x, s16 y);
-extern void func_8001212C(void);
-extern void func_800190AC(void);
+extern void DrawDemoLogo(void);
+extern void StepRumbleScript(void);
 void func_801287B8(void);
 void func_80129010(void);
 void func_80129CF8(void);
@@ -315,7 +316,7 @@ void func_801285E4(void) {
     func_801287B8();
     ResetSpadStack();
     if (D_801ED344 != 0) {
-        func_80011A3C();
+        NextGameState();
     }
 }
 
@@ -342,8 +343,8 @@ void func_80128714(void) {
         func_801287B8();
         ResetSpadStack();
     } else {
-        func_8001903C();
-        func_80018FC8();
+        ClearRumbleScript();
+        StopPadRumble();
     }
 }
 
@@ -359,7 +360,7 @@ void func_801287B8(void) {
     func_80165CA0();
     func_80129010();
     func_8013CA14();
-    func_800190AC();
+    StepRumbleScript();
     func_8012956C();
     func_8016E95C();
     func_801754A8();
@@ -373,7 +374,7 @@ void func_801287B8(void) {
     func_801379FC();
     D_800B99DA++;
     if (D_800B9A64 != 0) {
-        func_8001212C();
+        DrawDemoLogo();
     }
 }
 
@@ -409,16 +410,16 @@ void func_80128A28(void) {
     case 1:
         D_8018D4D8();
     case 0:
-        func_80011C10();
+        NextGameStateStep();
         break;
     case 2:
         r = D_8018D4DC();
         if (r != 0) {
             if (r < 0) {
-                func_80011B7C(0);
+                SetGameState(0);
                 D_800B9A00 = 1;
             } else {
-                func_80010DE0();
+                ModeGoTitle();
             }
         }
         break;
@@ -429,23 +430,23 @@ void func_80128AF4(void) {
     switch (D_800B99F6) {
     case 0:
         D_801ED340 = func_8002AF08();
-        func_80011C10();
+        NextGameStateStep();
         break;
     case 1:
         D_8018D4E4();
-        func_80011C10();
+        NextGameStateStep();
         break;
     case 2:
         if (D_8018D4E8() != 0) {
             if (D_801ED340 == 1) {
                 if (func_800CFBE8() != 0) {
                     func_800CFBBC();
-                    func_80011B7C(0x13);
+                    SetGameState(0x13);
                 } else {
-                    func_80011B7C(4);
+                    SetGameState(4);
                 }
             } else {
-                func_80010DE0();
+                ModeGoTitle();
             }
             func_8002AEF8();
         }
@@ -473,7 +474,7 @@ void func_80128C14(void) {
         n = 0xFFB;
         break;
     }
-    func_80010AE0(n);
+    SetOtDepthLimit(n);
 }
 
 s32 func_80128C98(s32 i) {
@@ -824,7 +825,7 @@ void func_801298F4(BgLayer *l) {
     l->bg.y = l->y;
     l->bg.w = l->w;
     l->bg.h = l->h;
-    if (D_800AF630.unkA3C0 == 0) {
+    if (D_800AF630.state == 0) {
         l->bg.scrollx = l->bg.scrolly = 0;
     }
     l->bg.r = l->bg.g = l->bg.b = 0x80;
@@ -885,7 +886,7 @@ typedef struct Camera {
     /* 0x00 */ void (*update)(struct Camera *c);
     /* 0x04 */ u8 mode;
     /* 0x05 */ u8 pad05[3];
-    /* 0x08 */ s32 proj;            /* passed to func_80053308 every frame (0x12C at boot) */
+    /* 0x08 */ s32 proj;            /* passed to GsSetProjection every frame (0x12C at boot) */
     /* 0x0C */ s32 projTo;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
@@ -917,8 +918,8 @@ extern s16 D_80126940;          /* the point the camera follows */
 extern s16 D_80126942;
 extern s16 D_80126944;
 extern MATRIX D_800AE688;       /* the world-to-screen matrix GsSetRefView2L sets */
-extern void func_800144D4(void);
-extern void func_80053308(s32 proj);
+extern void InitDefaultView(void);
+extern void GsSetProjection(s32 proj);
 extern s16 func_80012F74(s16 a, s16 b, s16 c, s16 d);
 void func_8012A018(void (*update)(Camera *c), u8 mode);
 void func_8012A048(Camera *c, void (*update)(Camera *c), u8 mode);
@@ -937,7 +938,7 @@ void func_80129C40(s32 a) {
     D_801150D6 = 0;
     D_801152C0 = 0;
     D_80127504 = 0;
-    func_800144D4();
+    InitDefaultView();
 }
 
 void func_80129CF8(void) {
@@ -960,7 +961,7 @@ void func_80129CF8(void) {
     if (c->update != NULL) {
         c->update(c);
     }
-    func_80053308(c->proj);
+    GsSetProjection(c->proj);
     if (D_80127504 != 0) {
         b->base.vpx = func_80012F74(b->base.vpx, c->base.vpx, 2, 1);
         b->base.vpy = func_80012F74(b->base.vpy, c->base.vpy, 2, 1);
@@ -1629,7 +1630,7 @@ s32 func_8012CC88(Mover *m, s32 mode, SVECTOR *ofs);
 void func_8012AD80(Mover *m);
 s32 func_8012CEB0(SVECTOR *from, SVECTOR *to, s32 mode);
 extern s32 func_80133784(s16 mode, SVECTOR *from, SVECTOR *to);
-extern u8 *func_80010A08(s32 n);
+extern u8 *AllocPrim(s32 n);
 extern void SetPolyF3(POLY_F3 *p);
 extern void SetRotMatrix(MATRIX *m);
 extern void SetTransMatrix(MATRIX *m);
@@ -1639,7 +1640,7 @@ extern void AddPrim(void *ot, void *p);
 extern void SetLineF2(LINE_F2 *p);
 extern void RotTransSV(SVECTOR *in, SVECTOR *out, s32 *flag);
 extern u8 D_8018D848[];
-s32 func_8012D098(StageActor *a, s32 n);
+void func_8012D098(StageActor *a, s32 n);
 s32 func_8012D664(SVECTOR *p, s32 r, s32 x);
 s32 func_8012DEB8(StageActor *a, SVECTOR *p0, SVECTOR *p1);
 s32 func_8012DF34(StageActor *a, SVECTOR *w0, SVECTOR *w1);
@@ -1673,7 +1674,7 @@ extern s32 D_801ED35C;
 void func_8012E5CC(SVECTOR *v, u16 a, u16 b);
 
 extern u8 D_8018D860[];
-extern void func_80019064(u8 *p);
+extern void StartRumbleScript(u8 *p);
 void func_8016AA50(StageActor *a, s32 n);
 void func_8016B428(StageActor *a);
 
@@ -2359,7 +2360,7 @@ void func_8012CFA8(SVECTOR *v) {
     s32 dummy;
     s32 flag;
     s32 z;
-    p = (POLY_F3 *)func_80010A08(sizeof(POLY_F3));
+    p = (POLY_F3 *)AllocPrim(sizeof(POLY_F3));
     *(u32 *)&p->r0 = 0xFF;
     SetPolyF3(p);
     SetRotMatrix(&D_800AF630.wsm);
@@ -2375,10 +2376,55 @@ void func_8012CFA8(SVECTOR *v) {
     }
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine", func_8012D098);
+extern void func_8012D3B4();
+
+/* the actor's hit box (or the box n points at) drawn as 12 white lines (debug drawing)
+   PORT NOTE: void, as the original (the return-delay slot holds lui v0): the file's s32 prototype becomes void and
+   func_8012D38C calls it through ((s32 (*)())func_8012D098)(a, 0) */
+void func_8012D098(StageActor *a, s32 n) {
+    SVECTOR v[8];
+    SVECTOR in;
+
+    if (a != NULL && a->state != 0) {
+        if (n == 0) {
+            if (a->hitData == 0) {
+                return;
+            }
+            n = (a->hitData & 0x0FFFFFFF) | 0x80000000;
+        }
+        in.vx = AF(n, u16, 4); in.vy = AF(n, u16, 8); in.vz = AF(n, u16, 0xC);
+        FaceHelper(a, &in, &v[0]);
+        in.vx = AF(n, u16, 6); in.vy = AF(n, u16, 8); in.vz = AF(n, u16, 0xC);
+        FaceHelper(a, &in, &v[1]);
+        in.vx = AF(n, u16, 4); in.vy = AF(n, u16, 0xA); in.vz = AF(n, u16, 0xC);
+        FaceHelper(a, &in, &v[2]);
+        in.vx = AF(n, u16, 6); in.vy = AF(n, u16, 0xA); in.vz = AF(n, u16, 0xC);
+        FaceHelper(a, &in, &v[3]);
+        in.vx = AF(n, u16, 4); in.vy = AF(n, u16, 8); in.vz = AF(n, u16, 0xE);
+        FaceHelper(a, &in, &v[4]);
+        in.vx = AF(n, u16, 6); in.vy = AF(n, u16, 8); in.vz = AF(n, u16, 0xE);
+        FaceHelper(a, &in, &v[5]);
+        in.vx = AF(n, u16, 4); in.vy = AF(n, u16, 0xA); in.vz = AF(n, u16, 0xE);
+        FaceHelper(a, &in, &v[6]);
+        in.vx = AF(n, u16, 6); in.vy = AF(n, u16, 0xA); in.vz = AF(n, u16, 0xE);
+        FaceHelper(a, &in, &v[7]);
+        func_8012D3B4(&v[0], &v[1], 0xFFFFFF);
+        func_8012D3B4(&v[1], &v[3], 0xFFFFFF);
+        func_8012D3B4(&v[3], &v[2], 0xFFFFFF);
+        func_8012D3B4(&v[2], &v[0], 0xFFFFFF);
+        func_8012D3B4(&v[4], &v[5], 0xFFFFFF);
+        func_8012D3B4(&v[5], &v[7], 0xFFFFFF);
+        func_8012D3B4(&v[7], &v[6], 0xFFFFFF);
+        func_8012D3B4(&v[6], &v[4], 0xFFFFFF);
+        func_8012D3B4(&v[0], &v[4], 0xFFFFFF);
+        func_8012D3B4(&v[1], &v[5], 0xFFFFFF);
+        func_8012D3B4(&v[2], &v[6], 0xFFFFFF);
+        func_8012D3B4(&v[3], &v[7], 0xFFFFFF);
+    }
+}
 
 s32 func_8012D38C(StageActor *a) {
-    return func_8012D098(a, 0);
+    return ((s32 (*)())func_8012D098)(a, 0);
 }
 
 void func_8012D3AC(void) {
@@ -2390,7 +2436,7 @@ void func_8012D3B4(SVECTOR *a, SVECTOR *b, u32 colour) {
     s32 dummy;
     s32 flag;
     s32 z;
-    p = (LINE_F2 *)func_80010A08(sizeof(LINE_F2));
+    p = (LINE_F2 *)AllocPrim(sizeof(LINE_F2));
     *(u32 *)&p->r0 = colour;
     SetLineF2(p);
     SetRotMatrix(&D_800AF630.wsm);
@@ -2411,7 +2457,7 @@ void func_8012D4B4(StageActor *a, SVECTOR *p0, SVECTOR *p1, u32 colour) {
     s32 z;
     FaceHelper(a, p0, &w0);
     FaceHelper(a, p1, &w1);
-    p = (LINE_F2 *)func_80010A08(sizeof(LINE_F2));
+    p = (LINE_F2 *)AllocPrim(sizeof(LINE_F2));
     *(u32 *)&p->r0 = colour;
     SetLineF2(p);
     SetRotMatrix(&D_800AF630.wsm);
@@ -2455,7 +2501,56 @@ s32 func_8012D664(SVECTOR *p, s32 r, s32 x) {
     return 0;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine", func_8012D714);
+/* the actor's collision box (x0 x1 y0 y1 z0 z1 at +4) edges hit Musashi: bit 1 the four x edges, 2 the y, 4 the z */
+s32 func_8012D714(StageActor *a, s32 edges) {
+    SVECTOR p0;
+    SVECTOR p1;
+    s16 *h = (s16 *)((a->hitData & 0x0FFFFFFF) | 0x80000000);
+
+    if (edges & 1) {
+        p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[6];
+        p1.vx = h[3]; p1.vy = h[4]; p1.vz = h[6];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[2]; p0.vy = h[5]; p0.vz = h[6];
+        p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[6];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[7];
+        p1.vx = h[3]; p1.vy = h[4]; p1.vz = h[7];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[2]; p0.vy = h[5]; p0.vz = h[7];
+        p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[7];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+    }
+    if (edges & 2) {
+        p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[6];
+        p1.vx = h[2]; p1.vy = h[5]; p1.vz = h[6];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[7];
+        p1.vx = h[2]; p1.vy = h[5]; p1.vz = h[7];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[3]; p0.vy = h[4]; p0.vz = h[6];
+        p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[6];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[3]; p0.vy = h[4]; p0.vz = h[7];
+        p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[7];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+    }
+    if (edges & 4) {
+        p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[6];
+        p1.vx = h[2]; p1.vy = h[4]; p1.vz = h[7];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[2]; p0.vy = h[5]; p0.vz = h[6];
+        p1.vx = h[2]; p1.vy = h[5]; p1.vz = h[7];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[3]; p0.vy = h[4]; p0.vz = h[6];
+        p1.vx = h[3]; p1.vy = h[4]; p1.vz = h[7];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        p0.vx = h[3]; p0.vy = h[5]; p0.vz = h[6];
+        p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[7];
+        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+    }
+    return 0;
+}
 
 /* Matched 17 Oct: the first call written without its argument (the callee reads this function's a0, as the
    pass-through row of docs/decomp_recipes.md); with `func_8014C978(a)` the `a0 = 1` of the second call depends on the
@@ -2465,7 +2560,49 @@ void func_8012DB84(StageActor *a) {
     func_8012F568(1, 0xC001, 0, 1000, &D_8018D850, D_8018D858);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine", func_8012DBD0);
+StageActor *func_8012DE2C(StageActor *skip);
+StageActor *func_8012DDA4(void);
+
+s32 func_8012DBD0(StageActor *a, s32 speed, s32 angle, s32 n) {
+    StageActor *o;
+    s32 r;
+    s32 v;
+    s16 *h;
+
+    o = func_8012DE2C(a);
+    if (o != NULL) {
+        if (a->hitData == 0) {
+            r = 0x80;
+        } else {
+            h = (s16 *)(a->hitData & 0x0FFFFFFF);
+            r = abs(h[2]);
+            v = abs(h[3]);
+            if (r < v) r = v;
+            v = abs(h[4]);
+            if (r < v) r = v;
+            v = abs(h[5]);
+            if (r < v) r = v;
+            v = abs(h[6]);
+            if (r < v) r = v;
+            v = abs(h[7]);
+            if (r < v) r = v;
+        }
+        r = r * r;
+        do {
+            if (o->flags5C & 0x8000) {
+                if (!(o->flags5C & 0x4000) && (u16)o->unk5E != n
+                    && !(*(u16 *)o->pad0AE & 1) && func_80013350((s16 *)a->pos, (s16 *)o->pos) < r) {
+                    o->unk60 = speed;
+                    o->unk62 = angle;
+                    o->unk5E = n;
+                    o->flags5C |= 1;
+                }
+            }
+            o = func_8012DDA4();
+        } while (o != NULL);
+    }
+    return 0;
+}
 
 /* the actor iterator: the next live actor that is not the one skipped */
 StageActor *func_8012DDA4(void) {
@@ -2593,7 +2730,7 @@ void func_8012E28C(s32 z, s32 abr) {
     u8 *p;
     if (z > 0) {
         ot = D_800A6518[D_800AF630.frame].org + z;
-        p = func_80010A08(0xC);
+        p = AllocPrim(0xC);
         SetDrawMode(p, 0, 0, GetTPage(0, abr, 0, 0), NULL);
         AddPrim(ot, p);
     }
@@ -2815,7 +2952,7 @@ void func_8012E9C0(StageActor *a) {
         func_8016AA50(a, n);
         if (a->hitFlags & 1) {
             func_8016B428(a);
-            func_80019064(D_8018D860);
+            StartRumbleScript(D_8018D860);
         }
     }
 }
@@ -2851,7 +2988,49 @@ void func_8012EA90(StageActor *a, s32 part, MATRIX *out) {
     }
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine", func_8012EC04);
+void func_8012EC04(StageActor *a, s32 part, MATRIX *out) {
+    ModelObj *o = a->model;
+    PoseRec12 *p = o->pose;
+    SVECTOR r;
+    SVECTOR unused;
+    if (p == NULL) {
+        *out = *(MATRIX *)&o->coord.coord;
+    } else if ((u32)p & 0x01000000) {
+        PoseRec8 *q = (PoseRec8 *)((u32)p & 0xFEFFFFFF) + part;
+        s32 w;
+        r.vx = q->a0;
+        w = *(s32 *)q;
+        r.vy = q->b1 | ((w & 0xF) << 8);
+        r.vz = ((w >> 16) & 0xFF) | ((w & 0xF0) << 4);
+        RotMatrixZYX(&r, out);
+        out->t[0] = q->t[0];
+        out->t[1] = q->t[1];
+        out->t[2] = q->t[2];
+    } else {
+        p += part;
+        r.vx = p->a[0];
+        r.vy = p->a[1];
+        r.vz = p->a[2];
+        RotMatrixZYX(&r, out);
+        out->t[0] = p->t[0];
+        out->t[1] = p->t[1];
+        out->t[2] = p->t[2];
+    }
+    gte_SetRotMatrix(&a->model->coord.coord);
+    gte_ldclmv(&out->m[0][0]);
+    gte_rtir();
+    gte_stclmv(&out->m[0][0]);
+    gte_ldclmv(&out->m[0][1]);
+    gte_rtir();
+    gte_stclmv(&out->m[0][1]);
+    gte_ldclmv(&out->m[0][2]);
+    gte_rtir();
+    gte_stclmv(&out->m[0][2]);
+    gte_SetTransMatrix(&a->model->coord.coord);
+    gte_ldlv0(out->t);
+    gte_rtv0tr();
+    gte_stlvnl(out->t);
+}
 
 /* x less x * func_8002A4FC() * 100 / 7680 */
 s32 func_8012EECC(s32 x) {

@@ -229,7 +229,7 @@ extern void func_sc03_028_8018B5F4();
 extern u8 D_80062C14;
 extern u8 D_sc03_028_80190E34;
 extern void func_sc03_028_8017EE64();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_801511E0();
 extern void func_80154274();
 extern void func_801477E8();
@@ -467,7 +467,7 @@ extern u8 D_sc03_028_8018FF50[];
 extern OtRef D_800A651C[];
 extern u16 D_800B9A02;
 extern s32 D_80126950;
-extern u8 *func_80010A08(s32 n);
+extern u8 *AllocPrim(s32 n);
 extern s32 func_sc03_028_801802F4();
 extern u8 D_sc03_028_8018F970;
 extern u8 D_sc03_028_8018F978;
@@ -1424,8 +1424,8 @@ s32 func_sc03_028_8018ADD0(void);
 
 typedef struct { u8 *verts; u32 pad; u32 x; u32 y; u32 z; u32 *start; u32 *end; } CellC77;
 typedef struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteC77;
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern SV8 D_sc03_028_801EC4A0;
 
 void func_sc03_028_8017DF98(u8 *o) {
@@ -1460,8 +1460,8 @@ void func_sc03_028_8017DF98(u8 *o) {
     GsGetLs(o + 0x10, &ls);
     GsSetLsMatrix(&ls);
     func_sc03_028_8017D8B8(&D_sc03_028_801EC4A0, &r, AF(o, s32, 0x60));
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     x0 = (r.x + 0x4000) / 512;
     x1 = (r.x + r.z + 0x4000) / 512 + 2;
     x0 = x0 < 0 ? 0 : (x0 > 63 ? 63 : x0);
@@ -1685,7 +1685,7 @@ void func_sc03_028_8017DF98(u8 *o) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc03_028_8017EE64(a)
@@ -2229,7 +2229,7 @@ void func_sc03_028_80180494(u8 *arg0) {
     ys[1] = y - e;
     ys[3] = y + e;
     ys[4] = y + d;
-    prim = func_80010A08(0x9C);
+    prim = AllocPrim(0x9C);
     if (prim == 0) return;
     SetDrawMode(prim, 0, 0, GetTPage(0, 1, 0, 0) & 0xFFFF, 0);
     pp[0] = prim + 0xC;
@@ -3517,7 +3517,7 @@ void func_sc03_028_80183E04(u8 *arg0) {
     y[1] = sy - k;
     y[3] = sy + k;
     y[4] = sy + d;
-    prim = func_80010A08(0x9C);
+    prim = AllocPrim(0x9C);
     if (prim == 0) return;
     SetDrawMode(prim, 0, 0, GetTPage(0, 1, 0, 0) & 0xFFFF, 0);
     pp[0] = prim + 0xC;
@@ -6717,7 +6717,7 @@ void func_sc03_028_8018B2E0(s32 arg0) {
 }
 
 void func_sc03_028_8018B310(u8 *o) {
-    func_80019064(&D_80062C14);
+    StartRumbleScript(&D_80062C14);
     func_801511E0(o);
     func_80154274(o, &D_sc03_028_80190E34);
     AF(o, s32, 0x234) = 0;
@@ -6783,7 +6783,7 @@ void func_sc03_028_8018B5C4(s32 arg0) {
 }
 
 void func_sc03_028_8018B5F4(u8 *o) {
-    func_80019064(&D_80062C14);
+    StartRumbleScript(&D_80062C14);
     func_801511E0(o);
     AF(AF(o, u8 *, 0x20), s16, 0x12) = (AF(o, u16, 0x42) + 0x800) & 0xFFF;
     func_80154274(o, &D_sc03_028_80190E34);
@@ -6859,7 +6859,7 @@ void func_sc03_028_8018B8C4(u8 *arg0) {
 
 void func_sc03_028_8018B900(s32 arg0) {
     func_sc03_028_8017EE64();
-    func_80019064((s32) &D_80062C14);
+    StartRumbleScript((s32) &D_80062C14);
     func_801511E0(arg0);
     func_80154274(arg0, (s32) &D_sc03_028_80190E34);
     AF(arg0, s32, 0x234) = 0;

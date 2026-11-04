@@ -323,9 +323,9 @@ extern void func_8012931C();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 typedef struct { u16 x, y, z, pad; } UV4;
 typedef struct { u8 r, g, b, cd; } CV4;
@@ -531,7 +531,7 @@ extern s32 func_8012CC64();
 typedef struct { s16 x, y, z; } SV6;
 typedef struct { s32 w[4]; } W16;
 extern void func_8012E9C0();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern u8 D_80062BDC;
 extern void func_8012B200();
 extern void func_80130088();
@@ -713,8 +713,8 @@ void func_sc01_084_8017CA80(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -936,7 +936,7 @@ void func_sc01_084_8017CA80(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_084_8017D960(void) {
@@ -1048,7 +1048,7 @@ extern s32 GetTPage();
 extern s32 GetClut();
 extern s32 RotTransPers();
 extern OtRef D_800A651C[];
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern void SetPolyFT4();
 extern void AddPrim();
 
@@ -1825,7 +1825,7 @@ void func_sc01_084_801838F0(s32 arg0);
 extern s16 D_80126960;
 extern void TransposeMatrix();
 extern void ApplyMatrixSV();
-extern s32 func_80014C54();
+extern s32 TestPadAll();
 void func_sc01_084_80184090(s32 arg0);
 extern void func_80129350();
 
@@ -2340,7 +2340,7 @@ void func_sc01_084_801809C4(u8 *o) {
         z += RotTransPers(&v[i], &sxy[i], &p, &flag);
     }
     z /= 6;
-    pr[0] = func_80010A08(0x48);
+    pr[0] = AllocPrim(0x48);
     pr[1] = pr[0] + 0x24;
     c = AF(o, u32, 4);
     AF(pr[0], s32, 4) = AF(pr[1], s32, 4) = 0;
@@ -3154,7 +3154,7 @@ void func_sc01_084_80182A00(arg0)
     sp = D_sc01_084_801C611C;
     func_8012E9C0(arg0);
     if (AF(arg0, u8, 0x5E) == 5) {
-        func_80019064(&D_80062BDC);
+        StartRumbleScript(&D_80062BDC);
     }
     AF(arg0, u8, 0xC1) = 0;
     AF(arg0, s16, 0x76) -= AF(arg0, s16, 0x60);
@@ -3748,7 +3748,7 @@ void func_sc01_084_80183DA4(u8 *o) {
                 return;
             }
             if ((s16)sc >= 2) {
-                pk = func_80010A08(0x28);
+                pk = AllocPrim(0x28);
                 AF(pk, s32, 4) = 0x808080;
                 SetPolyFT4(pk);
                 AF(pk, s16, 0x8) = s0.s.x - sc;
@@ -3841,7 +3841,7 @@ void func_sc01_084_80184138(u8 *o) {
                 return;
             }
             if (w >= 2) {
-                prim = func_80010A08(0x28);
+                prim = AllocPrim(0x28);
                 AF(prim, u32, 4) = 0x808080;
                 SetPolyFT4(prim);
                 AF(prim, s16, 8) = sxy.s.x - w;
@@ -3975,10 +3975,10 @@ void func_sc01_084_80184834(u8 *o) {
     s32 s;
     s16 n;
 
-    if ((s16)func_80014C54(1, 0, 0x40) != 0) {
+    if ((s16)TestPadAll(1, 0, 0x40) != 0) {
         AF(AF(o, u8 *, 0x20), u16, 0x12) += 0x200;
     }
-    if ((s16)func_80014C54(1, 0, 0x20) != 0) {
+    if ((s16)TestPadAll(1, 0, 0x20) != 0) {
         n = AF(o, u16, 0xFC) + 1;
         AF(o, s16, 0xFC) = n;
         s = D_sc01_084_8018A978[AF(o, s16, 0x70)][n];

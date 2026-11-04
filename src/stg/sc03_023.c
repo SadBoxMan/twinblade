@@ -343,8 +343,8 @@ typedef struct { s16 a; s16 b; s16 c[8]; s16 *p[8]; } S8A3FC;
 typedef struct { u8 *verts; u32 pad; u32 x; u32 y; u32 z; u32 *start; u32 *end; } CellC77;
 typedef struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteC77;
 extern u16 D_800B9A02;
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern SV8 D_sc03_023_80198C20;
 
 void func_sc03_023_8017C59C(u8 *o) {
@@ -379,8 +379,8 @@ void func_sc03_023_8017C59C(u8 *o) {
     GsGetLs(o + 0x10, &ls);
     GsSetLsMatrix(&ls);
     func_sc03_023_8017BEBC(&D_sc03_023_80198C20, &r, AF(o, s32, 0x60));
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     x0 = (r.x + 0x4000) / 512;
     x1 = (r.x + r.z + 0x4000) / 512 + 2;
     x0 = x0 < 0 ? 0 : (x0 > 63 ? 63 : x0);
@@ -604,7 +604,7 @@ void func_sc03_023_8017C59C(u8 *o) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc03_023_8017D468(u8 *arg0) {

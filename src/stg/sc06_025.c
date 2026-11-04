@@ -106,7 +106,7 @@ extern void func_800D0C48();
 extern void func_800D1E28();
 extern u8 D_sc06_025_801AD9E4;
 extern void (*D_sc06_025_801ADA0C[])();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_8014E934();
 extern void func_8014CC28();
 extern void func_8014F3E8();
@@ -300,9 +300,9 @@ extern void func_80017714();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc06_025_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -335,8 +335,8 @@ void func_sc06_025_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -558,7 +558,7 @@ void func_sc06_025_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc06_025_8017CD9C(void) {
@@ -635,7 +635,7 @@ extern OtRec D_800A651C[];
 typedef union { s32 w; XY s; } UXY;
 extern void func_8012E32C();
 extern void func_8012B0B4();
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern s32 RotTransPers();
 extern void AddPrim();
 extern void func_8012E28C();
@@ -1414,7 +1414,7 @@ void func_sc06_025_8017E4E0(o)
     u8 *p;
 
     ot = (u32 *) D_800A651C[D_800B9A02].ot;
-    p = func_80010A08(0x30);
+    p = AllocPrim(0x30);
     if (p != 0) {
         SetDrawMode(p, 0, 0, (u16) GetTPage(0, 1, 0, 0), 0);
         AF(p, u8, 0x10) = AF(o, s32, 0x1C);
@@ -1798,7 +1798,7 @@ s32 func_sc06_025_8017F424(Spr *r) {
     u8 u, v;
     s32 z;
 
-    pk = func_80010A08(0x28);
+    pk = AllocPrim(0x28);
     AF(pk, u16, 0xE) = GetClut(0, 0x1F0);
     AF(pk, u16, 0x16) = GetTPage(2, 0, (s16)(r->x & 0xFFC0), (s16)(r->y & 0xFF00));
     AF(pk, u8, 3) = 9;
@@ -1868,7 +1868,7 @@ void func_sc06_025_8017F788(u8 *a, u8 *b, s32 col) {
     s32 flag;
     s32 z;
 
-    pr = func_80010A08(0x10);
+    pr = AllocPrim(0x10);
     AF(pr, s32, 4) = col;
     AF(pr, u8, 7) = 0x42;
     AF(pr, s32, 0) = 0x3000000;
@@ -1956,7 +1956,7 @@ void func_sc06_025_8017FB50(s32 idx, s32 col) {
     s32 i;
     s32 z;
 
-    pr = func_80010A08(0x18);
+    pr = AllocPrim(0x18);
     AF(pr, u8, 3) = 5;
     AF(pr, s32, 4) = col;
     AF(pr, u8, 7) = 0x28;
@@ -2747,7 +2747,7 @@ void func_sc06_025_801818D8(SV8 *pos, s32 k, s32 n, s32 col) {
             v[3].x = pos->x + ((x.s.x * r) >> 12);
             v[3].y = pos->y - h;
             v[3].z = pos->z + ((x.s.y * r) >> 12);
-            pr = func_80010A08(0x24);
+            pr = AllocPrim(0x24);
             AF(pr, s32, 4) = col;
             AF(pr, s32, 0xC) = col;
             AF(pr, s32, 0x14) = AF(pr, s32, 0x1C) = 0;
@@ -2853,7 +2853,7 @@ void func_sc06_025_80181E08(u8 *o) {
     v = (SV8 *)(o + 0x2C);
     w = (SV8 *)(o + 0x8C);
     for (i = 0; i < 12; i++, v++, w++) {
-        pr = func_80010A08(0x24);
+        pr = AllocPrim(0x24);
         AF(pr, s32, 4) = AF(pr, s32, 0xC) = AF(o, s32, 0xEC);
         AF(pr, s32, 0x14) = AF(pr, s32, 0x1C) = AF(o, s32, 0xF0);
         AF(pr, u8, 7) = 0x3A;
@@ -2870,7 +2870,7 @@ void func_sc06_025_80181E08(u8 *o) {
     col = func_sc06_025_80182090(AF(o, s32, 0xEC), 0x2800);
     v = (SV8 *)(o + 0x2C);
     for (i = 0; i < 12; i++) {
-        pq = func_80010A08(0x1C);
+        pq = AllocPrim(0x1C);
         AF(pq, s32, 4) = col;
         AF(pq, s32, 0x14) = col;
         AF(pq, s32, 0xC) = col;
@@ -3570,7 +3570,7 @@ void func_sc06_025_80183604(u8 *arg0) {
 }
 
 void func_sc06_025_801836CC(u8 *arg0) {
-    func_80019064((s32) &D_sc06_025_801AD9E4);
+    StartRumbleScript((s32) &D_sc06_025_801AD9E4);
     D_sc06_025_801ADA0C[AF(arg0, u16, 2)](arg0);
 }
 
@@ -3886,7 +3886,7 @@ extern u8 D_sc06_025_801ADA84;
 extern void func_80146DE8();
 extern void func_801477E8();
 void func_sc06_025_801842C0(u8 *o) {
-    func_80019064(&D_80062C14);
+    StartRumbleScript(&D_80062C14);
     AF(AF(o, u8 *, 0x20), s16, 0x12) = 0x800;
     func_80154274(o, &D_sc06_025_801ADA84);
     func_80146DE8(o, 0, 0, 0x180000);

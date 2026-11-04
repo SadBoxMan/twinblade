@@ -354,9 +354,9 @@ extern u8 D_sc03_124_80190614;
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 typedef struct { s16 vx, vy, vz, pad; } SV;
 typedef struct { u16 v[6]; } U12;
@@ -613,8 +613,8 @@ extern u8 *D_sc03_124_801BC118[];
 extern u8 D_sc03_124_801BC0E8;
 extern u8 D_sc03_124_801BC100;
 
-extern s32 func_80014ED4();
-extern s32 func_80015018();
+extern s32 GetPadPressedDirWide();
+extern s32 GetPadHeldDirWide();
 extern s32 func_sc03_124_80188C68();
 extern void func_sc03_124_8018654C();
 extern u16 D_80115122;
@@ -728,7 +728,7 @@ extern u8 D_sc03_124_801DE444;
 extern void *D_sc03_124_801DE4DC[];
 
 extern OtRef D_800A651C[];
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern SV8 D_sc03_124_8019023C[][4];
 extern SV8 D_sc03_124_801902BC[][4];
 extern SV8 D_sc03_124_8019035C[];
@@ -963,8 +963,8 @@ void func_sc03_124_8017C710(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -1186,7 +1186,7 @@ void func_sc03_124_8017C710(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 s32 func_sc03_124_8017D5F0(u8 *arg0) {
@@ -3529,7 +3529,7 @@ void func_sc03_124_80182598(u8 *o, s32 col) {
         w[j].z = AF(o, s16, 4) + u->z;
     }
     RotTransPers4(&w[0], &w[1], &w[2], &w[3], &sxy[4], &sxy[5], &sxy[6], &sxy[7], &p, &flag);
-    prim = func_80010A08(0xA8);
+    prim = AllocPrim(0xA8);
     for (i = 0; i < 4; i++) {
         idx.x = D_sc03_124_8019035C[i].x;
         idx.y = D_sc03_124_8019035C[i].y;
@@ -4281,7 +4281,7 @@ extern u8 D_sc03_124_801E73C0;
 extern s32 D_sc03_124_801BCBB4[];
 extern u8 D_sc03_124_801BCBEC[];
 extern void func_8017ADE8();
-extern s32 func_800149E0();
+extern s32 GetPadPressedDir();
 extern s32 func_sc03_124_8018957C(s32 arg0);
 extern s32 rand();
 
@@ -5627,7 +5627,7 @@ void func_sc03_124_80187010(void) {
             }
             goto end;
         }
-        if (!(func_800149E0(0) & 0x50) && D_sc03_124_801E2404 <= 0) {
+        if (!(GetPadPressedDir(0) & 0x50) && D_sc03_124_801E2404 <= 0) {
             goto end;
         }
         switch (D_sc03_124_801E23EC) {
@@ -5760,7 +5760,7 @@ void func_sc03_124_80187010(void) {
             if (func_801399F0(D_sc03_124_801E235C) != 0) {
                 D_sc03_124_801E2358 = 0;
             }
-        } else if (func_800149E0(0) & 0x50) {
+        } else if (GetPadPressedDir(0) & 0x50) {
             if (D_80115138[(u16)D_8011511A] == 8) {
                 func_sc03_124_80188C68(0xF, (s16)func_8014168C(D_8011511A));
             }
@@ -5876,11 +5876,11 @@ s32 func_sc03_124_80187B50(void) {
     s32 m;
 
     moved = 0;
-    pad = func_80014ED4(0);
+    pad = GetPadPressedDirWide(0);
     if ((u16)pad != 0) {
         D_sc03_124_801E2358 = 0;
     }
-    rep = func_80015018(0);
+    rep = GetPadHeldDirWide(0);
     q = &D_8011511A;
     r = func_8014168C(*q);
     idx = (u16)*q;

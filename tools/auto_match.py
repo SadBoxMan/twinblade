@@ -8,6 +8,11 @@ the result is instruction-for-instruction identical. Functions that call one oth
 Usage: auto_match.py scan [max_bytes=0x60]   try every candidate function; writes build/auto/results.json and the C files under build/auto/
        auto_match.py apply                    patch src/*.c with the matches, run `make check-main`, and revert everything if the build does not match
        --abil (with either)                   the ability packages instead: src/abil/*.c, asm/abil/, `make check-abil`
+       --area stage|stg|ovl [--image NAME]    (r222) the shared stage engine and the village (src/stage), the split stage
+                                              images (src/stg; NAME e.g. sc07_002) or the mode overlays (src/ovl3x;
+                                              NAME e.g. ovl38); results in build/auto_<area>[_<NAME>]/, each candidate
+                                              compared within its own image (TWINBLADE_OVL), and apply checks the
+                                              images it changed (check-stage, check-<stage>, check-<ovl>)
 """
 import glob
 import json
@@ -28,6 +33,32 @@ SRC_GLOB = os.path.join(ROOT, 'src', 'abil', '*.c') if ABIL else os.path.join(RO
 ASM_GLOB = (os.path.join(ROOT, 'asm', 'abil', '*', 'nonmatchings', '*', '*.s') if ABIL else
             os.path.join(ROOT, 'asm', 'nonmatchings', '*', '*.s'))
 CHECK = ('check-abil', 35) if ABIL else ('check-main', 1)     # the make target and its number of OK lines
+# r222: the other images. AREA None keeps the EXE (or --abil) set-up above as it was
+AREA = IMAGE = None
+if '--area' in sys.argv:
+    i = sys.argv.index('--area'); AREA = sys.argv[i + 1]; del sys.argv[i:i + 2]
+    if '--image' in sys.argv:
+        i = sys.argv.index('--image'); IMAGE = sys.argv[i + 1].lower(); del sys.argv[i:i + 2]
+    if AREA not in ('stage', 'stg', 'ovl') or ABIL:
+        sys.exit('auto_match: --area takes stage, stg or ovl (and not with --abil)')
+    AUTO = os.path.join(ROOT, 'build', f'auto_{AREA}' + (f'_{IMAGE}' if IMAGE else ''))
+    if AREA == 'stage':
+        SRC_GLOB = os.path.join(ROOT, 'src', 'stage', '*.c')
+        ASM_GLOB = os.path.join(ROOT, 'asm', 'stage', 'nonmatchings', '*', '*.s')
+    elif AREA == 'stg':
+        SRC_GLOB = os.path.join(ROOT, 'src', 'stg', f'{IMAGE}*.c' if IMAGE else '*.c')
+        ASM_GLOB = os.path.join(ROOT, 'asm', 'stg', IMAGE or '*', 'nonmatchings', '*', '*.s')
+    else:
+        SRC_GLOB = os.path.join(ROOT, 'src', IMAGE or 'ovl3?', '*.c')
+        ASM_GLOB = os.path.join(ROOT, 'asm', IMAGE or 'ovl3?', 'nonmatchings', '*', '*.s')
+    CHECK = None                                                # per changed file: put_func.target_of
+
+
+def image_of(asm_path):
+    """r222: the asm/ subfolder cmp_func must search (TWINBLADE_OVL) for a function of an --area image: the mode
+    overlays share a load address, and the engine's names can repeat an overlay's"""
+    rel = os.path.relpath(asm_path, os.path.join(ROOT, 'asm')).replace(os.sep, '/').split('/')
+    return '/'.join(rel[:2]) if rel[0] == 'stg' else rel[0]
 LOAD = {'lw': 's32', 'lh': 's16', 'lhu': 'u16', 'lb': 's8', 'lbu': 'u8'}
 STORE = {'sw': 's32', 'sh': 's16', 'sb': 's8'}
 SIZE = {'s32': 4, 'u32': 4, 's16': 2, 'u16': 2, 's8': 1, 'u8': 1}
@@ -304,7 +335,8 @@ def try_function(name, asm_path):
             os.makedirs(AUTO, exist_ok=True)
             p = os.path.join(AUTO, name + '.c')
             open(p, 'w').write(c)
-            r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'cmp_func.py'), p, name, '2.7.2', stage_units.opt_of(name)], capture_output=True, text=True, cwd=ROOT)
+            env = dict(os.environ, TWINBLADE_OVL=image_of(asm_path)) if AREA else None
+            r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'cmp_func.py'), p, name, '2.7.2', stage_units.opt_of(name)], capture_output=True, text=True, cwd=ROOT, env=env)
             if 'MATCH' in r.stdout and 'MISMATCH' not in r.stdout and 'DIFFER' not in r.stdout.upper().replace('MATCH', ''):
                 return c, 'ok'
     return None, 'no variant matched'
@@ -312,7 +344,9 @@ def try_function(name, asm_path):
 
 def unmatched():
     src = ''.join(open(f, encoding='utf-8').read() for f in glob.glob(SRC_GLOB))
-    inc = set(re.findall(r'INCLUDE_ASM\([^,]+,\s*[^,]+,\s*(\w+)\)', src))
+    # r222 (LuciDin's yes): INCLUDE_ASM takes two arguments; the three-argument pattern used before matched only across
+    # line breaks and saw 59 of the EXE's 153 (the same candidates under the default 0x60 limit)
+    inc = set(re.findall(r'^INCLUDE_ASM\("[^"]*",\s*(\w+)\);', src, re.M))
     rows = []
     for f in glob.glob(ASM_GLOB):
         m = re.match(r'nonmatching (\w+), 0x([0-9A-Fa-f]+)', open(f, encoding='utf-8').readline())
@@ -361,11 +395,21 @@ def patch(res, names, originals):
     return files
 
 
+ORIGINALS = {}   # r222: apply()'s sources as they were, so --area checks only the images it changed
+
+
 def build_ok(files):
     """write the files, run the byte-identical check; returns (matches, compiler errors)"""
     for f, t in files.items():
         open(f, 'w', encoding='utf-8', newline='\n').write(t)
     env = dict(os.environ, PATH='C:\\msys64\\usr\\bin;' + os.environ['PATH'])
+    if CHECK is None:                                               # r222: --area: the images of the changed files
+        import put_func
+        targets = sorted({put_func.target_of(f) for f, t in files.items() if t != ORIGINALS.get(f)})
+        if not targets:
+            return True, ''
+        r = subprocess.run(['C:\\msys64\\usr\\bin\\make.exe'] + [x for x, _ in targets], capture_output=True, text=True, cwd=ROOT, env=env)
+        return r.returncode == 0 and all(ok in r.stdout for _, ok in targets), r.stdout + r.stderr
     r = subprocess.run(['C:\\msys64\\usr\\bin\\make.exe', CHECK[0]], capture_output=True, text=True, cwd=ROOT, env=env)
     return r.returncode == 0 and r.stdout.count(': OK') == CHECK[1], r.stdout + r.stderr
 
@@ -373,6 +417,7 @@ def build_ok(files):
 def apply():
     res = json.load(open(os.path.join(AUTO, 'results.json')))['matches']
     originals = {f: open(f, encoding='utf-8').read() for f in glob.glob(SRC_GLOB)}
+    ORIGINALS.update(originals)
     names = list(res)
     dropped = {}
     for attempt in range(12):                                       # 1. drop the functions the compiler rejects in the real source

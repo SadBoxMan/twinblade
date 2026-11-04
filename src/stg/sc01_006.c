@@ -270,8 +270,8 @@ void func_sc01_006_8017C338(void) {
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 typedef struct { u16 a; u16 b; u8 pad[28]; } R8017D4A4;
 typedef struct {
     s16 f0; u8 p2[0xC]; s16 fE; u8 p10[0xC];
@@ -325,8 +325,8 @@ void func_sc01_006_8017C340(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -548,7 +548,7 @@ void func_sc01_006_8017C340(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_006_8017D220(s32 arg0) {
@@ -722,7 +722,7 @@ extern s32 func_sc01_006_8017E3DC();
 extern s32 func_sc01_006_8017ED5C();
 extern s32 func_801376E8();
 extern s32 func_801399F0();
-extern s32 func_80014ED4();
+extern s32 GetPadPressedDirWide();
 extern s32 func_sc01_006_8017F2D4();
 
 typedef struct { s8 lo; u8 hi; } S8PE804;
@@ -767,8 +767,8 @@ extern void func_8001C1E4();
 extern void func_800183E0();
 extern s16 D_sc01_006_801C3880[];
 extern s16 D_sc01_006_801C38D8[];
-extern s32 func_800149E0();
-extern s32 func_80014B10();
+extern s32 GetPadPressedDir();
+extern s32 GetPadHeldDir();
 extern void func_8012B260();
 
 extern s16 D_8011515A;
@@ -839,7 +839,7 @@ extern void func_80029344();
 extern void func_8014BD24();
 extern s32 func_801621CC();
 extern void func_801622C4();
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern s32 D_sc01_006_801C37D4[];
 extern s32 func_8013767C();
 extern s32 D_sc01_006_801C36F8[];
@@ -895,7 +895,7 @@ extern void func_80139A44();
 
 extern u16 D_80115122;
 extern u16 D_80115120;
-extern s32 func_80015018();
+extern s32 GetPadHeldDirWide();
 
 extern u8 D_800B9A13;
 extern s16 D_80115110;
@@ -1234,7 +1234,7 @@ void func_sc01_006_8017E258(void) {
         if (func_801399F0(D_sc01_006_801CD9AC) != 0) {
             D_sc01_006_801CD9A8 = 0;
         }
-    } else if (func_80014ED4(0) & 0x50) {
+    } else if (GetPadPressedDirWide(0) & 0x50) {
         k = D_8011511A;
         if (D_80115138[k] == 8) {
             func_sc01_006_8017F2D4(0xF, (s16) func_8014168C((s16) k));
@@ -1275,11 +1275,11 @@ s32 func_sc01_006_8017E3DC(void) {
     s16 ret;
 
     ret = 0;
-    btn = func_80014ED4(0);
+    btn = GetPadPressedDirWide(0);
     if (btn & 0xFFFF) {
         D_sc01_006_801CD9A8 = 0;
     }
-    rep = func_80015018(0);
+    rep = GetPadHeldDirWide(0);
     r = func_8014168C(*(s16 *)D_80115118.p2);
     cur = *(u16 *)D_80115118.p2;
     kind = D_80115138[cur];
@@ -1936,7 +1936,7 @@ void func_sc01_006_8017FD50(u8 *o) {
     u8 c;
     u8 d;
 
-    p = func_80010A08(0x34);
+    p = AllocPrim(0x34);
     setlen(p, 1);
     AF(p, u32, 4) = 0xE1000015;
     addPrim(D_800AE7BC[((U16RE804 *)&D_800B9A02)->v].ot, p);
@@ -2029,7 +2029,7 @@ void func_sc01_006_801800C0(u8 *o) {
     } else {
         r = 0;
     }
-    if (r == 0 && (func_800149E0(0) & 0x800) && func_800CF8B4() != 0) {
+    if (r == 0 && (GetPadPressedDir(0) & 0x800) && func_800CF8B4() != 0) {
         if (AF(o, s32, 0x1C) == 0x8E) {
             AF(D_80126B78, s16, 0x10) = 0;
         }
@@ -2732,8 +2732,8 @@ void func_sc01_006_8018165C(u8 *o) {
 
     pad = 0;
     if (AF(o, s16, 0xFC) != 0) {
-        pad = func_800149E0(0);
-        func_80014B10(0);
+        pad = GetPadPressedDir(0);
+        GetPadHeldDir(0);
     }
     func_sc01_006_80181B00(o);
     func_sc01_006_801820F8(o);
@@ -2885,8 +2885,8 @@ void func_sc01_006_80181B00(s32 arg0) {
     s32 snd;
 
     if (AF(arg0, s16, 0xFC) != 0 && AF(arg0, u16, 2) == 1) {
-        trig = func_800149E0(0);
-        held = func_80014B10(0);
+        trig = GetPadPressedDir(0);
+        held = GetPadHeldDir(0);
     } else {
         trig = 0;
         held = 0;

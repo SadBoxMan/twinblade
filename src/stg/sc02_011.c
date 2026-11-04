@@ -552,7 +552,7 @@ extern u8 D_800D6078;
 extern u8 D_800D6118;
 extern u8 D_sc02_011_80194FCC;
 extern u8 D_sc02_011_8019500A[];
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_sc02_011_80181FA0();
 extern s32 func_sc02_011_80181F6C();
 extern void func_8014BF48();
@@ -656,7 +656,7 @@ typedef struct { s32 x, y, z, pad; } V4;
 typedef struct { u32 *ot; u8 pad[0x10]; } OtRef;
 typedef struct { u8 b[0x14]; } Ot14;
 typedef struct { unsigned addr : 24; unsigned len : 8; } PTag;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern OtRef D_800A651C[];
 extern Ot14 D_800A6518[];
 extern u16 D_800B9A02[];
@@ -2987,9 +2987,9 @@ extern s16 D_80126B98;
 extern u8 D_sc02_011_80195D30;
 extern s32 func_sc02_011_80186B1C();
 extern void func_sc02_011_80186AA0();
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 extern void func_8012E8C4();
-extern void func_8001931C();
+extern void CancelStreamLoad();
 extern u8 D_sc02_011_80195138;
 extern u8 D_sc02_011_8019514C;
 extern u8 D_sc02_011_801F4654;
@@ -3106,8 +3106,8 @@ void func_sc02_011_80180FE4(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -3268,7 +3268,7 @@ void func_sc02_011_80180FE4(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc02_011_80181A64(u8 *arg0) {
@@ -3375,7 +3375,7 @@ void func_sc02_011_80181E00(u8 *arg0) {
 void func_sc02_011_80181E40(s32 arg0) {
     s16 temp_v0;
 
-    func_80019064((s32) &D_sc02_011_80194FCC);
+    StartRumbleScript((s32) &D_sc02_011_80194FCC);
     func_sc02_011_80181FA0(arg0);
     if (func_sc02_011_80181F6C(arg0) != 0) {
         temp_v0 = AF(arg0, s16, 0x210);
@@ -4306,7 +4306,7 @@ void func_sc02_011_8018418C(u8 *o) {
         if (func_8012BEE8(o) != 0) {
             D_sc02_011_801EBA7C = 3;
             AF(o, u16, 0x34) = 0;
-            func_8001931C();
+            CancelStreamLoad();
             if (AF(o, u8 *, 0xD0) != 0) {
                 func_801439C0(AF(o, u8 *, 0xD0));
             }
@@ -4316,7 +4316,7 @@ void func_sc02_011_8018418C(u8 *o) {
         if (func_80172658(&D_80126B58) != 0) {
             D_sc02_011_801EBA7C = 3;
             AF(o, u16, 0x34) = 0;
-            func_8001931C();
+            CancelStreamLoad();
         }
         break;
     case 5:
@@ -4892,12 +4892,12 @@ void func_sc02_011_8018576C(u8 *o) {
     v[2].y = AF(o, u16, 0x8A) + AF(p, u16, 0xA) + 0x40;
     v[3].y = AF(o, u16, 0x8A) + AF(p, u16, 0xA) + 0x40;
     v[0].z = v[1].z = v[2].z = v[3].z = AF(o, u16, 0x8C) - 0x50;
-    ot = D_800A6610[D_800B9A02[0]];
+    ot = g_WorldOtTable[D_800B9A02[0]];
     w = AF(p, s16, 4);
     h = (w - 0x20 < 0 ? 0x20 - w : w - 0x20) / 2;
     for (i = -2; i < 2; i++) {
-        pk = D_800A5E60;
-        D_800A5E60 = pk + 0x18;
+        pk = g_PrimNext;
+        g_PrimNext = pk + 0x18;
         AF(pk, u8, 3) = 5;
         AF(pk, s32, 4) = 0;
         AF(pk, u8, 7) = 0x28;
@@ -7085,8 +7085,8 @@ void func_sc02_011_8018AB20(s32 i) {
     u16 cy;
 
     m = D_800AE620;
-    p = D_800A5E60;
-    D_800A5E60 = p + 0x1C;
+    p = g_PrimNext;
+    g_PrimNext = p + 0x1C;
     AF(p, u8, 3) = 6;
     AF(p, u8, 7) = 0x32;
     r = &D_sc02_011_801EB6E4 + i * 14;
@@ -7282,9 +7282,9 @@ void func_sc02_011_8018B2C4(s32 i) {
     u16 cx;
     u16 cz;
 
-    p = D_800A5E60;
+    p = g_PrimNext;
     m = D_800AE620;
-    D_800A5E60 = p + 0x14;
+    g_PrimNext = p + 0x14;
     AF(p, u8, 3) = 4;
     AF(p, u8, 7) = 0x22;
     AF(p, u8, 4) = D_sc02_011_801EB5D8;

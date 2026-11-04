@@ -10,15 +10,15 @@ typedef struct {
 } OtInfo; /* size 0x14 */
 
 extern u8 D_800BA118[];
-extern s32 D_80074778;
+extern s32 g_OtDepthLimit;
 extern s32 D_800A2B7C;
-extern s32 D_800C7C70;
+extern s32 g_FrameCount;
 extern s16 D_800C7C74;
-extern u8 D_8007BA70[2][0x13880];
-extern u8 *D_800A5E60;
+extern u8 g_PrimBuf[2][0x13880];
+extern u8 *g_PrimNext;
 extern u8 D_800A4F48[2][0x640];
 extern OtInfo D_800A651C[2];
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 extern OtInfo D_800AE7BC[2];
 extern u32 D_800BA0D8[2][4];
 
@@ -26,29 +26,29 @@ extern void InitGraph(void);
 extern void InitPad(void);
 extern void InitSound(void);
 extern void InitCdFiles(void);
-extern void func_80014238(void);
-extern void func_80014390(void);
-extern void func_800191A8(void);
-extern void func_800189A8(void);
-extern void func_80015208(void);
-extern void func_80010B40(void);
-extern void func_80015498(void);
+extern void ResetSystems(void);
+extern void ResetFrameLoop(void);
+extern void ForgetStageImage(void);
+extern void UpdatePads(void);
+extern void CheckPauseStart(void);
+extern void ModeDispatch(void);
+extern void DrawDebugText(void);
 extern void func_8001C00C(void);
 extern void func_800D25FC(void);
-extern void func_800184F0(void);
+extern void FlushImageQueue(void);
 extern void func_8003500C(void);
 extern void func_8002D034(void);
-extern void func_8001AF34(void);
-extern void func_8001513C(void);
+extern void LoadQueueStep(void);
+extern void FrameEndNop(void);
 
-extern s32 D_80074788;
-extern u16 D_80074794;
-extern u16 D_80074798;
-extern s32 D_800629D0;
+extern s32 g_DemoPos;
+extern u16 g_DemoHeld;
+extern u16 g_DemoPressed;
+extern s32 g_DemoPadMode;
 extern s32 D_800AE810[];
 
 extern int DrawSyncCallback(void (*func)(void));
-extern void func_8001096C(void);
+extern void VSyncHandler(void);
 void DrawSyncHandler(void);
 void SetFrameCallbacks(void);
 
@@ -67,7 +67,7 @@ int main(void)
     s32 unused[6];
 
     SetVideoMode(0);
-    D_80074778 = 0x3E0;
+    g_OtDepthLimit = 0x3E0;
     InitGraph();
     MemCardInit(0);
     MemCardStart();
@@ -77,37 +77,37 @@ int main(void)
     InitCdFiles();
 
     while (1) {
-        func_80014238();
-        func_80014390();
-        func_800191A8();
+        ResetSystems();
+        ResetFrameLoop();
+        ForgetStageImage();
         SetFrameCallbacks();
 
         while (!w->exitLoop) {
-            D_800C7C70++;
-            D_800C7C70 = D_800C7C70 ? D_800C7C70 : 1;
+            g_FrameCount++;
+            g_FrameCount = g_FrameCount ? g_FrameCount : 1;
             D_800C7C74 = !D_800C7C74;
             w->frame = D_800C7C74;
 
-            D_800A5E60 = D_8007BA70[w->frame];
+            g_PrimNext = g_PrimBuf[w->frame];
             w->pool[w->frame].buf = D_800A4F48[w->frame];
             w->pool[w->frame].size = 0x640;
             w->pool[w->frame].used = 0;
 
-            func_800189A8();
-            func_80015208();
+            UpdatePads();
+            CheckPauseStart();
 
-            if (!w->unkA3E3) {
-                w->unkA3A8++;
-                w->unkA3AC += w->unkA3A8;
-                D_800A651C[w->frame].ot = D_800A6610[w->frame];
-                D_800A651C[w->frame].otLast = &D_800A6610[w->frame][0xFFF];
+            if (!w->pauseMenu) {
+                w->tick++;
+                w->tickSum += w->tick;
+                D_800A651C[w->frame].ot = g_WorldOtTable[w->frame];
+                D_800A651C[w->frame].otLast = &g_WorldOtTable[w->frame][0xFFF];
                 ClearOTagR(D_800A651C[w->frame].ot, 0x1000);
                 D_800AE7BC[w->frame].ot = D_800BA0D8[w->frame];
                 D_800AE7BC[w->frame].otLast = &D_800BA0D8[w->frame][3];
                 ClearOTagR(D_800AE7BC[w->frame].ot, 4);
-                func_80010B40();
+                ModeDispatch();
                 SetSpadStack();
-                func_80015498();
+                DrawDebugText();
                 ResetSpadStack();
                 SetSpadStack();
                 func_8001C00C();
@@ -121,7 +121,7 @@ int main(void)
                 ResetSpadStack();
             }
 
-            func_800184F0();
+            FlushImageQueue();
             DrawSync(0);
             VSync(w->vsyncMode);
 
@@ -132,66 +132,67 @@ int main(void)
             }
             PutDispEnv(&w->disp[w->dispIdx]);
             PutDrawEnv(&w->draw[w->drawIdx]);
-            CatPrim(D_800A651C[w->frame].ot + 0xFFC, &D_800A651C[w->frame].ot[D_80074778]);
+            CatPrim(D_800A651C[w->frame].ot + 0xFFC, &D_800A651C[w->frame].ot[g_OtDepthLimit]);
             DrawOTag(D_800A651C[w->frame].ot + 0xFFF);
             DrawOTag(D_800AE7BC[w->frame].ot + 3);
 
             func_8003500C();
             func_8002D034();
-            func_8001AF34();
-            func_8001513C();
+            LoadQueueStep();
+            FrameEndNop();
         }
         VSyncCallback(0);
     }
 }
 
-extern void func_80011778(void);
-extern void func_80011818(u16 n);
-extern void func_80011B7C(u16 n);
+extern void NextMode(void);
+extern void SetMode(u16 n);
+extern void SetGameState(u16 n);
 extern void func_800CEDFC(void);
 
-extern u8 D_800AE888[];
-extern s32 D_80072C70;
-extern s32 D_80074780;
+extern u8 g_FileLocDebug[];
+extern s32 g_LoadAddr;
+extern s32 g_DemoEndRequest;
 extern void func_8001C044(void);
 extern void func_80015310(void);
-extern void func_80010AE0(s32 n);
-extern void func_8001A9F8(s32 n);
-extern s32 func_80019A24(u8 *p, s32 a, s32 b, s32 c);
+extern void SetOtDepthLimit(s32 n);
+extern void DrawNowLoading(s32 n);
+extern s32 LoadFileStep(u8 *p, s32 a, s32 b, s32 c);
 
 extern void func_8002D4C8(s32 a, s32 b);
 
-extern void (*D_800629F4[])(void);
-extern u8 D_800AE838[];
-extern s32 D_80074784;
+extern void (*g_ModeTable[])(void);
+extern u8 g_FileLocLicence[];
+extern s32 g_DemoIndex;
 
-extern s32 D_80074790;
+extern s32 g_DemoStream;
 
-extern u8 D_800AE870[];
+extern u8 g_FileLocTrialEnd[];
 
 extern s16 D_801150D4;
 extern void func_80029690(void);
-extern void func_80018FC8(void);
-extern void func_8001903C(void);
+extern void StopPadRumble(void);
+extern void ClearRumbleScript(void);
 extern void func_80029274(void);
 extern void func_8002941C(void);
 extern void func_8002CDD8(void);
 extern void func_800CEE74(void);
-extern u16 func_80014B10(s32 port);
-extern u16 func_800149E0(u8 port);
+extern u16 GetPadHeldDir(s32 port);
+extern u16 GetPadPressedDir(u8 port);
 extern void func_800CEEC8();
 extern void func_80029514(s32 a);
 extern s32 D_800629C8;
 extern u8 D_80078E78[];
-extern void func_80014338(void);
-extern u8 D_800AE880[];
-extern u8 D_800AE848[];
+extern void ResetGameProgress(void);
+extern u8 g_FileLocField[];
+extern u8 g_FileLocTitle[];
 extern s32 D_800C7C60;
 extern u8 *D_800C7C64;
 extern u8 D_800A2E20[];
 extern s16 D_800B99DA;
 
-void func_8001096C(void) {
+/* VSync callback: run the sound driver's per-vblank tick */
+void VSyncHandler(void) {
     func_8002CDD8();
 }
 
@@ -203,209 +204,300 @@ void DrawSyncHandler(void)
     D_800AE810[w->frame] = VSync(1);
 }
 
-u8 *func_80010A08(s32 size) {
+/* Take size bytes (rounded up to 4) from this frame's primitive packet buffer */
+u8 *AllocPrim(s32 size) {
     register Work *w = &D_800AF630;
-    u8 *p;
-    s32 n;
-    n = (size + 3) / 4;
-    p = D_800A5E60;
-    D_800A5E60 += n << 2;
-    return p;
+    u8 *prim;
+    s32 words;
+    words = (size + 3) / 4;
+    prim = g_PrimNext;
+    g_PrimNext += words << 2;
+    return prim;
 }
 
 /* Install the frame-timing callbacks */
 void SetFrameCallbacks(void)
 {
     DrawSyncCallback(DrawSyncHandler);
-    VSyncCallback(func_8001096C);
+    VSyncCallback(VSyncHandler);
 }
 
-void func_80010AE0(s32 a) {
-    D_80074778 = a;
+/* Set the farthest ordering-table entry drawn (main links OT entry 0xFFC straight to it) */
+void SetOtDepthLimit(s32 depth) {
+    g_OtDepthLimit = depth;
 }
 
-s32 func_80010B10(void) {
-    return D_80074778;
+/* Return the ordering-table depth limit set by SetOtDepthLimit */
+s32 GetOtDepthLimit(void) {
+    return g_OtDepthLimit;
 }
 
-void func_80010B40(void) {
+/* Call the handler for the current game mode from the mode table */
+void ModeDispatch(void) {
     register Work *w = &D_800AF630;
-    register void (*fn)(void);
-    fn = D_800629F4[w->mode];
-    fn();
+    register void (*handler)(void);
+    handler = PS1_FN(g_ModeTable[w->mode]);
+    handler();
 }
 
-void func_80010BB4(void) {
+/* Mode 0: reset the game state at boot (records, CD files, demo index, OT depth), then mode 1 */
+void ModeReset(void) {
     register Work *w = &D_800AF630;
-    w->unkA3E0 = 0;
+    w->mapLive = 0;
     w->unkA3E1 = 1;
-    w->unkA434 = 0;
+    w->demoActive = 0;
     func_8001C044();
     func_80015310();
     func_80029690();
     D_801150D4 = 0;
-    D_80074784 = 0;
-    func_80018FC8();
-    func_8001903C();
+    g_DemoIndex = 0;
+    StopPadRumble();
+    ClearRumbleScript();
     func_80029274();
     func_8002941C();
-    func_80010AE0(0x3E0);
-    func_80011B7C(0);
-    func_80011778();
+    SetOtDepthLimit(0x3E0);
+    SetGameState(0);
+    NextMode();
 }
 
-void func_80010C7C(void) {
-    s32 r;
-    r = func_80019A24(D_800AE838, D_80072C70, 0, 0);
-    if (r != 0) {
-        func_80010AE0(0x3E0);
-        func_80011778();
+/* Mode 1: load the licence screen overlay (MAIN.CD entry 1, ovl38), then mode 2 */
+void ModeLicenceLoad(void) {
+    s32 done;
+    done = LoadFileStep(g_FileLocLicence, g_LoadAddr, 0, 0);
+    if (done != 0) {
+        SetOtDepthLimit(0x3E0);
+        NextMode();
     }
 }
 
-void func_80010CEC(void) {
+/* Mode 2: run the licence screen each frame; when it sets done, free records and go to mode 3 */
+void ModeLicenceRun(void) {
     register Work *w = &D_800AF630;
     func_800CEDFC();
-    if (w->unkA3B6 != 0) {
+    if (w->done != 0) {
         func_8001C044();
         func_80015310();
-        func_80011818(3);
+        SetMode(3);
     }
 }
 
-void func_80010D60(void) {
-    func_80010AE0(0x3E0);
-    func_80011818(5);
+/* Mode 3: after the licence screen, reset the 2D OT depth and go to the title load (mode 5) */
+void ModeLicenceExit(void) {
+    SetOtDepthLimit(0x3E0);
+    SetMode(5);
 }
 
-void func_80010DA0(void) {
+/* Mode 4: unused slot that only advances to mode 5 */
+void ModeSkip(void) {
     register Work *w = &D_800AF630;
-    func_80011778();
+    NextMode();
 }
 
-void func_80010DE0(void) {
-    func_80011818(5);
+/* Return to the title: SetMode(5), which reloads the title overlay */
+void ModeGoTitle(void) {
+    SetMode(5);
 }
 
-void func_80010E14(void) {
-    func_80011818(0xD);
+/* Go to the trial version's end screen: SetMode(13), which loads MAIN.CD entry 8 (ovl3b) */
+void ModeGoTrialEnd(void) {
+    SetMode(0xD);
 }
 
-void func_80010E48(void) {
-    func_80011818(0xC);
+/* Switch to the empty mode 12 (nothing runs); no callers found */
+void ModeGoIdle(void) {
+    SetMode(0xC);
 }
 
-void func_80010E7C(void) {
+/* Send sound command 2 and set Work.exitLoop so main() leaves its frame loop; no callers found */
+void QuitMainLoop(void) {
     register Work *w = &D_800AF630;
     func_8002D4C8(2, 0);
     w->exitLoop = 1;
 }
 
-void func_80010ED4(void) {
+/* Mode 5: load the title overlay (MAIN.CD entry 3, ovl39) with sound bank 0x57, reset progress and sound, then mode 6 */
+void ModeTitleLoad(void) {
     D_800C7C60 = 0x57;
     D_800C7C64 = D_800A2E20;
-    if (func_80019A24(D_800AE848, D_80072C70, 0, (s32)&D_800C7C60) != 0) {
+    if (LoadFileStep(g_FileLocTitle, g_LoadAddr, 0, (s32)&D_800C7C60) != 0) {
         func_8002D4C8(2, 0);
-        func_80010AE0(0x3E0);
-        func_80014338();
-        func_800116E0();
+        SetOtDepthLimit(0x3E0);
+        ResetGameProgress();
+        ApplySoundOptions();
         D_800B99DA = 0;
-        func_80011778();
+        NextMode();
     }
 }
 
-void func_80010F80(void) {
+/* Mode 6: run the title; on its choice start a new game, Continue (field state 11) or a demo */
+void ModeTitleRun(void) {
     register Work *w = &D_800AF630;
     u8 *p = D_80078E78;
     func_800CEEC8();
-    if (w->unkA3B6 != 0) {
-        func_80011B7C(0);
+    if (w->done != 0) {
+        SetGameState(0);
         func_8001C044();
         func_80015310();
         if (w->timer == 4) {
-            w->unkA434 = 1;
-            func_80011818(0xF);
+            w->demoActive = 1;
+            SetMode(0xF);
         } else if (w->timer < 2) {
             w->mapId = 0x3005;
-            w->unkA3DA = 0x3000;
+            w->mapGroup = 0x3000;
             func_80029514(D_800629C8);
             if (w->timer == 1) {
-                func_80011818(0xA);
-                func_80011B7C(0xB);
+                SetMode(0xA);
+                SetGameState(0xB);
             } else {
-                func_80011818(0xA);
+                SetMode(0xA);
             }
         }
     }
 }
 
-void func_800110CC(void) {
+/* Modes 10 and 15: load the field overlay (MAIN.CD entry 10, ovl36), then the next mode */
+void ModeFieldLoad(void) {
     s32 pad0;
-    func_8001A9F8(0);
-    if (func_80019A24(D_800AE880, D_80072C70, 0, 0) != 0) {
-        func_80010AE0(0x3E0);
-        func_80011778();
+    DrawNowLoading(0);
+    if (LoadFileStep(g_FileLocField, g_LoadAddr, 0, 0) != 0) {
+        SetOtDepthLimit(0x3E0);
+        NextMode();
         func_80015310();
     }
 }
 
-void func_80011144(void) {
+/* Mode 7: load the developer debug menu overlay (MAIN.CD entry 11, ovl37), then mode 8 */
+void ModeDebugLoad(void) {
     s32 pad0;
     s32 pad1;
-    func_8001A9F8(0);
-    if (func_80019A24(D_800AE888, D_80072C70, 0, 0) != 0) {
-        func_80010AE0(0x3E0);
-        func_80011778();
+    DrawNowLoading(0);
+    if (LoadFileStep(g_FileLocDebug, g_LoadAddr, 0, 0) != 0) {
+        SetOtDepthLimit(0x3E0);
+        NextMode();
         func_80015310();
     }
 }
 
-void func_800111BC(void) {
+/* Mode 8: run the debug menu; when it sets done, load the field (mode 10) */
+void ModeDebugRun(void) {
     register Work *w = &D_800AF630;
     func_800CEE74();
-    if (w->unkA3B6 != 0) {
-        func_80011818(0xA);
+    if (w->done != 0) {
+        SetMode(0xA);
     }
 }
 
-void func_80011220(void) {
-    func_80011778();
-    func_80011B7C(0);
+/* Mode 9: advance to mode 10 (field load) with the game state reset to 0 */
+void ModeNextClearState(void) {
+    NextMode();
+    SetGameState(0);
 }
 
-void func_8001125C(void) {
+/* Mode 11: run the field overlay each frame (normal play); clears the demo flag */
+void ModeFieldRun(void) {
     register Work *w = &D_800AF630;
-    w->unkA434 = 0;
+    w->demoActive = 0;
     func_800CEDFC();
 }
 
-void func_800112A8(void) {
+/* Mode 12: does nothing (where the trial version's end screen leaves the game) */
+void ModeIdle(void) {
 }
 
-void func_800112C8(void) {
-    if (func_80019A24(D_800AE870, D_80072C70, 0, 0) != 0) {
-        func_80011778();
+/* Mode 13: load the trial version's end screen (MAIN.CD entry 8, ovl3b), then mode 14 */
+void ModeTrialEndLoad(void) {
+    if (LoadFileStep(g_FileLocTrialEnd, g_LoadAddr, 0, 0) != 0) {
+        NextMode();
     }
 }
 
-void func_80011320(void) {
+/* Mode 14: run the trial end screen each frame (it sets mode 12 itself when done) */
+void ModeTrialEndRun(void) {
     func_800CEDFC();
 }
 
-s32 func_80011350(void) {
-    return D_80074784;
+/* Return the index of the next attract demo (0-4); no callers found */
+s32 GetDemoIndex(void) {
+    return g_DemoIndex;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main", func_80011380);
+extern u16 g_DemoMaps[];
+extern u16 g_DemoLengths[];
+extern s32 g_DemoLength;
+extern u16 D_800B99E8;
+extern u8 D_800D3A68[];
+extern void func_800295D4(void);
+extern void func_80029664(void);
+extern s32 TestPadsAny(u8 which, s32 mask);
+extern void func_800D1724(u8 *p);
+extern void srand(u32 seed);
+void DemoClearEndRequest(void);
+void DemoReset(void);
+void NextStep(void);
+void DemoReadPad(void);
+void DemoRequestEnd(void);
+typedef struct { u8 pad[0x16]; u8 unk16; } Obj6A8;
+extern Obj6A8 D_800AE6A8;
 
-void func_80011680(void) {
+/* Mode 16: set up and run an attract demo (recorded pad stream) until it times out or is skipped */
+void ModeDemoRun(void) {
     register Work *w = &D_800AF630;
-    w->unkA434 = 0;
+    Obj6A8 *mapState = &D_800AE6A8;
+    switch (w->step) {
+    case 0:
+        D_800B99E8 = 0;
+        func_800295D4();
+        if (g_DemoIndex >= 5) {
+            g_DemoIndex = 0;
+        }
+        w->mapId = g_DemoMaps[g_DemoIndex * 2];
+        w->mapGroup = g_DemoMaps[g_DemoIndex * 2] & 0xF000;
+        mapState->unk16 = g_DemoMaps[g_DemoIndex * 2 + 1];
+        g_DemoLength = g_DemoLengths[g_DemoIndex];
+        if (g_DemoIndex == 0) {
+            func_80029664();
+        }
+        DemoClearEndRequest();
+        DemoReset();
+        srand(1);
+        w->demoActive = 1;
+        w->mapLive = 0;
+        g_DemoIndex++;
+        func_8002D4C8(0x28, 0);
+        SetGameState(0);
+        NextStep();
+        break;
+    case 1:
+        if (w->mapLive != 0) {
+            DemoReadPad();
+        }
+        func_800CEDFC();
+        if (g_DemoLength < (s16)++D_800B99E8 || ((s16)TestPadsAny(0, 0x840) != 0 && w->mapLive != 0)) {
+            DemoRequestEnd();
+            func_800D1724(D_800D3A68);
+            NextStep();
+        }
+        break;
+    case 2:
+        func_800CEDFC();
+        break;
+    }
+}
+
+/* Mode 17: after a demo, clear the demo flag, play sound 0x29 and reload the title (mode 5) */
+void ModeDemoEnd(void) {
+    register Work *w = &D_800AF630;
+    w->demoActive = 0;
     func_8002D4C8(0x29, 0);
-    func_80011818(5);
+    SetMode(5);
 }
 
-void func_800116E0(void) {
+/* Send the saved sound options (two volume levels and a mode flag) to the sound driver */
+extern s32 func_80028FBC();
+extern s32 func_80029000();
+extern s32 func_80028D9C();
+
+void ApplySoundOptions(void) {
     func_8002D4C8(0x21, (u16)func_80028FBC());
     func_8002D4C8(0x22, (u16)func_80029000());
     if (func_80028D9C() == 0) {
@@ -415,7 +507,8 @@ void func_800116E0(void) {
     }
 }
 
-void func_80011778(void) {
+/* Advance Work.mode by one and clear the mode's step, timer and scratch halfwords */
+void NextMode(void) {
     register u8 *w = (u8 *)&D_800AF630;
     (*(u16 *)(w + 0xA3AE))++;
     *(u16 *)(w + 0xA3B4) = 0;
@@ -427,19 +520,21 @@ void func_80011778(void) {
     *(u16 *)(w + 0xA3BC) = 0;
 }
 
-void func_80011818(u16 mode) {
+/* Set Work.mode and clear the mode's step, timer and scratch halfwords */
+void SetMode(u16 mode) {
     register Work *w = &D_800AF630;
     w->mode = mode;
     w->step = 0;
-    w->unkA3BA = 0;
+    w->subStep = 0;
     w->timer = 0;
-    w->unkA3BE = 0;
-    w->unkA3B0 = 0;
-    w->unkA3B6 = 0;
-    w->unkA3BC = 0;
+    w->stepTimer = 0;
+    w->modeVar = 0;
+    w->done = 0;
+    w->subStepVar = 0;
 }
 
-void func_800118AC(void) {
+/* Advance Work.step and clear the step's done flag, sub-step and step timers */
+void NextStep(void) {
     register u8 *w = (u8 *)&D_800AF630;
     (*(u16 *)(w + 0xA3B4))++;
     *(u16 *)(w + 0xA3BA) = 0;
@@ -448,28 +543,32 @@ void func_800118AC(void) {
     *(u16 *)(w + 0xA3BC) = 0;
 }
 
-void func_80011928(u16 step) {
+/* Set Work.step and clear the step's done flag, sub-step and step timers */
+void SetStep(u16 step) {
     register Work *w = &D_800AF630;
     w->step = step;
-    w->unkA3BA = 0;
-    w->unkA3BE = 0;
-    w->unkA3B6 = 0;
-    w->unkA3BC = 0;
+    w->subStep = 0;
+    w->stepTimer = 0;
+    w->done = 0;
+    w->subStepVar = 0;
 }
 
-void func_80011998(void) {
+/* Advance the mode's sub-step (Work+0xA3BA) and clear its scratch halfword */
+void NextSubStep(void) {
     register u8 *w = (u8 *)&D_800AF630;
     (*(u16 *)(w + 0xA3BA))++;
     *(u16 *)(w + 0xA3BC) = 0;
 }
 
-void func_800119F0(u16 v) {
+/* Set the mode's sub-step (Work+0xA3BA) and clear its scratch halfword */
+void SetSubStep(u16 subStep) {
     register Work *w = &D_800AF630;
-    w->unkA3BA = v;
-    w->unkA3BC = 0;
+    w->subStep = subStep;
+    w->subStepVar = 0;
 }
 
-void func_80011A3C(void) {
+/* Advance the game state (Work+0xA3C0) and clear its step, sub-step and scratch halfwords */
+void NextGameState(void) {
     register u8 *w = (u8 *)&D_800AF630;
     (*(u16 *)(w + 0xA3C0))++;
     *(u16 *)(w + 0xA3C6) = 0;
@@ -481,7 +580,8 @@ void func_80011A3C(void) {
     *(u16 *)(w + 0xA3CE) = 0;
 }
 
-void func_80011ADC(void) {
+/* Step the game state (Work+0xA3C0) back by one and clear its step and scratch halfwords */
+void PrevGameState(void) {
     register u8 *w = (u8 *)&D_800AF630;
     (*(u16 *)(w + 0xA3C0))--;
     *(u16 *)(w + 0xA3C6) = 0;
@@ -493,19 +593,21 @@ void func_80011ADC(void) {
     *(u16 *)(w + 0xA3CE) = 0;
 }
 
-void func_80011B7C(u16 n) {
+/* Set the game state (Work+0xA3C0) read by the field overlay and clear its step and scratch */
+void SetGameState(u16 state) {
     register Work *w = &D_800AF630;
-    w->unkA3C0 = n;
-    w->unkA3C6 = 0;
-    w->unkA3CC = 0;
+    w->state = state;
+    w->stateStep = 0;
+    w->stateSubStep = 0;
     w->unkA3CA = 0;
-    w->unkA3D0 = 0;
-    w->unkA3C2 = 0;
-    w->unkA3C8 = 0;
-    w->unkA3CE = 0;
+    w->stateStepTimer = 0;
+    w->stateFlag = 0;
+    w->stateStepVar = 0;
+    w->stateSubStepVar = 0;
 }
 
-void func_80011C10(void) {
+/* Advance the game state's step (Work+0xA3C6) and clear its sub-step and step scratch */
+void NextGameStateStep(void) {
     register u8 *w = (u8 *)&D_800AF630;
     (*(u16 *)(w + 0xA3C6))++;
     *(u16 *)(w + 0xA3CC) = 0;
@@ -514,94 +616,105 @@ void func_80011C10(void) {
     *(u16 *)(w + 0xA3CE) = 0;
 }
 
-void func_80011C8C(u16 n) {
+/* Set the game state's step (Work+0xA3C6) and clear its sub-step and step scratch */
+void SetGameStateStep(u16 step) {
     register Work *w = &D_800AF630;
-    w->unkA3C6 = n;
-    w->unkA3CC = 0;
-    w->unkA3D0 = 0;
-    w->unkA3C8 = 0;
-    w->unkA3CE = 0;
+    w->stateStep = step;
+    w->stateSubStep = 0;
+    w->stateStepTimer = 0;
+    w->stateStepVar = 0;
+    w->stateSubStepVar = 0;
 }
 
-void func_80011CFC(void) {
+/* Advance the game state's sub-step (Work+0xA3CC) and clear its scratch halfword */
+void NextGameStateSubStep(void) {
     register u8 *w = (u8 *)&D_800AF630;
     (*(u16 *)(w + 0xA3CC))++;
     *(u16 *)(w + 0xA3CE) = 0;
 }
 
-void func_80011D54(u16 v) {
+/* Set the game state's sub-step (Work+0xA3CC) and clear its scratch halfword */
+void SetGameStateSubStep(u16 subStep) {
     register u8 *w = (u8 *)&D_800AF630;
-    *(u16 *)(w + 0xA3CC) = v;
+    *(u16 *)(w + 0xA3CC) = subStep;
     *(u16 *)(w + 0xA3CE) = 0;
 }
 
-void func_80011DA0(void) {
-    D_80074780 = 1;
+/* Ask the field to end the running attract demo */
+void DemoRequestEnd(void) {
+    g_DemoEndRequest = 1;
 }
 
-void func_80011DCC(void) {
-    D_80074780 = 0;
+/* Clear the demo end request */
+void DemoClearEndRequest(void) {
+    g_DemoEndRequest = 0;
 }
 
-s32 func_80011DF4(void) {
-    return D_80074780;
+/* Return nonzero when the attract demo has been asked to end */
+s32 DemoEndRequested(void) {
+    return g_DemoEndRequest;
 }
 
-void func_80011E24(void)
+/* Reset the demo stream position and pad words; in record mode clear the demo flag */
+void DemoReset(void)
 {
     register Work *w = &D_800AF630;
     s32 unused; /* pads the frame to 0x10 like the original */
 
-    D_80074788 = 0;
-    if (D_800629D0 == 0) {
-        w->unkA434 = 0;
+    g_DemoPos = 0;
+    if (g_DemoPadMode == 0) {
+        w->demoActive = 0;
     }
-    D_80074794 = 0;
-    D_80074798 = 0;
+    g_DemoHeld = 0;
+    g_DemoPressed = 0;
 }
 
-void func_80011E84(s32 v) {
-    D_80074790 = v;
+/* Set the pointer to the stage's recorded demo pad stream */
+void SetDemoStream(s32 stream) {
+    g_DemoStream = stream;
 }
 
-void func_80011EB4(void) {
-    u16 r;
-    switch (D_800629D0) {
+/* Per demo frame: record the live pad, or read this frame's held/pressed words from the stream */
+void DemoReadPad(void) {
+    u16 word;
+    switch (g_DemoPadMode) {
     case 0:
-        r = func_80014B10(0);
-        ((u16 *)0x80700000)[D_80074788] = r;
-        D_80074788++;
-        r = func_800149E0(0);
-        ((u16 *)0x80700000)[D_80074788] = r;
-        D_80074788++;
+        word = GetPadHeldDir(0);
+        ((u16 *)0x80700000)[g_DemoPos] = word;
+        g_DemoPos++;
+        word = GetPadPressedDir(0);
+        ((u16 *)0x80700000)[g_DemoPos] = word;
+        g_DemoPos++;
         break;
     case 1:
-        if (D_80074790 != 0) {
-            D_80074794 = ((u16 *)D_80074790)[D_80074788++];
-            D_80074798 = ((u16 *)D_80074790)[D_80074788++];
+        if (g_DemoStream != 0) {
+            g_DemoHeld = ((u16 *)g_DemoStream)[g_DemoPos++];
+            g_DemoPressed = ((u16 *)g_DemoStream)[g_DemoPos++];
         } else {
-            D_80074794 = 0;
-            D_80074798 = 0;
+            g_DemoHeld = 0;
+            g_DemoPressed = 0;
         }
         break;
     case 2:
-        D_80074794 = ((u16 *)0x80700000)[D_80074788++];
-        D_80074798 = ((u16 *)0x80700000)[D_80074788++];
+        g_DemoHeld = ((u16 *)0x80700000)[g_DemoPos++];
+        g_DemoPressed = ((u16 *)0x80700000)[g_DemoPos++];
         break;
     }
 }
 
-void func_800120DC(u16 *a, u16 *b) {
-    *a = D_80074794;
-    *b = D_80074798;
+/* Return this demo frame's held and pressed pad words */
+void GetDemoPad(u16 *held, u16 *pressed) {
+    *held = g_DemoHeld;
+    *pressed = g_DemoPressed;
 }
 
 typedef struct { u32 tag; u32 tpage; u8 r0, g0, b0, code; s16 x0, y0; u8 u0, v0; u16 clut; s16 w, h; } Spr18;
 
-void func_8001212C(void) {
+/* Draw the two 96x24 sprites of the demo corner logo into the OT */
+void DrawDemoLogo(void) {
     register Work *w = &D_800AF630;
-    Spr18 *s = (Spr18 *)D_800A5E60;
-    u32 *ot = D_800A6610[w->frame];
+    Spr18 *s = (Spr18 *)g_PrimNext;
+    u32 *ot = g_WorldOtTable[w->frame];
     setlen(s, 5);
     *(u32 *)((u8 *)s + 4) = 0xE1000018;
     s->code = 0x66;
@@ -632,5 +745,5 @@ void func_8001212C(void) {
     s->h = 0x18;
     addPrim(ot + 1, s);
     s++;
-    D_800A5E60 = (u8 *)s;
+    g_PrimNext = (u8 *)s;
 }

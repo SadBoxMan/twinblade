@@ -15,6 +15,12 @@
 
 /* ---- loads ---- */
 #define gte_ldv0(r0) __asm__ volatile("lwc2 $0, 0(%0)\n\tlwc2 $1, 4(%0)" : : "r"(r0))
+/* r224 (func_80020A28, accepted 31 Oct): VXY0 / VZ0 from three signed bytes r0[0..2] (lb, x masked to 16 bits, y in
+   the high half), as the original packs them in $12 / $13 before the mtc2s */
+#define gte_ldv0_b(r0)                                                                                            \
+    __asm__ volatile("lb $13, 1(%0)\n\tlb $12, 0(%0)\n\tsll $13, $13, 16\n\tsll $12, $12, 16\n\t"                  \
+                     "srl $12, $12, 16\n\tor $12, $12, $13\n\tlb $13, 2(%0)\n\tmtc2 $12, $0\n\tmtc2 $13, $1"     \
+                     : : "r"(r0) : "$12", "$13")
 #define gte_ldv1(r0) __asm__ volatile("lwc2 $2, 0(%0)\n\tlwc2 $3, 4(%0)" : : "r"(r0))
 #define gte_ldv2(r0) __asm__ volatile("lwc2 $4, 0(%0)\n\tlwc2 $5, 4(%0)" : : "r"(r0))
 #define gte_ldv3(r0, r1, r2)                                                                                      \
@@ -29,6 +35,11 @@
 	"                                  "mtc2 $12, $0
 	lwc2 $1, 8(%0)"                                                                                   :                                                                                                                 : "r"(r0)                                                                                                         : "$12", "$13")
 #define gte_ldrgb(r0) __asm__ volatile("lwc2 $6, 0(%0)" : : "r"(r0))
+/* r223 (func_8013D9B0, accepted 30 Oct): IR0 = 0, RGB from *r0 and IRGB (IR1-IR3 from a 5:5:5 colour) from *r1 in one
+   asm, as the original loads them before DPCL */
+#define gte_ldrgb_irgb(r0, r1) __asm__ volatile("mtc2 $0, $8
+	lwc2 $6, 0(%0)
+	lwc2 $28, 0(%1)" : : "r"(r0), "r"(r1))
 #define gte_ldlvl(r0) __asm__ volatile("lwc2 $9, 0(%0)\n\tlwc2 $10, 4(%0)\n\tlwc2 $11, 8(%0)" : : "r"(r0))
 #define gte_ldsv(r0)                                                                                              \
     __asm__ volatile("lhu $12, 0(%0)\n\tlhu $13, 2(%0)\n\tlhu $14, 4(%0)\n\t"                                     \
@@ -82,6 +93,9 @@
 #define gte_stotz(r0) __asm__ volatile("swc2 $7, 0(%0)" : : "r"(r0) : "memory")
 #define gte_stopz(r0) __asm__ volatile("swc2 $24, 0(%0)" : : "r"(r0) : "memory")
 #define gte_strgb(r0) __asm__ volatile("swc2 $22, 0(%0)" : : "r"(r0) : "memory")
+/* r223 (func_8013D9B0, accepted 30 Oct): ORGB (IR1-IR3 as a 5:5:5 colour) to *r0, the address moved into $12 first */
+#define gte_storgb(r0) __asm__ volatile("move $12, %0
+	swc2 $29, 0($12)" : : "r"(r0) : "$12", "memory")
 /* (r137) PSX side only so far: pc/gte_pc.h has no strgb3 (src/abil is not in the PC build) */
 #define gte_strgb3(r0, r1, r2)                                                                                    \
     __asm__ volatile("swc2 $20, 0(%0)\n\tswc2 $21, 0(%1)\n\tswc2 $22, 0(%2)" : : "r"(r0), "r"(r1), "r"(r2)        \

@@ -122,7 +122,7 @@ def defined_names(c):
     names = set(re.findall(r'\b(?:struct|union|enum)\s+(\w+)\s*\{', c))
     if c.startswith('typedef'):
         tail = c[c.rindex('}') + 1:] if '}' in c else re.sub(r'^typedef\s+', '', c)
-        fp = re.search(r'\(\s*\*\s*(\w+)\s*\)', tail)            # typedef void (*Fn)(...);
+        fp = re.search(r'\(\s*(?:\*\s*)+(\w+)\s*\)', tail)       # typedef void (*Fn)(...); (**Fn) too (r222)
         if fp:
             names.add(fp[1])
         elif '}' in c:
@@ -132,7 +132,9 @@ def defined_names(c):
             if m:
                 names.add(m[1])
     elif '{' not in c:
-        fp = re.search(r'\(\s*\*\s*(\w+)\s*(?:\[[^\]]*\])*\s*\)\s*\(', c)   # extern void (*D_X[10])(s32); (r192: was "void")
+        # extern void (*D_X[10])(s32); (r192: was "void"); r222: a pointer to pointers, `extern void (**D)();`, too
+        # (its name was read as `void`, which any fn-pointer line "declares", so place_stage dropped it: r216 8017849C)
+        fp = re.search(r'\(\s*(?:\*\s*)+(\w+)\s*(?:\[[^\]]*\])*\s*\)\s*\(', c)
         m = fp or re.search(r'(\w+)\s*(?:\[[^\]]*\])*\s*(?:\([^;]*\))?\s*;$', c)
         if m:
             names.add(m[1])
@@ -147,7 +149,7 @@ def declared_in(name, t):
     t = strip_comments(t)
     return bool(re.search(rf'\btypedef\b[^;{{}}]*\b{n}\s*(?:\[[^\]]*\])*\s*;', t)
                 or re.search(rf'\}}\s*(?:\*?\s*\w+\s*,\s*)*\*?\s*{n}\s*[,;]', t)
-                or re.search(rf'\(\s*\*\s*{n}\s*(?:\[[^\]]*\])*\s*\)', t)
+                or re.search(rf'\(\s*(?:\*\s*)+{n}\s*(?:\[[^\]]*\])*\s*\)', t)
                 or re.search(rf'\b(?:struct|union|enum)\s+{n}\s*\{{', t)
                 or re.search(rf'^[A-Za-z_][^\n;{{}}#]*\b{n}\s*(?:\[[^\]]*\])*\s*(?:\([^;{{}}]*\))?\s*(?:=[^;]*)?;', t, re.M)
                 or re.search(rf'^[A-Za-z_][^\n;{{}}]*\b{n}\s*\([^;{{}}]*\)\s*\{{', t, re.M))
@@ -235,7 +237,7 @@ def missing_decls(cs, t, at=None):
                 # an extern variable the file declares only further down: the file's own line, up here too
                 if cc.lstrip().startswith('extern') and len(names) == 1 and not declared_in(next(iter(names)), head):
                     n = re.escape(next(iter(names)))
-                    m = re.search(rf'^extern\b[^;{{}}()]*\b{n}\s*(?:\[[^\]]*\])*\s*;|^extern\b[^;{{}}]*\(\s*\*\s*{n}\b[^;{{}}]*;',
+                    m = re.search(rf'^extern\b[^;{{}}()]*\b{n}\s*(?:\[[^\]]*\])*\s*;|^extern\b[^;{{}}]*\(\s*(?:\*\s*)+{n}\b[^;{{}}]*;',
                                   rest, re.M)
                     x = m[0] if m else cc                               # r208: defined (not extern) below: the draft's
                     if x not in out:

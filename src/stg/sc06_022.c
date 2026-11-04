@@ -279,9 +279,9 @@ extern s32 D_sc06_022_801D591C[];
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc06_022_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -314,8 +314,8 @@ void func_sc06_022_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -537,7 +537,7 @@ void func_sc06_022_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc06_022_8017CD9C(void) {
@@ -621,7 +621,7 @@ extern u8 D_sc06_022_801DF294;
 extern void func_80143970();
 extern void func_8012B200();
 
-extern void func_80019064();
+extern void StartRumbleScript();
 extern u8 D_sc06_022_801D5A38;
 extern void func_8016AA50();
 extern void func_8016B428();
@@ -5511,7 +5511,7 @@ void func_sc06_022_80188D68(u8 *o) {
         func_8016AA50(o, d);
         if (AF(o, u16, 0x82) & 1) {
             func_8016B428(o);
-            func_80019064(&D_sc06_022_801D5A38);
+            StartRumbleScript(&D_sc06_022_801D5A38);
         }
     }
     if (st != 0x1D) {
@@ -5891,7 +5891,7 @@ void func_sc06_022_80189EB4(u8 *o) {
             func_8016AA50(o, n);
             if (AF(o, u16, 0x82) & 1) {
                 func_8016B428(o);
-                func_80019064(&D_sc06_022_801D5A38);
+                StartRumbleScript(&D_sc06_022_801D5A38);
             }
         }
         if (st != 0x1D) {

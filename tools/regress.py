@@ -157,6 +157,13 @@ def resplit(paths):
             other.add(f'abil/{m.group(1).lower()}.yaml')
         elif re.match(r'^[^/]+\.yaml$', p) and p != 'slus_007.26.yaml':
             other.add(p)
+        if re.match(r'^(symbol_addrs[^/]*\.txt|slus_007\.26\.yaml)$', p):
+            # a top-level symbol file names symbols for every split (the EXE's data tables, the overlays, and every
+            # stage and package config lists it), so all of them are re-split, as `make split` does (r241: renamed
+            # EXE functions left the EXE's mode table in the old asm and every link failed)
+            stg.add('*')
+            other.update([y for y in os.listdir(ROOT) if y.endswith('.yaml')]
+                         + ['abil/' + y for y in os.listdir(os.path.join(ROOT, 'abil')) if y.endswith('.yaml')])
     py = os.path.join(ROOT, '.venv', 'Scripts', 'python.exe')
     py = py if os.path.exists(py) else sys.executable
     done = []

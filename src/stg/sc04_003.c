@@ -196,9 +196,9 @@ extern s32 func_8012CBA4();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02[];
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc04_003_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -231,8 +231,8 @@ void func_sc04_003_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -454,7 +454,7 @@ void func_sc04_003_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc04_003_8017CD9C(void) {
@@ -771,7 +771,7 @@ extern s32 D_sc04_003_80190D28[];
 extern void func_8012B0B4();
 extern void func_8012E32C();
 extern void func_8012E28C();
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 
 typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
 extern WMtx D_800AE620;
@@ -1293,7 +1293,7 @@ void func_sc04_003_8017E4F4(u8 *arg0, s32 arg1) {
     s32 d;
     u16 t;
 
-    ot = D_800A6610[D_800B9A02[0]];
+    ot = g_WorldOtTable[D_800B9A02[0]];
     p = AF(arg0, Pts80182FD4 *, 0x20);
     if (p == 0) {
         return;
@@ -1391,7 +1391,7 @@ void func_sc04_003_8017E910(u8 *o, u8 *s, u8 *v, u32 *ot) {
     u16 u1, v1;
     u16 sflag;
 
-    p = (PFT4 *)D_800A5E60;
+    p = (PFT4 *)g_PrimNext;
     sflag = *(u16 *)(o + 0x1E) & 0x8000;
     fl = *(u32 *)(o + 4);
     tp = (fl >> 24) & 3;
@@ -1399,7 +1399,7 @@ void func_sc04_003_8017E910(u8 *o, u8 *s, u8 *v, u32 *ot) {
     x = *(u16 *)(o + 0x28) + (*(s16 *)(s + 4) >> sh);
     y = *(u16 *)(o + 0x2A) + *(u16 *)(s + 6);
     uv = *(FANUV **)(o + 0x20);
-    D_800A5E60 = (u8 *)p + 0xF0;
+    g_PrimNext = (u8 *)p + 0xF0;
     if (fl & 0x40000000) {
         code = 0x2E;
         abr = (fl >> 28) & 3;
@@ -1467,7 +1467,7 @@ void func_sc04_003_8017E910(u8 *o, u8 *s, u8 *v, u32 *ot) {
     if (fl & 0x40000000) {
         m = (PMODE *)p;
         if (sflag) {
-            D_800A5E60 += 0x30;
+            g_PrimNext += 0x30;
             for (i = 0; i < 6; i++, m++) {
                 ((u8 *)m)[3] = 1;
                 m->code = (abr << 5) | 0xE100000A;
@@ -1475,7 +1475,7 @@ void func_sc04_003_8017E910(u8 *o, u8 *s, u8 *v, u32 *ot) {
             }
         } else {
             m->code = (abr << 5) | 0xE100000A;
-            D_800A5E60 += 8;
+            g_PrimNext += 8;
             ((u8 *)m)[3] = 1;
             addPrim(ot, m);
         }
@@ -1534,7 +1534,7 @@ void func_sc04_003_8017EE80(u8 *o, s32 n) {
         v[3].x = AF(o, u16, 0) + ((x.s.x * (r * 3 + 0x1000)) >> 12);
         v[3].y = AF(o, u16, 2) - h;
         v[3].z = AF(o, u16, 4) + ((x.s.y * (r * 3 + 0x1000)) >> 12);
-        p = func_80010A08(0x24);
+        p = AllocPrim(0x24);
         AF(p, s32, 4) = D_sc04_003_80190D28[i];
         AF(p, s32, 0xC) = D_sc04_003_80190D28[i + 1];
         p[7] = 0x3A;

@@ -710,6 +710,9 @@ GsInit3D = 0x80053218; // type:func
 // LIBGS.LIB GS_105.OBJ (psyq 4.00)
 GsMapModelingData = 0x80053290; // type:func
 
+// LIBGS.LIB GS_106.OBJ (psyq 4.00; r249: signature bytes equal, after GS_105 GsMapModelingData)
+GsSetProjection = 0x80053308; // type:func
+
 // LIBGS.LIB GS_107.OBJ (psyq 4.00)
 GsSetFlatLight = 0x80053328; // type:func
 gte_set_lc = 0x80053804; // type:func
@@ -935,6 +938,10 @@ getchar = 0x8005C2F8; // type:func
 
 // LIBC2.LIB MEMCPY.OBJ (psyq 4.00)
 memcpy = 0x8005C324; // type:func
+
+// LIBC2.LIB MEMSET.OBJ (psyq 4.00; r249: signature bytes equal). The C library's memset; the label memset above
+// (0x8005C29C) is LIBGPU SYS.OBJ's own copy. Named libc_memset so the PC build keeps the C runtime's name
+libc_memset = 0x8005C358; // type:func
 
 // LIBC2.LIB PUTCHAR.OBJ (psyq 4.00)
 putchar = 0x8005C388; // type:func

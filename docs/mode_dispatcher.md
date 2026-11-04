@@ -1,41 +1,90 @@
-# The game mode dispatcher (main EXE), 2026-10-11
+# The game mode dispatcher (main EXE), 2026-10-11; rewritten from the matched C in r241 (1 Nov 2026)
 
-Read from `src/main.c`, `include/work.h` and the asm in `asm/nonmatchings/main`. Nothing here is matching C; it is the map of the top-level state machine.
+Read from `src/main.c` (all matched C since r224), `include/work.h` and the overlays' C. Names are r241's
+(`docs/names_r241.md` maps them to the old func_ / D_ names used further down and in older docs). The sections from
+"What this gives" on are the October experiments, kept as they were.
+
+## The boot path and the frame loop
+`main()`: SetVideoMode(NTSC), `g_OtDepthLimit = 0x3E0`, InitGraph (ResetGraph, the debug level, the display mask off;
+it also zero-fills D_800BA118 and calls ResetGameState), MemCardInit / MemCardStart, InitPad, CdInit (result in
+D_800A2B7C), InitSound, InitCdFiles. Then the outer loop: ResetSystems (heap, GPU, Work, 3D, queues, state; the Work
+block is cleared here), ResetFrameLoop (`Work.exitLoop = 0`, `Work.vsyncMode = 2`: 30 frames a second),
+ForgetStageImage, SetFrameCallbacks (VSyncHandler: the sound driver's tick; DrawSyncHandler). Each frame of the inner
+loop: g_FrameCount, the double-buffer index, the primitive buffer (g_PrimBuf / g_PrimNext, AllocPrim), the pads
+(func_800189A8), the pause check (func_80015208); then, while **Work.pauseMenu** (0xA3E3) is 0: `Work.tick` and
+`tickSum`, both ordering tables cleared, **ModeDispatch**, DrawDebugText and the sprite / model draw (func_8001C00C) on
+the scratchpad stack; while it is nonzero (the field's pause menu, kind + 1) the field overlay's pause-menu update
+(ovl36 func_800D25FC) runs instead and the mode does not advance. After both: FlushImageQueue (the VRAM upload queue),
+DrawSync, VSync(Work.vsyncMode), the env swap, `CatPrim(ot + 0xFFC, &ot[g_OtDepthLimit])` (the OT entries between the
+limit and 0xFFB are skipped: 0x3E0 by default; the stage engine picks 0x3E0, 0x480 or 0xFFB per map), DrawOTag of the
+world OT then the 4-entry front OT, the sound request ring (func_8003500C), the sound driver's frame update
+(func_8002D034), LoadQueueStep and FrameEndNop. `Work.exitLoop` (set only by QuitMainLoop, which has no caller) leaves
+the inner loop.
 
 ## How the frame loop picks what to run
-`main()` loops: each frame it calls `func_80010B40`, which reads **`Work.mode`** (halfword at **0x800B99DE**; `Work` is the block at 0x800AF630, field 0xA3AE) and calls the function in the table
-**`D_800629F4[mode]`** (18 entries, 0 to 17). Most mode handlers do one of two things: *load an overlay* (`func_80019A24` with a descriptor in the 0x800AE830 table: descriptor index i = MAIN.CD entry i, so
-AE838 = entry 1, AE848 = entry 3, AE870 = entry 8, AE880 = entry 10, AE888 = entry 11) or *run the loaded overlay* (call its entry at 0x800CEDFC, or the other entries 0x800CEE74 / 0x800CEEC8), and
-when the overlay sets its **done flag** (halfword 0x800B99E6) they call `SetMode(next)`.
+**ModeDispatch** reads **`Work.mode`** (halfword at 0x800B99DE, Work field 0xA3AE) and calls `g_ModeTable[mode]`
+(0x800629F4, 18 entries). The loaders call **LoadFileStep**(`g_FileLoc*` descriptor, `g_LoadAddr[0]` = 0x800CEDF8,
+size 0, sound table) every frame until it returns 1; the descriptors are `g_ArchiveFileLoc[i]` (8 bytes each), i =
+MAIN.CD entry. The runners call the loaded overlay's entry (0x800CEDFC; the debug menu 0x800CEE74, the title
+0x800CEEC8) and look at **`Work.done`** (0xA3B6), which the overlay sets when it is finished.
 
-* **`SetMode(n)`** = `func_80011818`: `Work.mode = n`, then it zeroes the seven step halfwords 0x800B99E0, E4, E6, E8, EA, EC, EE (the mode's step counter, done flag and scratch values).
-* `NextMode` = `func_80011778`: the same with `mode + 1`.
-* The **state** at 0x800B99F0 (9 in the field, 5 in some rooms) is a *sub-state inside a mode overlay*, set by `func_80011B7C(n)` (+1: `func_80011A3C`, -1: `func_80011ADC`; they zero the seven halfwords after it). The main EXE never reads it;
-  only the overlays do. It is not the dispatcher (an earlier note called it the game state).
+Work holds two control records with the same layout:
 
-## The modes (what each handler does; descriptors resolved to overlay files)
+| offset | MODE record | cleared by | offset | GAME-STATE record | cleared by |
+|---|---|---|---|---|---|
+| 0xA3AE | mode | | 0xA3C0 | state | |
+| 0xA3B0 | modeVar | SetMode, NextMode | 0xA3C2 | stateFlag | SetGameState, NextGameState, PrevGameState |
+| 0xA3B2 | (untouched) | | 0xA3C4 | (untouched) | |
+| 0xA3B4 | step | SetMode, NextMode | 0xA3C6 | stateStep | the game-state setters |
+| 0xA3B6 | done | SetMode, NextMode, SetStep, NextStep | 0xA3C8 | stateStepVar | the game-state setters, Set/NextGameStateStep |
+| 0xA3B8 | timer | SetMode, NextMode | 0xA3CA | unkA3CA (a timer?) | the game-state setters |
+| 0xA3BA | subStep | SetMode, NextMode, SetStep, NextStep | 0xA3CC | stateSubStep | the game-state setters, Set/NextGameStateStep |
+| 0xA3BC | subStepVar | all four, SetSubStep, NextSubStep | 0xA3CE | stateSubStepVar | all of them, Set/NextGameStateSubStep |
+| 0xA3BE | stepTimer | SetMode, NextMode, SetStep, NextStep | 0xA3D0 | stateStepTimer | the game-state setters, Set/NextGameStateStep |
+
+* **SetMode(n)** / **NextMode**: the old doc's seven halfwords (0x800B99E0, E4, E6, E8, EA, EC, EE) are right.
+* **SetGameState(n)** (0x80011B7C) / NextGameState / PrevGameState clear 0xA3C2, C6, C8, CA, CC, CE, D0 (not 0xA3C4).
+  The game state is a sub-state inside the field overlay: the EXE never reads it, the field overlay (ovl36's table
+  D_800D3430, 20 states) and the stage engine read and set it.
+* `Work.timer` is not only a timer: the licence screen and the demo count frames in it, but the title stores its menu
+  result there (ovl39 func_800CF3A4).
+* 0x3E0 in the loaders is `SetOtDepthLimit(0x3E0)`, the OT index main() links the 2D layer at (the old "display value"
+  and mode 5's "sound 0x3E0" were this call).
+
+## The modes (g_ModeTable)
 | mode | handler | what it does |
 |---|---|---|
-| 0 | 0x80010BB4 | reset (sets a few flags, calls the CD and graphics setup) |
-| 1 | 0x80010C7C | **load MAIN.CD entry 1** (`main_01`, the licence screen) |
-| 2 | 0x80010CEC | run the overlay; when done -> mode 3 |
-| 3 | 0x80010D60 | set display value 0x3E0 -> mode 5 |
-| 4 | 0x80010DA0 | next mode |
-| 5 | 0x80010ED4 | **load entry 3** (`main_03`, 176 KB) with parameters (0x57, a table at 0x800A2E20), sound 0x3E0 |
-| 6 | 0x80010F80 | run overlay entry 0x800CEEC8, sub-steps; sets mode / state |
-| 7 | 0x80011144 | **load entry 11 (`main_11`: the developer debug overlay)** |
-| 8 | 0x800111BC | run overlay entry 0x800CEE74; when done -> **mode 10** |
-| 9 | 0x80011220 | next mode / state reset |
-| 10 | 0x800110CC | **load entry 10 (`main_10`, the field overlay)** |
-| 11 | 0x8001125C | **run the field overlay** (0x800CEDFC) every frame: this is the mode while you play in a map (value 11 read in three captures) |
-| 12 | 0x800112A8 | (empty) |
-| 13 | 0x800112C8 | **load entry 8 (`main_08`, 2 KB)** |
-| 14 | 0x80011320 | run the overlay |
-| 15 | 0x800110CC | the same loader as mode 10 |
-| 16 | 0x80011380 | a multi-step handler using the block at 0x800AE6A8 (not read in full) |
-| 17 | 0x80011680 | start sound 0x29 -> mode 5 |
+| 0 | ModeReset | boot reset: Work.mapLive = 0, Work.unkA3E1 = 1 (while 1, DrawDebugText and the sprite / model draw draw nothing), demoActive = 0, records, the rumble, depth 0x3E0, SetGameState(0), NextMode |
+| 1 | ModeLicenceLoad | load MAIN.CD entry 1 (ovl38, the licence screen) -> 2 |
+| 2 | ModeLicenceRun | run it; when done -> 3 |
+| 3 | ModeLicenceExit | depth 0x3E0 -> 5 |
+| 4 | ModeSkip | NextMode only; nothing sets mode 4 |
+| 5 | ModeTitleLoad | load entry 3 (ovl39, the title) with sound bank 0x57 (D_800C7C60 = {0x57, D_800A2E20}); sound command 2, ResetGameProgress, ApplySoundOptions, frame counter 0x800B99DA = 0 -> 6 |
+| 6 | ModeTitleRun | run the title (0x800CEEC8); on done, by Work.timer: 0 New Game: map 0x3005 (SC01_000), group 0x3000, mode 10; 1 Continue: the same plus SetGameState(11); 4 (idle 451 frames): demoActive = 1, mode 15; 2, 3 nothing |
+| 7 | ModeDebugLoad | load entry 11 (ovl37, the CHECK LIST debug menu) -> 8 |
+| 8 | ModeDebugRun | run it (0x800CEE74); when done -> 10 |
+| 9 | ModeNextClearState | NextMode and SetGameState(0); unused |
+| 10, 15 | ModeFieldLoad | load entry 10 (ovl36, the field), NOW LOADING drawn; then NextMode: 10 -> 11 play, 15 -> 16 demo |
+| 11 | ModeFieldRun | demoActive = 0, run the field (0x800CEDFC): the mode while you play |
+| 12 | ModeIdle | empty: the trial version's end screen ends here (ovl3b's last step SetMode(12)), so it halts |
+| 13 | ModeTrialEndLoad | load entry 8 (ovl3b, the trial end screen) -> 14 |
+| 14 | ModeTrialEndRun | run it |
+| 16 | ModeDemoRun | an attract demo: the recorded pad stream (docs/demos.md) until it times out or is skipped |
+| 17 | ModeDemoEnd | demo flag off, sound 0x29 -> 5 |
 
-So the path **7 (load the debug overlay) -> 8 (run it) -> 10 (load the field) -> 11 (field)** looks like the developer's "debug menu, then play" route.
+Mode changes from outside main.c: ovl36 func_800D1BF8 SetMode(17) (the demo's end); the stage engine ModeGoTitle
+(SetMode(5)) from field states 12 / 14 and ModeGoTrialEnd (SetMode(13)) from field state 17 (engine func_801282EC);
+ovl3b SetMode(12). ModeGoIdle (SetMode(12)) and QuitMainLoop have no callers.
+
+## The field's game states (ovl36 table D_800D3430, 20 entries)
+0 field init (steps D_800D3480: setup func_800CEE84, package load func_800CEF04); 1 func_800CEF34 -> next; 4 -> 15;
+5 / 6 frame loops (func_800CEFD0 / func_800CF104) -> 7; 7-10 the stage engine's entries 0x80128158 / 78 / 98 / B8 (7 =
+the stage start, 9 steps D_8018D7A4 ending with NextGameState and stateFlag = 1; 9 = play, the "state 9 in the field"
+of the old reading); 11 and 13 load MAIN.CD entry 12 (the stage engine image) to slot 1; 12 and 14 stage hook screens
+(func_80128A28: Continue / load game; func_80128AF4, chosen by func_8002AF08: probably the save screen, low
+confidence); 15 next; 16 frame loop -> 7; 17 stage func_801282EC -> mode 13 (trial end); 18 a frame loop waiting for
+stateFlag -> 8; 19 func_800CF990 loads an archive entry by D_800D3408, fades, counts stateStepTimer to 0x5B -> 6. After a
+map change func_800D1BF8 picks 13, 19, 18, then 6 / 5 / 16 by the area kind (func_800D1DB0: 0 / 1 / 2).
 
 ## What this gives
 * A mode change is only RAM writes: `Work.mode = n` and the seven halfwords zeroed. A DuckStation cheat can do that (a manual, one-time cheat; a continuously applied one would lock the mode).

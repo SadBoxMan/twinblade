@@ -188,7 +188,7 @@ void func_sc04_011_8017C1CC(u8 *arg0) {
 
 extern u8 D_sc04_011_80193EF8;
 extern void (*D_sc04_011_80193F1C[])();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern u8 D_sc04_011_80193F28;
 extern void (*D_sc04_011_80193F4C[])();
 extern void func_8002D4C8();
@@ -467,9 +467,9 @@ extern void func_8014ABF0();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02[];
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
 typedef struct { s16 m[3][3]; s32 t[3]; } MAT3;
 typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, y3; } PF4;
@@ -746,7 +746,7 @@ extern void func_800139C8();
 extern s32 func_8012EFB8();
 extern void func_80017E30();
 extern void func_80016ED4();
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern void func_80017E8C();
 
 typedef struct { u8 b[8]; } B8;
@@ -1305,8 +1305,8 @@ void func_sc04_011_8017D494(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -1528,7 +1528,7 @@ void func_sc04_011_8017D494(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc04_011_8017E374(u8 *arg0) {
@@ -1661,7 +1661,7 @@ void func_sc04_011_8017E6EC(u8 *o, u8 *b) {
 }
 
 void func_sc04_011_8017E9A4(u8 *arg0) {
-    func_80019064((s32) &D_sc04_011_80193EF8);
+    StartRumbleScript((s32) &D_sc04_011_80193EF8);
     D_sc04_011_80193F1C[AF(arg0, u16, 2)](arg0);
 }
 
@@ -1775,14 +1775,14 @@ void func_sc04_011_8017EB10(s32 arg0) {
 }
 
 s32 func_sc04_011_8017EBE8(s32 arg0) {
-    func_80019064((s32) &D_80062C04);
+    StartRumbleScript((s32) &D_80062C04);
     func_8014BC44(arg0, (s32) AF(arg0, s16, 0xF2));
     AF(arg0, u8, 0xA8) = 0x20;
     return func_80151664(arg0);
 }
 
 void func_sc04_011_8017EC38(u8 *arg0) {
-    func_80019064((s32) &D_sc04_011_80193F28);
+    StartRumbleScript((s32) &D_sc04_011_80193F28);
     D_sc04_011_80193F4C[AF(arg0, u16, 2)](arg0);
 }
 
@@ -1822,7 +1822,7 @@ void func_sc04_011_8017ED60(s32 arg0) {
 }
 
 s32 func_sc04_011_8017EDC4(s32 arg0) {
-    func_80019064((s32) &D_80062C04);
+    StartRumbleScript((s32) &D_80062C04);
     func_8014BC44(arg0, (s32) AF(arg0, s16, 0xF2));
     AF(arg0, u8, 0xA8) = 0x20;
     return func_80151664(arg0);
@@ -3707,7 +3707,46 @@ void func_sc04_011_801835B0(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc04_011/nonmatchings/sc04_011", func_sc04_011_801836D4);
+s32 func_sc04_011_801836D4(u8 *o, u8 *e) {
+    s16 dv[3];
+    u8 unused[0x18];
+    s32 lim;
+    s32 l2;
+    s16 d;
+    u16 ov;
+    s32 b;
+    d = AF(o, s16, 0xEA);
+    if (d != 0) AF(o, s16, 0xEA) = d - 1;
+    switch (AF(o, s16, 0xE2)) {
+    case 0:
+        ov = AF(o, u16, 0xE4);
+        d = AF(e, u16, 0x6);
+        d = ov - d;
+        dv[0] = d;
+        lim = AF(o, s16, 0xEC);
+        break;
+    case 1:
+        ov = AF(o, u16, 0xE6);
+        d = AF(e, u16, 0xA);
+        d = ov - d;
+        dv[1] = d;
+        lim = AF(o, s16, 0xEE);
+        break;
+    case 2:
+        ov = AF(o, u16, 0xE8);
+        d = AF(e, u16, 0xE);
+        d = ov - d;
+        dv[2] = d;
+        lim = AF(o, s16, 0xF0);
+        break;
+    default:
+        return AF(o, s16, 0xEA) == 0;
+    }
+    if (lim == 0) return 1;
+    l2 = (s16)lim;
+    if (d == 0 || (s16)(d ^ l2) < 0) return 1;
+    return AF(o, s16, 0xEA) == 0;
+}
 
 void func_sc04_011_801837C4(u8 *o) {
     u8 *e = (u8 *)D_sc04_011_801EFC4C[0];
@@ -8266,8 +8305,8 @@ void func_sc04_011_8018E428(s32 i) {
     u16 cy;
 
     m = D_800AE620;
-    p = D_800A5E60;
-    D_800A5E60 = p + 0x1C;
+    p = g_PrimNext;
+    g_PrimNext = p + 0x1C;
     AF(p, u8, 3) = 6;
     AF(p, u8, 7) = 0x32;
     r = &D_sc04_011_801F141C + i * 14;
@@ -8463,9 +8502,9 @@ void func_sc04_011_8018EBCC(s32 i) {
     u16 cx;
     u16 cz;
 
-    p = D_800A5E60;
+    p = g_PrimNext;
     m = D_800AE620;
-    D_800A5E60 = p + 0x14;
+    g_PrimNext = p + 0x14;
     AF(p, u8, 3) = 4;
     AF(p, u8, 7) = 0x22;
     AF(p, u8, 4) = D_sc04_011_801F1310;
@@ -8567,7 +8606,7 @@ void func_sc04_011_8018F02C(u8 *arg0) {
     gte_stszotz(&otz);
     if (flag & ~0x1000) return;
     z = otz + 1;
-    ot = D_800A6610[D_800B9A02[0]];
+    ot = g_WorldOtTable[D_800B9A02[0]];
     h = AF(arg0, u16, 0x2C);
     if ((h & 0xC000) != 0) {
         if ((h & 0xC000) == 0xC000) {
@@ -8602,7 +8641,7 @@ void func_sc04_011_8018F02C(u8 *arg0) {
     gte_stsxy(&d);
     r = (d.s.x >> 3) & 0xFFFF;
     r |= (d.s.y >> 3) << 16;
-    p = (PF4 *)D_800A5E60;
+    p = (PF4 *)g_PrimNext;
     p1 = p + 1;
     p->tag.len = 5;
     p->code = 0x28;
@@ -8640,11 +8679,11 @@ void func_sc04_011_8018F02C(u8 *arg0) {
     ((PTAG *)(ot + z))->addr = (u32)p;
     p1->tag.addr = ((PTAG *)(ot + z))->addr;
     ((PTAG *)(ot + z))->addr = (u32)p1;
-    D_800A5E60 += 0x30;
+    g_PrimNext += 0x30;
     if (semi) {
         s32 unused2[2];
-        t = (PTAG *)D_800A5E60;
-        D_800A5E60 += 8;
+        t = (PTAG *)g_PrimNext;
+        g_PrimNext += 8;
         t->len = 1;
         ((u32 *)t)[1] = 0xE1000000 | ((fl >> 23) & 0x60);
         t->addr = ((PTAG *)(ot + z))->addr;
@@ -8708,7 +8747,7 @@ void func_sc04_011_8018F734(u8 *o) {
     s32 z;
     u16 w;
 
-    ot = D_800A6610[D_800B9A02[0]];
+    ot = g_WorldOtTable[D_800B9A02[0]];
     w = AF(o, u16, 6);
     if (w == 0) return;
     v[0].x = 0;
@@ -8727,7 +8766,7 @@ void func_sc04_011_8018F734(u8 *o) {
     m.t[0] = AF(o, s16, 0);
     m.t[1] = AF(o, s16, 2);
     m.t[2] = AF(o, s16, 4);
-    p = func_80010A08(0x24);
+    p = AllocPrim(0x24);
     AF(p, s32, 4) = AF(o, s32, 0x10);
     AF(p, s32, 0xC) = AF(o, s32, 0x10);
     AF(p, s32, 0x14) = AF(o, s32, 0x14);
@@ -8743,7 +8782,7 @@ void func_sc04_011_8018F734(u8 *o) {
     ((PTAG *)(ot + z))->addr = (u32)p;
     if (AF(o, u32, 0x1C) & 0x40000000) {
         p[7] |= 2;
-        t = func_80010A08(8);
+        t = AllocPrim(8);
         t[3] = 1;
         AF(t, u32, 4) = 0xE1000200 | ((AF(o, u32, 0x1C) >> 23) & 0x60);
         ((PTAG *)t)->addr = ((PTAG *)(ot + z))->addr;

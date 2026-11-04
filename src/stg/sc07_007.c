@@ -169,7 +169,7 @@ extern void func_8013CB20();
 extern s32 D_800B9A18;
 extern u8 D_sc07_007_80186940;
 extern s32 func_sc07_007_80181B8C();
-extern void func_800146B0();
+extern void SetScreenMode2();
 extern void func_800D1724();
 extern s32 D_sc07_007_801C7870;
 extern s32 D_sc07_007_801C7994[];
@@ -238,9 +238,9 @@ extern s32 func_sc07_007_8018107C();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02[];
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc07_007_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -273,8 +273,8 @@ void func_sc07_007_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -496,7 +496,7 @@ void func_sc07_007_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc07_007_8017CD9C(u8 *arg0) {
@@ -553,7 +553,7 @@ extern s32 D_800A5EB0;
 extern u8 D_sc07_007_80186964;
 extern u8 D_sc07_007_80187C60;
 extern s32 func_8002AE60();
-extern s32 func_80014C54();
+extern s32 TestPadAll();
 extern s32 func_800CF8B4();
 extern s32 func_8012A758();
 extern void func_800139C8();
@@ -645,7 +645,7 @@ s32 func_sc07_007_8017CF70(u8 *arg0) {
 
 s32 func_sc07_007_8017CFEC(void) {
     if (func_800167F0(4) & 0xFFFF) {
-        func_800146B0(1);
+        SetScreenMode2(1);
         D_800B9A18 = 2;
         func_80029514(0x6A4);
         func_80029124(0x11D, 1);
@@ -974,7 +974,7 @@ void func_sc07_007_8017DFB8(u8 *o) {
     SV8 v;
     s16 id;
     if ((func_80029178(0x123) & 0xFF) != 0 && (s16)func_8002AE60() == 0
-        && ((s16)func_80014C54(0, 0, 0x800) != 0 || (s16)func_80014C54(0, 0, 0x40) != 0)
+        && ((s16)TestPadAll(0, 0, 0x800) != 0 || (s16)TestPadAll(0, 0, 0x40) != 0)
         && func_800CF8B4() != 0) {
         D_sc07_007_801C79CC = 1;
         func_800D1724(&D_sc07_007_80186964);
@@ -2640,7 +2640,7 @@ void func_sc07_007_80181AA8(u8 *o) {
     D_sc07_007_801C79A4 = 0;
     D_sc07_007_801C79B0 = 0;
     if (D_sc07_007_801C7A08 == 0x1B) {
-        func_800146B0(7);
+        SetScreenMode2(7);
         D_800B9A18 = 0;
         func_8012AD50(o);
     }
@@ -2648,7 +2648,7 @@ void func_sc07_007_80181AA8(u8 *o) {
 
 void func_sc07_007_80181B28(s32 arg0) {
     if (func_sc07_007_80181B8C() != 0) {
-        func_800146B0(1);
+        SetScreenMode2(1);
         D_800B9A18 = 2;
         func_800D1724((s32) &D_sc07_007_80186940);
         func_8012AD50(arg0);
@@ -2792,8 +2792,8 @@ void func_sc07_007_80181F4C(s32 c, s32 n0) {
     (&D_sc07_007_801C7874[n][D_800B9A02[0]])->clut = (((n << 8) >> 4) & 0x3F) | 0x7800;
     (&D_sc07_007_801C7874[n][D_800B9A02[0]])->w = 0x100;
     (&D_sc07_007_801C7874[n][D_800B9A02[0]])->h = 0xC0;
-    (&D_sc07_007_801C7874[n][D_800B9A02[0]])->tag.addr = ((PTag *)&D_800A6610[D_800B9A02[0]][3])->addr;
-    ((PTag *)&D_800A6610[D_800B9A02[0]][3])->addr = (u32)(&D_sc07_007_801C7874[n][D_800B9A02[0]]);
+    (&D_sc07_007_801C7874[n][D_800B9A02[0]])->tag.addr = ((PTag *)&g_WorldOtTable[D_800B9A02[0]][3])->addr;
+    ((PTag *)&g_WorldOtTable[D_800B9A02[0]][3])->addr = (u32)(&D_sc07_007_801C7874[n][D_800B9A02[0]]);
 }
 
 void func_sc07_007_80182184(s32 c, s32 n0) {
@@ -2810,8 +2810,8 @@ void func_sc07_007_80182184(s32 c, s32 n0) {
     (&D_sc07_007_801C78D4[n][D_800B9A02[0]])->clut = (((n << 8) >> 4) & 0x3F) | 0x7880;
     (&D_sc07_007_801C78D4[n][D_800B9A02[0]])->w = 0x100;
     (&D_sc07_007_801C78D4[n][D_800B9A02[0]])->h = 0x100;
-    (&D_sc07_007_801C78D4[n][D_800B9A02[0]])->tag.addr = ((PTag *)&D_800A6610[D_800B9A02[0]][2])->addr;
-    ((PTag *)&D_800A6610[D_800B9A02[0]][2])->addr = (u32)(&D_sc07_007_801C78D4[n][D_800B9A02[0]]);
+    (&D_sc07_007_801C78D4[n][D_800B9A02[0]])->tag.addr = ((PTag *)&g_WorldOtTable[D_800B9A02[0]][2])->addr;
+    ((PTag *)&g_WorldOtTable[D_800B9A02[0]][2])->addr = (u32)(&D_sc07_007_801C78D4[n][D_800B9A02[0]]);
     (&D_sc07_007_801C7934[n][D_800B9A02[0]])->tag.len = 5;
     ((u32 *)&D_sc07_007_801C7934[n][D_800B9A02[0]])[1] = 0xE1000000 | ((n * 2 + 0x9A) & 0x9FF);
     (&D_sc07_007_801C7934[n][D_800B9A02[0]])->code = 0x64;
@@ -2823,8 +2823,8 @@ void func_sc07_007_80182184(s32 c, s32 n0) {
     (&D_sc07_007_801C7934[n][D_800B9A02[0]])->clut = (((n << 8) >> 4) & 0x3F) | 0x7880;
     (&D_sc07_007_801C7934[n][D_800B9A02[0]])->w = 0x100;
     (&D_sc07_007_801C7934[n][D_800B9A02[0]])->h = 0xE0;
-    (&D_sc07_007_801C7934[n][D_800B9A02[0]])->tag.addr = ((PTag *)&D_800A6610[D_800B9A02[0]][2])->addr;
-    ((PTag *)&D_800A6610[D_800B9A02[0]][2])->addr = (u32)(&D_sc07_007_801C7934[n][D_800B9A02[0]]);
+    (&D_sc07_007_801C7934[n][D_800B9A02[0]])->tag.addr = ((PTag *)&g_WorldOtTable[D_800B9A02[0]][2])->addr;
+    ((PTag *)&g_WorldOtTable[D_800B9A02[0]][2])->addr = (u32)(&D_sc07_007_801C7934[n][D_800B9A02[0]]);
 }
 
 void func_sc07_007_801825C4(u8 *arg0) {

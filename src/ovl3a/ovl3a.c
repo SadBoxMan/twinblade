@@ -1,15 +1,15 @@
 #include "common.h"
 #include "work.h"
 
-extern void func_800118AC(void);
-extern u16 func_800149E0(s32 a);
-extern s16 func_80014CAC(s32 a, s32 b);
+extern void NextStep(void);
+extern u16 GetPadPressedDir(s32 a);
+extern s16 TestPadsAny(s32 a, s32 b);
 extern void func_80015310(void);
 extern void func_8001534C(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
 extern void func_800167B8(s32 a);
 extern s32 func_800167F0(s32 arg0);
 extern void func_800183E0(void *p);
-extern void func_8001AA98(char *name);
+extern void LoadPatPicture(char *name);
 extern void func_8001C044(void);
 extern s32 func_800CF3B0(void);
 extern void func_800CF408(s32 a, s32 b);
@@ -56,19 +56,19 @@ void func_800CEEFC(void) {
     func_800183E0(D_800D130C);
     func_800167B8(0);
     D_800B99E8 = 0;
-    func_800118AC();
+    NextStep();
 }
 
 void func_800CEF60(void) {
     if (func_800167F0(0) & 0xFFFF) {
-        func_800118AC();
+        NextStep();
     }
 }
 
 void func_800CEF94(void) {
-    if (++D_800B99E8 > 0x80 || func_80014CAC(0, 0x800) != 0) {
+    if (++D_800B99E8 > 0x80 || TestPadsAny(0, 0x800) != 0) {
         func_800167B8(4);
-        func_800118AC();
+        NextStep();
     }
 }
 
@@ -83,12 +83,12 @@ void func_800CF02C(void) {
 }
 
 void func_800CF068(void) {
-    func_8001AA98(D_800CEDFC);
+    LoadPatPicture(D_800CEDFC);
     D_800D1368 = 0;
     D_800D1370 = 0;
     D_800D1374 = 0;
     func_800167B8(0);
-    func_800118AC();
+    NextStep();
 }
 
 void func_800CF0B8(void) {
@@ -121,7 +121,7 @@ void func_800CF1CC(void) {
 }
 
 void func_800CF220(void) {
-    func_8001AA98(D_800CEE14);
+    LoadPatPicture(D_800CEE14);
     func_800167B8(0);
     D_800D1374++;
 }
@@ -156,7 +156,7 @@ void func_800CF390(void) {
 }
 
 s32 func_800CF3B0(void) {
-    if ((func_800149E0(0) | func_800149E0(1)) & 0x800) {
+    if ((GetPadPressedDir(0) | GetPadPressedDir(1)) & 0x800) {
         D_800B99E6 = 1;
         return 1;
     }

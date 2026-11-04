@@ -453,7 +453,7 @@ extern u8 D_sc01_077_8018A9EC[][4];
 extern u8 D_sc01_077_8018A9FC[][4];
 extern u8 D_sc01_077_8018AA0C[][4];
 extern s32 func_sc01_077_8017F7E8();
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 
 typedef struct { u8 pad[0x18]; WMtx wsm; } WorkHead;
 typedef struct { s16 m[3][3]; s32 t[3]; } SMtx;
@@ -495,7 +495,7 @@ extern s32 D_801270CC;
 typedef struct { s32 w[4]; } W16;
 extern W16 D_sc01_077_801D9204;
 extern u8 D_80062BDC;
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_8012E9C0();
 extern u8 D_sc01_077_801B02A8;
 extern void func_sc01_077_80182268();
@@ -745,8 +745,8 @@ typedef struct { u8 *verts; u32 pad; u32 x; u32 y; u32 z; u32 *start; u32 *end; 
 typedef struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteC77;
 extern void GsGetLs();
 extern void GsSetLsMatrix();
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern SV8 D_sc01_077_801DA9A0;
 
 void func_sc01_077_8017C974(u8 *o) {
@@ -781,8 +781,8 @@ void func_sc01_077_8017C974(u8 *o) {
     GsGetLs(o + 0x10, &ls);
     GsSetLsMatrix(&ls);
     func_sc01_077_8017C294(&D_sc01_077_801DA9A0, &r, AF(o, s32, 0x60));
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     x0 = (r.x + 0x4000) / 512;
     x1 = (r.x + r.z + 0x4000) / 512 + 2;
     x0 = x0 < 0 ? 0 : (x0 > 63 ? 63 : x0);
@@ -1006,7 +1006,7 @@ void func_sc01_077_8017C974(u8 *o) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_077_8017D840(void) {
@@ -1892,7 +1892,7 @@ void func_sc01_077_8017FD14(u8 *arg0) {
         ys[2] = sy;
         ys[3] = sy + r2;
         ys[4] = sy + r;
-        prim = func_80010A08(0x9C);
+        prim = AllocPrim(0x9C);
         SetDrawMode(prim, 0, 0, (u16)GetTPage(0, 1, 0, 0), 0);
         polys[0] = prim + 0xC;
         polys[1] = prim + 0x30;
@@ -2748,7 +2748,7 @@ void func_sc01_077_80181BE4(s32 arg0) {
 void func_sc01_077_80181F08(u8 *o) {
     W16 t = D_sc01_077_801D9204;
     if (AF(o, u8, 0x5E) == 5) {
-        func_80019064(&D_80062BDC);
+        StartRumbleScript(&D_80062BDC);
     }
     if (AF(o, u16, 0x5E) == 0x1F) {
         func_sc01_077_8018301C(o);
@@ -4557,7 +4557,7 @@ void func_sc01_077_80185BA4(u8 *o) {
         v[3].x = c.x + ((x.s.x * (r * 3 + 0x1000)) >> 12);
         v[3].y = c.y - h;
         v[3].z = c.z + ((x.s.y * (r * 3 + 0x1000)) >> 12);
-        p = func_80010A08(0x24);
+        p = AllocPrim(0x24);
         AF(p, s32, 4) = D_sc01_077_801D55F4[i];
         AF(p, s32, 0xC) = D_sc01_077_801D55F4[i + 1];
         p[7] = 0x3A;
@@ -4586,11 +4586,11 @@ void func_sc01_077_80185E68(o)
     AF(o, s32, 0x1C) = 0x15;
     AF(o, u16, 0x5C) &= 0xFFFE;
     if (AF(o, u8, 0x5E) == 5) {
-        func_80019064(&D_80062BDC);
+        StartRumbleScript(&D_80062BDC);
     }
     if (AF(o, u16, 0x82) & 1) {
         func_8016B428(o);
-        func_80019064(&D_80062C04);
+        StartRumbleScript(&D_80062C04);
     }
     if (--AF(o, s16, 0x76) == 0) {
         AF(o, u16, 0x5C) &= 0x7FFF;

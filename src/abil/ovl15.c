@@ -50,7 +50,7 @@ extern void func_80149374();
 
 extern void func_80146A6C();
 extern s32 func_80012ABC();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_801466F0();
 extern void func_80147324();
 extern void func_80148AFC();
@@ -111,7 +111,7 @@ void func_ovl15_800CAF9C(u8 *arg0) {
             func_80146A6C(0xF, arg0, 0, -0x18, -0xF, 0, 0);
             func_80147324(0x476);
             func_801655E4(arg0);
-            func_80019064(&D_80062BD0);
+            StartRumbleScript(&D_80062BD0);
         }
         if (AF(arg0, u16, 0xB8) & 0x8000) {
             if ((func_80165624(arg0) == 0) && (func_801487F4(arg0) & 0x20)) {

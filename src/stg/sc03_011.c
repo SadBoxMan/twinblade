@@ -155,7 +155,7 @@ extern void func_8012AD50();
 extern u8 D_80062BE8;
 extern void func_sc03_011_8017EB88();
 extern s32 func_8012BEE8();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern u8 D_sc03_011_801852D0;
 extern u8 D_sc03_011_80185300;
 extern void func_801437D8();
@@ -272,9 +272,9 @@ extern s32 *D_80126B78;
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 typedef struct { s16 vx, vy, vz, pad; } SV;
 typedef struct { u16 v[6]; } U12;
@@ -556,8 +556,8 @@ void func_sc03_011_8017C730(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -779,7 +779,7 @@ void func_sc03_011_8017C730(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc03_011_8017D610(u8 *arg0) {
@@ -1697,11 +1697,11 @@ void func_sc03_011_8017F584(u8 *o) {
             func_sc03_011_8017ECD4(o);
             AF(o, s32, 0x1C) = 0x10;
             func_8012AD50(o);
-            func_80019064(&D_80062BE8);
+            StartRumbleScript(&D_80062BE8);
         } else if (AF(o, s16, 0x104) != 0) {
             AF(o, s16, 0x104)--;
         } else {
-            func_80019064(&D_80062BC0);
+            StartRumbleScript(&D_80062BC0);
             AF(o, s16, 0x104) = (rand() & 3) + 8;
         }
     }
@@ -1715,7 +1715,7 @@ void func_sc03_011_8017F64C(s32 arg0) {
         func_8012AD50(arg0);
     }
     if (!(AF(arg0, s32, 0x1C) & 7)) {
-        func_80019064((s32) &D_80062BE8);
+        StartRumbleScript((s32) &D_80062BE8);
     }
 }
 

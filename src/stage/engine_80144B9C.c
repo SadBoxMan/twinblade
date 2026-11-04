@@ -145,8 +145,8 @@ extern s32 D_80126728, D_8011DB08, D_80126AEC;
 extern u8 D_801151F0[8];
 extern s32 D_801274C8, D_801274CC, D_801274D0, D_801274D4, D_801270B8, D_80127520;
 extern s32 D_801151D8, D_8011DB28;
-extern void func_80019018(void);
-extern void func_80018E78(void);
+extern void EnableRumbleScripts(void);
+extern void ResetSelectHold(void);
 extern void func_8002AB64(void);
 extern void func_80015978(void *a, void *b);
 extern void func_8012A1BC(void);
@@ -158,7 +158,7 @@ extern void func_801336E8(s32 a, s32 b, s32 c);
 void func_8013B83C(u8 *a, u8 *b, s32 c);
 void func_8013B568(void (*f)(void));
 extern void func_800D02C0(s32 a);
-extern void func_80011E84(s32 a);
+extern void SetDemoStream(s32 a);
 extern void func_8013D3D4(s32 a, s32 b);
 extern void func_8002D4C8(s32 a, s32 b);
 extern void *memcpy(void *dst, const void *src, u32 n);
@@ -181,8 +181,8 @@ void func_80144B9C(void) {
     void (*fn)(void);
     s32 first;
 
-    func_80019018();
-    func_80018E78();
+    EnableRumbleScripts();
+    ResetSelectHold();
     if (cd->flags == 0) {
         room = (RoomRec *)func_801457A4(w->mapId);
         cd->entryIdx = 0;
@@ -208,7 +208,7 @@ void func_80144B9C(void) {
     if (entry->unkC != (s32)&D_8010F5C8) {
         g->unk198 = entry->unkC;
     }
-    if (w->unkA3DA == 0x1000 && w->unkA3DC == 0x1000) {
+    if (w->mapGroup == 0x1000 && w->unkA3DC == 0x1000) {
         g->x = g->unk88 = g->unk90 = cd->x;
         g->y = g->unk8A = g->unk92 = cd->y;
         g->z = g->unk8C = g->unk94 = cd->z;
@@ -225,11 +225,11 @@ void func_80144B9C(void) {
     g->focus[2] = g->unk15C[2] = g->z;
     func_80015978(&g->xf, D_80126DB0);
     D_80126DB6 = g->model->dir;
-    if (w->unkA3DA == 0x1000 && (w->unkA3DC == 0x1000 || w->unkA3DC == 0x2000) && first == 0) {
+    if (w->mapGroup == 0x1000 && (w->unkA3DC == 0x1000 || w->unkA3DC == 0x2000) && first == 0) {
         entry->init();
         func_8012A1BC();
     } else {
-        if (w->unkA3DA == 0x1000 && w->unkA3DC == 0x3000) {
+        if (w->mapGroup == 0x1000 && w->unkA3DC == 0x3000) {
             h->mode = entry->unk3;
         } else {
             h->mode = 0;
@@ -298,7 +298,7 @@ void func_80144B9C(void) {
     func_8013B83C(room->unk94, room->unk98, room->unk9C);
     func_8013B568(room->unkA8);
     func_800D02C0(room->unkD4);
-    func_80011E84(room->unkD8);
+    SetDemoStream(room->unkD8);
     for (i = 0; i < 8; i++) {
         D_801151F0[i] = *(i + (u8 *)room + 0xAC);  /* not room->unkAC[i]: -O0 adds i to room first */
     }

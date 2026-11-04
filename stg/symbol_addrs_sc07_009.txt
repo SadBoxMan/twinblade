@@ -1,6 +1,6 @@
 // Stage SC07_009 (stg/sc07_009.yaml): names given by hand first
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
-func_80014C54 = 0x80014C54; // type:func
+TestPadAll = 0x80014C54; // type:func
 func_800167B8 = 0x800167B8; // type:func
 func_800167F0 = 0x800167F0; // type:func
 func_80016940 = 0x80016940; // type:func
@@ -15,8 +15,8 @@ func_8002AE60 = 0x8002AE60; // type:func
 func_8002AEE4 = 0x8002AEE4; // type:func
 func_8002D4C8 = 0x8002D4C8; // type:func
 D_80078EC6 = 0x80078EC6;
-D_800A5E60 = 0x800A5E60;
-D_800A6610 = 0x800A6610;
+g_PrimNext = 0x800A5E60;
+g_WorldOtTable = 0x800A6610;
 D_800B9A02 = 0x800B9A02;
 D_800B9AB8 = 0x800B9AB8;
 D_800B9ABA = 0x800B9ABA;

@@ -2,10 +2,10 @@
 #include "psyq.h"
 #include "work.h"
 
-extern void func_800118AC(void);
-extern void func_80011818(s32 a);
+extern void NextStep(void);
+extern void SetMode(s32 a);
 extern void func_80015310(void);
-extern s32 func_800149E0(s32 a);
+extern s32 GetPadPressedDir(s32 a);
 extern void func_800167B8(s32 a);
 extern s32 func_800167F0(s32 a);
 extern void func_8001C044(void);
@@ -26,27 +26,27 @@ void func_800CEE44(void) {
     D_800B9A11 = 0;
     D_800CF13C = 0;
     func_800167B8(0);
-    func_800118AC();
+    NextStep();
 }
 
 void func_800CEE8C(void) {
     if (func_800167F0(0) & 0xFFFF) {
-        func_800118AC();
+        NextStep();
     }
 }
 
 void func_800CEEC0(void) {
     s32 pad;
-    pad = func_800149E0(0);
+    pad = GetPadPressedDir(0);
     if (++D_800CF13C > 0x12C || (pad & 0x8F0)) {
         func_800167B8(4);
-        func_800118AC();
+        NextStep();
     }
 }
 
 void func_800CEF1C(void) {
     if (func_800167F0(4) & 0xFFFF) {
-        func_80011818(0xC);
+        SetMode(0xC);
     }
 }
 

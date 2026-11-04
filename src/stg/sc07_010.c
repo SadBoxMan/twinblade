@@ -61,7 +61,7 @@ extern void func_80029514();
 extern void func_80029124();
 extern void func_8002AEE4();
 
-extern void func_80019028();
+extern void DisableRumbleScripts();
 extern void func_80175494();
 void func_sc07_010_8017DC68(void);
 extern void func_800167B8();
@@ -117,7 +117,7 @@ extern s32 func_8001739C();
 extern s32 func_sc07_010_80181F40();
 extern u16 D_800B9A02;
 extern void func_sc07_010_801817D0();
-extern s32 func_80014D94();
+extern s32 GetPadPressed();
 extern void (*D_sc07_010_80186070[])();
 void func_sc07_010_80181E20(u8 *arg0);
 extern void func_8012931C();
@@ -131,7 +131,7 @@ extern u8 D_sc07_010_80185D18;
 extern u8 D_sc07_010_80185D20;
 extern void func_80016450();
 extern void func_sc07_010_8017E520();
-extern void func_80019064();
+extern void StartRumbleScript();
 
 extern u8 D_sc07_010_80192358;
 extern s8 D_sc07_010_801A7D09;
@@ -144,7 +144,7 @@ extern u8 D_sc07_010_8019EDE4;
 extern u8 D_sc07_010_80185CB0;
 extern s32 func_8012C194();
 extern void func_8001CEC0();
-extern s32 func_80010B10();
+extern s32 GetOtDepthLimit();
 extern void func_8001CD9C();
 extern void func_800233CC();
 extern s32 D_sc07_010_80185C90[];
@@ -156,7 +156,7 @@ extern void func_800159E4();
 extern s32 D_80078E78;
 extern s32 D_800B9A18;
 extern u8 D_sc07_010_801859D0;
-extern void func_800146B0();
+extern void SetScreenMode2();
 extern void func_800D1724();
 
 extern void *D_801151D4;
@@ -299,7 +299,7 @@ extern void func_sc07_010_801810F8();
 extern struct { s16 st, tm, x4, ang; s32 x8; s16 sx, sy, sz, x12; s32 col; s32 x18; } D_sc07_010_801A7F8C[];
 
 extern s32 func_80029178();
-extern s32 func_80014C54();
+extern s32 TestPadAll();
 extern s32 func_800CF8B4();
 
 typedef struct { U12 e[9]; } U12x9;
@@ -445,8 +445,8 @@ typedef struct { s16 x, y; s32 col; } Star8;
 typedef struct { SV8 p[3]; CV4 c[3]; s32 code; } TriArg;
 typedef struct { u8 *verts; u32 pad; u32 x; u32 y; u32 z; u32 *start; u32 *end; } CellC77;
 typedef struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteC77;
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern SV8 D_sc07_010_801A93E0;
 
 void func_sc07_010_8017C59C(u8 *o) {
@@ -481,8 +481,8 @@ void func_sc07_010_8017C59C(u8 *o) {
     GsGetLs(o + 0x10, &ls);
     GsSetLsMatrix(&ls);
     func_sc07_010_8017BEBC(&D_sc07_010_801A93E0, &r, AF(o, s32, 0x60));
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     x0 = (r.x + 0x4000) / 512;
     x1 = (r.x + r.z + 0x4000) / 512 + 2;
     x0 = x0 < 0 ? 0 : (x0 > 63 ? 63 : x0);
@@ -706,7 +706,7 @@ void func_sc07_010_8017C59C(u8 *o) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc07_010_8017D468(u8 *arg0) {
@@ -714,7 +714,7 @@ void func_sc07_010_8017D468(u8 *arg0) {
 }
 
 s32 func_sc07_010_8017D4A4(u8 *arg0) {
-    func_80019028();
+    DisableRumbleScripts();
     func_80175494();
     func_sc07_010_8017DC68();
     func_800167B8(0);
@@ -799,7 +799,7 @@ void func_sc07_010_8017D708(u8 *o) {
         func_8013C9C4((s32) p);
         q = &D_sc07_010_80185C08;
         *q = (*p << 4) + 0x3F;
-        func_80019064((s32) q);
+        StartRumbleScript((s32) q);
     }
     if (func_80171A88((s32) o) != 0) {
         ((s32 (*)())func_sc07_010_8017DCB8)(3);
@@ -1144,7 +1144,7 @@ void func_sc07_010_8017E3EC(u8 *arg0) {
     AF(temp_s1, u16, 0x18) = temp_v0_2;
     if ((s16) temp_v0_2 >= 0x1001) {
         AF(temp_s1, u16, 0x18) = 0x1000U;
-        func_80019064((s32) &D_sc07_010_80185D20);
+        StartRumbleScript((s32) &D_sc07_010_80185D20);
         func_8013C9C4((s32) &D_sc07_010_80185D18);
         func_8012BF4C((s32) arg0, 0x1E);
         func_8012AD50((s32) arg0);
@@ -1241,7 +1241,7 @@ void func_sc07_010_8017E890(u8 *arg0) {
         return;
     }
     func_8001CEC0(temp_v0, (s32) &D_sc07_010_80185CB0);
-    AF(temp_v0, s16, 0x2C) = func_80010B10();
+    AF(temp_v0, s16, 0x2C) = GetOtDepthLimit();
     func_8012AD50((s32) arg0);
 }
 
@@ -1897,7 +1897,7 @@ void func_sc07_010_80180138(u8 *o) {
         break;
     case 2:
         if ((u8)func_80029178(0x123) != 0 && (s16)func_8002AE60() == 0) {
-            if ((s16)func_80014C54(0, 0, 0x800) != 0 || (s16)func_80014C54(0, 0, 0x40) != 0) {
+            if ((s16)TestPadAll(0, 0, 0x800) != 0 || (s16)TestPadAll(0, 0, 0x40) != 0) {
                 if (func_800CF8B4() != 0) {
                     func_800D1724(&D_sc07_010_801859D0);
                 }
@@ -2346,7 +2346,7 @@ void func_sc07_010_80181270(s32 arg0) {
 
 void func_sc07_010_80181304(s32 arg0) {
     if (func_sc07_010_8018140C() != 0) {
-        if (func_80014D94(0) & 0xF0) {
+        if (GetPadPressed(0) & 0xF0) {
             if ((func_8002AE60() << 0x10) != 0) {
                 ((s32 (*)())func_sc07_010_8017DCB8)(0xB);
             } else {
@@ -2446,7 +2446,7 @@ void func_sc07_010_80181578(s32 arg0) {
         ((s32 (*)())func_sc07_010_8017DCB8)(0xC);
         func_800167B8(0);
         D_800B9A11 = 1;
-        func_800146B0(7);
+        SetScreenMode2(7);
         D_800B9A18 = 0;
         func_8012AD50(arg0);
     }
@@ -2474,7 +2474,7 @@ void func_sc07_010_8018165C(u8 *arg0) {
 }
 
 void func_sc07_010_801816D4(s32 arg0) {
-    if (func_80014D94(0) & 0xF0) {
+    if (GetPadPressed(0) & 0xF0) {
         func_8012AD50(arg0);
     }
     func_sc07_010_801817D0((s32) D_800B9A02, (s32) AF(arg0, s16, 0xFC));
@@ -2490,7 +2490,7 @@ void func_sc07_010_80181728(u8 *arg0) {
     }
     func_sc07_010_801817D0((s32) D_800B9A02, (s32) (s16) AF(arg0, u16, 0xFC));
     if ((s16) AF(arg0, s16, 0xFC) == 0) {
-        func_800146B0(1);
+        SetScreenMode2(1);
         D_800B9A18 = 2;
         D_80078E78 = 1;
         func_800D1724((s32) &D_sc07_010_801859D0);

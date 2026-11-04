@@ -229,8 +229,8 @@ extern s32 func_80178970();
 extern void func_80178D18();
 
 extern u8 D_800AF630;
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern s32 D_sc03_116_80197C28;
 extern s16 D_sc03_116_80197C2C;
 extern s16 D_sc03_116_80197C2E;
@@ -360,10 +360,10 @@ void func_sc03_116_8017BF14(u8 *obj, s32 far) {
     yh3 = Y3 + R3;
     zl3 = Z3 - R3;
     zh3 = Z3 + R3;
-    pkt = D_800A5E60;
+    pkt = g_PrimNext;
     bb = AF(obj, u32 *, 0xC);
     hdr = AF(obj, u8 *, 8);
-    ot = D_800A6610[AF(w, u16, 0xA3D2)];
+    ot = g_WorldOtTable[AF(w, u16, 0xA3D2)];
     n = AF(hdr, s32, 8);
     base = AF(hdr, u8 *, 0x10);
     for (i = 0; i < n; i++, bb += 5) {
@@ -902,7 +902,7 @@ void func_sc03_116_8017BF14(u8 *obj, s32 far) {
             }
         }
     }
-    D_800A5E60 = pkt;
+    g_PrimNext = pkt;
 }
 
 void func_sc03_116_80180980(void) {

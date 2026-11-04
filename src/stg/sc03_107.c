@@ -345,9 +345,9 @@ extern void PushMatrix();
 extern void PopMatrix();
 extern void TransposeMatrix();
 extern void ApplyMatrixSV();
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 static inline void rdpush(MtxDCM *p) {
     ReadRotMatrix(p);
@@ -408,8 +408,8 @@ void func_sc03_107_8017BEBC(u8 *obj) {
     ApplyMatrixSV(&mt, &dv, &out);
     PopMatrix();
     out.y -= 0x180;
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -580,7 +580,7 @@ void func_sc03_107_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc03_107_8017CA50(u8 *arg0) {

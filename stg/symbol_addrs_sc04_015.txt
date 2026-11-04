@@ -1,7 +1,7 @@
 // Stage SC04_015 (stg/sc04_015.yaml): names given by hand first
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
-func_80010A08 = 0x80010A08; // type:func
-func_80011ADC = 0x80011ADC; // type:func
+AllocPrim = 0x80010A08; // type:func
+PrevGameState = 0x80011ADC; // type:func
 func_80012A60 = 0x80012A60; // type:func
 func_80012ABC = 0x80012ABC; // type:func
 func_80012B04 = 0x80012B04; // type:func
@@ -40,9 +40,9 @@ D_80078EAC = 0x80078EAC;
 D_80078EB0 = 0x80078EB0;
 D_80078EB1 = 0x80078EB1;
 D_80078EC0 = 0x80078EC0;
-D_800A5E60 = 0x800A5E60;
+g_PrimNext = 0x800A5E60;
 D_800A651C = 0x800A651C;
-D_800A6610 = 0x800A6610;
+g_WorldOtTable = 0x800A6610;
 D_800AE6A8 = 0x800AE6A8;
 D_800AE6B0 = 0x800AE6B0;
 D_800AE6BD = 0x800AE6BD;

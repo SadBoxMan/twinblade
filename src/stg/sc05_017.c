@@ -422,9 +422,9 @@ extern u8 D_sc05_017_801E6748;
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 extern u8 D_sc05_017_80191170;
 extern u8 D_sc05_017_801E4130;
@@ -681,8 +681,8 @@ extern S8P D_80115158[];
 extern u16 D_sc05_017_801B8D96;
 extern u16 D_sc05_017_801B8DAA;
 
-extern s32 func_80014ED4();
-extern s32 func_80015018();
+extern s32 GetPadPressedDirWide();
+extern s32 GetPadHeldDirWide();
 extern s32 func_sc05_017_80189240();
 extern void func_sc05_017_80186B24();
 extern u16 D_80115122;
@@ -810,7 +810,7 @@ extern s16 D_sc05_017_801E9B00[];
 extern void func_8012AD50();
 
 extern OtRef D_800A651C[];
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern SV8 D_sc05_017_801E6370[][4];
 extern SV8 D_sc05_017_801E63F0[][4];
 extern SV8 D_sc05_017_801E6490[];
@@ -1008,8 +1008,8 @@ void func_sc05_017_8017C710(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -1231,7 +1231,7 @@ void func_sc05_017_8017C710(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc05_017_8017D5F0(u8 *arg0) {
@@ -4559,7 +4559,7 @@ extern u8 D_sc05_017_801F27B0;
 extern s32 D_sc05_017_801B9428[];
 extern u8 D_sc05_017_801B9460[];
 extern void func_8017ADE8();
-extern s32 func_800149E0();
+extern s32 GetPadPressedDir();
 extern s32 func_sc05_017_80189B54(s32 arg0);
 
 s32 func_sc05_017_801848D0(s32 a0, s32 a1, s32 a2, s32 a3) {
@@ -5846,7 +5846,7 @@ void func_sc05_017_801875E8(void) {
             }
             goto end;
         }
-        if (!(func_800149E0(0) & 0x50) && D_sc05_017_801ED60C <= 0) {
+        if (!(GetPadPressedDir(0) & 0x50) && D_sc05_017_801ED60C <= 0) {
             goto end;
         }
         switch (D_sc05_017_801ED5F4) {
@@ -5979,7 +5979,7 @@ void func_sc05_017_801875E8(void) {
             if (func_801399F0(D_sc05_017_801ED564) != 0) {
                 D_sc05_017_801ED560 = 0;
             }
-        } else if (func_800149E0(0) & 0x50) {
+        } else if (GetPadPressedDir(0) & 0x50) {
             if (D_80115138[(u16)D_8011511A] == 8) {
                 func_sc05_017_80189240(0xF, (s16)func_8014168C(D_8011511A));
             }
@@ -6095,11 +6095,11 @@ s32 func_sc05_017_80188128(void) {
     s32 m;
 
     moved = 0;
-    pad = func_80014ED4(0);
+    pad = GetPadPressedDirWide(0);
     if ((u16)pad != 0) {
         D_sc05_017_801ED560 = 0;
     }
-    rep = func_80015018(0);
+    rep = GetPadHeldDirWide(0);
     q = &D_8011511A;
     r = func_8014168C(*q);
     idx = (u16)*q;
@@ -6954,7 +6954,7 @@ void func_sc05_017_80189FE0(u8 *o, s32 col) {
         w[j].z = AF(o, s16, 4) + u->z;
     }
     RotTransPers4(&w[0], &w[1], &w[2], &w[3], &sxy[4], &sxy[5], &sxy[6], &sxy[7], &p, &flag);
-    prim = func_80010A08(0xA8);
+    prim = AllocPrim(0xA8);
     for (i = 0; i < 4; i++) {
         idx.x = D_sc05_017_801E6490[i].x;
         idx.y = D_sc05_017_801E6490[i].y;

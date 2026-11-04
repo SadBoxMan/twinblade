@@ -128,9 +128,9 @@ extern s16 D_sc06_030_80185DC8[];
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 extern u16 D_801202A0;
 
@@ -379,7 +379,7 @@ extern s32 func_8012D5E4();
 extern u8 D_sc06_030_80185AB8;
 extern s32 func_8016AA50();
 extern s32 func_8016B428();
-extern s32 func_80019064();
+extern s32 StartRumbleScript();
 extern s32 func_8002A520();
 extern s32 func_8002A790();
 extern u8 D_sc06_030_8019EEAC;
@@ -533,8 +533,8 @@ void func_sc06_030_8017C8D0(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -756,7 +756,7 @@ void func_sc06_030_8017C8D0(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc06_030_8017D7B0(u8 *arg0) {
@@ -862,7 +862,7 @@ void func_sc06_030_8017DB58(s32 arg0) {
 }
 
 extern s32 D_80126950;
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern SV8 D_sc06_030_801B4CA4;
 extern u32 D_sc06_030_801B4CAC[];
 extern u8 D_sc06_030_801B4CB8[];
@@ -966,7 +966,7 @@ void func_sc06_030_8017DE08(u8 *o) {
     u8 *p;
 
     ot = D_800A651C[D_800B9A02].ot;
-    p = func_80010A08(0x30);
+    p = AllocPrim(0x30);
     if (p != 0) {
         SetDrawMode(p, 0, 0, (u16) GetTPage(0, 1, 0, 0), 0);
         AF(p, u8, 0x10) = AF(o, s32, 0x1C);
@@ -1022,7 +1022,7 @@ void func_sc06_030_8017DF70(u8 *o) {
         func_8016AA50(o, d);
         if (AF(o, u16, 0x82) & 1) {
             func_8016B428(o);
-            func_80019064(&D_sc06_030_80185AB8);
+            StartRumbleScript(&D_sc06_030_80185AB8);
         }
     }
     if (k != 0x1D) {
@@ -2325,7 +2325,7 @@ void func_sc06_030_80181164(o)
         y[2] = sy;
         y[3] = sy + h;
         y[4] = sy + r;
-        prim = func_80010A08(0x9C);
+        prim = AllocPrim(0x9C);
         if (prim != 0) {
             SetDrawMode(prim, 0, 0, (u16) GetTPage(0, 1, 0, 0), 0);
             q = pp[0] = prim + 0xC;

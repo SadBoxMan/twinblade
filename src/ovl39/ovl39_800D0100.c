@@ -2,7 +2,7 @@
 #include "psyq.h"
 #include "work.h"
 
-extern void func_800118AC(void);
+extern void NextStep(void);
 extern void func_80015310(void);
 extern void func_800183E0(void *p);
 extern void func_8001C044(void);
@@ -11,7 +11,7 @@ extern s32 func_800D1E18(void);
 extern void func_800D1E58(void);
 extern void func_800D0D6C(void);
 extern void func_800D12D0(void);
-extern void func_800146B0(s32 mode);
+extern void SetScreenMode2(s32 mode);
 extern void func_800D1D14(s32 a, s32 b);
 extern void (*D_800D363C[])(void);
 extern u8 D_800D4E6C[];
@@ -38,21 +38,21 @@ void func_800D0174(void) {
     func_800183E0(D_800D93FC);
     D_800EC894 = 0;
     D_800EC8B0 = func_800D1E18();
-    func_800118AC();
+    NextStep();
 }
 
 void func_800D0204(void) {
     if (D_800EC8B0 != 0) {
         func_800D1E58();
         func_800D0D6C();
-        func_800118AC();
+        NextStep();
     } else {
-        func_800118AC();
+        NextStep();
     }
 }
 
 typedef struct { s16 n; s16 pad; } TitleSprite;
-extern void func_80011928(u16 step);
+extern void SetStep(u16 step);
 extern void func_8001534C(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
 extern u8 D_800D3618[];
 extern u8 D_800D3620[];
@@ -60,7 +60,7 @@ extern u8 *D_800D3624[];
 extern TitleSprite D_800D3630[];
 
 extern void ClearImage(RECT *r, s32 a, s32 b, s32 c);
-extern u16 func_800149E0(s32 a);
+extern u16 GetPadPressedDir(s32 a);
 extern u16 func_800167F0(s32 a);
 extern void func_800167B8(s32 a);
 extern void func_8002D4C8(s32 a, s32 b);
@@ -68,7 +68,7 @@ extern void func_8002D4C8(s32 a, s32 b);
 void func_800D0268(void) {
     register Work *w = &D_800AF630;
     u16 pad;
-    pad = func_800149E0(0);
+    pad = GetPadPressedDir(0);
     if (pad & 0x4000) {
         func_8002D4C8(0x9C1, 0);
         D_800EC894++;
@@ -87,7 +87,7 @@ void func_800D0268(void) {
         if (pad & 0x800) {
             func_8002D4C8(0x9C0, 0);
             func_800167B8(4);
-            func_800118AC();
+            NextStep();
         }
         break;
     case 1:
@@ -95,7 +95,7 @@ void func_800D0268(void) {
         if (pad & 0x800) {
             func_8002D4C8(0x9C0, 0);
             func_800167B8(4);
-            func_800118AC();
+            NextStep();
         }
         break;
     }
@@ -108,19 +108,19 @@ void func_800D0440(void) {
     if (func_800167F0(4)) {
         switch (D_800EC894) {
         case 0:
-            w->unkA3B6 = 1;
+            w->done = 1;
             w->timer = 2;
             break;
         case 1:
-            w->unkA3B6 = 1;
+            w->done = 1;
             w->timer = 0;
             break;
         case 2:
-            w->unkA3B6 = 1;
+            w->done = 1;
             w->timer = 1;
             break;
         case 4:
-            w->unkA3B6 = 1;
+            w->done = 1;
             w->timer = 4;
             break;
         }
@@ -146,7 +146,7 @@ void func_800D05B4(void) {
     D_800EC894 = 0;
     D_800EC88C = -1;
     w->timer = 0;
-    func_800118AC();
+    NextStep();
 }
 
 void func_800D0664(void) {
@@ -154,7 +154,7 @@ void func_800D0664(void) {
     s32 unused;
     func_80015310();
     func_800183E0(D_800D93FC);
-    func_800118AC();
+    NextStep();
 }
 
 void func_800D06BC(void) {
@@ -163,7 +163,7 @@ void func_800D06BC(void) {
     D_800EC890 += 4;
     if (D_800EC890 >= 0x80) {
         D_800EC890 = 0x80;
-        func_800118AC();
+        NextStep();
     }
 }
 
@@ -188,7 +188,7 @@ void func_800D0740(void) {
     register Work *w = &D_800AF630;
     s32 moved;
     func_800D12D0();
-    D_800EC888 = func_800149E0(0);
+    D_800EC888 = GetPadPressedDir(0);
     moved = 0;
     if (D_800EC888 & 0x4000) {
         func_8002D4C8(0x9C1, 0);
@@ -211,7 +211,7 @@ void func_800D0740(void) {
         if (D_800EC888 & 0x800) {
             func_8002D4C8(0x9C0, 0);
             func_800167B8(4);
-            func_800118AC();
+            NextStep();
         }
         break;
     case 1:
@@ -219,7 +219,7 @@ void func_800D0740(void) {
         if (D_800EC888 & 0x800) {
             func_8002D4C8(0x9C0, 0);
             func_800167B8(4);
-            func_800118AC();
+            NextStep();
         }
         break;
     }
@@ -227,7 +227,7 @@ void func_800D0740(void) {
         if (--D_800EC88C == 0) {
             func_800167B8(4);
             D_800EC894 = 4;
-            func_800118AC();
+            NextStep();
         }
     }
 }
@@ -242,7 +242,7 @@ void func_800D09A0(void) {
         func_800D1D14(D_800EC894, 0);
     }
     if (D_800EC898 >= 0x21) {
-        func_800118AC();
+        NextStep();
     }
 }
 
@@ -251,9 +251,9 @@ void func_800D0A7C(void) {
     D_800EC890 -= 4;
     if (D_800EC890 < 0) {
         D_800EC890 = 0;
-        func_800146B0(1);
+        SetScreenMode2(1);
         w->vsyncMode = 2;
-        func_800118AC();
+        NextStep();
     } else {
         func_800D12D0();
     }
@@ -264,19 +264,19 @@ void func_800D0B1C(void) {
     func_800183E0(D_800D4E6C);
     switch (D_800EC894) {
     case 0:
-        w->unkA3B6 = 1;
+        w->done = 1;
         w->timer = 2;
         break;
     case 1:
-        w->unkA3B6 = 1;
+        w->done = 1;
         w->timer = 0;
         break;
     case 2:
-        w->unkA3B6 = 1;
+        w->done = 1;
         w->timer = 1;
         break;
     case 4:
-        w->unkA3B6 = 1;
+        w->done = 1;
         w->timer = 4;
         break;
     }
@@ -298,7 +298,7 @@ void func_800D0C50(void) {
     r[1].h = 0x1E0;
     LoadImage(&r[0], (u32 *)p);
     LoadImage(&r[1], (u32 *)q);
-    func_80011928(3);
+    SetStep(3);
 }
 
 void func_800D0D6C(void) {

@@ -2,14 +2,14 @@
 #include "work.h"
 
 typedef struct { void (*fn)(void); } MenuFn;
-extern void func_800118AC(void);
-extern void func_80011B7C(u16 n);
+extern void NextStep(void);
+extern void SetGameState(u16 n);
 extern void func_80015310(void);
 extern s32 func_800167F0(s32 arg0);
 extern void func_8001C044(void);
 extern void func_8001534C(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
-extern s16 func_800149E0(s32 a);
-extern u16 func_80014B10(s32 a);
+extern s16 GetPadPressedDir(s32 a);
+extern u16 GetPadHeldDir(s32 a);
 extern void func_80136EC4(void);
 extern void func_800D0964(void);
 extern void func_800D0BDC(void);
@@ -135,7 +135,7 @@ void func_800CEF00(void) {
     w->unkA3E1 = 1;
     func_8001C044();
     func_80015310();
-    func_80011B7C(0);
+    SetGameState(0);
     func_8001534C(0, (s32)D_800D31FC, 0x40, 0x1E, 0, 0);
     func_8001534C(1, (s32)D_800D31F8, 0x34, 0x46, 0, 0);
     func_8001534C(9, (s32)D_800D3248, 0x40, 0x46, 0, 0);
@@ -164,7 +164,7 @@ void func_800CEF00(void) {
     D_800D4C9C = 0;
     D_800D4C98 = 0;
     func_80029514(D_800D3344);
-    func_800118AC();
+    NextStep();
 }
 
 extern s32 func_80029124(u32 bit, s32 on);
@@ -252,7 +252,7 @@ extern u16 D_8010F534;
 extern u8 D_8010F536;
 
 typedef struct { s32 unk0[6]; s16 unk18; s16 unk1A; } DbgClock;
-extern void func_80011928(u16 step);
+extern void SetStep(u16 step);
 extern void func_800152F4(s32 a);
 extern void func_800167B8(s32 a);
 extern void func_800CFCBC(void);
@@ -288,7 +288,7 @@ void func_800CF28C(void) {
     switch (D_800D4C80) {
     case 0:
         if (D_800D4C9C & 0x820) {
-            func_80011928(4);
+            SetStep(4);
         }
         break;
     case 1:
@@ -296,7 +296,7 @@ void func_800CF28C(void) {
     case 3:
     case 5:
         if (D_800D4C9C & 0x820) {
-            func_80011928(2);
+            SetStep(2);
             func_800167B8(4);
         }
         break;
@@ -416,7 +416,7 @@ void func_800CF28C(void) {
     }
     if (D_800D4C80 >= 6 && (D_800D4C9C & 0x800)) {
         D_800D4C80 = 0;
-        func_80011928(4);
+        SetStep(4);
     }
     c->unk1A = D_800D334A;
     func_800D04F4();
@@ -434,8 +434,8 @@ void func_800CFBF0(void) {
 
 void func_800CFC58(void) {
     if (func_800167F0(4) & 0xFFFF) {
-        func_800118AC();
-        func_80011B7C(0);
+        NextStep();
+        SetGameState(0);
         func_8001C044();
         func_80015310();
     }
@@ -476,18 +476,18 @@ void func_800CFDB4(void) {
     if (D_800D4C9C & 0x820) {
         func_800167B8(4);
         w->mapId = D_800D4B64[D_800D4C88].items[D_800D4C8C].id;
-        w->unkA3DA = w->mapId & 0xF000;
+        w->mapGroup = w->mapId & 0xF000;
         if (ok) {
             func_800CFCBC();
-            if (func_80014B10(0) & 0x10) {
+            if (GetPadHeldDir(0) & 0x10) {
                 func_80029514(D_800D3344);
                 c->unk1A = D_800D334A;
             }
-            func_80011928(2);
+            SetStep(2);
         }
     }
     if (D_800D4C9C & 0x40) {
-        func_80011928(1);
+        SetStep(1);
     }
     if (D_800D4C9C & 0x5000) {
         D_800D4C84 = (D_800D4C84 + 1) & 1;
@@ -537,7 +537,7 @@ void func_800CFDB4(void) {
 
 void func_800D03F8(void) {
     register Work *w = &D_800AF630;
-    w->unkA3B6 = 1;
+    w->done = 1;
 }
 
 void func_800D0430(void) {
@@ -576,8 +576,8 @@ s32 func_800D0828(s32 a) {
 }
 
 void func_800D0858(void) {
-    D_800D4C9C = func_800149E0(0);
-    D_800D4C98 = func_80014B10(0);
+    D_800D4C9C = GetPadPressedDir(0);
+    D_800D4C98 = GetPadHeldDir(0);
     if (D_800D4C98 != 0) {
         if (D_800D4C98 == D_800D4CA0) {
             if (--D_800D4CA4 == 0) {

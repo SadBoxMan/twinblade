@@ -218,7 +218,7 @@ extern void (*D_8018D9DC[])(StageActor *a);
 extern u8 D_8018D9CC[];
 void func_8012C218(StageActor *a);
 void func_8012B2CC(Mover *m);
-extern void func_80019064(u8 *p);
+extern void StartRumbleScript(u8 *p);
 void func_8016AA50(StageActor *a, s32 n);
 void func_8016B428(StageActor *a);
 extern void func_8002A04C(StageActor *a);
@@ -360,7 +360,7 @@ typedef struct {
     /* 0x0C */ u8 r, g, b;
 } GsLINE; /* size 0x10 */
 extern GsOT D_800A6518[2];
-extern u8 *func_80010A08(s32 n);
+extern u8 *AllocPrim(s32 n);
 extern s32 RotTransPers(SVECTOR *v, s32 *sxy, s32 *p, s32 *flag);
 extern void AddPrim(void *ot, void *p);
 extern void SetLineG2(void *p);
@@ -448,7 +448,7 @@ void func_80139DC8();
 void func_80138BE0(Win *w);
 extern void (*D_8018DB10[])(Win *w);   /* the window steps, by state */
 void func_8013A9F8(Cursor *c, u16 n);
-extern s32 func_80014E80(u8 which, s32 mask);
+extern s32 TestPadDirWideAny(u8 which, s32 mask);
 extern int ClearImage(RECT *r, u8 cr, u8 cg, u8 cb);
 s32 func_80139220(Win *w);
 void func_801392C8(Win *w);
@@ -464,7 +464,7 @@ typedef struct {
 } Quad16;
 extern Quad16 D_8018DAC0[3];
 
-extern void func_8001931C(void);
+extern void CancelStreamLoad(void);
 void func_8013A8B0(Cursor *c);
 extern s16 D_8012752C;
 extern s32 D_80127530[4];
@@ -487,7 +487,7 @@ void func_8013A448(Cursor *c);
 void func_8013A4C4(Cursor *c);
 void func_8013A9B4(Win *w, Cursor *c);
 
-extern s32 D_800A5E60;
+extern s32 g_PrimNext;
 extern s16 D_801269F4;
 extern s16 D_80126A0A;
 extern u8 D_80126A0E;
@@ -539,7 +539,7 @@ void func_8013B204(Win *w, Cursor *c);
 void func_8013AF20(u32 *ot, s16 *pos, Pt16 *v, Pair8 *d);
 
 void func_8013B274(u32 *ot, s16 n, s16 *scale);
-extern s32 func_80019198(void);
+extern s32 GetRumbleScript(void);
 extern u8 D_80062BC0[];
 extern s8 *D_801ED428;          /* a sequence of (value, frames) pairs played into D_801269C8/D4 */
 extern u8 D_801ED42C;           /* its pair */
@@ -593,11 +593,11 @@ extern void (*D_8011DB24)(void);   /* the stage's frame step */
 extern void func_800D24A0(s32 n);
 extern s32 func_800D0EC4(void);
 extern void func_80029444(void);
-extern void func_800190AC(void);
+extern void StepRumbleScript(void);
 void func_801754A8(void);
 void func_80141C04(void);
-extern u16 func_80015018(s32 n);
-extern u16 func_80014ED4(s32 n);
+extern u16 GetPadHeldDirWide(s32 n);
+extern u16 GetPadPressedDirWide(s32 n);
 void func_80141788(void);
 void func_80141874(void);
 void func_8013E5E8(void);
@@ -610,8 +610,8 @@ typedef struct {
     /* 0x06 */ u16 frames;          /* frames in the mode */
     /* 0x08 */ u16 fade;              /* 0 to 0x40 in steps of 0x10 */
     /* 0x0A */ u16 unkA;
-    /* 0x0C */ s16 padHeld;         /* pad 0: func_80015018 */
-    /* 0x0E */ s16 padPressed;      /* func_80014ED4 */
+    /* 0x0C */ s16 padHeld;         /* pad 0: GetPadHeldDirWide */
+    /* 0x0E */ s16 padPressed;      /* GetPadPressedDirWide */
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
@@ -771,7 +771,50 @@ typedef struct {
 } POLY_FT4;
 extern s16 D_8018DC54[6];
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_8012F968);
+extern s32 *D_801151D4;
+extern s32 func_8012B744();
+extern StageActor *func_8012C588();
+
+void func_8012F968(StageActor *a) {
+    s32 *cam = D_801151D4;
+    SVECTOR v;
+    ModelObj *m;
+
+    a->unkC1 = 0x12;
+    if (a->unkB4 & 0x10000) {
+        v.vx = cam[23];
+        v.vy = cam[24];
+        v.vz = cam[25];
+        m = a->model;
+        a->flags5C = 0;
+        a->ofs[2] = 0;
+        a->ofs[1] = 0;
+        a->ofs[0] = 0;
+        m->rot.vz = 0;
+        m->rot.vx = 0;
+        a->model->rot.vy = func_8012B744(a->pos, &v);
+        a->count = 0x2D;
+        if (a->hitData != 0) {
+            a->unkAC = (((s16 *)KSEG0(a->hitData))[4] + ((s16 *)KSEG0(a->hitData))[5]) >> 1;
+        } else {
+            a->unkAC = 0;
+        }
+        a->vel[0] = ((cam[23] - a->pos[0].h.i) << 16) / 30;
+        a->vel[1] = ((cam[24] - a->pos[1].h.i - a->unkAC) << 16) / 30;
+        a->vel[2] = ((cam[25] - a->pos[2].h.i) << 16) / 30;
+        a->timer = 0;
+        if (func_80131A34(a, 0x24) == 0) {
+            a->unkC4 &= ~4;
+            if (func_80131A34(a, 0x20) != 0) {
+                a->unkC4 |= 4;
+            } else {
+                a->timer = 0;
+            }
+        }
+        func_8012C588(0x289, a);
+    }
+    func_80131CA8(a, 0x35);
+}
 
 /* a timed glide: the position steps by the velocity until the count runs out (then func_801319E0); a linked actor rides
    up by +0xAC, with a sound at count 0x13 */
@@ -1668,7 +1711,7 @@ void func_80131B14(StageActor *a) {
         func_8016AA50(a, d);
         if (a->hitFlags & 1) {
             func_8016B428(a);
-            func_80019064(D_8018D9CC);
+            StartRumbleScript(D_8018D9CC);
         }
     }
     a->flags5C &= ~1;
@@ -1952,7 +1995,102 @@ void func_801325B8(TmdHead *dst, TmdHead *src, s32 *vd, s32 *ndp, s32 w) {
 void func_8013277C(void) {
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80132784);
+extern MATRIX *RotMatrixZYX(SVECTOR *r, MATRIX *m);
+extern void GsGetLw(GameCoord2 *c, MATRIX *m);
+extern void func_80020F34();
+
+s32 func_80132784(u8 *arg0, u8 *arg1, s32 arg2) {
+    GameCoord2 coord;
+    MATRIX lw;
+    MATRIX rot;
+    MATRIX m;
+    SVECTOR r;
+    u8 pad[8]; /* MATCH-TRICK: unused frame pad, the original frame is 8 bytes bigger than its locals (0xF8) */
+    u8 *o;
+    u8 *pose;
+    u8 *p;
+    u32 w;
+
+    if (AF(arg0, s32, 0x20) == 0 && AF(arg1, s32, 0x20) == 0) {
+        return;
+    }
+    o = AF(arg1, u8 *, 0x20);
+    pose = AF(o, u8 *, 0x20);
+    if (pose == NULL) {
+        return;
+    }
+    coord.super = AF(o, GameCoord2 *, 0x78);
+    coord.flg = 0;
+    if (AF(o, u16, 0x2C) & 1) {
+        coord.coord = AF(o, GameMatrix, 0x34);
+    } else {
+        RotMatrixZYX((SVECTOR *)(o + 0x10), (MATRIX *)&coord.coord);
+        coord.coord.t[0] = AF(o, s16, 8) = AF(arg1, u16, 6) + AF(arg1, u16, 0x50);
+        coord.coord.t[1] = AF(o, s16, 0xA) = AF(arg1, u16, 0xA) + AF(arg1, u16, 0x52);
+        coord.coord.t[2] = AF(o, s16, 0xC) = AF(arg1, u16, 0xE) + AF(arg1, u16, 0x54);
+        AF(o, GameMatrix, 0x34) = coord.coord;
+        AF(o, u16, 0x2C) |= 1;
+    }
+    if (AF(o, u16, 0x2C) & 0x10) {
+        func_80020F34(&coord.coord, o + 0x18);
+    }
+    GsGetLw(&coord, &lw);
+    if (!((u32)pose & 0x1000000) && !(AF(o, u16, 0x2C) & 0x40)) {
+        pose += (u16)arg2 * 12;
+        RotMatrixZYX((SVECTOR *)(pose + 6), &rot);
+        rot.t[0] = AF(pose, s16, 0);
+        rot.t[1] = AF(pose, s16, 2);
+        rot.t[2] = AF(pose, s16, 4);
+    } else {
+        p = (u8 *)((u32)pose & 0xFEFFFFFF) + (u16)arg2 * 8;
+        r.vx = AF(p, u16, 6);
+        w = AF(p, u32, 0);
+        r.vy = AF(p, u8, 1) | ((w & 0xF) << 8);
+        r.vz = ((w >> 16) & 0xFF) | ((w & 0xF0) << 4);
+        RotMatrixZYX(&r, &rot);
+        rot.t[0] = AF(p, s8, 3);
+        rot.t[1] = AF(p, s8, 4);
+        rot.t[2] = AF(p, s8, 5);
+    }
+    gte_SetRotMatrix(&lw);
+    gte_ldclmv(&rot);
+    gte_rtir();
+    gte_stclmv(&m);
+    gte_ldclmv((u8 *)&rot + 2);
+    gte_rtir();
+    gte_stclmv((u8 *)&m + 2);
+    gte_ldclmv((u8 *)&rot + 4);
+    gte_rtir();
+    gte_stclmv((u8 *)&m + 4);
+    gte_SetTransMatrix(&lw);
+    gte_ldlv0(rot.t);
+    gte_rtv0tr();
+    gte_stlvnl(m.t);
+
+    o = AF(arg0, u8 *, 0x20);
+    RotMatrixZYX((SVECTOR *)(o + 0x10), &rot);
+    rot.t[0] = AF(o, s16, 8) = AF(arg0, u16, 6) + AF(arg0, u16, 0x50);
+    rot.t[1] = AF(o, s16, 0xA) = AF(arg0, u16, 0xA) + AF(arg0, u16, 0x52);
+    rot.t[2] = AF(o, s16, 0xC) = AF(arg0, u16, 0xE) + AF(arg0, u16, 0x54);
+    gte_SetRotMatrix(&m);
+    gte_ldclmv(&rot);
+    gte_rtir();
+    gte_stclmv(&lw);
+    gte_ldclmv((u8 *)&rot + 2);
+    gte_rtir();
+    gte_stclmv((u8 *)&lw + 2);
+    gte_ldclmv((u8 *)&rot + 4);
+    gte_rtir();
+    gte_stclmv((u8 *)&lw + 4);
+    gte_SetTransMatrix(&m);
+    gte_ldlv0(rot.t);
+    gte_rtv0tr();
+    gte_stlvnl(lw.t);
+    AF(o, MATRIX, 0x34) = lw;
+    AF(o, MATRIX, 0x54) = lw;
+    AF(o, s32, 0x30) = 1;
+    AF(o, u16, 0x2C) |= 1;
+}
 
 /* the velocity toward a point: the unit direction times the speed */
 void func_80132DC4(Mover *m, SVECTOR *to, s32 speed) {
@@ -1995,7 +2133,41 @@ Prop *func_80132EF4(Prop *from, u16 kind) {
     return e;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80132F40);
+extern u8 D_80126BE0;
+extern s32 func_80135888();
+extern void func_8012F038();
+extern void func_8012F14C();
+
+void func_80132F40(StageActor *a) {
+    SVECTOR p;
+    SVECTOR np;
+    SVECTOR unused; /* MATCH-TRICK: frame pad, 8 unused bytes in the original frame */
+    HitBox *h;
+    s16 y;
+    s32 y0;
+    s16 y1;
+    SVECTOR *npp = &np;
+    p.vx = D_80126B5E;
+    p.vy = D_80126B62;
+    p.vz = D_80126B66;
+    np = p;
+    if (func_80135888(a->model, a->hitData, &D_80126BE0, npp) != 0) {
+        h = (HitBox *)KSEG0(a->hitData);
+        /* MATCH-TRICK: the loop end note stops cse from reusing the copy's &p pseudo at the later calls */
+        do { y0 = h->y0; } while (0);
+        y1 = h->y1;
+        y = y0;
+        if (y1 < y0) {
+            y = y1;
+        }
+        func_8012F038(&a->model->coord.coord, &p, npp);
+        np.vy = y;
+        func_8012F14C(&a->model->coord.coord, npp, &p);
+        D_80126B5E = p.vx;
+        D_80126B62 = p.vy;
+        D_80126B66 = p.vz;
+    }
+}
 
 /* a position's integer parts rotated by func_801330E0, back as 16.16 */
 void func_80133060(Fixed *pos, Fixed *out, s16 a) {
@@ -2237,9 +2409,171 @@ s32 func_80133784(s16 kind, SVECTOR *from, SVECTOR *to) {
     return 0;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80133AB0);
+extern s32 func_80133CD4();
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80133CD4);
+s32 func_80133AB0(s16 kind, s16 x, s16 z, void *h) {
+    s16 cx;
+    s16 cz;
+    u16 w;
+    u16 *cell;
+    u16 *list;
+    u16 n;
+    u16 *rec;
+    u16 id;
+    s16 bit;
+    s16 r;
+    void *a;
+    void *b;
+    u8 *r18;
+    u8 *r22;
+    u8 *lists;
+    D_8018DAA8->vx = D_8018DAA0->vx - D_8018DA9C->vx;
+    D_8018DAA8->vy = D_8018DAA0->vy - D_8018DA9C->vy;
+    D_8018DAA8->vz = D_8018DAA0->vz - D_8018DA9C->vz;
+    cx = ((((u16)x + 0x8000) >> 7) & 0x1FF) - AF(h, u16, 0);
+    w = AF(h, u16, 4);
+    if ((cx & 0xFFFFU) < w) {
+        cz = ((((u16)z + 0x8000) >> 7) & 0x1FF) - AF(h, u16, 2);
+        if ((cz & 0xFFFFU) >= AF(h, u16, 6)) {
+            return 0;
+        }
+        cell = (u16 *)((u16)(((u16)cz * w + (u16)cx) * 2) * 2 + AF(h, s32, 8));
+        lists = AF(h, u8 *, 0x14);
+        b = AF(h, void *, 0xC);
+        a = AF(h, void *, 0x10);
+        r18 = AF(h, u8 *, 0x18);
+        r22 = AF(h, u8 *, 0x1C);
+        list = (u16 *)(lists + cell[0]);
+        n = cell[1];
+        while (n-- != 0) {
+            id = *list;
+            bit = id & 0x8000;
+            if (bit == 0) {
+                rec = (u16 *)(r18 + id * 18);
+            } else {
+                rec = (u16 *)(r22 + (id & 0x7FFF) * 22);
+            }
+            r = func_80133CD4((bit | kind), rec, a, b);
+            if (r != 0) {
+                if (r > 0) {
+                    D_801ED3C0 = *rec;
+                }
+                return 1;
+            }
+            list++;
+            if (D_801ED3BC != 0) {
+                D_801ED3C0 = *rec;
+                return 0;
+            }
+        }
+    }
+    return 0;
+}
+
+extern s16 D_801152A8;
+extern s16 D_801152AA;
+extern VECTOR *D_8018DAB0;
+extern VECTOR *D_8018DAB4;
+extern s16 D_801152AE;
+extern inline s32 func_80134310();
+extern s32 func_8013435C();
+
+s32 func_80133CD4(s32 kind0, u16 *rec, SVECTOR *v, s32 *t) {
+    SVECTOR *p;
+    s32 d;
+    s32 a;
+    s32 b;
+    s32 z;
+    s32 r;
+    VECTOR *s;
+    u16 f;
+    s16 kind = kind0;
+
+    p = &v[AF(rec, s16, 2)];
+    d = t[AF(rec, s16, 4)];
+    if (func_80134310(p, D_8018DAA0, d) >= 0) {
+        return 0;
+    }
+    a = func_80134310(p, D_8018DA9C, d);
+    if (a < 0) {
+        return 0;
+    }
+    b = func_80134310(p, D_8018DAA8, 0);
+    D_8018DAA4->vx = D_8018DA9C->vx + -a * D_8018DAA8->vx / b;
+    D_8018DAA4->vy = D_8018DA9C->vy + -a * D_8018DAA8->vy / b;
+    D_8018DAA4->vz = D_8018DA9C->vz + -a * D_8018DAA8->vz / b;
+    if (func_8013435C(&v[AF(rec, s16, 6)], D_8018DAA4, t[AF(rec, s16, 8)], p)) {
+        return 0;
+    }
+    if (func_8013435C(&v[AF(rec, s16, 10)], D_8018DAA4, t[AF(rec, s16, 12)], p)) {
+        return 0;
+    }
+    if (func_8013435C(&v[AF(rec, s16, 14)], D_8018DAA4, t[AF(rec, s16, 16)], p)) {
+        return 0;
+    }
+    if (kind < 0) {
+        if (func_8013435C(&v[AF(rec, s16, 18)], D_8018DAA4, t[AF(rec, s16, 20)], p)) {
+            return 0;
+        }
+    }
+    if ((kind & 0x10) && (rec[0] & 0x100)) {
+        return 0;
+    }
+    f = rec[0];
+    if (f & 0x200) {
+        D_801ED3C0 = f;
+        return 0;
+    }
+    a = -func_80134310(p, D_8018DAA0, d);
+    D_8018DAB0->vx = p->vx;
+    D_8018DAB0->vy = p->vy;
+    D_8018DAB0->vz = p->vz;
+    gte_ldlvl(D_8018DAB0);
+    gte_sqr0();
+    gte_stlvnl(D_8018DAB4);
+    s = D_8018DAB0;
+    b = D_8018DAB4->vx + D_8018DAB4->vy + D_8018DAB4->vz;
+    D_8018DAA0->vx += a * s->vx / b;
+    D_8018DAA0->vy += a * s->vy / b;
+    D_8018DAA0->vz += a * s->vz / b;
+    a = D_8018DAA0->vx << 16;
+    b = D_8018DAA0->vy << 16;
+    z = D_8018DAA0->vz << 16;
+    if ((s->vx <<= 4) < 0) {
+        a |= 0xFFFF;
+    }
+    if ((s->vy <<= 4) < 0) {
+        b |= 0xFFFF;
+    }
+    if ((s->vz <<= 4) < 0) {
+        z |= 0xFFFF;
+    }
+    z += s->vz * 2;
+    a += s->vx * 2;
+    b += s->vy * 2;
+    do {
+        a += D_8018DAB0->vx;
+        b += D_8018DAB0->vy;
+        z += D_8018DAB0->vz;
+        D_8018DAA0->vx = a >> 16;
+        D_8018DAA0->vy = b >> 16;
+        D_8018DAA0->vz = z >> 16;
+        r = func_80134310(p, D_8018DAA0, d);
+    } while (p->vy < -0xE00 ? r < 0x1800 : r < 0x2F00);
+    if (p->vy >= -0xBCB) {
+        D_8018DA9C->pad = p->vy;
+        D_801152B0 = *p;
+        if (*(u8 *)rec == 0) {
+            return -1;
+        }
+    } else {
+        D_801152A8 = AF(p, s16, 0);
+        D_801152AA = D_8018DAA0->pad = AF(p, s16, 2);
+        D_801152AC = AF(p, s16, 4);
+        D_801152AE = AF(p, s16, 6);
+    }
+    return 1;
+}
 
 /* the dot product of two short vectors, plus a constant */
 inline s32 func_80134310(SVECTOR *a, SVECTOR *b, s32 c) {
@@ -2328,18 +2662,216 @@ s32 func_80134510(SVECTOR *p) {
     return r;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_801345F8);
+extern s32 func_801347A0();
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_801347A0);
+/* the records of the cell under the path start (D_8018DA9C) tried against it (func_801347A0), last first: 1 when
+   one blocks it, its first word kept in D_801ED3C0 */
+s32 func_801345F8(void *h, SVECTOR *s, SVECTOR *e) {
+    s16 cx;
+    s16 cz;
+    s32 idx;
+    u16 k;
+    u16 *cell;
+    u16 *list;
+    u16 n;
+    u16 *rec;
+    u16 id;
+    s16 bit;
+    void *a;
+    void *b;
+    u8 *r18;
+    u8 *r22;
+    u8 *lists;
+    cx = ((((u16)D_8018DA9C->vx + 0x8000) >> 7) & 0x1FF) - AF(h, u16, 0);
+    if ((cx & 0xFFFFU) < AF(h, u16, 4)) {
+        cz = ((((u16)D_8018DA9C->vz + 0x8000) >> 7) & 0x1FF) - AF(h, u16, 2);
+        if ((cz & 0xFFFFU) >= AF(h, u16, 6)) {
+            return 0;
+        }
+        {
+            idx = (u16)cz * AF(h, u16, 4) + (u16)cx;
+            k = idx * 2;
+            cell = (u16 *)(k * 2 + AF(h, s32, 8));
+            lists = AF(h, u8 *, 0x14);
+            b = AF(h, void *, 0xC);
+            a = AF(h, void *, 0x10);
+            r18 = AF(h, u8 *, 0x18);
+            r22 = AF(h, u8 *, 0x1C);
+            n = cell[1];
+            list = (u16 *)(lists + cell[0]) + n - 1;
+            while (n-- != 0) {
+                id = *list;
+                bit = id & 0x8000;
+                if (bit == 0) {
+                    rec = (u16 *)(r18 + id * 18);
+                } else {
+                    rec = (u16 *)(r22 + (id & 0x7FFF) * 22);
+                }
+                if (func_801347A0(bit, rec, a, b) != 0) {
+                    D_801ED3C0 = *rec;
+                    return 1;
+                }
+                list--;
+            }
+        }
+    }
+    return 0;
+}
+
+extern inline s32 func_80134A28();
+
+s32 func_801347A0(s32 arg0, u16 *rec, SVECTOR *a, s32 *b) {
+    s16 bit = arg0;
+    SVECTOR *s;
+    s32 c;
+    s32 t;
+    s32 d;
+    s32 q;
+
+    s = a + (s16)rec[1];
+    c = b[(s16)rec[2]];
+    if (func_80134A28(s, D_8018DAA0, c) >= 0) {
+        return 0;
+    }
+    t = func_80134A28(s, D_8018DA9C, c);
+    if (t < 0) {
+        return 0;
+    }
+    d = s->vy * 0x30;
+    q = (-t * 0x30) / d;
+    D_8018DAA4->vx = D_8018DA9C->vx;
+    D_8018DAA4->vy = D_8018DA9C->vy + q;
+    D_8018DAA4->vz = D_8018DA9C->vz;
+    if (func_80134A28(a + (s16)rec[3], D_8018DAA4, b[(s16)rec[4]]) < -0x2F00) {
+        return 0;
+    }
+    if (func_80134A28(a + (s16)rec[5], D_8018DAA4, b[(s16)rec[6]]) < -0x2F00) {
+        return 0;
+    }
+    if (func_80134A28(a + (s16)rec[7], D_8018DAA4, b[(s16)rec[8]]) < -0x2F00) {
+        return 0;
+    }
+    if (bit != 0) {
+        if (func_80134A28(a + (s16)rec[9], D_8018DAA4, b[(s16)rec[10]]) < -0x2F00) {
+            return 0;
+        }
+    }
+    if (rec[0] & 0x300) {
+        return 0;
+    }
+    D_8018DAA4->vx = D_8018DA9C->vx;
+    D_8018DAA4->vz = D_8018DA9C->vz;
+    *(SVECTOR *)&D_801152A8 = *s;
+    D_8018DA9C->pad = s->vy;
+    return 1;
+}
 
 /* the dot product of two short vectors, plus a constant (this file's copy) */
 inline s32 func_80134A28(SVECTOR *a, SVECTOR *b, s32 c) {
     return a->vx * b->vx + a->vy * b->vy + a->vz * b->vz + c;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80134A74);
+extern s32 func_80134C20();
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80134C20);
+s32 func_80134A74(u16 kind, s16 x, s16 z, void *h) {
+    s16 cx;
+    s16 cz;
+    u16 w;
+    u16 *cell;
+    u16 *list;
+    u16 n;
+    u8 *rec;
+    u16 id;
+    s16 bit;
+    void *a;
+    void *b;
+    u8 *r18;
+    u8 *r22;
+    u8 *lists;
+    w = AF(h, u16, 4);
+    cx = ((((u16)x + 0x8000) >> 7) & 0x1FF) - AF(h, u16, 0);
+    if ((u32)(cx & 0xFFFF) < w) {
+        cz = ((((u16)z + 0x8000) >> 7) & 0x1FF) - AF(h, u16, 2);
+        if ((u32)(cz & 0xFFFF) >= AF(h, u16, 6)) {
+            return 0;
+        }
+        b = AF(h, void *, 0xC);
+        a = AF(h, void *, 0x10);
+        r18 = AF(h, u8 *, 0x18);
+        r22 = AF(h, u8 *, 0x1C);
+        lists = AF(h, u8 *, 0x14);
+        cell = (u16 *)((u16)(((u16)cz * w + (u16)cx) * 2) * 2 + AF(h, s32, 8));
+        n = cell[1];
+        list = (u16 *)(lists + cell[0]) + n - 1;
+        while (n-- != 0) {
+            id = *list;
+            bit = id & 0x8000;
+            if (bit == 0) {
+                rec = r18 + id * 18;
+                list--;
+            } else {
+                rec = r22 + (id & 0x7FFF) * 22;
+                list--;
+            }
+            if (func_80134C20((s16)(bit | kind), rec, a, b) != 0) {
+                D_801ED3C0 = *(u16 *)rec;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+extern inline s32 func_80134FB8();
+
+s32 func_80134C20(s32 kind0, s16 *rec, SVECTOR *a, s32 *b) {
+    s16 kind = kind0;
+    SVECTOR *p = &a[rec[1]];
+    s32 c = b[rec[2]];
+    s32 d1;
+    s32 dd;
+    s32 n;
+    if (func_80134FB8(p, D_8018DAA0, c) >= 0) {
+        return 0;
+    }
+    d1 = func_80134FB8(p, D_8018DA9C, c);
+    if (d1 < 0) {
+        return 0;
+    }
+    dd = func_80134FB8(p, D_8018DAA8, 0);
+    n = -d1;
+    D_8018DAA4->vx = D_8018DA9C->vx + n * D_8018DAA8->vx / dd;
+    D_8018DAA4->vy = D_8018DA9C->vy + n * D_8018DAA8->vy / dd;
+    D_8018DAA4->vz = D_8018DA9C->vz + n * D_8018DAA8->vz / dd;
+    if (func_80134FB8(&a[rec[3]], D_8018DAA4, b[rec[4]]) < -0x2F00) {
+        return 0;
+    }
+    if (func_80134FB8(&a[rec[5]], D_8018DAA4, b[rec[6]]) < -0x2F00) {
+        return 0;
+    }
+    if (func_80134FB8(&a[rec[7]], D_8018DAA4, b[rec[8]]) < -0x2F00) {
+        return 0;
+    }
+    if (kind < 0) {
+        if (func_80134FB8(&a[rec[9]], D_8018DAA4, b[rec[10]]) < -0x2F00) {
+            return 0;
+        }
+    }
+    if (kind & 1) {
+        if ((u16)rec[0] & 0x300) {
+            return 0;
+        }
+    } else if ((u16)rec[0] & 0x200) {
+        D_801ED3C0 = rec[0];
+        return 0;
+    }
+    *(SVECTOR *)&D_801152A8 = *p;
+    VectorNormalSS(D_8018DAA8, D_8018DAA8);
+    D_8018DAA4->vx -= D_8018DAA8->vx >> 11;
+    D_8018DAA4->vy -= D_8018DAA8->vy >> 11;
+    D_8018DAA4->vz -= D_8018DAA8->vz >> 11;
+    return 1;
+}
 
 /* the dot product of two short vectors, plus a constant (this file's copy) */
 inline s32 func_80134FB8(SVECTOR *a, SVECTOR *b, s32 c) {
@@ -2935,7 +3467,7 @@ void func_80136C4C(void) {
 
 /* the current mode's handler */
 void func_80136C54(void) {
-    D_8018DAB8[D_800AF630.unkA3C0]();
+    D_8018DAB8[D_800AF630.state]();
 }
 
 /* the ten-character text at (0x78, 0x10) */
@@ -2955,7 +3487,7 @@ void func_80136D08(SVECTOR *a, SVECTOR *b) {
     s32 z;
     SetRotMatrix(&D_800AF630.wsm);
     SetTransMatrix(&D_800AF630.wsm);
-    p = (LINE_G2 *)func_80010A08(sizeof(LINE_G2));
+    p = (LINE_G2 *)AllocPrim(sizeof(LINE_G2));
     SetLineG2(p);
     p->r0 = p->b1 = 0xFF;
     p->b0 = p->r1 = p->g0 = p->g1 = 0x80;
@@ -2989,13 +3521,161 @@ void func_80136ECC(s16 x0, s16 y0, s16 x1, s16 y1, u8 r, u8 g, u8 b) {
     GsSortLine(&l, &D_800A6518[D_800AF630.frame], 0);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80136F3C);
+void func_80136F3C(s32 x, s32 y) {
+    GsLINE l;
+    s16 x0, x1, y0, y1;
+    y0 = y - 3;
+    x1 = x + 3;
+    y1 = y + 3;
+    l.attribute = 0;
+    l.r = 0xFF;
+    l.g = 0;
+    l.b = 0;
+    l.x0 = x - 3;
+    l.y0 = y0;
+    l.x1 = x1;
+    l.y1 = y1;
+    GsSortLine(&l, &D_800A6518[D_800B9A02], 0);
+    x0 = x1;
+    x1 = x - 3;
+    l.attribute = 0;
+    l.r = 0xFF;
+    l.g = 0;
+    l.b = 0;
+    l.x0 = x0;
+    l.y0 = y0;
+    l.x1 = x1;
+    l.y1 = y1;
+    GsSortLine(&l, &D_800A6518[D_800B9A02], 0);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80137030);
+/* a green Y marker at a screen point (debug) */
+void func_80137030(s32 x, s32 y) {
+    GsLINE l;
+    s16 a, b;
+    a = x - 3;
+    b = y - 3;
+    l.attribute = 0;
+    l.r = 0;
+    l.g = 0xFF;
+    l.b = 0;
+    l.x0 = a;
+    l.y0 = b;
+    l.x1 = x;
+    l.y1 = y;
+    GsSortLine(&l, &D_800A6518[D_800B9A02], 0);
+    a = x + 3;
+    l.attribute = 0;
+    l.r = 0;
+    l.g = 0xFF;
+    l.b = 0;
+    l.x0 = a;
+    l.y0 = b;
+    l.x1 = x;
+    l.y1 = y;
+    GsSortLine(&l, &D_800A6518[D_800B9A02], 0);
+    b = y + 3;
+    l.attribute = 0;
+    l.r = 0;
+    l.g = 0xFF;
+    l.b = 0;
+    l.x0 = x;
+    l.y0 = b;
+    l.x1 = x;
+    l.y1 = y;
+    GsSortLine(&l, &D_800A6518[D_800B9A02], 0);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80137178);
+static inline void func_80137178_line(s16 x0, s16 y0, s16 x1, s16 y1, u8 r, u8 g, u8 b) {
+    GsLINE l;
+    l.attribute = 0;
+    l.r = r;
+    l.g = g;
+    l.b = b;
+    l.x0 = x0;
+    l.y0 = y0;
+    l.x1 = x1;
+    l.y1 = y1;
+    GsSortLine(&l, &D_800A6518[D_800B9A02], 0);
+}
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_801372B0);
+/* a blue Z at a screen point (debug marker), drawn as a polyline: each line moves one end */
+void func_80137178(s32 x, s32 y) {
+    s16 x0 = x - 3;
+    s16 y0 = y - 3;
+    s16 x1 = x + 3;
+    s16 y1 = y - 3;
+    func_80137178_line(x0, y0, x1, y1, 0, 0, 0xFF);
+    y0 = y + 3;
+    func_80137178_line(x0, y0, x1, y1, 0, 0, 0xFF);
+    y1 = y + 3;
+    func_80137178_line(x0, y0, x1, y1, 0, 0, 0xFF);
+}
+
+extern u8 D_800B9A11;
+
+static inline void func_801372B0_x(s16 x, s16 y) {
+    GsLINE l;
+    s16 x0, x1, y0, y1;
+    y0 = y - 3;
+    x1 = x + 3;
+    y1 = y + 3;
+    l.attribute = 0;
+    l.r = 0xFF;
+    l.g = 0;
+    l.b = 0;
+    l.x0 = x - 3;
+    l.y0 = y0;
+    l.x1 = x1;
+    l.y1 = y1;
+    GsSortLine(&l, &D_800A6518[D_800B9A02], 0);
+    x0 = x1;
+    x1 = x - 3;
+    l.attribute = 0;
+    l.r = 0xFF;
+    l.g = 0;
+    l.b = 0;
+    l.x0 = x0;
+    l.y0 = y0;
+    l.x1 = x1;
+    l.y1 = y1;
+    GsSortLine(&l, &D_800A6518[D_800B9A02], 0);
+}
+
+void func_801372B0(void) {
+    SVECTOR v;
+    SVECTOR o;
+    Work *w = &D_800AF630;
+    s16 x, y;
+    v.vx = v.vy = v.vz = 0;
+    if (D_800B9A11 == 1) return;
+    v.vx = 0x10;
+    ApplyMatrixSV(&w->wsm, &v, &o);
+    func_80137178_line(0x78, -0x5A, o.vx + 0x78, o.vy - 0x5A, 0xFF, 0xFF, 0xFF);
+    v.vx += 6;
+    ApplyMatrixSV(&w->wsm, &v, &o);
+    x = o.vx + 0x78;
+    y = o.vy - 0x5A;
+    func_801372B0_x(x, y);
+    v.vx = 0;
+    v.vy = 0x10;
+    ApplyMatrixSV(&w->wsm, &v, &o);
+    func_80137178_line(0x78, -0x5A, o.vx + 0x78, o.vy - 0x5A, 0xFF, 0xFF, 0xFF);
+    v.vy += 6;
+    ApplyMatrixSV(&w->wsm, &v, &o);
+    x = o.vx + 0x78;
+    y = o.vy - 0x5A;
+    func_80137030(x, y);
+    v.vy = 0;
+    v.vz = 0x10;
+    ApplyMatrixSV(&w->wsm, &v, &o);
+    func_80137178_line(0x78, -0x5A, o.vx + 0x78, o.vy - 0x5A, 0xFF, 0xFF, 0xFF);
+    v.vz += 6;
+    ApplyMatrixSV(&w->wsm, &v, &o);
+    x = o.vx + 0x78;
+    y = o.vy - 0x5A;
+    func_80137178(x, y);
+}
 
 Win *func_801375EC(s32 id, s32 v) {
     return func_80137614(id, v, 0);
@@ -3162,7 +3842,7 @@ void func_80137BD8(Win *w) {
             col[1] = 0xFF;
             col[2] = 0x71;
             func_80137DD4(w, col, &D_800A6518[D_800AF630.frame]);
-        } else if (w->state == 3 && (D_800AF630.unkA3A8 & 4)) {
+        } else if (w->state == 3 && (D_800AF630.tick & 4)) {
             func_80139680(w, &D_800A6518[D_800AF630.frame]);
         }
     }
@@ -3171,7 +3851,7 @@ void func_80137BD8(Win *w) {
 /* window 0's step for the frame: its text, then the arrow (state 7) or the blinking prompt (state 3) */
 s32 func_80137D08(s32 a, GsOT *b, s16 c) {
     u8 col[3];
-    D_800A5E60 = a;
+    g_PrimNext = a;
     D_80126A0A = c;
     func_801392FC(D_801269F0, D_80126A0E, b);
     if (D_801269F4 == 7) {
@@ -3182,10 +3862,38 @@ s32 func_80137D08(s32 a, GsOT *b, s16 c) {
     } else if (D_801269F4 == 3 && (D_8018DB0C & 4)) {
         func_80139680(D_801269F0, b);
     }
-    return D_800A5E60;
+    return g_PrimNext;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80137DD4);
+extern void func_80137FD8(Win *w, u8 *col, PolyG4 *p, s16 y);
+
+void func_80137DD4(Win *w, u8 *col, GsOT *ot) {
+    s16 r;
+    s16 y;
+    s16 t;
+    s16 n;
+    PolyG4 *p;
+    P_TAG *m;
+    r = w->unk12 - w->unk16;
+    if (r < 0) {
+        r += w->unk2E + 1;
+    }
+    n = r - w->unk21;
+    t = (s8)AF(w, u8, 0x1F) + 1;
+    y = w->unk32 + (s16)(n + t) * 14;
+    p = (PolyG4 *)AllocPrim(0x48);
+    col[3] = 0;
+    func_80137FD8(w, col, p, y);
+    addPrim(&ot->org[w->unk1A], p);
+    p++;
+    col[3] = 1;
+    func_80137FD8(w, col, p, y);
+    addPrim(&ot->org[w->unk1A], p);
+    m = (P_TAG *)AllocPrim(8);
+    m->len = 1;
+    ((u32 *)m)[1] = 0xE100000A;
+    addPrim(&ot->org[w->unk1A], m);
+}
 
 /* the window's highlight bar: the colour given fading to white, one row high */
 void func_80137FD8(Win *w, u8 *col, PolyG4 *p, s16 y) {
@@ -3218,7 +3926,263 @@ void func_80137FD8(Win *w, u8 *col, PolyG4 *p, s16 y) {
     }
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_801380E0);
+extern inline void func_80139914();
+extern s32 func_800CF864();
+extern void func_8001AAD0();
+extern void func_80029124();
+extern void func_801391F0();
+extern s32 func_80138C60();
+extern void func_80138D58(Win *w, u16 n);
+extern void func_80138AB4();
+
+void func_801380E0(Win *w) {
+    u16 *p;
+    u8 *s;
+    u8 c;
+    u8 arg;
+    s32 r;
+    s16 *voice; /* D_8012752E, and D_8012752C read through it (one object split by splat) */
+    if (w->unkC != 0) {
+        w->unkC--;
+    } else {
+        voice = &D_8012752E;
+        do {
+            r = 0;
+            if (w->flags & 0x400) {
+                s = (u8 *)D_80127530[w->unk4A];
+                p = &w->unk44;
+            } else {
+                p = &w->unk10;
+                s = (u8 *)w->id;
+            }
+            {
+                u8 *t = s + *p;
+                c = t[0];
+                arg = t[1];
+            }
+            if (c >= 0x20) {
+                r = func_80138DE0(w, c, arg);
+                if (!(w->flags & 0x80220)) {
+                    r = 0;
+                }
+                continue;
+            }
+            if (c == 0) {
+                goto stop;
+            }
+            switch (c) {
+            case 10:
+                func_80139220(w);
+                *p += 1;
+                w->flags &= ~0x80000;
+                continue;
+            case 7:
+                if (w->flags & 0x10000) {
+                    r = 1;
+                } else {
+                    w->state = 3;
+                }
+                *p += 1;
+                continue;
+            case 8:
+                func_801391F0(w);
+                *p += 1;
+                continue;
+            case 1:
+                w->unk23 = arg;
+                *p += 2;
+                r = 1;
+                continue;
+            case 2:
+                w->unk22 = arg;
+                w->unk20 = s[*p + 2];
+                *p += 3;
+                if (func_80138C60(w) == 0) {
+                    func_80139914(w);
+                    return;
+                }
+                w->state = 9;
+                if (s[*p] == 5) {
+                    w->flags |= 0x4000;
+                    *p += 1;
+                }
+                continue;
+            case 22:
+                w->flags = (w->flags & ~0x20) | 0x4001;
+                *p += 1;
+                r = 1;
+                continue;
+            case 5:
+                w->flags |= 0x4000;
+                *p += 1;
+                r = 1;
+                continue;
+            case 4:
+                w->unkD = arg;
+                *p += 2;
+                r = 1;
+                continue;
+            case 3:
+                if (!(w->flags & 0x20000)) {
+                    w->state = 0xB;
+                    w->unkD = arg;
+                    w->flags = (w->flags | 0x8000) & ~0x20;
+                    continue;
+                }
+                *p += 2;
+                r = 1;
+                continue;
+            case 6:
+                w->state = 4;
+                *p += 1;
+                continue;
+            case 11:
+                if (voice[0] != 0 || (w->flags & 0x20) || func_800CF864() == 0) {
+                    *p += 4;
+                    r = 1;
+                    continue;
+                }
+                voice[-1] = s[*p + 2] + (s[*p + 3] << 8);
+                *p += 4;
+                w->flags = (w->flags & ~0x60020) | 0x10000;
+                if (voice[-1] != 0) {
+                    func_8001AAD0(arg & 0x7F, voice[-1]);
+                    if (arg & 0x80) {
+                        w->flags |= 0x40000;
+                    }
+                    if (s[*p] == 2 || (w->flags & 0x40000)) {
+                        r = 1;
+                    } else {
+                        w->state = 0x10;
+                    }
+                    if (func_8001B22C() == 0) {
+                        if (w->flags & 1) {
+                            CancelStreamLoad();
+                        } else {
+                            w->flags = (w->flags & ~0x10000) | 0x20020;
+                            func_80139788();
+                        }
+                        w->state = 2;
+                    }
+                    continue;
+                }
+                r = 1;
+                continue;
+            case 12:
+                w->state = 6;
+                w->unk21 = 2;
+                *p += 1;
+                w->flags |= 0x4300;
+                continue;
+            case 13:
+                w->state = 6;
+                w->unk21 = 3;
+                *p += 1;
+                w->flags |= 0x4300;
+                continue;
+            case 9:
+                func_80138D58(w, arg);
+                *p += 2;
+                r = 1;
+                continue;
+            case 14:
+                w->state = 8;
+                w->unk44 = 0;
+                func_80138AB4(w);
+                *p += 1;
+                continue;
+            case 15:
+                w->unk44 = 0;
+                w->flags |= 0x400;
+                *p += 1;
+                r = 1;
+                continue;
+            case 16:
+                func_80029124(arg | (s[*p + 2] << 8), 1);
+                *p += 3;
+                r = 1;
+                continue;
+            case 17:
+                func_80029124(arg | (s[*p + 2] << 8), 0);
+                *p += 3;
+                r = 1;
+                continue;
+            case 18:
+                if ((u8)func_80029178(arg | (s[*p + 2] << 8)) != 0) {
+                    *p += 4 + s[*p + 3];
+                } else {
+                    *p += 4;
+                }
+                r = 1;
+                continue;
+            case 19:
+                if ((u8)func_80029178(arg | (s[*p + 2] << 8)) == 0) {
+                    *p += 4 + s[*p + 3];
+                } else {
+                    *p += 4;
+                }
+                r = 1;
+                continue;
+            case 20:
+                if (!(w->flags & 0x20000)) {
+                    w->unkE = s[*p + 1] + (s[*p + 2] << 8);
+                }
+                *p += 3;
+                r = 1;
+                continue;
+            case 21:
+                if (w->unkE != 0) {
+                    w->state = 0xF;
+                } else {
+                    r = 1;
+                }
+                *p += 1;
+                continue;
+            case 23:
+                w->flags |= 2;
+                *p += 1;
+                r = 1;
+                continue;
+            case 24:
+                w->flags |= 0x80000;
+                *p += 1;
+                r = 1;
+                continue;
+            case 25:
+                *p += 1;
+                if ((w->flags & 0x10000) && D_8012752C != 0) {
+                    w->state = 0x10;
+                    continue;
+                }
+                r = 1;
+                continue;
+            default:
+                *p += 1;
+                r = 1;
+                continue;
+            }
+        stop:
+            if (w->flags & 0x400) {
+                w->flags &= ~0x400;
+                if (w->unk4A < 3) {
+                    w->unk4A++;
+                }
+                continue;
+            }
+            if (w->flags & 0x2000) {
+                w->state = 0xD;
+                return;
+            }
+            w->state = 0xA;
+            return;
+        } while (r != 0);
+        if (w->unkC == 0) {
+            w->unkC = w->unkD;
+        }
+    }
+    func_80139A8C(w);
+    func_80139B18(w);
+}
 
 /* the window's text run until it waits: characters, then the control codes below 0x20 */
 void func_801387B8(Win *w) {
@@ -3395,7 +4359,7 @@ void func_80138D58(Win *w, u16 n) {
 }
 
 s16 func_80138DB8(Win *w, u8 which, s32 mask) {
-    return func_80014E80(which, mask);
+    return TestPadDirWideAny(which, mask);
 }
 
 /* one character put: 0xE0 and up a wide one, 0x20 and up a narrow one; the frame's character budget used */
@@ -3430,7 +4394,78 @@ s32 func_80138DE0(Win *w, u8 ch, s32 x) {
     return --*c;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80138ED0);
+extern s32 func_8013914C();
+extern u16 D_80127C0C[];
+
+/* a glyph put into the window's text area (two 4-bit pixel columns per halfword), then copied into this frame's
+   slot of the character buffer after the budget word and loaded to VRAM */
+s32 func_80138ED0(Win *w, u16 ch, u8 *font) {
+    RECT r;
+    u16 x;
+    u16 col;
+    u8 *g;
+    u16 *src;
+    u16 *d;
+    u16 *dst;
+    s32 i;
+    s32 j;
+    s32 b; /* PORT NOTE: read before set, as the original */
+    s32 t;
+    s32 k;
+    s32 *c;
+    u16 *s;
+    col = w->unk23 & 0xF;
+    if (func_8013914C(w, &r) != 0) {
+        return 1;
+    }
+    x = r.x - w->unk38;
+    g = font + ch * 12;
+    src = &D_80127C0C[x];
+    if (x % 3 != 0) {
+        for (i = 0, k = 0; i < 12; i++) {
+            for (j = 6; j < 8; j++) {
+                t = (u16)b << 4;
+                if (!((*g >> j) & 1)) b = t; else b = t | (u16)col;
+            }
+            src[k++] |= b << 8;
+            for (j = 2; j < 6; j++) {
+                t = (u16)b << 4;
+                if (!((*g >> j) & 1)) b = t; else b = t | (u16)col;
+            }
+            src[k] = b;
+            k += 53;
+            g++;
+        }
+    } else {
+        for (i = 0, k = 0; i < 12; i++) {
+            for (j = 4; j < 8; j++) {
+                t = (u16)b << 4;
+                if (!((*g >> j) & 1)) b = t; else b = t | (u16)col;
+            }
+            src[k++] = b;
+            for (j = 2; j < 4; j++) {
+                t = (u16)b << 4;
+                if (!((*g >> j) & 1)) b = t; else b = t | (u16)col;
+            }
+            src[k] = b & 0xFF;
+            k += 53;
+            g++;
+        }
+    }
+    i = 0;
+    s = src;
+    c = &D_80127548;
+    dst = (u16 *)(&D_80127548 + 1) + (0x24 - *c) * 24;
+    for (d = dst; i < 12; i++) {
+        *d++ = *s++;
+        *d++ = *s;
+        s += 53;
+    }
+    r.w = 2;
+    r.h = 12;
+    LoadImage(&r, (u32 *)dst);
+    return 0;
+}
 
 /* the next character cell of a window's text: past the row's end it goes to the next row (1 when the text ends) */
 s32 func_8013914C(Win *w, s16 *out) {
@@ -3534,14 +4569,81 @@ void func_80139634(Win *w) {
     ClearImage(&r, 0, 0, 0);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80139680);
+void func_80139680(Win *w, GsOT *ot) {
+    GsSPRITE s;
+    s32 n = w->unk12 - w->unk16;
+    u16 c;
+    s32 x;
+    s16 sx;
+    if (n < 0) {
+        n += 4;
+    }
+    s.attribute = 0;
+    s.tpage = GetTPage(0, 1, 0x1C0, 0x100);
+    s.cx = w->unk3C;
+    s.cy = w->unk3E;
+    s.r = s.g = s.b = 0x80;
+    c = w->unk14;
+    x = w->unk30;
+    if (c < 0x24) {
+        sx = c * 6 + x;
+    } else {
+        sx = x + 0xD2;
+    }
+    s.x = sx;
+    s.y = w->unk32 + n * 12;
+    if (n != 0) {
+        s.y += n * 2;
+    }
+    s.h = s.w = 12;
+    s.u = 0xF0;
+    s.v = 0;
+    GsSortFastSprite(&s, ot, w->unk1A);
+}
 
 void func_80139788(void) {
-    func_8001931C();
+    CancelStreamLoad();
     D_8012752C = 0;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_801397B0);
+/* the window's portrait */
+void func_801397B0(Win *w) {
+    GsSPRITE s;
+    u8 pad[8]; /* MATCH-TRICK: frame 0x48, nothing stored */
+    s32 k = w->unk20 - 1;
+    Pos16 *e = &D_8018DB54[k];
+    UPos16 *c;
+    s32 x, y;
+    s32 t;
+    s16 sc;
+    s.attribute = 0;
+    x = e->x;
+    y = e->y;
+    t = ((0 & 3) << 7) | ((1 & 3) << 5) | ((y & 0x100) >> 4) | ((x & 0x3C0) >> 6) | ((y & 0x200) << 2);
+    do { c = &D_8018DB98[k]; } while (0); /* MATCH-TRICK: loop-depth weight puts k's quantity above y in local-alloc (k in a0, y in a1) */
+    s.tpage = t;
+    s.cx = c->x;
+    s.cy = c->y;
+    s.r = s.g = s.b = 0x80;
+    s.y = w->unk32;
+    s.w = 0x20;
+    s.h = 0x28;
+    x = (e->x & 0x3F) << 2;
+    s.u = x;
+    s.v = e->y;
+    if (w->unk22 & 8) {
+        s.x = w->unk30 + w->unk34 + 0x28;
+        sc = -w->unk28;
+    } else {
+        s.x = w->unk30 - 0x28;
+        sc = w->unk28;
+    }
+    s.scalex = sc;
+    s.scaley = w->unk2A;
+    s.mx = s.my = 0;
+    s.rotate = 0;
+    GsSortSprite(&s, &D_800A6518[D_800B9A02], w->unk1A);
+}
 
 /* a window closed */
 inline void func_80139914(Win *w) {
@@ -3597,12 +4699,12 @@ void func_80139A68(s16 v, u16 i) {
 /* the confirm button: the window's text finished (0x20), or skipped to its end */
 void func_80139A8C(Win *w) {
     s32 f;
-    if (!(w->flags & 0x2021) && (s16)func_80014E80(0, 0x20) != 0) {
+    if (!(w->flags & 0x2021) && (s16)TestPadDirWideAny(0, 0x20) != 0) {
         f = w->flags | 0x20;
         w->flags = f;
         if (f & 0x10000) {
             w->flags = (f & ~0x10000) | 0x20000;
-            func_8001931C();
+            CancelStreamLoad();
             D_8012752C = 0;
         }
     }
@@ -3612,11 +4714,11 @@ void func_80139A8C(Win *w) {
 void func_80139B18(Win *w) {
     s32 f;
     Cursor *p;
-    if (!(w->flags & 0x6000) && (s16)func_80014E80(0, 0x10) != 0) {
+    if (!(w->flags & 0x6000) && (s16)TestPadDirWideAny(0, 0x10) != 0) {
         f = w->flags;
         if (f & 0x10000) {
             w->flags = f & ~0x10000;
-            func_8001931C();
+            CancelStreamLoad();
             D_8012752C = 0;
         }
         if (w->flags & 0x2000) {
@@ -3632,7 +4734,32 @@ void func_80139B18(Win *w) {
     }
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80139BE0);
+void func_80139BE0(Win *w) {
+    u16 k;
+    s16 c;
+    s16 r;
+    if (!(w->flags & 0x2000)) {
+        k = w->unk22 & 0x60;
+        switch (w->unk18) {
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+            c = D_8018DAD8[k >> 5];
+            r = 3;
+            break;
+        default:
+            c = D_8018DAD8[0];
+            r = 3;
+            break;
+        }
+        w->unk2E = r;
+        w->unk2C = c;
+    }
+    w->unk34 = w->unk2C * 6;
+    w->unk36 = w->unk2E * 12 + (w->unk2E - 1) * 2;
+}
 
 /* the window's corner from its centre */
 void func_80139C7C(Win *w) {
@@ -3760,7 +4887,7 @@ void func_80139FE8(Win *w) {
     }
     if (r == 0) {
         if (w->flags & 1) {
-            func_8001931C();
+            CancelStreamLoad();
         } else {
             w->flags = (w->flags & ~0x10000) | 0x20020;
             func_80139788();
@@ -3914,7 +5041,64 @@ void func_8013A4C4(Cursor *c) {
     func_8013A530(c);
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_8013A530);
+extern void func_8013AA24();
+extern void func_80015F04();
+extern void func_80015D4C();
+
+/* r216 x11f: x is reused for c->unkE (one s16 local for both values); that raises its global-alloc priority above the unk34 load temp, so x gets a0 as in the original. */
+void func_8013A530(Cursor *c) {
+    Win *w = c->owner;
+    u8 f;
+    s16 x;
+    s32 y;
+    s16 sw, sh, sx, sy;
+    f = w->unk22;
+    if (w->unk18 != 0 && w->unk18 < 7) {
+    switch (w->unk18) {
+    case 2: case 3: case 4: case 5: case 6:
+        x = w->unk34 + 0x10;
+        y = (u16)w->unk36 + 0x10;
+        if (w->unk20 != 0) {
+            x = w->unk34 + 0x38;
+        }
+        c->unk8 = (w->unk28 * (u16)x) / 154;
+        if (!(f & 8)) {
+            c->unk8 = -c->unk8;
+        }
+        if (!(f & 0x60) || (f & 0x80)) {
+            c->unk8 = -c->unk8;
+        }
+        c->unkA = (w->unk2A * (u16)y) / 42;
+        if (f & 0x10) {
+            c->unkA = -c->unkA;
+        }
+        x = c->unkE;
+        if (x > c->unkC) {
+            c->unkC += 0x400;
+            if (c->unkC > c->unkE) {
+                c->unkC = c->unkE;
+            }
+        } else if (x < c->unkC) {
+            c->unkC -= 0x400;
+            if (c->unkC < c->unkE) {
+                c->unkC = c->unkE;
+            }
+        }
+        func_8013AA24(w, c, c, y);
+        break;
+    case 1:
+        *(Pt16 *)&c->unk8 = *(Pt16 *)&w->unk28;
+        sw = ((w->unk34 + 0x10) * (s16)c->unk8) >> 12;
+        sh = ((w->unk36 + 0x10) * (s16)c->unkA) >> 12;
+        sx = w->pos[0] - ((u16)sw >> 1);
+        sy = w->pos[1] - ((u16)sh >> 1);
+        func_80015F04(sx, sy, sw, sh, 0xB3, 0x99, 0x4C, w->unk1A, 4);
+        func_80015F04((s16)(sx + 1), (s16)(sy + 1), (s16)(sw - 2), (s16)(sh - 2), 0xE6, 0xCC, 0x73, w->unk1A, 4);
+        func_80015D4C(sx, sy, sw, sh, 0xFF, 0xE6, 0x99, w->unk1A, 4);
+        break;
+    }
+    }
+}
 
 void func_8013A860(void) {
     s32 i;
@@ -4034,13 +5218,13 @@ s32 func_8013AB54(s32 buf, u32 *ot, s16 *r, s32 f) {
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     func_8013AD38(sc, 0, (Pt16 *)v, (Pair8 *)z);
-    D_800A5E60 = buf;
+    g_PrimNext = buf;
     if (f != 0) {
         /* called with three arguments (a3 passes through) */
         func_8013B274(ot, 0x80, sc);
     }
     func_8013AF20(ot, r, (Pt16 *)v, (Pair8 *)z);
-    return D_800A5E60;
+    return g_PrimNext;
 }
 
 /* the cursor's outline: 30 points between two shapes at n / 0x1000, through the GTE's rotation and translation */
@@ -4073,9 +5257,9 @@ void func_8013AF20(u32 *ot, s16 *pos, Pt16 *v, Pair8 *d) {
     LINE_F2 *a;
     LINE_F2 *b;
     s32 i;
-    q = (POLY_F4 *)func_80010A08(0x168);
-    a = (LINE_F2 *)func_80010A08(0x1E0);
-    b = (LINE_F2 *)func_80010A08(0x1E0);
+    q = (POLY_F4 *)AllocPrim(0x168);
+    a = (LINE_F2 *)AllocPrim(0x1E0);
+    b = (LINE_F2 *)AllocPrim(0x1E0);
     for (i = 0; i < 30; i++, a++) {
         setlen(a, 3);
         a->code = 0x40;
@@ -4135,7 +5319,7 @@ void func_8013B274(u32 *ot, s16 n, s16 *scale) {
     s16 x;
     s16 lim;
     s32 e;
-    p = (POLY_FT4 *)func_80010A08(0x28);
+    p = (POLY_FT4 *)AllocPrim(0x28);
     setlen(p, 9);
     p->code = 0x2C;
     p->r0 = 0x80;

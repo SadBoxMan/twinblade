@@ -79,9 +79,9 @@ extern u8 D_sc06_027_8019A074;
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc06_027_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -114,8 +114,8 @@ void func_sc06_027_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -337,7 +337,7 @@ void func_sc06_027_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc06_027_8017CD9C(void) {
@@ -478,7 +478,7 @@ extern void func_80013F3C();
 extern s16 D_sc06_027_8019A0DC[];
 
 extern OtRef D_800A651C[];
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 
 extern SV8 D_80126940;
 extern s32 ratan2();
@@ -538,7 +538,7 @@ void func_sc06_027_8017D3A0(u8 *o) {
     u8 *p;
 
     ot = D_800A651C[D_800B9A02].ot;
-    p = func_80010A08(0x30);
+    p = AllocPrim(0x30);
     if (p != 0) {
         SetDrawMode(p, 0, 0, (u16) GetTPage(0, 1, 0, 0), 0);
         AF(p, u8, 0x10) = AF(o, s32, 0x1C);

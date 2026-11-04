@@ -289,9 +289,9 @@ extern void func_sc03_002_80184A38();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02[];
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 typedef struct { s16 vx, vy, vz, pad; } SV;
 typedef struct { u16 v[6]; } U12;
@@ -458,7 +458,7 @@ extern s32 D_sc03_002_80189DAC[];
 extern void func_8012B0B4();
 extern void func_8012E32C();
 extern void func_8012E28C();
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 
 extern s32 func_8012EF70();
 extern void func_sc03_002_8017EF80();
@@ -1187,8 +1187,8 @@ void func_sc03_002_8017D604(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -1410,7 +1410,7 @@ void func_sc03_002_8017D604(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc03_002_8017E4E4(u8 *o) {
@@ -3262,7 +3262,7 @@ void func_sc03_002_80182A78(u8 *o, s32 n) {
         v[3].x = AF(o, u16, 0) + ((x.s.x * (r * 3 + 0x1000)) >> 12);
         v[3].y = AF(o, u16, 2) - h;
         v[3].z = AF(o, u16, 4) + ((x.s.y * (r * 3 + 0x1000)) >> 12);
-        p = func_80010A08(0x24);
+        p = AllocPrim(0x24);
         AF(p, s32, 4) = D_sc03_002_80189DAC[i];
         AF(p, s32, 0xC) = D_sc03_002_80189DAC[i + 1];
         p[7] = 0x3A;

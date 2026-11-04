@@ -226,8 +226,10 @@ extern void MemCardStart(void);
    the main stack at the saved value, which was stale while these were empty (the pause menu's Lumina Scroll change
    crashed). pc/recomp_rt.c */
 void pc_set_spad_stack(void);
+void pc_set_spad_stack_nested(void);
 void pc_reset_spad_stack(void);
 #define SetSpadStack() pc_set_spad_stack()
+#define SetSpadStackNested() pc_set_spad_stack_nested()
 #define ResetSpadStack() pc_reset_spad_stack()
 #else
 /*
@@ -242,7 +244,18 @@ void pc_reset_spad_stack(void);
                      "sw $sp,0($8)\n\t"                                        \
                      "addiu $8,$8,-4\n\t"                                      \
                      "addu $sp,$8,$0" :: "r"(0x1F8003FC) : "$8", "memory")
-#define ResetSpadStack()                                                       \
+/*
+ * The nested form (r216; LuciDin's ruling 27 Oct): the word at 0x1F8003FC holds the address of the slot for the old
+ * $sp, so a call already running on the scratchpad stack can move below it. ResetSpadStack() restores it the same way
+ * (func_8014CCB4, func_8014D04C, func_8014D3E0, func_8014F6F4, func_8014FA04, func_8014FBC0, func_8014FCFC).
+ */
+#define SetSpadStackNested()                                                   \
+    __asm__ volatile("addu $8,%0,$0\n\t"                                       \
+                     "lw $9,0($8)\n\t"                                         \
+                     "sw $sp,0($9)\n\t"                                        \
+                     "addiu $9,$9,-4\n\t"                                      \
+                     "addu $sp,$9,$0" :: "r"(0x1F8003FC) : "$8", "$9", "memory")
+#define ResetSpadStack()                                                    \
     __asm__ volatile("addiu $sp,$sp,4\n\t"                                     \
                      "lw $sp,0($sp)" ::: "memory")
 

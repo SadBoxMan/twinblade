@@ -192,7 +192,7 @@ extern s32 func_sc04_015_80180B28();
 extern u8 D_sc04_015_801B27DC;
 
 extern s8 D_800B9A10;
-extern void func_80011ADC();
+extern void PrevGameState();
 extern void func_8016F0E4();
 extern void func_80165770();
 extern void func_sc04_015_80181E1C();
@@ -316,9 +316,9 @@ extern u8 D_sc04_015_801C4418;
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 extern u8 D_sc04_015_80188748;
 extern u8 D_sc04_015_80188868;
@@ -579,7 +579,7 @@ extern u8 D_800D387C;
 extern u8 D_800D3888;
 
 extern OtRef D_800A651C[];
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern s32 GetClut();
 extern s32 GetTPage();
 extern void AddPrim();
@@ -829,8 +829,8 @@ void func_sc04_015_8017C730(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -1052,7 +1052,7 @@ void func_sc04_015_8017C730(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 s32 func_sc04_015_8017D610(u8 *arg0) {
@@ -1130,7 +1130,7 @@ s32 func_sc04_015_8017D878(void) {
 }
 
 s32 func_sc04_015_8017D880(u8 *arg0) {
-    func_80011ADC();
+    PrevGameState();
     AF(arg0, s32, 8) = (s32) (AF(arg0, s32, 8) & 0x7F000000);
     D_800B9A10 = 1;
     return 0;
@@ -1533,7 +1533,7 @@ void func_sc04_015_8017E830(u8 *o) {
         D_sc04_015_801C8C60 = 1;
         u = (n & 7) * 4 + 0x140;
         v = (n / 8) * 24;
-        p = func_80010A08(0x28);
+        p = AllocPrim(0x28);
         AF(p, u16, 0xE) = GetClut(0x160, 0x1BA);
         y = v + 0x160;
         tp = GetTPage(0, 0, u & 0x3C0, y & ~0xFF);
@@ -1638,7 +1638,7 @@ s32 func_sc04_015_8017EB78(u8 *r) {
 
     x = AF(r, s16, 0x10);
     y = AF(r, s16, 0x12);
-    pk = func_80010A08(0x28);
+    pk = AllocPrim(0x28);
     AF(pk, u16, 0xE) = GetClut(AF(r, s16, 0x18), AF(r, s16, 0x1A));
     AF(pk, u16, 0x16) = GetTPage(0, 0, x & ~0x3F, y & ~0xFF);
     AF(pk, u8, 3) = 9;
@@ -3691,7 +3691,7 @@ void func_sc04_015_80182F2C(u8 *o, s32 col) {
         w[j].z = AF(o, s16, 4) + u->z;
     }
     RotTransPers4(&w[0], &w[1], &w[2], &w[3], &sxy[4], &sxy[5], &sxy[6], &sxy[7], &p, &flag);
-    prim = func_80010A08(0xA8);
+    prim = AllocPrim(0xA8);
     for (i = 0; i < 4; i++) {
         idx.x = D_sc04_015_801C4160[i].x;
         idx.y = D_sc04_015_801C4160[i].y;

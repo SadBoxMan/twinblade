@@ -80,8 +80,8 @@ typedef struct { PTAG tag; u8 r0, g0, b0, code; s16 x0, y0, x1, y1, x2, y2, x3, 
 typedef union { s32 w; XY s; } UXY;
 extern s32 D_800AF648[];
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
-extern u8 *D_800A5E60;
+extern u32 g_WorldOtTable[2][0x1000];
+extern u8 *g_PrimNext;
 extern s32 RotMatrixZ();
 
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
@@ -119,8 +119,8 @@ void func_sc03_114_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -342,7 +342,7 @@ void func_sc03_114_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc03_114_8017CD9C(u8 *arg0) {
@@ -618,7 +618,7 @@ typedef struct { V16 a, b, c; } Blk30;
 typedef struct { u8 b[0x34]; } R34;
 typedef struct { s16 x, y, z, a, b, c, d, e; s32 f; } FeS14s;
 
-extern s32 func_800149E0();
+extern s32 GetPadPressedDir();
 extern s32 func_800CF8B4();
 extern s32 func_80029178();
 extern void func_8017B368();
@@ -635,7 +635,7 @@ extern u8 D_sc03_114_8019A6CC;
 void func_sc03_114_8017D518(u8 *o) {
     u8 *p;
 
-    if ((func_800149E0(0) & 0x840) && func_800CF8B4() != 0) {
+    if ((GetPadPressedDir(0) & 0x840) && func_800CF8B4() != 0) {
         AF(o, s16, 2)++;
         return;
     }
@@ -1035,7 +1035,7 @@ void func_sc03_114_8017E2EC(u8 *arg0) {
     gte_stszotz(&otz);
     if (flag & ~0x1000) return;
     z = otz + 1;
-    ot = D_800A6610[D_800B9A02];
+    ot = g_WorldOtTable[D_800B9A02];
     h = AF(arg0, u16, 0x2C);
     if ((h & 0xC000) != 0) {
         if ((h & 0xC000) == 0xC000) {
@@ -1070,7 +1070,7 @@ void func_sc03_114_8017E2EC(u8 *arg0) {
     gte_stsxy(&d);
     r = (d.s.x >> 3) & 0xFFFF;
     r |= (d.s.y >> 3) << 16;
-    p = (PF4 *)D_800A5E60;
+    p = (PF4 *)g_PrimNext;
     p1 = p + 1;
     p->tag.len = 5;
     p->code = 0x28;
@@ -1108,11 +1108,11 @@ void func_sc03_114_8017E2EC(u8 *arg0) {
     ((PTAG *)(ot + z))->addr = (u32)p;
     p1->tag.addr = ((PTAG *)(ot + z))->addr;
     ((PTAG *)(ot + z))->addr = (u32)p1;
-    D_800A5E60 += 0x30;
+    g_PrimNext += 0x30;
     if (semi) {
         s32 unused2[2];
-        t = (PTAG *)D_800A5E60;
-        D_800A5E60 += 8;
+        t = (PTAG *)g_PrimNext;
+        g_PrimNext += 8;
         t->len = 1;
         ((u32 *)t)[1] = 0xE1000000 | ((fl >> 23) & 0x60);
         t->addr = ((PTAG *)(ot + z))->addr;

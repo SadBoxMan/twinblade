@@ -237,6 +237,22 @@ Merges 50c4e5f and a607038 (gates 140/140; full `make regress` 182/182 and engin
 
 m2c and jump tables (r213, 27 Oct; merge 911cf1a): `tools/stage_bulk/m2c_stage.py` now reads each `jtbl_*` table from the stage's data asm (asm/stg/<stage>/data, or asm/stage/data), writes a copy of the function with an `.Ljt_<addr>` label before every case target and the table as a rodata `.word` list (r211's mkjt.py), and runs m2c on that; functions without a table pass through, and a "Decompilation failure" result is skipped. Tested on the village: func_801549F8 gave no draft before and now a clean 21-case switch draft. func_80171B4C, func_801734BC and func_80159A20 get past the jump table but m2c still reads an unset $a0 (existing limitation, no draft). The two split stages tried (sc06_032, sc03_124) have no INCLUDE_ASM left in their stage files, so they gave 0 drafts.
 
+## 2f. Round helpers made repo tools (r222, 31 Oct 2026)
+
+Merge 5fad3337 (the dispatcher's yes; `make regress` 182/182 and engine 140/140 on the branch). Each tool's docstring has
+its usage line.
+
+| Piece | What changed |
+|---|---|
+| put_func, stage_bulk/place_stage | `extern void (**D)();` is a declaration of D (the fn-pointer regexes allow `*+`); it was read as a `void` declaration and dropped. Tested by re-placing r216's func_8017849C draft with the line removed from the file |
+| stage_bulk/place_stage | "too few / many arguments to function f" for an f already in C (or prototyped in the file): f's ANSI definition goes K&R (word parameters only; a narrow one is refused), its prototypes in the file and in f's file become `T f();`, then `make check` alone; on OK the drafts go in again, else the file is left as it was. Names in `<dir>/_knr.txt` |
+| stage_bulk/collect.py | `collect.py <stubs> <out> [--skip f] [--strict]`: the stubs of a fan-out round still INCLUDE_ASM in src/, minus untouched stubs, HELD / `__asm__` drafts and drafts with more than one steering line; then cmp_par + place_stage |
+| stage_bulk/tricks.py | `tricks.py [--base main] [--strict] [globs]`: functions new against the base with steering lines; "NEEDS A RULING" when more than one counts (marked frame-pad locals are natural and a mark repeated in copied blocks counts once, the 30 Oct rulings; `--strict` counts as r216 did) |
+| stage_bulk/hold.py | `hold.py <held_dir> <func>...`: placed functions back to INCLUDE_ASM (any area), their C saved; then `make split` |
+| stage_bulk/batches.py | `batches.py list <list.json> [--src G] [--m2c D] [--prior F]`, `make <list.json> <tiers> <out.json>`, `show <out.json> <TAG>`: r216's work list and per-agent batches for any area |
+| auto_match | `--area stage / stg / ovl [--image NAME]`: the engine and village, the split stages, the mode overlays; candidates compared in their own image (TWINBLADE_OVL), apply checks the images it changed. The INCLUDE_ASM pattern takes the macro's two arguments (it saw 59 of the EXE's 153; the default-limit EXE scan is unchanged) |
+| port_accuracy_check | result.json, report.txt and docs/port_accuracy.json written with LF |
+
 ## 3. Line endings
 
 `.gitattributes` keeps src/, include/ and every *.yaml LF in every checkout, whatever `core.autocrlf` says. Git for
@@ -549,3 +565,163 @@ regression; it would be reported apart.
 **Decisions for LuciDin:** (1) start r129 (determinism) first, or the state layer now on the loading-free scenes;
 (2) the scene list; (3) the matrix (4 configurations, or 2: one aspect and the software renderer); (4) the
 tolerances; (5) where the goldens live (disc/golden proposed); (6) when it runs.
+
+## 7. Input movies, the map log and the coverage report (r226, 1 Nov 2026)
+
+The tools for LuciDin's chapter-by-chapter playthrough (docs/port_as_shipped.md V1, V2, P1). How-to for the player:
+docs/recording_and_marks.md.
+
+* **Input movie** (pc/psyq/movie.c). `input_record = 1` writes
+  `build/pc/recordings/movie_<date>_<time>.tbm` from the game's start:
+  * **Header:** text. It holds the exe's PE stamp and size, the start time, the memory cards (copied beside it as
+    `_card1.mcd` / `_card2.mcd`, with an FNV hash), the RAM-hash rule, and every game-changing setting (`as_shipped`,
+    `deterministic`, every key of pc/settings.c `shipped[]`).
+  * **Records:** one 16-byte record per pad poll (pc/psyq/pad.c `pad_poll`):
+    * the controller's buttons with a script's (`TWINBLADE_TEST_BUTTONS`), and `TWINBLADE_TEST_PRESS`'s buttons;
+    * the player's buttons through the bindings;
+    * the port's own keys (F1, F2, the mark key);
+    * the analog flag and the four stick bytes;
+    * whether a controller was connected (PadInfoMode's answer);
+    * what the game was given, and the poll's vblank.
+  * **RAM hashes:** written to `.hashes` (vblank, ram, spad, seed, sp). The default is every 60 vblanks by the
+    spadstack rule (`ram_hash` / `ram_hash_rule` in the ini or environment win).
+
+  Recording only reads, so it is allowed in As Shipped.
+* **Playback** (`input_play = <.tbm>`, through `tools/input_movie.py play <.tbm> --mode windowed|borderless`):
+  * the keyboard and controller are not read (settings_scripted);
+  * every poll takes the recorded values;
+  * the recorded settings are applied over the ini (`settings_override`; the window's settings are not);
+  * the cards start from fresh copies of the recorded ones;
+  * the game compares each RAM hash and each poll's output with the recording.
+
+  The verdict uses port_accuracy_check's rule: main-loop frames (sp 0x801FFFF0) must be equal. Deep-wait frames hold
+  the host wrappers' leftovers (F4), which differ even between two replays of the same build, so they are counted
+  apart. `input_movie.py` prints IDENTICAL or DIFFERS and exits 0 only on IDENTICAL.
+* **Scene line** (pc/psyq/maplog.c, always on): `scene:` in run.log each time a map goes live (0x800B9A10). It gives:
+  * the map id and the stage image (the field overlay's table at 0x800D34AC) and its name;
+  * the entrance and the spawn point, and where Musashi stands;
+  * the story progress, day, clock, HP and BP;
+  * the number of event flags set, the demo flag, the vblank and the wall time.
+* **Map log** (`map_log = 1`, the default): `build/pc/maplogs/maplog_<date>_<time>.txt` (`_replay` for a playback),
+  one block per visit:
+  * `visit`, `entered`;
+  * `music group` (0x800A4EF0);
+  * `xa <file> +<sector> file channel` and `cdda track` (hooks in pc/psyq/cd.c);
+  * `actors`: kind:handler:spawn-kind*most, from the stage's actor array at 0x801202A0 every 30 vblanks;
+  * `flags`: the story progress and the event flags changed, both areas;
+  * `mark`;
+  * `exit`: the destination record the game puts in force at 0x800AE6B0 (stage code marked), with Musashi's position;
+  * `left`.
+* **Mark key** (`map_mark_key`, default PAUSE; it is not a bindable key) and the controller's **L3**
+  (`map_mark_button`, LuciDin 2 Nov; read from the controller before the bindings, still given to the game). Each
+  press writes:
+  * a `mark` line;
+  * a screenshot, `build/pc/marks/<stamp>_markNN.bmp`;
+  * a 2 MB RAM capture (`map_mark_shot`, `map_mark_ram`);
+  * a beep (`map_mark_beep`).
+
+  The key goes through the movie, so a playback writes the same marks.
+* **Coverage report** (`tools/port_coverage.py`): reads map logs, run logs and movie headers, and reports:
+  * maps reached against docs/map_ids.md's 163, per archive, with entrances, exits and time; demo-only maps apart;
+  * XA streams and channels, and CD audio tracks;
+  * the boss flags 0x8A-0x8E;
+  * the ending maps;
+  * the marks, and playback verdicts.
+
+  `--json` writes docs/map_coverage.json (one entry per map) for the tracker.
+
+Checked (r226, the worktree build, the secondary monitor):
+* port_accuracy_check `--hash-rule spadstack` PASS, all 4 modes x 3 baselines, both with `MAP_LOG=0` and with
+  `INPUT_RECORD=1`;
+* the check's route recorded and replayed IDENTICAL in windowed and borderless (513 main-loop hashes, 5820 polls);
+* a Pause mark replayed at the same vblank, with a byte-identical RAM capture and screenshot;
+* the A/B against main at 4:3 and 16:9: no difference.
+
+## 8. Cleaning build/pc (`tools/clean_build.py`, r260, 4 Nov 2026)
+
+Port test runs and captures grew build/pc to 35 GB before r259 (docs/disk_audit.md) cleaned it. This tool keeps it from
+growing again. It is a **dry run by default**; deletion is permanent and needs `--yes` and LuciDin's own yes.
+
+```
+python -I tools/clean_build.py [--root DIR] [--days N] [--list] [--show-keep] [--report FILE] [--yes]
+```
+
+* **Candidates** (one unit each): `build/pc/test_runs/*`; `build/pc/captures/range_NNN` and every file of one
+  `capture_NNN` together; `build/pc/accuracy/<stamp>` folders; the contents of `build/pc/shots*`; `build/work/*`.
+* **Never touched:** `build/pc/recordings*`, `build/work/archive`, `baseline_card.mcd`, the doc pictures in
+  `build/pc/captures` (png, debug_menu.bmp), and everything outside the list above.
+* **Kept** (the reason is printed): the newest file in it is younger than `--days` (default 7); its name appears in
+  `docs/` (any text file, including docs/port_accuracy.json; docs/disk_audit.md is ignored since it names everything);
+  its name appears in a tools/ top-level script or the Makefile; a wildcard such as `r105_*` in docs covers every name
+  with that prefix; or it is, or holds, a junction.
+* **Safety:** reparse points (junctions, symlinks) are never followed or counted, and a tree that holds one is kept
+  and refused at delete time, so a worktree junction cannot make it delete main's disc/, .venv or tools/. It deletes
+  only the listed units, prints each one removed and the space freed, and keeps going if one fails.
+* `--report FILE` writes a short markdown table (items, files, size, kept) per group.
+* A full scan of main's build/ takes about 5 minutes (Windows, ~100k files).
+
+## 9. The hardware renderer's 5-bit blending (`tools/blend_check.py`, r263, 4 Nov 2026)
+
+```
+.venv\Scripts\python.exe -I tools/blend_check.py [--exe build/pc/Twinblade.exe] [--true-color-1] [--keep DIR]
+```
+
+* **What it proves:** at true_color = 0 the hardware renderer's semi-transparency (all four modes, stacked blends,
+  STP and non-STP texels, raw and modulated textures, a blend right after an opaque draw, tiles, sprites, lines)
+  gives the software renderer's picture in every pixel at render scale 1 and 2, and VRAM holds only 5-bit values
+  (every channel a multiple of 8). A synthetic capture is replayed with `--replay --renderer both` (dither 0: the
+  hardware renderer does not dither); the window opens on the secondary monitor.
+* **What it cannot:** it trusts the software renderer as the console's reference (raster.c's blend() and mix15(),
+  audited against psx-spx in docs/port_accuracy.md); it does not cover narrowed widescreen 2D, the mask bit,
+  dithering or render scales above 2. `--true-color-1` only reports how far the 8-bit path is (not judged).
+* Exit 0 = PASS. The exe before r263 fails it (26,704 of 76,800 pixels).
+
+## 10. The port accuracy check and the test levels (r247, 4 Nov 2026)
+
+tools/port_accuracy_check.py is every port card's gate (docs/port_accuracy.md section 7 has its areas and history).
+Since r247 it runs three window modes (windowed, borderless, fullscreen) with both renderers (software, the As Shipped
+one; hardware, a logged exception) on three profiles (`console` = As Shipped, `console_card_fast`, `fast`), and each
+run plays a 2.5-minute route LuciDin recorded on that profile (dialogue, map changes, a debug-menu warp on the fast
+profiles, combat), from a route file (tools/port_accuracy_routes/<profile>.txt) as an input movie.
+
+**Which level a card runs** (LuciDin, 2 Nov; the same words as the "Test level" paragraph of the Standard card brief in
+docs/dispatcher_handoff.md):
+
+| Level | Command | Runs | Time | For |
+|---|---|---|---|---|
+| No game run | - | 0 | - | docs, tracker, tools that do not build the game, launcher text only (launcher_check if the launcher changed; `make regress` if src/ or the build changed) |
+| Quick Test | `port_accuracy_check.py --quick` | 1: windowed, `console`, software | ~2 min 30 s | changes that cannot reach game RAM, the picture or timing: exe resources (icons), settings plumbing whose default is unchanged, logging off by default, launcher behaviour |
+| Comprehensive Test | `port_accuracy_check.py` (or `--comprehensive`) | 18: 3 profiles x 3 modes x 2 renderers | ~45 min, the last ~8 hands off | anything touching game code, src/ the PC build compiles, the shims, the recompiler / gen.py, the renderers, window / display / input / pacing code, timing, the memory card or RAM; plus the A/B at both aspects where the picture can change. When unsure, Comprehensive |
+
+The report's first line names the level. The three hardware full-screen runs come last: the check puts the game in
+front (DXGI's exclusive full screen needs the focus), so the PC must be left alone from the report's "HANDS OFF" line
+to "hands off over". While LuciDin uses the PC, `--exclusive skip` runs the other 15 and says so; `--exclusive only`
+runs the three later. A Comprehensive Test is whole only with both.
+
+**What a PASS proves**: game RAM, scratchpad and the rand seed equal on every main-loop frame (sp 0x801FFFF0) to vblank
+8900, in all 18 runs, against one baseline per profile (the renderer must not change game RAM); every shot
+byte-identical to that renderer's set; the window's size, the 4:3 picture, black bars and a grab equal to the game's
+shot near it; the tick's rate within 0.05 %; Alt+Enter leaving the game untouched; the replay giving the game the
+recorded buttons. **What it does not prove**: console accuracy past r189's audit. The tail's hashes are this build's
+own, a regression guard; nothing compares these routes with a console or DuckStation. The deep-wait frames (loads,
+the logo movie) are counted but not compared (card F4).
+
+**Gate wording for card briefs** (r247):
+* Quick Test: "port_accuracy_check --quick (Quick Test: windowed, default baseline, software renderer) PASS; say why
+  the change cannot reach game RAM, the picture or timing."
+* Comprehensive Test: "port_accuracy_check (Comprehensive Test: 3 modes x software + hardware x 3 baselines, 18 runs,
+  LuciDin's recorded routes to vblank 8900; the hardware full-screen block hands off, or
+  --exclusive skip now and --exclusive only later) ALL PASS, plus the A/B at 4:3 and 16:9 where the picture can
+  change."
+
+**Recording a route** (only when the routes have to change; LuciDin plays): `--record-route <profile> --debug-menu`
+starts the game borderless on the secondary monitor in the check's own setup (As Shipped, the window settings fixed,
+a copy of the pinned card, the debug menu's key on R3 / F1 as a logged exception) and records every pad poll from cold
+boot (r226's input movie) until he closes the window or vblank 9000 (2.5 minutes; `--route-vblanks N`). Pause twice,
+7-20 s each (the pause menu or a waiting dialogue): the tool places the grabs and the Alt+Enter round trip in the
+still stretches it finds, and refuses a route without one of at least 7 s. Replay it once (`--profiles <p> --modes
+windowed --renderers software`) and compare its hashes with the recording's run.log before storing; then
+`--write-baseline --allow-change "<reason>"` with LuciDin's yes. (`--record-tail` / `--splice-tail`, with
+TWINBLADE_TEST_LIVE_AFTER, continue r129's scripted route by hand instead; kept, not used by the stored routes.)
+
+Checked (r247, the worktree build of main 1fafb279 + r247, the secondary monitor): the three routes replayed exactly against LuciDin's live runs (796 / 754 / 790 main-loop frames); the hardware renderer's RAM equal to the software baseline on every profile; baselines stored with every run of a profile agreeing (20261104_042341, 20261104_090345); the whole Comprehensive Test against them 18 / 18 PASS (20261104_050223, 20261104_091116); before the routes changed, the fixed settings and the folded Alt+Enter left r129's route equal to its baseline, and the three old baselines' frames came out identical with the new matrix; make regress 182 / 182; launcher_check PASS.

@@ -86,7 +86,7 @@ extern void (*D_sc04_002_801BE37C[])();
 
 extern u8 D_sc04_002_8018BE1C;
 extern void (*D_sc04_002_8018BE74[])();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern u8 D_sc04_002_8018C018;
 extern void (*D_sc04_002_8018C03C[])();
 extern void func_8001BFD0();
@@ -335,9 +335,9 @@ extern int rand();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 typedef struct { s16 vx, vy, vz, pad; } SV;
 typedef struct { u16 v[6]; } U12;
 extern s32 func_800291B4();
@@ -396,8 +396,8 @@ void func_sc04_002_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -619,11 +619,11 @@ void func_sc04_002_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc04_002_8017CD9C(u8 *arg0) {
-    func_80019064((s32) &D_sc04_002_8018BE1C);
+    StartRumbleScript((s32) &D_sc04_002_8018BE1C);
     D_sc04_002_8018BE74[AF(arg0, u16, 2)](arg0);
 }
 
@@ -1693,7 +1693,7 @@ void func_sc04_002_8017E924(u8 *arg0) {
 }
 
 void func_sc04_002_8017EA94(u8 *arg0) {
-    func_80019064((s32) &D_sc04_002_8018C018);
+    StartRumbleScript((s32) &D_sc04_002_8018C018);
     D_sc04_002_8018C03C[AF(arg0, u16, 2)](arg0);
 }
 
@@ -1733,7 +1733,7 @@ void func_sc04_002_8017EBBC(s32 arg0) {
 }
 
 s32 func_sc04_002_8017EC20(s32 arg0) {
-    func_80019064((s32) &D_80062C04);
+    StartRumbleScript((s32) &D_80062C04);
     func_8014BC44(arg0, (s32) AF(arg0, s16, 0xF2));
     AF(arg0, u8, 0xA8) = 0x20;
     return func_80151664(arg0);
@@ -2430,7 +2430,7 @@ void func_sc04_002_801806F4(u8 *o) {
 }
 
 void func_sc04_002_801807E0(u8 *arg0) {
-    func_80019064((s32) &D_sc04_002_80198CEC);
+    StartRumbleScript((s32) &D_sc04_002_80198CEC);
     D_sc04_002_80198D14[AF(arg0, u16, 2)](arg0);
 }
 
@@ -5444,8 +5444,8 @@ void func_sc04_002_801879FC(u8 *v) {
     s32 z;
     u32 *base;
 
-    pk = D_800A5E60;
-    D_800A5E60 = pk + 0x24;
+    pk = g_PrimNext;
+    g_PrimNext = pk + 0x24;
     AF(pk, s32, 4) = AF(v, s32, 0x20);
     AF(pk, s32, 0xC) = AF(v, s32, 0x24);
     AF(pk, s32, 0x14) = AF(v, s32, 0x28);
@@ -5464,16 +5464,16 @@ void func_sc04_002_801879FC(u8 *v) {
     gte_avsz4();
     gte_stotz(&otz);
     if ((flag[0] & ~0x1000) == 0) {
-        base = D_800A6610[D_800B9A02];
+        base = g_WorldOtTable[D_800B9A02];
         z = otz + 1;
         if (z >= 0x1000) {
             z = 0xFFF;
         }
         ot = (PTag *)((z << 2) + (u32)base);
         ((PTag *)pk)->addr = ot->addr;
-        pk2 = D_800A5E60;
+        pk2 = g_PrimNext;
         ot->addr = (u32)pk;
-        D_800A5E60 = pk2 + 8;
+        g_PrimNext = pk2 + 8;
         AF(pk2, u8, 3) = 1;
         AF(pk2, u32, 4) = 0xE100002A;
         ((PTag *)pk2)->addr = ot->addr;

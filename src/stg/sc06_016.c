@@ -220,9 +220,9 @@ extern void func_sc06_016_80180F68();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02[];
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 typedef struct { s16 vx, vy, vz, pad; } SV;
 typedef struct { u16 v[6]; } U12;
@@ -380,7 +380,7 @@ extern s32 func_80143C74();
 
 typedef struct { SV4 p[4]; s32 c[4]; s32 code; } QuadW;
 typedef struct { SV8 p[4]; s16 uv[8]; s32 col; s32 code; u8 flag; u8 pad[7]; } Q40;
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern void func_80017E8C();
 
 typedef struct { U12 e[9]; } U12x9;
@@ -669,8 +669,8 @@ void func_sc06_016_8017C8D0(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -892,7 +892,7 @@ void func_sc06_016_8017C8D0(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc06_016_8017D7B0(void) {
@@ -2145,7 +2145,7 @@ void func_sc06_016_80180894(SV8 *pa, SV8 *pb, s32 w, s32 sel) {
     p[4].y = a.y + dx;
     p[5].x = b.x - dy;
     p[5].y = b.y + dx;
-    prim = func_80010A08(0x24);
+    prim = AllocPrim(0x24);
     if (sel == 0) {
         AF(prim, CV, 4) = D_sc06_016_8019E28C;
     } else {
@@ -2162,7 +2162,7 @@ void func_sc06_016_80180894(SV8 *pa, SV8 *pb, s32 w, s32 sel) {
     AF(prim, s32, 0) = 0x08000000;
     AddPrim(D_800A651C[D_800B9A02[0]].ot + z, prim);
     func_8012E28C(z, 1);
-    prim = func_80010A08(0x24);
+    prim = AllocPrim(0x24);
     if (sel == 0) {
         AF(prim, CV, 4) = D_sc06_016_8019E28C;
     } else {
@@ -3257,7 +3257,7 @@ void func_sc06_016_801830B4(o)
         y[2] = sy;
         y[3] = sy + h;
         y[4] = sy + r;
-        prim = func_80010A08(0x9C);
+        prim = AllocPrim(0x9C);
         if (prim != 0) {
             SetDrawMode(prim, 0, 0, (u16) GetTPage(0, 1, 0, 0), 0);
             q = pp[0] = prim + 0xC;
@@ -3624,8 +3624,8 @@ void func_sc06_016_80184174(s32 i) {
     u16 cy;
 
     m = D_800AE620;
-    p = D_800A5E60;
-    D_800A5E60 = p + 0x1C;
+    p = g_PrimNext;
+    g_PrimNext = p + 0x1C;
     AF(p, u8, 3) = 6;
     AF(p, u8, 7) = 0x32;
     r = &D_sc06_016_801A001C + i * 14;
@@ -3821,9 +3821,9 @@ void func_sc06_016_80184918(s32 i) {
     u16 cx;
     u16 cz;
 
-    p = D_800A5E60;
+    p = g_PrimNext;
     m = D_800AE620;
-    D_800A5E60 = p + 0x14;
+    g_PrimNext = p + 0x14;
     AF(p, u8, 3) = 4;
     AF(p, u8, 7) = 0x22;
     AF(p, u8, 4) = D_sc06_016_8019FF10;
@@ -3871,7 +3871,7 @@ void func_sc06_016_80184BFC(u8 *o) {
     s32 z;
     u16 w;
 
-    ot = D_800A6610[D_800B9A02[0]];
+    ot = g_WorldOtTable[D_800B9A02[0]];
     w = AF(o, u16, 6);
     if (w == 0) return;
     v[0].x = 0;
@@ -3890,7 +3890,7 @@ void func_sc06_016_80184BFC(u8 *o) {
     m.t[0] = AF(o, s16, 0);
     m.t[1] = AF(o, s16, 2);
     m.t[2] = AF(o, s16, 4);
-    p = func_80010A08(0x24);
+    p = AllocPrim(0x24);
     AF(p, s32, 4) = AF(o, s32, 0x10);
     AF(p, s32, 0xC) = AF(o, s32, 0x10);
     AF(p, s32, 0x14) = AF(o, s32, 0x14);
@@ -3906,7 +3906,7 @@ void func_sc06_016_80184BFC(u8 *o) {
     ((PTAG *)(ot + z))->addr = (u32)p;
     if (AF(o, u32, 0x1C) & 0x40000000) {
         p[7] |= 2;
-        t = func_80010A08(8);
+        t = AllocPrim(8);
         t[3] = 1;
         AF(t, u32, 4) = 0xE1000200 | ((AF(o, u32, 0x1C) >> 23) & 0x60);
         ((PTAG *)t)->addr = ((PTAG *)(ot + z))->addr;

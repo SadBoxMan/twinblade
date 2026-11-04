@@ -18,9 +18,9 @@ typedef struct {
     /* 0x14 */ s16 w, h;
 } SprtTpage; /* size 0x18 */
 
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 extern s32 D_800AE840[];
-/* Parameters for an archive read (func_8001ABBC / func_80019A24) */
+/* Parameters for an archive read (func_8001ABBC / LoadFileStep) */
 typedef struct {
     /* 0x0 */ s32 unk0;
     /* 0x4 */ u8 *unk4;
@@ -39,11 +39,11 @@ extern s32 D_800D3C0C;
 extern s32 D_800D3C10;
 
 
-extern void func_800116E0(void);
-extern void func_800118AC(void);
-extern void func_80011928(s32 arg0);
-extern void func_800146B0(s32 arg0);
-extern s32 func_800149E0(s32 arg0);
+extern void ApplySoundOptions(void);
+extern void NextStep(void);
+extern void SetStep(s32 arg0);
+extern void SetScreenMode2(s32 arg0);
+extern s32 GetPadPressedDir(s32 arg0);
 extern void func_80015310(void);
 extern void func_800167B8(s32 arg0);
 extern s32 func_800167F0(s32 arg0);
@@ -61,7 +61,7 @@ void func_800CF290(void);
 void func_800CEDFC(void)
 {
     if (WORK->step < 8) {
-        D_800CF450[WORK->step]();
+        PS1_FN(D_800CF450[WORK->step])();
     }
 }
 
@@ -71,7 +71,7 @@ void func_800CEE40(void)
     WORK->unkA3E1 = 1;
     func_8001C044();
     func_80015310();
-    func_800146B0(7);
+    SetScreenMode2(7);
     SetDispMask(0);
     VSync(0);
     SetDispMask(1);
@@ -80,14 +80,14 @@ void func_800CEE40(void)
     func_800183E0(D_800D3ABC);
     D_800D3C0C = 0;
     D_800D3C10 = 0;
-    func_800116E0();
+    ApplySoundOptions();
     WORK->timer = 0;
     if (func_8001BFE8() != 0) {
-        func_80011928(3);
+        SetStep(3);
         return;
     }
     func_8001BFF8();
-    func_800118AC();
+    NextStep();
 }
 
 /* Step 1: fade the licence image in */
@@ -96,7 +96,7 @@ void func_800CEF04(void)
     D_800D3C10 += 16;
     if (D_800D3C10 >= 0x80) {
         D_800D3C10 = 0x80;
-        func_800118AC();
+        NextStep();
     }
     func_800CF290();
 }
@@ -105,8 +105,8 @@ void func_800CEF04(void)
 void func_800CEF54(void)
 {
     func_800CF290();
-    if (++WORK->unkA3BE >= 0x105) {
-        func_800118AC();
+    if (++WORK->stepTimer >= 0x105) {
+        NextStep();
     }
 }
 
@@ -116,7 +116,7 @@ void func_800CEFA8(void)
     D_800D3C10 -= 4;
     if (D_800D3C10 <= 0) {
         D_800D3C10 = 0;
-        func_800118AC();
+        NextStep();
     }
     func_800CF290();
 }
@@ -127,7 +127,7 @@ void func_800CEFF4(void)
     func_800CF180();
     func_800CF114();
     if (func_800167F0(0) & 0xFFFF) {
-        func_800118AC();
+        NextStep();
     }
 }
 
@@ -139,10 +139,10 @@ void func_800CF038(void)
     func_800CF180();
     func_800CF114();
     WORK->timer++;
-    pad = func_800149E0(0);
+    pad = GetPadPressedDir(0);
     if (D_800D3C0C != 0 && (WORK->timer >= 0x81 || (pad & 0x840))) {
         func_800167B8(4);
-        func_800118AC();
+        NextStep();
     }
 }
 
@@ -151,8 +151,8 @@ void func_800CF0C4(void)
 {
     func_800CF180();
     if (func_800167F0(4) & 0xFFFF) {
-        WORK->unkA3B6 = 1;
-        func_800146B0(1);
+        WORK->done = 1;
+        SetScreenMode2(1);
         WORK->vsyncMode = 2;
     }
 }
@@ -172,8 +172,8 @@ void func_800CF114(void)
 /* Link the SQUARESOFT logo's two sprites into this frame's ordering table (shown in steps 4 to 6) */
 void func_800CF180(void)
 {
-    addPrim(&D_800A6610[WORK->frame][0xFFF], &D_800CF3F0[WORK->frame]);
-    addPrim(&D_800A6610[WORK->frame][0xFFF], &D_800CF420[WORK->frame]);
+    addPrim(&g_WorldOtTable[WORK->frame][0xFFF], &D_800CF3F0[WORK->frame]);
+    addPrim(&g_WorldOtTable[WORK->frame][0xFFF], &D_800CF420[WORK->frame]);
 }
 
 INCLUDE_ASM("asm/ovl38/nonmatchings/ovl38", func_800CF290);

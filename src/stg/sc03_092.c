@@ -330,8 +330,8 @@ extern void PushMatrix();
 extern void PopMatrix();
 extern void TransposeMatrix();
 extern void ApplyMatrixSV();
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[];
 extern u16 D_800B9A02[];
 
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
@@ -996,8 +996,8 @@ void func_sc03_092_8017CE58(u8 *obj) {
     zero.z = 0;
     cam_local(&zero, &out);
     out.y -= 0x180;
-    pkt = D_800A5E60;
-    ot = D_800A6610 + (D_800B9A02[0] << 12);
+    pkt = g_PrimNext;
+    ot = g_WorldOtTable + (D_800B9A02[0] << 12);
     chunk = AF(obj, u32 *, 0xC);
     mesh = AF(obj, u8 *, 8);
     n = AF(mesh, s32, 8);
@@ -1211,7 +1211,7 @@ void func_sc03_092_8017CE58(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pkt;
+    g_PrimNext = pkt;
 }
 
 void func_sc03_092_8017D9CC(u8 *arg0) {
@@ -3812,7 +3812,7 @@ void func_sc03_092_80184370(u8 *arg0, s32 arg1) {
     s32 d;
     u16 t;
 
-    ot = ((u32 (*)[0x1000]) D_800A6610)[D_800B9A02[0]];
+    ot = ((u32 (*)[0x1000]) g_WorldOtTable)[D_800B9A02[0]];
     p = AF(arg0, Pts80182FD4 *, 0x20);
     if (p == 0) {
         return;
@@ -3910,7 +3910,7 @@ void func_sc03_092_8018478C(u8 *o, u8 *s, u8 *v, u32 *ot) {
     u16 u1, v1;
     u16 sflag;
 
-    p = (PFT4 *)D_800A5E60;
+    p = (PFT4 *)g_PrimNext;
     sflag = *(u16 *)(o + 0x1E) & 0x8000;
     fl = *(u32 *)(o + 4);
     tp = (fl >> 24) & 3;
@@ -3918,7 +3918,7 @@ void func_sc03_092_8018478C(u8 *o, u8 *s, u8 *v, u32 *ot) {
     x = *(u16 *)(o + 0x28) + (*(s16 *)(s + 4) >> sh);
     y = *(u16 *)(o + 0x2A) + *(u16 *)(s + 6);
     uv = *(FANUV **)(o + 0x20);
-    D_800A5E60 = (u8 *)p + 0xF0;
+    g_PrimNext = (u8 *)p + 0xF0;
     if (fl & 0x40000000) {
         code = 0x2E;
         abr = (fl >> 28) & 3;
@@ -3986,7 +3986,7 @@ void func_sc03_092_8018478C(u8 *o, u8 *s, u8 *v, u32 *ot) {
     if (fl & 0x40000000) {
         m = (PMODE *)p;
         if (sflag) {
-            D_800A5E60 += 0x30;
+            g_PrimNext += 0x30;
             for (i = 0; i < 6; i++, m++) {
                 ((u8 *)m)[3] = 1;
                 m->code = (abr << 5) | 0xE100000A;
@@ -3994,7 +3994,7 @@ void func_sc03_092_8018478C(u8 *o, u8 *s, u8 *v, u32 *ot) {
             }
         } else {
             m->code = (abr << 5) | 0xE100000A;
-            D_800A5E60 += 8;
+            g_PrimNext += 8;
             ((u8 *)m)[3] = 1;
             addPrim(ot, m);
         }

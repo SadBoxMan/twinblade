@@ -80,7 +80,7 @@ extern u8 D_sc06_010_801AF540;
 
 extern u8 D_sc06_010_8018A3DC;
 extern void (*D_sc06_010_8018A404[])();
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_8014E934();
 extern void func_8014CC28();
 extern void func_8014F3E8();
@@ -374,9 +374,9 @@ extern SV8 D_sc06_010_801AEF78[];
 extern s32 ReadGeomScreen();
 extern void GsGetLs();
 extern void GsSetLsMatrix();
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc06_010_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -413,8 +413,8 @@ void func_sc06_010_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -580,7 +580,7 @@ void func_sc06_010_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 s32 func_sc06_010_8017CA80(s32 arg0) {
@@ -633,8 +633,8 @@ void func_sc06_010_8017CAD4(u8 *obj, u8 *hdr, void *coord) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(coord, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = (ChunkDCM *)(hdr + 0x14);
     n = AF(hdr, s32, 8);
     verts = AF(hdr, u8 *, 0x10);
@@ -799,11 +799,11 @@ void func_sc06_010_8017CAD4(u8 *obj, u8 *hdr, void *coord) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc06_010_8017D6A0(u8 *arg0) {
-    func_80019064((s32) &D_sc06_010_8018A3DC);
+    StartRumbleScript((s32) &D_sc06_010_8018A3DC);
     D_sc06_010_8018A404[AF(arg0, u16, 2)](arg0);
 }
 
@@ -3127,7 +3127,7 @@ void func_sc06_010_80183560(u8 *o) {
         func_8016AA50(o, d);
         if (AF(o, u16, 0x82) & 1) {
             func_8016B428(o);
-            func_80019064(&D_sc06_010_801A7124);
+            StartRumbleScript(&D_sc06_010_801A7124);
         }
     }
     if (st != 0x1D) {
@@ -3507,7 +3507,7 @@ void func_sc06_010_801846AC(u8 *o) {
             func_8016AA50(o, n);
             if (AF(o, u16, 0x82) & 1) {
                 func_8016B428(o);
-                func_80019064(&D_sc06_010_801A7124);
+                StartRumbleScript(&D_sc06_010_801A7124);
             }
         }
         if (st != 0x1D) {

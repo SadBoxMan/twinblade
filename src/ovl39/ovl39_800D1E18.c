@@ -5,8 +5,8 @@ typedef struct { char *name; s32 rest[7]; } TitleMovie;
 extern CdlFILE *CdSearchFile(CdlFILE *fp, char *name);
 extern int ResetCallback(void);
 extern void *DMACallback(s32 ch, void (*cb)(void));
-extern void func_800118AC(void);
-extern void func_800146B0(s32 mode);
+extern void NextStep(void);
+extern void SetScreenMode2(s32 mode);
 extern void func_800183E0(void *p);
 extern s32 func_8001BFA0(void);
 extern void func_8001BFB0(void);
@@ -44,8 +44,8 @@ extern int CdRead2(s32 mode);
 extern void StSetRing(u32 *ring, u32 size);
 extern void StSetStream(u32 mode, u32 start, u32 end, void (*f1)(), void (*f2)());
 extern void func_80015310(void);
-extern s32 func_80019A24(CdlFILE *file, void *dest, s32 arg2, s32 arg3);
-extern void func_8001A9F8(s32 n);
+extern s32 LoadFileStep(CdlFILE *file, void *dest, s32 arg2, s32 arg3);
+extern void DrawNowLoading(s32 n);
 extern void func_800CF3E8(void);
 extern void func_800CFB3C(void *p);
 extern void func_800CFFEC(void);
@@ -118,8 +118,8 @@ extern s32 D_800EC9F8;
 extern void SetDefDispEnv(DISPENV *env, s32 x, s32 y, s32 w, s32 h);
 extern void StUnSetRing(void);
 extern void SetFrameCallbacks(void);
-extern s32 func_80014CAC(s32 a, s32 b);
-extern void func_800189A8(void);
+extern s32 TestPadsAny(s32 a, s32 b);
+extern void UpdatePads(void);
 extern void func_8002D034(void);
 extern void func_8002D8A8(void);
 extern void func_8002D8D4(void);
@@ -206,10 +206,10 @@ s32 func_800D1E9C(TitleMovie *m) {
         if (D_800EC9F4 == 1) {
             goto end;
         }
-        func_800189A8();
+        UpdatePads();
         if (D_800EC9F8 == 0) {
             if (D_800EC9E0 == 0) {
-                if (func_80014CAC(0, 0x800) != 0) {
+                if (TestPadsAny(0, 0x800) != 0) {
                     D_800EC9E0 = 1;
                     D_800EC9E4 = 0x10;
                     func_8002D8A8();

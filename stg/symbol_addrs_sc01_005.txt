@@ -1,12 +1,12 @@
 // Stage SC01_005 (stg/sc01_005.yaml): names given by hand first
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
-func_80010A08 = 0x80010A08; // type:func
+AllocPrim = 0x80010A08; // type:func
 func_80012ABC = 0x80012ABC; // type:func
 func_80012C6C = 0x80012C6C; // type:func
-func_800149E0 = 0x800149E0; // type:func
-func_80014B10 = 0x80014B10; // type:func
-func_80014ED4 = 0x80014ED4; // type:func
-func_80015018 = 0x80015018; // type:func
+GetPadPressedDir = 0x800149E0; // type:func
+GetPadHeldDir = 0x80014B10; // type:func
+GetPadPressedDirWide = 0x80014ED4; // type:func
+GetPadHeldDirWide = 0x80015018; // type:func
 func_80016450 = 0x80016450; // type:func
 func_800167B8 = 0x800167B8; // type:func
 func_800167F0 = 0x800167F0; // type:func
@@ -36,11 +36,11 @@ func_80029514 = 0x80029514; // type:func
 func_8002D4C8 = 0x8002D4C8; // type:func
 D_80078E92 = 0x80078E92;
 D_800A2E20 = 0x800A2E20;
-D_800A5E60 = 0x800A5E60;
+g_PrimNext = 0x800A5E60;
 D_800A5E88 = 0x800A5E88;
 D_800A5E98 = 0x800A5E98;
 D_800A5EA8 = 0x800A5EA8;
-D_800A6610 = 0x800A6610;
+g_WorldOtTable = 0x800A6610;
 D_800AE7B8 = 0x800AE7B8;
 D_800AE7BC = 0x800AE7BC;
 D_800AE9F0 = 0x800AE9F0;

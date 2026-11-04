@@ -157,9 +157,9 @@ extern s32 func_8012BD3C();
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc05_007_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -192,8 +192,8 @@ void func_sc05_007_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -415,7 +415,7 @@ void func_sc05_007_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc05_007_8017CD9C(u8 *arg0) {
@@ -575,7 +575,7 @@ typedef struct { u8 a, b; } B2;
 typedef struct { u8 type; u8 kind; s16 a[2]; s16 b[2]; s16 x; s16 z; } E14;
 extern void func_80146A6C();
 extern u8 D_80062BF4;
-extern void func_80019064();
+extern void StartRumbleScript();
 extern s32 func_801511E0();
 extern s32 func_80012A60();
 extern u8 D_800D58AC;
@@ -817,15 +817,15 @@ void func_sc05_007_8017D66C(void) {
     func_80147324(0x7F0);
 }
 
-extern s32 func_80019198();
+extern s32 GetRumbleScript();
 extern u8 D_sc05_007_801844F0;
 extern void func_80172310();
 extern u8 D_sc05_007_8018446C;
 extern void func_800D1724();
 s32 func_sc05_007_8017D68C(u8 *o) {
     SV8 v;
-    if (func_80019198(o) == 0) {
-        func_80019064(&D_sc05_007_801844F0);
+    if (GetRumbleScript(o) == 0) {
+        StartRumbleScript(&D_sc05_007_801844F0);
     }
     AF(o, s32, 0xDC) += 0x8000;
     AF(o, s16, 6) = AF(o, s16, 0xFC);
@@ -898,7 +898,7 @@ void func_sc05_007_8017D948(s32 arg0) {
 }
 
 void func_sc05_007_8017D990(u8 *o) {
-    func_80019064(&D_80062BF4);
+    StartRumbleScript(&D_80062BF4);
     func_80149020(o);
     func_80147324(0x451);
     func_801511E0(o);

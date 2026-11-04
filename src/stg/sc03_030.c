@@ -208,7 +208,7 @@ extern void func_sc03_030_8017FB04();
 extern void (*D_sc03_030_8018593C[])();
 extern void func_8014C88C();
 extern u8 D_sc03_030_801858EC;
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_sc03_030_8017DFA0();
 extern void func_sc03_030_8017E204();
 extern void func_sc03_030_8017E090();
@@ -539,7 +539,7 @@ extern s32 func_80012C6C();
 extern s32 func_80012ABC();
 extern void func_8012F14C();
 extern void RotMatrixZYX();
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern WMtx D_800AF648;
 extern OtRef D_800A651C[];
 extern u16 D_800B9A02[];
@@ -612,8 +612,8 @@ typedef struct { SV8 p[3]; CV4 c[3]; s32 code; } TriArg;
 typedef struct { s16 x, y, z, a, b, c, d, e; s32 f; } FeS14s;
 typedef struct { u8 *verts; u32 pad; u32 x; u32 y; u32 z; u32 *start; u32 *end; } CellC77;
 typedef struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteC77;
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern SV8 D_sc03_030_801E1AD8;
 
 void func_sc03_030_8017C974(u8 *o) {
@@ -648,8 +648,8 @@ void func_sc03_030_8017C974(u8 *o) {
     GsGetLs(o + 0x10, &ls);
     GsSetLsMatrix(&ls);
     func_sc03_030_8017C294(&D_sc03_030_801E1AD8, &r, AF(o, s32, 0x60));
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02[0]];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02[0]];
     x0 = (r.x + 0x4000) / 512;
     x1 = (r.x + r.z + 0x4000) / 512 + 2;
     x0 = x0 < 0 ? 0 : (x0 > 63 ? 63 : x0);
@@ -873,7 +873,7 @@ void func_sc03_030_8017C974(u8 *o) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc03_030_8017D840(u8 *arg0) {
@@ -953,7 +953,7 @@ void func_sc03_030_8017DAFC(u8 *o) {
     B8 v;
 
     v = D_sc03_030_801E06BC;
-    func_80019064(&D_sc03_030_801858EC);
+    StartRumbleScript(&D_sc03_030_801858EC);
     func_80171D78(o, &v);
     func_sc03_030_8017DFA0(o);
     if (--AF(o, s32, 0x200) == -1) {
@@ -964,7 +964,7 @@ void func_sc03_030_8017DAFC(u8 *o) {
 }
 
 void func_sc03_030_8017DB98(s32 arg0) {
-    func_80019064((s32) &D_sc03_030_801858EC);
+    StartRumbleScript((s32) &D_sc03_030_801858EC);
     func_sc03_030_8017DFA0(arg0);
     func_sc03_030_8017E204(arg0);
     func_sc03_030_8017E090(arg0);
@@ -999,7 +999,7 @@ void func_sc03_030_8017DCD8(s32 arg0, s32 arg1) {
 }
 
 void func_sc03_030_8017DD08(s32 arg0) {
-    func_80019064((s32) &D_sc03_030_801858EC);
+    StartRumbleScript((s32) &D_sc03_030_801858EC);
     func_sc03_030_8017DFA0(arg0);
     func_sc03_030_8017E204(arg0);
     func_sc03_030_8017E090(arg0);
@@ -1017,7 +1017,7 @@ void func_sc03_030_8017DD80(s32 arg0) {
     if (AF(arg0, s16, 0xE) < -0x1180) {
         AF(arg0, s16, 0xE) = -0x1180;
     }
-    func_80019064((s32) &D_sc03_030_801858EC);
+    StartRumbleScript((s32) &D_sc03_030_801858EC);
     func_sc03_030_8017DFA0(arg0);
     func_sc03_030_8017E240(arg0);
     func_sc03_030_8017E090(arg0);
@@ -1042,7 +1042,7 @@ void func_sc03_030_8017DE60(u8 *arg0) {
 }
 
 void func_sc03_030_8017DEB0(s32 arg0) {
-    func_80019064((s32) &D_sc03_030_801858EC);
+    StartRumbleScript((s32) &D_sc03_030_801858EC);
     func_sc03_030_8017DFA0(arg0);
     func_sc03_030_8017E204(arg0);
     func_sc03_030_8017E090(arg0);
@@ -1055,11 +1055,11 @@ void func_sc03_030_8017DEB0(s32 arg0) {
 void func_sc03_030_8017DF1C(s32 arg0) {
     AF(arg0, s16, 0x20C) = 0x800;
     AF(arg0, s16, 0x13A) = 1;
-    func_80019064((s32) &D_sc03_030_801858F4);
+    StartRumbleScript((s32) &D_sc03_030_801858F4);
 }
 
 void func_sc03_030_8017DF54(s32 arg0) {
-    func_80019064((s32) &D_sc03_030_801858FC);
+    StartRumbleScript((s32) &D_sc03_030_801858FC);
     func_80147324(0x57F);
     AF(arg0, s16, 0x20C) = 0x1000;
     AF(arg0, s16, 0x13A) = 1;
@@ -2339,7 +2339,7 @@ void func_sc03_030_80181A60(SV8 *a) {
     s32 flag;
     s32 z;
 
-    p = func_80010A08(0x10);
+    p = AllocPrim(0x10);
     AF(p, u8, 3) = 3;
     AF(p, s32, 4) = 0xFFFFFF;
     AF(p, u8, 7) = 0x40;

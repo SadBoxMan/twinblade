@@ -4,3 +4,9 @@ D_80078E7E = 0x80078E7E;
 D_80078E7F = 0x80078E7F;
 
 g_CdStream = 0x800AE6F0;   /* the CD streamer state struct (src/code_800123F0.c: CdStream) */
+
+/* g_SoundSlot fields func_8002FDE8 reads and writes as plain scalars (r224; LuciDin 31 Oct: symbols, not a trick) */
+D_800A469C = 0x800A469C;   /* g_SoundSlot[3].spuAddr */
+D_800A46A0 = 0x800A46A0;   /* g_SoundSlot[4] +0 */
+D_800A46A2 = 0x800A46A2;   /* g_SoundSlot[4].unk2 */
+D_800A46B0 = 0x800A46B0;   /* g_SoundSlot[4].unk10 */

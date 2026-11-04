@@ -1,6 +1,6 @@
 // Stage SC05_010 (stg/sc05_010.yaml): names given by hand first
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
-func_80010A08 = 0x80010A08; // type:func
+AllocPrim = 0x80010A08; // type:func
 func_80012A60 = 0x80012A60; // type:func
 func_80012ABC = 0x80012ABC; // type:func
 func_80012C6C = 0x80012C6C; // type:func
@@ -17,7 +17,7 @@ func_800176F0 = 0x800176F0; // type:func
 func_80017DC4 = 0x80017DC4; // type:func
 func_80017E30 = 0x80017E30; // type:func
 func_800183E0 = 0x800183E0; // type:func
-func_80019064 = 0x80019064; // type:func
+StartRumbleScript = 0x80019064; // type:func
 func_8001AAA0 = 0x8001AAA0; // type:func
 func_8001BFD0 = 0x8001BFD0; // type:func
 func_8001C214 = 0x8001C214; // type:func
@@ -40,9 +40,9 @@ func_8002D4C8 = 0x8002D4C8; // type:func
 D_80062BF4 = 0x80062BF4;
 D_80062C04 = 0x80062C04;
 D_80062C14 = 0x80062C14;
-D_800A5E60 = 0x800A5E60;
+g_PrimNext = 0x800A5E60;
 D_800A651C = 0x800A651C;
-D_800A6610 = 0x800A6610;
+g_WorldOtTable = 0x800A6610;
 D_800AF648 = 0x800AF648;
 D_800B99DA = 0x800B99DA;
 D_800B9A02 = 0x800B9A02;

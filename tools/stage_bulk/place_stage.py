@@ -24,8 +24,8 @@ def target(n):
         if re.search(rf'INCLUDE_ASM\("[^"]+",\s*{n}\);', t): return f
 SYM = re.compile(r'(\w+)(?:\[\w*\])?(?:\(.*\))?;$')
 def sym_of(x):
-    # r208: `(*D[])()`, `(*D[4])()` and `(*f)()` too
-    m = re.search(r'\(\*\s*(\w+)\s*(?:\[\w*\])?\)', x) or SYM.search(x)
+    # r208: `(*D[])()`, `(*D[4])()` and `(*f)()` too; r222: `(**D)()` (a pointer to a handler table, r216 8017849C)
+    m = re.search(r'\(\s*(?:\*\s*)+(\w+)\s*(?:\[\w*\])?\)', x) or SYM.search(x)
     return m[1] if m else None
 def norm(x): return re.sub(r'\s+', ' ', x).strip()
 groups = {}
@@ -165,9 +165,46 @@ def bindiff(limit=8):
 def check():
     r = subprocess.run(['C:\\msys64\\usr\\bin\\make.exe', CHECK], capture_output=True, text=True, env=ENV)
     return CHECK_OK in r.stdout
+def unspec_protos(t, n):
+    """t with its prototypes of n (`extern s32 n(s32 a);`, `void n(void);`) as `T n();`"""
+    return re.sub(rf'^((?:extern\s+)?[A-Za-z_][\w \*]*?\b{n})\s*\([^;{{}})]*\)\s*;', r'\1();', t, flags=re.M)
+def knr_callee(f, base, n):
+    """r222 (r216's kr.py, ruled natural): a draft calls n, a function already in C or prototyped in f, with fewer or
+    more arguments than its prototype (the original passes registers through): n's definition old-style (word
+    parameters only; a narrow one is refused, its promotion changes the code) and n's prototypes in f and in the
+    defining file as `T n();`, checked alone (make check) before the drafts go back in. -> f's new text, or None"""
+    new = {}
+    for g, t in src.items():
+        t = base if g == f else t
+        h = re.search(rf'^[A-Za-z_][\w \*]*?\b{n}\s*\(([^;{{}}]*)\)\s*((?:[A-Za-z_][^;{{}}()]*;\s*)*)\{{', t, re.M)
+        if not h:
+            continue
+        if not h[2].strip():                  # an ANSI definition (not a prototype above it): old-style, or refused
+            k = P.knr(t, n)
+            if k is None:
+                print(f'{n}: not made K&R (a narrow or non-word parameter: {h[1]})'); return None
+            t = k
+        new[g] = unspec_protos(t, n)
+        break
+    new[f] = unspec_protos(new.get(f, base), n)
+    if all(new[g] == (base if g == f else src[g]) for g in new):
+        return None                           # nothing to change: the error is something else
+    old = {g: (base if g == f else src[g]) for g in new}
+    for g, t in new.items():
+        open(g, 'w', encoding='utf-8', newline='\n').write(t)
+    if not check():
+        for g, t in old.items():
+            open(g, 'w', encoding='utf-8', newline='\n').write(t)
+        print(f'{n}: K&R form does not build identically; left as it was'); return None
+    for g, t in new.items():
+        if g != f: src[g] = t
+    print(f'{n}: made K&R for a caller passing other arguments ({", ".join(sorted(g.replace(os.sep, "/") for g in new))})')
+    with open(os.path.join(d, '_knr.txt'), 'a') as w: w.write(f'{n}\n')
+    return new[f]
 def place(f, items):
     """compile-screen the drafts in one go, then check the build; bisect only a byte mismatch"""
     base = src[f]
+    tried = set()                            # r222: callees already offered to knr_callee
     while items:
         t, owner = insert(base, items)
         open(f, 'w', encoding='utf-8', newline='\n').write(t)
@@ -187,8 +224,15 @@ def place(f, items):
         # passes registers through; an old-style definition makes no prototype, and word-sized parameters compile
         # the same
         argn = {}
+        rebased = False
         for m in re.finditer(r':(\d+): too (?:few|many) arguments to function `(\w+)\'', out):
             if m[2] in idx: argn[int(m[1])] = m[2]
+            elif m[2] not in tried:           # r222: a callee already in the file (r216 had kr.py do this by hand)
+                tried.add(m[2])
+                nb = knr_callee(f, base, m[2])
+                if nb is not None:
+                    base = nb; rebased = True
+        if rebased: continue                  # the drafts again, over the file with the K&R callees
         fixed = set()
         for l, n in argn.items():
             i = idx[n]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Decompress the game's PAC type-4 packages.
 
-The CD loader (func_8001A338, state 5) feeds each sector of a type-4 package to func_80018730
+The CD loader (StreamReadyCallback, state 5) feeds each sector of a type-4 package to LzssDecodeSector
 (0x80018730), a streaming LZSS decoder. Read from that code:
 
   window      1024 bytes (the engine keeps it in the scratchpad at 0x1F800000), indices wrap at 1024

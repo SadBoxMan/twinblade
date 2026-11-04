@@ -54,7 +54,7 @@ extern void func_80154274();
 extern void func_80147324();
 extern void func_801655E4();
 extern void func_80156648();
-extern void func_80019064();
+extern void StartRumbleScript();
 
 void func_ovl13_800CAEE0(s32 arg0) {
     func_80154274(arg0, (s32) &D_ovl13_800CB830);
@@ -66,7 +66,7 @@ void func_ovl13_800CAEE0(s32 arg0) {
     func_80156648(arg0);
     AF(arg0, u8, 0x1AA) = 0;
     func_ovl13_800CB054(arg0);
-    func_80019064((s32) &D_80062BD0);
+    StartRumbleScript((s32) &D_80062BD0);
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 

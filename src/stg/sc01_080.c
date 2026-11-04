@@ -227,7 +227,7 @@ typedef struct { s32 w[4]; } W16;
 extern void func_8012B0B4();
 extern u16 D_800B9A02;
 extern u8 D_800A651C[];
-extern u8 *func_80010A08();
+extern u8 *AllocPrim();
 extern void func_8012E32C();
 extern void func_8012E28C();
 extern s32 D_sc01_080_80186FF8[];
@@ -354,8 +354,8 @@ extern void func_8012F14C();
 extern u8 D_sc01_080_801899B4;
 extern u8 D_sc01_080_801899BC;
 extern void (*D_sc01_080_8018A200[])();
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern SV8 D_sc01_080_801C7600[];
 extern void GsGetLs();
 extern void GsSetLsMatrix();
@@ -402,7 +402,7 @@ typedef struct { s16 x, y, z; } SV6;
 typedef struct { s16 x, y; s32 col; } Star8;
 typedef struct { SV8 p[3]; CV4 c[3]; s32 code; } TriArg;
 extern u8 D_80062BDC;
-extern void func_80019064();
+extern void StartRumbleScript();
 extern u8 D_80062C04;
 extern void func_8016B428();
 extern S12 D_sc01_080_801C5A30[];
@@ -541,8 +541,8 @@ void func_sc01_080_8017C59C(u8 *o) {
     GsGetLs(o + 0x10, &ls);
     GsSetLsMatrix(&ls);
     func_sc01_080_8017BEBC(&D_sc01_080_801C75E0, &r, AF(o, s32, 0x60));
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     x0 = (r.x + 0x4000) / 512;
     x1 = (r.x + r.z + 0x4000) / 512 + 2;
     x0 = x0 < 0 ? 0 : (x0 > 63 ? 63 : x0);
@@ -766,7 +766,7 @@ void func_sc01_080_8017C59C(u8 *o) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_080_8017D468(u8 *o) {
@@ -810,7 +810,7 @@ void func_sc01_080_8017D468(u8 *o) {
         v[3].x = c.x + ((x.s.x * (r * 3 + 0x1000)) >> 12);
         v[3].y = c.y - h;
         v[3].z = c.z + ((x.s.y * (r * 3 + 0x1000)) >> 12);
-        p = func_80010A08(0x24);
+        p = AllocPrim(0x24);
         AF(p, s32, 4) = D_sc01_080_80186FF8[i];
         AF(p, s32, 0xC) = D_sc01_080_80186FF8[i + 1];
         p[7] = 0x3A;
@@ -839,11 +839,11 @@ void func_sc01_080_8017D72C(o)
     AF(o, s32, 0x1C) = 0x15;
     AF(o, u16, 0x5C) &= 0xFFFE;
     if (AF(o, u8, 0x5E) == 5) {
-        func_80019064(&D_80062BDC);
+        StartRumbleScript(&D_80062BDC);
     }
     if (AF(o, u16, 0x82) & 1) {
         func_8016B428(o);
-        func_80019064(&D_80062C04);
+        StartRumbleScript(&D_80062C04);
     }
     if (--AF(o, s16, 0x76) == 0) {
         AF(o, u16, 0x5C) &= 0x7FFF;
@@ -1775,8 +1775,8 @@ void func_sc01_080_8017FD64(u8 *o) {
     t = D_sc01_080_801C7600;
     GsGetLs(o + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     for (i = 0; i < 0x100; i++, t++) {
         if (t->pad == 0) continue;
         v.x = 0x80;
@@ -1812,7 +1812,7 @@ void func_sc01_080_8017FD64(u8 *o) {
         ((PTag *)otp)->addr = (u32)pk;
         pk += 0x28;
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_080_8017FF78(u8 *arg0) {
@@ -2661,7 +2661,64 @@ void func_sc01_080_80181CA4(void) {
     }
 }
 
-INCLUDE_ASM("asm/stg/sc01_080/nonmatchings/sc01_080", func_sc01_080_80181D98);
+extern s32 D_sc01_080_801C7548;
+extern s32 D_sc01_080_801C754C;
+extern s16 D_sc01_080_8018A278[];
+
+/* r242: the loop's `t += 2` is written on both paths of the body (before the early `continue` and at the end):
+   flow counts both sets, so global-alloc gives t s0 and p s1 as the original; jump2's cross-jumping merges the two
+   copies into one addiu. Ruled natural source by LuciDin (4 Nov 2026). */
+void func_sc01_080_80181D98(void) {
+    s32 *p = &D_801270CC;
+    s16 *t;
+    u8 *r;
+    s32 f;
+
+    switch (p[0]) {
+    case 0:
+        p[0] = 1;
+        D_sc01_080_801C7548 = 0;
+        D_sc01_080_801C754C = 1;
+        break;
+    case 1:
+        f = D_80126D50;
+        p[0] = 1;
+        if (f != 0) {
+            break;
+        }
+        if (D_sc01_080_801C7548 == 0x34) {
+            /* MATCH-TRICK: call_value cast, the original calls it without its two arguments */
+            ((s32 (*)())func_sc01_080_80180174)();
+        }
+        if (++D_sc01_080_801C7548 >= 0x3C && D_80126B66 >= -0x500 && (D_80126B9C & 0x8000000)) {
+            D_sc01_080_801C7548 = 0;
+            func_8012C588(0x36, 0);
+        }
+        break;
+    case 2:
+        p += 15;
+        func_sc01_080_80181CA4();
+        t = D_sc01_080_8018A278;
+        if (D_80127188 == 4) {
+            for (; t[0] != -1; p++) {
+                s16 a = t[0];
+                if (*p != 0 || D_801270D0 < a) {
+                    t += 2;
+                    continue;
+                }
+                r = (u8 *)func_8012C658(0x2C, t[1], 0);
+                if (r != 0) {
+                    s16 v = t[0];
+                    AF(r, s32 *, 0xCC) = p;
+                    AF(r, s16, 0xFC) = v + 0x500;
+                }
+                *p = 1;
+                t += 2;
+            }
+        }
+        break;
+    }
+}
 
 void func_sc01_080_80181F5C(u8 *arg0) {
     func_sc01_080_80181D98();

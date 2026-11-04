@@ -5,8 +5,8 @@ typedef struct { char *name; s32 rest[7]; } TitleMovie;
 extern CdlFILE *CdSearchFile(CdlFILE *fp, char *name);
 extern int ResetCallback(void);
 extern void *DMACallback(s32 ch, void (*cb)(void));
-extern void func_800118AC(void);
-extern void func_800146B0(s32 mode);
+extern void NextStep(void);
+extern void SetScreenMode2(s32 mode);
 extern void func_800183E0(void *p);
 extern s32 func_8001BFA0(void);
 extern void func_8001BFB0(void);
@@ -38,8 +38,8 @@ extern int CdRead2(s32 mode);
 extern void StSetRing(u32 *ring, u32 size);
 extern void StSetStream(u32 mode, u32 start, u32 end, void (*f1)(), void (*f2)());
 extern void func_80015310(void);
-extern s32 func_80019A24(CdlFILE *file, void *dest, s32 arg2, s32 arg3);
-extern void func_8001A9F8(s32 n);
+extern s32 LoadFileStep(CdlFILE *file, void *dest, s32 arg2, s32 arg3);
+extern void DrawNowLoading(s32 n);
 extern void func_800CF3E8(void);
 extern void func_800CFB3C(void *p);
 extern void func_800CFFEC(void);
@@ -66,7 +66,7 @@ extern s32 D_800EC690;
 typedef struct { u16 type; u16 pad; RECT r; u16 *pix; } TitleImg;
 extern void func_8001C044(void);
 extern void func_8002D858(void);
-extern void func_800147B8(void);
+extern void InitDrawDispEnvs(void);
 extern s32 func_800D1E18(void);
 extern void GsInitGraph2(s32 w, s32 h, s32 a, s32 b, s32 c);
 extern void GsDefDispBuff2(s32 a, s32 b, s32 c, s32 d);
@@ -99,15 +99,15 @@ void func_800CEF04(void) {
     D_800EC688 = 0xFF;
     D_800EC684 = func_800D1E18();
     func_800CFB3C(D_800DA48C);
-    func_800118AC();
-    func_800118AC();
+    NextStep();
+    NextStep();
 }
 
 void func_800CEFBC(void) {
-    func_8001A9F8(0);
-    if (func_80019A24(&D_800AE858, (void *)0x80164E20, 0, 0) != 0) {
+    DrawNowLoading(0);
+    if (LoadFileStep(&D_800AE858, (void *)0x80164E20, 0, 0) != 0) {
         func_80015310();
-        func_800118AC();
+        NextStep();
     }
 }
 
@@ -120,7 +120,7 @@ void func_800CF010(void) {
     D_800EC6A0 = 0;
     func_800CFB3C(D_800DA48C);
     D_800EC6A4 = 1;
-    func_800118AC();
+    NextStep();
 }
 
 void func_800CF078(void) {
@@ -132,19 +132,19 @@ void func_800CF078(void) {
     }
     if (D_800EC6A0 != 0 && D_800EC6A4 != 0) {
         D_800EC690 = 1;
-        func_800118AC();
+        NextStep();
     }
 }
 
-extern s32 func_800149E0(s32 a);
-extern s32 func_80014B10(s32 a);
+extern s32 GetPadPressedDir(s32 a);
+extern s32 GetPadHeldDir(s32 a);
 extern void func_8002D4C8(s32 a, s32 b);
 extern void func_800CFE00(void);
 
 void func_800CF104(void) {
     s32 pad;
-    pad = func_800149E0(0);
-    func_80014B10(0);
+    pad = GetPadPressedDir(0);
+    GetPadHeldDir(0);
     switch (D_800EC690) {
     case 0:
         break;
@@ -178,14 +178,14 @@ void func_800CF104(void) {
         } else if (pad & 0x840) {
             func_8002D4C8(0x9C0, 0);
             D_800EC680 = D_800EC678;
-            func_800118AC();
+            NextStep();
         }
         break;
     }
     func_800CF3E8();
     if (D_800EC67C >= 0x1C3) {
         D_800EC680 = 4;
-        func_800118AC();
+        NextStep();
     }
 }
 
@@ -199,14 +199,14 @@ void func_800CF300(void) {
         r.w = 0x280;
         r.h = 0x1E0;
         ClearImage(&r, 0, 0, 0);
-        func_800118AC();
+        NextStep();
     }
 }
 
 void func_800CF370(void) {
-    func_800146B0(1);
+    SetScreenMode2(1);
     D_800B9A18 = 2;
-    func_800118AC();
+    NextStep();
 }
 
 void func_800CF3A4(void) {
@@ -298,7 +298,7 @@ void func_800CFFEC(void) {
     GsDefDispBuff2(0, 0, 0, 0);
     ResetGraph(1);
     GsInit3D();
-    func_800147B8();
+    InitDrawDispEnvs();
     r[0].x = 0;
     r[0].y = 0;
     r[0].w = 0x280;

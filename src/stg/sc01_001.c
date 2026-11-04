@@ -55,7 +55,7 @@ extern void func_8002D4C8();
 extern void func_8001BFD0();
 extern void func_800D0C48();
 
-extern void func_80019028();
+extern void DisableRumbleScripts();
 void func_sc01_001_8017CF78(void);
 extern s32 D_sc01_001_801EDA20;
 extern s32 func_8013767C();
@@ -110,9 +110,9 @@ extern Spark50 D_sc01_001_801EDA44[];
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
 typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } GteDCM;
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc01_001_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -145,8 +145,8 @@ void func_sc01_001_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -368,7 +368,7 @@ void func_sc01_001_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_001_8017CD9C(u8 *arg0) {
@@ -376,7 +376,7 @@ void func_sc01_001_8017CD9C(u8 *arg0) {
 }
 
 s32 func_sc01_001_8017CDD8(u8 *arg0) {
-    func_80019028();
+    DisableRumbleScripts();
     func_sc01_001_8017CF78();
     func_800167B8(0);
     AF(arg0, u8, 0x15) = (u8) (AF(arg0, u8, 0x15) + 1);
@@ -880,7 +880,7 @@ extern s32 D_sc01_001_801ED9E8;
 extern s32 D_sc01_001_801ED9F4;
 extern s32 D_sc01_001_801F3034;
 extern s32 D_sc01_001_801F313C;
-extern s32 func_800149E0();
+extern s32 GetPadPressedDir();
 extern void func_80016450();
 extern void func_8001AAA0();
 extern void func_800D1724();
@@ -918,7 +918,7 @@ void func_sc01_001_8017D2DC(void) {
     u8 *p = &D_80126948;
     s32 v;
 
-    v = func_800149E0(0);
+    v = GetPadPressedDir(0);
     if (D_sc01_001_801F313C < 0x7B && (v & 0x840)) {
         D_sc01_001_801F313C = 0x7B;
     }
@@ -3129,8 +3129,8 @@ void func_sc01_001_80181E04(void) {
 
     GsGetLs(D_sc01_001_801F3168, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     for (i = 0; i < 256; i++) {
         if (D_sc01_001_801EDA44[i].active == 0) continue;
         v0.x = D_sc01_001_801EDA44[i].pos.x.w.hi;
@@ -3181,7 +3181,7 @@ void func_sc01_001_80181E04(void) {
         addPrim(&ot[z], pk);
         pk += 0x18;
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_001_80182238(void) {

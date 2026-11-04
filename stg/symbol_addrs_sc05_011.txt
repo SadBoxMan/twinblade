@@ -1,7 +1,7 @@
 // Stage SC05_011 (stg/sc05_011.yaml): names given by hand first
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
 func_80012ABC = 0x80012ABC; // type:func
-func_800149E0 = 0x800149E0; // type:func
+GetPadPressedDir = 0x800149E0; // type:func
 func_800167B8 = 0x800167B8; // type:func
 func_800167F0 = 0x800167F0; // type:func
 func_800183E0 = 0x800183E0; // type:func
@@ -14,8 +14,8 @@ func_80029178 = 0x80029178; // type:func
 func_80029514 = 0x80029514; // type:func
 func_8002AC00 = 0x8002AC00; // type:func
 func_8002D4C8 = 0x8002D4C8; // type:func
-D_800A5E60 = 0x800A5E60;
-D_800A6610 = 0x800A6610;
+g_PrimNext = 0x800A5E60;
+g_WorldOtTable = 0x800A6610;
 D_800B9A02 = 0x800B9A02;
 func_800CF8B4 = 0x800CF8B4; // type:func
 func_800CFBCC = 0x800CFBCC; // type:func

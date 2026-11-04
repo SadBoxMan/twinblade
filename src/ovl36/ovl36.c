@@ -1,16 +1,16 @@
 #include "common.h"
 #include "work.h"
 
-extern void func_80010AE0(s32 a);
-extern void func_80011A3C(void);
-extern void func_80011B7C(u16 n);
-extern void func_80011C10(void);
-extern void func_80011CFC(void);
-extern void func_80011D54(s32 a);
-extern void func_80011DCC(void);
-extern void func_80014928(void);
+extern void SetOtDepthLimit(s32 a);
+extern void NextGameState(void);
+extern void SetGameState(u16 n);
+extern void NextGameStateStep(void);
+extern void NextGameStateSubStep(void);
+extern void SetGameStateSubStep(s32 a);
+extern void DemoClearEndRequest(void);
+extern void ResetMallocHeap(void);
 extern void func_80015310(void);
-extern void func_8001A9F8(s32 a);
+extern void DrawNowLoading(s32 a);
 extern s32 func_8001ABBC(s32 a, s32 b, void *c, s32 d, s32 e);
 extern void func_8001B324(void);
 extern void func_8001B384(void);
@@ -63,20 +63,20 @@ void func_800CEE84(void) {
     func_8002AEF8();
     func_80029254();
     func_800CFBBC();
-    func_80011DCC();
-    func_80010AE0(0x3E0);
-    func_80011C10();
+    DemoClearEndRequest();
+    SetOtDepthLimit(0x3E0);
+    NextGameStateStep();
 }
 
 void func_800CEF04(void) {
     if (func_800D0488(1) != 0) {
-        func_80011A3C();
+        NextGameState();
     }
 }
 
 void func_800CEF34(void) {
     func_8001B324();
-    func_80011A3C();
+    NextGameState();
 }
 
 void func_800CEF5C(void) {
@@ -88,17 +88,17 @@ void func_800CEF5C(void) {
     D_800B9A17 = 0;
     func_8001C0C8();
     D_800B9A0E = 0;
-    func_80011A3C();
+    NextGameState();
 }
 
 void func_800CEFB0(void) {
-    func_80011A3C();
+    NextGameState();
 }
 
-extern void func_800191A8(void);
-extern void func_800191BC(s32 a);
-extern s32 func_800191D4(s32 a);
-extern s32 func_80019A24(void *a, s32 b, s32 c, s32 d);
+extern void ForgetStageImage(void);
+extern void SetStageImage(s32 a);
+extern s32 StageImageNeedsLoad(s32 a);
+extern s32 LoadFileStep(void *a, s32 b, s32 c, s32 d);
 extern s32 func_8001AF04(void);
 extern s32 func_80128218(void);
 extern s32 func_800CF8B4(void);
@@ -111,7 +111,7 @@ extern s32 func_800D0214(s32 a);
 extern s32 func_800D1714(void);
 extern s32 D_80072C74;
 extern u8 D_800AE6BF;
-extern u8 D_800AE890[];
+extern u8 g_FileLocStageEngine[];
 extern s32 g_ArchiveFileLoc[][2];
 extern s16 D_800B9A08;
 extern s32 D_800D34AC[];
@@ -243,7 +243,7 @@ typedef struct {
 extern int DrawSync(int mode);
 extern int VSync(int mode);
 extern void DrawOTag(u32 *p);
-extern void func_8001AF34(void);
+extern void LoadQueueStep(void);
 extern void func_8001B85C(void);
 extern s32 func_8001B86C(s32 a);
 extern void func_80128158(void);
@@ -265,13 +265,13 @@ loop:
         D_80114E9C = func_8001B86C(0);
     }
     if (D_80114E98 != 0 && D_80114E9C != 0) {
-        func_80011B7C(7);
+        SetGameState(7);
         return;
     }
     DrawSync(0);
     VSync(w->vsyncMode);
     DrawOTag(D_800A651C[w->frame].ot + 1);
-    func_8001AF34();
+    LoadQueueStep();
     goto loop;
 }
 
@@ -289,13 +289,13 @@ loop:
         D_80114E9C = func_8001B86C(1);
     }
     if (D_80114E98 != 0 && D_80114E9C != 0) {
-        func_80011B7C(7);
+        SetGameState(7);
         return;
     }
     DrawSync(0);
     VSync(w->vsyncMode);
     DrawOTag(D_800A651C[w->frame].ot + 1);
-    func_8001AF34();
+    LoadQueueStep();
     goto loop;
 }
 
@@ -313,28 +313,28 @@ loop:
     }
 wait:
     func_80128158();
-    if ((u16)w->unkA3C2 == 0) {
+    if ((u16)w->stateFlag == 0) {
         VSync(w->vsyncMode);
-        func_8001AF34();
+        LoadQueueStep();
         goto wait;
     }
-    func_80011B7C(8);
+    SetGameState(8);
     return;
 draw:
     DrawSync(0);
     VSync(w->vsyncMode);
     DrawOTag(D_800A651C[w->frame].ot + 1);
-    func_8001AF34();
+    LoadQueueStep();
     goto loop;
 }
 
 void func_800CF370(void) {
-    func_8001A9F8(0);
-    func_80011B7C(0xF);
+    DrawNowLoading(0);
+    SetGameState(0xF);
 }
 
 void func_800CF398(void) {
-    func_80011A3C();
+    NextGameState();
 }
 
 extern s32 func_800CFBF8(void);
@@ -350,12 +350,12 @@ loop:
         D_800D3488[D_800B99F6]();
         if (D_80114E98 == 0) {
             VSync(w->vsyncMode);
-            func_8001AF34();
+            LoadQueueStep();
             goto loop;
         }
     }
     func_80015310();
-    func_80011B7C(7);
+    SetGameState(7);
 }
 
 void func_800CF47C(void) {
@@ -365,7 +365,7 @@ void func_800CF47C(void) {
         }
         D_80114E78 = 0;
     }
-    func_80011C10();
+    NextGameStateStep();
 }
 
 void func_800CF4D4(void) {
@@ -373,22 +373,22 @@ void func_800CF4D4(void) {
 }
 
 void func_800CF510(void) {
-    func_80014928();
+    ResetMallocHeap();
     D_800B9A11 = 1;
     func_8001C0C8();
     func_80015310();
     func_8001B384();
     D_801152BA = 0;
     if (D_80127084 != 0) {
-        func_80011CFC();
+        NextGameStateSubStep();
     } else {
-        func_80011D54(3);
+        SetGameStateSubStep(3);
     }
 }
 
 void func_800CF584(void) {
     if (D_80127084 != 0 && (D_80078EC1 == 0 || func_800D02D0(D_80078EC1) != 0)) {
-        func_80011CFC();
+        NextGameStateSubStep();
     }
 }
 
@@ -396,7 +396,7 @@ void func_800CF5D4(void) {
     s32 t;
 
     if (D_80127084 != 0 && ((t = D_80078EC0 & 0x7F) == 0 || func_800D0488(t) != 0)) {
-        func_80011CFC();
+        NextGameStateSubStep();
     }
 }
 
@@ -408,7 +408,7 @@ void func_800CF628(void) {
             D_80114E94 = *m;
             *m = func_800CFBF8();
         cfc:
-            func_80011CFC();
+            NextGameStateSubStep();
             return;
         }
         D_80114E94 = *m;
@@ -416,7 +416,7 @@ void func_800CF628(void) {
             goto cfc;
         }
         *m = D_80114E94;
-        func_80011D54(5);
+        SetGameStateSubStep(5);
         return;
     }
     D_80127084 = 0;
@@ -424,15 +424,15 @@ void func_800CF628(void) {
         D_80114E98 = 1;
         return;
     }
-    func_80011D54(6);
+    SetGameStateSubStep(6);
 }
 
 void func_800CF714(void) {
-    func_800191A8();
+    ForgetStageImage();
     if (func_800CFE60() != 0) {
         func_800CFDA4();
         D_800B9A08 = D_80114E94;
-        func_80011CFC();
+        NextGameStateSubStep();
     }
 }
 
@@ -444,7 +444,7 @@ void func_800CF764(void) {
 }
 
 void func_800CF7A4(void) {
-    func_800191A8();
+    ForgetStageImage();
     if (func_8001AF04() != 2 && func_800CFE60() != 0) {
         func_800CFDA4();
         D_80127084 = 0;
@@ -499,8 +499,8 @@ void func_800CF8E4(void) {
 }
 
 void func_800CF94C(void) {
-    if (func_80019A24(D_800AE890, D_80072C74, 0, 0) != 0) {
-        func_80011A3C();
+    if (LoadFileStep(g_FileLocStageEngine, D_80072C74, 0, 0) != 0) {
+        NextGameState();
     }
 }
 
@@ -518,19 +518,19 @@ void func_800CF990(void) {
         func_80015310();
         if (func_8001ABBC(0, 0, g_ArchiveFileLoc[D_800D3408[D_80114E74]], 0, 0) != 0) {
             func_800167B8(0);
-            func_80011C10();
+            NextGameStateStep();
         }
         break;
     case 1:
         func_800CFAD0();
         if (func_800167F0(0) & 0xFFFF) {
-            func_80011C10();
+            NextGameStateStep();
         }
         break;
     case 2:
         func_800CFAD0();
         if (++D_800B9A00 >= 0x5B && D_800AF630.dispIdx != 0) {
-            func_80011B7C(6);
+            SetGameState(6);
         }
         break;
     }
@@ -574,8 +574,8 @@ extern s16 func_800CFBE8(void);
 extern void func_800CF8E4(void);
 extern void func_800D1D24(void);
 extern s32 func_800D1DB0(void);
-extern s32 func_80011DF4();
-extern void func_80011818(s32 a);
+extern s32 DemoEndRequested();
+extern void SetMode(s32 a);
 extern s32 func_8002AF08();
 extern s32 func_80029264();
 extern void func_8001BE20();
@@ -589,7 +589,7 @@ extern u8 D_80126BA6;
 typedef struct { s32 w[9]; } FieldBlk24;
 typedef struct { s32 next, unk4, cur; u8 padC[0xA]; u8 unk16; u8 pad17[2]; u8 unk19; } FieldMapX;
 
-extern void func_80018FC8(void);
+extern void StopPadRumble(void);
 extern u16 D_800B9A02;
 extern u16 D_80115114;
 extern s16 D_80115124;
@@ -597,7 +597,7 @@ extern s16 D_8011512A;
 extern u8 *D_801151C8;
 extern u8 *D_801151CC;
 extern GsOT D_800A6518[];
-extern u8 D_8007BA70[];
+extern u8 g_PrimBuf[];
 extern u8 D_800856B0[];
 typedef struct { s32 v; } S32R;
 extern S32R D_80115168[];
@@ -721,11 +721,11 @@ s32 func_800CFC5C(s32 a) {
 }
 
 s32 func_800CFD68(s32 a) {
-    return func_800191D4(D_800D34AC[a & ~0xF000] & 0xFFF);
+    return StageImageNeedsLoad(D_800D34AC[a & ~0xF000] & 0xFFF);
 }
 
 void func_800CFDA4(void) {
-    func_800191BC(D_800D34AC[D_800B9A08 & ~0xF000] & 0xFFF);
+    SetStageImage(D_800D34AC[D_800B9A08 & ~0xF000] & 0xFFF);
 }
 
 void func_800CFDE8(s32 a) {
@@ -775,7 +775,7 @@ s32 func_800D0214(s32 a) {
     *p = t;
     if (i >= 0) {
         if (g_ArchiveFileLoc[i][0] != 0) {
-            return func_80019A24(g_ArchiveFileLoc[i], a, 0, (s32)p);
+            return LoadFileStep(g_ArchiveFileLoc[i], a, 0, (s32)p);
         }
         return 1;
     }
@@ -1280,7 +1280,7 @@ s32 func_800D17B8(s32 a) {
             D_80114EA8 = 0;
             D_800AE6B4 = d->unk4;
         }
-        func_80011A3C();
+        NextGameState();
         return 1;
     }
     return 0;
@@ -1362,28 +1362,28 @@ void func_800D1BF8(void) {
     D_800B9A0E = 0;
     ((FieldDestFn *)(D_800AE6B0 & 0x80FFFFFF))->fn();
     func_800D1D24();
-    if (func_80011DF4() != 0) {
-        func_80011DCC();
-        func_80011818(0x11);
+    if (DemoEndRequested() != 0) {
+        DemoClearEndRequest();
+        SetMode(0x11);
     } else if (func_8002AF08() != 0) {
-        func_80011B7C(0xD);
+        SetGameState(0xD);
     } else if (((s32 (*)(void))func_800CFBE8)() != 0) {
         func_800CFBBC();
-        func_80011B7C(0x13);
+        SetGameState(0x13);
     } else if (func_80029264() != 0) {
         func_80029254();
-        func_80011B7C(0x12);
+        SetGameState(0x12);
     } else {
         switch (func_800D1DB0()) {
         case 0:
-            func_80011B7C(6);
+            SetGameState(6);
             break;
         case 1:
-            func_80011B7C(5);
+            SetGameState(5);
             break;
         case 2:
         default:
-            func_80011B7C(0x10);
+            SetGameState(0x10);
             break;
         }
     }
@@ -1556,7 +1556,7 @@ void func_800D24A0(s16 mode) {
     s32 *dst;
     s16 j;
     u8 *p;
-    func_80018FC8();
+    StopPadRumble();
     DrawSync(0);
     j = 0;
     src = (s32 *)&D_800A6518[D_800B9A02 ^ 1];
@@ -1572,7 +1572,7 @@ void func_800D24A0(s16 mode) {
     *(s16 *)D_80115110 = mode;
     D_800B9A13 = mode + 1;
     D_80115114 = D_800B9A02;
-    D_801151C8 = D_8007BA70 + D_800B9A02 * 0x13880;
+    D_801151C8 = g_PrimBuf + D_800B9A02 * 0x13880;
     D_801151CC = D_800856B0 + D_800B9A02 * 0x13880;
     for (; j < 8; j++) {
         p = D_80115110 + j * 4; *(s32 *)(p + 0x78) = 0;

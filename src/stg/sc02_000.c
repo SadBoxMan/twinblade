@@ -618,7 +618,7 @@ typedef struct { u32 *ot; s32 pad[4]; } OtE;
 extern s32 D_80126950;
 extern OtE D_800A651C[];
 extern u16 D_800B9A02;
-extern u8 *func_80010A08(s32 n);
+extern u8 *AllocPrim(s32 n);
 extern s16 D_sc02_000_8018F6E4[];
 
 extern void func_sc02_000_8017D230();
@@ -687,7 +687,7 @@ extern u8 D_sc02_000_8018E6B0;
 extern s32 D_sc02_000_801E8008;
 extern W16 D_sc02_000_801E6A00;
 extern u8 D_80062BDC;
-extern void func_80019064();
+extern void StartRumbleScript();
 extern void func_8012E9C0();
 extern u8 D_sc02_000_801A681C;
 extern void func_sc02_000_8017FCB0();
@@ -772,8 +772,8 @@ extern void func_80013F3C();
 extern void func_800123F0();
 extern void func_80012558();
 extern void func_800126C4();
-extern u8 *D_800A5E60;
-extern u32 D_800A6610[2][0x1000];
+extern u8 *g_PrimNext;
+extern u32 g_WorldOtTable[2][0x1000];
 extern s32 GetTPage();
 extern void SetDrawMode();
 
@@ -1349,8 +1349,8 @@ void func_sc02_000_8017D538(u8 *o) {
     GsGetLs(o + 0x10, &ls);
     GsSetLsMatrix(&ls);
     func_sc02_000_8017CE58(&D_sc02_000_801E8678, &r, AF(o, s32, 0x60));
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     x0 = (r.x + 0x4000) / 512;
     x1 = (r.x + r.z + 0x4000) / 512 + 2;
     x0 = x0 < 0 ? 0 : (x0 > 63 ? 63 : x0);
@@ -1574,7 +1574,7 @@ void func_sc02_000_8017D538(u8 *o) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 s32 func_sc02_000_8017E404(u8 *p, u8 *o) {
@@ -2167,7 +2167,7 @@ void func_sc02_000_8017F62C(s32 arg0) {
 void func_sc02_000_8017F950(u8 *o) {
     W16 t = D_sc02_000_801E6A00;
     if (AF(o, u8, 0x5E) == 5) {
-        func_80019064(&D_80062BDC);
+        StartRumbleScript(&D_80062BDC);
     }
     if (AF(o, u16, 0x5E) == 0x1F) {
         func_sc02_000_80180A64(o);
@@ -4868,7 +4868,7 @@ void func_sc02_000_80185910(SV8 *a, SV8 *b, SV8 *c, SV8 *d) {
     if (flag & 0x7F85E000) {
         return;
     }
-    p = D_800A5E60;
+    p = g_PrimNext;
     gte_stsxy3c(xy);
     gte_ldv0(d);
     gte_rtps();
@@ -4883,14 +4883,14 @@ void func_sc02_000_80185910(SV8 *a, SV8 *b, SV8 *c, SV8 *d) {
     AF(p, u8, 0x14) = AF(p, u8, 4) = 0;
     AF(p, u8, 0x1D) = AF(p, u8, 0x15) = AF(p, u8, 0xD) = AF(p, u8, 5) = 0;
     AF(p, u8, 0x1E) = AF(p, u8, 0x16) = AF(p, u8, 0xE) = AF(p, u8, 6) = 0;
-    row = D_800A6610[D_800B9A02];
+    row = g_WorldOtTable[D_800B9A02];
     ((PTag *)p)->addr = ((PTag *)&row[otz])->addr;
     ((PTag *)&row[otz])->addr = (u32)p;
     p += 0x24;
     SetDrawMode(p, 0, 0, GetTPage(0, 1, 0, 0) & 0xFFFF, 0);
     ((PTag *)p)->addr = ((PTag *)&row[otz])->addr;
     ((PTag *)&row[otz])->addr = (u32)p;
-    D_800A5E60 = p + 0xC;
+    g_PrimNext = p + 0xC;
 }
 
 void func_sc02_000_80185B40(u8 *arg0) {
@@ -5635,7 +5635,47 @@ void func_sc02_000_801876FC(u8 *arg0) {
     D_sc02_000_8018F460[AF(arg0, u16, 2)]();
 }
 
-INCLUDE_ASM("asm/stg/sc02_000/nonmatchings/sc02_000", func_sc02_000_80187738);
+extern u8 D_sc02_000_801E0CBC;
+extern u8 D_sc02_000_801E087C;
+extern u8 D_sc02_000_801E0B5C;
+
+void func_sc02_000_80187738(u8 *o) {
+    s32 r;
+    u8 *p;
+    s32 k;
+    s32 n;
+    s32 y;
+
+    r = func_8012C1B8();
+    AF(o, s32, 0x20) = r;
+    if (r == 0) {
+        func_8012CAE4(o);
+        return;
+    }
+    p = &D_sc02_000_801E0CBC;
+    if (AF(o, s16, 0x70) == 0) {
+        p = &D_sc02_000_801E087C;
+    } else if (AF(o, s16, 0x70) == 1) {
+        p = &D_sc02_000_801E0B5C;
+    }
+    func_8001C214(AF(o, s32, 0x20), p);
+    func_8001D0E8(AF(o, s32, 0x20), 0x140, 0xF0);
+    SetScript(o, &D_sc02_000_8018AF28);
+    func_8012B200(o);
+    AF(o, s32, 0x18) = 0xFFDBC000;
+    AF(o, s32, 0x14) = 0xFFF40000;
+    k = D_800B99DC[0];
+    n = AF(o, u16, 2);
+    y = AF(o, s16, 0x72);
+    AF(o, s32, 0x44) = 0;
+    AF(o, s32, 0x48) = 0x80000;
+    AF(o, s32, 0x4C) = 0;
+    n++;
+    k &= 0x1F;
+    AF(o, s16, 0x12) = 0xF - k;
+    AF(o, s32, 0x48) = y + 0x80000;
+    AF(o, u16, 2) = n;
+}
 
 void func_sc02_000_80187834(u8 *arg0) {
     void *temp_v1;
@@ -6346,7 +6386,7 @@ void func_sc02_000_80189340(u8 *arg0) {
     if (otz <= 0) return;
     if (flag < 0) return;
     ot = D_800A651C[D_800B9A02].ot + otz;
-    prim = func_80010A08(0x3FC);
+    prim = AllocPrim(0x3FC);
     if (prim == 0) return;
     SetDrawMode(prim, 0, 0, GetTPage(0, 1, 0, 0) & 0xFFFF, 0);
     pp[0] = prim + 0xC;

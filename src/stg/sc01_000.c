@@ -46,7 +46,7 @@ extern void func_8012A094();
 extern s32 func_sc01_000_8017EB54();
 
 extern void func_800167B8();
-extern void func_80019028();
+extern void DisableRumbleScripts();
 void func_sc01_000_8017CFD4(void);
 extern void func_800CFBCC();
 
@@ -71,9 +71,9 @@ typedef struct { s32 zbox; s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; 
 extern s32 ReadGeomScreen();
 extern void GsGetLs();
 extern void GsSetLsMatrix();
-extern u8 *D_800A5E60;
+extern u8 *g_PrimNext;
 extern u16 D_800B9A02;
-extern u32 D_800A6610[2][0x1000];
+extern u32 g_WorldOtTable[2][0x1000];
 
 void func_sc01_000_8017BEBC(u8 *obj) {
     s32 tmp[3];
@@ -106,8 +106,8 @@ void func_sc01_000_8017BEBC(u8 *obj) {
     zlim = ReadGeomScreen() + AF(obj, s32, 0x64);
     GsGetLs(obj + 0x10, &ls);
     GsSetLsMatrix(&ls);
-    pk = D_800A5E60;
-    ot = D_800A6610[D_800B9A02];
+    pk = g_PrimNext;
+    ot = g_WorldOtTable[D_800B9A02];
     c = AF(obj, ChunkDCM *, 0xC);
     hdr = AF(obj, u8 *, 8);
     n = AF(hdr, s32, 8);
@@ -329,7 +329,7 @@ void func_sc01_000_8017BEBC(u8 *obj) {
             }
         }
     }
-    D_800A5E60 = pk;
+    g_PrimNext = pk;
 }
 
 void func_sc01_000_8017CD9C(u8 *arg0) {
@@ -337,7 +337,7 @@ void func_sc01_000_8017CD9C(u8 *arg0) {
 }
 
 s32 func_sc01_000_8017CDD8(u8 *arg0) {
-    func_80019028();
+    DisableRumbleScripts();
     func_sc01_000_8017CFD4();
     func_800167B8(0);
     AF(arg0, u8, 0x15) = (u8) (AF(arg0, u8, 0x15) + 1);
@@ -555,7 +555,7 @@ s32 func_sc01_000_8017D488(void) {
     return 0x80;
 }
 
-extern s32 func_800149E0();
+extern s32 GetPadPressedDir();
 extern void func_800D1724();
 extern void func_80174E9C();
 extern s32 func_80174ED4();
@@ -613,7 +613,7 @@ void func_sc01_000_8017D490(void) {
     s32 *t;
 
     w = &D_80126948;
-    pad = func_800149E0(0);
+    pad = GetPadPressedDir(0);
     if (D_sc01_000_801A585C < 0xE && (pad & 0x840)) {
         func_800D1724(&D_sc01_000_8018263C);
         D_sc01_000_801A585C = 0xF;
@@ -790,7 +790,7 @@ void func_sc01_000_8017DD04(s32 arg0, s32 arg1) {
     u8 *p;
 
     func_sc01_000_8017E1A8(&D_sc01_000_801826EC, arg0, arg1, D_sc01_000_801A5734);
-    p = D_800A5E60;
+    p = g_PrimNext;
     AF(p, u8, 3) = 9;
     AF(p, u8, 7) = 0x2C;
     AF(p, s16, 0x16) = 0x8E;
@@ -887,7 +887,7 @@ void func_sc01_000_8017DD04(s32 arg0, s32 arg1) {
     *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(D_800AA60C[D_800B9A02]) & 0xFFFFFF);
     setaddr(D_800AA60C[D_800B9A02], p);
     p += 0x28;
-    D_800A5E60 = p;
+    g_PrimNext = p;
 }
 
 void func_sc01_000_8017E1A8(SV8 *p, s32 x, s32 y, s32 s) {
@@ -908,7 +908,7 @@ void func_sc01_000_8017E1A8(SV8 *p, s32 x, s32 y, s32 s) {
 void func_sc01_000_8017E210(s32 c) {
     u8 *p;
 
-    p = D_800A5E60;
+    p = g_PrimNext;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100003E;
     AF(p, u8, 0xB) = 0x64;
@@ -939,7 +939,7 @@ void func_sc01_000_8017E210(s32 c) {
     *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(D_800AA608[D_800B9A02]) & 0xFFFFFF);
     setaddr(D_800AA608[D_800B9A02], p);
     p += 0x18;
-    D_800A5E60 = p;
+    g_PrimNext = p;
 }
 
 void func_sc01_000_8017E3A0(s32 x0, s32 y0, s32 x1, s32 y1, s32 c, s32 blue) {
@@ -947,7 +947,7 @@ void func_sc01_000_8017E3A0(s32 x0, s32 y0, s32 x1, s32 y1, s32 c, s32 blue) {
     u8 *w;
 
     w = &D_800AF630;
-    p = D_800A5E60;
+    p = g_PrimNext;
     AF(p, u8, 3) = 4;
     AF(p, u8, 7) = 0x50;
     if (blue == 0) {
@@ -972,7 +972,7 @@ void func_sc01_000_8017E3A0(s32 x0, s32 y0, s32 x1, s32 y1, s32 c, s32 blue) {
     *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(D_800AA608[AF(w, u16, 0xA3D2)]) & 0xFFFFFF);
     setaddr(D_800AA608[AF(w, u16, 0xA3D2)], p);
     p += 0x14;
-    D_800A5E60 = p;
+    g_PrimNext = p;
 }
 
 typedef struct { u32 tag; u32 mode; u8 r, g, b, code; s16 x, y; u8 u, v; u16 clut; s16 w, h; } SprtM;
@@ -982,7 +982,7 @@ void func_sc01_000_8017E4A0(void) {
     SprtM *p;
     u32 c;
 
-    p = (SprtM *)D_800A5E60;
+    p = (SprtM *)g_PrimNext;
     ((u8 *)p)[3] = 5;
     c = 0xE100001E;
     p->mode = c;
@@ -1003,13 +1003,13 @@ void func_sc01_000_8017E4A0(void) {
     *(u32 *)p = c;
     setaddr(D_800A6614[D_800B9A02], p);
     p++;
-    D_800A5E60 = (u8 *)p;
+    g_PrimNext = (u8 *)p;
 }
 
 void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *p;
 
-    p = D_800A5E60;
+    p = g_PrimNext;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100003E;
     AF(p, u8, 0xB) = 0x64;
@@ -1025,8 +1025,8 @@ void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(p, s16, 0xE) = arg1 - arg0;
     AF(p, s16, 0x14) = 0x100;
     AF(p, s16, 0x16) = arg0;
-    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
-    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&g_WorldOtTable[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&g_WorldOtTable[D_800B9A02][0xFFE], p);
     p += 0x18;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100005E;
@@ -1043,8 +1043,8 @@ void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(p, s16, 0xE) = arg1 - arg0;
     AF(p, s16, 0x14) = 0x100;
     AF(p, s16, 0x16) = arg0;
-    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
-    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&g_WorldOtTable[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&g_WorldOtTable[D_800B9A02][0xFFE], p);
     p += 0x18;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100003E;
@@ -1061,8 +1061,8 @@ void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(p, s16, 0xE) = arg1;
     AF(p, s16, 0x14) = 0x100;
     AF(p, s16, 0x16) = arg0 + 1;
-    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
-    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&g_WorldOtTable[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&g_WorldOtTable[D_800B9A02][0xFFE], p);
     p += 0x18;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100005E;
@@ -1079,8 +1079,8 @@ void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(p, s16, 0xE) = arg1;
     AF(p, s16, 0x14) = 0x100;
     AF(p, s16, 0x16) = arg0 + 1;
-    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
-    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&g_WorldOtTable[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&g_WorldOtTable[D_800B9A02][0xFFE], p);
     p += 0x18;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100003E;
@@ -1097,8 +1097,8 @@ void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(p, s16, 0xE) = arg2 - arg0;
     AF(p, s16, 0x14) = 0x100;
     AF(p, s16, 0x16) = arg0;
-    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
-    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&g_WorldOtTable[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&g_WorldOtTable[D_800B9A02][0xFFE], p);
     p += 0x18;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100005E;
@@ -1115,8 +1115,8 @@ void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(p, s16, 0xE) = arg2 - arg0;
     AF(p, s16, 0x14) = 0x100;
     AF(p, s16, 0x16) = arg0;
-    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
-    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&g_WorldOtTable[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&g_WorldOtTable[D_800B9A02][0xFFE], p);
     p += 0x18;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100003E;
@@ -1133,8 +1133,8 @@ void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(p, s16, 0xE) = arg2;
     AF(p, s16, 0x14) = 0x100;
     AF(p, s16, 0x16) = arg0 + 1;
-    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
-    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&g_WorldOtTable[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&g_WorldOtTable[D_800B9A02][0xFFE], p);
     p += 0x18;
     AF(p, u8, 3) = 5;
     AF(p, u32, 4) = 0xE100005E;
@@ -1151,10 +1151,10 @@ void func_sc01_000_8017E594(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(p, s16, 0xE) = arg2;
     AF(p, s16, 0x14) = 0x100;
     AF(p, s16, 0x16) = arg0 + 1;
-    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&D_800A6610[D_800B9A02][0xFFE]) & 0xFFFFFF);
-    setaddr(&D_800A6610[D_800B9A02][0xFFE], p);
+    *(u32 *)p = (*(u32 *)p & 0xFF000000) | (getaddr(&g_WorldOtTable[D_800B9A02][0xFFE]) & 0xFFFFFF);
+    setaddr(&g_WorldOtTable[D_800B9A02][0xFFE], p);
     p += 0x18;
-    D_800A5E60 = p;
+    g_PrimNext = p;
 }
 
 s32 func_sc01_000_8017EB28(s32 arg0) {

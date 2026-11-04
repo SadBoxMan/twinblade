@@ -1,6 +1,6 @@
 // Stage SC02_003 (stg/sc02_003.yaml): names given by hand first
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
-func_80010A08 = 0x80010A08; // type:func
+AllocPrim = 0x80010A08; // type:func
 func_800123F0 = 0x800123F0; // type:func
 func_80012558 = 0x80012558; // type:func
 func_800126C4 = 0x800126C4; // type:func
@@ -17,7 +17,7 @@ func_80016A5C = 0x80016A5C; // type:func
 func_80017758 = 0x80017758; // type:func
 func_80017DC4 = 0x80017DC4; // type:func
 func_80017E68 = 0x80017E68; // type:func
-func_80019064 = 0x80019064; // type:func
+StartRumbleScript = 0x80019064; // type:func
 func_8001AAA0 = 0x8001AAA0; // type:func
 func_8001B23C = 0x8001B23C; // type:func
 func_8001BFD0 = 0x8001BFD0; // type:func
@@ -39,7 +39,7 @@ func_80028620 = 0x80028620; // type:func
 func_8002D4C8 = 0x8002D4C8; // type:func
 func_80036D58 = 0x80036D58; // type:func
 D_80062BDC = 0x80062BDC;
-D_800A5E60 = 0x800A5E60;
+g_PrimNext = 0x800A5E60;
 D_800A5E94 = 0x800A5E94;
 D_800A5E95 = 0x800A5E95;
 D_800A5E96 = 0x800A5E96;
@@ -49,7 +49,7 @@ D_800A5EA4 = 0x800A5EA4;
 D_800A5EA5 = 0x800A5EA5;
 D_800A5EA6 = 0x800A5EA6;
 D_800A651C = 0x800A651C;
-D_800A6610 = 0x800A6610;
+g_WorldOtTable = 0x800A6610;
 D_800AE620 = 0x800AE620;
 D_800AE7E0 = 0x800AE7E0;
 D_800AE7E2 = 0x800AE7E2;
