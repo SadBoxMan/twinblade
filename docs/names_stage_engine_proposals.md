@@ -326,3 +326,103 @@ the point enemies are told to go for; "Target" is a reading, not a fact (M). If 
 | 0x8013339C | func_8013339C | UnscaleMatrix | a matrix's columns divided by a scale vector | H | e5F4 comment |
 | 0x80134310 | func_80134310 | DotPlus | dot product of two SVECTORs plus a constant (a plane test) | H | e5F4 comment (copies at 0x80134A28, 0x80134FB8) |
 | 0x8012EECC | func_8012EECC | ScaleByDifficulty | x less x * func_8002A4FC() * 100 / 7680 | L | e.c; the EXE function's meaning is not known yet |
+
+## Script and messages
+
+### The event script VM (e58E0, 0x80178xxx-0x8017Bxxx)
+
+An interpreter for the stage's event scripts (talks, cutscenes): state D_801EF464 (0 idle, 1 / 2 waiting on a message
+window, 3 run on, 4 a frame wait, 5 a native wait hook, 6 a finished choice), a 512-halfword command ring, a gosub slot,
+ten hooks. Stage NPC code starts one with func_80178B18 when spoken to, polls func_80178970 each frame and calls
+func_80178D18 when it is over.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80178B18 | func_80178B18 | StartEvent | reset the VM, patch the built-in script's goto target with s, take Musashi's control (func_801746A4, func_8017435C), run | H | e58E0 comment. 234 calls / 95 files: `func_80178B18(a, def->+0xC)` (an NPC's script from its def) |
+| 0x80178B70 | func_80178B70 | StartEventKeepPlayer | the same without taking Musashi's control | H | e58E0 comment; 14 calls / 18 files |
+| 0x80178BB8 | func_80178BB8 | ResetAndRunScript | reset, then RunScript on a script directly | H | e58E0 |
+| 0x80178BF8 | func_80178BF8 | ResetScriptVM | all VM state cleared (window, gosub slot, hooks, the command ring, the actor-move block) | H | e58E0 comment. 185 calls / 61 files |
+| 0x80178CBC | func_80178CBC | RunScript | interpret from a script pointer until it waits (state other than 3); returns the state | H | e58E0. 296 calls / 63 files |
+| 0x80178D40 | func_80178D40 | ScriptStep | one command (the interpreter proper) | M | e58E0 (the switch that follows "the interpreter's declarations") |
+| 0x801789AC | func_801789AC | UpdateScript | the VM's frame: the hooks, then by state wait for the window's answer, a frame count or the wait hook, and run on; at state 6 return the choice (1 / 2 / 3) | H | e58E0. 128 calls / 64 files: `if (func_801789AC(a) == 1)` |
+| 0x80178970 | func_80178970 | IsEventDone | UpdateScript says done and the scripted camera (D_801EF3F0) is idle | H | e58E0 comment ("finished?"). 461 calls / 91 files: `if (func_80178970(a) != 0)` |
+| 0x80178D18 | func_80178D18 | EndEvent | VM state 0; unless the field overlay objects (func_800CF8CC), BeginScene on Musashi and end his scripted action | H | e58E0 (with func_80174714). 461 calls / 106 files, right after IsEventDone |
+| 0x80174714 | func_80174714 | ReleasePlayer | as above without the VM reset | M | e58E0 |
+| 0x8017B368 | func_8017B368 | ScriptOpCameraCut | op 0x21: cut the scripted camera to two points (absolute or the actor's numbered points) | H | e58E0 comment; 9 calls (stages call ops directly) |
+| 0x8017B490 | func_8017B490 | ScriptOpCameraMove | the same, easing over 0x1E frames from the current view | M | e58E0 (D_801EE5DC = 0x1E, the main camera's view fields copied as the start) |
+| 0x801788B8 | func_801788B8 | SpawnTalkMarker | spawn kind 0x83 linked to the actor (its position and heading, +0xDC = the second argument) | L | e58E0; 165 calls / 60 files. Kind 0x83 next to the VM, given the speaker and a value: probably the "can talk" helper; check the kind |
+
+### Message windows (e5F4, 0x80137xxx-0x80139xxx)
+
+Three windows of 0x4C at D_801269F0 (window 0 is the fixed one), text from message ids.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8013767C | func_8013767C | OpenMessage | a free window opened with a message | H | e5F4. 66 calls / 32 files: `a->+0x198 = func_8013767C(msg)`, closed later with func_80139914(a->+0x198) |
+| 0x80137614 | func_80137614 | OpenMessageEx | the same with a value (+0x1C) and flags (& 0xD8) | H | e5F4 comment |
+| 0x801376E8 | func_801376E8 | OpenMessageAt | window 0 with a message, centred on a screen point when given | H | e5F4 comment; 17 calls |
+| 0x801377B4 | func_801377B4 | SetupMessage | a window set up for a message id; front window unless flags 0x2000 | H | e5F4 comment |
+| 0x801378F0 | func_801378F0 | InitMessages | the window system cleared | H | e5F4 comment; called by the stage start (e.c func_80128420) |
+| 0x801379FC | func_801379FC | UpdateMessages | the windows' frame: front one first, then the others, then each drawn | H | e5F4 comment |
+| 0x80137B80 | func_80137B80 | UpdateMessage0 | window 0's frame only (its step, the blink counter) | M | e5F4; 22 calls |
+| 0x80137D08 | func_80137D08 | DrawMessage0 | window 0's text, then the arrow (state 7) or blinking prompt (state 3) | H | e5F4 comment; 9 calls |
+| 0x80139914 | func_80139914 | CloseMessage | a window closed | H | e5F4 comment. 64 calls / 32 files |
+| 0x80139954 | func_80139954 | CloseMessage0 | CloseMessage on window 0 | H | e5F4; 43 calls |
+| 0x801399A8 | func_801399A8 | FindFreeWindow | the first free window after window 0 | H | e5F4 comment |
+| 0x801399F0 | func_801399F0 | GetMessageAnswer | -1 closed / closing, the choice once made (state 0xD), else 0 | H | e5F4 comment. 83 calls / 40 files: `if (func_801399F0(a->+0x198) != 0)` |
+| 0x80139A44 | func_80139A44 | SetMessageText | inserted text slot i (0-3) = v (window +0x4A picks the slot) | M | e5F4 struct comment ("which text (D_80127530)"); 12 calls |
+| 0x80139A68 | func_80139A68 | SetMessageNumber | number slot i (0-3) = v, printed by func_80138AB4 | H | e5F4 (func_80138AB4 prints D_80127540[w->+0x48]). 45 calls: `func_80139A68(count, 0)` |
+| 0x80138AB4 | func_80138AB4 | PutMessageNumber | the number put into the window digit by digit | H | e5F4 comment |
+| 0x801379D8 | func_801379D8 | EnableMessageVoice | D_8012752E = 1 | L | e5F4 (func_80138? reads it through `voice`); 2 calls |
+| 0x801379EC | func_801379EC | DisableMessageVoice | D_8012752E = 0 | L | as above |
+
+### Musashi's scripted actions (Player +0x1F8.., e58E0 0x8016Exxx-0x80174xxx)
+
+Player +0x1F8 holds an action handler (a function, low 24 bits and bit 31) with flags in bits 24-30; +0x1FC an action
+script (a list of handlers), +0x214 the phase (NextPhase / SetPhase, already named), +0x215 / +0x216 the two
+sub-counts (BumpSub1 / BumpSub2), +0x200 a timer. Stage code drives Musashi in cutscenes with these.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8016EE94 | func_8016EE94 | SetPlayerAction | +0x1F8 = handler | 0x04000000 | flags, the action's state cleared | H | e58E0 |
+| 0x8016EDEC | func_8016EDEC | StartPlayerAction | SetPlayerAction, then (unless Musashi's kind is 0x19 / 0x1A) his state handler and func_80159B3C | H | e58E0. 51 calls / 16 files: `func_8016EDEC(stage_fn, 0x01000000)` |
+| 0x8016EFC8 | func_8016EFC8 | SetPlayerActionScript | +0x1FC = an action script, +0x1F8 = its first handler | flags, phase 1 | H | e58E0 |
+| 0x8016EF78 | func_8016EF78 | SetPlayerActionScriptReset | SetPlayerActionScript and func_801726D0 | M | e58E0 (arguments pass through in registers) |
+| 0x8016EE40 | func_8016EE40 | StartPlayerActionScript | the above, then as StartPlayerAction | H | e58E0. 338 calls / 135 files: `func_8016EE40(&stage_script, 0x01000000)` |
+| 0x8016F14C | func_8016F14C | RunPlayerAction | each frame: call the handler (func_80148634 first with flag 0x01000000) | H | e58E0; called from the player update func_80146128 |
+| 0x8016F0E4 | func_8016F0E4 | EndPlayerActionOf | +0x1F8 / +0x1FC = 0, phase 0, BeginScene, func_801511A8 | H | e58E0; 50 calls / 16 files |
+| 0x8016F0AC | func_8016F0AC | EndPlayerAction | EndPlayerActionOf(Musashi) and func_80165770 | H | e58E0; 13 calls / 20 files |
+| 0x8016F4C4 | func_8016F4C4 | EndPlayerActionAndRest | the same for any player object | M | e58E0 |
+| 0x8016F1AC | func_8016F1AC | GetPlayerAction | the handler (+0x1F8 & 0x80FFFFFF) | H | e58E0; 63 calls / 44 files (`if (func_8016F1AC() == 0)`) |
+| 0x8016F1C4 | func_8016F1C4 | PlayerActionBlocksInput | 1 on maps listed at D_801908E8, else the handler unless flag 0x10000000 | M | e58E0; 13 calls |
+| 0x8016F264 | func_8016F264 | ClearPlayerActionFlag01 | +0x1F8 &= ~0x01000000 | M | e58E0 (the flag's meaning: func_80148634 is run before the handler) |
+| 0x8016F288 | func_8016F288 | SetPlayerActionFlag01 | +0x1F8 |= 0x01000000 | M | e58E0 |
+| 0x8016F2A8 | func_8016F2A8 | SetPlayerActionFlag02 | |= 0x02000000 | L | e58E0 |
+| 0x8016F2C8 | func_8016F2C8 | ClearPlayerActionFlag02 | &= ~0x02000000 | L | e58E0 |
+| 0x8016F2EC | func_8016F2EC | SetPlayerActionFlag08 | |= 0x08000000 | L | e58E0 |
+| 0x8016F30C | func_8016F30C | ClearPlayerActionFlag08 | &= ~0x08000000 | L | e58E0 |
+| 0x8016F330 | func_8016F330 | SetPlayerActionFlag10 | |= 0x10000000 (see PlayerActionBlocksInput) | M | e58E0 |
+| 0x8016F350 | func_8016F350 | ClearPlayerActionFlag10 | &= ~0x10000000 | M | e58E0 |
+| 0x80171928 | func_80171928 | NextPlayerActionHandler | the next handler from the action script (+0x1FC[phase]), NextPhase | H | e58E0; 110 calls / 44 files |
+| 0x801718AC | func_801718AC | SetPlayerActionList | a new action script, its first handler, NextPhase | M | e58E0 |
+| 0x80171904 | func_80171904 | SetPlayerActionHandler | the handler replaced, flags kept | H | e58E0 |
+| 0x801719A4 | func_801719A4 | TakeActionArgs | copy n words after the phase into D_8011F738 and skip them | H | e58E0 |
+| 0x8017196C | func_8017196C | SetPhaseCopy | identical to SetPhase | H | e58E0 |
+| 0x8017197C | func_8017197C | BumpSub1Copy | identical to BumpSub1 | H | e58E0 |
+| 0x80171990 | func_80171990 | BumpSub2Copy | identical to BumpSub2 | H | e58E0. 244 calls / 56 files |
+| 0x80171A6C | func_80171A6C | DropSub2 | +0x216 -= 1 | H | e58E0 |
+| 0x80171A04 | func_80171A04 | SetActionMark1 | +0x217 = 1 | L | e58E0; 17 calls |
+| 0x80171A10 | func_80171A10 | SetActionMark2 | +0x217 = 2 | L | e58E0; 17 calls |
+| 0x80171A80 | func_80171A80 | SetActionTimer | +0x200 = n | H | e58E0; 13 calls |
+| 0x80171A88 | func_80171A88 | TickActionTimer | count +0x200 down; 1 at 0 | H | e58E0; 13 calls |
+| 0x80171B10 | func_80171B10 | FacePoint | the model's heading = the heading to a point (func_8014C568) | M | e58E0 |
+| 0x80171B44 | func_80171B44 | ClearWalkCount | +0x20C = 0 | M | e58E0; 9 calls (before func_80171B4C) |
+| 0x80171B4C | func_80171B4C | AutoWalkFrames | fake pad input (+0xA9 = digital, +0xAA = the direction toward the model's heading relative to the camera) for n frames; then stop | H | e58E0; 9 calls |
+| 0x80171D78 | func_80171D78 | WalkToPoint | face a point and walk (func_80171EC8); returns nonzero when arrived (func_8017248C) | M | e58E0; 16 calls |
+| 0x80171E08 | func_80171E08 | WalkToPointTurning | the same, the turn limited by arg2 | M | e58E0 |
+| 0x80171D1C | func_80171D1C | StepTowardEx | as StepToward with a speed byte (func_80171FFC) | M | e58E0 |
+| 0x80172710 | func_80172710 | CallActionHandler | call D_80127088 (set by SetActionHandler) | H | e58E0. 176 calls / 60 files (as an action: `func_8016EDEC(func_80172710, ...)`) |
+| 0x801746A4 | func_801746A4 | TakePlayerControl | StartPlayerAction(CallActionHandler, 0x01000000), SetActionHandler(func_80172760) | H | e58E0; 43 calls / 40 files |
+| 0x801746DC | func_801746DC | TakePlayerControlNoStop | the same with SetPlayerAction | H | e58E0; 22 calls |
+| 0x80174784 | func_80174784 | StartActionTable | StartPlayerAction(func_801747CC): run D_80190B70[phase] | M | e58E0 |
+| 0x801747AC | func_801747AC | EndActionTable | EndPlayerAction | M | e58E0 |
