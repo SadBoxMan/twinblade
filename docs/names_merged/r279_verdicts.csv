@@ -1399,3 +1399,63 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8002EDE4,exe,StopAllMusic,StopMusicAndSfx,M,H,FIX,"StopMusic and StopAllSfx, flags reset: music and every sound effect, not only music (exe_H already has StopAllSound at 0x8002CCB4)",1
 0x8002EE64,exe,StopMusicForBgm,StopMusicForBgm,M,H,PROMOTE,StopCdTrack and StopBgm before a new BGM; PlayBgm,1
 0x8002EEB8,exe,StopCdAudioCmd,StopCdAudioCmd,M,H,PROMOTE,StopCdAudio; a sound command,1
+0x8002EFD0,exe,FadeOutLoopSfx,FadeOutLoopSfx,M,M,KEEP,"ReleaseAllScriptSfx and FadeOutFlaggedSfxVoices; nothing loop-specific in the body, the flagged voices' meaning would settle it",1
+0x8002F248,exe,PlaySpecialSfx,PlaySpecialSfx,M,M,KEEP,a switch over special SFX ids to PlaySfx (lines not read in full); M,1
+0x8002F620,exe,ClearStageSfxTable,ClearStageSfxTable,M,H,PROMOTE,"g_StageSfxTableId = 0, ReleaseAllSfx; SetStageSfxTable clears the old table with it",1
+0x8002F67C,exe,FreeStageBanks,FreeStageBanks,M,H,PROMOTE,the stage bank slots 3 / 4 freed when loaded; SoftReset,1
+0x8002FA3C,exe,StepMovieFade,StepMovieFade,M,H,PROMOTE,"the movie fade's frame: counter +1, CD input off, frame hook cleared at the end",1
+0x8002FAE0,exe,ResetBankLoader,ResetBankLoader,M,H,PROMOTE,"g_BankLoadStep = 0, ClearBankMap; InitSound",1
+0x8002FB08,exe,BeginBankUpload,BeginBankUpload,M,H,PROMOTE,"ClaimSpuTransfer with CancelBankUpload, the bank's upload set up, 1; StreamReadyCallback loops on it",1
+0x8002FD14,exe,OpenSoundBank,OpenSoundBank,M,H,PROMOTE,the bank open when the loader is idle (OpenSoundBankStep); StreamStep loops on it,1
+0x8002FDE8,exe,OpenMusicVab,OpenMusicVab,M,H,PROMOTE,"StopBgmAll, the music VAB opened; OpenStreamedMusic",1
+0x80030730,exe,BuildToneCache,BuildToneCache,M,M,KEEP,the tone cache built from the VAB attributes (lines not read in full); M,1
+0x80030A14,exe,BuildToneCacheNext,BuildToneCacheNext,M,M,KEEP,the next part of the same; M,1
+0x800316F8,exe,StartSfxVoicePitchEnv,StartSfxVoicePitchEnv,M,M,KEEP,lines not read in full; M,1
+0x80031B7C,exe,FadeOutFlaggedSfxVoices,FadeOutFlaggedSfxVoices,M,H,PROMOTE,the 8 SFX channels' flagged voices faded out,1
+0x80031D70,exe,ReleaseAllSfx,ReleaseAllSfx,M,H,PROMOTE,every SFX channel released (natural key off); ClearStageSfxTable,1
+0x80031DEC,exe,DimSfx,DimSfx,M,H,PROMOTE,the SFX channels' volume dimmed (DimScriptSfx for script ones); a sound command,1
+0x80031E94,exe,UndimSfx,UndimSfx,M,H,PROMOTE,"the pair, UndimScriptSfx",1
+0x80031F14,exe,SilenceSfx,SilenceSfx,M,H,PROMOTE,SilenceScriptSfx for each channel (volume 0); a sound command with DimMusic,1
+0x80031FC8,exe,UnsilenceSfx,UnsilenceSfx,M,H,PROMOTE,UnsilenceScriptSfx (volume 0x3FFF) with UndimMusic,1
+0x800322A8,exe,PlaySfxRestart,PlaySfxRestart,M,H,PROMOTE,"an SFX that restarts its own channel if playing, StartSfxTrack; PlaySfx's case",1
+0x80032774,exe,PlaySfxPerOwner,PlaySfxPerOwner,M,H,PROMOTE,"an SFX limited per owner (the quietest replaced), StartSfxTrack; PlaySfx's case",1
+0x8003388C,exe,RunScriptSfx,RunScriptSfx,M,M,KEEP,no C body in reach; L,1
+0x80034844,exe,ReleaseAllScriptSfx,ReleaseAllScriptSfx,M,H,PROMOTE,every script SFX channel released,1
+0x8003491C,exe,ReleaseSfx,ReleaseSfx,M,H,PROMOTE,the SFX with the id released under the sound lock; a sound command,1
+0x80034A54,exe,DimScriptSfx,DimScriptSfx,M,H,PROMOTE,a script channel's volume dimmed when flagged,1
+0x80034A9C,exe,UndimScriptSfx,UndimScriptSfx,M,H,PROMOTE,the pair,1
+0x80034AE0,exe,SilenceScriptSfx,SilenceScriptSfx,M,H,PROMOTE,"under the sound lock, the script channel's volume target 0 (step 0x3FF)",1
+0x80034B0C,exe,UnsilenceScriptSfx,UnsilenceScriptSfx,M,H,PROMOTE,the pair: target 0x3FFF,1
+0x80035270,exe,XaStep,XaStep,M,M,KEEP,"no C body in reach; installed as PlayXa's step, L",1
+0x8003602C,exe,StopCdTrackStep,StopCdTrackStep,M,H,PROMOTE,the CD track stop step; PlayCdTrack's request,1
+0x80036130,exe,OnCdTrackReady,OnCdTrackReady,M,H,PROMOTE,"the CD ready callback of CdTrackStep (state 0xC, ready 1)",1
+0x80036260,exe,CancelBgmLoad,CancelBgmLoad,M,H,PROMOTE,"the cancel callback LoadBgmStep registers with ClaimSpuTransfer, 1",1
+0x80036D24,exe,OnXaDone,OnXaDone,M,H,PROMOTE,the XA request's done callback: the request id and count cleared,1
+0x80036EB4,exe,StopCdTrack,StopCdTrack,M,H,PROMOTE,"unless an XA clip is playing, the CD track stopped",1
+0x80036F98,exe,OnCdTrackDone,OnCdTrackDone,M,H,PROMOTE,the CD track's done callback: the request id and count cleared,1
+0x80037004,exe,ClearBgmLoadQueue,ClearBgmLoadQueue,M,H,PROMOTE,the 5 BGM load-queue entries cleared; InitSound,1
+0x80037144,exe,QueueMusicStream,QueueMusicStream,M,H,PROMOTE,a music stream queued; LoadBgmStep,1
+0x80037358,exe,SetStreamSector,SetStreamSector,M,H,PROMOTE,D_8007623C = the stream sector; LoadBgmStep,1
+0x80037368,exe,GetStreamResults,GetStreamResults,M,H,PROMOTE,the stream result list and its count; LoadBgmStep,1
+0x800374CC,exe,GetStreamPos,GetStreamPos,M,H,PROMOTE,"the stream position when the phase is running, else 1; LoadBgmStep",1
+0x8003750C,exe,PrepareStreamSlots,PrepareStreamSlots,M,M,KEEP,lines not read in full; M,1
+0x8003775C,exe,FinishStream,FinishStream,M,H,PROMOTE,"when the stream ended: SPU flags cleared, OpenStreamedMusic, 1",1
+0x80037CC8,exe,ResetSpuOwner,ResetSpuOwner,M,H,PROMOTE,g_SpuXferOwner = 0; InitSound,1
+0x80037D98,exe,InitSequencer,InitSequencer,M,M,KEEP,"func_8003D424(D_80079A68), an unnamed call; M",1
+0x80062BA8,exe,g_SortScratch,g_SortScratch,M,M,KEEP,"read once by DrawTmdModel as a scratch pointer; one use, M",1
+0x8006387C,exe,g_ColorFT3,g_ColorFT3,M,H,PROMOTE,the colour DrawPolyFT3Lit loads into the GTE (gte_ldrgb),1
+0x80068B5C,exe,g_BgmTable,g_BgmTable,M,H,PROMOTE,PlayBgm reads the slot per BGM entry (8 bytes),1
+0x80013F68,exe,SetRotYMinus90,SetRotYMinus90,M,H,PROMOTE,the matrix rotation set to Y by -90 degrees (0 / -0x1000 / 0x1000 entries); no caller,0
+0x800140B8,exe,ApplyMatrixSVToFixed,ApplyMatrixSVToFixed,M,H,PROMOTE,"the GTE rotation applied to an SVECTOR, the result << 16 (16.16)",0
+0x80015A08,exe,CopyVecLow16,CopyVecLow16,M,H,PROMOTE,the low halves of three 32-bit words copied,0
+0x80015AD0,exe,ATan2Div,ATan2Div,M,M,KEEP,lines not read in full; M,0
+0x80016110,exe,DrawScreenHalfDark,DrawScreenHalfDark,M,M,KEEP,lines not read in full (a half-dark screen tile); M,0
+0x800168C4,exe,FadeTimerStep,FadeTimerStep,M,M,KEEP,lines not read in full; M,0
+0x80019398,exe,CdFilesReady,CdFilesReady,M,H,PROMOTE,returns D_800747D4 (PsyQ-like Cd prefix warning from r276 stands),0
+0x800193A8,exe,SetCdFilesReady,SetCdFilesReady,M,H,PROMOTE,D_800747D4 = a,0
+0x8001BFF8,exe,SetLicenceShown,SetLicenceShown,M,H,PROMOTE,g_LicenceShown = 1,0
+0x8001C448,exe,InitNullPresetModel,InitNullPresetModel,M,H,PROMOTE,"ResetModelFields, type 1, kind 1, +0x24 = 0: the preset kind with no data",0
+0x8001C4A4,exe,InitModelKind7,InitModelKind7,M,H,PROMOTE,ResetModelFields and a kind-7 model; a kind-number name,0
+0x8001C558,exe,InitNullModelKind7,InitNullModelKind7,M,H,PROMOTE,"kind 7, no data",0
+0x8001C5B8,exe,InitPresetModelKind8,InitPresetModelKind8,M,H,PROMOTE,a kind-8 preset model; a kind-number name,0
+0x8001C6E4,exe,InitNullModelKind8,InitNullModelKind8,M,H,PROMOTE,"kind 8, no data",0

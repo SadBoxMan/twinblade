@@ -2,6 +2,9 @@ address,scope,current,proposed,confidence,source,note
 0x8001282C,exe,func_8001282C,NormalizeMatrix,H,r274:names_exe_proposals.md:65,r279 promote
 0x800129CC,exe,func_800129CC,VectorToAngles,H,r274:names_exe_proposals.md:68,r279 promote
 0x80013E94,exe,func_80013E94,PackAngles10,H,r274:names_exe_proposals.md:102,r279 promote; conflict resolved over PackVec10 (synonyms; owning card's name and family stem kept)
+0x80013F68,exe,func_80013F68,SetRotYMinus90,H,r274:names_exe_proposals.md:105,r279 promote
+0x800140B8,exe,func_800140B8,ApplyMatrixSVToFixed,H,r274:names_exe_proposals.md:114,r279 promote
+0x80015A08,exe,func_80015A08,CopyVecLow16,H,r274:names_exe_proposals.md:135,r279 promote
 0x800176F0,exe,func_800176F0,DrawPrimG4ScreenDithered,M,r274:names_exe_proposals.md:190,r279 fix: was DrawPrimG4ScreenNoDither
 0x80017738,exe,func_80017738,DrawPrimG4MtxDithered,M,r274:names_exe_proposals.md:192,r279 fix: was DrawPrimG4MtxNoDither
 0x800178C8,exe,func_800178C8,DrawPrimGT4ScreenDithered,M,r274:names_exe_proposals.md:195,r279 fix: was DrawPrimGT4ScreenNoDither
@@ -9,6 +12,8 @@ address,scope,current,proposed,confidence,source,note
 0x80017F14,exe,func_80017F14,AddPrimDithered,M,r274:names_exe_proposals.md:199,r279 fix: was AddPrimNoDither
 0x8001820C,exe,func_8001820C,AddPrimTexturedDithered,M,r274:names_exe_proposals.md:202,r279 fix: was AddPrimTexturedNoDither
 0x80018450,exe,func_80018450,QueueImageAt,H,r274:names_exe_proposals.md:205,r279 promote
+0x80019398,exe,func_80019398,CdFilesReady,H,r274:names_exe_proposals.md:243,r279 promote; f:PsyQ-like prefix (warning)
+0x800193A8,exe,func_800193A8,SetCdFilesReady,H,r274:names_exe_proposals.md:244,r279 promote
 0x8001B22C,exe,func_8001B22C,GetXaClipState,H,r274:names_exe_proposals.md:253,r279 promote
 0x8001B324,exe,func_8001B324,ResetBgmPacks,H,r274:names_exe_proposals.md:256,r279 promote
 0x8001B34C,exe,func_8001B34C,ForgetBgmPack,H,r274:names_exe_proposals.md:257,r279 promote
@@ -25,6 +30,12 @@ address,scope,current,proposed,confidence,source,note
 0x8001BFB0,exe,func_8001BFB0,NextTitleMovie,H,r274:names_exe_proposals.md:277,r279 promote
 0x8001BFD0,exe,func_8001BFD0,ClearTimeChime,H,r274:names_exe_proposals.md:278,r279 promote
 0x8001BFE8,exe,func_8001BFE8,LicenceShown,H,r274:names_exe_proposals.md:279,r279 promote
+0x8001BFF8,exe,func_8001BFF8,SetLicenceShown,H,r274:names_exe_proposals.md:280,r279 promote
+0x8001C448,exe,func_8001C448,InitNullPresetModel,H,r274:names_exe_proposals.md:501,r279 promote
+0x8001C4A4,exe,func_8001C4A4,InitModelKind7,H,r274:names_exe_proposals.md:502,r279 promote
+0x8001C558,exe,func_8001C558,InitNullModelKind7,H,r274:names_exe_proposals.md:503,r279 promote
+0x8001C5B8,exe,func_8001C5B8,InitPresetModelKind8,H,r274:names_exe_proposals.md:504,r279 promote
+0x8001C6E4,exe,func_8001C6E4,InitNullModelKind8,H,r274:names_exe_proposals.md:505,r279 promote
 0x8001CB00,exe,func_8001CB00,InitSpriteKind1,H,r274:names_exe_proposals.md:515,r279 promote
 0x8001CB6C,exe,func_8001CB6C,InitSpriteKind2,H,r274:names_exe_proposals.md:516,r279 promote
 0x8001CC3C,exe,func_8001CC3C,InitSpriteKind3,H,r274:names_exe_proposals.md:518,r279 promote
@@ -82,17 +93,53 @@ address,scope,current,proposed,confidence,source,note
 0x8002EEB8,exe,func_8002EEB8,StopCdAudioCmd,H,r274:names_exe_proposals.md:814,r279 promote
 0x8002F0D0,exe,func_8002F0D0,ClearSoundTimers,H,r274:names_exe_proposals.md:847,r279 promote
 0x8002F4E4,exe,func_8002F4E4,ResolveSfxAlias,H,r274:names_exe_proposals.md:786,r279 promote
+0x8002F620,exe,func_8002F620,ClearStageSfxTable,H,r274:names_exe_proposals.md:788,r279 promote
+0x8002F67C,exe,func_8002F67C,FreeStageBanks,H,r274:names_exe_proposals.md:938,r279 promote
 0x8002F714,exe,func_8002F714,SetLoopSfxLevel,H,r274:names_exe_proposals.md:784,r279 promote
 0x8002F80C,exe,func_8002F80C,UpdateLoopSfx,H,r274:names_exe_proposals.md:785,r279 promote
+0x8002FA3C,exe,func_8002FA3C,StepMovieFade,H,r274:names_exe_proposals.md:852,r279 promote
+0x8002FAE0,exe,func_8002FAE0,ResetBankLoader,H,r274:names_exe_proposals.md:923,r279 promote
+0x8002FB08,exe,func_8002FB08,BeginBankUpload,H,r274:names_exe_proposals.md:924,r279 promote
+0x8002FD14,exe,func_8002FD14,OpenSoundBank,H,r274:names_exe_proposals.md:927,r279 promote
 0x8002FDC8,exe,func_8002FDC8,AbortBankUpload,H,r274:names_exe_proposals.md:926,r279 promote
+0x8002FDE8,exe,func_8002FDE8,OpenMusicVab,H,r274:names_exe_proposals.md:937,r279 promote
 0x800301A4,exe,func_800301A4,CancelBankUpload,H,r274:names_exe_proposals.md:936,r279 promote
 0x80031A98,exe,func_80031A98,StopOrphanSfxVoices,H,r274:names_exe_proposals.md:886,r279 promote
+0x80031B7C,exe,func_80031B7C,FadeOutFlaggedSfxVoices,H,r274:names_exe_proposals.md:887,r279 promote
+0x80031D70,exe,func_80031D70,ReleaseAllSfx,H,r274:names_exe_proposals.md:890,r279 promote
+0x80031DEC,exe,func_80031DEC,DimSfx,H,r274:names_exe_proposals.md:891,r279 promote
+0x80031E94,exe,func_80031E94,UndimSfx,H,r274:names_exe_proposals.md:892,r279 promote
+0x80031F14,exe,func_80031F14,SilenceSfx,H,r274:names_exe_proposals.md:893,r279 promote
+0x80031FC8,exe,func_80031FC8,UnsilenceSfx,H,r274:names_exe_proposals.md:894,r279 promote
+0x800322A8,exe,func_800322A8,PlaySfxRestart,H,r274:names_exe_proposals.md:869,r279 promote
+0x80032774,exe,func_80032774,PlaySfxPerOwner,H,r274:names_exe_proposals.md:871,r279 promote
 0x8003350C,exe,func_8003350C,StopSfxTrackVoices,H,r274:names_exe_proposals.md:878,r279 promote
+0x80034844,exe,func_80034844,ReleaseAllScriptSfx,H,r274:names_exe_proposals.md:904,r279 promote
+0x8003491C,exe,func_8003491C,ReleaseSfx,H,r274:names_exe_proposals.md:780,r279 promote
+0x80034A54,exe,func_80034A54,DimScriptSfx,H,r274:names_exe_proposals.md:906,r279 promote
+0x80034A9C,exe,func_80034A9C,UndimScriptSfx,H,r274:names_exe_proposals.md:907,r279 promote
+0x80034AE0,exe,func_80034AE0,SilenceScriptSfx,H,r274:names_exe_proposals.md:908,r279 promote
+0x80034B0C,exe,func_80034B0C,UnsilenceScriptSfx,H,r274:names_exe_proposals.md:909,r279 promote
+0x8003602C,exe,func_8003602C,StopCdTrackStep,H,r274:names_exe_proposals.md:971,r279 promote
+0x80036130,exe,func_80036130,OnCdTrackReady,H,r274:names_exe_proposals.md:972,r279 promote
+0x80036260,exe,func_80036260,CancelBgmLoad,H,r274:names_exe_proposals.md:981,r279 promote
+0x80036D24,exe,func_80036D24,OnXaDone,H,r274:names_exe_proposals.md:968,r279 promote
+0x80036EB4,exe,func_80036EB4,StopCdTrack,H,r274:names_exe_proposals.md:977,r279 promote
+0x80036F98,exe,func_80036F98,OnCdTrackDone,H,r274:names_exe_proposals.md:975,r279 promote
+0x80037004,exe,func_80037004,ClearBgmLoadQueue,H,r274:names_exe_proposals.md:982,r279 promote
+0x80037144,exe,func_80037144,QueueMusicStream,H,r274:names_exe_proposals.md:985,r279 promote
 0x80037334,exe,func_80037334,ClearBgmLoadQueue2,H,r274:names_exe_proposals.md:983,r279 promote
+0x80037358,exe,func_80037358,SetStreamSector,H,r274:names_exe_proposals.md:986,r279 promote
+0x80037368,exe,func_80037368,GetStreamResults,H,r274:names_exe_proposals.md:987,r279 promote
 0x800373D0,exe,func_800373D0,OpenStreamedMusic,H,r274:names_exe_proposals.md:988,r279 promote
+0x800374CC,exe,func_800374CC,GetStreamPos,H,r274:names_exe_proposals.md:989,r279 promote
+0x8003775C,exe,func_8003775C,FinishStream,H,r274:names_exe_proposals.md:991,r279 promote
+0x80037CC8,exe,func_80037CC8,ResetSpuOwner,H,r274:names_exe_proposals.md:940,r279 promote
 0x8003834C,exe,func_8003834C,SetSeqVolume,H,r274:names_exe_proposals.md:1019,r279 promote
 0x80063074,exe,D_80063074,g_TitleMovieCount,H,r274:names_exe_proposals.md:1150,r279 promote
+0x8006387C,exe,D_8006387C,g_ColorFT3,H,r274:names_exe_proposals.md:721,r279 promote
 0x8006388C,exe,D_8006388C,g_EnvMapTex,H,r274:names_exe_proposals.md:722,r279 promote
+0x80068B5C,exe,D_80068B5C,g_BgmTable,H,r274:names_exe_proposals.md:1097,r279 promote
 0x8006A96E,exe,D_8006A96E,g_LoopSfxFlags,H,r274:names_exe_proposals.md:1088,r279 promote
 0x8006A980,exe,D_8006A980,g_MergedSfxFlags,H,r274:names_exe_proposals.md:1071,r279 promote
 0x800747D8,exe,D_800747D8,g_LicenceShown,H,r274:names_exe_proposals.md:1151,r279 promote
