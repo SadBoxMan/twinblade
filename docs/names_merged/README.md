@@ -232,8 +232,8 @@ verdicts), `r279_clash_check.py`.
 | exe_MM | 0 | | | | | 0 |
 | stage_ML | 0 | | | | | 0 |
 
-The 235 rows are every engine_ML M row with more than 3 references but five, and a few lower ones taken with their
-family (6,966 of the 7,488 references to engine M rows, 93%). They include Musashi's movement (fall speed, move
+The 235 rows are all 193 engine_ML M rows with more than 3 references and 42 with 3 or fewer (in order, or taken
+with their family), 6,966 of the 7,488 references to engine M rows (93%). They include Musashi's movement (fall speed, move
 speed, ground / air / landing steps, carrying), his hit and guard code, the sword triggers and the camera fields.
 
 **Error rate.** FIX 29 of 235 = 12.3% (95% Wilson 8.7-17.2%); KEEP 45 = 19.1%. 18 of the 29 are one family (below);
@@ -270,7 +270,7 @@ batch already names) writes `r279_clash_check.txt`: 190 names, **0 clashes**. It
 `ClearHittable` (engine_ML's actor-side name at 0x8012BF68, hence `ClearPlayerHittable`) and
 `SetPlayerActionScript` (engine_H 0x8016EFC8).
 
-**Not checked:** engine_ML M rows with 3 references or fewer (757 rows); every engine_ML L row (258; 78 have 3 or
+**Not checked:** engine_ML M rows with 3 references or fewer (755 rows); every engine_ML L row (258; 78 have 3 or
 more references, led by `SpawnShadowB` 246 and `SpawnTalkMarker` 185); all of exe_MM (306; the most-referenced
 names left in any batch: `InitSpriteModel` 350, `ClearTimeChime` 266, `GiveItem` 197, `g_WorldOtOrg` 172); all of
 stage_ML (545, at most 37 references each).
