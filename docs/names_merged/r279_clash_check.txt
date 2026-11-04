@@ -1,4 +1,4 @@
-r279 clash check: 162 H2 names, 0 with a clash
+r279 clash check: 183 H2 names, 0 with a clash
 
 0x801151FC engine         D_801151FC               -> g_PlayerHitBy              ok
 0x801152B0 engine         D_801152B0               -> g_WallNormal               ok
@@ -83,6 +83,7 @@ r279 clash check: 162 H2 names, 0 with a clash
 0x80149AD4 engine         func_80149AD4            -> TriggerFusionCombo         ok
 0x80149B54 engine         func_80149B54            -> CanSwingLumina             ok
 0x80149BAC engine         func_80149BAC            -> TriggerLuminaSlash         ok
+0x80149CB4 engine         func_80149CB4            -> TriggerSwordSkill          ok
 0x80149CD4 engine         func_80149CD4            -> CanGuard                   ok
 0x8014ABF0 engine         func_8014ABF0            -> ClearEffectKind            ok
 0x8014ACE8 engine         func_8014ACE8            -> ShowNumberAbove            ok
@@ -91,34 +92,45 @@ r279 clash check: 162 H2 names, 0 with a clash
 0x8014B310 engine         func_8014B310            -> StartPoison                ok
 0x8014BC44 engine         func_8014BC44            -> DamagePlayerHp             ok
 0x8014C010 engine         func_8014C010            -> SpawnEffect2               ok
+0x8014C1A0 engine         func_8014C1A0            -> ClipObjBehindWallDef       ok
 0x8014C308 engine         func_8014C308            -> CanStrikeActor             ok
 0x8014C3A4 engine         func_8014C3A4            -> StrikeActorFacing          ok
+0x8014C88C engine         func_8014C88C            -> SetTargetPointToSelf       ok
 0x8014C918 engine         func_8014C918            -> SurfaceIndexOf             ok
+0x8014C978 engine         func_8014C978            -> SetFatalHit                ok
 0x8014E934 engine         func_8014E934            -> CollidePlayerMove          ok
 0x8014E98C engine         func_8014E98C            -> CollidePlayerMoveBody      ok
 0x80151204 engine         func_80151204            -> ShowDamageNumber           ok
 0x80151664 engine         func_80151664            -> ResetPlayerAfterHit        ok
 0x80151C54 engine         func_80151C54            -> EndKnockback               ok
+0x801525F4 engine         func_801525F4            -> EndBlowback                ok
 0x8015369C engine         func_8015369C            -> StartRespawnWait           ok
 0x80153BD8 engine         func_80153BD8            -> IsPlayerHitBy              ok
 0x80153BF0 engine         func_80153BF0            -> ClearPlayerHitBy           ok
 0x80153C18 engine         func_80153C18            -> ForgetPlayerHit            ok
 0x80154150 engine         func_80154150            -> SetPlayerMotionIndex       ok
+0x80154190 engine         func_80154190            -> RestartPlayerMotionIndex   ok
 0x801541D8 engine         func_801541D8            -> SetPlayerMotionIndexBlend  ok
 0x80154274 engine         func_80154274            -> SetPlayerMotion            ok
 0x801542A4 engine         func_801542A4            -> RestartPlayerMotion        ok
 0x801542DC engine         func_801542DC            -> SetPlayerMotionBlend       ok
+0x80155F80 engine         func_80155F80            -> EndSwordSwing              ok
 0x80155FF8 engine         func_80155FF8            -> RunAttackHit               ok
 0x80156370 engine         func_80156370            -> RollDamage                 ok
 0x80156648 engine         func_80156648            -> ResetAttackHit             ok
+0x80159464 engine         func_80159464            -> GetGameOverRule            ok
 0x801599A4 engine         func_801599A4            -> LeavePlayerKind            ok
 0x80159B3C engine         func_80159B3C            -> ResetPlayerKind            ok
 0x80159B70 engine         func_80159B70            -> RunPlayerStateHandler      ok
 0x8015BDD0 engine         func_8015BDD0            -> StartPlayerFall            ok
+0x8015C6E0 engine         func_8015C6E0            -> SwitchToPushBlock          ok
+0x8015DAC4 engine         func_8015DAC4            -> SwitchToThrowCarried       ok
 0x8015E880 engine         func_8015E880            -> SwitchToGuard              ok
+0x8015E9B8 engine         func_8015E9B8            -> StartGuard                 ok
 0x8016007C engine         func_8016007C            -> CancelAssimilate           ok
 0x80161104 engine         func_80161104            -> StayedGrounded             ok
 0x80161208 engine         func_80161208            -> CheckPlayerGround          ok
+0x80161240 engine         func_80161240            -> CheckPlayerGroundNoCollide ok
 0x801612B8 engine         func_801612B8            -> RunPlayerGroundSteps       ok
 0x80161418 engine         func_80161418            -> CheckLanding               ok
 0x80161450 engine         func_80161450            -> CheckLandingKeepKind       ok
@@ -130,6 +142,7 @@ r279 clash check: 162 H2 names, 0 with a clash
 0x801621CC engine         func_801621CC            -> GetDeadline8Passed         ok
 0x801622C4 engine         func_801622C4            -> ExpireDeadline8            ok
 0x80162D28 engine         func_80162D28            -> UpdateObj68Matrix          ok
+0x80162D88 engine         func_80162D88            -> UpdateObj68MatrixYXZ       ok
 0x80162F60 engine         func_80162F60            -> AddObj68MoveSpeedX         ok
 0x80162F80 engine         func_80162F80            -> AddObj68MoveSpeedY         ok
 0x80162FA0 engine         func_80162FA0            -> AddObj68MoveSpeedZ         ok
@@ -144,24 +157,32 @@ r279 clash check: 162 H2 names, 0 with a clash
 0x80165124 engine         func_80165124            -> SetTrailSpriteColour       ok
 0x801651B8 engine         func_801651B8            -> DrawTrailSprite            ok
 0x80165658 engine         func_80165658            -> GetAbilityInfo             ok
+0x801657A0 engine         func_801657A0            -> SaveStatusOnce             ok
 0x80165840 engine         func_80165840            -> RestoreStatusOnce          ok
 0x80165910 engine         func_80165910            -> TestAndSetAbilityUsed      ok
 0x80165A78 engine         func_80165A78            -> StopAbility                ok
+0x80165FA4 engine         func_80165FA4            -> ScalePointsByModel         ok
 0x8016AA50 engine         func_8016AA50            -> ShowDamage                 ok
 0x8016B428 engine         func_8016B428            -> ShowDefeat                 ok
+0x8016B984 engine         func_8016B984            -> EndDefeatFx                ok
 0x8016E918 engine         func_8016E918            -> OpenHudSlot                ok
 0x8016F094 engine         func_8016F094            -> ClearPlayerActionFlag04    ok
 0x8016F264 engine         func_8016F264            -> ClearPlayerActionFlag01    ok
 0x8016F288 engine         func_8016F288            -> SetPlayerActionFlag01      ok
 0x801718AC engine         func_801718AC            -> SwitchPlayerActionScript   ok
+0x80171B10 engine         func_80171B10            -> FacePoint                  ok
 0x80171D1C engine         func_80171D1C            -> StepTowardSpeed            ok
 0x80171D78 engine         func_80171D78            -> WalkToPoint                ok
+0x801722CC engine         func_801722CC            -> PressCross                 ok
+0x80172304 engine         func_80172304            -> HoldCross                  ok
 0x801725A4 engine         func_801725A4            -> SetPlayerEvent02           ok
+0x801725F4 engine         func_801725F4            -> SetPlayerEvent20           ok
 0x80172670 engine         func_80172670            -> PlayerEvent04              ok
 0x80172688 engine         func_80172688            -> PlayerEvent10              ok
 0x801726AC engine         func_801726AC            -> PlayerEvent80              ok
 0x801726B8 engine         func_801726B8            -> PlayerEvent100             ok
 0x801726C4 engine         func_801726C4            -> PlayerEvent200             ok
+0x80172780 engine         func_80172780            -> WalkPlayerTo               ok
 
 Same engine / exe address named differently by two scopes (0):
 

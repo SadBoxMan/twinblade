@@ -193,6 +193,34 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x801726B8,engine,PlayerEvent100,PlayerEvent100,M,H,PROMOTE,returns +0x1F4 & 0x100; the PlayerEvent family,4
 0x801269D4,engine,g_CameraShakeB,g_CameraShakeTargetY,M,H,FIX,"g_Camera +0x8C = offset[4], which the camera frame adds to rview.vry (the reference point's y); UpdateCameraShake writes the same table byte to it and to g_CameraShakeY (+0x80, offset[1], the eye's y). ""B"" said nothing",3
 0x80127530,engine,g_MessageTexts,g_MessageTexts,M,H,PROMOTE,four text pointers; windows with flag 0x400 insert text [w->unk4A] (func_801380E0 / func_801387B8); SetMessageText fills them,3
+0x80135168,engine,RaycastMap,RaycastMap,M,M,KEEP,"25 lines: the path against the map cell records, the end set to the hit and +pad to the surface, 1 on a hit; Raycast word as RaycastMapCell, M with that family",3
+0x80135D20,engine,FindGroundOnModel,FindGroundOnModel,M,M,KEEP,"39 lines not read in full (a point's ground on a model, moved with the model's frame per the comment); M",3
+0x8013B83C,engine,InitSeqPlayer,InitSeqPlayer,M,M,KEEP,"stops the player, resets the four points (0x6000, +0xC 0x100), then starts the block by its kind letter 'B' / 'C' / 'D' / 'E'; the Seq family root, M until the eB568 file's purpose is read",3
+0x80149CB4,engine,TriggerSwordSkill,TriggerSwordSkill,M,H,PROMOTE,"StartSwordSkill(p, n); its callers are the skill inputs (CheckFusionSkillInput with flag 0x85, CheckSkillAFollowUp), the Trigger* wrappers' pattern",3
+0x8014C1A0,engine,ClipObjBehindWallDef,ClipObjBehindWallDef,M,H,PROMOTE,ClipObjBehindWall with the default offset D_8018F14C; release / throw code calls it before StrikeActor,3
+0x8014C88C,engine,SetTargetPointToSelf,SetTargetPointToSelf,M,H,PROMOTE,SetTargetPoint (engine_H) with the object's own position (PosToSVec); stage scenes point the aim at an actor with it,3
+0x8014C978,engine,SetFatalHit,SetFatalHit,M,H,PROMOTE,"D_80126B50 = 1, returns 1; HitPlayerFatal calls it before its 1000-damage hit, sc02_011 likewise",3
+0x8014E6A0,engine,GrabBar,GrabBar,M,M,KEEP,"GrabBarBody on the scratchpad stack; the airborne step catches bars with it. Rests on the body (0x8014E6F8), not read here",3
+0x801525F4,engine,EndBlowback,EndBlowback,M,H,PROMOTE,"the blowback's end: DamagePlayerHp with +0xF2, scale and fall speed reset, ForgetPlayerHit (EndKnockback's shape); the blowback steps call it when the motion ends",3
+0x80154190,engine,RestartPlayerMotionIndex,RestartPlayerMotionIndex,M,H,PROMOTE,"+0xB4 = motion n of the table +0xB0, counters reset, StepPlayerMotion; SetPlayerMotionIndex's unconditional half",3
+0x801549F8,engine,CountMotionPoses,CountMotionPoses,M,M,KEEP,counts pose entries before index +0xBC (25 lines not read in full); the blend starters call it. M,3
+0x80155F80,engine,EndSwordSwing,EndSwordSwing,M,H,PROMOTE,+0x44 &= ~2 (the swinging bit) and face 0x11; the Fusion swing ends with it,3
+0x80159464,engine,GetGameOverRule,GetGameOverRule,M,H,PROMOTE,"the rule paired with the current map in D_8018F8E4, else -1 when neither save slot is used (IsStateSlotUsed 1 and 0), else 0; CheckPlayerDeath and the death state branch on it (exe_H ApplyGameOverRule)",3
+0x8015C6E0,engine,SwitchToPushBlock,SwitchToPushBlock,M,H,PROMOTE,"SetKindAndState(p, 9) and RunPushBlockState; after PushBlock",3
+0x8015DAC4,engine,SwitchToThrowCarried,SwitchToThrowCarried,M,H,PROMOTE,"SetKindAndState(p, 0xE) and RunThrowCarriedState; the Fusion trigger calls it while carrying",3
+0x8015E0D4,engine,ReleaseCarriedAlt,ReleaseCarriedAlt,M,M,KEEP,"strikes the carried actor (+0x178) with kind 0x11 and the stat-0 power, then +0x178 = 0. ""Alt"" is the second throw (SwitchToThrowCarriedAlt, Lumina's trigger); a pair name (Fusion / Lumina) would be better, once both throws are read",3
+0x8015E9B8,engine,StartGuard,StartGuard,M,H,PROMOTE,"kind 0x1C instead when D_80078EC0 bit 7, else the guard motion, +0x44 |= 1, SetGuarding, camera-relative heading kept, next state; the guard kind's start",3
+0x80161240,engine,CheckPlayerGroundNoCollide,CheckPlayerGroundNoCollide,M,H,PROMOTE,"FallOrSlideOnResult(p, RunPlayerGroundSteps(p, 1)): CheckPlayerGround without CollidePlayerMove; the push-block steps use it",3
+0x80161774,engine,HandleLandingKeepKind,HandleLandingKeepKind,M,M,KEEP,"18 lines not read in full; the ends seen (wall climb on bit 8, dust and SE on a floor) fit ""the kind is kept"", M",3
+0x80162D88,engine,UpdateObj68MatrixYXZ,UpdateObj68MatrixYXZ,M,H,PROMOTE,"model +0x34 matrix = identity, RotateMatrixY, X, Z (Y first): UpdateObj68Matrix in YXZ order; the Fusion throw steps call it",3
+0x801657A0,engine,SaveStatusOnce,SaveStatusOnce,M,H,PROMOTE,when D_80078EC3 == 0: set it and SaveStatus; held abilities call it at their start (r276 ruling 1),3
+0x80165FA4,engine,ModelPointsToWorld,ScalePointsByModel,M,M,FIX,"identity matrix, ScaleMatrixFast by the model's +0x18, then both points through it in place: only the model's scale, no rotation or translation, so ""to world"" is wrong. M because ScaleMatrixFast and the +0x18 field are themselves M; the sword-trail callers then ObjLocalToWorld separately",3
+0x8016B984,engine,EndDefeatFx,EndDefeatFx,M,H,PROMOTE,zeroes the three 0x38 pieces (+0x10.. +0x18) and FreeEffect; SpawnDefeatEffect ends an older one with it,3
+0x80171B10,engine,FacePoint,FacePoint,M,H,PROMOTE,"model heading = GetHeadingToPoint(o, p); stage scenes turn Musashi with it",3
+0x801722CC,engine,PressCross,PressCross,M,H,PROMOTE,unless +0x1F4 bit 2: pad pressed +0xAC and held +0xAA = 0x40 (cross); scripted actions press it,3
+0x80172304,engine,HoldCross,HoldCross,M,H,PROMOTE,pad held +0xAA = 0x40 (cross); scripted actions hold it,3
+0x801725F4,engine,SetPlayerEvent20,SetPlayerEvent20,M,H,PROMOTE,+0x1F4 |= 0x20; the PlayerEvent family (the bar swing sets it),3
+0x80172780,engine,WalkPlayerTo,WalkPlayerTo,M,H,PROMOTE,"D_80126B30 = the point, SetActionHandler(WalkPlayerToStep); stage scenes walk Musashi to a point with it",3
 0x80147B5C,engine,SetVelKeepAxes,SetVelKeepAxes,M,H,PROMOTE,"vel (+0x10..) = the given vector, except the axes flagged in +0x44 bits 22-24, which take the stored +0x24.. as they are; through g_PushVel",2
 0x80147CC8,engine,AccelMoveToWorld,AddMoveSpeedToWorld,M,H,FIX,"AddMoveSpeedX / Y / Z (+0x24 / +0x28 / +0x2C, limited +-0x1F0000) then MoveSpeedToWorld into the out vector; was AccelMoveToWorld, same reason as AddMoveSpeedFacing",2
 0x80147C30,engine,AccelFacingFree,AddMoveSpeedFacingFree,M,H,FIX,"AddMoveSpeedToWorld, then vel = the result on all three axes (no kept axes); was AccelFacingFree",1
