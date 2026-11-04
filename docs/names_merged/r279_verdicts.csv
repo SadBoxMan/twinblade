@@ -172,7 +172,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80147814,engine,AddFallSpeedClamped,AddFallSpeedClamped,M,H,PROMOTE,"+0x34 += v, clamped to +-0x1F0000 in the direction of v; the airborne step and stage code adjust the fall speed with it (engine_H AddFallSpeedLimited is the gravity form)",4
 0x80147928,engine,AddMoveSpeedX,AddMoveSpeedX,M,H,PROMOTE,"AddMoveSpeedXLimit(o, d, 0x1F0000); engine_H's family",4
 0x8014799C,engine,AddMoveSpeedY,AddMoveSpeedY,M,H,PROMOTE,"the Y one (AddMoveSpeedYLimit, 0x1F0000); AddMoveSpeedToWorld calls the three",4
-0x80149724,engine,TriggerJumpRising,TriggerJumpRising,M,M,KEEP,"only StartPlayerJump (0x8015ACC4); pole and bar steps jump off with it. ""Rising"" rests on StartPlayerJump starting at state 1, not read here",4
+0x80149724,engine,TriggerJumpRising,TriggerJumpRising,M,H,PROMOTE,"StartPlayerJump, now read: kind 2 entered and JumpStart run at once (fall speed -0x120000, rising); pole and bar jump-offs",4
 0x8014ABF0,engine,ClearEffectKind,ClearEffectKind,M,H,PROMOTE,FreeEffectsByKind(kind); stage code clears effect kind 0x40 with it,4
 0x8014AD30,engine,ShowNumberAt,ShowNumberAt,M,H,PROMOTE,AllocEffect of kind 0x1D (ShowDamage's number effect) at a point with a mode (+0x2C) and value (+0x30); ShowNumberAbove and UpdatePoison call it,4
 0x8014B2F8,engine,CurePoison,CurePoison,M,H,PROMOTE,g_StatusPoison and its saved copy D_80078ECC = 0; Antidote and CureStatus call it,4
@@ -507,6 +507,64 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x801567BC,engine,TurnToAttackHit,TurnToAttackHit,M,H,PROMOTE,"for each point that hit an actor, the model heading to it; AttackHitStep",1
 0x80156A14,engine,ResetClankSe,ResetClankSe,M,H,PROMOTE,+0xDA = 0 (PlayClankSeOnce's once-per-swing count); ResetAttackHit,1
 0x80156A88,engine,PlayAttackHitSe,PlayAttackHitSe,M,H,PROMOTE,"per point that hit: by the record's flags a plain PlaySe, PlayInitSeB or PlayInitSeA; AttackHitStep",1
+0x80156B74,engine,ComputeAttackPoints,ComputeAttackPoints,M,H,PROMOTE,"the attack segment by the record's point source: 0 the pose points A (now and next pose), 1 the B pair, 2 a fixed point turned by +0x24A, else a table; then AttackPointsToWorld",1
+0x80156ECC,engine,AttackPointsToWorld,AttackPointsToWorld,M,H,PROMOTE,"SplitAttackSegment, BuildPlayerMatrixOnce, the origin and each used point through ObjLocalToWorld",1
+0x80156FA8,engine,SplitAttackSegment,SplitAttackSegment,M,H,PROMOTE,"from a-b makes a, a+d, b-d (d = (b-a)/3) when the segment is longer than 0x40, pad 1 marking an unused point",1
+0x80157510,engine,EnterLuminaSlash,EnterLuminaSlash,M,H,PROMOTE,"SetKindAndState(p, 6), RunLuminaSlashState; TriggerLuminaSlash",1
+0x80157544,engine,RunLuminaSlashState,RunLuminaSlashState,M,H,PROMOTE,D_8018F7F0[state](obj): kind 6's state table,1
+0x8015773C,engine,EndLuminaSlash,EndLuminaSlash,M,H,PROMOTE,"+0x44 &= ~2, face 0x11, parts, display flag; the Lumina slash's end",1
+0x80157808,engine,RunAirSlashState,RunAirSlashState,M,H,PROMOTE,"D_8018F818[state], and when the 300-frame count D_801ED510 runs out LeavePlayerKind and ResetPlayerKind",1
+0x80157A8C,engine,SpawnLandingFx,SpawnLandingFx,M,H,PROMOTE,"PlayLandSe with the floor surface and SpawnEffect2(o, 1); the landing of the air slash",1
+0x80157D20,engine,StartSwordSkill,StartSwordSkill,M,H,PROMOTE,"ResetAttackHit, SetKindAndState(o, D_8018F848[n]), RunSwordSkillState; TriggerSwordSkill",1
+0x80157D74,engine,RunSwordSkillState,RunSwordSkillState,M,H,PROMOTE,"kind 0x24: RunSkillAState, 0x25: RunSkillBState",1
+0x80157DC4,engine,RunSkillAState,RunSkillAState,M,H,PROMOTE,D_8018F858[state](obj): kind 0x24's state table,1
+0x80157E38,engine,SkillAStart,SkillAStart,M,H,PROMOTE,"skill A's first step: step 0xD, the Lumina slash motion, face, trail, SE, +0x244 = 0, next state",1
+0x80157F64,engine,CheckSkillAFollowUp,CheckSkillAFollowUp,M,H,PROMOTE,"flag 0x87 and square pressed: TriggerSwordSkill(5), 1",1
+0x80157FC4,engine,RunSkillBState,RunSkillBState,M,H,PROMOTE,D_8018F860[state](obj): kind 0x25's state table,1
+0x80158038,engine,SkillBStart,SkillBStart,M,H,PROMOTE,"skill B's first step: step 0xE, motion, face, push drive, trail, SE, next state",1
+0x801582C0,engine,SkillCStart,SkillCStart,M,H,PROMOTE,"skill C's first step: step 0x10, swinging bit, motion, face, ClearSkillInput, trails swapped, SE, next state",1
+0x801585A4,engine,ClearSkillInput,ClearSkillInput,M,H,PROMOTE,+0x244 = 0 (the latched buttons LatchSkillInput ORs into); SkillCStart,1
+0x801585AC,engine,LatchSkillInput,LatchSkillInput,M,H,PROMOTE,"+0x244 |= the pressed buttons, 1 once triangle is in it; SkillCStep",1
+0x80158AE4,engine,ResetPlayerForDeath,ResetPlayerForDeath,M,H,PROMOTE,"the death set-up: event word, action flag, status restored, abilities ended, platform left, statuses cured, ClearPlayerHittable, all scales 0x1000, ability timer 0, next state",1
+0x80159404,engine,SpinPlayerModel,SpinPlayerModel,M,H,PROMOTE,"model heading += +0x236 (the speed's whole part), +0x234 -= step; DeathSpinStep",1
+0x801594E8,engine,ApplyGameOverRule,ApplyGameOverRule,M,H,PROMOTE,"the game-over rule: -1 a fresh start keeping some flags and stats, 1 / others the continue cases (restore the entry vitals, next map, progress); the death state applies GetGameOverRule's value",1
+0x80159968,engine,RunPlayerUpdatePhase,RunPlayerUpdatePhase,M,H,PROMOTE,D_8018FB9C[+0x4D](obj) (three entries); UpdatePlayerNoVertical,1
+0x80159A20,engine,UpdatePlayerKind,UpdatePlayerKind,M,H,PROMOTE,"RunSurfaceHandler, CheckPlayerDeath, ProcessPlayerHit, re-arm hittable, the per-kind step D_8018FC4C[kind], then per-kind flag fix-ups",1
+0x8015ABD4,engine,ShouldSkidStop,ShouldSkidStop,M,H,PROMOTE,"no action and the saved speed at the limit, or a slippery floor without flag 0x21; PlayerRunningStep then StartSkidStop",1
+0x8015AC48,engine,StartSkidStop,StartSkidStop,M,H,PROMOTE,"motion index 9, push drive D_8018FB3C, PlayJumpSe with the floor surface",1
+0x8015ACC4,engine,StartPlayerJump,StartPlayerJump,M,H,PROMOTE,"SetKindAndState(p, 2), PushOutOfSolidActors, ClipMoveToMap, JumpStart; TriggerJumpRising",1
+0x8015AD08,engine,EnterPlayerJump,EnterPlayerJump,M,H,PROMOTE,"SetKindAndState(p, 2), RunPlayerJumpState",1
+0x8015AD3C,engine,RunPlayerJumpState,RunPlayerJumpState,M,H,PROMOTE,D_8018FD00[state](obj): kind 2's state table,1
+0x8015AE2C,engine,PlayerAirborneStep,PlayerAirborneStep,M,H,PROMOTE,"the airborne kind's step (230 lines): glide, air slashes, double jump, pole / bar catch, landing; the name is broad and accurate",1
+0x8015B6F4,engine,TryAirFusionSlash,TryAirFusionSlash,M,H,PROMOTE,"CanSwingFusion: ResetAttackHit, step, swing flag, motion saved, the air motion, trail, SE, 1",1
+0x8015B7B4,engine,TryAirLuminaSlash,TryAirLuminaSlash,M,H,PROMOTE,"CanSwingLumina: ResetAttackHit, step 0xC, motion, trail, SE, 1",1
+0x8015B858,engine,TryDoubleJump,TryDoubleJump,M,H,PROMOTE,"once per jump, not in +0x1C6: CanDoubleJump, motion saved, fall speed -0xE0000, +0x240++",1
+0x8015B950,engine,PlayerLandStep,PlayerLandStep,M,H,PROMOTE,"the landed kind's step (106 lines): action / attack / charge / jump / direction checks, then CheckPlayerGround",1
+0x8015BE04,engine,EnterPlayerFall,EnterPlayerFall,M,H,PROMOTE,"SetKindAndState(p, 3), RunPlayerFallState",1
+0x8015BE38,engine,RunPlayerFallState,RunPlayerFallState,M,H,PROMOTE,D_8018FD1C[state](obj): kind 3's state table,1
+0x8015BFF4,engine,RunPlayerSlideState,RunPlayerSlideState,M,H,PROMOTE,D_8018FD28[state](obj): kind 4's state table (the slide),1
+0x8015C030,engine,StartSlopeSlideVec,StartSlopeSlideVec,M,H,PROMOTE,"the slide's first step with a vector: +0x234 / +0x23C from v.x / v.z, +0x238 = 0x80000, motion 0x11",1
+0x8015CC40,engine,SwitchToPole,SwitchToPole,M,H,PROMOTE,"SetKindAndState(p, 0xB), RunPoleState; the airborne step on GrabPole",1
+0x8015CF8C,engine,SwitchToBarSwing,SwitchToBarSwing,M,H,PROMOTE,"SetKindAndState(p, 0xC), RunBarSwingState; the airborne step on GrabBar",1
+0x8015D380,engine,UpdateBarSwingPoint,UpdateBarSwingPoint,M,H,PROMOTE,+0x138 = D_8018FDD8 turned by his heading and pitch; BarSwingStep,1
+0x8015D4B4,engine,SwitchToCarry,SwitchToCarry,M,H,PROMOTE,"SetKindAndState(p, 0xD), RunCarryState; TriggerCarry",1
+0x8015DA5C,engine,DropCarried,DropCarried,M,H,PROMOTE,face 0x11 and ReleaseCarriedAlt (the carried actor struck down); CarryStep when the throw lacks BP,1
+0x8015E184,engine,SwitchToGrab,SwitchToGrab,M,H,PROMOTE,"SetKindAndState(p, 0x10), RunGrabState; TriggerGrab",1
+0x8015E4B0,engine,SpawnGrabEffect,SpawnGrabEffect,M,H,PROMOTE,effect 0x1F at the grabbed actor's point; GrabReachStep,1
+0x8015E5B0,engine,ReleaseGrabbed,ReleaseGrabbed,M,H,PROMOTE,"a trace from his chest to the grabbed actor, StrikeActor kind 0x1C, +0x18C = NULL",1
+0x8015EDD4,engine,SwitchToGuardHop,SwitchToGuardHop,M,H,PROMOTE,"SetKindAndState(p, 0x12), RunGuardHopState",1
+0x8015F7A0,engine,SwitchToChargedAttack,SwitchToChargedAttack,M,H,PROMOTE,"SetKindAndState(p, 0x15), RunChargedAttackState",1
+0x8015F948,engine,StartNoBpMotion,StartNoBpMotion,M,H,PROMOTE,"kind 0x15, then (StayedGrounded) motion 0x22, face, state 2; CarryStep when the throw lacks BP",1
+0x8015FA78,engine,SwitchToAssimilate,SwitchToAssimilate,M,H,PROMOTE,"SetKindAndState(p, 0x16), RunAssimilateState, 1",1
+0x8016004C,engine,ClearAssimilateState,ClearAssimilateState,M,H,PROMOTE,"+0x184 and +0x188 / +0x18A = 0, +0x44 bit 4 off, D_800B9A17 = 1: the assimilate fields cleared",1
+0x80160368,engine,SwitchToGuardRecoil,SwitchToGuardRecoil,M,H,PROMOTE,"SetKindAndState(p, 0x1B), RunGuardRecoilState, +0x3E = 0; ProcessPlayerHit on a guarded hit",1
+0x801607B8,engine,DropGuard,DropGuard,M,H,PROMOTE,"+0x44 &= ~1, ClearGuarding; ProcessPlayerHit when a hit lands",1
+0x80160818,engine,SwitchToKind1C,SwitchToKind1C,M,M,KEEP,"SetKindAndState(p, 0x1C), RunKind1CState; kind 0x1C (StartGuard's D_80078EC0 bit 7 case) has no word yet, M with EndKind1C",1
+0x80161278,engine,CheckPlayerGroundUphill,CheckPlayerGroundUphill,M,H,PROMOTE,"D_801152BC = 0, FallOrSlideBlockUphill(RunPlayerGroundSteps(p, 1)); PlayerRunningStep",1
+0x80161374,engine,FallOrSlideBlockUphill,FallOrSlideBlockUphill,M,H,PROMOTE,FallOrSlideOnResult except that a steep hit puts him back at +0x88,1
+0x80161488,engine,CheckLandingBy1C6,CheckLandingBy1C6,M,H,PROMOTE,"air steps; +0x1C6 == 0: HandleLandingKeepKind, else LandingResultCode & ~7; a field-number name",1
+0x8016158C,engine,CheckLandingKeepKindNoBump,CheckLandingKeepKindNoBump,M,H,PROMOTE,"HandleLandingKeepKind(p, RunPlayerAirSteps(p, 1))",1
+0x80161888,engine,HandleLandingFx,HandleLandingFx,M,H,PROMOTE,"bits 1 / 0x4000 / 0x2000: SpawnEffect2(p, 1) + PlayLandSe, returns 1 / 2 / 4",1
 0x80162F08,engine,AddObj68Accel,AddObj68MoveSpeed,M,H,FIX,"AddObj68MoveSpeedX / Y / Z in turn (AddMoveSpeed*Limit, 0x7F0000) on a 0x68 object; the family root. Was AddObj68Accel",1
 0x801630C4,engine,AddObj68AccelLocalYXZ,AddObj68MoveSpeedFacingYXZ,M,H,FIX,"AddObj68MoveSpeedX / Y / Z, then vel = the move speed turned by the model's rotation built Y, X, Z (via g_PushVel); AddObj68MoveSpeedFacing in YXZ order. Was AddObj68AccelLocalYXZ",1
 0x80147AAC,engine,ApplyMoveSpeedFree,SetVelFromMoveSpeedFacing,M,H,FIX,"AddMoveSpeedFacingFree(o, 0, 0, 0): vel = the move speed turned by the model's facing, all axes; the turned partner of SetVelFromMoveSpeed. Was ApplyMoveSpeedFree",0
