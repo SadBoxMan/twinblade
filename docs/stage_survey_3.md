@@ -2,9 +2,9 @@
 
 Continues `docs/stage_survey_2.md`; method, names, the timeline and the shared patterns are in `docs/stage_survey.md`.
 
-## Chapter: archive SC06
+## A late chapter (archive SC06)
 
-Progress about 1210-1590.
+Progress 1210-1590: SC06_000 starts it (0x4BA); bosses in SC06_030 (0x514), SC06_016 (0x578), SC06_025 (0x5DC) and SC06_029 (0x636, which also sets all five boss flags 0x8A-0x8E).
 
 ### SC06_000
 * **Place:** the opening map of the sc06 block. Its room start 0x80180A50 sets progress 0x4BA (1210) (H), the lowest
@@ -694,7 +694,7 @@ About 140 more own functions (camera modes, effects, part helpers) not proposed.
 
 ## The end of the game (archive SC07)
 
-Progress 1600-1700.
+Progress 1600-1700: SC07_002 splits at 0x640; SC07_007 / 009 / 010 set 0x6A4 with flags 0x11D / 0x123 (the ending, M).
 
 ### SC07_000
 * **Place:** an SC07 (late game, M by archive order and SC07's progress values) map with scripted events and spawned

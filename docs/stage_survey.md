@@ -51,7 +51,7 @@ are the game's chapters in order** (M), with SC03 (the village and its surroundi
 
 | archive | own progress values set (decimal) | reading |
 |---|---|---|
-| SC01 | 2, 5, 10 (SC01_004-006, shared F002), 140-950 (SC01_009) | the prologue and small interiors visited all game (M) |
+| SC01 | 5, 10 (SC01_004), 2 and 10 (SC01_005 / 006, F002), 140-950 (SC01_009) | the opening, the prologue and a story hub visited all game (M) |
 | SC02 | 2 (SC02_005), 80-270 (SC02_017, SC02_021), 370 (F054) | the first chapter (M) |
 | SC03 | 20-480 (village variants SC03_002, SC03_124, SC03_125), 160-420 (SC03_031, 092, 111, 121), 700-730 (F082 in SC03_014/015), 970-1120 (SC03_011-013, 024) | the village hub and its surroundings across chapters (M) |
 | SC04 | 640-780 (SC04_000, 012, 015, F111 in SC04_018/019) | a middle chapter (M) |
@@ -992,9 +992,9 @@ Written under a shortened deadline: F115 was read in detail; F116-F122 from the 
 * F121 (3 stages: sc06_018/020/032, 3 shapes): an actor that sways on rsin/rcos and drives two sub-points
   (0x8017D934 / 0x8017D9A4 / 0x8017DB20) (M); 0x8017DC60 [S7] next to it is CarryPlayer (a moving platform).
 
-## Chapter 0: the prologue and the small interiors (archive SC01)
+## The opening and the early rooms (archive SC01)
 
-Progress 2-10 at the start of the game, plus small rooms visited throughout (SC01_009 sets 140-950).
+SC01_000 is the New Game map (0x3005 by docs/mode_dispatcher.md: an opening sequence), SC01_001 a long cutscene (L: the summoning), SC01_004 / 005 / 006 set progress 5, 10 and 2; SC01_009 is a story hub visited all game (progress 140-950); SC01_074-084 are action rooms (M).
 
 Common notes for this group:
 * `RequestFieldFileLoad(n)` (ovl36 func_800CFBCC) sets D_80114E70 = 1, D_80114E74 = n. After the next map change
@@ -1461,9 +1461,9 @@ Many more own functions not proposed (time).
 | 0x801814E8 | func_sc01_084_801814E8 | SpawnerStep | kinds 0x1D / 0x26, sound 0x4BD | M |
 Many more own functions not proposed (time).
 
-## Chapter 1: archive SC02
+## The first chapter (archive SC02)
 
-Progress about 2 (SC02_005) and 80-370.
+Progress 2 (the boss room SC02_005) and 80-370 (SC02_017, SC02_021, F054). SC02_031 is Steamwood (docs/decomp_pilot.md) (H by the doc).
 
 ### SC02_000
 * **Place:** an outdoor run along a long straight course (Musashi's z runs from about +0x3C98 down past -0x1950) with a

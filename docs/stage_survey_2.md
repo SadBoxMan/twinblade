@@ -4,7 +4,7 @@ Continues `docs/stage_survey.md`; method, names, the timeline and the shared pat
 
 ## The village and its surroundings (archive SC03)
 
-The village (SC03_001) and its variants, and the maps around it, across the whole story (progress 20-1120).
+The village (SC03_001, the hub, in src/stage) and its variants, and the maps around it, across the whole story (progress 20-1120). SC03_105 is a boss arena keyed on progress 0x258 (600).
 
 Common reading used below (all from sc03_001 code, cited once here):
 * **Game clock**: byte D_80078EB1 = hour 0-23, D_80078EB0 = minute 0-59 (H: ovl36 func_800D0D7C wraps them at 60 / 24).
@@ -1789,9 +1789,9 @@ About 65 more own functions not proposed.
 #### Names: SC03_126
 No own functions (all shapes are P01-P03, F006, F074, F102 or lone shapes).
 
-## Chapter: archive SC04
+## A middle chapter (archive SC04)
 
-Progress about 640-780.
+Progress 640-780: three gate rooms (SC04_000 / 002 / 005, items 0x60-0x62), the boss arena SC04_011 and the village variants SC04_015, SC04_018 / 019, SC04_020.
 
 ### SC04_000
 * **Place:** unknown field map with talkable characters, chests and a respawning enemy (M). Story hub of the
@@ -2348,9 +2348,9 @@ Own code is the family F111 (see G6_families.md); no other own functions.
 ### SC04_021
 * Same code as SC03_126 / SC05_019 (H: identical own code; described by another helper); differs only in data.
 
-## Chapter: archive SC05
+## The next chapter (archive SC05)
 
-Progress about 920-1170.
+Progress 920-1170: SC05_011 (0x398), the village variants SC05_017 (0x3A2) and SC05_018 (0x3C0-0x492); flags link SC05_000 / 001 / 002 / 004 / 007 / 009.
 
 ### SC05_000
 * **Place:** unknown; a small outdoor-looking room with a hazard swarm and one talker (L). The stage neither sets nor
