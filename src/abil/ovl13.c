@@ -143,7 +143,71 @@ extern void func_800D1FC8();
 extern s32 func_800D21C4();
 extern void func_80128EA8();
 
-INCLUDE_ASM("asm/abil/ovl13/nonmatchings/ovl13", func_ovl13_800CB138);
+extern AMtx D_800AE620;
+extern u8 D_ovl13_800CB88C;
+extern void func_800D20C0();
+extern void func_800D23D0();
+extern s32 func_800D222C();
+extern void func_8012F14C();
+
+static inline void ovl13_place(u8 *arg0, u8 *q) {
+    /* the placement step, likely shared with func_ovl13_800CB56C: as an inline helper each identity copy keeps its own
+       `la` inside the block move and &m is rebuilt per call (integrate substitutes the frame addresses) */
+    AVec v;
+    AVec w; /* unused: frame pad */
+    AMtx m;
+    s16 ang;
+
+    m = D_800AE620;
+    ang = AF(arg0, s16, 0x10);
+    RotMatrixZ(ang, &m);
+    v.vx = AF(arg0, s32, 0x30) << 2;
+    v.vy = 0;
+    v.vz = 0x30;
+    ApplyMatrixSV(&m, &v, &v);
+    q += 0x38;
+    func_8012F14C(q, &v, &v);
+    AF(arg0, u16, 6) = v.vx;
+    AF(arg0, u16, 0xA) = v.vy;
+    AF(arg0, u16, 0xE) = v.vz;
+    m = D_800AE620;
+    RotMatrixZ(ang + 0x200, &m);
+    MulMatrix0(q, &m, arg0 + 0x38);
+}
+
+void func_ovl13_800CB138(u8 *arg0) {
+    AVec a;
+    AVec b;
+    AMtx x; /* unused: frame pad */
+    u8 *p;
+    u8 *o;
+
+    p = AF(arg0, u8 *, 0x34);
+    if (!(AF(arg0, s32, 0x2C) & 0x8000)) {
+        a.vx = AF(p, u16, 6);
+        a.vy = AF(p, u16, 0xA);
+        a.vz = AF(p, u16, 0xE);
+        func_800D20C0(&a, &b, 0);
+        func_800D23D0(&b);
+        RotMatrixYXZ(&b, arg0 + 0x38);
+        AF(arg0, s16, 2) = 2;
+        return;
+    }
+    o = (u8 *) func_800D222C(arg0, &D_ovl13_800CB8FC, 0x1A);
+    if (o == NULL) {
+        goto fail;
+    }
+    AF(arg0, s16, 0x10) = rand() & 0xFFF;
+    ovl13_place(arg0, AF(arg0, u8 *, 0x34));
+    AF(arg0, u8 *, 0x20) = o;
+    AF(o, u8 *, 0x34) = arg0 + 0x38;
+    AF(o, s16, 0x18) = AF(o, s16, 0x1A) = 0x2000;
+    func_80128EA8(o, arg0 + 0x24, &D_ovl13_800CB88C);
+    AF(arg0, u16, 2)++;
+    return;
+fail:
+    func_80146C3C(arg0);
+}
 
 void func_ovl13_800CB370(u8 *arg0) {
     if (D_80078EC1 == 7) {
@@ -200,7 +264,40 @@ void func_ovl13_800CB510(u8 *arg0) {
     func_80146C3C();
 }
 
-INCLUDE_ASM("asm/abil/ovl13/nonmatchings/ovl13", func_ovl13_800CB56C);
+static inline void func_ovl13_800CB56C_body(u8 *arg0) {
+    /* the whole body is an inlined helper: its locals' addresses (&m, &v) and the identity matrix's address reach the
+       calls and block moves as constants, so each `la D_800AE620` folds into its copy and &m is recomputed per call */
+    AVec v;
+    AVec w;
+    AMtx m;
+    u8 *o;
+    u8 *s;
+    s16 r;
+
+    o = AF(arg0, u8 *, 0x20);
+    s = AF(arg0, u8 *, 0x34);
+    m = D_800AE620;
+    r = AF(arg0, s16, 0x10);
+    RotMatrixZ(r, &m);
+    v.vx = AF(arg0, s32, 0x30) * 4;
+    v.vy = 0;
+    v.vz = 0x30;
+    ApplyMatrixSV(&m, &v, &v);
+    func_8012F14C(s + 0x38, &v, &v);
+    AF(arg0, u16, 6) = v.vx;
+    AF(arg0, u16, 0xA) = v.vy;
+    AF(arg0, u16, 0xE) = v.vz;
+    m = D_800AE620;
+    RotMatrixZ(r + 0x200, &m);
+    MulMatrix0(s + 0x38, &m, arg0 + 0x38);
+    if (func_80128ED8(o, arg0 + 0x24) != 0) {
+        func_80146C3C(arg0);
+    }
+}
+
+void func_ovl13_800CB56C(u8 *arg0) {
+    func_ovl13_800CB56C_body(arg0);
+}
 
 void func_ovl13_800CB6E4(u8 *arg0) {
     s16 var_v1;

@@ -2891,6 +2891,49 @@ a matched EXE function goes into src/ and runs as C when these hold.
 | a 556-insn match whose frame is 8 bytes short (0xD0 vs 0xD8), the do-while loop form fits the frame but swaps two s-registers | keep the `for (i = 0; n > i; i++) { .. if (hit) break; }` form: combine folds `i = 0` + slt + branch into `blez n` and distribute_notes leaves an orphan `(use (reg))` that reload gives an 8-aligned slot AND that lengthens a live range by one insn, which orders the two s-registers as the original; put the missing 8 bytes INSIDE the GTE result struct (`s32 pad[2]`, the accepted unused frame pad), not as a separate array (allocated early, otz moves) | sc06_024 8017EC4C (b6, run 16) |
 | `(X < 0 ? -X : X)` on an EXPRESSION X (`d / 128`) | expr.c's singleton path re-expands X for the compare: the duplicated `sll; subu` with the quotient copy is the natural result; do not hoist X into a local | sc06_024 8017EC4C (b6) |
 
+### r240 rows (4 Nov, the ability packages' and mode overlays' last 43; Opus 5.5 high + Ultracode, one helper per function; batch 1 merge aa9559e5)
+
+| The diff shows / the error says | Write the source as | Where |
+|---|---|---|
+| a store between a call's argument copy and the jal goes through a0 in the original, s0 in ours | the argument register is set TWICE in the function: the callback takes the object (`p->fn(p)`); the copy then gets no sched1 birthing boost and local-alloc's optimize_reg_copy_1 moves the store onto a0 | ovl36 func_800D1984, func_800D1B80 (FieldTask.fn retyped to take the task) |
+| `li a0,K` loads after the stack-argument constant (`ori v0,0x8000`) | pass the earlier K&R call the parameter already in a0 (`f(arg0)`, not `f()`): the call reads a0, so sched1 keeps a0 = K dependent and first (r133's func_8016E1CC row, for the package clones) | ovl1c func_ovl1c_800CB944, 800CB8A4 |
+| a load into a hard argument register with no later use (`lw a1` next to `jal f`) in a parked draft | check the callee's arity at its other call sites: the draft passed a phantom argument, which changed sched1 priorities | ovl2a func_ovl2a_800CB708 (func_80162FC0 takes one) |
+| `lbu v1; move v0,zero ... sb v1` where the original sets the return value last | `do { return 0; } while (0);` (marked; one statement, accepted) | ovl36 func_800D1B10 |
+| a packed two-byte value rebuilt (`hi << 8 | lo`, an `andi 0xFFFF` before `srl 8`, a stray copy) | a local `union { s16 w; struct { u8 lo, hi; } b; }` written field by field and returned as `.w` | ovl36 func_800D0D7C, func_800D0E30 (ClockDiff) |
+| `lh v0; bgtz v0; move s0,v0` with an s16 return and a frame 8 bytes too big | load into `s32 t`, test t, then `s16 r = t;` (an s16 local's sign-extension pseudo keeps a stack slot) | ovl36 func_800D1658 |
+| a small switch tests the range high bound first (slti before bltz) | write `case 2: default:` together (`case 0: case 1: A; case 2: default: B`): stmt.c's leaf range node tests low first then | ovl36 func_800D1E28, func_800D1EBC |
+| an unmerged `k = 2` block mid-function (inverted beqz + j) | the odd value as the FINAL else (`... else if (x) k = 2; else k = 1;`): every k = 2 arm then cross-jumps | ovl36 func_800D1EBC |
+| a register pair swapped after a narrowing copy makes the count right | declare the long-lived narrow variable before the short-lived one (allocno_compare ties go by pseudo number = declaration order) | ovl36 func_800D2D10 |
+| a constant base + offset kept in its own argument register, the sum in s0 | each sum into its OWN new local before the first call (`q = C + off`), never `b += off` | ovl39 func_800CFE00 |
+| `la sym` loaded before the `&A[f]` index multiply, ours multiplies first | make the packet's FIRST use a MEM through `&A[f]` (`setlen(&A[f], 5);` before `p = &A[f];`): memory_address's break_out_memory_refs loads the symbol first | ovl39 func_800CF3E8 |
+| the OT frame index reloaded with `lui; lhu %lo(D_800B9A02)` after every tag store | read it in-struct through the files' own `register Work *w = &D_800AF630; ... D_800AA60C[w->frame]` (a scalar global is not invalidated by in-struct stores) | ovl39 func_800CF3E8, ovl3a func_800CF408 / CF6D0, ovl3b func_800CEF50 |
+| cmp_func lists `lhu %lo(D_800B9A02)` vs `<%lo(D_800AF630+-0x5c2e)>` | not a difference: the assembler's HI16 carry for `D_800AF630 + 0xA3D2`; tools/cmp_func.py now accepts a %lo exactly 0x10000 off (r240) | the Work.frame readers above |
+| a lui / ori constant split apart at the head of a store-only packet builder | the big constant's store (tpage) right after setlen, as the sibling packet builders write it | ovl36 func_800CFAD0 |
+| frame `vars= 8` from a variable-index s32 table read twice around a call | declare the table as the struct it is (`FieldMapEnt {file:12, mode:4, slot:16}`): get_inner_reference leaves no orphan address pseudo; a cast at the use does not help | ovl36 func_800CFE60 (+ its four readers .file / .slot) |
+| two callee-saved pseudos swapped: a long-lived pointer outranks a short flag | give the flag one more natural set: `if (v == m) mode = -1; else if (v == 0) mode = 0; else { mode = 0; f(); }` (refs 5 -> 6 lifts priority past the pointer) | ovl36 func_800CFE60 |
+| a frame-address pointer set in the delay slot of an early-return branch | assign it as the very FIRST statement, before the first call | ovl21 func_ovl21_800CB82C |
+| `&r` / `&m` rebuilt with `addiu aN,sp,K` at each call and global matrix copies each with their own `la` | a static inline helper that owns those locals and makes the calls (integrate substitutes the constant and frame addresses; cse has no pseudo to share); confirms r170 / r186 for the packages | ovl13 func_ovl13_800CB138 / CB56C, ovl1b func_ovl1b_800CAF94 / CB0C8 |
+| ring-buffer row stores `addu v0,s1,v0` where pointer arithmetic gives `addu v0,v0,s1` | a struct with an array member, `r->e[r->idx][k]` (ARRAY_REF builds base first) | ovl35 func_ovl35_800CCDE8 |
+| a global pointer reloaded after each store through another struct pointer | read the global in-struct: `g[0]->f` or `g.p->f` | ovl35 func_ovl35_800CD314 |
+| a single-set s32 temp boosted to just before the branch | declare it s16 / u16 (its set becomes a subreg set, not birthing) | ovl21 func_ovl21_800CC024 |
+| two equal-ref single-set locals in one block with their registers swapped | lengthen the loser's life: compute the derived value (the table-row pointer) as a variable before the other's uses | ovl19 func_ovl19_800CB578 |
+| `and rX,rY,sN` with sN = -0x8000 hoisted, ours `andi 0x8000` on a u16 load | the operand a plain int (`s32 t = *src; t & ~0x7FFF`) | ovl39 func_800CFC1C |
+| signed range tests whose if / goto form inverts one arm | each test as a truth conditional `(v >= 0 ? v <= L : -v <= L)` joined with `&&` | ovl2d func_ovl2d_800CB6F4 |
+| a read-modify-write copy (`addu vB,vA`; `addiu vB,vB,k` in the delay slot) | through a pointer: `p = (s16 *)&G; if (*p < K) { *p += k; G2 = *p; }` | ovl23 func_ovl23_800CB0D0 |
+| a bare `v = K; break;` case gone into another case's delay slot while two call cases stay separate | the bare case label as a fallthrough right before the `v = K` of the case that stays whole | ovl36 func_800D128C |
+| `move v1,v0` before a compare kept, then an in-place `addiu v1,v1,k` | reuse the compared variable as a temporary inside the then-block before `x += k` | ovl18 func_ovl18_800CB168 |
+| a stack-passed value reloaded right after its own `|=` store | the out-buffer a scalar local (`s32 w; f(&D, &w); w |= K;`), not `s32 w[2]` | ovl1f func_ovl1f_800CB300 |
+| equal-priority stores fill a load-delay gap in the wrong order | reorder the source statements (rank_for_schedule ties: later LUID first) | ovl23 func_ovl23_800CB2AC |
+| a shared clamp store with the bound in a register, a few nops short | a plain else-if with literal bounds (single-set constants, cross-jumped stores); supersedes the r137 bound-variable row | ovl21 func_ovl21_800CB4A4 |
+| s-register assignment off in a straight-line packet draw | the second row as `y + 256`, not `y += 256` | ovl3a func_800CF408 |
+| an s-register swap where the actor loses the priority tie and a0 is live at an early jal | pass the argument the callee was spelled without | ovl20 func_ovl20_800CB470 |
+| two callee-saved pointers swapped with an early exit jumping to a shared free tail | write the tail out again in the early arm (more refs; jump2 cross-jumps the copies back) | ovl18 func_ovl18_800CB328 |
+| a struct word stored through `addiu rS,rSym,off; addu rA,rIdx,rS` | the field's address in a pointer local (`u32 *t = &D[f].field; *t = v;`) | ovl38 func_800CF290 |
+| an s-register copy of a new object kept for one arm only | `t = f(); o = t; m = t;` plus one marked do-while(0) around the arm's two related stores | ovl20 func_ovl20_800CB278 |
+| a call value kept in v0 (test, store, a0) with an s-register copy for a use after the join | reuse the call-value variable as a temp in the skipped inner block, plus one marked dead store after the copy's last use (cse make_regs_eqv on both paths) | ovl21 func_ovl21_800CBF28 |
+| a 5th (stack) parameter loaded at entry into a temp and copied to a0 at the call; ours `lw a0` at the call | declare it `T * volatile p` and read it once at the top, marked (assign_parms' REG_EQUIV lets combine sink the load past the stores); ACCEPTED by LuciDin 4 Nov (r240) | ovl19 func_ovl19_800CB9F8 |
+| a wave helper reports a NEW form as HELD | re-run the file's own idiom after the neighbours are placed: the HELD wrapper may come from stale file context (func_800CF6D0's bitfield wrapper was) | process |
+
 ## func_8012CB64 (hard v0): the cause, settled from the GCC 2.7.2 source (r221, Fable)
 
 The original's registers (x in v1, the compare temporaries in a1 / v1 / v1, `v0 = 0` in the first branch's delay slot,
