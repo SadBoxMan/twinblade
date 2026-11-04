@@ -1,0 +1,86 @@
+address,scope,current,proposed,confidence,source,note
+0x801151FC,engine,D_801151FC,g_PlayerHitBy,H,r272:names_stage_engine_proposals.md:816,r279 promote
+0x801152B0,engine,D_801152B0,g_WallNormal,H,r272:names_stage_engine_proposals.md:813,r279 promote
+0x8011F9D0,engine,D_8011F9D0,g_Obj68s,H,r272:names_stage_engine_proposals.md:787,r279 promote
+0x80126958,engine,D_80126958,g_CameraDist,H,r272:names_stage_engine_proposals.md:837,r279 promote
+0x8012695C,engine,D_8012695C,g_CameraDistTarget,H,r272:names_stage_engine_proposals.md:838,r279 promote
+0x80126960,engine,D_80126960,g_CameraAngle,H,r272:names_stage_engine_proposals.md:839,r279 promote
+0x80126968,engine,D_80126968,g_CameraAngleTarget,H,r272:names_stage_engine_proposals.md:840,r279 promote
+0x80126970,engine,D_80126970,g_CameraOfs,H,r272:names_stage_engine_proposals.md:841,r279 promote
+0x80126976,engine,D_80126976,g_CameraOfsTarget,H,r272:names_stage_engine_proposals.md:842,r279 promote
+0x801269E8,engine,D_801269E8,g_CameraVarA0,H,r272:names_stage_engine_proposals.md:845,r279 promote
+0x80126B96,engine,D_80126B96,g_PlayerHitKind,H,r272:names_stage_engine_proposals.md:856,r279 promote
+0x80126CB4,engine,D_80126CB4,g_PlayerTarget,H,r272:names_stage_engine_proposals.md:861,r279 promote
+0x80126CBA,engine,D_80126CBA,g_PlayerTargetOff,H,r272:names_stage_engine_proposals.md:862,r279 promote
+0x80126CF0,engine,D_80126CF0,g_PlayerWindow,H,r272:names_stage_engine_proposals.md:864,r279 promote
+0x80127078,engine,D_80127078,g_PlayerAttacker,H,r272:names_stage_engine_proposals.md:814,r279 promote
+0x80127090,engine,D_80127090,g_PushVel,H,r272:names_stage_engine_proposals.md:810,r279 promote
+0x801274C8,engine,D_801274C8,g_SpawnListFixed,H,r272:names_stage_engine_proposals.md:796,r279 fix: was g_SpawnListA
+0x801274CC,engine,D_801274CC,g_SpawnListRanged,M,r272:names_stage_engine_proposals.md:797,r279 fix: was g_SpawnListB
+0x80128D60,engine,func_80128D60,StartImageAnim,H,r272:names_stage_engine_proposals.md:164,r279 promote
+0x8012B864,engine,func_8012B864,HeadingToTarget,H,r272:names_stage_engine_proposals.md:322,r279 promote
+0x8012B8E4,engine,func_8012B8E4,TurnStepToTarget,H,r272:names_stage_engine_proposals.md:324,r279 promote
+0x8012BCCC,engine,func_8012BCCC,DistSqToTarget,H,r272:names_stage_engine_proposals.md:328,r279 promote
+0x8012BD3C,engine,func_8012BD3C,TargetInSight,H,r272:names_stage_engine_proposals.md:330,r279 promote
+0x8012BDBC,engine,func_8012BDBC,TargetInFront,H,r272:names_stage_engine_proposals.md:331,r279 promote
+0x8012C044,engine,func_8012C044,IsActorFar,H,r272:names_stage_engine_proposals.md:106,r279 promote
+0x8012C0EC,engine,func_8012C0EC,DespawnIfFar,H,r272:names_stage_engine_proposals.md:107,r279 promote
+0x8012C194,engine,func_8012C194,AllocActorSprite,H,r272:names_stage_engine_proposals.md:88,r279 promote
+0x8012DB84,engine,func_8012DB84,HitPlayerFatal,H,r272:names_stage_engine_proposals.md:256,r279 promote
+0x8012DFD4,engine,func_8012DFD4,CarryPlayer,H,r272:names_stage_engine_proposals.md:149,r279 promote
+0x8012E014,engine,func_8012E014,CarryPlayerExact,H,r272:names_stage_engine_proposals.md:150,r279 promote
+0x8012E138,engine,func_8012E138,CarryPlayerClipped,H,r272:names_stage_engine_proposals.md:151,r279 promote
+0x801319E0,engine,func_801319E0,FinishEnemy,H,r272:names_stage_engine_proposals.md:590,r279 promote
+0x80132288,engine,func_80132288,InitMime,H,r272:names_stage_engine_proposals.md:565,r279 promote
+0x8013240C,engine,func_8013240C,StepMime,H,r272:names_stage_engine_proposals.md:566,r279 promote
+0x80137B80,engine,func_80137B80,UpdateMessage0,H,r272:names_stage_engine_proposals.md:391,r279 promote
+0x80139A44,engine,func_80139A44,SetMessageText,H,r272:names_stage_engine_proposals.md:397,r279 promote
+0x8013CB84,engine,func_8013CB84,UpdateDayLighting,H,r272:names_stage_engine_proposals.md:756,r279 promote
+0x801437D8,engine,func_801437D8,EmitProp23,H,r272:names_stage_engine_proposals.md:541,r279 promote
+0x80143970,engine,func_80143970,SpawnShadow,H,r272:names_stage_engine_proposals.md:191,r279 promote
+0x801439C0,engine,func_801439C0,FreeShadow,H,r272:names_stage_engine_proposals.md:193,r279 promote
+0x80145EE8,engine,func_80145EE8,UploadFlagImages,H,r272:names_stage_engine_proposals.md:569,r279 promote
+0x801466B4,engine,func_801466B4,SpawnObj68On,H,r272:names_stage_engine_proposals.md:520,r279 promote
+0x801466F0,engine,func_801466F0,SpawnObj68,H,r272:names_stage_engine_proposals.md:519,r279 promote
+0x801472B4,engine,func_801472B4,ClearPlayerFlag7E2,H,r272:names_stage_engine_proposals.md:640,r279 promote
+0x801472C8,engine,func_801472C8,SetPlayerFlag7E2,H,r272:names_stage_engine_proposals.md:641,r279 promote
+0x801473EC,engine,func_801473EC,MoveObjByVel,H,r272:names_stage_engine_proposals.md:505,r279 fix: was MoveEffect
+0x80147460,engine,func_80147460,ApplyFallSpeed,H,r272:names_stage_engine_proposals.md:507,r279 fix: was AddFallSpeed
+0x801477E8,engine,func_801477E8,SetFallSpeed,H,r272:names_stage_engine_proposals.md:508,r279 promote
+0x80147928,engine,func_80147928,AddMoveSpeedX,H,r272:names_stage_engine_proposals_2.md:228,r279 promote
+0x8014799C,engine,func_8014799C,AddMoveSpeedY,H,r272:names_stage_engine_proposals_2.md:230,r279 promote
+0x80147A10,engine,func_80147A10,AddMoveSpeedZ,H,r272:names_stage_engine_proposals_2.md:232,r279 promote
+0x80147AD4,engine,func_80147AD4,AddMoveSpeedFacing,H,r272:names_stage_engine_proposals_2.md:235,r279 fix: was AccelFacing
+0x80147B5C,engine,func_80147B5C,SetVelKeepAxes,H,r272:names_stage_engine_proposals_2.md:237,r279 promote
+0x80147C30,engine,func_80147C30,AddMoveSpeedFacingFree,H,r272:names_stage_engine_proposals_2.md:238,r279 fix: was AccelFacingFree
+0x80147CC8,engine,func_80147CC8,AddMoveSpeedToWorld,H,r272:names_stage_engine_proposals_2.md:239,r279 fix: was AccelMoveToWorld
+0x80149020,engine,func_80149020,ClearPlayerHittable,H,r272:names_stage_engine_proposals.md:645,r279 fix: was ClearHitPending
+0x8014BC44,engine,func_8014BC44,DamagePlayerHp,H,r272:names_stage_engine_proposals.md:608,r279 promote
+0x8014C010,engine,func_8014C010,SpawnEffect2,H,r272:names_stage_engine_proposals.md:488,r279 promote
+0x8014C3A4,engine,func_8014C3A4,StrikeActorFacing,H,r272:names_stage_engine_proposals_2.md:511,r279 promote; conflict resolved over Actor_GiveHit (owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out))
+0x8014E934,engine,func_8014E934,CollidePlayerMove,H,r272:names_stage_engine_proposals.md:751,r279 promote
+0x8014E98C,engine,func_8014E98C,CollidePlayerMoveBody,H,r272:names_stage_engine_proposals_2.md:590,r279 promote
+0x80151664,engine,func_80151664,ResetPlayerAfterHit,H,r272:names_stage_engine_proposals.md:646,r279 promote
+0x80153BD8,engine,func_80153BD8,IsPlayerHitBy,H,r272:names_stage_engine_proposals.md:647,r279 promote
+0x80153BF0,engine,func_80153BF0,ClearPlayerHitBy,H,r272:names_stage_engine_proposals.md:648,r279 promote
+0x80153C18,engine,func_80153C18,ForgetPlayerHit,H,r272:names_stage_engine_proposals.md:649,r279 promote
+0x80154150,engine,func_80154150,SetPlayerMotionIndex,H,r272:names_stage_engine_proposals.md:629,r279 promote
+0x80154274,engine,func_80154274,SetPlayerMotion,H,r272:names_stage_engine_proposals.md:626,r279 promote
+0x801542A4,engine,func_801542A4,RestartPlayerMotion,H,r272:names_stage_engine_proposals.md:627,r279 promote
+0x80155FF8,engine,func_80155FF8,RunAttackHit,H,r272:names_stage_engine_proposals_2.md:879,r279 promote; conflict resolved over SwordHitCheck (synonyms; owning card's name and family stem kept)
+0x80156648,engine,func_80156648,ResetAttackHit,H,r272:names_stage_engine_proposals_2.md:888,r279 promote
+0x801599A4,engine,func_801599A4,LeavePlayerKind,M,r272:names_stage_engine_proposals.md:747,r279 fix: was RunPlayerKindHandler
+0x80159B3C,engine,func_80159B3C,ResetPlayerKind,H,r272:names_stage_engine_proposals.md:746,r279 promote
+0x80159B70,engine,func_80159B70,RunPlayerStateHandler,H,r272:names_stage_engine_proposals.md:748,r279 promote
+0x80161104,engine,func_80161104,StayedGrounded,H,r272:names_stage_engine_proposals_2.md:1088,r279 promote
+0x80161208,engine,func_80161208,CheckPlayerGround,H,r272:names_stage_engine_proposals_2.md:1090,r279 promote
+0x80161D20,engine,func_80161D20,PlayLandSe,H,r272:names_stage_engine_proposals_2.md:1403,r279 promote
+0x80162D28,engine,func_80162D28,UpdateObj68Matrix,H,r272:names_stage_engine_proposals.md:529,r279 promote
+0x80162FC0,engine,func_80162FC0,MoveObj68,H,r272:names_stage_engine_proposals.md:510,r279 promote
+0x801632F0,engine,func_801632F0,GetSweepHitResult,H,r272:names_stage_engine_proposals_2.md:1464,r279 promote; conflict resolved over Sweep_FirstResult (owning card's name keeps its family and style (r271 6b name has a Module_ prefix the engine style rules out))
+0x80163328,engine,func_80163328,MarkSweepHitPoints,H,r272:names_stage_engine_proposals_2.md:1465,r279 promote
+0x80163408,engine,func_80163408,SweepHitObj68,H,r272:names_stage_engine_proposals_2.md:1467,r279 promote
+0x80165910,engine,func_80165910,TestAndSetAbilityUsed,H,r272:names_stage_engine_proposals_2.md:1317,r279 promote
+0x8016AA50,engine,func_8016AA50,ShowDamage,H,r272:names_stage_engine_proposals.md:535,r279 promote
+0x8016B428,engine,func_8016B428,ShowDefeat,H,r272:names_stage_engine_proposals.md:537,r279 promote
+0x80171D78,engine,func_80171D78,WalkToPoint,H,r272:names_stage_engine_proposals.md:445,r279 promote
