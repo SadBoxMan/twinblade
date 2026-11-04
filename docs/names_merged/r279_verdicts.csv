@@ -88,7 +88,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80153C18,engine,ForgetPlayerHit,ForgetPlayerHit,M,H,PROMOTE,g_PlayerHitByHeld = g_PlayerHitBy = 0; ResetPlayerAfterHit / EndKnockback end with it,12
 0x80165910,engine,TestAndSetAbilityUsed,TestAndSetAbilityUsed,M,H,PROMOTE,returns D_80078EC4 and sets it to 1 when it was 0; packages spend BP only on the first use,12
 0x80128C98,engine,LoadStageFileA,LoadStageFileA,M,M,KEEP,RequestLoad of g_ArchiveFileLoc[D_8018D7BC[i]] into D_801EBC68 (1 when the entry < 0); see LoadStageFileB: A / B wait for the two tables' contents,11
-0x8014ED28,engine,PushOutOfSolidActors,PushOutOfSolidActors,M,M,KEEP,"PushOutOfSolidActorsBody on the scratchpad stack; callers ClearObjPush when it returns nonzero. Rests on the body (0x8014ED80), not read here",11
+0x8014ED28,engine,PushOutOfSolidActors,PushOutOfSolidActors,M,H,PROMOTE,"PushOutOfSolidActorsBody on the scratchpad stack, now read (one segment at waist height to PushOutOfSolidActorsPass); callers ClearObjPush when it pushed him",11
 0x801542A4,engine,RestartPlayerMotion,RestartPlayerMotion,M,H,PROMOTE,"+0xB4 = motion, frame counters +0xBA / +0xB8 = 1, +0xBC / +0xBD / +0xDC = 0, StepPlayerMotion; SetPlayerMotion's unconditional half",11
 0x80161D20,engine,PlayLandSe,PlayLandSe,M,H,PROMOTE,surface < 8: PlaySe(D_80190004[surface]); called with +0x16E (the floor's surface) by the landing code,11
 0x801632F0,engine,GetSweepHitResult,GetSweepHitResult,M,H,PROMOTE,the first nonzero of the three sweep results D_80115200; package projectiles switch on 1 (actor) / wall bits,11
@@ -115,7 +115,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x801270BC,engine,g_EngineReadyFlag,g_EngineReadyFlag,M,H,PROMOTE,"EngineReady returns it; ResetActionHandler clears it, the action-handler setup ORs 1 in",8
 0x8012C438,engine,SetupActorAlt,SetupActorTrans,M,M,FIX,"SetupActor's body with InitTransModel (0x8001C810) for the model in place of InitModel; ""Alt"" says nothing. M because InitTransModel is itself M (exe_MM)",8
 0x801483E8,engine,SaveSafeGroundPos,SaveSafeGroundPos,M,H,PROMOTE,"TraceMap 8 down: a floor hit (0x2000) right at the feet with surface 0, then +0xA0 = the position; jumps and lifts call it before leaving the ground (the respawn point)",8
-0x8014D738,engine,PushBlock,PushBlock,M,M,KEEP,"PushBlockBody on the scratchpad stack; nonzero makes the running / sliding steps leave their kind. Rests on the body (0x8014D790), not read here",8
+0x8014D738,engine,PushBlock,PushBlock,M,H,PROMOTE,"PushBlockBody on the scratchpad stack, now read: PushHeldBlock with a held block (+0x170), else FindPushBlock; nonzero makes the run / slide steps switch to pushing",8
 0x80161B18,engine,CheckAssimilatePending,CheckAssimilatePending,M,H,PROMOTE,"no event and +0x44 bit 4: LeavePlayerKind, SwitchToAssimilate, 1. Bit 4 is the assimilate request: CancelAssimilate clears it with the +0x184 assimilate fields",8
 0x80161B84,engine,CheckLieDownFlag,CheckLieDownFlag,M,H,PROMOTE,"+0x44 bit 8 and HasNoPlayerAction: LeavePlayerKind, TriggerLieDown (SwitchToLieDown, read), 1",8
 0x801622C4,engine,ExpireDeadline8,ExpireDeadline8,M,H,PROMOTE,"flag 0x141 = 1, var 8 = 0, the three timer sprites zeroed; UpdateDeadline8 calls it when the clock reaches var 8's minute, rest / stage code when GetDeadline8Passed. The Deadline8 family names var 8's timed event",8
@@ -201,7 +201,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8014C1A0,engine,ClipObjBehindWallDef,ClipObjBehindWallDef,M,H,PROMOTE,ClipObjBehindWall with the default offset D_8018F14C; release / throw code calls it before StrikeActor,3
 0x8014C88C,engine,SetTargetPointToSelf,SetTargetPointToSelf,M,H,PROMOTE,SetTargetPoint (engine_H) with the object's own position (PosToSVec); stage scenes point the aim at an actor with it,3
 0x8014C978,engine,SetFatalHit,SetFatalHit,M,H,PROMOTE,"D_80126B50 = 1, returns 1; HitPlayerFatal calls it before its 1000-damage hit, sc02_011 likewise",3
-0x8014E6A0,engine,GrabBar,GrabBar,M,M,KEEP,"GrabBarBody on the scratchpad stack; the airborne step catches bars with it. Rests on the body (0x8014E6F8), not read here",3
+0x8014E6A0,engine,GrabBar,GrabBar,M,H,PROMOTE,"GrabBarBody on the scratchpad stack, now read: KeepBar with a held bar (+0x180), else FindBar at hand height",3
 0x801525F4,engine,EndBlowback,EndBlowback,M,H,PROMOTE,"the blowback's end: DamagePlayerHp with +0xF2, scale and fall speed reset, ForgetPlayerHit (EndKnockback's shape); the blowback steps call it when the motion ends",3
 0x80154190,engine,RestartPlayerMotionIndex,RestartPlayerMotionIndex,M,H,PROMOTE,"+0xB4 = motion n of the table +0xB0, counters reset, StepPlayerMotion; SetPlayerMotionIndex's unconditional half",3
 0x801549F8,engine,CountMotionPoses,CountMotionPoses,M,M,KEEP,counts pose entries before index +0xBC (25 lines not read in full); the blend starters call it. M,3
@@ -257,8 +257,8 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8014C118,engine,FindActorByKindAnd70,FindActorByKindAnd70,M,H,PROMOTE,the first actor whose state is the kind and +0x70 == v; scripted actions find their partner with it,2
 0x8014C43C,engine,StrikeActorWithDamage,StrikeActorWithDamage,M,H,PROMOTE,StrikeActor with RollDamage(kind); StrikeActorFacing / StrikeActorToward call it,2
 0x8014C5FC,engine,GetPitchToObjOffset,GetPitchToObjOffset,M,H,PROMOTE,"ratan2(dy, horizontal distance) to b + offset: the pitch; GetPitchToObj and ovl2d's homing use it",2
-0x8014D3E0,engine,ProbePlatformFall,ProbePlatformFall,M,M,KEEP,"ProbePlatformFallBody on the scratchpad stack; PlayerObjFallStep calls it when the height changed. Rests on the body (0x8014D438), not read here",2
-0x8014E434,engine,GrabPole,GrabPole,M,M,KEEP,"GrabPoleBody on the scratchpad stack; the airborne step catches poles with it. Rests on the body (0x8014E48C), not read here",2
+0x8014D3E0,engine,ProbePlatformFall,ProbePlatformFall,M,H,PROMOTE,"ProbePlatformFallBody on the scratchpad stack, now read: KeepPlatformFall when riding, else FindPlatformFall",2
+0x8014E434,engine,GrabPole,GrabPole,M,H,PROMOTE,"GrabPoleBody on the scratchpad stack, now read: KeepPole with a held pole (+0x17C), else FindPole",2
 0x8014F74C,engine,TraceGroundMoveBody,TraceGroundMoveBody,M,M,KEEP,"45 lines not read in full: TraceMap(0) of the move with the ground push, the position set to the trace end, 0x8000 when fully blocked (the end seen); M",2
 0x8014FA70,engine,ClipMoveToMapBody,ClipMoveToMapBody,M,M,KEEP,"28 lines not read in full: TraceMap(1) from +0x88 to the position, the floor surface kept in +0x16C (the end seen); M",2
 0x80150820,engine,GainBpShown,GainBpShown,M,H,PROMOTE,"AddBp(n) and ShowNumberAbove(o, 4, n) when n is not 0; pickups and ExitAssimilate give BP with it",2
@@ -423,8 +423,90 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8014CD0C,engine,ProbePlatformStillBody,ProbePlatformStillBody,M,H,PROMOTE,"a short segment at his feet: KeepPlatformStill when riding, else FindPlatformStill",1
 0x8014CD80,engine,KeepPlatformStill,KeepPlatformStill,M,H,PROMOTE,"the ridden platform still under him: his position follows it (1), else +0x174 cleared (0); the end read",1
 0x8014CF04,engine,FindPlatformStill,FindPlatformStill,M,H,PROMOTE,"the first platform the segment hits (not carried, not ridden) becomes +0x174 and he is put on it with its surface",1
-0x8014D04C,engine,ProbePlatformSlide,ProbePlatformSlide,M,M,KEEP,"ProbePlatformSlideBody on the scratchpad stack; rests on the body, not read here",1
+0x8014D04C,engine,ProbePlatformSlide,ProbePlatformSlide,M,H,PROMOTE,"ProbePlatformSlideBody on the scratchpad stack, now read: KeepPlatformSlide when riding, else FindPlatformSlide",1
+0x8014D0A4,engine,ProbePlatformSlideBody,ProbePlatformSlideBody,M,H,PROMOTE,"the move +0x88 -> position: KeepPlatformSlide when riding, else FindPlatformSlide",1
+0x8014D12C,engine,KeepPlatformSlide,KeepPlatformSlide,M,H,PROMOTE,"the ridden platform checked along the move: he follows it (1), else +0x74 / +0x174 cleared (0); the end read",1
+0x8014D2A0,engine,FindPlatformSlide,FindPlatformSlide,M,H,PROMOTE,a platform the move hits puts him on it with its surface (1); the end read,1
+0x8014D438,engine,ProbePlatformFallBody,ProbePlatformFallBody,M,H,PROMOTE,"the fall +0x88 -> position: KeepPlatformFall when riding, else FindPlatformFall",1
+0x8014D4C0,engine,KeepPlatformFall,KeepPlatformFall,M,H,PROMOTE,"the fall checked against the ridden platform: kept (1), else +0x74 / +0x174 cleared (0)",1
+0x8014D610,engine,FindPlatformFall,FindPlatformFall,M,H,PROMOTE,"a platform the fall hits becomes +0x174 (he lands on it), 1",1
+0x8014D790,engine,PushBlockBody,PushBlockBody,M,H,PROMOTE,"the move at waist height: PushHeldBlock with a held block (+0x170), else FindPushBlock",1
+0x8014D820,engine,PushHeldBlock,PushHeldBlock,M,M,KEEP,"80 lines not read in full (the held block moved by the step, clipped; +0x170 cleared at the end); M",1
+0x8014DCE0,engine,BlockRaysHitActor,BlockRaysHitActor,M,H,PROMOTE,any of three rays from a point hits the actor's model (PathHitsModel); PushHeldBlock,1
+0x8014DD8C,engine,FindPushBlock,FindPushBlock,M,H,PROMOTE,the first flags5C 0x1000 actor the move runs into in front becomes +0x170 (the end read; middle 23 lines per the evidence),1
+0x8014DF94,engine,PullBlockBody,PullBlockBody,M,H,PROMOTE,"the move mirrored (2 * last - position): PullHeldBlock with a held block, else FindPullBlock",1
+0x8014E048,engine,PullHeldBlock,PullHeldBlock,M,M,KEEP,43 lines not read in full (the held block moved back unless blocked); M,1
+0x8014E284,engine,FindPullBlock,FindPullBlock,M,H,PROMOTE,FindPushBlock's search on the mirrored move (the end read),1
+0x8014E48C,engine,GrabPoleBody,GrabPoleBody,M,H,PROMOTE,"KeepPole when +0x17C is set, else FindPole",1
+0x8014E514,engine,KeepPole,KeepPole,M,H,PROMOTE,"the held pole still crossed by the move: x / z snap to it (1), else +0x17C = NULL",1
+0x8014E5B4,engine,FindPole,FindPole,M,H,PROMOTE,"the first flags5C 0x40 actor the move crosses becomes +0x17C, x / z snap to it",1
+0x8014E6F8,engine,GrabBarBody,GrabBarBody,M,H,PROMOTE,"KeepBar when +0x180 is set, else FindBar 0x54 up (hand height)",1
+0x8014E790,engine,KeepBar,KeepBar,M,H,PROMOTE,"the held bar still crossed: the whole position snaps to it, else +0x180 = NULL",1
+0x8014E83C,engine,FindBar,FindBar,M,H,PROMOTE,"the first flags5C 0x20 actor crossed becomes +0x180, position snaps",1
 0x8014E98C,engine,CollidePlayerMoveBody,CollidePlayerMoveBody,M,H,PROMOTE,"unless +0x44 bit 19 / +0x1F8 bit 26: two passes of func_8014EA4C on the segment from the previous position (+0x88) to the current one (+6/+0xA/+0xE), both 0x10 up; ORs the results",1
+0x8014EA4C,engine,CollideSolidActorsPass,CollideSolidActorsPass,M,M,KEEP,64 lines not read in full (the solid-actor side / top hits of one pass); M,1
+0x8014ED80,engine,PushOutOfSolidActorsBody,PushOutOfSolidActorsBody,M,H,PROMOTE,unless the guard bits: one segment from +0x88 to the position at waist height to PushOutOfSolidActorsPass,1
+0x8014EE14,engine,PushOutOfSolidActorsPass,PushOutOfSolidActorsPass,M,M,KEEP,87 lines not read in full; M,1
+0x8014F1F4,engine,MoveHitsSolidActor,MoveHitsSolidActor,M,H,PROMOTE,MoveHitsSolidActorBody on the scratchpad stack; WallClimbStep restores the saved position on 1,1
+0x8014F24C,engine,MoveHitsSolidActorBody,MoveHitsSolidActorBody,M,H,PROMOTE,"the guarded waist-height segment from +0x88 to the position, to AnySolidActorOnPath",1
+0x8014F2E0,engine,AnySolidActorOnPath,AnySolidActorOnPath,M,H,PROMOTE,"1 when the segment hits any solid actor's model, no correction",1
+0x8014F468,engine,ProbeGroundStill,ProbeGroundStill,M,H,PROMOTE,ProbeGroundStillBody on the scratchpad stack (result D_801ED4DC); PlayerObjGroundStep's not-moved case,1
+0x8014F4C0,engine,ProbeGroundStillBody,ProbeGroundStillBody,M,H,PROMOTE,"TraceMap(0) from +0x88 to 8 below (TraceGroundMoveBody with a ground push), the surface into +0x16C, the up vector reset; the end read",1
+0x8014F6F4,engine,TraceGroundMove,TraceGroundMove,M,M,KEEP,TraceGroundMoveBody on the scratchpad stack; M with that body,1
+0x8014FC18,engine,SnapToFloorBody,SnapToFloorBody,M,H,PROMOTE,"TraceMap(1) from the position to 0x10 below: on a hit he is put there, the surface into +0x16C",1
+0x8014FCFC,engine,IsClimbWallAhead,IsClimbWallAhead,M,H,PROMOTE,IsClimbWallAheadBody on the scratchpad stack; WallClimbStep jumps off when it is 0,1
+0x8014FD54,engine,IsClimbWallAheadBody,IsClimbWallAheadBody,M,H,PROMOTE,a model-space ray from 7 in front to 0x18 behind (ObjLocalToWorldAtPos): 1 on a wall hit of surface 0x15 (climbable),1
+0x8014FDF4,engine,FindFloorBelowPlayer,FindFloorBelowPlayer,M,H,PROMOTE,"FindFloorBelowMoved when the position changed since +0x88, else FindFloorBelowStill",1
+0x8014FE60,engine,FindFloorBelowStill,FindFloorBelowStill,M,H,PROMOTE,"the higher of the platform and map floors below into +0x78.. with the normal, else height 0x7FFF and +0x7E bit 0",1
+0x8014FFDC,engine,FindPlatformFloorA,FindPlatformFloorA,M,H,PROMOTE,the highest floor on a platform actor below a point (FindGroundOnModel); A because FindPlatformFloorB is its copy for the moved case,1
+0x80150150,engine,FindMapFloorA,FindMapFloorA,M,H,PROMOTE,FindGround(p) != 0; B is its copy,1
+0x80150170,engine,FindFloorBelowMoved,FindFloorBelowMoved,M,H,PROMOTE,FindFloorBelowStill's copy for the moved case (the B helpers),1
+0x801502EC,engine,FindPlatformFloorB,FindPlatformFloorB,M,H,PROMOTE,FindPlatformFloorA's copy,1
+0x80150460,engine,FindMapFloorB,FindMapFloorB,M,H,PROMOTE,FindMapFloorA's copy,1
+0x80150480,engine,ProbeExitActor,ProbeExitActor,M,H,PROMOTE,ProbeExitActorBody on the scratchpad stack; TakeActorExit,1
+0x801504D8,engine,ProbeExitActorBody,ProbeExitActorBody,M,H,PROMOTE,a short segment at his feet to FindExitActorOnPath,1
+0x80150528,engine,FindExitActorOnPath,FindExitActorOnPath,M,H,PROMOTE,"the first flags5C 0x80 actor the segment hits: g_Player +0x1A4 = it, 1; TakeActorExit reads its map change",1
+0x801505FC,engine,CollectPickups,CollectPickups,M,H,PROMOTE,"the first live pickup actor (flags5C 0x100) within 0x30: ApplyPickup, 1; per frame",1
+0x8015086C,engine,CurePoisonWithFx,CurePoisonWithFx,M,H,PROMOTE,"effect 0x48 on him, CurePoison, SE 0xA1B; ApplyPickup's antidote kinds",1
+0x801508B4,engine,StrikeTouchedActor,StrikeTouchedActor,M,H,PROMOTE,"the first hittable actor within 0x30 gets StrikeActorKind1F, 1; per frame",1
+0x80150A70,engine,CommitPlayerMove,CommitPlayerMove,M,H,PROMOTE,"when the position changed: ClipMoveToMapBody on the scratchpad stack (unless +0x44 bit 18), then +0x88 = the position; UpdatePlayer",1
+0x8015126C,engine,ProcessPlayerHit,ProcessPlayerHit,M,H,PROMOTE,"per frame: the invincibility count +0xA8, the attacker moved to Prev, a queued hit dropped while invincible or not hittable (+0x3C bit 15), else counters and EnterHitState with the damage; read in part in the first pass (the ClearPlayerHittable row)",1
+0x8015173C,engine,EnterHitState,EnterHitState,M,H,PROMOTE,"SetTargetPointToSafePos, +0xDE = the old kind, kind 0x19, RunHitHandler; ProcessPlayerHit",1
+0x801519C8,engine,StartHitKnockback,StartHitKnockback,M,H,PROMOTE,"the knockback hit's first step: rumble, damage popup, front / back motion by the hit facing, face, next state(s)",1
+0x80151DB0,engine,StartFlattenHit,StartFlattenHit,M,H,PROMOTE,"the flatten hit's first step: rumble, popup, model laid flat, scale +0x64 = 0xCC, ClearPlayerHittable, SE, next state",1
+0x80151FB4,engine,EndFlattenHit,EndFlattenHit,M,H,PROMOTE,"the flatten hit's end: damage taken, scale and fall speed reset, ForgetPlayerHit (EndKnockback's shape)",1
+0x801520DC,engine,StartPitFall,StartPitFallHit,M,H,FIX,"the pit-fall hit's first step (rumble, popup, fall speed down, LeavePlatform, effect, SE), run from PitFallHitBegin. The hit handlers are Start*Hit / End*Hit (StartFlattenHit, StartLaunchHit ...), and PitFallStart (0x801533A4) is a different step, so ""StartPitFall"" next to ""PitFallStart"" invites a mix-up",1
+0x801522CC,engine,EndPitFall,EndPitFallHit,M,H,FIX,"the pit-fall hit's end (damage, scale, fall speed, ForgetPlayerHit), run from PitFallRespawn; renamed with StartPitFallHit",1
+0x801523F4,engine,StartBlowback,StartBlowback,M,H,PROMOTE,"the blowback hit's first step: rumble, popup, motion, push turned to the hit direction, fall speed, SE, next state",1
+0x80152714,engine,StartSleepHit,StartSleepHit,M,H,PROMOTE,"rumble, popup; unless ability 2 is held, forced-sleep timer 60 and +0x44 bit 8 (lie down), then EndSleepHit, ResetPlayerKind, DropTimedAbility",1
+0x80152790,engine,EndSleepHit,EndSleepHit,M,H,PROMOTE,"the sleep hit's end without invincibility frames (damage, scale, ForgetPlayerHit)",1
+0x801528B0,engine,StartLaunchHit,StartLaunchHit,M,H,PROMOTE,"the launch hit's first step: motion, SE, push, fall speed -0x100000 (up), LeavePlatform, next state",1
+0x80152AC8,engine,EndLaunchHit,EndLaunchHit,M,H,PROMOTE,"the launch hit's end (damage, scale, ForgetPlayerHit)",1
+0x80152BF0,engine,StartFlinchHit,StartFlinchHit,M,H,PROMOTE,"rumble and the damage popup, ClearPlayerHittable, next state",1
+0x80152C80,engine,EndFlinchHit,EndFlinchHit,M,H,PROMOTE,"the flinch hit's end (damage, scale, ForgetPlayerHit)",1
+0x80152DA8,engine,StartFlingHit,StartFlingHit,M,H,PROMOTE,"StartLaunchHit with another push, fall speed -0x1C0000 and frames without gravity",1
+0x80152FBC,engine,EndFlingHit,EndFlingHit,M,H,PROMOTE,"the fling hit's end (damage, scale, ForgetPlayerHit)",1
+0x801530E4,engine,VanishStart,VanishStart,M,H,PROMOTE,"rumble, ClearPlayerHittable, SetPlayerFlag7E2, +0xDE = 0x40, LeavePlatform, ResetTiltVectors, parts hidden, next state; VanishEnter",1
+0x8015327C,engine,RecoverFromVanish,RecoverFromVanish,M,H,PROMOTE,"DamagePlayerHp, invincibility 0x20, face, parts and ability shown, ClearPlayerFlag7E2, hit fields, scale, ForgetPlayerHit; VanishRespawnStep",1
+0x801533A4,engine,PitFallStart,PitFallStart,M,H,PROMOTE,VanishStart's set-up for the pit fall (same body); PitFallEnter,1
+0x80153550,engine,RecoverFromPitFall,RecoverFromPitFall,M,H,PROMOTE,RecoverFromVanish's shape for the pit fall; PitFallRespawnStep,1
+0x80153978,engine,TestRespawnSpot,TestRespawnSpot,M,H,PROMOTE,TraceMap from the candidate to 0x1F below: 0 when it is a floor of surface 0 and ValidateRespawnSpot accepts it; FindRespawnPoint,1
+0x801539F8,engine,ValidateRespawnSpot,ValidateRespawnSpot,M,H,PROMOTE,traces from the safe point to the candidate must stay floor; stores the point into +0x88 / +0x90 (the end read),1
+0x80153D7C,engine,GrabbedStart,GrabbedStart,M,H,PROMOTE,"the grabbed state's first step: SE, motion, ClearPlayerHittable, position saved, struggle count 10 (20 on map 0x3075), next state",1
+0x80154F9C,engine,RefreshFaceOverride,RefreshFaceOverride,M,H,PROMOTE,swaps the face for the placeholder or the tired face (low +0x26 / +0x2E stats); UpdatePlayerFace,1
+0x80155580,engine,RunFusionComboState,RunFusionComboState,M,H,PROMOTE,D_8018F37C[state](obj): kind 5's state table; EnterFusionCombo,1
+0x80155A44,engine,CheckFusionSkillInput,CheckFusionSkillInput,M,H,PROMOTE,"by combo step: with flags 0x85 / 0x86, the Lumina and a hit, triangle starts TriggerSwordSkill(2 / 3); FusionSwingStep",1
+0x80155FB0,engine,RunAttackHitSet1,RunAttackHitSet1,M,H,PROMOTE,"RunAttackHit(o, step ",1
+0x80156044,engine,AttackHitStep,AttackHitStep,M,H,PROMOTE,"the record for the step, damage rolled; while the hit window is open TraceAttackPoints, effects, SE, +0x1C0 on a hit; RunAttackHit's worker",1
+0x8015616C,engine,RollAttackDamage,RollAttackDamage,M,H,PROMOTE,"the record's damage (base + range, or the level formulas by flags), critical by flag 0x8000 (ApplyCriticalDamage); the end read",1
+0x8015640C,engine,ApplyCriticalDamage,ApplyCriticalDamage,M,H,PROMOTE,"when RollCriticalHit: damage x 1.75 (flag 0x1C) or x 1.5, marked 0x8000",1
+0x801564B0,engine,RollCriticalHit,RollCriticalHit,M,H,PROMOTE,"0x8000 by chance (1/2 with +0x44 bit 9, 1/4 with the stat checks, else a roll against stat +0x2E)",1
+0x801565C0,engine,AnyAttackPointHit,AnyAttackPointHit,M,H,PROMOTE,1 when any of the three point results D_801151E0 has bit 0 (an actor hit),1
+0x80156600,engine,GetAttackHitPoint,GetAttackHitPoint,M,H,PROMOTE,"the first attack point whose result has bit 0, else 0; SkillAStep",1
+0x80156670,engine,TraceAttackPoints,TraceAttackPoints,M,H,PROMOTE,"ComputeAttackPoints, then TraceAttackPath for each live point, results in D_801151E0",1
+0x801567BC,engine,TurnToAttackHit,TurnToAttackHit,M,H,PROMOTE,"for each point that hit an actor, the model heading to it; AttackHitStep",1
+0x80156A14,engine,ResetClankSe,ResetClankSe,M,H,PROMOTE,+0xDA = 0 (PlayClankSeOnce's once-per-swing count); ResetAttackHit,1
+0x80156A88,engine,PlayAttackHitSe,PlayAttackHitSe,M,H,PROMOTE,"per point that hit: by the record's flags a plain PlaySe, PlayInitSeB or PlayInitSeA; AttackHitStep",1
 0x80162F08,engine,AddObj68Accel,AddObj68MoveSpeed,M,H,FIX,"AddObj68MoveSpeedX / Y / Z in turn (AddMoveSpeed*Limit, 0x7F0000) on a 0x68 object; the family root. Was AddObj68Accel",1
 0x801630C4,engine,AddObj68AccelLocalYXZ,AddObj68MoveSpeedFacingYXZ,M,H,FIX,"AddObj68MoveSpeedX / Y / Z, then vel = the move speed turned by the model's rotation built Y, X, Z (via g_PushVel); AddObj68MoveSpeedFacing in YXZ order. Was AddObj68AccelLocalYXZ",1
 0x80147AAC,engine,ApplyMoveSpeedFree,SetVelFromMoveSpeedFacing,M,H,FIX,"AddMoveSpeedFacingFree(o, 0, 0, 0): vel = the move speed turned by the model's facing, all axes; the turned partner of SetVelFromMoveSpeed. Was ApplyMoveSpeedFree",0
