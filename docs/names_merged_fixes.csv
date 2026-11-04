@@ -1,2 +1,3 @@
 address,scope,proposed,corrected,reason
 0x8002B0B4,exe,SaveCardStep,MemCardStep,VAGUE: the card state machine dispatches check-directory / save / load / mode 3 on mode & 7: not save-only
+0x80146DE8,engine,SetEffectAccel,SetObjAccel,"VAGUE: writes +0x24..+0x2C; most callers pass the player or an actor (with SetPlayerMotion / SetFallSpeed / ClearHitPending), StepToward clears it on any walker: the ""Effect"" in the name is too narrow (the whole SetEffect* / ClearEffect* helper family in 0x80146C98-0x80146E98 shares this)"
