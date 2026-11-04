@@ -807,6 +807,8 @@ What is left:
 
 ## Status of this document
 
+See also docs/structs_2.md: the camera, effect, Work and other shared records (r273 round 2).
+
 Complete for r273 (research only): census, groups, field tables, draft structs, conflicts, open questions.
 Nothing in src/ or include/ was changed.
 
