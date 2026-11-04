@@ -44,6 +44,22 @@ Files: `docs/stage_survey.md`, `docs/stage_survey_2.md`, `docs/stage_survey_3.md
 | 0x800167B8 / 0x800167F0 | func_800167B8 / func_800167F0 | StartFade / FadeDone | EXE; 0 at a room's entry, 4 at its exit | M |
 | 0x800CFBCC | func_800CFBCC | RequestFieldFileLoad | field overlay: D_80114E70 = 1, D_80114E74 = n; the field then loads MAIN.CD file D_800D3408[n] (func_800CF990) | M |
 
+## What is left (r275)
+* **Coverage.** Every stage image has an entry (139 in src/stg, plus the village SC03_001 as the reference); the
+  twins of identical code (SC01_006, SC02_003, SC03_015, SC03_119, SC04_019, SC04_021, SC05_019) have one-line entries.
+  All 122 families are in the index; the largest are described with naming tables, the small ones in "minor" lists.
+* **Names.** The tables cover the dispatchers, set-ups, bosses, events and room code of each stage; the many small own
+  helpers of the big stages (SC02_005, SC02_011, SC02_017, SC03_105, SC03_117-125, SC04_011, SC05_008 / 010 / 017 / 018,
+  SC06_000 / 016 / 029, SC01_077 / 080 / 084) are counted as "n more own functions not proposed". Families F117, F118,
+  F119 and F122 (SC06) and most of F017-F044 have prose but no tables.
+* **Data.** Exit destinations, event script contents, text, spawn lists and the map-id-to-image table are data, not in
+  the snapshot: a local card with the game can fill them in (the map log, docs/test_infrastructure.md section 7, records
+  the exits and actors per visit).
+* **Checks before applying.** The actor-block grouping (a dispatcher and the states after it) is from address order (M);
+  a local card should confirm it from the state tables in the data before applying state names.
+* **Open readings.** The meaning of SoundCmd1(n) (L: music), the 0x16-0x1A / 0x8A-0x8E flag pairs (SC06_029, F020),
+  func_8001AAA0, and the stats bytes at D_80078E78 +0x1A / +0x39 / +0xC0.
+
 ## The story timeline from the code
 The EXE word D_80078E80 is a story-progress counter: stage code sets it when a story step is done and compares it
 to choose scenes and actors. It runs from 2 to 0x6A4 (1700), and the archives follow it closely, so **the archives
@@ -178,11 +194,11 @@ one constant changed (0x200 for 0x20, docs/decomp_recipes.md r152). Proposed: `D
 
 ### Shared families
 #### Family index
-Every family (shapes shared by 3+ stages in 3+ shapes, or 2 stages in 8+ shapes; tools: r275 digest), with where it is described below. Stage lists: the digest's families list, reproduced in each section.
+Every family (shapes shared by 3+ stages in 3+ shapes, or by 2 stages in 8+ shapes), with where it is described below.
 
 | id | stages | shapes | first stage: functions | described |
 |---|---|---|---|---|
-| F001 | 5 | 16 | SC01_004: 0x8017D308..0x8017EF8C | section: stage-local multi-page menu (5 stages) |
+| F001 | 5 | 16 | SC01_004: 0x8017D308..0x8017EF8C | section: stage-local multi-page menu |
 | F002 | 2 | 47 | SC01_005: 0x8017D220..0x801822B0 | section: SC01_005 / SC01_006 room code (2 stages, 47 shapes) |
 | F003 | 3 | 8 | SC01_005: 0x8017BF00..0x801807D8 | section: room-event player action phases (3 stages, 8 shapes) |
 | F004 | 3 | 36 | SC01_077: 0x8017EF50..0x80183CF4 | section: ground enemy (3 stages, 36 shapes) |
@@ -197,7 +213,7 @@ Every family (shapes shared by 3+ stages in 3+ shapes, or 2 stages in 8+ shapes;
 | F013 | 37 | 15 | SC01_084: 0x8017BEBC..0x8017C910 | minor list |
 | F014 | 2 | 158 | SC02_000: 0x8017E958..0x801888F4 | section: the boulder-course code of SC02_000 / SC02_003 (2 stages, 158 shapes) |
 | F015 | 3 | 8 | SC02_000: 0x80188F08..0x8018A650 | section: an 8-slot screen sprite chain (3 stages, 8 shapes) |
-| F016 | 3 | 3 | SC02_000: 0x801822BC..0x80182CB4 | section: exit with SoundCmd1(2) + StartFade(4), message answer (3 stages, 3 sha |
+| F016 | 3 | 3 | SC02_000: 0x801822BC..0x80182CB4 | section: exit with SoundCmd1(2) + StartFade(4), message answer (3 stages, 3 shapes) |
 | F017 | 11 | 8 | SC02_005: 0x8017BE9C..0x8017C41C | section: boss HP-bar and spawn helpers (11 stages, 8 shapes) |
 | F018 | 9 | 5 | SC02_005: 0x80190144..0x80190408 | section: an effect sprite actor (9 stages, 5 shapes) |
 | F019 | 4 | 3 | SC02_005: 0x8018C2B0..0x8018CEE0 | section: prop helpers (4 stages, 3 shapes) |
@@ -226,20 +242,20 @@ Every family (shapes shared by 3+ stages in 3+ shapes, or 2 stages in 8+ shapes;
 | F042 | 2 | 9 | SC02_016: 0x80180B30..0x801820C0 | minor list |
 | F043 | 2 | 17 | SC02_017: 0x80184BA4..0x80185D10 | minor list |
 | F044 | 7 | 12 | SC02_017: 0x80184B18..0x80185C68 | minor list |
-| F045 | 16 | 39 | SC02_026: 0x80182F00..0x80185398 | section: kind-0x12C foot soldier enemy (16 stages) |
+| F045 | 16 | 39 | SC02_026: 0x80182F00..0x80185398 | section: kind-0x12C foot soldier enemy |
 | F046 | 3 | 35 | SC02_026: 0x8017D434..0x8017F9D4 | minor list |
-| F047 | 6 | 26 | SC02_026: 0x8018144C..0x80182E80 | section: splitting blob (6 stages) |
-| F048 | 21 | 21 | SC02_026: 0x8017FAC0..0x80181374 | section: (+F051): bundle of small actors (21 stages) |
+| F047 | 6 | 26 | SC02_026: 0x8018144C..0x80182E80 | section: splitting blob |
+| F048 | 21 | 21 | SC02_026: 0x8017FAC0..0x80181374 | section: (+F051): bundle of small actors |
 | F049 | 4 | 6 | SC02_026: 0x8017DAB8..0x8017E02C | minor list |
-| F050 | 23 | 5 | SC02_026: 0x80185440..0x8018584C | section: room lights (23 stages) |
-| F051 | 22 | 3 | SC02_026: 0x80180A34..0x80180B90 | section: three tiny helpers used with F048 (22 stages): clear hit (+0xC1/+0x5E) |
+| F050 | 23 | 5 | SC02_026: 0x80185440..0x8018584C | section: room lights |
+| F051 | 22 | 3 | SC02_026: 0x80180A34..0x80180B90 | section: three tiny helpers used with F048 (22 stages): clear hit (+0xC1/+0x5E), spin mod |
 | F052 | 2 | 48 | SC02_027: 0x8017E7F8..0x80189CC4 | minor list |
-| F053 | 8 | 7 | SC02_027: 0x80189EB0..0x8018A4A4 | section: screen-space spawner + sound (8 stages: sc02_027 sc02_028 sc03_099-sc0 |
-| F054 | 4 | 14 | SC02_028: 0x80181EDC..0x8018292C | section: switch / gate set that sets progress 0x172 (4 stages: sc02_028 sc03_09 |
-| F055 | 8 | 5 | SC02_028: 0x801829BC..0x80182F88 | section: warp disc (8 stages: sc02_028 sc03_089-sc03_092 sc03_097 sc03_101 sc03 |
+| F053 | 8 | 7 | SC02_027: 0x80189EB0..0x8018A4A4 | section: screen-space spawner + sound (8 stages: sc02_027 sc02_028 sc03_099-sc03_103 sc03 |
+| F054 | 4 | 14 | SC02_028: 0x80181EDC..0x8018292C | section: switch / gate set that sets progress 0x172 (4 stages: sc02_028 sc03_097 sc03_101 |
+| F055 | 8 | 5 | SC02_028: 0x801829BC..0x80182F88 | section: warp disc (8 stages: sc02_028 sc03_089-sc03_092 sc03_097 sc03_101 sc03_104) |
 | F056 | 8 | 15 | SC02_031: 0x8017DB98..0x8017F52C | minor list |
-| F057 | 10 | 10 | SC02_035: 0x801832D4..0x80183E68 | section: flying diver, variant (10 stages: sc02_035 sc03_094 sc03_099 sc03_103  |
-| F058 | 5 | 8 | SC02_035: 0x8017D398..0x8017D85C | section: swinging hazard and platform (5 stages: sc02_035 sc03_098-sc03_101; fi |
+| F057 | 10 | 10 | SC02_035: 0x801832D4..0x80183E68 | section: flying diver, variant (10 stages: sc02_035 sc03_094 sc03_099 sc03_103 sc03_110 s |
+| F058 | 5 | 8 | SC02_035: 0x8017D398..0x8017D85C | section: swinging hazard and platform (5 stages: sc02_035 sc03_098-sc03_101; first sc02_0 |
 | F059 | 2 | 18 | SC02_039: 0x8017D01C..0x8017F050 | minor list |
 | F060 | 4 | 41 | SC02_041: 0x8017E654..0x801845F0 | minor list |
 | F061 | 3 | 13 | SC02_041: 0x8017CE3C..0x8017FE34 | minor list |
@@ -248,55 +264,55 @@ Every family (shapes shared by 3+ stages in 3+ shapes, or 2 stages in 8+ shapes;
 | F064 | 3 | 5 | SC02_041: 0x80180C40..0x80181284 | minor list |
 | F065 | 13 | 4 | SC02_041: 0x8017E7A4..0x8017EA1C | minor list |
 | F066 | 3 | 3 | SC02_041: 0x80182484..0x801829B4 | minor list |
-| F067 | 4 | 82 | SC03_001: 0x8017EF30..0x80186674 | not described |
-| F068 | 10 | 67 | SC03_001: 0x8017BF50..0x80188ED0 | not described |
-| F069 | 5 | 33 | SC03_001: 0x8017F0EC..0x8018D0E4 | not described |
-| F070 | 3 | 19 | SC03_001: 0x80182638..0x801855CC | not described |
-| F071 | 6 | 17 | SC03_001: 0xDrawChunkedMesh..0x80186DAC | not described |
-| F072 | 9 | 4 | SC03_001: 0x8017E810..0x80188830 | not described |
-| F073 | 4 | 29 | SC03_002: 0x8017EAE8..0x80185000 | not described |
-| F074 | 4 | 19 | SC03_003: 0x8017BEF8..0x8017F204 | minor list |
-| F075 | 2 | 29 | SC03_006: 0x80184B30..0x80188C18 | not described |
-| F076 | 2 | 16 | SC03_006: 0x801838FC..0x801846D0 | not described |
-| F077 | 4 | 4 | SC03_006: 0x80183B14..0x80184300 | minor list |
-| F078 | 3 | 8 | SC03_007: 0xDCB4..0x801846EC | not described |
-| F079 | 2 | 37 | SC03_010: 0x8017C628..0x8017FE88 | not described |
-| F080 | 3 | 10 | SC03_010: 0x8017BEBC..0x8017C6F4 | not described |
-| F081 | 3 | 3 | SC03_010: 0x8017DD84..0x8017DE04 | not described |
-| F082 | 2 | 74 | SC03_014: 0x8017FA5C..0x80189AC4 | not described |
-| F083 | 6 | 3 | SC03_014: 0x80188D64..0x80189630 | not described |
-| F084 | 4 | 3 | SC03_014: 0x8017DF84..0x801842E0 | not described |
-| F085 | 3 | 4 | SC03_024: 0x8017CE10..0x80182F48 | not described |
-| F086 | 3 | 4 | SC03_024: 0x801868C0..0x80186E08 | not described |
-| F087 | 6 | 3 | SC03_028: 0x8017F0D0..0x8017F40C | not described |
-| F088 | 2 | 10 | SC03_031: 0x80180F0C..0x80181A98 | not described |
+| F067 | 4 | 82 | SC03_001: 0x8017EF30..0x80186674 | section: village NPC behaviour (villager states, talk, schedules) |
+| F068 | 10 | 67 | SC03_001: 0x8017BF50..0x80188ED0 | section: village core (props, doors, clock, villager helpers, key gate) |
+| F069 | 5 | 33 | SC03_001: 0x8017F0EC..0x8018D0E4 | section: village shop / inn menu and villager talk-check variants |
+| F070 | 3 | 19 | SC03_001: 0x80182638..0x801855CC | section: village NPC variant states |
+| F071 | 6 | 17 | SC03_001: 0xDrawChunkedMesh..0x80186DAC | section: village scenery |
+| F072 | 9 | 4 | SC03_001: 0x8017E810..0x80188830 | section: house door messages and Musashi action ends |
+| F073 | 4 | 29 | SC03_002: 0x8017EAE8..0x80185000 | section: village version 2 scenery |
+| F074 | 4 | 19 | SC03_003: 0x8017BEF8..0x8017F204 | section: small room with fall-in and button exit |
+| F075 | 2 | 29 | SC03_006: 0x80184B30..0x80188C18 | section: melee enemy (mime-animated) |
+| F076 | 2 | 16 | SC03_006: 0x801838FC..0x801846D0 | section: enemy with item drop |
+| F077 | 4 | 4 | SC03_006: 0x80183B14..0x80184300 | section: helpers inside F076 |
+| F078 | 3 | 8 | SC03_007: 0xDCB4..0x801846EC | section: debris / spark props |
+| F079 | 2 | 37 | SC03_010: 0x8017C628..0x8017FE88 | section: timed challenge course |
+| F080 | 3 | 10 | SC03_010: 0x8017BEBC..0x8017C6F4 | section: course start sequence |
+| F081 | 3 | 3 | SC03_010: 0x8017DD84..0x8017DE04 | section: course helper wrappers |
+| F082 | 2 | 74 | SC03_014: 0x8017FA5C..0x80189AC4 | section: the SC03_014 / SC03_015 fight |
+| F083 | 6 | 3 | SC03_014: 0x80188D64..0x80189630 | section: mover helpers |
+| F084 | 4 | 3 | SC03_014: 0x8017DF84..0x801842E0 | section: set-piece mesh draw |
+| F085 | 3 | 4 | SC03_024: 0x8017CE10..0x80182F48 | section: effect spawn wrappers |
+| F086 | 3 | 4 | SC03_024: 0x801868C0..0x80186E08 | section: proximity rumble trigger and props |
+| F087 | 6 | 3 | SC03_028: 0x8017F0D0..0x8017F40C | section: boss-arena effect |
+| F088 | 2 | 10 | SC03_031: 0x80180F0C..0x80181A98 | section: melee enemy |
 | F089 | 4 | 36 | SC03_089: 0x80181474..0x80185C58 | section: diver enemy with bomb (4 stages: sc03_089 sc03_090 sc03_091 sc03_104) |
 | F090 | 2 | 22 | SC03_090: 0x80181578..0x8018A9C8 | section: drifting 0x19E creature + camera bits (2 stages: sc03_090 sc03_091) |
 | F091 | 5 | 19 | SC03_093: 0x801813E0..0x8018232C | section: glowing 0x1A2 creature (5 stages: sc03_093-sc03_097) |
 | F092 | 4 | 9 | SC03_093: 0x8017F2D8..0x8017FA00 | section: occluder hider (4 stages: sc03_093 sc03_095 sc03_096 sc03_097) |
-| F093 | 8 | 29 | SC03_107: 0x8017EF3C..0x801812F8 | section: chained creature, actor kind 0x1EA (8 stages) |
-| F094 | 5 | 19 | SC03_107: 0x8017D9B8..0x8017ED6C | section: ground melee enemy, burst-attack half (5 stages) |
-| F095 | 4 | 6 | SC03_107: 0x801819C8..0x80181CC0 | section: roaming object dispatcher and reaction states (4 stages) |
-| F096 | 4 | 26 | SC03_108: 0x8017F0B0..0x80180B7C | section: hopping blob enemy (4 stages) |
-| F097 | 2 | 11 | SC03_109: 0x8017D2E0..0x8017DC54 | section: spinning platform with four arms (2 stages) |
-| F098 | 7 | 5 | SC03_114: 0x8017E170..0x8017E94C | section: particle prop spawner (7 stages) |
+| F093 | 8 | 29 | SC03_107: 0x8017EF3C..0x801812F8 | section: chained creature, actor kind 0x1EA |
+| F094 | 5 | 19 | SC03_107: 0x8017D9B8..0x8017ED6C | section: ground melee enemy, burst-attack half |
+| F095 | 4 | 6 | SC03_107: 0x801819C8..0x80181CC0 | section: roaming object dispatcher and reaction states |
+| F096 | 4 | 26 | SC03_108: 0x8017F0B0..0x80180B7C | section: hopping blob enemy |
+| F097 | 2 | 11 | SC03_109: 0x8017D2E0..0x8017DC54 | section: spinning platform with four arms |
+| F098 | 7 | 5 | SC03_114: 0x8017E170..0x8017E94C | section: particle prop spawner |
 | F099 | 2 | 54 | SC03_118: 0x80181A64..0x80188FB0 | section: SC03_118 / SC03_119 room code (2 stages, 54 shapes) |
-| F100 | 5 | 15 | SC03_124: 0x8017DB88..0x80183364 | section: village clock lights and master set-up (5 stages) |
-| F101 | 3 | 5 | SC03_124: 0x801807D8..0x80180A88 | section: progress-window NPC with talk zone (3 stages) |
-| F102 | 3 | 5 | SC03_126: 0x8017EA10..0x8017ED0C | section: message sequence in a player-action scene (3 stages) |
-| F103 | 2 | 14 | SC04_000: 0x80180FF8..0x80181BA4 | section: respawning spinning enemy (2 stages) |
+| F100 | 5 | 15 | SC03_124: 0x8017DB88..0x80183364 | section: village clock lights and master set-up |
+| F101 | 3 | 5 | SC03_124: 0x801807D8..0x80180A88 | section: progress-window NPC with talk zone |
+| F102 | 3 | 5 | SC03_126: 0x8017EA10..0x8017ED0C | section: message sequence in a player-action scene |
+| F103 | 2 | 14 | SC04_000: 0x80180FF8..0x80181BA4 | section: respawning spinning enemy |
 | F104 | 2 | 13 | SC04_000: 0x801822F0..0x80182D78 | section: warp flash / sparkle swarm (2 stages; with F105) |
-| F105 | 3 | 3 | SC04_000: 0x80182724..0x80182800 | section: sparkle quad helpers (3 stages) |
-| F106 | 3 | 33 | SC04_002: 0x80181C20..0x80183548 | section: block-throwing large enemy, kind 0x1FC (3 stages) |
-| F107 | 4 | 14 | SC04_002: 0x801835E0..0x80183F24 | section: thrown block, kind 0x239 (4 stages) |
-| F108 | 3 | 8 | SC04_003: 0x8017D698..0x8017E39C | section: enemy-clear reward light (3 stages) |
-| F109 | 3 | 13 | SC04_004: 0x801829BC..0x801831FC | section: leaping enemy, kind 0x210 (3 stages) |
-| F110 | 2 | 12 | SC04_005: 0x8018093C..0x80186DCC | section: stomping enemy + reward trigger (2 stages) |
+| F105 | 3 | 3 | SC04_000: 0x80182724..0x80182800 | section: sparkle quad helpers |
+| F106 | 3 | 33 | SC04_002: 0x80181C20..0x80183548 | section: block-throwing large enemy, kind 0x1FC |
+| F107 | 4 | 14 | SC04_002: 0x801835E0..0x80183F24 | section: thrown block, kind 0x239 |
+| F108 | 3 | 8 | SC04_003: 0x8017D698..0x8017E39C | section: enemy-clear reward light |
+| F109 | 3 | 13 | SC04_004: 0x801829BC..0x801831FC | section: leaping enemy, kind 0x210 |
+| F110 | 2 | 12 | SC04_005: 0x8018093C..0x80186DCC | section: stomping enemy + reward trigger |
 | F111 | 2 | 52 | SC04_018: 0x8017E628..0x801877B0 | section: SC04_018 / SC04_019 village code (2 stages, 52 shapes) |
-| F112 | 3 | 18 | SC04_018: 0x8017E5CC..0x801877B0 | section: village villager steps (3 stages) |
-| F113 | 4 | 5 | SC05_001: 0x80180B70..0x80180F50 | section: Musashi's knock-down hurt and its green puff effect (4 stages) |
-| F114 | 2 | 43 | SC05_003: 0x8017F68C..0x80181CDC | section: the large walking creature of SC05_003 / SC05_005 (2 stages, 43 shapes |
-| F115 | 7 | 49 | SC06_008: 0x8017EC48..0x80183BF4 | section: sc06 mechanical enemies: rotor flyer and sprayer mech, with their debr |
+| F112 | 3 | 18 | SC04_018: 0x8017E5CC..0x801877B0 | section: village villager steps |
+| F113 | 4 | 5 | SC05_001: 0x80180B70..0x80180F50 | section: Musashi's knock-down hurt and its green puff effect |
+| F114 | 2 | 43 | SC05_003: 0x8017F68C..0x80181CDC | section: the large walking creature of SC05_003 / SC05_005 (2 stages, 43 shapes) |
+| F115 | 7 | 49 | SC06_008: 0x8017EC48..0x80183BF4 | section: sc06 mechanical enemies: rotor flyer and sprayer mech, with their debris (7 stag |
 | F116 | 6 | 13 | SC06_011: 0x8017E9F4..0x8017F6CC | section: lift / conveyor hub of the small sc06 rooms (6 stages, 13 shapes) |
 | F117 | 6 | 87 | SC06_018: 0x80183A00..0x8018A0B8 | section: big sc06 enemy / hazard set (6 stages, 87 shapes) |
 | F118 | 2 | 42 | SC06_018: 0x8018A28C..0x8018CD04 | section: sc06_018 / sc06_032 machine enemy (2 stages, 42 shapes) |
@@ -603,6 +619,195 @@ Addresses are in the first stage (families.md `first=`). Actor state = +2, subty
 * SetupActorAlt platform spawning 0x1C4 with CarryPlayer; a swinging part (rcos, UpdateModelRot,
   ActorSegmentDamagesPlayer, sound 0x6A5) (H in sc03_099 0x8017F0D0-0x8017F538). M: swinging hazard.
 
+### F067: village NPC behaviour (villager states, talk, schedules) (4 stages)
+* **Stages:** sc03_001 sc04_018 sc04_019 sc05_017 (the hub and its later village versions).
+* **What it is:** the bulk of the villagers' per-state code: place / show / hide at schedule points, start a path
+  walk, door-open request, talk handlers (DistSqToPlayer + ResetScriptVM), RunScript / IsEventDone / EndEvent glue,
+  one-time talk flags (0x110, 0x113, 0x115, 0x116 in sc03_001) and sound 0x464 (H). Schedules test the game clock
+  hour via F068 func_8018766C and the chapter index func_801877C0 (H). **Where in the first stage:**
+  0x8017EF30-0x80186674 (112 shapes there, 82 shared).
+| shape (address in first stage) | proposed | evidence | conf |
+|---|---|---|---|
+| 0x8017EF30 | VillagerTalkCheck | DistSqToPlayer + ResetScriptVM, talk-marker handler | M |
+| 0x80180B5C | VillagerAppearAt | PlaceObject + ShowModel + SetScript + start path | M |
+| 0x80180D9C | VillagerTalkOnceFlag | GetFlag(0x110) / SetFlag(0x110, 1) | H |
+| 0x80181300 | VillagerPickStateByProgress | progress 0xC8, chapter index | M |
+| 0x80181394 | VillagerResetStats | ClearStatsWords + sound 0x464 | M |
+| 0x801815A0 | VillagerInit | func_8018727C model + clock tests + SpawnTalkMarker | M |
+| 0x80182058 | VillagerTalkCheckFar | DistSqToPlayer, ResetScriptVM, 35 lines | M |
+| 0x80182704 | VillagerWalkHome | door open (func_801886A0) + path steps (func_80187A64) | M |
+| 0x8018247C | VillagerEventEnd | IsEventDone / EndEvent / SetScript | H |
+
+### F068: village core (props, doors, clock, villager helpers, key gate) (10 stages)
+* **Stages:** sc03_001 sc03_002 sc03_124 sc03_125 sc04_015 sc04_018 sc04_019 sc04_020 sc05_017 sc05_018 (all village
+  versions).
+* **What it is:** shared village engine: point-list spawner, room exit step, pad camera, clock tests, chapter indices,
+  villager model set-up and door linkage (kind 0x61), path following, house doors (open sound 0x514, close 0x515),
+  door-front talk areas, the two-leaf key gate (flag 0xF6, item 0x59, sound 0x7A0), progress 0x3A2 -> 0x3AC (H).
+  **Where in the first stage:** 0x8017BF50-0x80188ED0.
+| shape (address in first stage) | proposed | evidence | conf |
+|---|---|---|---|
+| 0x8017BF50 | SpawnPointList | up to 16 SpawnFromDef(0x158) / SpawnProp(0x11) from +0xDC list | H |
+| 0x8017E578 | RoomExitStep | P01-style exit with SoundCmd1(1) | H |
+| 0x8017EA58 | CameraPadControl | GetObjPadHeld / Pressed | M |
+| 0x8018727C | VillagerAllocModel | model from def, link door kind 0x61 by def +0x12 | H |
+| 0x8018739C | PlayerInDoorFront | WorldToActorLocal + IsInArea(-0xC0..0x40, -0x60..0) of the linked door | H |
+| 0x8018766C | HourInRange | D_80078EB1 (hour) in [a, b) | H |
+| 0x80187690 | ClockInRange | hh:mm in [t0, t1) | H |
+| 0x80187750 | SetVillagerShadow | +0x58 = shadow def, +0x5C = 0x800 | M |
+| 0x80187778 | VillagerHideAt | HideModel + PlaceObject | H |
+| 0x801877C0 | GetChapterIndex | progress thresholds 0x14/0x46/0x64/0x82 -> 0-4 | H |
+| 0x80187904 | GetLateChapterIndex | thresholds 0x3B6/0x3E8/0x44C/0x4B0 -> 0-4 | H |
+| 0x80187960 | FixProgress3A2 | progress 0x3A2 -> 0x3AC | H |
+| 0x80187A64 | VillagerPathStep | walk point list fwd / back, 8x when PlayerFlag80B | H |
+| 0x80187C2C | DoorBlockedByPlayer | PlayerActionBlocksInput / PlayerFlag80B | L |
+| 0x80187F84 | DoorInit | model per door index, talk handler | H |
+| 0x80187DAC | DoorUpdate | open / close requests | M |
+| 0x801881A0 | DoorOpen | angle to 0x600, sound 0x514 | H |
+| 0x8018828C | DoorClose | sound 0x515 | H |
+| 0x801886A0 | RequestDoorOpen | FindActorByKindArg(0x61, n), +0x108 = 1 | H |
+| 0x80188124 | DoorTalkRun | func_80188830 script, event end | H |
+| 0x80188BFC | SnapToNearestDoor | nearest kind-0x61 actor to Musashi | H |
+| 0x80186DDC | KeyGateInit | leaves +-0x600, flag 0xF6, progress 0xE6 | H |
+| 0x80187004 | KeyGateOpen | sound 0x7A0, SetFlag(0xF6), TakeItem(0x59) | H |
+| 0x801870B0 | KeyGateTalk | two scripts, IsEventDone | M |
+
+### F069: village shop / inn menu and villager talk-check variants (5 stages)
+* **Stages:** sc03_001 sc03_124 sc04_018 sc04_019 sc05_017.
+* **What it is:** (a) small villager state helpers that find door kind 0x61; (b) the **shop / inn menu**
+  (0x80188FDC-0x8018D0E4): goods lists by shop type D_80115126, entries unlocked by flags 0x11D, 0x1B-0x21, a count
+  and all 42 collectibles (vars 0x63-0x8C bit 0x40); message windows, choice cursor, item icons, buy / use writing
+  flags or inventory slots; rest: AddHp / AddBp / ClearStatsWords; buying flag-item 0x1F sets progress 100, flags
+  0xEB / 0x91, var 0xCE (in S4 func_8018C000, used by F069) (H). Sounds 0x45A-0x474, 0x5EE, 0xC62.
+| shape (address in first stage) | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80188FDC | ShopOpen | func_800D24A0 + ShopBuildList | M |
+| 0x80189030 | ShopBuildList | goods by shop type, flag unlocks | H |
+| 0x801898E4 | ShopFormatEntry | strcpy x8, BCD prices, flags 0xFB / 0x9B | M |
+| 0x8018A3A8 | ShopMenuMain | answers, item icons, sounds | M |
+| 0x8018ABAC | InnRest | AddHp + AddBp + ClearStatsWords | H |
+| 0x8018AEE8 | ShopCursorMove | pad dirs, sounds 0x473 / 0x45A | H |
+| 0x8018B238 | ShopDraw | DrawMessage0 + DrawChoiceCursor | H |
+| 0x8018B8DC | ShopSetCounts | GetVar item counts -> SetMessageNumber | H |
+| 0x8018D0E4 | GiveFlagItem | GetVar id, SetFlag, PutItem / TakeItem | M |
+
+### F070: village NPC variant states (3 stages)
+* **Stages:** sc03_001 sc04_018 sc04_019. **What it is:** more villager states (show / script / path start, talk
+  check with door area, event end), the same mechanics as F067 for villagers only in these three images (H).
+  **Where:** 0x80182638-0x801855CC. Key: 0x80182D04 VillagerInitB (talk marker set-up, M), 0x801855CC
+  VillagerTalkCheckDoor (func_8018739C + DistSqToPlayer, M).
+
+### F071: village scenery (6 stages)
+* **Stages:** sc03_001 sc03_124 sc04_015 sc04_018 sc04_019 sc05_017.
+* **What it is:** the village's chunked mesh draw DrawChunkedMesh, window-light quad helpers, the daytime bird spawner
+  (kind 0x140 between hours 7 and 19), the positional ambient sound 0x7E6, sprite / model props (one hidden for
+  progress 0x181-0x1D5) (H). **Where:** DrawChunkedMesh .. 0x80186DAC.
+| shape (address in first stage) | proposed | evidence | conf |
+|---|---|---|---|
+| 0x8017F1F0 | ClockWindowFade | minutes-of-day window, 16-minute fade, -1 outside | H |
+| 0x8017F750 | DrawWindowLightAlt | quad type 0x200 | M |
+| 0x8017F804 | BirdSpawnerUpdate | hour 7-19, SpawnActorArg(0x140) | H |
+| 0x8017FC00 | UpdateAmbientSound | sound 0x7E6 pan / volume | H |
+| 0x80180224 | SpritePropInit | AllocActorSprite + anim | M |
+| 0x801804D0 | PropInitByProgress | absent for progress 0x181-0x1D5 | H |
+
+### F072: house door messages and Musashi action ends (9 stages)
+* **Stages:** sc03_001 sc03_002 sc03_124 sc03_125 sc04_018 sc04_019 sc04_020 sc05_017 sc05_018.
+* **What it is:** 0x80188830 PickDoorScript (script by door index +0x70 with D_80078EBA / progress / flag 0xFA /
+  chapter indices, H); 0x80187994 StartVillagerPath (heading to the first point, StopMotion, H); 0x8017E874
+  EndEntryAction (CloseHudPanel + EndPlayerActionOf + EndAbility12, H); 0x8017E810 stub-like.
+
+### F073: village version 2 scenery (4 stages)
+* **Stages:** sc03_002 sc03_125 sc04_020 sc05_018.
+* **What it is:** room frame with progress-0x85 music restart (0x8017EAE8 RoomFrameMusic85, H); a line / beam
+  effect between two points (0x8017EBD0 / 0x8017EC98 DrawBeam, M); debris props (0x8017F068 SpawnDebrisProp,
+  0x8017F304 SpawnDebrisPropB, H); a model for progress >= 0x3B6 except 0x460-0x487 (0x8017F500, H); a talk NPC
+  gated by flag 0xF0 with var 0x40 script choice (0x8017FB24 / 0x8017FBF8, H); villager variants with flag 0xF0 /
+  progress 0x85 (0x80180F1C) and var 0xDC / flag 0xDE talk counter (0x80181090, H); a spinner that randomly speeds up
+  / slows down, gone at progress >= 0x492 (0x801824DC SpinnerUpdate, H); a kind-0x3BF spawner (0x801827EC, H).
+
+### F074: small room with fall-in and button exit (4 stages)
+* **Stages:** sc03_003 sc03_126 sc04_021 sc05_019.
+* **What it is:** effect sprite, Musashi's scripted entry (fall + land, motion), a distance helper used by the
+  message sequence (0x8017EC64), camera set-ups, and the button exit 0x8017F204 ButtonExit (TestPadAll 0x800 +
+  func_800CF8B4 -> RequestMapChange(+0xDC), H).
+
+### F075: melee enemy (mime-animated) (2 stages)
+* **Stages:** sc03_006 sc03_029. **What it is:** an enemy kind with SetupActor + StopWithGravity set-up
+  (0x80187628 EnemyMimeInit), mime animation (InitMime / StepMime), approaches (TargetInFront, TurnStepToTarget),
+  segment attacks (ActorSegmentDamagesPlayer, sounds 0x7F / 0x524), area damage (DamageActorsNear, 0x80188134),
+  knock-back reactions (SetReactionStep), sound 0xA74 (H for calls, M for "enemy").
+
+### F076: enemy with item drop (2 stages)
+* **Stages:** sc03_006 sc05_003. **What it is:** SetupActor enemy (0x801839A4 Enemy2Init), wanders (0x8018450C),
+  hits Musashi (0x80184380 HitPlayer), on-screen sound 0x662, defeat with DropItem (0x80184034) and despawn
+  (0x801846D0), sound 0xAA1 (H).
+
+### F077: helpers inside F076 (4 stages)
+* **Stages:** sc03_006 sc04_000 sc04_006 sc05_003. Four small shapes (timer + rcos bob 0x80183B14, SetScript,
+  DistSqToTarget test, a 6-line state) (H). Minor.
+
+### F078: debris / spark props (3 stages)
+* **Stages:** sc03_007 sc04_008 sc04_012. **What it is:** SpawnPropAt bursts with random velocities clamped by
+  clamp_DCB4 (0x80184560 RandomBurstVelocity), prop update / free (0x801846EC) (H). M: debris or sparks.
+
+### F079: timed challenge course (2 stages)
+* **Stages:** sc03_010 sc03_013.
+* **What it is:** var-0xCE checkpoint course: start / finish scenes with sound commands 0x1A / 0x1B, checkpoint
+  test (0x8017DB84 CheckpointPass: var 0xCE raised or reset to 1), RequestMapChange from a fixed record
+  (0x8017DD44 CourseExit), countdown (0x8017ECE8 CourseCountdown: seconds via func_800242D0, at 0 resets var 0xCE),
+  checkpoint markers lit by var 0xCE (0x8017EA58), carrier platform with height sound 0x547 (0x8017F7E0
+  CarrierUpdate, CarryPlayer), sound 0x540 (H).
+
+### F080: course start sequence (3 stages)
+* **Stages:** sc03_010 sc03_011 sc03_013. **What it is:** five sprites (AllocSprite16To3E x5, 0x8017C004 StartSignInit), beeps
+  0x541 / 0x542 / 0x543 (0x8017C234 StartSignBeep, positional), start scene with sound command 0x1A (0x8017C454
+  CourseStartScene), wait for the pad (0x8017C4C4), go with sound 0x544 and an action timer (0x8017C528) (H; M:
+  "ready, set, go").
+
+### F081: course helper wrappers (3 stages)
+* **Stages:** sc03_010 sc03_013 sc07_006. Three 3-line wrappers calling one helper (0x8017DE84). Minor.
+
+### F082: the SC03_014 / SC03_015 fight (2 stages)
+* **Stages:** sc03_014 sc03_015 (identical code). **What it is:** a multi-phase fight / set-piece taking progress
+  0x2BC -> 0x2C6 -> 0x2D0 -> 0x2DA (H), with a chunked set-piece mesh and collision map switching (F084 / 0x80183D50
+  SelectCollisionMap, H).
+| shape (address in first stage) | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80184A08 | FightTrigger | events by flag 0x8B, sets flag 0xB9, SoundCmd1(0), sound 0xBD8 | H |
+| 0x80184F14 | FightPhase1 | 6 hits -> SetProgress(0x2C6), sound 0x8B5 | H |
+| 0x80185180 | FightPhase2 | progress >= 0x2D0, kind 0x265 waves, event D_80190078 | H |
+| 0x80185380 | FightPhase3End | linked HP <= 0 -> event, SetProgress(0x2DA) | H |
+| 0x801856C4 | FightActorGate | progress < 0x2BC | H |
+| 0x801874C0 | AttackerSweep | sounds 0xA7F / 0xA80 / 0xA89, three damage segments, kind 0x3DE | H |
+| 0x80183D50 | SetPieceSelectMap | RelocateSeqBlock x3, flag test, SelectCollisionMap x2 | M |
+
+### F083: mover helpers (6 stages)
+* **Stages:** sc03_014 sc03_015 sc03_024 sc03_118 sc03_119 sc06_000. Three shapes: SetState wrapper, a mover that
+  waits for an event (MoveObject + IsEventDone, 0x8018950C), a mover that frees itself (0x80189630) (H). Minor.
+
+### F084: set-piece mesh draw (4 stages)
+* **Stages:** sc03_014 sc03_015 sc03_118 sc03_119. 0x8017DF84 DrawSetPieceMesh (198-line GTE draw) plus two small
+  helpers (H). Minor.
+
+### F085: effect spawn wrappers (3 stages)
+* **Stages:** sc03_024 sc03_118 sc03_119. Three SpawnEffect wrappers and a 20-line field setter (H). Minor.
+
+### F086: proximity rumble trigger and props (3 stages)
+* **Stages:** sc03_024 sc05_006 sc05_009. 0x801868C0 ProximityRumble (GroundDistSqToPlayer + PlayerFlag1000 ->
+  StartRumbleScript, SpawnActor(0x27D), a sound, free) and random props around a point (0x80186A58 / 0x80186C20)
+  (H).
+
+### F087: boss-arena effect (6 stages)
+* **Stages:** sc03_028 sc03_105 sc04_011 sc05_010 sc06_029 sc07_002 (all boss stages, H). Three shapes: random
+  effect set-up (0x8017F0D0), effect update / free (0x8017F278), projected effect draw (0x8017F40C, ProjectPoint,
+  ApplyMatrixSV x4) (H). M: a boss-arena effect (hit spark / aura).
+
+### F088: melee enemy (2 stages)
+* **Stages:** sc03_031 sc06_011. 10 shapes: floor check chk_floor_80180F0C (TraceMap), chase with SpawnKind13 and
+  sound 0x6A9, TargetInSight + segment damage, despawn with func_8002AC00 tally, set-up SetupActor + hidden (H for
+  calls, M for "enemy").
+
 ### F089: diver enemy with bomb (4 stages: sc03_089 sc03_090 sc03_091 sc03_104)
 * Seq points 0x80183C90 / 0x80183CE8: each frame the two actors nearest Musashi among kinds 0x1E8, 0x19E,
   visible 0x178, 0x1AA get seq points 1 and 2 (SetSeqPoint; L: positional sound sources) (H). Diver set-up
@@ -637,6 +842,8 @@ Addresses are in the first stage (families.md `first=`). Actor state = +2, subty
 * 0x8017F8D8 spawns kind-0x167 parts at listed positions; 0x8017F398 / 0x8017F570: when Musashi is inside a zone
   (z / y / x bounds by subtype) hide all kind-0x12F actors and the 0x167 parts, ramp a tint (func_80016224) (H).
   M: walls / roofs that vanish when Musashi walks behind them. **Where:** 0x8017F2D8-0x8017FA00.
+
+Addresses are in the family's first stage. Village functions have no stage infix (func_8017XXXX).
 
 ### F093: chained creature, actor kind 0x1EA (8 stages)
 * **Stages:** sc03_107 sc03_111 sc03_112 sc03_113 sc03_117 sc03_118 sc03_119 sc05_004

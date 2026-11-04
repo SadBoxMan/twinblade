@@ -120,7 +120,6 @@ Common reading used below (all from sc03_001 code, cited once here):
 | 0x8017FF08 | func_8017FF08 | WindowLitTime8 | 2:30-4:00, not progress 0x64-0x258 | H |
 | 0x80180078 | func_80180078 | RoomManagerFrame | minutes-of-day, window lights, ambient sound | H |
 | 0x80180134 | func_80180134 | RoomManagerInit | spawns six kinds | H |
-| 0x8017FC00 | func_8017FC00 | UpdateAmbientSound | pan/volume sound 0x7E6 | H |
 | 0x80180A58 | func_80180A58 | VillagerSetScript | SetScript helper | M |
 | 0x80180ECC | func_80180ECC | VillagerTalkChoice | UpdateScript answer picks one of two scripts | H |
 | 0x80180FF8 | func_80180FF8 | Villager3Init | talk marker set-up | M |
