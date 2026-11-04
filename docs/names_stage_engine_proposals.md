@@ -278,3 +278,51 @@ across map changes at D_801201F8, and D_80126DB8 is the blend that eases toward 
 | 0x80132E6C | func_80132E6C | GroundDistSqToFocus | squared ground distance from Musashi's focus (the camera's followed point) | M | e5F4 comment says "camera's focus": it reads Player +0x154, which the camera follows |
 | 0x80133060 | func_80133060 | PushAlongView16 | a 16.16 position through func_801330E0 | M | e5F4 comment; 7 calls / 15 files |
 | 0x801330E0 | func_801330E0 | PushAlongView | a point through the world-screen matrix, pushed by a along the view axis in proportion, and back | M | e5F4 comment; 4 calls |
+
+## Math and vectors
+
+Angles are 4096 a turn. "Target" below is the Player's point at +0x15C (game.h: "another point of his", +0x162 nonzero
+= not set). Enemies chase and face it far more than Musashi's own position (func_8012B8E4 279 calls against
+func_8012BA10 30), and stage NPCs write their own position into it (sc03_007: `D_80126CB4 = o->x` and so on), so it is
+the point enemies are told to go for; "Target" is a reading, not a fact (M). If the local card prefers a neutral word,
+"Aim" works the same way in every name below.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8012B0B4 | func_8012B0B4 | AngleToVec2 | a 2D vector of length len at an angle, packed x low / y high | H | e.c comment. 203 calls / 77 files |
+| 0x8012B608 | func_8012B608 | TurnStep | a step from angle a toward b the short way round: the difference over n, at least 1 | H | e.c comment. 427 calls / 91 files: `rot.vy += func_8012B608(rot.vy, heading, 8)` |
+| 0x8012B6D4 | func_8012B6D4 | HeadingTo | the ground heading from one 16.16 point to another | H | e.c comment. 163 calls / 71 files |
+| 0x8012B70C | func_8012B70C | HeadingToSV | the same for two SVECTORs | H | e.c; 61 calls / 36 files |
+| 0x8012B744 | func_8012B744 | HeadingToPoint | the same from a 16.16 point to an SVECTOR | H | e.c. 211 calls / 69 files: `func_8012B744(a + 4, &v)` |
+| 0x8012B77C | func_8012B77C | HeadingPitchTo | heading (high half) and pitch (low half) from a to b | H | e.c comment; 114 calls / 59 files |
+| 0x8012B864 | func_8012B864 | HeadingToTarget | the heading from an object to the Player's target point | M | e.c comment ("other point"); 95 calls / 60 files |
+| 0x8012B8A4 | func_8012B8A4 | HeadingToPlayer | the heading from an object to Musashi | H | e.c comment; 54 calls / 35 files |
+| 0x8012B8E4 | func_8012B8E4 | TurnStepToTarget | TurnStep from the model's heading toward the target point | M | e.c comment. 279 calls / 72 files: `rot.vy += func_8012B8E4(a, 8)` |
+| 0x8012BA10 | func_8012BA10 | TurnStepToPlayer | the same toward Musashi | H | e.c comment; 30 calls |
+| 0x8012BB3C | func_8012BB3C | TurnStepToward | TurnStep from an angle toward the heading from a to b | H | e.c comment; 34 calls / 21 files |
+| 0x8012BC60 | func_8012BC60 | DistSq | squared distance between two 16.16 points (whole units) | H | e.c comment; 60 calls / 47 files |
+| 0x8012BCCC | func_8012BCCC | DistSqToTarget | squared distance to the target point, 0x7FFFFFFF when it is not set | M | e.c comment. 344 calls / 66 files: `if (func_8012BCCC(a) < 0x...)` (notice ranges) |
+| 0x8012BD14 | func_8012BD14 | DistSqToPlayer | squared distance to Musashi | H | e.c comment. 296 calls / 96 files |
+| 0x8012BD3C | func_8012BD3C | TargetInSight | the target point within dist (squared) and within range of the model's facing | M | e.c comment; 109 calls / 44 files |
+| 0x8012BDBC | func_8012BDBC | TargetInFront | the target point within range of the model's facing | M | e.c comment. 180 calls / 78 files: `func_8012BDBC(p, 0x300)` |
+| 0x8012BE54 | func_8012BE54 | GroundDistSqToPlayer | squared ground distance to Musashi | H | e.c comment; 121 calls / 61 files |
+| 0x8012BE98 | func_8012BE98 | GroundDistSqTo | squared ground distance to a point | H | e.c comment. 124 calls / 53 files: `func_8012BE98(a, &D_80126CB4) <= 0x240000` |
+| 0x8012EF34 | func_8012EF34 | ProjectPointZ | a point to the screen: xy and depth (SZ) | H | e.c comment |
+| 0x8012EF70 | func_8012EF70 | ProjectPointOtz | the same with the depth over 4 (an OT index) | H | e.c comment; 39 calls / 26 files (sprite effects) |
+| 0x8012EFB8 | func_8012EFB8 | ProjectPoint | a point through the world-screen matrix (Work +0x18); returns the GTE flag | H | e.c comment; 66 calls / 38 files |
+| 0x8012F40C | func_8012F40C | ScreenPos | a point's screen xy (0 when the GTE flags an error) | H | e.c comment |
+| 0x8012F49C | func_8012F49C | ActorPointScreenPos | ScreenPos of a point of the actor's model frame | H | e.c |
+| 0x8012E32C | func_8012E32C | LoadWorldScreenMatrix | SetRotMatrix / SetTransMatrix with the world-screen matrix | H | e.c comment; 22 calls / 16 files |
+| 0x8012E778 | func_8012E778 | IsOnScreen | the object's screen point within (lim low half, lim high half) of the centre | H | e.c comment. 85 calls / 55 files |
+| 0x8012F038 | func_8012F038 | WorldToLocal | a world point into a matrix's frame (whole units) | H | e.c comment; 17 calls |
+| 0x8012F0BC | func_8012F0BC | WorldToLocal16 | the same for a 16.16 point | H | e.c comment |
+| 0x8012F14C | func_8012F14C | LocalToWorld | a point of a matrix's frame into the world | H | e.c comment. 450 calls / 134 files: `func_8012F14C(&a->model->coord.coord, &ofs, &out)` |
+| 0x8012F1A4 | func_8012F1A4 | LocalToWorld16 | the same for a 16.16 point | H | e.c comment |
+| 0x8012F274 | func_8012F274 | ActorLocalToWorld16 | a 16.16 point from the actor's model frame into the world | H | e.c comment |
+| 0x8012F2E8 | func_8012F2E8 | WorldToActorLocal | a world point into the actor's model frame | H | e.c comment; 34 calls |
+| 0x8012F374 | func_8012F374 | TargetToActorLocal | the target point in the actor's model frame | M | e.c comment |
+| 0x8012EA90 | func_8012EA90 | GetPartLocalMatrix | a part's local matrix from the model's current pose (8- or 12-byte records) | H | e.c comment; 10 calls |
+| 0x8012EC04 | func_8012EC04 | GetPartWorldMatrix | a part's matrix composed with the model's (the pose's 8- or 12-byte record, then the model matrix) | H | e.c (same record decoding as func_8012EA90, then the model's coord). 108 calls / 29 files: `func_8012EC04(a, part, &m)` then LocalToWorld(&m, ...) for weapon tips |
+| 0x8013339C | func_8013339C | UnscaleMatrix | a matrix's columns divided by a scale vector | H | e5F4 comment |
+| 0x80134310 | func_80134310 | DotPlus | dot product of two SVECTORs plus a constant (a plane test) | H | e5F4 comment (copies at 0x80134A28, 0x80134FB8) |
+| 0x8012EECC | func_8012EECC | ScaleByDifficulty | x less x * func_8002A4FC() * 100 / 7680 | L | e.c; the EXE function's meaning is not known yet |
