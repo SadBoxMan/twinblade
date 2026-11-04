@@ -94,13 +94,108 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80163328,engine,MarkSweepHitPoints,MarkSweepHitPoints,M,H,PROMOTE,"for each sweep result with bit 0, the hit actor's hitPos +0x7C = the hit point D_80126B18[i], +0x82 = 0; after SweepHitObj68",11
 0x80163408,engine,SweepHitObj68,SweepHitObj68,M,H,PROMOTE,SweepHitObj68Rolled with a zero offset vector; package projectiles call it after MoveObj68,11
 0x80171B44,engine,ClearWalkCount,ClearWalkCount,M,M,KEEP,"+0x20C = 0; callers then step a walk (func_80171B4C). What +0x20C counts is in func_80171B4C, not read here",11
+0x801725A4,engine,SetPlayerEvent02,SetPlayerEvent02,M,H,PROMOTE,"+0x1F4 |= 2, no more; a flag-number name (the PlayerEvent04 test reads the same word), accurate",11
 0x80126960,engine,g_CameraAngle,g_CameraAngle,M,H,PROMOTE,Camera +0x18 SVECTOR: the eased rotation fed to RotMatrixZYX in camera updates; SnapCamera copies +0x20 into it,10
+0x80127524,engine,g_FrontWindow,g_FrontWindow,M,H,PROMOTE,"SetupMessage links non-0x2000 windows in front of it, UpdateMessages steps it first, and only it takes the choice keys (func_8013895C)",10
+0x80128DB4,engine,StepImageAnim,StepImageAnim,M,H,PROMOTE,"ticks the AnimPlayer's timer, next frame's image queued (QueueImage / QueueImageAt), 1 when the frame flags end it (0xC0), 0x80 loops; pair of StartImageAnim",10
+0x80151204,engine,ShowDamageNumber,ShowDamageNumber,M,H,PROMOTE,"ShowNumberAbove(o, 1, n & 0x7FFF) unless n is 0 or 1000 (the fatal value); hit code and stage hurt code pass the damage",10
+0x80127518,engine,g_PlayerHitByHeld,g_PlayerHitByHeld,M,H,PROMOTE,"ProcessPlayerHit sets it from g_PlayerAttackerPrev, RunHitHandler copies it to g_PlayerHitBy, ClearPlayerHitBy / ForgetPlayerHit clear it, GrabbedStep waits for 0",9
+0x8013B6A0,engine,SetSeqPointN,SetSeqPointN,M,M,KEEP,"SetSeqPoint with the +0xC value given; Seq family, M",9
+0x80148534,engine,GetPosePointsB,GetPosePointsB,M,M,KEEP,"ReadPosePoints from the player model's pose pointer - 8; GetPosePointsA reads another pair. Which two points (hands, blade) is in the pose data, not the C; A / B stays M",9
+0x80149AA8,engine,CanSwingFusion,CanSwingFusion,M,H,PROMOTE,"pad +0xAC bit 0x80 (square) held and +0x44 bits 0x404 clear; with CanSwingLumina (triangle, Lumina flag 0x80) it makes CanSwingSword, and its callers start the Fusion combo",9
+0x80149B54,engine,CanSwingLumina,CanSwingLumina,M,H,PROMOTE,pad +0xAC bit 0x10 (triangle) and TestFlag80 (the Lumina is held) and +0x44 bit 0x400 clear; the other half of CanSwingSword,9
+0x8014ACE8,engine,ShowNumberAbove,ShowNumberAbove,M,H,PROMOTE,"ShowNumberAt 0x20 above the object's position; pickups (money 3), BP gains (4) and damage (1) use it",9
+0x8014C308,engine,CanStrikeActor,CanStrikeActor,M,H,PROMOTE,"target live, has hitData, not already hit by this kind, flags5C & 0xC100 == 0x8000 (hittable), not immune; packages test each actor with it before StrikeActor",9
+0x8014FA04,engine,ClipMoveToMap,ClipMoveToMap,M,M,KEEP,"ClipMoveToMapBody on the scratchpad stack unless +0x44 bit 18; callers test 0x4000 / 0x2000 on the result. Rests on the body (0x8014FA70), not read here",9
+0x80156370,engine,RollDamage,RollDamage,M,H,PROMOTE,damage record n: base (low 12 bits) + rand() % (range + 1); StrikeActor callers pass the record's damage,9
+0x801615C4,engine,RunPlayerAirSteps,RunPlayerAirSteps,M,H,PROMOTE,"(bit 0 clear: PushOutOfSolidActors), PlayerObjFallStep while +0x34 > 0, ClipMoveToMap; returns the ORed bits; package air steps call it",9
+0x8016325C,engine,AddObj68AccelWorld,AddObj68MoveSpeedSetVel,M,H,FIX,"adds (x, y, z) to the move speed, then vel = the move speed as it is (no matrix), through g_PushVel / SetPushVel. Was AddObj68AccelWorld",9
+0x8016F264,engine,ClearPlayerActionFlag01,ClearPlayerActionFlag01,M,H,PROMOTE,"g_PlayerAction (+0x1F8) &= ~0x01000000; a flag-number name (the 0x01 byte of the action word), accurate",9
+0x801270BC,engine,g_EngineReadyFlag,g_EngineReadyFlag,M,H,PROMOTE,"EngineReady returns it; ResetActionHandler clears it, the action-handler setup ORs 1 in",8
+0x8012C438,engine,SetupActorAlt,SetupActorTrans,M,M,FIX,"SetupActor's body with InitTransModel (0x8001C810) for the model in place of InitModel; ""Alt"" says nothing. M because InitTransModel is itself M (exe_MM)",8
+0x801483E8,engine,SaveSafeGroundPos,SaveSafeGroundPos,M,H,PROMOTE,"TraceMap 8 down: a floor hit (0x2000) right at the feet with surface 0, then +0xA0 = the position; jumps and lifts call it before leaving the ground (the respawn point)",8
+0x8014D738,engine,PushBlock,PushBlock,M,M,KEEP,"PushBlockBody on the scratchpad stack; nonzero makes the running / sliding steps leave their kind. Rests on the body (0x8014D790), not read here",8
+0x80161B18,engine,CheckAssimilatePending,CheckAssimilatePending,M,H,PROMOTE,"no event and +0x44 bit 4: LeavePlayerKind, SwitchToAssimilate, 1. Bit 4 is the assimilate request: CancelAssimilate clears it with the +0x184 assimilate fields",8
+0x80161B84,engine,CheckLieDownFlag,CheckLieDownFlag,M,M,KEEP,"+0x44 bit 8 and HasNoPlayerAction: LeavePlayerKind, TriggerLieDown, 1. Rests on TriggerLieDown (0x801498C0), not read here",8
+0x801622C4,engine,ExpireDeadline8,ExpireDeadline8,M,H,PROMOTE,"flag 0x141 = 1, var 8 = 0, the three timer sprites zeroed; UpdateDeadline8 calls it when the clock reaches var 8's minute, rest / stage code when GetDeadline8Passed. The Deadline8 family names var 8's timed event",8
+0x80163194,engine,AddObj68AccelByMatrix,AddObj68MoveSpeedByMatrix,M,H,FIX,"adds (x, y, z) to the move speed, then vel = matrix * move speed (through g_PushVel, SetPushVel); package bullets pass their heading matrix. Was AddObj68AccelByMatrix",8
+0x801718AC,engine,SetPlayerActionList,SwitchPlayerActionScript,M,H,FIX,"g_PlayerActionScript = list, D_80126D6C = 0, g_PlayerAction = the first word keeping bits 24-30, NextPhase: a running action moves to another script. engine_H's SetPlayerActionScript (0x8016EFC8) is the full start (sets 0x04000000 and clears the whole state), so this one switches; ""List"" was the only word for the same pointer (was SetPlayerActionList)",8
 0x80126970,engine,g_CameraOfs,g_CameraOfs,M,H,PROMOTE,Camera +0x28: the eased offset added to the follow point to give the look point; pair of g_CameraOfsTarget,7
+0x8012CE2C,engine,IsOnGround,IsOnGround,M,H,PROMOTE,TraceMap 8 units down from the position; 1 when the hit point is the start (something right under it); stage walkers MoveCollide when it is 0,7
+0x80130088,engine,PlayDistanceSound32,PlayDistanceSound32,M,H,PROMOTE,"parameter sound 0x32 when DistSqToTarget < 0x9000, else 0x33, each falling back to the other; StartKnockback plays it at 0 HP; pair of PlayDistanceSound30",7
+0x80131D68,engine,ReactToSurface,ReactToSurface,M,H,PROMOTE,surface 2 / 0x1B: reaction step 0x12; 0x1A / 0x1C: FinishEnemy; 1 when it reacted; actor moves pass MoveCollidePassable's surface byte,7
+0x80133060,engine,PushAlongView16,PushAlongView16,M,H,PROMOTE,"PushAlongView on the integer parts of a 16.16 position, written back as 16.16; stage props pass their own position and -0x180",7
+0x80134A74,engine,RaycastMapCell,RaycastMapCell,M,M,KEEP,"40-line test of a map cell's records of a kind along D_8018DA9C..; Raycast vs engine_H's Trace / PathHits words, and the middle lines, were not settled in reach",7
+0x8013CAE8,engine,ResetDayLighting,ResetDayLighting,M,H,PROMOTE,"D_801ED448 (the remembered period) = -1 and the hold flags cleared, so UpdateDayLighting re-applies; stage code calls it on entry",7
+0x80149AD4,engine,TriggerFusionCombo,TriggerFusionCombo,M,H,PROMOTE,"with a carried actor (+0x178) SwitchToThrowCarried, else attack step +0x1AA = 1 and EnterFusionCombo; after CanSwingFusion",7
+0x80149CD4,engine,CanGuard,CanGuard,M,H,PROMOTE,"pad +0xAA bit 8 (R1) held, +0x1C8 zero, +0x44 bits 0x404 clear; the stand step then switches to the guard kind",7
+0x8014C918,engine,SurfaceIndexOf,SurfaceIndexOf,M,H,PROMOTE,"the slot of surface byte b in the room's 8-entry table D_801151F0 (0x18 gives 8), else 0; platform code stores it at +0x16E (the floor surface PlayLandSe reads)",7
+0x801542DC,engine,SetPlayerMotionBlend,SetPlayerMotionBlend,M,H,PROMOTE,RestartPlayerMotionBlend when +0xB4 differs; SetPlayerMotion with blend frames (0xE from the knockback steps),7
+0x801621CC,engine,GetDeadline8Passed,GetDeadline8Passed,M,H,PROMOTE,"D_80190048 when var 8's hour has passed within the last n hours (clock hour g_ClockHour, wrap at 23), else 0; the Deadline8 family",7
+0x801330E0,engine,PushAlongView,PushAlongView,M,H,PROMOTE,"a point into view space (world-screen matrix), moved by a along the view axis in proportion, and back (transpose); PushAlongView16's worker",6
+0x80135004,engine,RaycastMapTwoCells,RaycastMapTwoCells,M,M,KEEP,"RaycastMapCell, again from the end cell when it lies in another; Raycast word as RaycastMapCell, M with it",6
+0x80147F50,engine,ApplyMoveSpeedWorld,SetVelFromMoveSpeed,M,H,FIX,"AddMoveSpeedSetVel(o, 0, 0, 0): vel = the move speed; stage and ovl34 call it after SetObjPush. Was ApplyMoveSpeedWorld; same word as SetObj68VelFromMoveSpeed",6
+0x801484B0,engine,GetPosePointsA,GetPosePointsA,M,M,KEEP,ReadPosePoints from the player model's pose pointer - 0x10; see GetPosePointsB,6
+0x80149184,engine,GetHeadingFromCamera,GetHeadingFromCamera,M,H,PROMOTE,(model heading - GetCameraViewYaw) & 0xFFF; airborne and stage riding steps keep it in D_801152A0,6
+0x80149BAC,engine,TriggerLuminaSlash,TriggerLuminaSlash,M,H,PROMOTE,"with a carried actor SwitchToThrowCarriedAlt, else +0x1AA = 1 and EnterLuminaSlash; after CanSwingLumina",6
+0x801612B8,engine,RunPlayerGroundSteps,RunPlayerGroundSteps,M,H,PROMOTE,(arg1 bit 0 clear: CollidePlayerMove) then PlayerObjFallStep | PlayerObjGroundStep; returns the map bits that CheckPlayerGround and the packages test,6
+0x80161450,engine,CheckLandingKeepKind,CheckLandingKeepKind,M,H,PROMOTE,"HandleLandingKeepKind(p, RunPlayerAirSteps(p, 0)); air attacks test the result & 5 (landed)",6
+0x80168BDC,engine,EmitFxAhead,EmitFxAhead,M,M,KEEP,"moves the effect a step along its facing and spawns n effects of a kind there (23 lines not read in full); the fx setup callers fit, M until the middle is read",6
+0x8016F094,engine,ClearPlayerActionFlag04,ClearPlayerActionFlag04,M,H,PROMOTE,"+0x1F8 &= ~0x04000000 (the bit SetPlayerAction sets on a new action); a flag-number name, accurate",6
+0x801726C4,engine,PlayerEvent200,PlayerEvent200,M,H,PROMOTE,returns +0x1F4 & 0x200; stage code doubles a speed while it is set; a flag-number test name like the r278 kept ones,6
 0x8012E138,engine,CarryPlayerClipped,CarryPlayerClipped,M,H,PROMOTE,"the same with whole-unit s16 positions, Musashi moved only when func_80135888 finds the way clear of the model; CarryPlayer's default",5
+0x8012E364,engine,UpdateSquash,UpdateSquash,M,M,KEEP,"ends with the model's x / z scale = |v| and y 0x1000; the ""squash"" reading (eased toward Musashi's +0x188) is in lines not read in full; M",5
 0x80147A10,engine,AddMoveSpeedZ,AddMoveSpeedZ,M,H,PROMOTE,"the Z one (AddMoveSpeedZLimit, 0x1F0000)",5
+0x801491C4,engine,GetCameraViewYaw,GetCameraViewYaw,M,H,PROMOTE,"ratan2 of the active camera's base vp - vr (x, z): the view's heading; GetHeadingFromCamera and the airborne step turn by it",5
+0x80149A64,engine,CanSwingSword,CanSwingSword,M,H,PROMOTE,CanSwingFusion || CanSwingLumina; the stand and run steps test it in their action switch,5
+0x8014CB68,engine,RequestTalkCheck,RequestTalkCheck,M,M,KEEP,"g_Player +0x1C5 = 1, no more; that a talk check follows rests on the reader func_80149E94 (r272), not read here",5
+0x80151C54,engine,EndKnockback,EndKnockback,M,H,PROMOTE,"the knockback's end: the damage +0xF2 taken as HP (DamagePlayerHp) or, for handler 0x11, as BP (SpendBp), scale and fall speed reset, ForgetPlayerHit; both knockback steps call it when the motion ends",5
+0x8015369C,engine,StartRespawnWait,StartRespawnWait,M,H,PROMOTE,"the stage respawn hook D_8011DB28 with the last safe point (+0xA0) when set, then +0xDE = 90 frames; pit and launch falls call it",5
+0x80153800,engine,FindRespawnPoint,FindRespawnPoint,M,M,KEEP,"27 lines not read in full: +0x88 = position, the room entry point when +0xDE > 0x20, +0xDE++; the pit / launch respawn steps call it. M until the middle is read",5
+0x8015BDD0,engine,StartPlayerFall,StartPlayerFall,M,H,PROMOTE,"SetKindAndState(p, 3) then FallStart; knockback and finisher steps call it when the ground is gone",5
+0x8015BE94,engine,FallStart,FallStart,M,M,KEEP,StartFall (0x80161124) then NextObjState: the fall kind's first state step. Next to StartFall the name reads like a synonym; a state-table name would be clearer once kind 3's table is read,5
+0x8016151C,engine,CheckLandingDust,CheckLandingDust,M,H,PROMOTE,"HandleLandingDust(p, RunPlayerAirSteps(p, 0)); package air steps (Hop_Air) test it",5
+0x80162F60,engine,AddObj68AccelX,AddObj68MoveSpeedX,M,H,FIX,"AddMoveSpeedXLimit(o, d, 0x7F0000): the same +0x24 move speed as Musashi's (engine_H AddMoveSpeed*Limit), not an acceleration; family renamed with AddObj68MoveSpeedY / Z / ByMatrix / SetVel",5
+0x80162F80,engine,AddObj68AccelY,AddObj68MoveSpeedY,M,H,FIX,"AddMoveSpeedYLimit(o, d, 0x7F0000); see AddObj68MoveSpeedX",5
+0x80162FA0,engine,AddObj68AccelZ,AddObj68MoveSpeedZ,M,H,FIX,"AddMoveSpeedZLimit(o, d, 0x7F0000); see AddObj68MoveSpeedX",5
+0x80162FF4,engine,AddObj68AccelLocal,AddObj68MoveSpeedFacing,M,H,FIX,"adds (x, y, z) to the 0x68 object's move speed, then vel = it turned by the model's X / Y / Z rotation (via g_PushVel / SetPushVel); the Obj68 copy of AddMoveSpeedFacing. Was AddObj68AccelLocal",5
+0x80165840,engine,RestoreStatusOnce,RestoreStatusOnce,M,H,PROMOTE,when D_80078EC3 is set: clear it and RestoreStatus; held abilities call it when their time (D_80078EC8) runs out (r276 ruling 1),5
+0x80171D1C,engine,StepTowardEx,StepTowardSpeed,M,H,FIX,"StepToward with a speed byte: WalkToPointSpeed(o, p, speed & 0xFF), ClearObjPush when SnapToPointIfNearXZ; ""Ex"" says nothing, its callee's word is Speed",5
+0x801726AC,engine,PlayerEvent80,PlayerEvent80,M,H,PROMOTE,returns +0x1F4 & 0x80; a flag-number test name,5
+0x8012A8E8,engine,AnimStepNow,AnimStepNow,M,H,PROMOTE,AnimStep(a) once; stage code calls it while +0x98 is 0,4
+0x80130740,engine,SpawnHitSpark,SpawnHitSpark,M,M,KEEP,"SpawnEffect(0x10, a, pos + ofs); effect kind 0x10's step (not read) would say whether it is a spark",4
+0x80132E6C,engine,GroundDistSqToFocus,GroundDistSqToFocus,M,H,PROMOTE,squared x / z distance from the mover to g_Player's focus; stage code compares it with a range,4
+0x8013BD74,engine,RelocateSeqBlockB,RelocateSeqBlockB,M,M,KEEP,"a kind-'B' block's entries relocated once (a[4] = 1); Seq family, M",4
+0x80146D30,engine,SetPushVel,SetPushVel,M,H,PROMOTE,"vel (+0x10..) = g_PushVel, which is then cleared; the 0x68 move-speed helpers end with it",4
+0x80147098,engine,ShowPlayerSys,ShowPlayerSys,M,M,KEEP,"+0x220 = 0, no more; UpdatePlayer calls it each frame next to ShowPlayerScene / ShowPlayerAbility. What +0x220 hides is in its reader, not read here",4
+0x80147814,engine,AddFallSpeedClamped,AddFallSpeedClamped,M,H,PROMOTE,"+0x34 += v, clamped to +-0x1F0000 in the direction of v; the airborne step and stage code adjust the fall speed with it (engine_H AddFallSpeedLimited is the gravity form)",4
 0x80147928,engine,AddMoveSpeedX,AddMoveSpeedX,M,H,PROMOTE,"AddMoveSpeedXLimit(o, d, 0x1F0000); engine_H's family",4
 0x8014799C,engine,AddMoveSpeedY,AddMoveSpeedY,M,H,PROMOTE,"the Y one (AddMoveSpeedYLimit, 0x1F0000); AddMoveSpeedToWorld calls the three",4
+0x80149724,engine,TriggerJumpRising,TriggerJumpRising,M,M,KEEP,"only StartPlayerJump (0x8015ACC4); pole and bar steps jump off with it. ""Rising"" rests on StartPlayerJump starting at state 1, not read here",4
+0x8014ABF0,engine,ClearEffectKind,ClearEffectKind,M,H,PROMOTE,FreeEffectsByKind(kind); stage code clears effect kind 0x40 with it,4
+0x8014AD30,engine,ShowNumberAt,ShowNumberAt,M,H,PROMOTE,AllocEffect of kind 0x1D (ShowDamage's number effect) at a point with a mode (+0x2C) and value (+0x30); ShowNumberAbove and UpdatePoison call it,4
+0x8014B2F8,engine,CurePoison,CurePoison,M,H,PROMOTE,g_StatusPoison and its saved copy D_80078ECC = 0; Antidote and CureStatus call it,4
+0x8014B310,engine,StartPoison,StartPoison,M,H,PROMOTE,"SetPoisonWord and D_80078ECC = 0x80000000 (bit 31 poisoned, timer 0); ProcessPlayerHit calls it for hit bit 0x2000",4
+0x801541D8,engine,SetPlayerMotionIndexBlend,SetPlayerMotionIndexBlend,M,H,PROMOTE,RestartPlayerMotionIndexBlend when +0xB4 is not motion n; the run / air steps pass blend frames,4
+0x8015E880,engine,SwitchToGuard,SwitchToGuard,M,H,PROMOTE,"SetKindAndState(p, 0x11) and RunGuardState; after CanGuard",4
+0x8016007C,engine,CancelAssimilate,CancelAssimilate,M,H,PROMOTE,"clears the assimilate fields +0x184.. and +0x44 bit 4 (the request CheckAssimilatePending reads), face 0x11, g_WorldAnimMode = 1; the assimilate states call it on a miss or an event",4
+0x80161418,engine,CheckLanding,CheckLanding,M,H,PROMOTE,"HandleLandingToNormal(p, RunPlayerAirSteps(p, 0)); package and skill air steps go on while it is 0",4
+0x80161C24,engine,PlayFootstep,PlayFootstep,M,H,PROMOTE,surface < 8: PlaySe of the left / right table entry by the +0xDA toggle; the run and push steps call it on motion flag 0x2000 (a foot down),4
+0x80165124,engine,SetTrailSpriteColour,SetTrailSpriteColour,M,H,PROMOTE,r / g / b (+0x50..+0x52) = the grey level +0x62; the trail sprite steps call it after changing it,4
+0x801651B8,engine,DrawTrailSprite,DrawTrailSprite,M,H,PROMOTE,"DrawTrailQuad for each live copy, counting each down; the trail sprite steps draw with it",4
+0x80165658,engine,GetAbilityInfo,GetAbilityInfo,M,H,PROMOTE,"D_801901EC[ability & 0x7F]: cost bits 0-6, bit 7 passive; CanUseAbility and RunPassiveAbility test bit 7",4
+0x80165A78,engine,StopAbility,StopAbility,M,H,PROMOTE,"RunAbilityEndHandler, +0x197 = 0, +0x44 &= ~8, model flag 0x20 off; packages call it with ResetPlayerKind",4
+0x801670E4,engine,DrawGlowFx,DrawGlowFx,M,M,KEEP,75 lines of camera-facing and ground quads at a point (DrawPrimG4Mtx); GlowFxStep / Pulse call it. Glow fits the two callers; the body was not read in full,4
+0x8016E918,engine,OpenHudSlot,OpenHudSlot,M,H,PROMOTE,"HUD slot a on, state 0, value b; GainStat0 / GainStat1 open their level-up slots with it (exe_H GainStat3 too)",4
+0x8016F288,engine,SetPlayerActionFlag01,SetPlayerActionFlag01,M,H,PROMOTE,g_PlayerAction |= 0x01000000; pair of ClearPlayerActionFlag01,4
+0x80172670,engine,PlayerEvent04,PlayerEvent04,M,H,PROMOTE,"returns +0x1F4 & 4; a flag-number test, the PlayerEvent family",4
+0x80172688,engine,PlayerEvent10,PlayerEvent10,M,H,PROMOTE,returns +0x1F4 & 0x10; the PlayerEvent family,4
+0x801726B8,engine,PlayerEvent100,PlayerEvent100,M,H,PROMOTE,returns +0x1F4 & 0x100; the PlayerEvent family,4
+0x801269D4,engine,g_CameraShakeB,g_CameraShakeTargetY,M,H,FIX,"g_Camera +0x8C = offset[4], which the camera frame adds to rview.vry (the reference point's y); UpdateCameraShake writes the same table byte to it and to g_CameraShakeY (+0x80, offset[1], the eye's y). ""B"" said nothing",3
+0x80127530,engine,g_MessageTexts,g_MessageTexts,M,H,PROMOTE,four text pointers; windows with flag 0x400 insert text [w->unk4A] (func_801380E0 / func_801387B8); SetMessageText fills them,3
 0x80147B5C,engine,SetVelKeepAxes,SetVelKeepAxes,M,H,PROMOTE,"vel (+0x10..) = the given vector, except the axes flagged in +0x44 bits 22-24, which take the stored +0x24.. as they are; through g_PushVel",2
 0x80147CC8,engine,AccelMoveToWorld,AddMoveSpeedToWorld,M,H,FIX,"AddMoveSpeedX / Y / Z (+0x24 / +0x28 / +0x2C, limited +-0x1F0000) then MoveSpeedToWorld into the out vector; was AccelMoveToWorld, same reason as AddMoveSpeedFacing",2
 0x80147C30,engine,AccelFacingFree,AddMoveSpeedFacingFree,M,H,FIX,"AddMoveSpeedToWorld, then vel = the result on all three axes (no kept axes); was AccelFacingFree",1
+0x80147F78,engine,AccelWorld,AddMoveSpeedSetVel,M,H,FIX,"AddMoveSpeedX / Y / Z, then vel (+0x10..) = the move speed +0x24.. as it is, through g_PushVel. Not an acceleration, and nothing world-turned (AddMoveSpeedFacing is the turned one). Was AccelWorld",1
 0x8014E98C,engine,CollidePlayerMoveBody,CollidePlayerMoveBody,M,H,PROMOTE,"unless +0x44 bit 19 / +0x1F8 bit 26: two passes of func_8014EA4C on the segment from the previous position (+0x88) to the current one (+6/+0xA/+0xE), both 0x10 up; ORs the results",1
+0x80163234,engine,SetObj68VelFromAccel,SetObj68VelFromMoveSpeed,M,H,FIX,"AddObj68MoveSpeedSetVel(o, 0, 0, 0): vel = the move speed. Was SetObj68VelFromAccel",0
