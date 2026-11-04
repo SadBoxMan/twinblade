@@ -1260,7 +1260,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8001CF30,exe,SetSpriteNoLight,SetSpriteNoLight,M,M,KEEP,"+4: bit 6 cleared, bit 12 set; that both mean no lighting rests on DrawSprite's reads, not in reach",66
 0x8007609C,exe,g_CardStatus,g_CardStatus,M,H,PROMOTE,"per card port {status, slot bits}: CardStep and ResetCardState read and clear it",56
 0x80024054,exe,SjisToGlyphs,SjisToGlyphs,M,H,PROMOTE,"a Shift-JIS string to a glyph list (-1 ended), the count returned; text drawing calls it",53
-0x800176F0,exe,DrawPrimG4ScreenNoDither,DrawPrimG4ScreenNoDither,M,M,KEEP,"DrawPrimG4(a, 0, 1); what the third argument switches (dither) is in DrawPrimG4, not read here",44
+0x800176F0,exe,DrawPrimG4ScreenNoDither,DrawPrimG4ScreenDithered,M,M,FIX,"DrawPrimG4(a, 0, 1): the third argument picks the AddPrimDithered path (dither on); M because the switch inside DrawPrimG4 was seen only at its AddPrimDithered call. Was DrawPrimG4ScreenNoDither",44
 0x8007622C,exe,g_StreamQueue,g_StreamQueue,M,H,PROMOTE,the 5-entry stream queue QueueBankStream / QueueMusicStream fill and OnStreamSector reads,35
 0x80078EAC,exe,g_Day,g_Day,M,H,PROMOTE,stage code computes hours + it * 24 and NextDay increments it,29
 0x8002953C,exe,GetFoundCount,GetFoundCount,M,M,KEEP,"returns D_80078E84; callers give an item at 0x23 of them. What is counted (""Found"") is not in the C",28
@@ -1289,7 +1289,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x800242D0,exe,FormatDigitGlyphs,FormatDigitGlyphs,M,H,PROMOTE,a number to digit glyphs from D_80063858 with leading zeros and a separator by flags (-1 ended); the deadline timers draw it,8
 0x800A2B70,exe,g_TimeChime,g_TimeChime,M,H,PROMOTE,"the chime kind (1 plays 0x518, 2 0x517) UpdateFieldSound runs and ClearTimeChime clears",8
 0x800A4EA2,exe,g_SuspendedBgmFlags,g_SuspendedBgmFlags,M,H,PROMOTE,the suspended BGM's flags PlayBgm / StopBgm / StopAllMusic read,8
-0x80017738,exe,DrawPrimG4MtxNoDither,DrawPrimG4MtxNoDither,M,M,KEEP,"DrawPrimG4(a, m, 1); the third argument's meaning (dither) is in DrawPrimG4, not read here",7
+0x80017738,exe,DrawPrimG4MtxNoDither,DrawPrimG4MtxDithered,M,M,FIX,"DrawPrimG4(a, m, 1); as DrawPrimG4ScreenDithered",7
 0x800A6588,exe,g_ItemValues,g_ItemValues,M,H,PROMOTE,"64 u16 item values: GiveItem sets one, the save slots copy them",6
 0x80037334,exe,ClearBgmLoadQueue2,ClearBgmLoadQueue2,M,H,PROMOTE,the 5 BGM load-queue entries cleared (a copy of 0x80037004); CancelBgmLoad / LoadBgmStep,5
 0x80075818,exe,g_ScreenOfsX,g_ScreenOfsX,M,H,PROMOTE,the display x origin DebugMoveScreen moves (y at +4),5
@@ -1299,3 +1299,103 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x800BA0FC,exe,g_TimeChimeTimer,g_TimeChimeTimer,M,H,PROMOTE,the chime's frame count; UpdateFieldSound stops it at 0x97,5
 0x8001B324,exe,ResetBgmPacks,ResetBgmPacks,M,H,PROMOTE,g_BgmPackStep = 0 and ForgetBgmPack,4
 0x8001BC6C,exe,AddScreenSprite,AddScreenSprite,M,H,PROMOTE,a SPRT of a frame-buffer rectangle (page by the buffer) added to the OT,4
+0x80028D9C,exe,GetSoundMode,GetSoundMode,M,H,PROMOTE,"flag 0xC; ApplySoundOptions sends sound command 0xC / 0xB by it, the options menu toggles it",4
+0x80028FBC,exe,GetMusicVolume,GetMusicVolume,M,H,PROMOTE,var 0x2C (0-7); ApplySoundOptions and the options menu,4
+0x80029000,exe,GetEffectsVolume,GetEffectsVolume,M,H,PROMOTE,"var 0x2D (0-7), sent as sound command 0x22",4
+0x8002AAAC,exe,LevelUpHook,LevelUpHook,M,H,PROMOTE,empty; GainStat0 / GainStat1 call it after a level-up,4
+0x8002AED0,exe,RequestSave,RequestSave,M,H,PROMOTE,g_SaveRequest = 1; stage exits request a save with it,4
+0x8002D8D4,exe,StopMovieSound,StopMovieSound,M,H,PROMOTE,"g_SoundFrameHook = 0 and SsSetSerialVol(0, 0, 0) (CD input muted); the movie player calls it",4
+0x8002F4E4,exe,ResolveSfxAlias,ResolveSfxAlias,M,H,PROMOTE,"a type-6 SFX entry mapped to a real id through the stage table, 0 when none; PlaySfx / StopSfxHandle",4
+0x8002F80C,exe,UpdateLoopSfx,UpdateLoopSfx,M,H,PROMOTE,the loop sound 0xBEB played at the loudest source level and stopped when none; installed as the sound frame hook by SetLoopSfxLevel,4
+0x8002FDC8,exe,AbortBankUpload,AbortBankUpload,M,H,PROMOTE,ReleaseSpuTransfer; StreamReadyCallback after a failed upload,4
+0x80031A98,exe,StopOrphanSfxVoices,StopOrphanSfxVoices,M,H,PROMOTE,SFX voices whose bank slot was unloaded keyed off hard; the bank uploads call it first,4
+0x80032A74,exe,StartSfxTrack,StartSfxTrack,M,M,KEEP,"asm, no body; L",4
+0x8003350C,exe,StopSfxTrackVoices,StopSfxTrackVoices,M,H,PROMOTE,"key off the 8 voices of a track (1 hard, 0 natural), the track cleared; StopAllSfx / ReleaseAllSfx",4
+0x80063074,exe,g_TitleMovieCount,g_TitleMovieCount,M,H,PROMOTE,"GetTitleMovieIndex reads its bit 0, NextTitleMovie advances it, InitCdFiles clears it",4
+0x800747D8,exe,g_LicenceShown,g_LicenceShown,M,H,PROMOTE,"LicenceShown / SetLicenceShown read and set it, InitCdFiles clears it",4
+0x800760C8,exe,g_SaveRequest,g_SaveRequest,M,H,PROMOTE,"RequestSave sets 1, RequestClearSave 2, ClearSaveRequest 0, GetSaveRequest reads",4
+0x80078EAF,exe,g_DayPeriod,g_DayPeriod,M,H,PROMOTE,the period byte UpdateDayLighting switches on; stage code tests 4 (night),4
+0x800A64B0,exe,g_SoundTimer,g_SoundTimer,M,H,PROMOTE,"8 {countdown, id, callback} records UpdateSound counts down and AllocSoundTimer fills",4
+0x8001282C,exe,NormalizeMatrix,NormalizeMatrix,M,H,PROMOTE,"each of the three columns normalised (NormalizeSVector), not re-orthogonalised; the Rotate* helpers end with it",3
+0x8001B384,exe,ResetBgmPackStep,ResetBgmPackStep,M,H,PROMOTE,g_BgmPackStep = 0; the field loader resets,3
+0x80028558,exe,SetLightColorUnchecked,SetLightColorUnchecked,M,H,PROMOTE,"SetLightColor without the id < 3 test, ApplyLight; stage scenes set light 0 with it",3
+0x80028DBC,exe,SetSoundMode,SetSoundMode,M,H,PROMOTE,"SetFlag(0xC, a); ResetGameState and the options menu",3
+0x80028FDC,exe,SetMusicVolume,SetMusicVolume,M,H,PROMOTE,"SetVar(0x2C, a); ResetGameState sets 7",3
+0x80029020,exe,SetEffectsVolume,SetEffectsVolume,M,H,PROMOTE,"SetVar(0x2D, a); ResetGameState sets 7",3
+0x80029D3C,exe,ReduceByStat1,ReduceByStat1,M,H,PROMOTE,"v - v * (stat 1 value * 60) / 4800, at least 1; ProcessPlayerHit reduces the damage with it",3
+0x8002AEE4,exe,RequestClearSave,RequestClearSave,M,H,PROMOTE,g_SaveRequest = 2; the ending rooms,3
+0x8002AEF8,exe,ClearSaveRequest,ClearSaveRequest,M,H,PROMOTE,g_SaveRequest = 0; field init and StageStart,3
+0x800301A4,exe,CancelBankUpload,CancelBankUpload,M,H,PROMOTE,"g_BankLoadStep = 0, g_SpuXferFlags bit 1 off: the cancel callback the bank uploads register with ClaimSpuTransfer",3
+0x800AE688,exe,g_ViewMatrix,g_ViewMatrix,M,H,PROMOTE,UpdateCamera copies it into Work.wsm after GsSetRefView2L; IsPointOnScreen loads it into the GTE,3
+0x800178C8,exe,DrawPrimGT4ScreenNoDither,DrawPrimGT4ScreenDithered,M,M,FIX,"DrawPrimGT4(a, 0, 1), which reaches AddPrimTexturedDithered; as DrawPrimG4ScreenDithered",2
+0x80017B98,exe,DrawSpriteRec,DrawSpriteRec,M,H,PROMOTE,"a SPRT and its draw-mode packet from a sprite record, z clamped to 0xFFF, into the world OT",2
+0x80018450,exe,QueueImageAt,QueueImageAt,M,H,PROMOTE,"QueueImage with the slot's x, y and CLUT row from a record; StartImageAnim / StepImageAnim",2
+0x8001B22C,exe,GetXaClipState,GetXaClipState,M,H,PROMOTE,returns g_XaClipState; the message windows wait on it,2
+0x8001B34C,exe,ForgetBgmPack,ForgetBgmPack,M,H,PROMOTE,"no pack playing, no entry loaded, the chime stopped (g_TimeChime / Timer = 0)",2
+0x8001B86C,exe,ScreenWipeStep,ScreenWipeStep,M,H,PROMOTE,"the room-change wipe: the screen copied into sprites, then the bars close (SetWipeBars); ovl36's loaders",2
+0x8001BADC,exe,SetWipeBars,SetWipeBars,M,H,PROMOTE,"the first n bars from top and bottom coloured, 1 when n >= 0x2C",2
+0x8001BD80,exe,IsSoundLoading,IsSoundLoading,M,H,PROMOTE,GetCdAudioState() != 0; the death state waits on it,2
+0x8001BFA0,exe,GetTitleMovieIndex,GetTitleMovieIndex,M,H,PROMOTE,g_TitleMovieCount & 1; ovl39 picks the title movie with it,2
+0x8002109C,exe,ApplyPartBackColor,ApplyPartBackColor,M,H,PROMOTE,"SetBackColor from the next {r, g, b, part} record when its part comes (or -2); DrawTmdModel",2
+0x80021120,exe,RestoreAmbientNextPart,RestoreAmbientNextPart,M,H,PROMOTE,GsSetAmbient(g_AmbientColor) and the part counter +1; DrawTmdModel,2
+0x800243EC,exe,SortTransObject,SortTransObject,M,H,PROMOTE,"g_SortAttr = attr, the rate, then SortTransObjectUnlit (attr bit 6) or SortTransObjectLit; DrawTmdModel's kind-5 path",2
+0x80026514,exe,DrawPolyG3EnvMap,DrawPolyG3EnvMap,M,H,PROMOTE,TMD G3 as POLY_GT3 with uv from screen xy / 2 plus a scroll (64 lines); SortTransObjectLit's env-map case,2
+0x800268D0,exe,DrawPolyG4EnvMap,DrawPolyG4EnvMap,M,H,PROMOTE,the same for G4 into POLY_GT4,2
+0x80029AAC,exe,CalcStat0Power,CalcStat0Power,M,H,PROMOTE,stat 0 value * 75 / 100; the carried-actor throws,2
+0x8002A1B4,exe,IsStat0Full,IsStat0Full,M,H,PROMOTE,at the level cap with full experience; the status screen and RollCriticalHit,2
+0x8002A400,exe,IsStat1Full,IsStat1Full,M,H,PROMOTE,the same for stat 1,2
+0x8002A670,exe,IsStat3Full,IsStat3Full,M,H,PROMOTE,the same for stat 3,2
+0x8002A8E0,exe,IsStat2Full,IsStat2Full,M,H,PROMOTE,the same for stat 2,2
+0x8002AF08,exe,GetSaveRequest,GetSaveRequest,M,H,PROMOTE,returns g_SaveRequest; the map change and the stage step read it,2
+0x8002F0D0,exe,ClearSoundTimers,ClearSoundTimers,M,H,PROMOTE,the 8 sound timers zeroed (0x54 down by 0xC); sound command reset,2
+0x8002F714,exe,SetLoopSfxLevel,SetLoopSfxLevel,M,H,PROMOTE,a source level of the loop sound by number; PlaySfx / StopSfx of a loop entry,2
+0x8002FF0C,exe,OpenSoundBankStep,OpenSoundBankStep,M,M,KEEP,the bank open's steps (lines not read in full); M,2
+0x80031988,exe,StartSfxVoiceReleasePitch,StartSfxVoiceReleasePitch,M,M,KEEP,lines not read in full; M,2
+0x800373D0,exe,OpenStreamedMusic,OpenStreamedMusic,M,H,PROMOTE,the streamed music's seq and VAB opened (SetMusicData ...); FinishStream,2
+0x800381E4,exe,IsSeqFading,IsSeqFading,M,M,KEEP,a per-player / channel word of D_800B9CF0; that it is a fade flag rests on its writers,2
+0x8003834C,exe,SetSeqVolume,SetSeqVolume,M,H,PROMOTE,the sequencer player i's volume (+0x1FC records); PlayBgm,2
+0x8006388C,exe,g_EnvMapTex,g_EnvMapTex,M,H,PROMOTE,the env-map texture records (8 bytes each) DrawPolyG3EnvMap / DrawPolyG4EnvMap index,2
+0x800A63F0,exe,g_LightMatrix,g_LightMatrix,M,M,KEEP,the matrix DrawSprite3D loads into the GTE rotation; that it is the light matrix needs its writer,2
+0x800129CC,exe,VectorToAngles,VectorToAngles,M,H,PROMOTE,a vector to x / y angles (ratan2 cases); SmoothTiltUpVector,1
+0x80017F14,exe,AddPrimNoDither,AddPrimDithered,M,M,FIX,"z clamped, then two DR_MODE packets around the primitive in one OT slot: SetDrawMode(q, 0, 0, ..) added before it and SetDrawMode(q, 0, 1, ..) after. AddPrim links at the head, so the dtd = 1 packet (dithering on, libgpu's third argument) is drawn just before the primitive and the dtd = 0 one after it: the primitive is drawn dithered, the opposite of ""NoDither"". M: the draw order rests on AddPrim's head insertion",1
+0x8001820C,exe,AddPrimTexturedNoDither,AddPrimTexturedDithered,M,M,FIX,"the textured form with the same two packets (dtd 0 before, dtd 1 after in add order); renamed with AddPrimDithered",1
+0x8001B7C4,exe,ReadHeaderStep,ReadHeaderStep,M,H,PROMOTE,"waits for the CD-audio state, StreamStep, returns the stream's complete flag; LoadQueueStep's header state",1
+0x8001BA84,exe,DrawScreenCopy,DrawScreenCopy,M,H,PROMOTE,four AddScreenSprite of the screen-copy records; ScreenWipeStep,1
+0x8001BE20,exe,ResetXaCancel,ResetXaCancel,M,H,PROMOTE,D_800747EC = 0; the map-leave step,1
+0x8001BE30,exe,CancelXaClipStep,CancelXaClipStep,M,H,PROMOTE,"the XA cancel's steps on D_800747EC, 0 when done; RunMapLeaveStep",1
+0x8001BFB0,exe,NextTitleMovie,NextTitleMovie,M,H,PROMOTE,g_TitleMovieCount += 1,1
+0x8001BFE8,exe,LicenceShown,LicenceShown,M,H,PROMOTE,returns g_LicenceShown; ovl38 skips the licence when set,1
+0x8001C14C,exe,ClearReservedObjects,ClearReservedObjects,M,M,KEEP,"clears the 0x84 objects between Work +0x2A8 and +0x4B8; ""Reserved"" is not in the C",1
+0x8001D70C,exe,SetSpriteMatrix2D,SetSpriteMatrix2D,M,H,PROMOTE,the GTE rotation / translation for a 2D sprite from its position; DrawShape2D,1
+0x80020598,exe,CalcPlayerPartMatrices,CalcPlayerPartMatrices,M,M,KEEP,"the part matrices of a model from its pose (lines not read in full); ""Player"" is not shown (DrawTmdModel calls it for any model)",1
+0x80023138,exe,EmitShapeTubePrims,EmitShapeTubePrims,M,M,KEEP,the tube primitives of a shape (lines not read in full); M,1
+0x80027BF0,exe,SortPresetObjectG,SortPresetObjectG,M,H,PROMOTE,SortPresetObjectGBody with the arguments passed through,1
+0x80027C10,exe,SortPresetObjectGBody,SortPresetObjectGBody,M,H,PROMOTE,the preset object's G primitives sorted (lines not all read; the caller DrawTmdModel's preset path),1
+0x800285AC,exe,DisableFog,DisableFog,M,H,PROMOTE,GsSetLightMode(0); StageStart; pair of EnableFog,1
+0x80029218,exe,ClearEntryPoint,ClearEntryPoint,M,H,PROMOTE,ZeroFill of g_EntryPoint (0x3C); ResetGameState,1
+0x80029664,exe,SetClockNight,SetClockNight,M,H,PROMOTE,"g_Clock = 0x528 (22:00), UpdateClockPeriod; the demo",1
+0x80029AF4,exe,CalcPower03Rand40,CalcPower03Rand40,M,H,PROMOTE,CalcPower03 * (200 + RandRange(40)) / 100; the grab throw's damage,1
+0x80029B4C,exe,CalcPower02Rand,CalcPower02Rand,M,H,PROMOTE,CalcPower02 * (a + RandRange(b)) / 100; RollAttackDamage,1
+0x80029BC8,exe,CalcPower03Rand,CalcPower03Rand,M,M,KEEP,CalcPower03 with a / b (lines not all read); M,1
+0x80029C44,exe,CalcPowerBothRand,CalcPowerBothRand,M,H,PROMOTE,(CalcPower02 + CalcPower03) * (a + RandRange(b)) / 100,1
+0x80029FD4,exe,GetOdometer,GetOdometer,M,H,PROMOTE,returns g_Odometer; the status screen prints it,1
+0x8002C8BC,exe,ClearBankMap,ClearBankMap,M,H,PROMOTE,the bank map's 0x79 pairs set to -1; ResetBankLoader,1
+0x8002CC4C,exe,ClearToneTables,ClearToneTables,M,M,KEEP,lines not read; M,1
+0x8002D7FC,exe,SetMusicData,SetMusicData,M,M,KEEP,"D_800A4E7C = a; ""MusicData"" rests on that global's readers",1
+0x8002D80C,exe,GetSwitchedBgm,GetSwitchedBgm,M,M,KEEP,returns a BGM id when g_BgmFlags bit 0 (lines not all read); M,1
+0x8002D834,exe,ClearSwitchedBgm,ClearSwitchedBgm,M,M,KEEP,"D_8006A990 = 0; pair of GetSwitchedBgm, M",1
+0x8002D858,exe,InitMovieSound,InitMovieSound,M,H,PROMOTE,the movie's CD input on at volume 100 (SsSetSerialAttr / SsSetSerialVol); ovl39,1
+0x8002D8A8,exe,FadeOutMovieSound,FadeOutMovieSound,M,H,PROMOTE,the fade count 6 and StepMovieFade as the sound frame hook; StrPlayMovie,1
+0x8002DF80,exe,FlushMergedSfx,FlushMergedSfx,M,H,PROMOTE,plays the merged SFX of the frame and clears them (lines not all read); UpdateSound,1
+0x8002E79C,exe,DuckMusic,DuckMusic,M,M,KEEP,a music level flag in D_800A4EE6 (lines not read in full); Duck vs Dim is not settled,1
+0x8002E818,exe,DimMusic,DimMusic,M,M,KEEP,PauseBgm when the flag allows (lines not read in full); see DuckMusic,1
+0x8002E8DC,exe,UnduckMusic,UnduckMusic,M,M,KEEP,the flag back; see DuckMusic,1
+0x8002E94C,exe,UndimMusic,UndimMusic,M,M,KEEP,ResumeBgm when the flag allows; see DuckMusic,1
+0x8002EA10,exe,PauseBgm,PauseBgm,M,H,PROMOTE,"with g_BgmFlags bit 2, the BGM paused (bit 4 noted)",1
+0x8002EAB0,exe,ResumeBgm,ResumeBgm,M,H,PROMOTE,with bit 4 the BGM resumed,1
+0x8002EB10,exe,PauseMusic,PauseMusic,M,H,PROMOTE,the BGM seq and CD audio paused while playing,1
+0x8002EBAC,exe,ResumeMusic,ResumeMusic,M,H,PROMOTE,PlayCdTrack(0) and the BGM resumed,1
+0x8002ED90,exe,StopBgmAll,StopBgmAll,M,H,PROMOTE,StopBgm and the suspended BGM stopped too,1
+0x8002EDE4,exe,StopAllMusic,StopMusicAndSfx,M,H,FIX,"StopMusic and StopAllSfx, flags reset: music and every sound effect, not only music (exe_H already has StopAllSound at 0x8002CCB4)",1
+0x8002EE64,exe,StopMusicForBgm,StopMusicForBgm,M,H,PROMOTE,StopCdTrack and StopBgm before a new BGM; PlayBgm,1
+0x8002EEB8,exe,StopCdAudioCmd,StopCdAudioCmd,M,H,PROMOTE,StopCdAudio; a sound command,1
