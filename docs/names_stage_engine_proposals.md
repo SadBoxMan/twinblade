@@ -1,0 +1,173 @@
+# Stage engine: naming proposals (r272, research only)
+
+Proposals for the shared stage engine's (0x80128158-0x8017BE9C, every stage image) still-generic functions and globals,
+from the matched C in `src/stage/engine*.c` and from how the stage code in `src/stg/*.c` calls them. Nothing here is
+applied: a later local card applies the names to `symbol_addrs_stage.txt` / `stg/symbol_addrs_engine.txt` and checks
+that everything still matches. Snapshot: main = fab5bf5a (4 Nov 2026).
+
+## How to read this
+* **Calls** in the evidence column: call sites in `src/stg/*.c` / number of stage files with at least one (counted with
+  `grep` over the 147 stage C files, `extern` lines excluded). A function used by 100+ stage files is one stage code leans on.
+* **Evidence** names the engine function's file (all under `src/stage/`) and what its body shows, then what the stage
+  call sites pass or test. "e.c" = engine.c, "e5F4" = engine_8012F5F4.c, "eB568" = engine_8013B568.c,
+  "eC98C" = engine_8013C98C.c, "e4B9C" = engine_80144B9C.c, "e58E0" = engine_801458E0.c.
+* **Confidence.** H: the body says it and the call sites agree. M: the behaviour is clear but the name picks one reading
+  (or the caller context is thin). L: a guess from a few call sites; check before applying.
+* **Style** follows the names already in the symbol files: CamelCase verb first (SetScript, StartFace, NextPhase,
+  StepToward, ClearActionHandler), `g_` for globals (g_PrimNext, g_FileTable). No module prefixes.
+* Engine *data* (0x8018Dxxx in SC03_001) moves with each stage image, so only the fixed-address globals (EXE bss
+  0x800xxxxx is out of scope; the engine's own bss below 0x80128158) are proposed as globals.
+* Where a struct already in `include/game.h` names the field (StageActor, Mover, ModelObj, Player), the evidence uses
+  its field names; corrections to those comments are in "Struct fields" at the end.
+
+## Names that already exist (not re-proposed)
+Already in `symbol_addrs_stage.txt` / `stg/symbol_addrs_engine.txt`: SetScript, FaceHelper, BeginScene, EndScene,
+StartFace(At), StartFaceScript(At), FaceScriptStep, FaceSet, FaceLoad, UpdateWeaponParts, ShowAllParts, HideAllParts,
+SetDisplayFlag20, ClearDisplayFlag20, UpdateFlag10Part21, ClearDisplayFlag10, RunStateHandler4E, NextPhase, SetPhase,
+BumpSub1, BumpSub2, ActionHelper_1AB0, StepToward, ClearActionHandler, SetActionHandler, EngineReady, AnimHelper.
+
+Named only in a **comment** of `symbol_addrs.txt` (the 12 Oct block and the dump_10 line). They are known, so they are
+not proposed again below, but they are not applied yet; the local batch can apply them as they are (the engine is at the
+same address in every image, so the dump_10 addresses hold):
+
+| address | current | known name | note |
+|---|---|---|---|
+| 0x8012AA80 | func_8012AA80 | AnimAdvance | dump_10 line; e.c: index++ then the step |
+| 0x8012AAAC | func_8012AAAC | AnimStep | dump_10 line; e.c: one script entry (docs/animation_controller.md) |
+| 0x8012ACA0 | func_8012ACA0 | AnimStartDefault | dump_10 line; e.c: SetScript with D_8018D838 |
+| 0x8012ACE0 | func_8012ACE0 | AnimScriptLength | dump_10 line; e.c: entries before the first -1/-2/0 |
+| 0x8012AD44 | func_8012AD44 | SetState | 12 Oct block; +2 = n, +0x34 = 0. 565 calls / 87 files |
+| 0x8012AD50 | func_8012AD50 | NextState | 12 Oct block; +0x34 = 0, +2 += 1. 567 calls / 111 files |
+| 0x8012AD64 | func_8012AD64 | SetCounter | 12 Oct block; +0x34 = n |
+| 0x8012AD6C | func_8012AD6C | IncCounter | 12 Oct block; +0x34 += 1 |
+| 0x8012AD80 | func_8012AD80 | MoveObject | 12 Oct block; vel += accel, pos += vel. 302 calls / 84 files |
+
+(0x8012AA80 is not a function start in today's split; the step-and-advance is inside func_8012A988. The local card
+should check that address before applying AnimAdvance; the other eight are function starts.)
+
+## Actors and objects
+
+The actor table is 96 StageActors of 0x10C bytes from 0x801202A0 (slot 0, 0x80120194, is never handed out). An actor's
++0 is its **kind** (index into the room's handler table D_8011DB08, which func_8017849C calls every frame and
+func_8012C890 calls once at spawn), +2 its state (SetState / NextState), +0x34 the state's frame count. Props are a
+second, simpler pool (128 x 0x38 at D_8011DB30, handlers D_80126AEC by kind).
+
+### Actor pool, spawning, freeing
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8012C218 | func_8012C218 | FreeActor | zero the actor (0x10C) and its model (0x84 or 0x38 by model type) | H | e.c: two func_80016714 (zero-fill) calls. 1415 calls / 123 files, the commonest "delete myself" (e.g. after func_8012BEE8 runs out, eC98C func_80143D28) |
+| 0x8012C098 | func_8012C098 | DespawnActor | FreeActor, and when animFlags bit 15 is set clear bit 15 of its SpawnDef's flags so the spawner may place it again | H | e.c (inline). 232 calls / 71 files |
+| 0x8012CAE4 | func_8012CAE4 | RejectSpawn | a kind's set-up refuses: set bit 0 of D_801274E4 (func_8012C890 then frees the actor and its def) and FreeActor | H | e.c; func_8012C890 tests `*D_801274E4 & 1` after the set-up call. 1029 calls / 125 files, nearly all `if (model == 0) { func_8012CAE4(a); return; }` after func_8012C1B8 |
+| 0x8012C1B8 | func_8012C1B8 | AllocActorModel | a free 0x84-byte model object from the model pool slots 0x26-0x85 (func_8001CFDC), or 0 | H | e.c; func_8012C354 inlines the same call. 919 calls / 135 files: `a->model (+0x20) = func_8012C1B8()` then func_8001C214 / func_8001C810 with the stage's model data |
+| 0x8012C194 | func_8012C194 | AllocActorSprite | a free 0x38-byte object (ModelObj type 2) from slots 0x3E-0x7D (func_8001D074) | M | e.c. 149 calls / 87 files; eC98C func_80144364 uses it for the shadow object (+0xCC) and sets +4 = 0x60000000, +0x27 = 0x14. "Sprite" is a reading of the 0x38-byte kind; "AllocActorObj38" if unsure |
+| 0x8012C1DC | func_8012C1DC | NextFreeModel | the next free model after the actor's own | M | e.c comment; no stage calls |
+| 0x8012C284 | func_8012C284 | FindFreeActorAfter | the next free actor slot after a (slot 1 when NULL) | H | e.c comment; inlined into func_8012C51C |
+| 0x8012C2D0 | func_8012C2D0 | FindFreeActor | the first free actor slot | H | e.c; 1 call |
+| 0x8012C31C | func_8012C31C | FindLastFreeActor | the last free actor slot | H | e.c comment; func_8012C750 uses it for defs with flag 0x800 |
+| 0x8012C354 | func_8012C354 | SetupActor | take an ActorInit record: HP (+0x76, init+0 x1.5 unless D_80078EAE), flags5C, a model built from init+4 (func_8001C214), hitData from init+8 with 0x60000000; 0 (and RejectSpawn) when no model is free | H | e.c comment. 565 calls / 113 files: `if (func_8012C354(a, &stage_init_record) == 0) return;` in set-up states |
+| 0x8012C438 | func_8012C438 | SetupActorAlt | the same with func_8001C810's kind of model | M | e.c comment. 8 calls / 8 files. Rename when func_8001C214 / func_8001C810 get names (the difference is the model kind) |
+| 0x8012C51C | func_8012C51C | SpawnActorFromDef | spawn from a SpawnDef into the next free slot after parent | H | e.c comment. 234 calls / 73 files |
+| 0x8012C588 | func_8012C588 | SpawnActor | spawn an actor of a kind at the parent's position (origin when no parent), facing kept | H | e.c. 384 calls / 93 files: `func_8012C588(0x1C4, a)`, `(0x281, a)` |
+| 0x8012C658 | func_8012C658 | SpawnActorArg | SpawnActor with a second value (the def's +8, the new actor's +0x70) | H | e.c. 992 calls / 106 files: `func_8012C658(0x33, 3, a)`, `(0x8F, a->unk70, a)`; children read the value at +0x70 as their variant |
+| 0x8012C724 | func_8012C724 | SpawnActorFromDefAt | mark a def out (flag 0x8000) and spawn it into a given slot | H | e.c comment; inline |
+| 0x8012C750 | func_8012C750 | SpawnFromDef | spawn a placed def (the room's spawn lists) into the first free slot, or the last with def flag 0x800; marks the def out | H | e.c. 32 calls / 26 files: `if (func_8012C750(&s) == 0) break;` loops |
+| 0x8012C890 | func_8012C890 | InitSpawnedActor | fill a slot from a def (kind, position, origin, +0x70, flags, id from D_801270C4, parent / def), run the kind's handler once, undo on RejectSpawn, apply the def's facing | H | e.c |
+| 0x8012DE2C | func_8012DE2C | FirstActor | start the live-actor iterator, skipping one actor, and return the first | H | e.c comment |
+| 0x8012DDA4 | func_8012DDA4 | NextActor | the iterator's next live actor | H | e.c comment; func_8012DBD0 loops with them |
+| 0x8012E504 | func_8012E504 | FindOtherActorByKind | the first live actor of a kind other than skip | H | e.c comment. 25 calls / 16 files |
+| 0x8012E544 | func_8012E544 | FindActorByKind | the first live actor of a kind | H | e.c comment. 159 calls / 44 files: `func_8012E544(0x245)`, `(0x2CD)`, `(0x306)` |
+| 0x8012E57C | func_8012E57C | FindActorByKindArg | the first live actor of a kind whose +0x70 is n | H | e.c comment. 124 calls / 18 files: `func_8012E57C(0x61, n)` (kind 0x61's numbered instances) |
+| 0x8012C044 | func_8012C044 | IsActorFar | Musashi's focus (Player +0x154) is at least D_801274E0 away, or the room's own test D_801274D4 when set | M | e.c. The comment says "in range" but the test is distance >= D_801274E0, i.e. *out* of range. 48 calls / 27 files |
+| 0x8012C0EC | func_8012C0EC | DespawnIfFar | DespawnActor when IsActorFar, returning 1 | M | e.c. 35 calls / 34 files, mostly at the top of a state step (`func_8012C0EC(a)`); the name follows the same reading |
+| 0x8012BF7C | func_8012BF7C | IsFarInDepth | |z - focus z| >= 0x360 | M | e.c comment; no stage calls |
+| 0x8012BFA8 | func_8012BFA8 | IsFarFromFocus | squared distance to the focus > 0xFFFFF | M | e.c comment; no stage calls |
+| 0x80178608 | func_80178608 | ResetActors | zero the 96 actors (0x6480 bytes), D_801270C0 = 1, room lights and layer values from the room record | M | e58E0. Named for its first job; the rest is the room's set-up (lights, BG layers, handler tables) and could justify "InitRoomActors" |
+| 0x8017849C | func_8017849C | UpdateActors | per frame: the animation pass (func_8012A908), then every live actor (all while D_801270C0 is 1, else those with animFlags 0x1000): save prev, run its kind's handler (or the hit reaction func_80130D0C), move its model | H | e58E0 |
+
+### State, timers, flags
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8012BEE8 | func_8012BEE8 | TickTimer | count +0x1C down; 1 when it is or reaches 0 | H | e.c comment. 1352 calls / 118 files: `if (func_8012BEE8(a)) NextState(a);` |
+| 0x8012BF10 | func_8012BF10 | TickTimerReload | the same, restarting at n when it runs out | H | e.c comment; 4 calls |
+| 0x8012BF4C | func_8012BF4C | SetTimer | +0x1C = n | H | e.c. 88 calls / 34 files: `(a, 0x1E)`, `(a, (rand() & 0x1F) | 0x20)` before TickTimer loops |
+| 0x8012BF54 | func_8012BF54 | SetHittable | flags5C |= 0x8000 | M | e.c; func_8012DBD0 only hurts actors with flags5C bit 15 (and not 0x4000) |
+| 0x8012BF68 | func_8012BF68 | ClearHittable | flags5C &= 0x7FFF | M | e.c; as above |
+| 0x8012E88C | func_8012E88C | ShowModel | model +4 bit 31 cleared | H | e.c; the EXE's draw (src/code_800123F0.c func_8002374C) returns at once when `*(s32 *)(model + 4) < 0`. 306 calls / 44 files |
+| 0x8012E8A8 | func_8012E8A8 | HideModel | model +4 bit 31 set | H | as above; 180 calls / 61 files. eC98C func_801439FC sets the same bit by hand to hide a shadow with no ground under it |
+| 0x8012E8C4 | func_8012E8C4 | ToggleModel | model +4 bit 31 flipped | H | as above; 17 calls / 14 files (blinking) |
+
+### Motion and the model
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8012ADE4 | func_8012ADE4 | RestorePrevPos | position = prev (+0x38), undoing the frame's move | H | e.c. 152 calls / 58 files, after a failed collision test |
+| 0x8012AE00 | func_8012AE00 | UndoMoveIntoPlayer | undo the move when the path crosses Musashi's model and he is nearer the start | H | e.c comment; 12 calls |
+| 0x8012AF0C | func_8012AF0C | UndoMoveIntoObject | the same against another object's model | H | e.c comment; 5 calls |
+| 0x8012B030 | func_8012B030 | SnapToGround | drop the position onto the ground below (func_80134510); 0 when there is none | H | e.c. 116 calls / 60 files |
+| 0x8012B14C | func_8012B14C | SetLocalVelocity | velocity = a vector in the model's frame | H | e.c comment. 333 calls / 80 files |
+| 0x8012B178 | func_8012B178 | SetForwardVelocity | velocity = speed straight ahead in the model's frame | H | e.c comment. 400 calls / 74 files: `(a, 0x20000)` style speeds |
+| 0x8012B1B4 | func_8012B1B4 | SetLocalVelocityXZ | only the horizontal velocity from a model-frame vector (vertical kept) | H | e.c comment. 359 calls / 58 files |
+| 0x8012B200 | func_8012B200 | StopMotion | velocity and acceleration zeroed | H | e.c. 259 calls / 83 files |
+| 0x8012B21C | func_8012B21C | StopWithHalfGravity | velocity zeroed, acceleration (0, 0xC000, 0) | H | e.c comment ("gravity 0.75"); 41 calls |
+| 0x8012B23C | func_8012B23C | StopWithGravity | velocity zeroed, acceleration (0, 0x18000, 0) | H | e.c comment ("gravity 1.5"). 750 calls / 97 files: the usual state set-up before MoveOnGround |
+| 0x8012B260 | func_8012B260 | SyncModelPos | model position = position + ofs (+0x50), model flag 1 | H | e.c comment. 46 calls |
+| 0x8012B2CC | func_8012B2CC | UpdateModelZYX | model matrix from its rotation (RotMatrixZYX), then SyncModelPos | H | e.c comment. 662 calls / 115 files: the per-frame "draw me here" |
+| 0x8012B370 | func_8012B370 | UpdateModelYXZ | the same in YXZ order | H | e.c comment. 124 calls / 36 files |
+| 0x8012B414 | func_8012B414 | UpdateModelRot | the same with RotMatrix | H | e.c comment; 17 calls |
+| 0x8012B4B8 | func_8012B4B8 | UpdateModelXZY | the same, rotations X, Z, Y on the identity | H | e.c comment; 2 calls |
+| 0x8012E8E0 | func_8012E8E0 | PlaceObject | position = a point (frac 0), heading = its pad, then UpdateModelZYX | H | e.c comment. 311 calls / 21 files: `func_8012E8E0(a, &stage_point)` with stage point tables |
+| 0x8012E364 | func_8012E364 | UpdateSquash | the model's x / z scale eased toward Musashi's +0x188 squash (0 to 0x90) | M | e.c; 7 calls |
+| 0x8012E470 | func_8012E470 | EaseScaleNormal | x / z scale a quarter of the way to 1.0, TickTimer | H | e.c comment; 4 calls |
+| 0x8012E4C8 | func_8012E4C8 | RecoilFromBehind | scale 1.0, damage 0, flags5C bit 0, knock angle = heading + 0x800, hit kind 1: a self-inflicted hit from behind | L | e.c; e5F4 func_80131E7C calls it when the squash ends and then starts reaction step 1 |
+| 0x8012DFD4 | func_8012DFD4 | CarryPlayer | Musashi rides the actor's model (exact or whole-unit version by +0x74) | M | e.c; 80 calls / 36 files (lifts, platforms) |
+| 0x8012E014 | func_8012E014 | CarryPlayerExact | his position into the model's frame, the model moved, back out | M | e.c comment |
+| 0x8012E138 | func_8012E138 | CarryPlayerClipped | the same in whole units, moved only where func_80135888 finds the way clear | M | e.c comment |
+| 0x80133298 | func_80133298 | CarryPlayerScaled | the same with the model's matrix divided by its scale first | M | e5F4 comment (func_8013339C) |
+| 0x80132DC4 | func_80132DC4 | SetVelocityToward | velocity = unit direction to a point x speed | H | e5F4 comment |
+
+### Animation (scripts and frame lists)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x8012A860 | func_8012A860 | SetScriptAtEnd | SetScript from the last entry, playing backwards (animFlags 0x200) | H | e.c comment; docs/animation_controller.md already calls it that |
+| 0x8012A8B0 | func_8012A8B0 | SetScriptCopy | a byte-identical second SetScript | H | e.c (docs/animation_controller.md: "an identical copy"); 64 calls / 4 files |
+| 0x8012A8E8 | func_8012A8E8 | AnimStepNow | run AnimStep on the actor once | M | e.c; 4 calls |
+| 0x8012A908 | func_8012A908 | AnimateActors | AnimTick for every actor with animFlags 0x1000 (all while D_801270C0 is 1) | H | e.c comment |
+| 0x8012A988 | func_8012A988 | AnimTick | count the pose down, then the next entry (forwards, backwards for 0x200, replay for 0x400) | H | e.c comment |
+| 0x80128D60 | func_80128D60 | StartImageAnim | start a frame list whose frames are image-queue requests (func_800183E0 / func_80018450) | M | e.c; 14 calls / 3 files. The frame value goes to the EXE's image queue (ClearImageQueue / FlushImageQueue's list) |
+| 0x80128DB4 | func_80128DB4 | StepImageAnim | step it; 1 when it ended (flags 0xC0), 0x80 loops | M | e.c; 10 calls |
+| 0x80128EA8 | func_80128EA8 | StartSpriteAnim | start a frame list on a sprite object: each frame writes object +0x28 / +0x2A | H | e.c. 101 calls / 70 files: `func_80128EA8(a->model, a + 0x24, frames)` (the actor's +0x24 is the AnimPlayer) |
+| 0x80128ED8 | func_80128ED8 | StepSpriteAnim | step it; 1 when it ended | H | e.c. 107 calls / 68 files: `if (func_80128ED8(a->model, a + 0x24)) FreeActor(a)` |
+
+### Props (the 128-entry pool)
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80129010 | func_80129010 | UpdateProps | while D_8011DB2C: each prop's handler (D_80126AEC by kind), then its model follows | H | e.c |
+| 0x801290DC | func_801290DC | SpawnPropAt | SpawnProp, at a point | H | e.c. 108 calls / 55 files |
+| 0x8012913C | func_8012913C | SpawnProp | a prop of a kind with a model from slots 0x7E-0xFF | H | e.c. 191 calls / 55 files (eC98C func_80143640 spawns kinds 0x22 / 0x23 with it) |
+| 0x801291C0 | func_801291C0 | AllocProp | the first free prop, zeroed | H | e.c; 11 calls |
+| 0x80129220 | func_80129220 | InitProps | ClearProps, props on | H | e.c |
+| 0x80129248 | func_80129248 | SetPropsActive | D_8011DB2C = on | H | e.c |
+| 0x80129258 | func_80129258 | ClearProps | every prop's kind = 0 | H | e.c |
+| 0x8012927C | func_8012927C | FreeAllProps | FreeProp on all 128 | H | e.c |
+| 0x801292C8 | func_801292C8 | FreeProp | zero its model, kind = 0 | H | e.c. 245 calls / 96 files |
+| 0x8012931C | func_8012931C | MoveProp | position += velocity | H | e.c. 100 calls / 60 files |
+| 0x80129350 | func_80129350 | CopyPropPos | position from another prop | H | e.c; 15 calls |
+| 0x80129374 | func_80129374 | CopyPropVel | velocity from another prop | H | e.c; 11 calls |
+| 0x80132EF4 | func_80132EF4 | SpawnPropFrom | SpawnProp at another prop's position | H | e5F4 comment. 261 calls / 75 files |
+
+### Shadows and other fixed engine kinds
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80143970 | func_80143970 | SpawnShadow | SpawnActor kind 0x1B for the owner | M | eC98C. Stage: `a->+0xCC = func_80143970(a)` (35x), freed with func_801439C0(a->+0xCC). Kind 0x1B's state step func_801439FC puts the +0xCC object on the ground under the owner, turned to the ground normal (D_801152A8..AC), hidden with no ground |
+| 0x80143994 | func_80143994 | SpawnShadowSized | SpawnActorArg kind 0x1B with a size (the +0x70 value) | M | eC98C; stage passes 0x1000, 0x1800, 0x3000, 0x4000 (scale-like) |
+| 0x801439C0 | func_801439C0 | FreeShadow | zero the shadow's 0x38 object (+0xCC) and FreeActor it | M | eC98C; 69 calls / 41 files |
+| 0x801439FC | func_801439FC | ShadowFollow | the step described above | M | eC98C |
+| 0x80143B6C | func_80143B6C | SpawnShadowB | SpawnActorArg kind 0x1C (n 1: flat, n 0: turned to the ground; n 0 copies the owner's heading to +0xFC) | L | eC98C; its step func_80143EBC is the same ground snap with `+0x70 == 1` giving a flat object and the owner's rotation scaling it. 241 calls / 56 files, mostly not stored. A second shadow kind; rename once the kind is seen in game |
+| 0x80143BDC | func_80143BDC | SpawnShadowBAt | kind 0x1C, n 1, at a point, no owner | L | eC98C; 30 calls |
+| 0x80143C74 | func_80143C74 | SpawnKind205 | SpawnActorArg kind 0x205 | L | eC98C; 83 calls / 45 files, the result's fields are set by the caller. Kind unknown: placeholder name |
+| 0x80143CD4 | func_80143CD4 | SpawnKind39Trio | kind 0x39 with n 0, 1, 2 | L | eC98C; 8 calls |
