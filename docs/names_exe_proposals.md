@@ -451,3 +451,85 @@ slot headers (D_80075A40: +2 checksum of the 0x70 bytes from +0x10, which hold a
 | 0x8002B0B4 | func_8002B0B4 | SaveCardStep | the card state machine (mode & 7: 0 check / read the directory, 1 save (creating the file), 2 load, 3 a further mode), MemCardSync-driven; status per port in D_8007609C | H | c23F0: MemCardExist / Open / CreateFile / ReadData / WriteData / Close, 533 lines |
 | 0x8002C320 | func_8002C320 | CheckCardSlots | two bits per used slot header: 1 checksum good, 2 bad | H | c23F0: the 0x70-byte sum against header +2 |
 | 0x8002C3B0 | func_8002C3B0 | CountCardBlocks | blocks (0x2000 bytes, rounded up) used by n directory entries | H | c23F0: DIRENTRY stride 0x28, size at +0x18 |
+
+## Globals
+
+The most-read still-generic EXE globals, by area (the sound driver's and the model code's are in their sections'
+tables further down). Reads are counted as for functions: "N refs / M files" outside the EXE, then "EXE n" inside it.
+
+### Ordering tables, screen, game state
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x800A6518 | D_800A6518 | g_WorldOt | the two GsOT headers (0x14 bytes) of the world ordering table, one per frame buffer | H | c23F0 InitDisplay ("two 4096-entry GsOT headers"); ScreenWipeStep sets `.ot` to g_WorldOtTable[frame] and ClearOTagR's it. 59 refs / 22 files, EXE 15 |
+| 0x800A651C | D_800A651C | g_WorldOtOrg | the same headers seen from their `.org` field (an `OtRec` array with stride 0x14) | M | 146 refs / 50 files, EXE 31: `D_800A651C[frame].ot + z * 4`. Better retyped as g_WorldOt[frame].org (see "Found along the way") |
+| 0x800AE7B8 | D_800AE7B8 | g_FrontOt | the two GsOT headers of the small front OT drawn after the world | M | DrawFadeBlack / DrawFadeWhite with z = 0 link into it; main's DrawOTag "then the 4-entry front OT". 19 refs / 11 files |
+| 0x800AE7BC | D_800AE7BC | g_FrontOtOrg | its `.org` field view | M | 101 refs / 13 files |
+| 0x800AE620 | D_800AE620 | GsIDMATRIX | an identity MATRIX (bss, never written by game code), the base for world-space effects | L | 223 refs / 84 files: `m = D_800AE620; func_80017758(&quad, &m);` and `MATRIX at +0x38 = D_800AE620`. If libgs's GsIDMATRIX is not here, name it g_IdentityMatrix |
+| 0x800AE610 | D_800AE610 | g_PadLostFrames | frames pad 0 has been missing (> 10 clears g_PadConnected); its address is also used as the end of g_WorldOtTable | M | c23F0 PollPad `if ((u32)D_800AE610++ >= 10)`; AddPrimChecked and 6 stage files compare OT pointers with `&D_800AE610` (g_WorldOtTable 0x800A6610 + 0x8000 = 0x800AE610) |
+| 0x800AE648 | D_800AE648 | g_Flags | 512 flag bits | H | SetFlag / GetFlag / ClearFlags; copied into the state slots |
+| 0x800BA1B8 | D_800BA1B8 | g_Vars | 256 byte variables (also s16 / s32 at byte offsets) | H | SetVar / GetVar / SetVar16 / SetVar32 |
+| 0x800BA2B8 | D_800BA2B8 | g_VarBlock60 | a 0x60-byte block saved with the state | L | ClearVarBlock60; slot +0x27C |
+| 0x800A6588 | D_800A6588 | g_ItemValues | 64 u16, one per item (GiveItem sets it from the item table, AgeItemValues moves it) | M | c23F0; slot +0xBC. ovl37's debug set-up writes D_800A6588..92 |
+| 0x8010F46C | D_8010F46C | g_ItemTable | the item table, 8 bytes an item (+0 value, +2 kind) | L | c23F0 GiveItem / AgeItemValues. Above the EXE: it belongs to the overlay loaded at that address; name it there |
+| 0x80078E78 | D_80078E78 | g_Status | the 0x98-byte status block (play time, progress, money, clock, stats) | H | c23F0 LoadDefaultStatus, SaveStateSlot; ovl36 `FieldStats`, ovl37 `DbgStats`. 128 refs / 43 files |
+| 0x80072C84 | D_80072C84 | g_DefaultStatus | its new-game copy | H | c23F0 LoadDefaultStatus |
+| 0x80078E7C | D_80078E7C | g_PlayTime | play time: frame, second, minute, hour bytes | H | c23F0 TickPlayTime |
+| 0x80078E80 | D_80078E80 | g_Progress | the story progress value | H | c23F0 GetProgress / SetProgress / GetLevelCap |
+| 0x80078E8C | D_80078E8C | g_Money | money (stage code caps it at 99999; halved on Continue) | H | stg/sc03_124 func_8018957C (add with cap 99999, fail when negative); e58E0 Continue `D_80078E8C = t / 2`. 22 refs / 7 files |
+| 0x80078E90 | D_80078E90 | g_Clock | the time of day, minutes in 16.16 | H | c23F0 SetClock; e58E0 adds to it each frame and wraps D_80078E92 at 0x5A0 |
+| 0x80078E92 | D_80078E92 | g_ClockMinutes | its integer half (minutes since midnight) | H | stg `if (D_80078E92 >= 0x438)` (18:00). 11 refs / 9 files |
+| 0x80078EAC | D_80078EAC | g_Day | the day count | M | stg: `hours + D_80078EAC * 0x18` (an absolute hour). 29 refs / 14 files |
+| 0x80078EAE | D_80078EAE | g_Daytime | 1 from 7:00 to 19:00 | H | c23F0 UpdateClockPeriod; r272 SetupActor's HP x1.5 test. 29 refs / 19 files |
+| 0x80078EAF | D_80078EAF | g_DayPeriod | 0 dawn (5-7), 1 day (7-16), 2 evening (16-19), 3 dusk (19-22), 4 night | M | c23F0 UpdateClockPeriod; ovl36 time chime keys on it (`unk37`). 4 refs / 4 files |
+| 0x80078EB0 | D_80078EB0 | g_ClockMinute | minutes of the hour | H | c23F0 UpdateClockPeriod. 31 refs / 12 files |
+| 0x80078EB1 | D_80078EB1 | g_ClockHour | the hour | H | c23F0 UpdateClockPeriod. 107 refs / 19 files: `if (D_80078EB1 >= 9)` |
+| 0x80078F28 | D_80078F28 | g_StateSlots | two 0x2DC-byte state slots | H | SaveStateSlot / LoadStateSlot |
+| 0x800A5E58 | D_800A5E58 | g_StateSlotUsed | one word per slot | H | IsStateSlotUsed |
+| 0x80079204 | D_80079204 | g_ContinueMapRecord | slot 1's 0x24-byte map record | H | SaveContinuePoint / LoadContinuePoint (it is g_StateSlots + 0x2DC) |
+| 0x800AE6A8 | D_800AE6A8 | g_EntryPoint | the 0x3C-byte map-entry record (where and how Musashi enters) | M | work.h mapGroup comment; ClearEntryPoint; main ModeDemoRun `mapState->unk16`. 11 refs / 4 files |
+| 0x800638F8 | D_800638F8 | g_StatTable | 31 levels x 16 bytes: needed / value for the four stats | H | c23F0 GetStat*ExpNeeded / GetStat*Value (D_800638FA..906 are its fields) |
+| 0x80078EE4 | D_80078EE4 | g_Stat0Level | stat 0 level, followed by its experience and the other stats' level / experience pairs (EEC / EF0, EF4 / EF8, EFC / F00) | H | c23F0 GetStat0Level etc. |
+| 0x80078F08 | D_80078F08 | g_Odometer | distance walked (D_80078F04 the step remainder, D_80078F0C the value at the last gain) | H | c23F0 AddWalkDistance |
+| 0x800638A0 | D_800638A0 | g_RankTable | (average level, title string) pairs for GetRankTitle; D_800638EC the default title | H | c23F0 |
+| 0x80062BA0 | D_80062BA0 | g_FadeSpeeds | fade speed per index (index 0 picked by Work.vsyncMode) | H | c23F0 FadeStep and its kin |
+| 0x80062A78 | D_80062A78 | g_DebugFontUV8 | UV words of the 8-pixel debug font from ' ' | H | c23F0 DebugFontUV (D_80062AF8 the 16-pixel one, D_80062B78 the hex digit characters) |
+| 0x800A2B70 | D_800A2B70 | g_TimeChime | the chime playing (1 sound 0x518, 2 sound 0x517) | M | ovl36 func_800CF... `D_800A2B70 = k` with the sound; ClearTimeChime |
+| 0x800BA0FC | D_800BA0FC | g_TimeChimeTimer | its frame count (0x97 stops it) | M | ovl36 `if (++D_800BA0FC >= 0x97)` |
+| 0x800760C8 | D_800760C8 | g_SaveRequest | 0 none, 1 save, 2 clear save | M | RequestSave / RequestClearSave |
+| 0x80063074 | D_80063074 | g_TitleMovieCount | which title movie next (& 1) | M | GetTitleMovieIndex; zeroed by InitCdFiles |
+| 0x800747D8 | D_800747D8 | g_LicenceShown | the licence screen has run | M | LicenceShown; zeroed by InitCdFiles |
+
+### Load queue and sound packs
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x800BA1B4 | D_800BA1B4 | g_LoadQueueState | 0 idle, 1 file, 2 sound pack, 3 done, 4 header, 5 sound bank | H | c23F0 LoadQueueStep, RequestLoad. EXE 25 |
+| 0x800747F0 | D_800747F0 | g_LoadKind | the queued request's kind | H | c23F0 QueueLoad |
+| 0x800747F4 | D_800747F4 | g_LoadKey | the queued request's identity (file's first word or pack id) | H | c23F0 QueueLoad / IsQueuedLoad |
+| 0x800AE6E4 | D_800AE6E4 | g_LoadFile | the queued file (a CdlFILE / archive location) | H | c23F0 QueueLoad, LoadQueueStep |
+| 0x800BA318 | D_800BA318 | g_LoadDest | its destination | H | c23F0 |
+| 0x800C6D2C | D_800C6D2C | g_LoadSize | its byte count (0 for a PAC archive) | H | c23F0 (RequestLoad comment) |
+| 0x800A6550 | D_800A6550 | g_LoadSoundTable | its (sound id, destination) table | H | c23F0 (extern comment "sound table") |
+| 0x80063138 | D_80063138 | g_SoundPacks | the sound pack table (`SoundPack` 6 bytes: archive entry, stream arg, sound id) | H | c23F0 RequestLoad / SoundPackStepImpl. EXE 20 |
+| 0x800A654C | D_800A654C | g_SoundPackPlaying | the pack id now playing | H | c23F0. 18 refs / 9 files |
+| 0x800747F8 | D_800747F8 | g_SoundPackEntry | the archive entry now loaded | H | c23F0 |
+| 0x800AE7EC | D_800AE7EC | g_SoundPackStep | SoundPackStepImpl's step | H | c23F0 |
+| 0x800AE708 | D_800AE708 | g_SoundPackPos | disc position of the pack being read (0 idle) | M | c23F0; CancelSoundLoadStep waits for 0 |
+| 0x800747E4 | D_800747E4 | g_SoundBankStep | LoadSoundBankStep's step | H | c23F0 |
+| 0x800747E8 | D_800747E8 | g_SoundBankState | its reported state | H | c23F0 GetSoundBankLoadState |
+| 0x800C7C60 | D_800C7C60 | g_SoundLoadTable | a one-entry (sound id, destination) table handed to LoadFileStep | H | main ModeTitleLoad `{0x57, D_800A2E20}`; StreamStep loads each pair with func_8002FD14. 31 refs / 9 files (D_800C7C64 its destination word) |
+| 0x800A2E20 | D_800A2E20 | g_SoundLoadBuf | the staging buffer those sound loads read into | M | main, ovl36, ovl38, stg: `D_800C7C64 = D_800A2E20`. 19 refs / 9 files |
+| 0x800747FC | D_800747FC | g_WipeStep | ScreenWipeStep's step (D_80074800 / 804 / 808 / 80C its brightness, delay, bar packets, bar count) | H | c23F0 |
+
+### Memory card
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x800760AC | D_800760AC | g_CardStep | SaveCardStep's step | H | c23F0. EXE 65 |
+| 0x800760B0 | D_800760B0 | g_CardPort | the card port (0x00 / 0x10) being worked on | H | c23F0: MemCardOpen(D_800760B0, ...), status index `D_800760B0 >> 4`. EXE 69 |
+| 0x8007609C | D_8007609C | g_CardStatus | per port {status, slot bits} (8 bytes each; 2 no card, 3 / 4 errors, 8 ready) | M | c23F0 SaveCardStep. EXE 56 |
+| 0x800760C4 | D_800760C4 | g_CardResult | the last MemCardOpen / Sync result | M | c23F0 |
+| 0x80075840 | D_80075840 | g_CardFileBuf | the card file image: header (0x200), directory (D_80075A40, 0x280), slot header (D_80075FC0), save (D_80075CC0) | M | c23F0: `D_80075840[0] = 'S'; [1] = 'C'`, MemCardWriteFile(.., D_80075840, 0, 0x200) |
+| 0x80075A40 | D_80075A40 | g_CardDir | the 0x280-byte directory read from the card | H | c23F0 MemCardReadData(&D_80075A40, 0x200, 0x280) |
+| 0x80075CC0 | D_80075CC0 | g_CardSaveBuf | the 0x300-byte save buffer | H | c23F0 SetCardSaveData / GetCardSaveData |
