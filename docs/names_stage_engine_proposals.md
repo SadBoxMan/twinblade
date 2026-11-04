@@ -239,3 +239,42 @@ whose record has flag 0x100. **Model collision** tests a path against one model'
 | 0x8012DBD0 | func_8012DBD0 | DamageActorsNear | every hittable actor (flags5C 0x8000, not 0x4000, not already hit by this hit id) within the actor's box radius takes speed/angle/hit id n: flags5C |= 1 | H | e.c. 27 calls / 19 files: `func_8012DBD0(a, 0x50, heading + 0x800, 0x1D)` |
 | 0x8012E9C0 | func_8012E9C0 | TakeDamage | pending damage (+0x60) scaled by the init record's +0x30, applied (func_8016AA50); finished: func_8016B428 and a rumble | H | e.c comment; 27 calls / 22 files |
 | 0x80131B14 | func_80131B14 | TakeDamageAndRecoil | the same plus HP (+0x76) -= damage, status effects (func_8002A520 / func_8002A790), the model turned to the knock angle, StopWithGravity | H | e5F4. 45 calls / 36 files |
+
+## Camera
+
+A Camera is 0xA4 bytes (struct in e.c): +0 the update function (the stage's own, run every frame), +4 a mode byte the
+update switches on, then (current, target) pairs: +0x08/+0x0C projection, +0x10/+0x14 distance, +0x18/+0x20 angles
+(SVECTOR), +0x28/+0x2E an offset; +0x3C the GsRVIEW2 before offsets, +0x5C the one given to GsSetRefView2L. The main
+camera is D_80126948, three alternates at D_80126E60 (D_801150D6 = 1-3 picks one), three saved at D_80114EE8, one kept
+across map changes at D_801201F8, and D_80126DB8 is the blend that eases toward the picked camera.
+
+| address | current | proposed | purpose | conf | evidence |
+|---|---|---|---|---|---|
+| 0x80129C40 | func_80129C40 | InitCameras | zero all nine cameras, main camera picked, no blend, InitDefaultView | H | e.c |
+| 0x80129CF8 | func_80129CF8 | UpdateCamera | the frame's camera: focus follow (func_8012A328), the picked camera's update, projection, the blend eased (func_80012F74) or copied, offsets added, GsSetRefView2L, the world-screen matrix into Work +0x18, D_801151D4 = the camera | H | e.c |
+| 0x8012A018 | func_8012A018 | SetCameraUpdate | the main camera's update function and mode (SetCameraUpdateOf on D_80126948) | H | e.c. 310 calls / 143 files: `func_8012A018(stage_cam_fn, 0/1/2)` right after the stage writes the target fields |
+| 0x8012A048 | func_8012A048 | SetCameraUpdateOf | a camera's update and mode, its +0x9C/+0xA0/+0xA2 cleared, the followed point = Musashi's position | H | e.c; 9 calls |
+| 0x80129FF4 | func_80129FF4 | ClearCameraUpdate | SetCameraUpdate(NULL, 0): the main camera stops moving | H | e.c; 10 calls |
+| 0x8012A094 | func_8012A094 | SnapCamera | current = target for projection, distance, angles and offset | H | e.c comment ("snaps current to target"). 281 calls / 141 files: `func_8012A094(&D_80126948)` after setting the targets |
+| 0x8012A100 | func_8012A100 | SelectCamera | D_801150D6 = n (0 main, 1-3 an alternate) | H | e.c. 17 calls: `(1)`, `(0)`, `(2)` |
+| 0x8012A0E0 | func_8012A0E0 | SelectMainCamera | SelectCamera(0) | H | e.c |
+| 0x8012A110 | func_8012A110 | ResetKeptCamera | the kept camera (D_801201F8) to its defaults: projection 0x1F4, distance 0x5DC, pitch 0x238 | H | e.c; 9 calls |
+| 0x8012A1BC | func_8012A1BC | RestoreKeptCamera | copy the kept camera's settings into the main camera | H | e.c |
+| 0x8012A2F4 | func_8012A2F4 | ClearCameraHeightLimit | D_801152C0 = 0 | H | e.c |
+| 0x8012A304 | func_8012A304 | SetCameraHeightLimit | keep the followed height at y while Musashi is within range of it | H | e.c comment on func_8012A328 |
+| 0x8012A328 | func_8012A328 | UpdateCameraFocus | the followed point D_80126940..44 = Musashi's focus (+0x154), its height eased (or held, see above) | H | e.c comment |
+| 0x8012A418 | func_8012A418 | SaveCamera | copy the current camera into save slot 0 | H | e.c |
+| 0x8012A464 | func_8012A464 | SaveCameraView | copy only its view (+0x3C) | H | e.c |
+| 0x8012A4BC | func_8012A4BC | RestoreSavedCamera | blend from the current camera back to the saved one over 48 frames | H | e.c comment |
+| 0x8012A598 | func_8012A598 | StartCameraBlend | blend from the current camera, 48 frames | H | e.c comment |
+| 0x8012A568 | func_8012A568 | BlendCameraThen | StartCameraBlend, then call f (which sets the new camera) | H | e.c. 19 calls / 20 files: `func_8012A568(stage_setup_fn)` |
+| 0x8012A62C | func_8012A62C | StartCameraBlendFrames | the same for n frames | H | e.c; stage `func_8012A62C(0x1E)` |
+| 0x8012A5F8 | func_8012A5F8 | BlendCameraFramesThen | StartCameraBlendFrames(n), then f | H | e.c |
+| 0x8012A7D4 | func_8012A7D4 | GetCameraView | the current camera's eye and target points | H | e.c |
+| 0x8012A68C | func_8012A68C | GetCameraPitch | the pitch from target to eye | H | e.c comment. 9 calls / 17 files (sprites turned to face the camera: `+0x10 = func_8012A68C()`) |
+| 0x8012A6D0 | func_8012A6D0 | PitchBetween | ratan2(dy, ground distance) | H | e.c |
+| 0x8012A758 | func_8012A758 | GetCameraHeading | the heading from target to eye | H | e.c comment. 23 calls / 30 files: `RotMatrixY(func_8012A758(), &m)` |
+| 0x8012A79C | func_8012A79C | HeadingBetween | ratan2(dx, dz) | H | e.c |
+| 0x80132E6C | func_80132E6C | GroundDistSqToFocus | squared ground distance from Musashi's focus (the camera's followed point) | M | e5F4 comment says "camera's focus": it reads Player +0x154, which the camera follows |
+| 0x80133060 | func_80133060 | PushAlongView16 | a 16.16 position through func_801330E0 | M | e5F4 comment; 7 calls / 15 files |
+| 0x801330E0 | func_801330E0 | PushAlongView | a point through the world-screen matrix, pushed by a along the view axis in proportion, and back | M | e5F4 comment; 4 calls |
