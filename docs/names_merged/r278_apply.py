@@ -22,6 +22,20 @@ CHANGES = [
      "evidence corrected, name kept: the core's state 0 (model, HP +0x76 = 0x1E0, StoreImage x2) spawns the five weak "
      "points (5 x SpawnActorArg(0x294, i)), the evidence r275 gave to 0x80180A70; kind 0x2EF is spawned by "
      "0x80180030, not here"),
+    # ---- step 2: "Thing + flag number" names whose body is an item hand-over or gift (61 such names; 56 kept) ----
+    ("stage_H.csv", "stage:sc03_124", "0x80180734", "TalkerTakeItem58",
+     "VAGUE (r277): an item hand-over: flag 0x106 set -> after-script; item 0x58 missing (func_800D0F8C) -> ask "
+     "script; else thanks script, SetFlag(0x106), TakeItem(0x58)"),
+    ("stage_H.csv", "stage:sc05_017", "0x80181C1C", "GiveItem28SetFlag124",
+     "VAGUE (r277): GiveItem(0x28) first, then var 0x8A |= 0x40 and SetFlag(0x124): the item is the point"),
+    ("stage_H.csv", "stage:sc02_017", "0x801839A8", "TakeFourItemsSetProgress50",
+     "weak name: the body takes items 0x4E, 0x50, 0x51, 0x52 (TakeItem x4) and spawns four kind 0x121 "
+     "(SpawnActorArg(0x121, 0..3)) before SetProgress(0x50): a hand-over of four items"),
+    ("stage_H.csv", "stage:sc03_011", "0x80180EA8", "SceneTakeItem6C",
+     "weak name: SetProgress(0x3F2) and TakeItem(0x6C) (and a +0xFC = 1 cue): the scene takes item 0x6C"),
+    ("stage_H.csv", "stage:sc03_013", "0x8017FAA8", "EventGiveItem1C",
+     "weak name: an 82-line event sequence (SpawnKind205 bursts, sounds 0x9E2 / 0x9E3, model and script swaps) "
+     "that gives item 0x1C (GiveItem(0x1C)) and ends with EndEvent, SetProgress(0x3D4), FreeActor"),
 ]
 
 
