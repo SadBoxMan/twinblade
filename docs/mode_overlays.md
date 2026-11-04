@@ -40,3 +40,27 @@ proposals. 5. Open questions.
   and the stage engine calls its loaders and helpers (the ability package loaders func_800D02D0 / func_800D0488, the
   camera helpers func_800D1FC8 / func_800D20C0, the sprite helpers func_800D21C4 / func_800D222C / func_800D2294,
   the vector helpers func_800D2318 / func_800D23D0). Section 3 lists them per function. (H)
+
+## 2. Shared shapes
+
+* **The Work record's step machine.** Except for the field, each overlay is one step machine on the MODE record
+  (docs/mode_dispatcher.md): its entry switches on `Work.step` (0xA3B4), advances with NextStep / SetStep(n) (which
+  clear `done`, `subStep`, `subStepVar` and `stepTimer`), counts frames in `Work.timer` / `stepTimer`, and ends by
+  setting `Work.done = 1` for the runner mode to see. The field runs the same shape one level down, on the GAME-STATE
+  record (`Work.state`, table D_800D3430, with NextGameState / SetGameState / NextGameStateStep /
+  NextGameStateSubStep). (H)
+* **Fades.** func_800167B8(k) starts a screen fade (level D_800AF7CE = 0; func_80016224 with 0xFF for k < 4, else 0)
+  and func_800167F0(speed) steps it (D_800AF7CE += D_80062BA0[speed & 3], the default speed D_800B9A18), drawing
+  func_80016224(level, ...): one full-screen semi-transparent POLY_F4 (code 0x2A) of grey `level`, sized from the
+  display (D_800AF7BC / BE). Six of the overlays use the pair for their fade-in / fade-out steps. (H for the code, M
+  for which direction each k gives)
+* **Leaving.** Before a runner mode changes mode, the EXE clears the sprite and model slots (func_8001C044: 0x100
+  sprites of 0x38 bytes at Work + 0x65A8, 0xC0 models of 0x84 at Work + 0x2A8) and the 64 draw-list records
+  D_800B93D8 (func_80015310); the overlays call the same two when they tear down. (H)
+* **Pads.** GetPadPressedDir(port) (src/code_800123F0.c): the newly pressed buttons, or a direction made from the
+  analog stick's movement when none is pressed: the menus' cursor input (five of the overlays). (H)
+* **Sprites and text.** func_8001534C(n, x, a, b, c, d) fills the 16-byte record n of Work + 0x9DA8 (the 2D sprite /
+  text list drawn by the EXE's func_8001C00C); func_800183E0 queues image records for the end-of-frame LoadImage
+  (as in the ability packages); the overlays build their own GPU packets with addPrim / setlen (PsyQ macros) into the
+  primitive buffer. (H)
+
