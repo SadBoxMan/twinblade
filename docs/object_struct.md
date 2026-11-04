@@ -36,7 +36,7 @@ adds the rest, and separates what is common to all objects from what only Musash
 ## 1. Method
 
 The census is a script (`census.py`, kept in full in Appendix C so it can be re-run on a later snapshot:
-`python3 census.py <repo> <out>` writes `<out>.json` and `<out>.tsv`, about 15 s). It reads every `src/**/*.c`, all
+`python3 census.py REPO OUT` writes `OUT.json` and `OUT.tsv`, about 15 s). It reads every `src/**/*.c`, all
 201 files, and splits them into 28 994 function definitions (ANSI and K&R). In each function it records every
 constant-offset access through a pointer variable, in all the forms the C uses:
 
@@ -62,6 +62,7 @@ call graph until nothing changes (11 rounds):
 * it indexes a handler table with its own +0x02 (u16 / s16), +0x4E or +0x214 (`D_xxx[AF(o, u16, 2)]()`);
 * callers pass objects at that argument in at least 2 of 3 call sites (reverse step; the parameter is then an
   object inside the function too).
+
 Of the 28 994 functions, 13 428 touch an object; 107 573 accesses are recorded (90 893 at the first level, 16 680
 through a pointer field).
 
@@ -70,6 +71,7 @@ handler registered with func_8016EDEC / func_8016ED8C / func_8016EE94 / SetActio
 `A` (a pool actor: the actor spawn functions, the pool `D_80120194` / `D_801202A0`) or `E` (an effect: the effect
 spawners func_80146A6C / func_80146994 / func_801469C8 / func_80146AFC, the pool `D_8011D030`, the argument of
 func_80146C3C), flowing from callers to callees.
+
 Most stage code is reached only through handler tables whose contents are data (not in this snapshot), so most
 pointers get no origin this way. For those the script falls back on two weaker tests, applied to the pointer's own
 accesses and, transitively, to those of every function it is handed to:
@@ -77,7 +79,9 @@ accesses and, transitively, to those of every function it is handed to:
 * an offset of 0x10C or beyond cannot be a 0x10C pool slot: Musashi (`P?`);
 * otherwise a vote: (offset, size) pairs seen only through proven-Musashi pointers (including his absolute
   addresses) against pairs seen only through proven-actor pointers; more Musashi pairs: `P?`, else `A?`.
+
 The weak labels then flow down the call graph like the strong ones; a function reached by both is **shared**.
+
 Buckets, first-level accesses:
 
 | bucket | strong | weak | accesses | functions | offsets | areas |
@@ -88,8 +92,8 @@ Buckets, first-level accesses:
 | shared | | PA? 43, AE? 40 | 83 | 31 | 25 | engine 60, stg 21, abil 2 |
 
 The `A?` bucket is the weak one: a stage function that touches only header fields and is never called directly
-could be handling Musashi or an effect (the effect bucket is a lower bound for that reason); section 5 says what that
-can and cannot hide.
+could be handling Musashi or an effect (the effect bucket is a lower bound for that reason); conflict 6 and section 7 say
+what that can hide and how to firm it up.
 
 **Caveats.**
 * Counts are inflated by duplication: the 147 files of src/stg are the stage-specific code of other stage images, and
@@ -97,9 +101,10 @@ can and cannot hide.
   measure of how widely a field is used.
 * The access type is what the decompiler or the matcher wrote, so `s16` against `u16` on the same field is often only
   which one gave the match (or m2c's guess). Two types count as a conflict below only when size differs or the code
-  depends on the sign (section 6).
+  depends on the sign (section 5, conflict 1).
 * Engine functions still in asm (INCLUDE_ASM) are invisible: so, for example, func_8012CC88 (the Mover's move) is
   known only from its callers' types.
+
 ## 2. The groups
 
 The census gives a common header, three kinds of object built on it, and three pointed-to structs:
@@ -107,10 +112,10 @@ The census gives a common header, three kinds of object built on it, and three p
 | group | what | where it lives | size | evidence for the split |
 |---|---|---|---|---|
 | `ObjHeader` | the fields every game object has | +0x00..+0x23 of the three kinds below | 0x24 | the same engine helpers run on all of them (pos += vel, the countdown, the model) at the same offsets; from +0x24 on the three differ |
-| `StageActor` | the pool actors: enemies, NPCs, props, pickups, effects | `D_80120194[97]`, slot 0 unused (`D_801202A0` = slot 1) | 0x10C | spawn functions (engine.c:func_8012C890, func_8012C284, func_8012C750); every actor offset in the census is 0x000..0x10A |
+| `StageActor` | the pool actors: enemies, NPCs, props, pickups | `D_80120194[97]`, slot 0 unused (`D_801202A0` = slot 1) | 0x10C | spawn functions (engine.c:func_8012C890, func_8012C284, func_8012C750); every actor offset in the census is 0x000..0x10A |
 | `Player` | Musashi | `D_80126B58` (one object) | 0x24C at least, below 0x258 | absolute addresses D_80126B58..D_80126DA2, handlers registered by func_8016EDEC; offsets up to +0x24A |
 | `Effect` | effects: sparks, splashes, small spawned things with an owner | `D_8011D030`, 30 slots of 0x58 | 0x58 | engine_801458E0.c:func_80146AFC (allocates: kind, pos, args, owner), func_8014AC10 / func_8016706C (scan and free), func_80146A6C (spawn) |
-| `ModelObj` | the drawn model an object keeps at +0x20 | the model pool (EXE) | 0x84 | 11 202 accesses through +0x20, all fitting game.h's ModelObj |
+| `ModelObj` | the drawn model an object keeps at +0x20 | the model pool (EXE) | 0x84 | 12 208 accesses through +0x20, all fitting game.h's ModelObj (section 3.6) |
 | `SpawnDef` | the spawn definition at actor +0x68 | stage data | 0x14 | engine.c:func_8012C890 |
 | `ActorInit` | the kind's set-up record at actor +0x78 | stage data | 0x32+ | engine.c:func_8012C354 (local typedef there) |
 
@@ -131,8 +136,8 @@ hit record, animation player, face, camera points, ability and action-handler bl
 `D_8011D030`: kind at +0x00, position at +0x06 / +0x0A / +0x0E, `d` at +0x2C, `e` at +0x30, the owner (an actor or
 Musashi) at +0x34; func_8014AC10 frees an effect's model (+0x20) exactly as func_8012C218 frees an actor's. So the
 header holds here too, and +0x24..+0x57 is the effect's own (section 3.5). Their handlers are reached through tables,
-so only the ones that read the owner pointer are recognised (72 functions); the rest fall into the actor bucket,
-which section 5 discusses.
+so only the ones that read the owner pointer are recognised (72 functions); the rest fall into the actor bucket
+(conflict 6, section 7).
 
 **Who uses which.** First-level accesses: pool actors 82 171 (stg 79 771, engine 1 207, SC03_001's own code 799,
 ability packages 391, EXE 3); Musashi 7 804 (stg 4 943, engine 2 276, ability packages 564, SC03_001 17, EXE 3,
@@ -264,7 +269,7 @@ type; the type below is the one the offset code uses.
 | 0x42 | s16 | `hitAngle` | the facing of what hit him | H | engine.c:func_8012DEB8, func_8012F568 |
 | 0x44 | u32 | `status` | status and display flags: 0x30000000 all parts shown, 0x20000000 / 0x10000000, 0x400 / 0x20000 / 0x4 weapon rules, 0xC0 face distance, 0x800, 0x80000000 moving (game.h puts this on StageActor as `display`) | H | engine_801458E0.c:ShowAllParts, UpdateWeaponParts, func_801473DC, func_80146128, func_80149DD8 |
 | 0x48 | s32 | `unk48` | one copy (D_80126BA0 = D_80126B9C) | L | engine_801458E0.c:func_801463A0 |
-| 0x4C | u8 * | `unk4C` | a pointer read as an object (its +0x20) | L | engine_801458E0.c:func_80163A94, func_80163C2C |
+| 0x4C | u8 | `unk4C` | unknown byte. Two functions read a pointer at +0x4C of an object the census put here (engine_801458E0.c:func_80163A94, func_80163C2C); that cannot be Musashi, whose +0x4D..+0x4F are bytes, so those two take some other object (conflict 6) | L | - |
 | 0x4D | u8 | `sceneMark` | 1 = BeginScene, 2 = EndScene; incremented and decremented by scene code | H | engine_801458E0.c:BeginScene, EndScene; sc02_000.c:func_sc02_000_80182894 |
 | 0x4E | u8 | `state4E` | RunStateHandler4E calls table[state4E - 1]; ovl36 tests it | H | engine_801458E0.c:RunStateHandler4E; ovl36.c:func_800D19F0 |
 | 0x4F | u8 | `handler4F` | index of the handler table D_8018F8A8 | M | engine_801458E0.c:func_80158880 |
@@ -402,10 +407,408 @@ engine.c's local `ActorInit` typedef has them; code_800123F0.c:func_8002A04C als
 
 **+0x34 of an effect (the owner).** Header fields, as above.
 
+## 4. Draft structs (not applied)
+
+Draft C for the local card, in the style of include/game.h (PsyQ GCC 2.7.2, C89: no anonymous unions, so the
+shared header is a macro). Names follow section 3; where game.h already has a name that code uses, the comment
+gives it, and the card can keep game.h's name to avoid touching matched code (`state` for `kind`, `count` for the
+header's `timer`, `unk70` for `param` ...). Sizes are checked by the offsets in the comments; the
+`AF(p, T, off)` accesses in matched code do not depend on any of this, so applying it means converting call sites
+one function at a time and re-checking (section 5, conflict 1, is the main trap).
+
+```c
+/* ---- the header every game object starts with (actors, Musashi, effects) ---- */
+#define OBJ_HEADER                                                                         \
+    /* 0x00 */ u16 kind;        /* actor: kind (0 free); Musashi: mode. game.h: state */   \
+    /* 0x02 */ u16 sub;         /* state inside the kind: handler table index */           \
+    /* 0x04 */ Fixed pos[3];    /* 16.16 */                                                \
+    /* 0x10 */ s32 vel[3];                                                                 \
+    /* 0x1C */ s32 timer;       /* countdown, true at 0. game.h: count / timer */           \
+    /* 0x20 */ ModelObj *model
+
+typedef struct Obj {
+    OBJ_HEADER;
+} Obj;                          /* 0x24: what a routine taking "any object" sees */
+
+/* ---- pool actor: D_80120194[97], 0x10C ---- */
+typedef struct StageActor {
+    OBJ_HEADER;
+    /* 0x024 */ s32 work24[4];      /* spare on actors (section 3.2) */
+    /* 0x034 */ u16 subTime;        /* frames in the sub-state */
+    /* 0x036 */ u16 id;             /* serial, never 0 */
+    /* 0x038 */ Fixed prev[3];      /* position before the last move */
+    /* 0x044 */ s32 accel[3];       /* game.h: display at +0x44 is Musashi's, see section 5 */
+    /* 0x050 */ s16 ofs[3];         /* model offset */
+    /* 0x056 */ u8 pad056[2];
+    /* 0x058 */ u32 hitData;        /* collision box | flag nibble */
+    /* 0x05C */ u16 hitState;       /* 0x8000 hittable, 0x4000 immune, 1 hit waiting. game.h: flags5C */
+    /* 0x05E */ u16 hitCode;        /* hitter's serial; low byte the attack type (0x1D). game.h: unk5E */
+    /* 0x060 */ s16 hitDamage;      /* game.h: unk60 */
+    /* 0x062 */ s16 hitAngle;       /* game.h: unk62 */
+    /* 0x064 */ struct Obj *parent; /* an actor, or Musashi (func_80142454) */
+    /* 0x068 */ SpawnDef *def;
+    /* 0x06C */ struct StageActor *link;   /* a chain some kinds keep */
+    /* 0x070 */ s16 param;          /* SpawnDef.unk8. game.h: unk70 */
+    /* 0x072 */ u16 animFlags;
+    /* 0x074 */ u8 unk74;
+    /* 0x075 */ u8 targetClass;     /* read by Musashi's targeting (his +0x16E) */
+    /* 0x076 */ s16 hp;             /* game.h: unk76 */
+    /* 0x078 */ struct ActorInit *init;
+    /* 0x07C */ s16 hitPos[3];
+    /* 0x082 */ u16 hitFlags;
+    /* 0x084 */ s16 unk84;
+    /* 0x086 */ u16 unk86;
+    /* 0x088 */ s16 origin[3];
+    /* 0x08E */ u8 pad08E[2];
+    /* 0x090 */ AnimEntry *script;
+    /* 0x094 */ s32 index;
+    /* 0x098 */ s16 animTimer;      /* game.h: timer */
+    /* 0x09A */ s16 retIndex;
+    /* 0x09C */ AnimEntry *retScript;
+    /* 0x0A0 */ u8 pad0A0[4];
+    /* 0x0A4 */ s32 unkA4;
+    /* 0x0A8 */ u16 unkA8;
+    /* 0x0AA */ s16 noHitPlayer;    /* game.h: unkAA */
+    /* 0x0AC */ s16 heightAdd;      /* game.h: unkAC */
+    /* 0x0AE */ u16 hitMask;        /* bit 0: out of the area hit */
+    /* 0x0B0 */ s32 reactStep;      /* game.h: step */
+    /* 0x0B4 */ u32 reactFlags;     /* game.h: unkB4 */
+    /* 0x0B8 */ u8 pad0B8[4];
+    /* 0x0BC */ s32 *params;
+    /* 0x0C0 */ u8 listed;
+    /* 0x0C1 */ u8 react;           /* game.h: unkC1 */
+    /* 0x0C2 */ u8 reactMode;       /* game.h: unkC2 */
+    /* 0x0C3 */ u8 reactBits;       /* game.h: unkC3 */
+    /* 0x0C4 */ u32 reactOpts;      /* game.h: unkC4 */
+    /* 0x0C8 */ u8 hitFx[2];        /* game.h: face (that is Musashi's +0xC8) */
+    /* 0x0CA */ u8 pad0CA[2];
+    /* 0x0CC */ ActorWork work;     /* per kind, below */
+} StageActor;                       /* 0x10C */
+
+/* the per-kind work area at +0xCC: one layout per kind; this is the most common one, the
+   union members give the other widths seen at the same offsets */
+typedef union {
+    u8 b[0x40];
+    s16 h[0x20];
+    s32 w[0x10];
+    struct {
+        /* 0x0CC */ void *ext0;         /* a second model (0x38-byte type 2) or actor */
+        /* 0x0D0 */ void *ext1;
+        /* 0x0D4 */ s32 workD4;
+        /* 0x0D8 */ s32 workD8;
+        /* 0x0DC */ void *message;      /* SpawnDef.unk10 at spawn. game.h: messages[0] */
+        /* 0x0E0 */ s32 workE0;
+        /* 0x0E4 */ s32 workE4;
+        /* 0x0E8 */ s32 workE8;         /* a path (s16 x, z pairs) in SC03_001's follower */
+        /* 0x0EC */ s32 workEC;
+        /* 0x0F0 */ s32 workF0;
+        /* 0x0F4 */ s32 workF4;
+        /* 0x0F8 */ s32 workF8;
+        /* 0x0FC */ s16 unkFC;          /* SpawnDef.unkE at spawn */
+        /* 0x0FE */ s16 workFE;         /* often the parent's id */
+        /* 0x100 */ s16 work100[6];     /* +0x106: path index */
+    } s;
+} ActorWork;                        /* 0x40 */
+
+/* ---- Musashi: D_80126B58 ---- */
+typedef struct Player {
+    OBJ_HEADER;
+    /* 0x024 */ s32 push[3];        /* a second velocity, clamped */
+    /* 0x030 */ u8 pad030[4];
+    /* 0x034 */ s32 fallSpeed;      /* added to pos.y, clamped to +-0x1F0000 */
+    /* 0x038 */ void *hitData;
+    /* 0x03C */ u16 hitState;       /* game.h: hitFlags */
+    /* 0x03E */ u16 hitCode;        /* game.h: unk3E */
+    /* 0x040 */ s16 hitDamage;      /* game.h: unk40 */
+    /* 0x042 */ s16 hitAngle;       /* game.h: unk42 */
+    /* 0x044 */ u32 status;         /* display / weapon / moving flags */
+    /* 0x048 */ s32 unk48;
+    /* 0x04C */ u8 unk4C;
+    /* 0x04D */ u8 sceneMark;       /* 1 BeginScene, 2 EndScene */
+    /* 0x04E */ u8 state4E;         /* RunStateHandler4E */
+    /* 0x04F */ u8 handler4F;       /* index into D_8018F8A8 */
+    /* 0x050 */ s32 travel[3];
+    /* 0x05C */ s32 unk5C;
+    /* 0x060 */ s16 scaleA[3];
+    /* 0x066 */ s16 unk66;
+    /* 0x068 */ s16 scaleB[3];
+    /* 0x06E */ u8 pad06E[2];
+    /* 0x070 */ s16 scaleC[3];
+    /* 0x076 */ u8 pad076[0x12];
+    /* 0x088 */ s16 respawn[3];
+    /* 0x08E */ u8 pad08E[2];
+    /* 0x090 */ SVECTOR respawnPrev;
+    /* 0x098 */ SVECTOR unk98;
+    /* 0x0A0 */ u8 pad0A0[8];
+    /* 0x0A8 */ u8 blink;
+    /* 0x0A9 */ u8 modeA9;
+    /* 0x0AA */ u16 unkAA;
+    /* 0x0AC */ u16 unkAC;
+    /* 0x0AE */ u8 unkAE[2];
+    /* 0x0B0 */ s32 *animTable;
+    /* 0x0B4 */ s32 anim;
+    /* 0x0B8 */ u16 animStatus;     /* 0x8000 ended */
+    /* 0x0BA */ s16 animTimer;
+    /* 0x0BC */ u8 animIndex;
+    /* 0x0BD */ u8 animStart;
+    /* 0x0BE */ u8 unkBE;
+    /* 0x0BF */ u8 unkBF;
+    /* 0x0C0 */ u8 pad0C0[8];
+    /* 0x0C8 */ u32 face;
+    /* 0x0CC */ s32 *faceTable;
+    /* 0x0D0 */ s32 *faceScript;
+    /* 0x0D4 */ u16 faceTimer;
+    /* 0x0D6 */ u16 faceTimer2;
+    /* 0x0D8 */ u8 faceIndex;
+    /* 0x0D9 */ u8 faceStart;
+    /* 0x0DA */ u8 unkDA;
+    /* 0x0DB */ u8 pad0DB;
+    /* 0x0DC */ u8 animDC;
+    /* 0x0DD */ u8 lastHit;
+    /* 0x0DE */ u8 prevMode;
+    /* 0x0DF */ u8 unkDF;
+    /* 0x0E0 */ SVECTOR hitP0;
+    /* 0x0E8 */ SVECTOR hitP1;
+    /* 0x0F0 */ u16 takenCode;
+    /* 0x0F2 */ s16 takenDamage;
+    /* 0x0F4 */ s16 takenAngle;
+    /* 0x0F6 */ s16 unkF6;
+    /* 0x0F8 */ u8 pad0F8[0x36];
+    /* 0x12E */ s16 unk12E;
+    /* 0x130 */ u8 pad130[8];
+    /* 0x138 */ s16 posOfs[4];
+    /* 0x140 */ SVECTOR unk140;     /* .pad (+0x146) is a flag */
+    /* 0x148 */ u8 pad148[0xC];
+    /* 0x154 */ s16 focus[3];
+    /* 0x15A */ u8 pad15A[2];
+    /* 0x15C */ s16 point[3];       /* game.h: unk15C */
+    /* 0x162 */ s16 pointUnset;     /* game.h: unk162 */
+    /* 0x164 */ u8 pad164[8];
+    /* 0x16C */ u16 unk16C;
+    /* 0x16E */ u16 targetClass;
+    /* 0x170 */ s32 unk170;
+    /* 0x174 */ u8 pad174[4];
+    /* 0x178 */ s32 unk178;
+    /* 0x17C */ s32 unk17C;
+    /* 0x180 */ struct StageActor *target;
+    /* 0x184 */ s32 unk184;
+    /* 0x188 */ s16 squash;         /* game.h: unk188 */
+    /* 0x18A */ s16 unk18A;
+    /* 0x18C */ u8 *unk18C;
+    /* 0x190 */ s32 unk190;
+    /* 0x194 */ u16 targetId;
+    /* 0x196 */ u8 unk196;
+    /* 0x197 */ u8 abilStep;
+    /* 0x198 */ s32 handle198;
+    /* 0x19C */ u8 pad19C[4];
+    /* 0x1A0 */ u8 unk1A0;
+    /* 0x1A1 */ u8 pad1A1[7];
+    /* 0x1A8 */ u8 toggles[4];
+    /* 0x1AC */ s32 unk1AC;
+    /* 0x1B0 */ s32 unk1B0;
+    /* 0x1B4 */ s32 anim1B4;
+    /* 0x1B8 */ s16 scaleD[2];
+    /* 0x1BC */ u8 flags1BC[12];
+    /* 0x1C8 */ s16 unk1C8[5];
+    /* 0x1D2 */ u8 pad1D2[2];
+    /* 0x1D4 */ s32 unk1D4[2];
+    /* 0x1DC */ u8 pad1DC[0xC];
+    /* 0x1E8 */ void **table1E8;
+    /* 0x1EC */ u8 pad1EC[0xC];
+    /* 0x1F8 */ u32 action;         /* handler address | 0x01/0x02/0x04000000 flags */
+    /* 0x1FC */ s32 *actionScript;
+    /* 0x200 */ s32 actionTimer;
+    /* 0x204 */ s32 action204;
+    /* 0x208 */ s32 action208;
+    /* 0x20C */ s16 action20C;
+    /* 0x20E */ s16 action20E;
+    /* 0x210 */ s16 action210[2];
+    /* 0x214 */ u8 phase;
+    /* 0x215 */ u8 phaseSub1;
+    /* 0x216 */ u8 phaseSub2;
+    /* 0x217 */ u8 phaseEnd;
+    /* 0x218 */ u8 action218;
+    /* 0x219 */ u8 pad219[3];
+    /* 0x21C */ s32 nextAction;
+    /* 0x220 */ u8 pad220[3];
+    /* 0x223 */ u8 unk223;
+    /* 0x224 */ u8 pad224[0x10];
+    /* 0x234 */ s32 abilPos[3];
+    /* 0x240 */ s32 unk240;
+    /* 0x244 */ u16 savedPos[3];
+    /* 0x24A */ s16 unk24A;
+} Player;                           /* 0x24C known; ends before 0x258 */
+
+/* ---- effect: D_8011D030[30], 0x58 ---- */
+typedef struct Effect {
+    OBJ_HEADER;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ u8 pad26[2];
+    /* 0x28 */ u16 unk28;
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ s32 arg0;            /* func_80146A6C's d */
+    /* 0x30 */ s32 arg1;            /* func_80146A6C's e */
+    /* 0x34 */ struct Obj *owner;
+    /* 0x38 */ MATRIX mtx;
+} Effect;                           /* 0x58 */
+```
+
+Two further changes to existing game.h types that the census supports (also not applied):
+* `ModelObj`: `/* 0x80 */ void *user;` in place of `pad80[4]` (130 writes of a pointer there).
+* `ActorInit` (engine.c's local typedef) belongs in game.h next to `SpawnDef`: `+0x00 s16 hpBase`, `+0x02 u16
+  hitState` (copied to actor +0x5C), `+0x04 void *model`, `+0x08 u32 hitData`, `+0x2E s16` (read by
+  func_8002A04C), `+0x30 s16 damageScale`.
+
+The offset comments in the code block above were checked mechanically: it compiles with `gcc -m32` against stand-in
+typedefs, with an `offsetof` assertion for every commented field and `sizeof` for each struct (226 assertions:
+StageActor 0x10C, ActorWork 0x40, Player 0x24C, Effect 0x58, Obj 0x24).
+
+## 5. Conflicts
+
+One offset used with two types, or a name that does not fit. Ordered by how much they matter to the card that
+applies the structs.
+
+1. **Signedness of reads (matters for matching).** A struct field has one type, so every load through it becomes
+   `lh` or `lhu` (`lb` / `lbu`). The matched C reads many fields with both signs, and in matched code that choice
+   was often what made the function match. Fields read both ways in at least 3 functions each (reads only; stores
+   do not care):
+
+   | bucket | off | s16 reads (funcs) | u16 reads (funcs) |
+   |---|---|---|---|
+   | actor | 0x02 sub | 148 | 3 044 |
+   | actor | 0x06 / 0x0A / 0x0E pos | 713 / 958 / 749 | 619 / 751 / 612 |
+   | actor | 0x34 subTime | 108 | 877 |
+   | actor | 0x36 id | 62 | 45 |
+   | actor | 0x5E hitCode | 4 | 182 |
+   | actor | 0x60 hitDamage | 81 | 31 |
+   | actor | 0x62 hitAngle | 22 | 51 |
+   | actor | 0x70 param | 1 090 | 853 |
+   | actor | 0x72 animFlags | 18 | 281 |
+   | actor | 0x76 hp | 202 | 12 |
+   | actor | 0x88 / 0x8A / 0x8C origin | 114 / 83 / 123 | 119 / 104 / 104 |
+   | actor | 0xFC .. 0x10A (work) | 738, 613, 296, 175, 96, 109, 107, 169 | 257, 190, 218, 94, 55, 86, 35, 8 |
+   | Musashi | 0x06 / 0x0A / 0x0E pos | 79 / 89 / 87 | 24 / 38 / 30 |
+   | Musashi | 0x62 / 0x64 scaleA | 7 / 6 | 75 / 77 |
+   | Musashi | 0x20C / 0x20E | 20 / 7 | 6 / 14 |
+   | effect | 0x06 / 0x0A / 0x0E pos | 43 / 41 / 43 | 8 / 42 / 10 |
+
+   56 such fields in all (the script lists them; 91 with any count). The card applying a struct should keep a cast
+   (`(u16)a->sub`, `(s16)a->param`) or keep the `AF` access wherever the matched read used the other sign, and run
+   `make check-stage` per file.
+2. **+0x44 on StageActor: `display` (game.h) or `accel[0]`.** game.h's StageActor calls +0x44 the display flags
+   and game.h's Mover calls it `accel[0]`; both are used on actors. The census settles it: the display routines
+   (ShowAllParts, SetDisplayFlag20, ClearDisplayFlag20, UpdateFlag10Part21, UpdateWeaponParts, FaceSet) only ever get
+   Musashi (`&D_80126B58`, or a pointer that can only be him), while engine.c:func_8012AD80 / func_8012B200 /
+   func_8012B23C write accel on actors (90 actor accesses of +0x44, 78 of them writes, all but one s32). The one
+   typed call `ClearDisplayFlag20((StageActor *)arg0)` (engine_801458E0.c, in a function that also writes +0x234)
+   passes Musashi. So on an actor +0x44..+0x4F is
+   `accel[3]` and the display word is Musashi's `status`.
+3. **+0x4D / +0x4E on StageActor (`sceneMark`, `state4E` in game.h).** BeginScene / EndScene and
+   RunStateHandler4E get Musashi only; on an actor +0x4C is `accel[2]` (91 s32 accesses; 27 more read it as a
+   pointer, which fits no actor field: probably effects whose +0x38 matrix the script did not recognise). Musashi's
+   fields. The census also shows 33 pointer / s32 reads of +0x4C on weakly placed (`P?`) pointers in stage code;
+   they cannot be Musashi either (his +0x4D..+0x4F are bytes) and belong with conflict 6.
+4. **+0xC8..+0xDF on StageActor (`face`, `faceTable`, `faceScript`, `faceTimer`, `faceIndex`, `messages[2]`).**
+   The face routines (StartFace, StartFaceAt, StartFaceScript, FaceScriptStep, FaceSet, FaceLoad) are called
+   from Musashi's code only (27 of the 31 call sites in src/stg are in functions the census puts on Musashi, the
+   other 4 in functions it could not place, none on an actor; the engine ones are his). On an actor +0xC8 / +0xC9 are two byte flags (engine_8012F5F4.c:func_80131B14 reads
+   `((u8 *)&a->face)[0]` and `[1]`), and +0xCC on is the per-kind work area. Only `messages[0]` (+0xDC) is the
+   actor's (func_8012C890 writes it); nothing reads a `messages[1]` at +0xE0, which kinds use as an s32.
+   Musashi's face fields are also narrower than game.h's: +0xD4 and +0xD6 are u16, +0xD8 / +0xD9 u8.
+5. **+0x34: u16 + u16 (actor) or s32 (Musashi), and owner pointer (effect).** The reason the shared header stops at
+   +0x24. Same for +0x24..+0x33 (actor spare, Musashi `push`, effect args) and +0x38 (actor `prev`, Musashi
+   `hitData`, effect `mtx`).
+6. **Objects the census could not place.** A few functions read fields that fit none of the three layouts:
+   engine_801458E0.c:func_80163A94 / func_80163C2C (a pointer at +0x4C, u16 at +0x60 / +0x62 / +0x64 and +0x100..),
+   func_80163EC8 (+0x5A, +0x66, +0x67), func_80165124 (+0x51), ovl20.c:func_ovl20_800CB688 (bytes at +0x59, +0x5B,
+   +0x5D, +0x5F). They are probably a fourth kind of object (the ability packages' 0x68-byte objects at D_8011F9D0,
+   include/abil.h, are a candidate) handed to helpers that also take actors. They are in Appendix A under the bucket
+   the script chose; treat those rows as unplaced.
+7. **The velocity's halfwords.** +0x12, +0x16, +0x1A are read and written as s16 by kinds that do not move by
+   velocity (580 / 585 / 523 accesses on actors, also on effects): the same space as `vel[3]` used as six
+   halfwords. A union, or casts, at those sites.
+8. **Byte views of halfwords and words.** Actor +0x5E is u16 in the engine and read as its low byte
+   (`*(u8 *)&a->unk5E`, 56 u8 accesses in stage code); +0x74 is a u8 flag in most kinds but an s16 (0x1000 / 0x1080)
+   in two; +0x108 is an s16 and the mode byte of SC03_001's path follower; +0xFC is s16 and also the start of
+   copied structs (S12, SV8) in a few kinds; Musashi's +0x244 (u16) has a byte at +0x245, and his +0x234 / +0x238
+   (s32) are read by halves at +0x236 / +0x23A.
+9. **The model at +0xCC is not always a ModelObj.** func_801439C0 frees it with 0x38 bytes (the type-2 object);
+   bytes are written at its +0x25 / +0x26 / +0x27, which in a 0x84-byte ModelObj are inside the `parts` pointer.
+   The 0x38-byte type-2 object needs its own small struct (ModelObj's first 0x24 bytes match it).
+10. **+0x58 hitData type.** u32 in game.h StageActor, `void *` in Mover and Player; the code ORs flags into it
+    (0x60000000), masks them off (`& 0x0FFFFFFF`) and also stores a plain address (func_80132018). u32 for actors;
+    Musashi's is used only as a pointer.
+11. **+0x64 parent: `StageActor *` or Musashi.** func_80142454 stores `&D_80126B58` there. A generic `Obj *` (the
+    header) is the honest type; game.h's `StageActor *` works if the card casts at that one site.
+12. **Names that collide in game.h.** `StageActor.timer` (+0x98, the animation timer) vs `Mover.timer` (+0x1C, the
+    countdown, `count` in StageActor); `state` (+0x00) is the kind, while `sub` and the reaction step are the states.
+    The draft renames +0x98 to `animTimer` and +0x1C to `timer`.
+13. **Mover is not a separate object.** game.h says the Mover is "not a StageActor: +0x44 is the display word there".
+    By conflict 2 that reason goes away: every Mover routine is called with actors (`(void *)a`, `(Mover *)a` in
+    engine_8012F5F4.c), and Mover's fields (+0x38 prev, +0x44 accel, +0x50 ofs, +0x58 hitData, +0x5C flags5C) are
+    the actor's at the same offsets. Mover can become a typedef of StageActor, or stay as the routines' view.
+
+## 6. Open questions (for a game-memory check)
+
+Things the C cannot settle and a RAM dump or a live log (tools/live_log.py) could:
+
+1. **Musashi's size.** The last field the code uses is +0x24A; 0x80126DB0 (+0x258) is a separate record and
+   0x80126DB8 (+0x260) the Camera. Is +0x24C..+0x257 part of him (a dump at a stage load: does func_80016714 or a
+   memset clear that range with him)?
+2. **What is at 0x80126948 and 0x80126E60?** Both are used with the same field offsets (+0x0C, +0x14, +0x18..+0x24,
+   +0x28..+0x32 as s16), 0x80126948 is passed to func_8012A094 and stage functions as an object, and both lie next
+   to Musashi. They are not the object header (+0x20 is an s16 there). A dump while a stage runs would say what they
+   are (camera targets? a second viewpoint?).
+3. **The effect pool's extent and kinds.** 30 slots of 0x58 at 0x8011D030 by the loops; is the effect runner
+   (the kind table) in the EXE or the stage? Dumping the pool during a fight would also show which kinds set
+   +0x24..+0x2A.
+4. **The ability packages' object array** (`AObj68`, 20 x 0x68 at 0x8011F9D0, include/abil.h): does it share the
+   header (kind at +0x00, pos at +0x04, model at +0x20)? The unplaced functions of conflict 6 may be its users.
+5. **Pool actor +0xA0..+0xA3, +0xB8..+0xBB, +0xCA..+0xCB, +0x56, +0x8E.** No code touches them: padding, or fields
+   used only by code still in asm? A dump with many actors alive would show whether they are ever nonzero.
+6. **Actor +0x24..+0x33.** Unused by the engine on actors; nonzero in a dump would mean kinds use it (the census saw
+   only a few uses, possibly effects mislabelled).
+7. **Musashi's mode values** (+0x00: 0x19, 0x1A, 0x1D, 0x1E ...): a live log of +0x00 while walking, swimming,
+   climbing, in a cutscene would name them.
+8. **Actor +0x75 (targetClass) and Musashi +0x16E:** logging both while locking on to different enemies would name
+   the classes.
+9. **+0x5E (hitCode):** confirm that the high byte is the hitter's serial (log it on an enemy while Musashi
+   attacks) and list the attack types in the low byte (0x1D is known).
+10. **The kinds.** Which kind numbers (+0x00, 1..0x363) are enemies, NPCs, props, pickups: the set-up table at
+    0x8011DB08 in a dump gives each kind's handler, and the handler's stage file gives its name.
+
+## 7. Field counts and what is left
+
+Fields in the tables of section 3 (padding rows not counted; a row marked "H (spawn) / L" counts as H, "L / M" as L):
+
+| group | H | M | L | total |
+|---|---|---|---|---|
+| ObjHeader (3.1) | 6 | 0 | 0 | 6 |
+| StageActor engine part (3.2) | 30 | 10 | 5 | 45 |
+| StageActor work area (3.3) | 2 | 4 | 11 | 17 |
+| Player / Musashi (3.4) | 29 | 35 | 36 | 100 |
+| Effect (3.5) | 3 | 1 | 3 | 7 |
+| **all** | **70** | **50** | **55** | **175** |
+
+What is left:
+* **Apply** (local card): put the draft of section 4 in include/game.h (or a new include/object.h), convert call
+  sites file by file keeping the read signedness (conflict 1), `make check` and `make check-stage` after each file.
+  The engine files first (they already use StageActor / Mover / Player), then src/stg (80 % of the accesses).
+* **The weak buckets.** 78 569 actor accesses are placed by the offset vote, not by a proven origin. A cheap
+  improvement once the stage data is at hand (local): read the kinds' handler tables (0x8011DB08 for set-up, each
+  kind's `D_xxx` state table) to give every stage handler a proven origin, then re-run the census.
+* **Effects** are under-counted (only handlers that read the owner are recognised); the effect runner's kind table
+  would place the rest the same way.
+* **The unplaced objects** of conflict 6 and the ability packages' 0x68-byte array need their own small census.
+* **Per-kind layouts.** The work area is one union here; naming it per kind needs the kind numbers tied to their
+  handlers (open question 10). The census JSON has, per function, every work-area access, which is the input for
+  that.
+* The open questions of section 6.
+
 ## Status of this document
 
-Round 2: method, groups, field tables (sections 1-3) and the census (Appendices A-C) are in. Draft structs,
-conflicts, open questions and the counts follow in round 3.
+Complete for r273 (research only): census, groups, field tables, draft structs, conflicts, open questions.
+Nothing in src/ or include/ was changed.
 
 ## Appendix A. The census, first level
 
