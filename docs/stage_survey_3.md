@@ -500,7 +500,7 @@ About 30 more own helpers (sprite effects, part set-ups 0x80182638..0x80182B4C) 
   an exit step 0x8017D258 also sets 0x5DC after FadeDone(4) with func_8002931C(0x41A0000) and func_8002AED0, H).
   The F023 reward talker (SetProgress(0x5A), family code) is also present.
 * **Size:** 199 functions (own 115 + 3 dup + 22 lone-shared; F023 x12, F041 x11, F035 x3; 11 actor kinds; P01 with
-  an extra exit 0x8017D1D0-ish step that fades with StartFade(4); P02, P03).
+  an extra exit step 0x8017D1DC [S10] that fades with StartFade(4); P02, P03).
 * **Boss:** a round-based fight without an HP check in the own code (H: no TakeDamage / ShowDamage in sc06_025; M).
   Arena set-up 0x8017E6C0 spawns the opponent SpawnActorArg(0x2CD) and its set: 0x2C7 x4, 0x2C8 x4, 0x2CA x4,
   0x2CB x2, 0x327 x3, 0x2C9, 0x32F x2 (H). Opponent states go through PlaceObject(D_801889F8) + SetScript
@@ -516,8 +516,8 @@ About 30 more own helpers (sprite effects, part set-ups 0x80182638..0x80182B4C) 
   (0x8017D318); sounds 0xC0E, 0xC0F, 0xC10, 0xC11.
 * **Sound:** 0x801817A8 issues sound command 0x27 with an argument from table D_801894F8 indexed by the round state,
   and waits until func_8002D80C() returns that value (H; L: switching the music track between phases).
-* **Exits:** 0x80183068 RequestMapChange(D_sc06_025_801886A4) after placing kind 0x2CD at D_80188EDC (0x80183020
-  area, H); destination unknown (data).
+* **Exits:** 0x80183068 RequestMapChange(D_sc06_025_801886A4) after placing kind 0x2CD at D_80188EDC (0x8018300C, H);
+  the caller of 0x80183068 is a table entry; destination unknown (data).
 
 #### Names: SC06_025
 | address | current | proposed | evidence | conf |
@@ -588,7 +588,7 @@ About 30 more own helpers (sprite effects, part set-ups 0x80182638..0x80182B4C) 
   state 0xE and event D_sc06_029_8019060C, with flag 0x11D choosing one of two follow-ups (func_8002959C when clear)
   (H).
 * **Events / scripted scenes:** 0x801862C0: when flag 0x8E is set and a check passes, SpawnActor(0x353) (H).
-  0x80186688-ish set-up spawns 0x354, 0x355, 0x356, 0x35F, 0x330, 0x38B x2, 0x39A and starts event
+  0x801866B0 set-up spawns 0x354, 0x355, 0x356, 0x35F, 0x330, 0x38B x2, 0x39A and starts event
   D_sc06_029_80191474; 0x801867D0 shows / moves five of them (sound 0xBD2) and when the script ends sets progress
   0x636, EndEvent, RequestMapChange(D_sc06_029_8018FFFC) (H).
 * **Exits:** RequestMapChange(D_8018FFFC) at the end of the closing event (H); destination unknown (data).
@@ -613,6 +613,84 @@ About 30 more own helpers (sprite effects, part set-ups 0x80182638..0x80182B4C) 
 | 0x801867D0 | func_sc06_029_801867D0 | EventClosing | SetProgress(0x636), RequestMapChange | H |
 
 About 140 more own functions (camera modes, effects, part helpers) not proposed.
+
+### SC06_030
+* **Place:** a boss arena of the F116 building (H: an own boss with HP and the F017 HP-bar helper; F116 door exit).
+  Exit step 0x8017DA24 sets progress 0x514 (1300) after FadeDone with func_8002931C and func_8002AED0 (H), the
+  lowest of the four sc06 boss values (0x514 here, 0x578 SC06_016, 0x5DC SC06_025, 0x636 SC06_029), so this fight
+  comes first of them (M).
+* **Size:** 87 functions (own 32 + 13 lone-shared; F116 x13, F017 x8; 5 actor kinds; P01 with an extra fade exit
+  0x8017D9A8 [S10]; P02, P03).
+* **Boss:** main 0x8017E120 (302 lines): turns to Musashi, scripted poses, panned sounds 0x942 / 0x944 (flag 0x2000),
+  0x943, SpawnActor(0x30B) (H). Attacks 0x8017EEF0 (SpawnActor(0x30C), 0xA8C, 0x945) and 0x8017F0A0
+  (SpawnActor(0x30D), 0xA8D), both aimed with HeadingToTarget (H; M: two kinds of shot); 0x8017F268 (101 lines):
+  a close attack with ActorTouchesPlayer, SquareRoot distance, sounds 0xA8A / 0xA8B / 0x93F / 0xC65 and
+  SpawnActorArg(0x3DD) (H; M: a charge or grab). Hurt 0x8017DF70: HP -= damage (min 1), ShowDamage / ShowDefeat /
+  rumble, sound 0xA8E; HP < 0 -> state 7, sound 0xA8F; HP bar via F017 0x8017C010(HP, D_80185D14, max 0xD2) (H:
+  maximum HP 210).
+* **Events / scripted scenes:** 0x8017F65C: event D_sc06_030_80185C9C with SoundCmd1(1), several IsEventDone waits,
+  moves the boss (MoveCollide), then F017 0x8017C068 frees it and sound 0xA47 (H; M: the intro / defeat scene).
+  0x801805F8: event D_sc06_030_80185C2C with sound 0xC7C (H). Shots 0x8017FE9C (panned 0x93E, freed on collision),
+  0x8017FCF4 (contact sound 0x941); 0x80180940 LoadImage + 0x941 (H: a palette flash).
+* **Exits:** F116 door exit; 0x8017DA24 (progress 0x514). Destinations unknown (data).
+
+#### Names: SC06_030
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017E120 | func_sc06_030_8017E120 | BossMain | 302-line main, sounds 0x942-0x944, spawns 0x30B | M |
+| 0x8017EEF0 | func_sc06_030_8017EEF0 | BossShotA | SpawnActor(0x30C), 0xA8C | M |
+| 0x8017F0A0 | func_sc06_030_8017F0A0 | BossShotB | SpawnActor(0x30D), 0xA8D | M |
+| 0x8017F268 | func_sc06_030_8017F268 | BossCloseAttack | ActorTouchesPlayer, 0x3DD | M |
+| 0x8017DF70 | func_sc06_030_8017DF70 | BossHurt | HP, 0xA8E / 0xA8F, HP bar max 0xD2 | H |
+| 0x8017F65C | func_sc06_030_8017F65C | EventBossScene | StartEvent(D_80185C9C), SoundCmd1(1) | M |
+| 0x801805F8 | func_sc06_030_801805F8 | EventObjStart | StartEvent(D_80185C2C), 0xC7C | H |
+| 0x8017FE9C | func_sc06_030_8017FE9C | ShotFly | panned 0x93E, free on hit | M |
+| 0x8017DA24 | func_sc06_030_8017DA24 | RoomExitAfterBoss | FadeDone, SetProgress(0x514) | H |
+
+### SC06_032
+* **Place:** a combat field of the machine area (M); its code is SC06_018's family set (F117, F115, F118, F119,
+  F041, F098, F120, F121, F010) with one own function. No progress, flag, event or map-change code (H).
+* **Size:** 297 functions (own 1 + 25 lone-shared; F117 x87, F115 x52, F118 x42, F119 x25, F041 x11, F098 x5, F120
+  x4, F121 x3, F010 x3; 13 actor kinds; P01, P02).
+* **Actors:** all shared (see SC06_018 and the families). Own: the pad-steered camera 0x8017D4A0 (43 lines,
+  GetObjPadPressed) (H). Compared with SC06_018 it lacks SC06_018's own rise-and-bob and timed-event actors (H).
+* **Exits:** P01 only; destinations unknown (data).
+
+#### Names: SC06_032
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017D4A0 | func_sc06_032_8017D4A0 | CamPadSteer | GetObjPadPressed camera mode | M |
+
+### SC06_033
+* **Place:** a machine-area field (M) with F117 / F115 / F119 enemies, a guarded switch-like object and an event
+  when two linked objects change. No progress or flag code (H).
+* **Size:** 271 functions (own 22 + 1 dup + 23 lone-shared; F117 x87, F115 x52, F119 x24, F041 x11, F120 x4, F036 x3,
+  F010 x3; 13 actor kinds; P01, P02).
+* **Actors:**
+  * 0x8017E224 / 0x8017E3EC: spawn SpawnActorArg(0x263, 1), move with MoveCollide toward Musashi (HeadingToPlayer)
+    when GroundDistSqToPlayer <= 0x9000, sounds 0xB23 / 0xB24 (H; M: something that comes out when he approaches).
+  * 0x8017E60C SetupActor + script; 0x8017E69C: once the +0x36 of both linked actors (+0xCC, +0xD0) differ from its
+    stored value, and Musashi is within 0x7900 and touching it (+0x74), starts event D_sc06_033_80195360 (H; M: a
+    reward / message after two switches are set).
+  * 0x8017DE00..0x8017E0E4: sway actor like F121 (own copy, rsin / rcos, two sub-points) (M).
+  * Enemy 0x80190CE0 (SetupActor, two extra models, StopWithGravity) / 0x80190E64 (90 lines: sound 0xB33, spawns
+    0x33C, a table of follow-up spawns SpawnActorArg(e[1], e[2]), SpawnKind205 debris, palette flash via LoadImage
+    0x80190E64_pal, drop func_8002A04C) / 0x8019131C (approaches Musashi) / 0x801915A8 (ShowDamage, ShowDefeat,
+    rumble) / 0x8019171C (MoveCollide shot) (H; M: an own enemy kind with a breakable shell).
+* **Exits:** P01 only; destinations unknown (data).
+
+#### Names: SC06_033
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017E224 | func_sc06_033_8017E224 | EmergerUpdate | spawns 0x263, approaches, 0xB23 / 0xB24 | M |
+| 0x8017E69C | func_sc06_033_8017E69C | EventOnLinkedChange | linked +0x36 changed -> StartEvent(D_80195360) | H |
+| 0x8017E60C | func_sc06_033_8017E60C | EventObjInit | SetupActor + script | M |
+| 0x8017DFE8 | func_sc06_033_8017DFE8 | SwayUpdate | rsin / rcos, two sub-points | M |
+| 0x80190CE0 | func_sc06_033_80190CE0 | ShellEnemyInit | SetupActor + two models | M |
+| 0x80190E64 | func_sc06_033_80190E64 | ShellEnemyBreak | 0xB33, spawns 0x33C, debris, drop | M |
+| 0x801915A8 | func_sc06_033_801915A8 | ShellEnemyHurt | ShowDamage / ShowDefeat | H |
+| 0x8019171C | func_sc06_033_8019171C | ShellShotFly | MoveCollide, FreeActor | M |
+| 0x8017D7E0 | func_sc06_033_8017D7E0 | CamPadSteer | GetObjPadPressed | M |
 
 ## The end of the game (archive SC07)
 

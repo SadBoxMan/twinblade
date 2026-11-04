@@ -615,6 +615,53 @@ Addresses are in the first stage (families.md `first=`). Actor state = +2, subty
 * **Where in the first stage:** 0x8017E170-0x8017E94C. Names: ParticleUpdate (0x8017E170), ParticleInit (0x8017E270),
   EmitParticleInBox (0x8017E78C), SpawnParticleFlagged (0x8017E918), SpawnParticle (0x8017E94C) (M).
 
+### F099: SC03_118 / SC03_119 room code (2 stages, 54 shapes)
+* **Stages:** sc03_118 sc03_119 (the same image twice).
+* **What it is:** the own code of this story room, shared only by its twin (H). Main pieces: an ability gate
+  0x80183D68 (events D_8018EBE8 / D_8018EBF8 by boss flag 0x8B; with GetStatsByteC0() == 3 it gives Musashi action
+  script D_8018DA14, music off, scripted camera 0x80184430 / 0x801842DC, then SetFlag(0xB8) and SpawnActor(0x249));
+  a hit trigger 0x801825EC (8 hit kinds -> prop 0x42, event D_8018E014, 0x74B, func_8001AAA0(0x4D)) and its end
+  0x80182DC4 (SetProgress(0x1CC)); 0x801845C8 (SetProgress(0x276) after func_8001AAA0(0x49)); 0x80188FB0 (talk-range
+  event D_801D09F4, SetProgress(0x1D1)); a knock-about object 0x80188990 (as sc03_107's, removed from progress 0x1D7)
+  (H).
+* **Where in the first stage:** 0x80181A64-0x80188FB0.
+| shape | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80183D68 | AbilityGateEvent | flag 0x8B, stats 3, SetFlag(0xB8), SpawnActor(0x249) | H |
+| 0x80184430 | CameraScriptedPath | camera mode set by the gate | M |
+| 0x801825EC | HitTriggerEvent | hit kinds -> event D_8018E014 | H |
+| 0x80182DC4 | EventEndSetProgress1CC | SetProgress(0x1CC) | H |
+| 0x801845C8 | TimedSetProgress276 | SetProgress(0x276), FreeActor | H |
+| 0x80188FB0 | NearEventSetProgress1D1 | event D_801D09F4, SetProgress(0x1D1) | H |
+| 0x80188990 | RoamObjKnockBack | bounce 0x754 / 0x7DF, progress 0x1D7 gate | M |
+
+### F100: village clock lights and master set-up (5 stages)
+* **Stages:** sc03_124 sc04_015 sc04_018 sc04_019 sc05_017 (village versions).
+* **What it is:** 0x801832A8 computes the minute of day from the game clock (D_80078EB1 * 60 + D_80078EB0) and, for
+  16 slots, calls a per-slot chooser (table D_80190624: 0x80182F8C-0x8018326C) that selects a quad set and a time
+  window through 0x80182420 (start / end minute, wraps at 0x5A0 = 24 h, fades over 16 minutes at each end); some
+  slots are suppressed in progress bands (0xC8-0x1A3, 0x64-0x257) (H); the chosen set is drawn as textured quads
+  (0x801824DC / 0x80182598: RotNclip4, RotTransPers4, AddPrim) (H). M: house windows / lamps lit by time of day.
+  0x80183364 is the village master set-up: AllocActorModel and SpawnActor kinds 0x13F, 0x66, 0x65, 0x14C, 0x335,
+  0x3D9 (H).
+* **Where in the first stage:** 0x8017DB88-0x80183364. Names: UpdateClockLights (0x801832A8), ClockWindowFade
+  (0x80182420), DrawClockSlot (0x80182488), DrawLitQuads (0x80182598), VillageMasterInit (0x80183364) (M).
+
+### F101: progress-window NPC with talk zone (3 stages)
+* **Stages:** sc03_124 sc04_018 sc04_019
+* **What it is:** an NPC present for progress 0xC8-0x275 (0x801808B8) whose talk test 0x8018095C needs g_PlayerFlags &
+  0x08000000, Musashi within distance^2 0x6400 of a point (D_8018FC3C), x < 0x281 and z >= -0x380 (H); 0x801807D8 ends
+  its event and returns it to its place (H); 0x80180A88 a second model present for 0xC8-0x257 only if flag 0x106 is
+  set, and for 0x258-0x275 (H). Names: ZoneTalkerInit (0x801808B8), ZoneTalkerCanTalk (0x8018095C), ZoneTalkerEndTalk
+  (0x801807D8), Flag106PropInit (0x80180A88) (M).
+
+### F102: message sequence in a player-action scene (3 stages)
+* **Stages:** sc03_126 sc04_021 sc05_019 (one image three times).
+* **What it is:** player-action phases (H): 0x8017EA10 opens message D_80183058 with a motion and PlaySe(0x7E7) once the
+  camera distance (zoomed in by the F074 helper 0x8017EC2C, floor 0x12C) drops below 0x190; 0x8017EACC / 0x8017EB4C chain the next messages on GetMessageAnswer;
+  0x8017EBC8 closes the last one; 0x8017ED0C a fall (AddFallSpeedLimited 0x1A000) until landing, then BeginScene.
+  Names: SceneOpenFirstMessage, SceneNextMessage (x2), SceneCloseMessage, SceneFallToGround (M).
+
 ### F103: respawning spinning enemy (2 stages)
 * **Stages:** sc04_000 sc04_006
 * **What it is:** an enemy that waits hidden, grows in (rcos scale) when Musashi is beyond distance^2 0x18FFF,

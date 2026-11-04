@@ -623,6 +623,111 @@ n more own functions not proposed: about 55.
 
 n more own functions not proposed: about 140 (attack sub-states).
 
+### SC03_029
+* **Place:** an outdoor field (day lighting, positional ambient sounds) of the same region as SC03_006 (H: shares
+  F021 35 and F075 30 shapes only with sc03_006, the same map-id-0x3028 test and the same F023 flag holders). Sets
+  **progress 0x5A (90)** + flag 0xEA via the F023 flag holder with flag 0x54 (func_80185684, H). Tests progress
+  0x14, 0x20, 0x46, 0x70, 0xD2 (H).
+* **Size:** 276 functions (own 50, stubs 14, 27 dispatchers, S 36; F021 35, F075 30, F013 15, F023 12, F024 11, F027 9,
+  F032 6, F033 5, F009 3, F035 3, F039 3; P01 x14, P02, P03, one PLAYER-ACTION-MAIN).
+* **Actors:**
+  * Unique enemy (func_8017FCE0 set-up .. func_80180250): absent once flag 0x9D is set or when another kind 0x95
+    exists; mime-animated melee (segment damage, sounds 0xAD3 / 0x6A8), ShowDamage / ShowDefeat with a rumble when hit
+    (func_801802C4), its death sets flag 0x9D (H). M: a one-time stronger enemy.
+  * Opening walker (func_80180B84): only while progress < 0x14 with flag 0xDF (as sc03_002's), stores a word var
+    (func_800291C8) (H); runner (func_80180D3C): near Musashi takes control and starts event D_8018B878, sound 0x525
+    (H). M: the same character met in the village / chase.
+  * Kind 0x116 starter (func_801818EC: SoundCmd1(1), sets its state and a 0x30 timer) (H); var-table props spawning
+    kind 0x15A unless the var is 3, and kind 0x15B x2 (func_80182580 / func_8018266C) (H); talk NPC RunScript
+    D_8018BDEC; an actor hidden after flag 0xE7 or progress >= 0x46 (func_80182BCC) (H).
+  * F075 enemy (this group), F021 / F027 / F013 / F024 / F032 / F033 (other groups); F021 holds the item-slot event
+    (GetVar 0x3A+ / StartEvent D_8018B2E4) (H).
+* **Exits:** fourteen P01 step functions; some exits with SoundCmd1(1), some without (H).
+* **Sound:** 0x526 / 0x531 / 0x525 (same family of ids as the sc03_007 chase), 0xAD3, 0x6A8, 0x580, 0x522.
+
+#### Names: SC03_029
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017FCE0 | func_sc03_029_8017FCE0 | ToughEnemyInit | flag 0x9D, kind 0x95 | H |
+| 0x80180250 | func_sc03_029_80180250 | ToughEnemyDie | FreeActor + SetFlag(0x9D) | H |
+| 0x801802C4 | func_sc03_029_801802C4 | ToughEnemyHurt | ShowDamage / ShowDefeat, rumble | H |
+| 0x80180B84 | func_sc03_029_80180B84 | OpeningWalkerInit | progress < 0x14, flag 0xDF | H |
+| 0x80180D3C | func_sc03_029_80180D3C | RunnerMeet | StartEvent D_8018B878, sound 0x525 | H |
+| 0x801818EC | func_sc03_029_801818EC | StartKind116 | SoundCmd1(1), SetState, SetTimer | H |
+| 0x80182580 | func_sc03_029_80182580 | VarPropInit | var table, kind 0x15A | H |
+| 0x8018266C | func_sc03_029_8018266C | PairPropInit | kind 0x15B x2 | H |
+| 0x80182BCC | func_sc03_029_80182BCC | EarlyActorInit | flag 0xE7, progress < 0x46 | H |
+
+n more own functions not proposed: about 40.
+
+### SC03_030
+* **Place:** a **steered-ride / survival room**: Musashi's scripted action with rumble, steered with left / right
+  (func_8017E240: heading +-0x71 per frame while held) and analog input (func_8017E090) (H); var 0xCF set to 4 with
+  four kind-0xCA actors (func_8017EC34) and counted down on each hit, HitPlayerFatal at 0, or at once if Musashi is not
+  in player state 0x1A (func_8017ECA8) (H). M: a ride where four hits (or falling off) is fatal. No progress values;
+  F006 / F009 shared (H). L: a raft / mine-cart style sequence.
+* **Size:** 127 functions (own 71 + dup 7, stubs 6, 12 dispatchers, S 19; F006 4, F009 3; P01 x4, P02).
+* **Actors:** ride sounds: positional 0x583-0x588 with volume by distance, each stopped with SoundRequest(4, id)
+  (H); 0x57F with rumble at the start, 0x5A2, 0x580 (H); falling objects (func_80180960 / func_80180A3C:
+  MoveCollideAt, sounds 0x581 / 0x582, spawn kind 0xF0, HitPlayer via func_80180B44) (H); spawners of kinds 0x10F /
+  0x10B; a hazard with TraceMap + HitPlayer + sound 0x5E3 (H); models shown when Musashi is near (GroundDistSqTo) (H).
+* **Events / scripted scenes:** the ride is a PLAYER-ACTION script (func_8017D9FC .. func_8017E2A0: StartRumbleScript,
+  WalkToPoint, CloseHudPanel at the end of +0x200 frames) (H); camera modes func_8017E2C8 .. func_8017E5F8 (H).
+* **Exits:** P01 exit (with SoundCmd1(1)); no RequestMapChange in own code.
+* **Sound:** 0x57F-0x588, 0x5A2, 0x5E3.
+
+#### Names: SC03_030
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017DAFC | func_sc03_030_8017DAFC | RideStart | rumble, WalkToPoint, +0x200 frames | H |
+| 0x8017E090 | func_sc03_030_8017E090 | RideReadAnalog | pad mode 0x41 / 0x53 / 0x73 | M |
+| 0x8017E240 | func_sc03_030_8017E240 | RideSteer | left / right held -> heading +-0x71 | H |
+| 0x8017E5F8 | func_sc03_030_8017E5F8 | CameraModeRide | camera transform | M |
+| 0x8017E7D4 | func_sc03_030_8017E7D4 | UpdateRideSounds | positional sounds | M |
+| 0x8017EC34 | func_sc03_030_8017EC34 | RideHitsInit | var 0xCF = 4, kinds 0xCA x4 | H |
+| 0x8017ECA8 | func_sc03_030_8017ECA8 | RideHitCheck | var 0xCF countdown, HitPlayerFatal | H |
+| 0x80180960 | func_sc03_030_80180960 | FallingRockA | MoveCollideAt, sound 0x581, kind 0xF0 | M |
+| 0x80180A3C | func_sc03_030_80180A3C | FallingRockB | sound 0x582, kind 0xF0 | M |
+| 0x80180B44 | func_sc03_030_80180B44 | RockHitPlayer | HitPlayer | H |
+
+n more own functions not proposed: about 55.
+
+### SC03_031
+* **Place:** a field / dungeon room of the SC03_006 region (H: same F013 / F023 / F024 / F035 / F036 set and the
+  map-id-0x3028 item event) with a **push-block puzzle** and a story event. Sets **progress 0xA0 (160)** at the end
+  of event D_8018634C, which starts when progress is 0x96 (150) and Musashi's z passes 0x800 (func_8018011C /
+  func_801801C0 / func_80180204, H). F023 flag holder can set progress 0x5A (90) + flag 0xEA (H).
+* **Size:** 150 functions (own 37 + dup 14, stubs 7, 12 dispatchers, S 18; F013 15, F023 12, F024 11, F088 10, F035 3,
+  F036 3; P01 x6, P02, P03).
+* **Actors / puzzle:**
+  * Blocks (func_8017F0B0 set-up, own): per block index (+0x70 >> 12) a flag in table D_801860AC; with the flag set
+    the block starts at its solved spot D_801860C4 (index 5 has a special state) (H). Pushed: sound 0x5C2 / 0x5C4;
+    when it lands in place (MoveCollideAt flag 0x2000) camera shake, sound 0x5C3, sets its flag (func_8017F394, H). A
+    rolling variant hits Musashi (PathHitsModel -> HitPlayer), spawns props, sound 0x651, sets its flag
+    (func_8017F428, H).
+  * Event host (func_8018011C): at progress 0x96 spawns four actors from defs and waits; at progress >= 0xA0 calls
+    func_8017FF20(1) (solved state) and leaves (H). During the event, script commands +0xF8 = 1-4 toggle four flags
+    (+0xDC .. +0xE8) and 5 sets all to 2 (func_80180204) (H). M: four lights / gates shown during the scene.
+  * F088 enemy (this group, shared with sc06_011): TargetInSight / segment-damage melee, SpawnKind13, sound 0x6A9.
+  * Hum source with rsin pulse and sound 0x63F (func_801804EC) (H).
+* **Exits:** P01 exits (one with SoundCmd1(1) by progress).
+* **Sound:** 0x5C2-0x5C4, 0x651, 0x63F, 0x6A9 / 0x6AA.
+
+#### Names: SC03_031
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017F0B0 | func_sc03_031_8017F0B0 | PushBlockInit | flag table D_801860AC, solved spot | H |
+| 0x8017F23C | func_sc03_031_8017F23C | PushBlockPush | SetForwardVelocity, sound 0x5C2 | M |
+| 0x8017F394 | func_sc03_031_8017F394 | PushBlockLand | shake, sound 0x5C3, SetFlag | H |
+| 0x8017F428 | func_sc03_031_8017F428 | RollingBlockUpdate | HitPlayer, sound 0x651, SetFlag | H |
+| 0x8017FDE4 | func_sc03_031_8017FDE4 | PushBlockStop | StopMotion, sound 0x5C4 | M |
+| 0x8018011C | func_sc03_031_8018011C | EventHostInit | progress 0x96 / 0xA0 | H |
+| 0x801801C0 | func_sc03_031_801801C0 | EventHostWaitZ | z >= 0x800 -> StartEvent D_8018634C | H |
+| 0x80180204 | func_sc03_031_80180204 | EventHostUpdate | toggles, SetProgress(0xA0) | H |
+| 0x801804EC | func_sc03_031_801804EC | HumSourceUpdate | rsin, sound 0x63F | M |
+
+n more own functions not proposed: about 25.
+
 Common pieces of this run of stages (described once in G4_families.md): F045 (the kind-0x12C foot soldier enemy),
 F048 + F051 (a bundle of small actors: hazard segments, hopper with three spinning parts, shuttling platform,
 particles), F050 (room lights with a pulsing light), F055 (warp disc that starts an event and changes map), F089
@@ -1633,6 +1738,56 @@ About 35 more own functions not proposed.
 | 0x8017FEB4 | func_sc03_124_8017FEB4 | EventFlagTrigger1E0 | player flag 0x08000000 -> event, progress 0x1E0 | H |
 | 0x80180734 | func_sc03_124_80180734 | TalkerFlag106 | scripts by flag 0x106, sets it | H |
 About 65 more own functions not proposed.
+
+### SC03_125
+* **Place:** a version of the village (shares ~95 shapes with sc03_001; F068 / F073 village families, F073 shared
+  with sc03_002) (H). Own code sets progress 0x122 (290) and leaves by RequestMapChange (0x8017EE2C), and sets 0x12C
+  (300) when flag 0xFA is set (H); F068 sets 0x3AC (940) (H). Tests progress 0xC8-0xD1, 0x118-0x121, 0x3A2, 0x492 (H).
+* **Size:** 219 functions (own 8, lone-shared 47, family 117: F068 x67, F073 x29, F025 x10, F072, F007, F036; 25
+  actor dispatchers, 2 player-action dispatchers, 16 stubs; P01, P02).
+* **Actors / events (own):**
+  * 0x8017EEDC: exists only for progress 0x118-0x121; if flag 0xFA is set it sets progress 0x12C, SpawnActor(0x3CF) and
+    removes itself; otherwise clears flag 0x109, sets flag 0x110 and places a model with script D_801A8D7C (H).
+  * 0x8017EE2C: SetProgress(0x122) + RequestMapChange(D_80187C04) (H; called from a script or state, M).
+  * 0x8017F258 / 0x8017F1B4: present only for progress 0xC8-0xD1 while flag 0xF4 is clear; when g_PlayerFlags &
+    0x08000000 it starts event D_80187FB8, then SetFlag(0xF4, 1) and frees itself (H).
+  * 0x8017F00C: true when item 0x57 is not in the bag (func_800D0F8C) (H); 0x8017F2BC: returns 0x3F (and calls
+    func_800D06CC) when flag 0x109 is set, else 0x27 (H; M: a script branch value).
+  * 0x8017F0F0: a placed model with script D_801A88D4 (H). 0x8017E780: func_800CF804 + ResetKeptCamera (H).
+  * Families: F025 walker (flag table D_80187AF0, event D_80187AD0), F068 / F073 / F072 village actors (owned elsewhere).
+* **Exits:** RequestMapChange(D_80187C04) with progress 0x122 (H; destination unknown, data); P01.
+* **Unknown / notes:** 0x80182A9C (S9) tests map 0x3069 (H), as in sc03_124.
+
+#### Names: SC03_125
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017E780 | func_sc03_125_8017E780 | ResetSceneCamera | func_800CF804 + ResetKeptCamera | M |
+| 0x8017EE2C | func_sc03_125_8017EE2C | EventLeaveSetProgress122 | SetProgress(0x122), RequestMapChange | H |
+| 0x8017EEDC | func_sc03_125_8017EEDC | StoryObjInit | progress 0x118-0x121, flag 0xFA -> progress 0x12C | H |
+| 0x8017F00C | func_sc03_125_8017F00C | LacksItem57 | func_800D0F8C(0x57) == 0 | H |
+| 0x8017F0F0 | func_sc03_125_8017F0F0 | PlacedModelInit | AllocActorModel, PlaceObject, script | H |
+| 0x8017F1B4 | func_sc03_125_8017F1B4 | EventFlagF4 | player flag -> event, SetFlag(0xF4) | H |
+| 0x8017F258 | func_sc03_125_8017F258 | EventFlagF4Init | progress 0xC8-0xD1 and flag 0xF4 gate | H |
+| 0x8017F2BC | func_sc03_125_8017F2BC | ScriptPickByFlag109 | 0x3F / 0x27 by flag 0x109 | M |
+
+### SC03_126
+* **Place:** a small scripted room (M); same code in SC04_021 and SC05_019 (H). No progress value set or tested (H).
+  Most of its code is F074 (shared with sc03_003 and others, owned elsewhere) plus the F102 message sequence (H).
+* **Size:** 55 functions (own 0, lone-shared 10, family 28: F074 x19, F102 x5, F006 x4; 2 actor dispatchers, 3
+  player-action dispatchers, 5 stubs; P01, P02, P03; plus an S15 renderer 0x8017C6F4 with the F006 projection helpers).
+* **Actors:**
+  * A1 (0x8017BEBC): a 16-pixel sprite effect with a timer (F074 / S8) (H).
+  * A2 (0x8017F154, F074): waits, then when the pad tests TestPadAll(0, 0, 0x800) and func_800CF8B4() allows, sets
+    D_8018FB28 = 1 and RequestMapChange(+0xDC record) (H). M: a "press a button to leave" exit.
+* **Events / scripted scenes:** three player-action sequences (F074 / F102): 0x8017E77C (EndScene, motion, an effect),
+  0x8017E950 (camera switch 0x8017EE68; the F074 helper 0x8017EC2C zooms the camera in (distance shrinking faster each frame, floor 0x12C); once the distance is below 0x190 it opens message
+  D_80183058 with a motion and PlaySe(0x7E7), then two more messages D_80183080 / D_801830B4 chained on the answer,
+  closed at the end), 0x8017EC84 (a fall with AddFallSpeedLimited 0x1A000 until landing, then BeginScene) (H).
+* **Exits:** the pad-triggered RequestMapChange above; P01 exits (H); destinations unknown (data).
+* **Sound:** PlaySe(0x7E7) (H).
+
+#### Names: SC03_126
+No own functions (all shapes are P01-P03, F006, F074, F102 or lone shapes).
 
 ## Chapter: archive SC04
 
