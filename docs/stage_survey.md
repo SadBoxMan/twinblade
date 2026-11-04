@@ -316,7 +316,7 @@ Addresses are in the first stage (families.md `first=`). Actor state = +2, subty
   gives up (H). Melee hit states 0x80184A94 / 0x80184C00: ActorSegmentHitsPlayer -> sound 0xCB2 and SetGrabReaction
   (3, 0x18) for subtypes 2-3 else (1, 0x14) (H). 0x80184B6C throws kind 0x19F (sound 0xCB3) or 0x1A7 (subtype 2)
   at script frame 0x17 (H); the thrown model lands with 0xCB4 (0x801851D0, H). 0x80183CAC: a hovering variant
-  (y kept 0x80-0x100 above Musashi, sound 0x702, state 0xA after 0x78 frames close) (M). Hurt 0x80184768-ish:
+  (y kept 0x80-0x100 above Musashi, sound 0x702, state 0xA after 0x78 frames close) (M). Hurt 0x80184768:
   TakeDamageAndRecoil + 0xA74 (H); death 0x801840FC: puffs (SpawnKind205) and 0xCBA, FreeActor (H). 0x80182F00
   spawns a kind-0x12C copy (subtype 1) on solid ground (H). Kind 0x12C = this actor (M: sc03_089 tests kind 0x12C).
   **Where in the first stage:** 0x80182F00-0x80185398.
@@ -329,8 +329,34 @@ Addresses are in the first stage (families.md `first=`). Actor state = +2, subty
 | 0x80184B6C | SoldierThrow | SpawnActor 0x19F / 0x1A7, 0xCB3 | M |
 | 0x801840FC | SoldierDeathPuff | SpawnKind205 puffs, 0xCBA, FreeActor | M |
 
-### F046 (3 stages: sc02_026 sc02_027 sc02_028), F052 (sc02_027 sc02_028), F049 (sc02_026-028, sc03_092)
-* Not read in this pass (no time); F049 recurs only in sc03_092 among G4 stages.
+### Families not in G4's stages, or read only from the digests (L-M, one line each)
+* **F046** (sc02_026 sc02_027 sc02_028; 0x8017D434-0x8017F9D4): an enemy with TargetInSight / IsOnScreen alert
+  (sound 0x64B or 0x652 by distance), TakeDamage + SetReactionStep, spawns 0x153, props; sounds 0x64A, 0x478,
+  0x47B (H for the calls; M an SC02 enemy kind).
+* **F049** (sc02_026-028, sc03_092; 0x8017DAB8-0x8017E02C): flag-keyed objects: GetFlag(table[subtype]) picks the
+  model, SetFlag(table[subtype], 1) when used, spawns 0x150, a MimeBlend model that bursts into props (H for the
+  calls; M a breakable / openable object remembered by flag).
+* **F052** (sc02_027 sc02_028; 0x8017E7F8-0x80189CC4): a room set tied to flag 0xAE (GetFlag x3) with its own exit
+  steps (sound command 4 0x6CA, 0x6CC) and many sound pairs (0x684 / 0x685, 0x675 / 0xAAE, 0x686, 0x6CB) (H for
+  the calls; L a machine room). Note F055 clears flags 0xAE / 0xAF / 0xB0 on warp (H).
+* **F056** (sc02_031 sc03_006 sc03_014/015 sc03_117-119 sc05_010; 0x8017DB98-0x8017F52C): an effect / scene set
+  built on Obj68 effects (SpawnObj68On x4, StartCameraShake, EndScene, SetPlayerMotion, sound 0x7BC) (H for the
+  calls; M a scripted cutscene effect, e.g. a transformation or explosion).
+* **F059** (sc02_039 sc03_108; 0x8017D01C-0x8017F050): camera set-ups plus spawners of kinds 0x199 / 0x1A9 and a
+  nearest-source panned sound 0x6DA (H for the calls).
+* **F060** (sc02_041 sc04_002 sc04_005 sc04_007; 0x8017E654-0x801845F0, 41 shapes): an actor set spawning kind
+  0x1EB with timers and a panned sound, scripted states (SetScript x4) (H for the calls; L an SC04 enemy).
+* **F061** (sc02_041 sc04_002 sc04_005): a ground enemy (SetupActor + SpawnShadow, TurnStepToTarget chase,
+  TraceMap, sounds 0xA9C / 0xB6B, ResetPlayerAfterHit) (H for the calls).
+* **F062** (sc02_041 sc04_002 sc04_004 sc04_011): effect set that damages Musashi (DamagePlayerHp, StartRumbleScript,
+  sounds 0x7EC / 0x7F4, 18 SpawnEffect) (H for the calls; M a trap blast).
+* **F063** (sc02_041 sc04_002 sc04_004): kind with a 0x23F companion, despawns when far (IsActorFar), sounds 0x98A /
+  0x98B (H for the calls).
+* **F064** (sc02_041 sc04_005 sc04_008): an actor that runs at / around Musashi (HeadingToPlayer, PlayerFlag800),
+  spawns 0x244, sounds 0xB41 / 0xB42, dies in SpawnKind205 puffs (H for the calls).
+* **F065** (sc02_041 + ten SC04 stages): effect helpers tied to kind 0x245 (FindActorByKind, props, timers) (H for
+  the calls).
+* **F066** (sc02_041 sc04_002 sc04_007): three MoveCollide movers (minor).
 
 ### F047: splitting blob (6 stages)
 * **Stages:** sc02_026 sc02_035 sc03_090 sc03_091 sc03_094 sc03_098
@@ -360,26 +386,24 @@ Addresses are in the first stage (families.md `first=`). Actor state = +2, subty
   = parent yaw + subtype (H).
 
 ### F053: screen-space spawner + sound (8 stages: sc02_027 sc02_028 sc03_099-sc03_103 sc03_105)
-* 0x80189EB0..: timer, when on screen SpawnActorFromDef; a helper plays 0x6D5 and 0x856 / 0x857 panned by
+* first stage sc02_027 0x80189EB0-0x8018A4A4: timer, when on screen SpawnActorFromDef; a helper plays 0x6D5 and 0x856 / 0x857 panned by
   ProjectPoint (H in sc03_099 0x80182870-0x80182E64). Meaning L (falling things, drips?).
 
 ### F054: switch / gate set that sets progress 0x172 (4 stages: sc02_028 sc03_097 sc03_101 sc03_104)
-* Set-up reads GetFlag(table[subtype]) (H); touch -> StartEvent + sound 0x700 (H); 0x80180CB8 (sc03_101): event
+* First stage sc02_028 0x80181EDC-0x8018292C (read in sc03_101 0x80180400-0x80180E50). Set-up reads GetFlag(table[subtype]) (H); touch -> StartEvent + sound 0x700 (H); 0x80180CB8 (sc03_101): event
   done, SetFlag(table[subtype], 1), when all flags in the table are set SetProgress(0x172) (370) (H). M: several
   switches/seals, all done = story step.
 
 ### F055: warp disc (8 stages: sc02_028 sc03_089-sc03_092 sc03_097 sc03_101 sc03_104)
-* Sprite disc (0x801829BC-ish set-up; companion kind 0x1E1; may be closed by GetVar(+0xFC)); grows to full size,
+* First stage sc02_028 0x801829BC-0x80182F88. Sprite disc (set-up; companion kind 0x1E1; may be closed by GetVar(+0xFC)); grows to full size,
   Musashi standing within 0x30 and level -> StartEvent (position packed), SetFlag(0xAE/0xAF/0xB0, 0), then
   IsEventDone -> RequestMapChange(+0xDC) (H, read in sc03_089 0x801881D0-0x8018879C). Sound 0x701 when it opens.
 
-### F056 (sc02_031 ...), F059 (sc02_039, sc03_108), F060-F066 (sc02_041 + SC04): not in G4's stages; not read.
-
-### F057: flying diver, variant (10 stages: sc02_035 sc03_094 sc03_099 sc03_103 sc03_110 ...)
+### F057: flying diver, variant (10 stages: sc02_035 sc03_094 sc03_099 sc03_103 sc03_110 sc03_113 sc03_115 sc03_117 sc05_002 sc05_007; first sc02_035 0x801832D4-0x80183E68)
 * Same behaviour as the F089 diver (wander with pitch, dive at Musashi with 0x6FF, off-screen respawn), without the
   companion / bomb (M, from sc03_099 0x8017F66C-0x80180200).
 
-### F058: spinning blade / pendulum and platform (5 stages: sc02_035 sc03_098-sc03_101)
+### F058: swinging hazard and platform (5 stages: sc02_035 sc03_098-sc03_101; first sc02_035 0x8017D398-0x8017D85C)
 * SetupActorAlt platform spawning 0x1C4 with CarryPlayer; a swinging part (rcos, UpdateModelRot,
   ActorSegmentDamagesPlayer, sound 0x6A5) (H in sc03_099 0x8017F0D0-0x8017F538). M: swinging hazard.
 
@@ -391,6 +415,17 @@ Addresses are in the first stage (families.md `first=`). Actor state = +2, subty
   Bomb 0x80184D7C-0x80185098 rides the parent's bone until released, on landing spawns 0x1AA + 8 x 0x1B0, 0x705 (H);
   0x1AA blast ring 0x801855BC (grows, HitPlayer within its radius) (H); 0x1B0 debris 0x801858BC (H).
   0x80181474: player-action effect 0x19 (H). **Where:** 0x80181474-0x80185C58.
+| shape (sc03_089) | proposed | evidence | conf |
+|---|---|---|---|
+| 0x80183CE8 | TrackNearestSources | two nearest of four kinds -> SetSeqPoint 1 / 2 | M |
+| 0x8018406C | DiverInit | SetupActor, spawn companion 0x178 | M |
+| 0x801841E8 | DiverWander | pitch heading, MoveCollidePassable | M |
+| 0x801844C8 | DiverDive | turn, 0x6FF, swoop, return | M |
+| 0x80184D7C | BombInit | model + sprite, parent serial | M |
+| 0x80184F98 | BombFall | landing -> 0x1AA + 8 x 0x1B0, 0x705 | H |
+| 0x801855BC | BlastRingInit | model, script | M |
+| 0x80185678 | BlastRingGrow | scale up / hold / shrink, hit test | M |
+| 0x801858BC | DebrisInit | random velocity, gravity | M |
 
 ### F090: drifting 0x19E creature + camera bits (2 stages: sc03_090 sc03_091)
 * Kind 0x19E (0x801874BC; first one of the kind is the leader with a path table): drifts, bobs, bounces off walls /
@@ -1046,6 +1081,34 @@ Many more own functions not proposed (time).
 | 0x8018331C | func_sc01_080_8018331C | UpdateMachineSound | sound 0xB1C with vol / pan | M |
 Many more own functions not proposed (time).
 
+### SC01_084
+* **Place:** an encounter arena (M): Musashi's entry action opens the HUD panel with sound command 0x12 (arg 2) and a
+  later one closes it with 0x13 (arg 2) (H; L: battle music on / off); attackers orbit a centre and damage the player;
+  a phase counter D_801270D8 runs to 6 (H); the end sequence (0x80180E74) fades the screen through white
+  (func_80016450), CloseHudPanel, EndActionTable2, SpawnActorFromDef(D_8018A9D8) (H) (M: a fight that ends in a
+  reward or exit object; L: a mini-boss). No progress values. Entry partial (time).
+* **Size:** 211 functions (own 130, F013 x15, F010 x3, F011 x3, F012 x3; P01-P03; 21 actor blocks, 3 PLAYER-ACTION-MAIN).
+* **Actors:** 0x8017EF28: orbiting attacker: angle +0xDC steps by D_8018A6EC around a centre per index (+0x70),
+  bobs (rsin), ActorSegmentDamagesPlayer, sound 0x4B5 at a set time, on hit (+0x5C & 1) TakeDamage + recoil (H).
+  0x8017F218 / 0x8017F308 / 0x8017F378: SpawnActor(0x26), sounds 0x4BA / 0x4AA (H). 0x80181310 / 0x801814E8: a
+  spawner of kinds 0x26 (x3) and 0x1D, positional sound 0x4BD (H). 0x80182D3C death effects 0x47B / 0x478 (H).
+  0x801849E4 SpawnActor(0x17). F010 (SpawnActor 0x85 debris), F011 (shooter, SpawnActor 0xBC), F012 (squash /
+  recoil helpers), F013 (Musashi warp-out / warp-in effects) (H).
+* **Events / scripted scenes:** entry action 0x8017E1AC: sound 0x1C, func_8001BFD0, SoundCmd1(2), SoundRequest(7,
+  0), StartPlayerAction(0x8017E524) (H); messages D_801A3220 / 3288 / 32A4 in Musashi's action phases (H).
+* **Exits:** none read in own code beyond the P01 steps.
+* **Sound:** commands 0x12 / 0x13 (arg 2), 7; effects 0x4AA-0x4BD, 0x43B, 0x6A9 (H).
+
+#### Names: SC01_084
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017E1AC | func_sc01_084_8017E1AC | RoomEntryAction | sound cmds, StartPlayerAction | H |
+| 0x8017E770 | func_sc01_084_8017E770 | ActOpenBattleHud | SoundRequest(0x12, 2), OpenHudPanel | M |
+| 0x8017EF28 | func_sc01_084_8017EF28 | OrbiterStep | orbit, bob, damage player, take hits | H |
+| 0x80180E74 | func_sc01_084_80180E74 | EncounterEnd | white fade, CloseHudPanel, spawn def | M |
+| 0x801814E8 | func_sc01_084_801814E8 | SpawnerStep | kinds 0x1D / 0x26, sound 0x4BD | M |
+Many more own functions not proposed (time).
+
 ## Chapter 1: archive SC02
 
 Progress about 2 (SC02_005) and 80-370.
@@ -1426,6 +1489,62 @@ Same as SC02_000 (F014).
 | 0x8017D6D0 | func_sc02_026_8017D6D0 | CameraFixedPointUpdate | same around (0x400, 0xE20) | H |
 | 0x8017D948 | func_sc02_026_8017D948 | PlayerInRing | distance between 0x10000 and 0x19000 | H |
 | 0x8017D9D8 | func_sc02_026_8017D9D8 | PlayerFarFrom | distance > 0x8FFFF | H |
+
+### SC02_027
+* **Place:** a room of the SC02_026-028 set (F045/F046/F048-F053 shared, owned elsewhere) with its own camera zones, a
+  **stationary emitter enemy** that is gone for good once destroyed (flag 0xB4) and flag-0xAF-driven start-up
+  (H). F023 sets progress 0x5A (90) (H).
+* **Size:** 323 functions (own 46; shared: F052 (49), F045 (39), F046 (35), F048 (21), F013 (15), F023 (12),
+  F024 (11), F053 (7), F049 (6), F050 (5), F035/F051 (3), 25 lone shared shapes; P01 x10, P02, P03).
+* **Actors:**
+  * Camera: 7 camera modes 0x8017EE50-0x8017F1E4 and zone updates 0x8017F2B8-0x8017F858 through S75 0x8017F918 (as
+    SC02_026's camera code) (H).
+  * 0x8017FCAC: a room sequencer (D_801DA9B4 steps) whose step 0 checks **flag 0xAF** and then pre-sets a state
+    (func 0x8017FED4(D_801A9564, 0x36)) (H; M: a door or machine already opened).
+  * A6 (0x80180058..0x80180770): a machine with a distance-volume loop sound 0x674 (0x801806FC) (H).
+  * **Emitter** (set-up 0x8018102C, absent once **flag 0xB4** is set): when Musashi is in front within 0x380 it turns to
+    him and spawns up to 10 segments of kind 0x175 (SpawnActorFromDef, table D_8018F298), loop sound 0x68B (H); when
+    hit 12 times (+0x5E == 0xC) it bursts: 6 x kind 0x18B, SpawnActorArg(0x1A1) x3, sound 0x68C (0x80181328) (H); its
+    death state 0x801812CC stops 0x68B, **SetFlag(0xB4)**, drops (func_8002A04C) (H). M: a flame / steam jet turret.
+  * A10 (0x80181B20 / 0x80181D14): a bouncing object (two bounces, sound 0x9C5, then a timer) (H).
+  * F052 / F053 / F045-F051 actors (owners describe); 0x80183344 SpawnActorArg(0x156) (H).
+* **Exits:** P01 exit 0x8017EB58 also stops loop 0x675 (SoundRequest(4, 0x675)) (H).
+* **Sound:** loops 0x674, 0x675, 0x68B (H).
+
+#### Names: SC02_027
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017EB58 | func_sc02_027_8017EB58 | RoomExitStep | P01 exit + stop 0x675 | H |
+| 0x8017FCAC | func_sc02_027_8017FCAC | RoomSequencer | step machine, flag 0xAF | M |
+| 0x801806FC | func_sc02_027_801806FC | MachineLoopSound | sound 0x674 volume by distance | H |
+| 0x8018102C | func_sc02_027_8018102C | EmitterInit | absent once flag 0xB4 set; SetupActor | H |
+| 0x801810A0 | func_sc02_027_801810A0 | EmitterFire | TargetInFront 0x380, spawns kind 0x175 x10, sound 0x68B | H |
+| 0x801812CC | func_sc02_027_801812CC | EmitterDie | stop 0x68B, SetFlag(0xB4), FreeActor | H |
+| 0x80181328 | func_sc02_027_80181328 | EmitterHitCheck | 12 hits -> debris 0x18B x6, 0x1A1 x3 | M |
+| 0x80181D14 | func_sc02_027_80181D14 | BouncerUpdate | two bounces with sound 0x9C5 | M |
+~38 more own functions not proposed.
+
+### SC02_028
+* **Place:** the third room of the SC02_026-028 set (F045/F046/F048-F053 shared with SC02_026/027; F054/F055 with
+  SC03_097/101/104), with camera zones and a flag-0xB0 start-up like SC02_027's (H). Shared F054 **sets progress
+  0x172 (370)** once all four flags of its table D_801A4EB0 are set (each instance sets its own flag; H, ann line
+  ~3415). L: four switches / four captives freed -> the chapter's last step (370 is the top of the brief's range).
+* **Size:** 331 functions (own 28; shared: F052 (49), F045 (39), F046 (35), F048 (21), F013/F022 (15), F054 (14),
+  F024 (11), F053 (7), F049 (6), F050/F055 (5), F051 (3), 31 lone shared shapes; P01 x12, P02, PLAYER-ACTION x1).
+* **Actors:** camera modes 0x8017F054-0x8017F34C and zone updates 0x8017F420-0x8017F8F4 (S75) (H). 0x8017FD30:
+  room sequencer, step 0 tests **flag 0xB0** (same shape of code as SC02_027's 0x8017FCAC with flag 0xAF) (H).
+  0x8017FFC8: returns 0x39 / 0x3B / 0x45 by D_8012704C (0, 1 with flag 0xAE -> 0x39 else 0x3B, 2) (H; M: picks a
+  model / script id by a mode). 0x8018144C SpawnActorArg(0x156). F022 draw helpers wrap own callbacks 0x80183918-
+  0x80184018 (H). F054 actors start events D_801A4DF4, D_801A4DFC, D_801A4E80, D_801A4E88 (H; owner describes).
+* **Exits:** P01 exits (data destinations).
+* **Unknown / notes:** the four F054 flags' ids are data (D_801A4EB0).
+
+#### Names: SC02_028
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017FD30 | func_sc02_028_8017FD30 | RoomSequencer | step machine, flag 0xB0 | M |
+| 0x8017FFC8 | func_sc02_028_8017FFC8 | PickModeId | 0x39/0x3B/0x45 by D_8012704C and flag 0xAE | H |
+~26 more own functions not proposed (camera modes and callbacks).
 
 ## The village and its surroundings (archive SC03)
 
@@ -1895,6 +2014,77 @@ n more own functions not proposed: about 80.
 | 0x8017DE18 | func_sc03_012_8017DE18 | QuakeSceneEnd | shake + RequestMapChange | H |
 | 0x8017DEF0 | func_sc03_012_8017DEF0 | QuakeCameraUpdate | camera set by state | M |
 | 0x8017E008 | func_sc03_012_8017E008 | DustSpriteInit | StartSpriteAnim | M |
+
+### SC03_014
+* **Place:** a story map with a **big multi-phase fight** (F082, this group) that runs progress 0x2BC (700) ->
+  0x2C6 (710) -> 0x2D0 (720) -> 0x2DA (730) (H: SetProgress calls in F082 0x80184F14 / 0x80185380, tests in
+  0x80185180 / 0x801856C4). Also F020 (other group) sets progress 0x85 (133) with flag 0x16, or flags 0x17-0x1A,
+  by D_80126B3A (H), and F013 / F023 / F024 code like sc03_006 (M: same region). No own code: every function is
+  family, S-shape, stub or P01/P02 (H).
+* **Size:** 313 functions (own 0, stubs 14, 22 dispatchers, S 39; F082 75, F020 52, F013 15, F022 15, F056 15, F023 12,
+  F024 11, F017 8, F029 7, F009 3, F035 3, F038 3, F083 3, F084 3; P01 x8, P02, four PLAYER-ACTION-MAIN). The split
+  pieces _o0 / _post are merged in the digest.
+* **Actors / boss (F082):**
+  * Opening trigger 0x80184A08 (same pattern as sc03_006's set-piece): events D_8018FE60 / D_8018FE70 by boss flag
+    0x8B; with GetStatsByteC0() == 3 and a player action sets flag 0xB9, SoundCmd1(0), sound 0xBD8 (H).
+  * Phase 1 (0x80184F14): after 6 counted hits sets progress 0x2C6, SoundCmd1(1), sound 0x8B5 then SoundRequest(0xD,
+    0x8B5) (H).
+  * Phase 2 (0x80185180): from progress 0x2D0: SoundCmd1(1), spawns kind 0x265 waves (args 5, 5, 0, 6), event
+    D_80190078 (H).
+  * Phase 3 (0x80185380): when the linked actor's +0x76 (HP, M) <= 0 starts an event at a computed point, then sets
+    progress 0x2DA (H).
+  * Attacker 0x801874C0: random wind-up sounds 0xA7F / 0xA80, sweeps three segments that damage Musashi
+    (ActorSegmentDamagesPlayer, hit kind 4), sound 0xA89, spawns kind 0x3DE (H). Other F082 attacks spawn 0x265 /
+    0x3DE with sounds 0xA35-0xA37, 0xA7E-0xA87 (H). Positional loop 0xBAB, 0x81E, 0x87A-0x87D; event D_80191ABC;
+    kind 0x2B4 spawned when flag 0x18 is set (H).
+  * Flag 0xB9 gates three F082 actors (H).
+* **Events / scripted scenes:** RunScript D_8018FEE0 / D_8018FFA0 / D_8018FF38 from progress 0x2BC (H); events
+  above. The flags 0x16-0x1A set in F020 are the same flags the village shop tests (0x1B-0x21 region) (H; M: a set of
+  five collected things).
+* **Exits:** P01 exits (three with SoundCmd1(1)).
+* **Sound:** 0xBD8, 0x8B5, 0xA35-0xA37, 0xA7E-0xA89, 0xBAB, 0x81E, 0x87A-0x87D, 0x445.
+* **Unknown / notes:** which creature this is is data (L: a boss). It does not set a boss flag 0x8A-0x8E itself (H).
+
+#### Names: SC03_014
+No own functions (all F082 / other families; F082 names are in G3_families.md).
+
+### SC03_015
+Same code as SC03_014 (H: identical shapes; 315 functions, two more S-shapes); differs only in data.
+
+### SC03_023
+* **Place:** the **last leg of the var-0xCC chase** begun in SC03_007 (H: same var 0xCC, runner set-up only when
+  var 0xCC == 0xE (flag_cc_is_0e), same sounds 0x525 / 0x526 / 0x529). On catching it Musashi's action puts item
+  0x4D into a free inventory slot (PutItem(func_800D0EC4(), 0x4D)), sets var 0xCC = 0xF, **progress 0x3C (60)** and
+  flag 0xE6 (func_8017D828, H). A branch checks for a free slot first (func_8017D774, H). Sets flag 0x8F at the end of
+  a timed actor (func_8017E524, H; 0x8F is next to the boss flags 0x8A-0x8E, meaning unknown).
+* **Size:** 68 functions (own 31 + dup 2, stubs 5, 3 dispatchers, S 13; F006 4; P01 x7, P02, two PLAYER-ACTION-MAIN).
+* **Actors:** runner (func_8017E614 set-up at Musashi's position -0x40, func_8017E70C / func_8017E79C / func_8017EA40 /
+  func_8017EB2C run with MoveCollide, sound 0x526; func_8017E834 turns to Musashi, sound 0x525; func_8017E988 caught /
+  reset: var 0xCC back to 1 unless already 0xF) (H). A spawner of kind 0x88 (sound 0x529) and a bouncing actor
+  (sound 0x532, random scripts) (H). Talk check func_8017EC30 (DistSqToPlayer + player action) (H).
+* **Events / scripted scenes:** the catch / reward PLAYER-ACTION script (func_8017D6E8 .. func_8017D8AC) (H).
+* **Exits:** P01 exits. Camera: five own camera set-ups (SetCameraUpdate) and a pad camera mode func_8017DBC4 (H).
+* **Sound:** 0x525, 0x526, 0x529, 0x532.
+
+#### Names: SC03_023
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017D6E8 | func_sc03_023_8017D6E8 | SetPlayerPose | SetPlayerByte1C2 | M |
+| 0x8017D774 | func_sc03_023_8017D774 | RewardCheckFreeSlot | func_800D0EC4 -> action mark 1 / 2 | M |
+| 0x8017D828 | func_sc03_023_8017D828 | RewardGiveItem4D | PutItem 0x4D, var 0xCC = 0xF, progress 0x3C, flag 0xE6 | H |
+| 0x8017D8AC | func_sc03_023_8017D8AC | RewardEnd | EndPlayerAction | H |
+| 0x8017D8CC | func_sc03_023_8017D8CC | RoomInitCamera | SetCameraUpdate + SnapCamera | H |
+| 0x8017DBC4 | func_sc03_023_8017DBC4 | CameraModePad | GetObjPadPressed camera | M |
+| 0x8017E230 | func_sc03_023_8017E230 | BouncerUpdate | random scripts, sound 0x532 | M |
+| 0x8017E414 | func_sc03_023_8017E414 | Spawner88Update | SpawnActorArg(0x88), sound 0x529 | H |
+| 0x8017E524 | func_sc03_023_8017E524 | TimerSetFlag8F | countdown, SetFlag(0x8F) | H |
+| 0x8017E614 | func_sc03_023_8017E614 | ChaseRunnerInit | var 0xCC == 0xE | H |
+| 0x8017E70C | func_sc03_023_8017E70C | ChaseRunnerRun | velocity + MoveCollide | M |
+| 0x8017E834 | func_sc03_023_8017E834 | ChaseRunnerFace | TurnStepToPlayer, sound 0x525 | H |
+| 0x8017E988 | func_sc03_023_8017E988 | ChaseRunnerCaught | var 0xCC reset to 1 unless 0xF | H |
+| 0x8017EA40 | func_sc03_023_8017EA40 | ChaseRunnerFlee | MoveCollide, sound 0x526 | M |
+| 0x8017EB2C | func_sc03_023_8017EB2C | ChaseRunnerLeave | MoveCollide, FreeActor | M |
+| 0x8017EC30 | func_sc03_023_8017EC30 | ChaseTalkCheck | DistSqToPlayer + player action | M |
 
 Common pieces of this run of stages (described once in G4_families.md): F045 (the kind-0x12C foot soldier enemy),
 F048 + F051 (a bundle of small actors: hazard segments, hopper with three spinning parts, shuttling platform,
@@ -2739,3 +2929,52 @@ No own functions (all are P01-P03, F033, F059, F096 or lone shapes named where t
 | 0x80180FBC | func_sc03_116_80180FBC | OpenEffectMain | ACTOR-MAIN of A1 | M |
 | 0x801814B0 | func_sc03_116_801814B0 | SpriteFxMain | ACTOR-MAIN of A2 | M |
 | 0x801822A0 | func_sc03_116_801822A0 | RoomSetSeqPoints | 4 x SetSeqPointN | H |
+
+### SC03_117
+* **Place:** unknown; a large scripted room whose main object wakes after boss flag 0x8C (H) in a camera-shaking event
+  that sets flag 0xBB (H). Sets progress 0x5A (90) through the F023 chest-type actor (H); one mover appears only for
+  progress 900-999 (0x8017FCF0) (H).
+* **Size:** 189 functions (own 47, lone-shared 26, family 75: F093 x29, F056 x15, F023 x12, F057 x10, F009, F035,
+  F036; 17 actor dispatchers, 2 player-action dispatchers, 10 stubs; P01 with extra steps, P02, P03).
+* **Actors / events (main points only):**
+  * Wake-up object, state 0x8017E498 (own): when Musashi is within ground distance 80 and not in player state 2/3 it
+    starts event D_8018865C (flag 0x8C clear) or D_8018866C (set) (H). With flag 0x8C set it then waits for Musashi to
+    come back with GetStatsByteC0() == 4 (L: a particular power / scroll), gives him player action script
+    D_80188350 (SetPlayer1C4And21C(4, ..)), turns music off 0x5A frames later (SoundCmd1(0)), swaps its sprite
+    (0x8017EA1C) and, when his action ends, starts event D_8018868C (0x8017E6A0) (H).
+  * Wake-up sequence 0x8017E6EC (own): camera shakes every 8 frames, then 11 parts SpawnActorArg(0x1E0, 0-10), sound
+    0x866 / 0x865, motion steps (0x8017EB34 / 0x8017ECC4), SpawnActor(0x23A) with 0x868 and stronger shakes; when that
+    child reports done (+0xE2) SetFlag(0xBB, 1), func_8002959C, stop 0x868 (H). L: a giant awakened / a structure that
+    rises.
+  * Flag-0xBB users: sprite 0x8017EA1C and model set-up 0x8017F894 (GetFlag(0xBB) picks the "after" look) (H).
+  * A4 / A5 (0x8017EFF0, 0x8017F25C, own): VRAM image save / restore (StoreImage / LoadImage, 0x8017F298 / 0x8017F2D8)
+    around a sprite actor that spawns kind 0x2B0 (H). 0x8017EE78: MoveImage texture animation (H).
+  * A6 / A7 (0x8017F568, 0x8017F750, own): a moving object with a loop sound 0x756 by distance (0x8017F5A4) and four
+    ActorSegmentHitsPlayer tests; variant 0 starts event D_801887B4 when Musashi is within 0x60 (0x8017FDB4) (H).
+  * Progress 900-999 mover 0x8017FCF0: a model launched with local velocity z 0xC0000 (H).
+  * Families: F093 chained creature, F056 / F057 creatures, F023 reward actor (SetProgress(0x5A)), F009 / F036
+    effects (H).
+* **Events / scripted scenes:** D_8018865C / D_8018866C / D_8018868C / D_801887B4 (H); player-action sequences
+  0x8017CD9C (EndScene, SetPlayerMotion) and 0x8017DFE8 (timed, 0x8017E024 / 0x8017E058) (H).
+* **Exits:** P01 (several step tables, 11 P01 functions) (H); destinations unknown (data).
+* **Sound:** 0x865 / 0x866 / 0x868 (wake-up), 0x756 (mover), SoundCmd1(0) music stop (H).
+* **Unknown / notes:** 30+ further own helpers (effects, sprite set-ups) not read in detail; camera 0x8017E118 /
+  0x8017E218 (pad toggle).
+
+#### Names: SC03_117
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017E118 | func_sc03_117_8017E118 | RoomInitCamera | SetCameraUpdate(0x8017E1DC) | H |
+| 0x8017E498 | func_sc03_117_8017E498 | WakeObjApproach | flag 0x8C events, ability check, action script | H |
+| 0x8017E6A0 | func_sc03_117_8017E6A0 | WakeObjStartEvent | StartEvent(D_8018868C) | H |
+| 0x8017E6EC | func_sc03_117_8017E6EC | WakeObjRiseSequence | shakes, 11 x 0x1E0, 0x23A, SetFlag(0xBB) | H |
+| 0x8017CF24 | func_sc03_117_8017CF24 | IsWakeActionScript | g_PlayerActionScript == D_80188350 | H |
+| 0x8017EA1C | func_sc03_117_8017EA1C | WakeObjSpriteInit | sprite by flag 0xBB | M |
+| 0x8017EE78 | func_sc03_117_8017EE78 | StepTexAnim | MoveImage x2 | H |
+| 0x8017F298 | func_sc03_117_8017F298 | SaveVramRect | StoreImage | H |
+| 0x8017F2D8 | func_sc03_117_8017F2D8 | RestoreVramRect | LoadImage | H |
+| 0x8017F5A4 | func_sc03_117_8017F5A4 | MoverLoopSound | 0x756 by distance | H |
+| 0x8017F894 | func_sc03_117_8017F894 | AfterWakeModelInit | GetFlag(0xBB), SpawnActor(0x2B0) | M |
+| 0x8017FCF0 | func_sc03_117_8017FCF0 | LateMoverInit | progress 900-999 gate | H |
+| 0x8017FDB4 | func_sc03_117_8017FDB4 | MoverNearEvent | StartEvent(D_801887B4) within 0x60 | H |
+About 34 more own functions not proposed.

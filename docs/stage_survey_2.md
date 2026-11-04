@@ -500,6 +500,38 @@ About 30 more own functions not proposed.
 | 0x8017EE78 | func_sc04_016_8017EE78 | CutsceneStart | clears flags, StartEvent | H |
 About 30 more own functions not proposed.
 
+### SC04_018
+* **Place:** a village version (H: shares F067 / F068 / F069 / F070 / F071 / F100 with the village SC03_001 and its
+  variants; mapid test 0x3069 in shared code). Story: **sets progress 0x280 (640)** (helper 0x8017F1A8), **0x2B2
+  (690)** after an event (0x8017FF70) and **0x2BC (700)** (0x8017E950) (H); villagers appear only from progress
+  0x2A8 (H), so this version follows SC04_015 (0x29E / 0x2A8) (M). Shared village code also sets progress 100 and
+  0x3AC (shop / item code S4 0x80189540, F068) (H; not specific to this map).
+* **Size:** 525 functions (own code is F111, 52 shapes shared only with SC04_019; F112 with SC05_017; F067 (109
+  shapes), F068, F069, F070, F071, F100, F101, S-shapes). Compared with SC03_001 the village core is the same; F111 /
+  F112 are this version's villagers (H).
+* **Actors:**
+  * F111 villagers (0x8017E628-0x801877B0): each set-up places a model, sets a script and a talk marker; several are
+    gated by progress (0x8017EAFC: needs >= 0x2A8; 0x8018001C: only for 0x2A8 <= progress < 0x2B2) and by a range test
+    0x80184BAC(8, 0x14) (H; likely the in-game clock 8:00-20:00, L). 0x8017E8FC picks villager script D_80191110 or
+    D_80191270 by progress < 0x2BC (H).
+  * 0x8017FF70: waits for Musashi's flag bit 0x08000000, starts event D_80191744, **SetProgress(0x2B2)**, then the
+    actor walks to D_8019171C (H) (same pattern as SC04_015's 0x8017E0CC).
+  * 0x8017E950: makes the kind-0x22B actor advance (+0x34 = 1) and raises progress to 0x2BC if lower (H).
+  * Script helpers: 0x8017F0D8 / 0x8017F108 swap flags 0x10C / 0x10D, 0x8017FA34 sets flag 0x107, 0x8017F1A8
+    SetProgress(0x280) (H).
+  * F112 handlers (show / place / script steps used by the villagers, see families). F067 sets flags 0x110, 0x113,
+    0x115, 0x116 once each (shared code, H).
+* **Events / scripted scenes:** event D_80191744 -> progress 0x2B2 (H); the rest is in scripts (data).
+* **Exits:** S10 0x80180134 RequestMapChange(D_80190F88) (H; destination unknown), plus the village exits in shared
+  code.
+* **Unknown / notes:** the clock reading of 0x80184BAC / 0x80184BD0 is a guess (L).
+
+#### Names: SC04_018
+Own code is the family F111 (see G6_families.md); no other own functions.
+
+### SC04_019
+* Same code as SC04_018 (identical own code, F111 / F112 at the same addresses; H); differs only in data.
+
 ## Chapter: archive SC05
 
 Progress about 920-1170.
@@ -998,6 +1030,47 @@ Progress about 920-1170.
 | 0x8017DB54 | func_sc05_011_8017DB54 | EventSceneRun | camera moves by flags, skip on pad | H |
 | 0x8017DC50 | func_sc05_011_8017DC50 | EventSceneEnd | SetProgress(0x398), RequestMapChange | H |
 
+### SC05_017
+* **Place:** a village variant (shares F067 / F068 / F069 / F071 / F072 / F007 / F009 with the village sc03_001, H)
+  (M: the village in this part of the story). Own progress code: SetProgress(0x3A2) (930) in callback 0x8017E5F4
+  (H); one actor exists only while progress is 0x384-0x3A1 (900-929) (0x8017E6D8, H); data chosen by progress ==
+  0x3AC (940) or 0x3E8-0x44B (1000-1099) without flag 0x12D (0x80183E44, H). The 0x3A2 -> 0x3AC step (0x80184BA0)
+  and the NPC band selector (0x80184B44: < 0x3B6 / < 0x3E8 / < 0x44C / < 0x4B0 / later) are F068 (H). The
+  set(100) in progress.txt is in the own item / message handler 0x80189240: when the item flag given is 0x1F it sets
+  progress 100 and flags 0xEB, 0x91, var 0xCE (H; M: village item code carried over, not a story step of this map).
+* **Size:** 473 functions (own 67 + 7 dup, lone-shared 56, family 281: F007 F009 F067 F068 F069 F071 F072 F100
+  F112; 41 actor dispatchers, 2 player-action dispatchers, 12 stubs; P01, P02).
+* **Actors:** most NPC actors (A8-A37) are F067 / F068 / F069 / F112 villager code with a few own states each:
+  RunScript calls for their talks (D_80191248, D_80191318, D_80191A54, D_80191BA8, D_80191F38, D_80191F70,
+  D_801920BC, D_801921A0, H) and FindActorByKind(0x363 / 0x365 / 0x372 / 0x37D) partner look-ups (H). F100 (A29)
+  spawns village set pieces 0x13F, 0x66, 0x65, 0x14C, 0x335, 0x3D9 in progress bands 100-599 / 200-419 (H).
+  A39: a talker (S20 / S25). A40-A41: F007.
+  * 0x8017E6D8 (own): a model placed at D_80191010 with script D_801B990C, only in progress 0x384-0x3A1 (H).
+  * 0x8017E614 (S2): when GetPlayerAction() == 0, StartEvent D_80191028, then frees itself (H): an arrival scene.
+* **Events / scripted scenes:** script callbacks set flags 0x110 (0x8017F174), 0x115 (0x80182540), 0x12D
+  (0x80183DB8), and 0x124 with var 0x8A |= 0x40 (0x80181C1C) (H); SetProgress(0x3A2) (0x8017E5F4) (H).
+* **Exits:** P01-style exit 0x8017DEA0: SoundCmd1(1) is skipped when var 0xCE is set or progress is in 0x384-0x3F1
+  or 0x460-0x491 (H; M: the music keeps playing in those story stretches). 0x8017E778 picks a value 0x89 / 0x65 /
+  0x28 / 0xF / 0x10 by the same progress bands and D_80078EAE (L: the village tune id).
+* **Sound:** the message handler 0x80189240 plays 0x46F, 0x472, 0x474, 0x5EE, 0x45F (H; M: menu / shop sounds).
+* **Unknown / notes:** S9 0x8018596C tests map id 0x3069 (H). Not all own functions read (time).
+
+#### Names: SC05_017
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017DEA0 | func_sc05_017_8017DEA0 | RoomExitStep | StartExitFade, music kept by progress / var 0xCE | H |
+| 0x8017E5F4 | func_sc05_017_8017E5F4 | SetProgress3A2 | SetProgress(0x3A2) | H |
+| 0x8017E614 | func_sc05_017_8017E614 | EventArrival | GetPlayerAction()==0: StartEvent D_80191028 | H |
+| 0x8017E6D8 | func_sc05_017_8017E6D8 | StoryPropInit | only for progress 0x384-0x3A1 | H |
+| 0x8017E778 | func_sc05_017_8017E778 | PickVillageTune | value by progress band | L |
+| 0x8017F174 | func_sc05_017_8017F174 | SetFlag110 | SetFlag(0x110, 1) | H |
+| 0x80181C1C | func_sc05_017_80181C1C | SetFlag124Var8A | var 0x8A bit 0x40, SetFlag(0x124) | H |
+| 0x80182540 | func_sc05_017_80182540 | SetFlag115 | SetFlag(0x115, 1) | H |
+| 0x80183DB8 | func_sc05_017_80183DB8 | SetFlag12D | SetFlag(0x12D, 1) | H |
+| 0x80183E44 | func_sc05_017_80183E44 | PickSceneByProgress | data by progress 0x3AC / 0x3E8-0x44B | H |
+| 0x80189240 | func_sc05_017_80189240 | ItemMessageHandler | message / item steps, SetProgress(100) for item 0x1F | M |
+(about 55 more own functions not proposed.)
+
 ## Chapter: archive SC06
 
 Progress about 1210-1590.
@@ -1490,3 +1563,44 @@ About 30 more own helpers (sprite effects, part set-ups 0x80182638..0x80182B4C) 
 | 0x8017FA1C | func_sc06_024_8017FA1C | MechShotFly | 0x954, impact 0x95D | M |
 | 0x80180C9C | func_sc06_024_80180C9C | EventNearStart | StartEvent(D_801936E4) | H |
 | 0x80180724 | func_sc06_024_80180724 | Spawner263 | SpawnActor(0x263) near Musashi | M |
+
+### SC06_025
+* **Place:** a boss arena (H: a scripted opponent, kind 0x2CD, whose end sets progress 0x5DC (1500) in 0x80180D84;
+  an exit step 0x8017D258 also sets 0x5DC after FadeDone(4) with func_8002931C(0x41A0000) and func_8002AED0, H).
+  The F023 reward talker (SetProgress(0x5A), family code) is also present.
+* **Size:** 199 functions (own 115 + 3 dup + 22 lone-shared; F023 x12, F041 x11, F035 x3; 11 actor kinds; P01 with
+  an extra exit 0x8017D1D0-ish step that fades with StartFade(4); P02, P03).
+* **Boss:** a round-based fight without an HP check in the own code (H: no TakeDamage / ShowDamage in sc06_025; M).
+  Arena set-up 0x8017E6C0 spawns the opponent SpawnActorArg(0x2CD) and its set: 0x2C7 x4, 0x2C8 x4, 0x2CA x4,
+  0x2CB x2, 0x327 x3, 0x2C9, 0x32F x2 (H). Opponent states go through PlaceObject(D_801889F8) + SetScript
+  (0x80180284 state 2 clears flag 0x11E; 0x80180300 state 3). Each round 0x80180300 increments a round counter
+  (D_801B1714 + 1); below 4 it starts event D_sc06_025_80188E40 and sets D_801270C8 = 2, at 4 it calls the defeat
+  0x80180D84 (H: three rounds). 0x801824B4 / 0x801825EC run event D_80188D50 and react to flags 0x11E / 0x120 set by
+  the event scripts (clear them, change the opponent's script) (H). 0x801808AC (state 5) opens message
+  D_sc06_025_80189BE4 with TakePlayerControl; 0x8018098C opens message D_801897FC and waits for the answer, with
+  sounds 0x9DB (H). Defeat 0x80180D84: state 8, func_8002A088(0x190), sound 0xA98, SetProgress(0x5DC), SoundCmd1(1),
+  RunScript(D_sc06_025_80188F18) (H).
+* **Actors:** 0x8017E430 starts event D_sc06_025_801887C4 after a timer with sound 0xC0C (H; M: the opening scene);
+  0x80183228 StartEvent(D_801892CC) + 0xB01, then rise / bob 0xB02 (as in SC06_018 / 022); SpawnActor(0x3B9)
+  (0x8017D318); sounds 0xC0E, 0xC0F, 0xC10, 0xC11.
+* **Sound:** 0x801817A8 issues sound command 0x27 with an argument from table D_801894F8 indexed by the round state,
+  and waits until func_8002D80C() returns that value (H; L: switching the music track between phases).
+* **Exits:** 0x80183068 RequestMapChange(D_sc06_025_801886A4) after placing kind 0x2CD at D_80188EDC (0x80183020
+  area, H); destination unknown (data).
+
+#### Names: SC06_025
+| address | current | proposed | evidence | conf |
+|---|---|---|---|---|
+| 0x8017E6C0 | func_sc06_025_8017E6C0 | ArenaInit | spawns 0x2CD and its set | H |
+| 0x8017E430 | func_sc06_025_8017E430 | EventOpening | timer -> StartEvent(D_801887C4), 0xC0C | H |
+| 0x80180300 | func_sc06_025_80180300 | RivalNextRound | round counter, StartEvent(D_80188E40) or defeat | H |
+| 0x801808AC | func_sc06_025_801808AC | RivalTalk | OpenMessageEx(D_80189BE4), TakePlayerControl | H |
+| 0x8018098C | func_sc06_025_8018098C | RivalAsk | OpenMessageEx(D_801897FC), answer | H |
+| 0x80180D84 | func_sc06_025_80180D84 | RivalDefeat | SetProgress(0x5DC), RunScript(D_80188F18) | H |
+| 0x801824B4 | func_sc06_025_801824B4 | RivalEventFlags | event D_80188D50, flag 0x11E | M |
+| 0x801825EC | func_sc06_025_801825EC | RivalMsgFlags | flag 0x120, message answer | M |
+| 0x801817A8 | func_sc06_025_801817A8 | SyncSoundCmd27 | SoundRequest(0x27, table), func_8002D80C | M |
+| 0x80181700 | func_sc06_025_80181700 | TurnToFront | TurnStep to heading 0 | H |
+| 0x8017D258 | func_sc06_025_8017D258 | RoomExitAfterBoss | FadeDone(4), SetProgress(0x5DC) | H |
+| 0x80183068 | func_sc06_025_80183068 | RoomExit | RequestMapChange(D_801886A4) | H |
+| 0x80183228 | func_sc06_025_80183228 | EventObjStart | StartEvent(D_801892CC), 0xB01 | H |
