@@ -1776,3 +1776,63 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8017DECC,stage:sc05_000,ThrownHurtMain,ThrownHurtMain,M,H,PROMOTE,D_80181FD0[state](obj): the thrown hazard's state table,0
 0x8017DEF0,stage:sc03_012,QuakeCameraUpdate,QuakeCameraUpdate,M,H,PROMOTE,"the model's pitch steps by +0xE2, next at 0x400",0
 0x8017DF08,stage:sc06_014,LiftBUpdate,LiftBUpdate,M,M,KEEP,lift B's step; letter pair,0
+0x8017DF78,stage:sc03_001,DawnLightUpdate,DawnLightUpdate,M,M,KEEP,"lines not read in full; ""Dawn"" rests on the scene",0
+0x8017DF7C,stage:sc06_011,TimedBeamUpdate,TimedBeamUpdate,M,M,KEEP,"lines not read in full; ""Timed"" not settled",0
+0x8017DFB8,stage:sc07_007,EndingSceneMain,EndingSceneMain,M,M,KEEP,the ending scene's lights set (lines not all read); M,0
+0x8017E008,stage:sc03_012,DustSpriteInit,DustSpriteInit,M,H,PROMOTE,"StartSpriteAnim, an upward speed, next state",0
+0x8017E020,stage:sc01_074,CableMain,CableMain,M,H,PROMOTE,D_8018223C[state](obj): the cable's state table,0
+0x8017E044,stage:sc03_092,CameraFollowAction,CameraFollowAction,M,H,PROMOTE,"the camera's follow point eased toward the action's point (EaseValueFrac), the camera placed",0
+0x8017E074,stage:sc06_016,EventPostFight,EventPostFight,M,M,KEEP,"by a helper's result StartEvent and state 2; ""PostFight"" rests on the helper",0
+0x8017E0BC,stage:sc03_101,CameraZoomToggle,CameraZoomToggle,M,M,KEEP,a fixed focus and the camera placed; no toggle in the lines read,0
+0x8017E0CC,stage:sc04_015,EventNpcWait,EventNpcWait,M,H,PROMOTE,at its progress point SetProgress(0x29E) and EventNpcBecomeTalkable,0
+0x8017E0FC,stage:sc03_094,PushBlockSlideA,PushBlockSlideA,M,M,KEEP,push block slide A; letter pair,0
+0x8017E120,stage:sc06_030,BossMain,BossMain,M,M,KEEP,lines not read in full (a model copy and a texture strip loaded); M,0
+0x8017E180,stage:sc03_105,CameraFollow14B,CameraFollow14B,M,M,KEEP,"the camera's fields by a case (lines not all read); ""14B"" is an address",0
+0x8017E1F0,stage:sc06_024,BigMechLaunch,BigMechLaunch,M,M,KEEP,lines not read in full; M,0
+0x8017E204,stage:sc06_008,VentEmitters,VentEmitters,M,M,KEEP,lines not read in full; M,0
+0x8017E224,stage:sc06_033,EmergerUpdate,EmergerUpdate,M,H,PROMOTE,near Musashi (ground distance) he is pushed away along the heading to him,0
+0x8017E230,stage:sc03_023,BouncerUpdate,BouncerUpdate,M,H,PROMOTE,its script by a test (two bounce scripts),0
+0x8017E254,stage:sc03_094,PushBlockSlideB,PushBlockSlideB,M,M,KEEP,push block slide B; letter pair,0
+0x8017E26C,stage:sc06_016,BossAttackLoop,BossAttackLoop,M,M,KEEP,lines not read in full; M,0
+0x8017E298,stage:sc01_077,ActTurnAndCheck,ActTurnAndCheck,M,M,KEEP,lines not read in full; M,0
+0x8017E35C,stage:sc06_000,DrawMeshTris,DrawMeshTris,M,M,KEEP,a mesh drawn (lines not read in full); M,0
+0x8017E3A8,stage:sc05_004,RoomInitCamera,RoomInitCamera,M,M,KEEP,"the focus clamped and the camera placed; ""Init"" is not shown",0
+0x8017E3B0,stage:sc03_094,TargetGlowSolve,TargetGlowSolve,M,M,KEEP,lines not read in full; M,0
+0x8017E3B8,stage:sc06_014,CritterWander,CritterWander,M,M,KEEP,lines not read in full; M,0
+0x8017E3D8,stage:sc03_001,RoomFrame,RoomFrame,M,H,PROMOTE,"UpdateDayLighting, the room's step, UpdateFieldSound: the village room's frame",0
+0x8017E3F8,stage:sc06_011,SwingUpdate,SwingUpdate,M,M,KEEP,lines not read in full; M,0
+0x8017E41C,stage:sc05_002,RoomPlaySeqBlock,RoomPlaySeqBlock,M,M,KEEP,a sequence block played by case (lines not all read); M,0
+0x8017E4C8,stage:sc01_074,PropMain,PropMain,M,H,PROMOTE,D_80182254[state](obj): the prop's state table,0
+0x8017E508,stage:sc03_001,RoomEntryStepB,RoomEntryStepB,M,M,KEEP,the room entry's step B; letter pair,0
+0x8017E52C,stage:sc03_094,PushBlockIdle,PushBlockIdle,M,H,PROMOTE,"for each block actor (0x1BE) whose flag is clear, its counter + 1",0
+0x8017E5C0,stage:sc06_014,CritterCharge,CritterCharge,M,M,KEEP,lines not read in full; M,0
+0x8017E60C,stage:sc06_033,EventObjInit,EventObjInit,M,H,PROMOTE,"its script, model matrix, model hidden bit set",0
+0x8017E70C,stage:sc03_023,ChaseRunnerRun,ChaseRunnerRun,M,M,KEEP,lines not read in full; M,0
+0x8017E710,stage:sc06_016,BossLunge,BossLunge,M,M,KEEP,lines not read in full; M,0
+0x8017E73C,stage:sc03_103,SeqMeshInit,SeqMeshInit,M,M,KEEP,"RelocateSeqBlock of the room's block, counter 0, next; the Seq family word, M",0
+0x8017E744,stage:sc03_010,LaunchedModelInit,LaunchedModelInit,M,H,PROMOTE,"a local velocity from the table, hit data by its index, timer from +0x70, next state",0
+0x8017E764,stage:sc06_010,WheelHazardUpdate,WheelHazardUpdate,M,M,KEEP,lines not read in full; M,0
+0x8017E770,stage:sc01_084,ActOpenBattleHud,ActOpenBattleHud,M,H,PROMOTE,"a sound, a helper, OpenHudPanel, next phase",0
+0x8017E778,stage:sc04_004,RoomEntryStartA,RoomEntryStartA,M,M,KEEP,the room entry A; letter pair,0
+0x8017E778,stage:sc04_007,RoomEntryStartA,RoomEntryStartA,M,M,KEEP,the same in sc04_007; letter pair,0
+0x8017E780,stage:sc03_092,FlagBoardInit,FlagBoardInit,M,H,PROMOTE,"its talk marker spawned when the flag allows, surface 0",0
+0x8017E780,stage:sc03_125,ResetSceneCamera,ResetSceneCamera,M,H,PROMOTE,RequestFullReload and ResetKeptCamera,0
+0x8017E7B4,stage:sc04_000,RoomEntryStart,RoomEntryStart,M,H,PROMOTE,"a sound, a helper, fade, step + 1",0
+0x8017E7E8,stage:sc03_105,HomingShotInit,HomingShotInit,M,H,PROMOTE,"its sprite flags, hit data, hittable bit",0
+0x8017E7E8,stage:sc04_004,RoomEntryStartB,RoomEntryStartB,M,M,KEEP,the room entry B; letter pair,0
+0x8017E7E8,stage:sc04_007,RoomEntryStartB,RoomEntryStartB,M,M,KEEP,the same in sc04_007; letter pair,0
+0x8017E80C,stage:sc03_103,RoomAnimInit,RoomAnimInit,M,H,PROMOTE,"its animation counters set, next state",0
+0x8017E830,stage:sc03_103,RoomAnimTick,RoomAnimTick,M,H,PROMOTE,every 8 frames the next of 16 images queued (QueueImage),0
+0x8017E890,stage:sc03_094,PushBlockInit,PushBlockInit,M,H,PROMOTE,its push fields and table set (lines not all read),0
+0x8017E90C,stage:sc05_004,ClearPlayerVar8C,ClearPlayerVar8C,M,H,PROMOTE,D_80126B8C = 0 (g_Player +0x34),0
+0x8017E948,stage:sc04_006,SpinnerHiddenWait,SpinnerHiddenWait,M,M,KEEP,lines not read in full; M,0
+0x8017EA1C,stage:sc03_001,CameraModeVillage,CameraModeVillage,M,H,PROMOTE,two helpers on the camera and +0xA0,0
+0x8017EA24,stage:sc03_105,HomingShotFly,HomingShotFly,M,H,PROMOTE,"moves (MoveCollidePassable), on a floor hit a follow-up, else steers",0
+0x8017EA2C,stage:sc06_014,PlatformInit,PlatformInit,M,M,KEEP,lines not read in full; M,0
+0x8017EA40,stage:sc03_023,ChaseRunnerFlee,ChaseRunnerFlee,M,H,PROMOTE,a timer and SE 0x526 every 10 frames while it flees,0
+0x8017EA94,stage:sc04_005,RoomEntryStartA,RoomEntryStartA,M,M,KEEP,the room entry A; letter pair,0
+0x8017EAD8,stage:sc04_007,RoomCameraInit,RoomCameraInit,M,H,PROMOTE,the room camera's update installed and snapped,0
+0x8017EADC,stage:sc06_014,PlatformCarry,PlatformCarry,M,H,PROMOTE,"state 3 with a timer, CarryPlayer",0
+0x8017EAF4,stage:sc03_093,RoomCameraInit0,RoomCameraInit0,M,M,KEEP,camera set-up 0; number name,0
+0x8017EB04,stage:sc04_005,RoomEntryStartB,RoomEntryStartB,M,M,KEEP,the room entry B; letter pair,0
+0x8017EB2C,stage:sc03_023,ChaseRunnerLeave,ChaseRunnerLeave,M,H,PROMOTE,SE 0x526 every 10 frames as it leaves,0
