@@ -6,7 +6,6 @@ address,scope,current,proposed,confidence,source,note
 0x800140B8,exe,func_800140B8,ApplyMatrixSVToFixed,H,r274:names_exe_proposals.md:114,r279 promote
 0x80014554,exe,func_80014554,InitNop,H,r274:names_exe_proposals.md:240,r279 promote
 0x8001455C,exe,func_8001455C,Init3DNop,H,r274:names_exe_proposals.md:241,r279 promote
-0x80014564,exe,func_80014564,ZeroRect,H,r274:names_exe_proposals.md:138,r279 promote
 0x80015A08,exe,func_80015A08,CopyVecLow16,H,r274:names_exe_proposals.md:135,r279 promote
 0x800176F0,exe,func_800176F0,DrawPrimG4ScreenDithered,M,r274:names_exe_proposals.md:190,r279 fix: was DrawPrimG4ScreenNoDither
 0x80017738,exe,func_80017738,DrawPrimG4MtxDithered,M,r274:names_exe_proposals.md:192,r279 fix: was DrawPrimG4MtxNoDither

@@ -1527,7 +1527,7 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80029264,exe,GetEndingPending,GetEndingPending,L,L,KEEP,returns D_80075838; see ClearEndingPending,1
 0x8002AC98,exe,AgeItemValues,AgeItemValues,L,L,KEEP,"lines not read in full here (r274's reading: values moved by rand, clamped); L",1
 0x80014554,exe,InitNop,InitNop,L,H,PROMOTE,empty,0
-0x80014564,exe,ZeroRect,ZeroRect,L,H,PROMOTE,"memset of 0x10 bytes (a RECT-sized block, two words of a RECT pair or one 16-byte RECT record)",0
+0x80014564,exe,ZeroRect,ZeroRect,L,L,KEEP,"memset of 0x10 bytes; a RECT is 8, so what the 16-byte block is (two RECTs, a matrix row set) is not settled; no caller",0
 0x8001ABB4,exe,LoadNop,LoadNop,L,H,PROMOTE,empty,0
 0x8001D16C,exe,AppendModelChain,AppendModelChain,L,H,PROMOTE,"+0x80 = the next link (address | 0x01000000), its link cleared",0
 0x80028E24,exe,GetOptionE,GetOptionE,L,H,PROMOTE,flag 0xE; a flag-number name,0
@@ -1553,3 +1553,46 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80030538,exe,BankLoadSendBody,BankLoadSendBody,L,L,KEEP,lines not read in full; L,0
 0x80030634,exe,BankLoadSendBodyNext,BankLoadSendBodyNext,L,L,KEEP,lines not read in full; L,0
 0x80039300,exe,SeqNop,SeqNop,L,H,PROMOTE,empty,0
+0x80186304,stage:sc02_005,BossSetAnim,BossSetAnim,M,H,PROMOTE,"the part actor's (+0xCC) script from the boss's table entry n (negative: mirrored), at the end or at once; the boss states call it with their animation numbers",37
+0x801823B8,stage:sc05_008,ObstacleHitsMover,ObstacleHitsMover,M,M,KEEP,"finds actor kind 0x204, sets its +0xFE / +0x100, camera shake; what kind 0x204 is (the ""mover"") is not in reach",23
+0x8017EEFC,stage:sc06_016,BossSetPose,BossSetPose,M,H,PROMOTE,"state = n, PlaceObject at the pose, SetScript, then one of two follow-ups by the state's table flag",20
+0x8017CAD4,stage:sc06_010,DrawMeshTris,DrawMeshTris,M,M,KEEP,187 lines not read in full; M,12
+0x8017D898,stage:sc03_094,PushBlockPathFree,PushBlockPathFree,M,M,KEEP,30 lines not read in full (the move undone at the end); M,8
+0x8017EF68,stage:sc06_000,DrawMeshQuads,DrawMeshQuads,M,M,KEEP,247 lines not read in full; M,7
+0x80182BD0,stage:sc01_001,SetFaceTexture,SetFaceTexture,M,H,PROMOTE,"D_801F3040 = 1, MoveImage of face picture n into VRAM (0x280, 0x188); the prologue scene",7
+0x8017D65C,stage:sc03_121,ProbeTwoCells,ProbeTwoCells,M,M,KEEP,lines not read in full; M,6
+0x8017EE28,stage:sc03_013,HazardFaceHit,HazardFaceHit,M,H,PROMOTE,"the two points into the hazard's frame (FaceHelper), HazardHitPlayer, and on a hit g_PlayerHitFacing = the hazard's heading",6
+0x8017F8F8,stage:sc06_011,WalkerPickHeading,WalkerPickHeading,M,H,PROMOTE,"state 1, a random timer, a new heading +0xFC from the ground ahead, StopWithGravity, its script",6
+0x80180E34,stage:sc05_003,ApplyActorMatrix,ApplyActorMatrix,M,H,PROMOTE,ApplyMatrixSV with the actor's model matrix (+0x34),6
+0x8017E090,stage:sc03_030,RideReadAnalog,RideReadAnalog,M,H,PROMOTE,"by the pad type (0x41 digital, 0x73 analog) the ride's stick value into +0x210 / +0x212 / +0x20E, pad type forced to 0x73",5
+0x801824EC,stage:sc01_001,SpawnLightRing,SpawnLightRing,M,M,KEEP,"a free one of 20 sprite records with its colours (27 lines not read in full); ""Ring"" not settled",5
+0x80183DA0,stage:sc03_105,PlayBossSoundPanned,PlayBossSoundPanned,M,H,PROMOTE,"sound 0x730 with a volume and a pan from the boss's position, clamped 0-15",5
+0x8017DB04,stage:sc01_074,SpawnRideEffect,SpawnRideEffect,M,H,PROMOTE,every 4th frame SpawnEffect(6) at the rider with an offset turned by its heading,4
+0x8017E158,stage:sc01_074,DrawCableSegment,DrawCableSegment,M,M,KEEP,20 lines not read in full; M,4
+0x8017D04C,stage:sc06_006,SetPlayerCutMotion,SetPlayerCutFace,M,M,FIX,"D_801F8070 = n and RestartFaceScript on Musashi with face script 0x800D5F14 / 0x800D5FD4: a face, not a motion. M because the cut-scene reading is the stage card's",3
+0x8017E37C,stage:sc06_008,VentEmit,VentEmit,M,M,KEEP,14 lines not read in full; M,3
+0x8017E594,stage:sc01_000,DrawUnrollBand,DrawUnrollBand,M,M,KEEP,134 lines not read in full; M,3
+0x8017E5F8,stage:sc03_030,CameraModeRide,CameraModeRide,M,H,PROMOTE,"the camera's distance, angles and offset eased (EaseValue / EaseAngle), the eye placed by LocalToWorld (+0x3C..); the ride's camera update",3
+0x8017E9CC,stage:sc06_016,BossWarp,BossWarp,M,H,PROMOTE,"BossSetPose 0xD, the warp point picked by Musashi's position, PlaceObject, matrix, sound 0xA94",3
+0x8017EE30,stage:sc03_010,ResetIndicator,ResetIndicator,M,H,PROMOTE,"finds actor kind 0xC7, zeroes its sprite objects, state 0",3
+0x8017F510,stage:sc03_006,DrawSetPieceMesh,DrawSetPieceMesh,M,M,KEEP,572 lines not read in full; M,3
+0x80181260,stage:sc03_102,DropperSpawnProp,DropperSpawnProp,M,H,PROMOTE,"a prop at the point with a velocity turned by the angle, timer 0x5A",3
+0x8018388C,stage:sc03_105,BossBodyHitPlayer,BossBodyHitPlayer,M,H,PROMOTE,"on a hit of Musashi's hit box, HitPlayer(1, 0x4201, 0, n) pushed along the normalised direction, 1",3
+0x801839A4,stage:sc03_105,BossPartHitPlayer,BossPartHitPlayer,M,H,PROMOTE,"Musashi's two model points against the part's model (PathHitsModel): HitPlayer(1, 0x4201, its heading, n), 1",3
+0x8017D3E4,stage:sc04_006,RoomCameraApply,RoomCameraApply,M,H,PROMOTE,"the room camera's distance, angles and offset eased, the eye from ApplyMatrixSV plus the follow point",2
+0x8017D5E4,stage:sc04_009,SwitchTargetSetStruck,SwitchTargetSetStruck,M,H,PROMOTE,"flags5C / +0xAE / reaction cleared, SwitchTargetStruckLook, the parent's counter -1",2
+0x8017D5F0,stage:sc03_001,AvoidActorPath,AvoidActorPath,M,H,PROMOTE,"when the actor's box would be crossed, the walker sidesteps 0x40; 1",2
+0x8017DBC4,stage:sc03_023,CameraModePad,CameraModePad,M,H,PROMOTE,"pad bits 0 / 1 toggle the distance preset, then the camera eased and placed (the camera update seen in the first pass)",2
+0x8017DC10,stage:sc02_021,DrawHazardBand,DrawHazardBand,M,M,KEEP,138 lines not read in full; M,2
+0x8017DCB4,stage:sc03_012,SpawnQuakeDebris,SpawnQuakeDebris,M,M,KEEP,43 lines not read in full; M,2
+0x8017DFE8,stage:sc06_033,SwayUpdate,SwayUpdate,M,H,PROMOTE,"the sway angle steps, two sway calls with its sine / cosine",2
+0x8017E114,stage:sc06_016,BossAttackA,BossAttackA,M,H,PROMOTE,"BossSetPose 3 with its script, timer and height, two sounds, a follow-up",2
+0x8017E4DC,stage:sc02_021,HazardBandHitsPlayer,HazardBandHitsPlayer,M,H,PROMOTE,the band's span against Musashi's position in two checks; HazardBandsUpdate sets the damage on 1,2
+0x8017EA1C,stage:sc03_117,WakeObjSpriteInit,WakeObjSpriteInit,M,H,PROMOTE,"AllocActorSprite into +0xD0, InitShapeSpriteKind5 with a circle shape, colours by flag 0xBB",2
+0x8017EBE4,stage:sc03_112,MachineMimeBlend,MachineMimeBlend,M,M,KEEP,32 lines not read in full; M,2
+0x8017EFE0,stage:sc06_022,BreakableHitTest,BreakableHitTest,M,H,PROMOTE,"for each actor of kind 0x27A, the hit test against the breakable and its position put back",2
+0x801811F0,stage:sc03_102,DropPropFree,DropPropFree,M,H,PROMOTE,"the model's hide bit toggled (blink), FreeProp at the end of the timer, 1",2
+0x8018134C,stage:sc03_107,ProbeBehindWall,ProbeBehindWall,M,M,KEEP,20 lines not read in full; M,2
+0x80182B68,stage:sc01_001,LoadFaceTexture,LoadFaceTexture,M,H,PROMOTE,"MoveImage of face picture n into VRAM (0x280, 0x188); SetFaceTexture without the flag",2
+0x801831EC,stage:sc01_001,SpawnSparkle,SpawnSparkle,M,H,PROMOTE,up to 13 sparkle actors (SpawnKind205) placed round a counter,2
+0x80183EE8,stage:sc03_105,StopBossSound,StopBossSound,M,H,PROMOTE,"PlaySound(4, 0x730): the boss sound 0x730 stopped",2
