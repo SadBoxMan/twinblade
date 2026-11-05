@@ -1667,3 +1667,50 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8017CD9C,stage:sc04_003,RoomEntryStartA,RoomEntryStartA,M,M,KEEP,"the room entry's flags, sound, spawn lists; ""A"" (a second entry form) is not settled",0
 0x8017CD9C,stage:sc04_006,RoomEntryStartA,RoomEntryStartA,M,M,KEEP,"the same in sc04_006; ""A"" not settled",0
 0x8017CD9C,stage:sc04_008,RoomEntryStart,RoomEntryStart,M,H,PROMOTE,"the room entry's flags, sound, spawn lists and sequence start""""""",0
+0x8017CD9C,stage:sc04_009,RoomEntryStart,RoomEntryStart,M,H,PROMOTE,"the room entry: the slippery-floor flag, a var, sound, the spawn lists, the room sequence started",0
+0x8017CD9C,stage:sc04_010,RoomEntryStart,RoomEntryStart,M,H,PROMOTE,the same for sc04_010,0
+0x8017CDBC,stage:sc05_009,RoomStart,RoomStart,M,H,PROMOTE,RequestBgmPack(0x6B) and the room sequence started,0
+0x8017CDD8,stage:sc04_012,RoomEntryStart,RoomEntryStart,M,H,PROMOTE,"the room entry task's step: flags, sound, fade, step + 1",0
+0x8017CDE4,stage:sc06_022,RoomStart,RoomStart,M,H,PROMOTE,"the clock set, the fog limits, the spawn lists, the room's step",0
+0x8017CE0C,stage:sc04_003,RoomEntryStartB,RoomEntryStartB,M,M,KEEP,"the second entry form (spawn lists B, step 1); ""B"" pairs with RoomEntryStartA, not settled",0
+0x8017CE0C,stage:sc04_006,RoomEntryStartB,RoomEntryStartB,M,M,KEEP,the same in sc04_006,0
+0x8017CE58,stage:sc03_092,DrawRoomMesh,DrawRoomMesh,M,M,KEEP,a room mesh drawn (the body was not read in full); M,0
+0x8017CF5C,stage:sc04_012,RoomExitStep,RoomExitStep,M,H,PROMOTE,"the room exit task's step: StartMapChangeFade, step + 1",0
+0x8017D028,stage:sc04_012,RoomExitPrep,RoomExitPrep,M,H,PROMOTE,"the clock set before the exit, timer 10, step + 1",0
+0x8017D030,stage:sc06_027,SetRoomCamera,SetRoomCamera,M,H,PROMOTE,"the room camera's targets, its update installed and snapped",0
+0x8017D05C,stage:sc03_096,RoomCameraInit,RoomCameraInit,M,H,PROMOTE,"the room camera's targets, its update installed and snapped",0
+0x8017D08C,stage:sc04_008,RoomCameraInit,RoomCameraInit,M,H,PROMOTE,the same with the offset target,0
+0x8017D0A4,stage:sc01_008,RoomCameraInitA,RoomCameraInitA,M,M,KEEP,the first of two camera set-ups (A / B differ only in the projection); letter pair,0
+0x8017D0BC,stage:sc01_000,CameraInitFromStored,CameraInitFromStored,M,H,PROMOTE,"the stored eye / target copied into the camera, its update installed and snapped",0
+0x8017D0BC,stage:sc04_012,RoomCameraInit,RoomCameraInit,M,H,PROMOTE,"the room camera's targets, its update installed and snapped",0
+0x8017D0C8,stage:sc04_009,RoomCameraInit,RoomCameraInit,M,H,PROMOTE,the room camera's update installed and snapped,0
+0x8017D118,stage:sc04_016,CutsceneDirectorInit,CutsceneDirectorInit,M,H,PROMOTE,"the cutscene director's set-up: its actors spawned from records, scripts, headings, next state",0
+0x8017D118,stage:sc05_011,RoomScrollTexture,RoomScrollTexture,M,H,PROMOTE,the room's texture scroll by its step (ScrollTextureStrip),0
+0x8017D11C,stage:sc03_094,RoomCameraInit0,RoomCameraInit0,M,M,KEEP,"camera set-up 0 of two; number pair, M",0
+0x8017D130,stage:sc03_096,CameraZoomToggle,CameraZoomToggle,M,M,KEEP,the focus clamped and a fixed distance; no toggle in the lines read,0
+0x8017D134,stage:sc03_099,RoomCameraInit1,RoomCameraInit1,M,M,KEEP,"camera set-up 1 of two; number pair, M",0
+0x8017D168,stage:sc01_008,RoomCameraInitB,RoomCameraInitB,M,M,KEEP,the second of two camera set-ups; letter pair,0
+0x8017D168,stage:sc04_008,RoomCameraStep,RoomCameraStep,M,H,PROMOTE,"the room camera's step: the distance preset, the focus, the eye placed",0
+0x8017D268,stage:sc04_006,RoomCameraFollowX,RoomCameraFollowX,M,H,PROMOTE,the camera follows the focus x (the angle from it) and RoomCameraApply,0
+0x8017D29C,stage:sc06_011,SetCamera0,SetCamera0,M,M,KEEP,"camera set-up 0; number name, M",0
+0x8017D2AC,stage:sc03_099,CameraZoomToggle,CameraZoomToggle,M,M,KEEP,the focus clamped (y <= -0x180) then the camera placed; no toggle in the lines read,0
+0x8017D380,stage:sc05_007,RideMain,RideMain,M,H,PROMOTE,D_801844F8[state](obj): the ride's state table,0
+0x8017D3B0,stage:sc03_115,CameraClampFocus,CameraClampFocus,M,H,PROMOTE,"the focus clamped (x >= -0x170), a fixed distance, the camera placed",0
+0x8017D3CC,stage:sc06_020,SetRoomCamera,SetRoomCamera,M,H,PROMOTE,"the room camera's targets, its update installed and snapped",0
+0x8017D3F8,stage:sc04_008,DrawRainStreaks,DrawRainStreaks,M,H,PROMOTE,rain streak lines added to the world OT,0
+0x8017D428,stage:sc01_000,CopyCameraEyeTarget,CopyCameraEyeTarget,M,H,PROMOTE,the stored eye and target into the camera's +0x3C.. / +0x48..,0
+0x8017D428,stage:sc06_006,Shot0,Shot0,M,H,PROMOTE,"state 1, StartShot of shot 0's record, SetPlayerCutFace(0): the cutscene's first shot",0
+0x8017D468,stage:sc02_004,RoomStartCameraPan,RoomStartCameraPan,M,H,PROMOTE,"StartCameraPan of the room's pan, projection 0x1F4",0
+0x8017D48C,stage:sc04_009,SliderInit,SliderInit,M,H,PROMOTE,the slider's counters 0 and its start position kept,0
+0x8017D4A0,stage:sc06_020,CamPadSteer,CamPadSteer,M,M,KEEP,"the focus clamped then the camera placed; ""Pad"" / steering not in the lines read",0
+0x8017D4A0,stage:sc06_032,CamPadSteer,CamPadSteer,M,M,KEEP,the same in sc06_032,0
+0x8017D4AC,stage:sc04_009,SliderOpen,SliderOpen,M,H,PROMOTE,"the slider opens by its step, SE 0xA48 at the end, 1",0
+0x8017D4BC,stage:sc06_015,SetRoomCamera,SetRoomCamera,M,H,PROMOTE,"the room camera's targets, its update installed and snapped",0
+0x8017D4CC,stage:sc04_012,DoorInit,DoorInit,M,H,PROMOTE,"SetupActor, the door's heading by its type, state 3",0
+0x8017D4DC,stage:sc06_018,CamPadSteer,CamPadSteer,M,M,KEEP,the same in sc06_018,0
+0x8017D540,stage:sc03_107,StoryPropMain,StoryPropMain,M,H,PROMOTE,D_801860C0[state](obj): the story prop's state table,0
+0x8017D560,stage:sc04_010,OrbOnHit,OrbOnHit,M,H,PROMOTE,"its sprite cleared, StartEvent of the orb's script, state 2, SE 0xAAF",0
+0x8017D564,stage:sc06_013,SwitchLiftUpdate,SwitchLiftUpdate,M,H,PROMOTE,"the switch lift's step, its sound once when on screen",0
+0x8017D588,stage:sc04_016,CutsceneRunSignals,CutsceneRunSignals,M,M,KEEP,"lines not read in full; ""Signals"" not settled",0
+0x8017D59C,stage:sc05_007,RideCheckPlayerState,RideCheckPlayerState,M,M,KEEP,"a counter +1, 1; the player-state check is not visible",0
+0x8017D5B4,stage:sc04_006,HitBoxObjInit,HitBoxObjInit,M,H,PROMOTE,"the hit box object's flags, hit data, surface 2, next state""""""",0
