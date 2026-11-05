@@ -3556,7 +3556,227 @@ end:
     return ret;
 }
 
+/* NON_MATCHING (r283, docs/phase1_rulings.md #9), 23 lines: the original's frame is 8 bytes bigger, a spill slot nothing uses, a by-product of a compiler step on a loop with a variable bound (this one's bound is constant); 22 lines are the offsets that follow, 1 an operand order. */
+#ifdef NON_MATCHING
+extern u8 D_8006AED8[];
+void func_80033324(s32 k, s32 i);
+
+void func_80032A74(u8 *c, s32 i, u8 *s, u16 f) {
+    VagAtr atr;
+    u16 prio;
+    s32 k;
+    u32 r2;
+
+    s32 j;
+    s32 t;
+    s32 ok;
+    s32 slot;
+    u8 tone;
+    u8 *e;
+    s32 n;
+    u8 *v;
+    u8 *ch;
+    u8 *r;
+    s32 addr;
+    u32 vol;
+    u8 pan;
+    u8 q;
+    u32 d;
+    u32 w;
+    u32 x;
+    u32 o;
+    u8 *vb;
+    s32 z;
+
+    vb = (u8 *)D_800A4C28;
+    prio = *(u16 *)(c + 2);
+    for (z = 0; z < 8; z++) {
+        c[0xE + z] = 0;
+    }
+    *(u16 *)(c + 0xC) = 0;
+    while (1) {
+        t = s[8];
+        ok = 0;
+        if (!(t & 0x80)) {
+            e = D_80064D44 + t * 12;
+            tone = s[9];
+            if (e[6] != 0) {
+                ok = tone < e[7];
+            }
+            slot = D_800C5328[t].lo;
+            if (slot < 0) {
+                if (!ok) {
+                    break;
+                }
+                slot = D_800C5328[t].hi;
+                if (slot < 0) {
+                    break;
+                }
+                if (!(tone < *(s16 *)g_SoundSlot[slot].pad6)) {
+                    break;
+                }
+            }
+        } else {
+            slot = 4;
+        }
+        if ((f & 0x1000) && (f & 0x7F) < 0x30) {
+            prio >>= 1;
+            f = (f & 0xFF80) | (0x2F - ((0x2F - (f & 0x7F)) >> 1));
+        }
+        n = func_80030CA4(prio);
+        if (n == 0) {
+            goto next;
+        }
+        n--;
+        v = n * 0x48 + vb;
+        if (!(t & 0x80)) {
+            r = D_8006A970[slot] + s[9] * 12;
+            *(s32 *)(v + 0x1C) = *(s32 *)r;
+            *(u16 *)(v + 0x18) = *(u16 *)(r + 4);
+            *(u16 *)(v + 0x3A) = *(u16 *)(r + 6);
+            *(u16 *)(v + 0x3C) = *(u16 *)(r + 8);
+        } else {
+            if (SsUtGetVagAtr(g_SoundSlot[4].unk2, t & 0x7F, s[9], &atr) != 0) {
+                goto next;
+            }
+            addr = SsUtGetVagAddr(g_SoundSlot[4].unk2, atr.vag);
+            if (addr < 0) {
+                goto next;
+            }
+            *(u16 *)(v + 0x18) = atr.center << 8;
+            *(s32 *)(v + 0x1C) = addr;
+            *(u16 *)(v + 0x3A) = atr.adsr1;
+            *(u16 *)(v + 0x3C) = atr.adsr2;
+        }
+        k = n + 0x10;
+        *(s32 *)v = D_80073140[k];
+        ch = (u8 *)&g_SoundChan[8 + n];
+        ch[0x4C] = 0;
+        *(s16 *)(ch + 0x4A) = 0x7FFF;
+        if (*(u16 *)c & 0x80) {
+            ch[0x4D] = 0;
+        } else {
+            ch[0x4D] = 1;
+        }
+        *(s32 *)ch = *(u16 *)(s + 2);
+        *(s32 *)(ch + 4) = 0;
+        *(u16 *)(ch + 8) = prio;
+        *(u16 *)(ch + 0xA) = k;
+        *(u16 *)(ch + 0xC) = s[9];
+        *(u16 *)(ch + 0xE) = t;
+        ch[0x36] = ok;
+        *(s16 *)(ch + 0x10) = slot;
+        *(s16 *)(ch + 0x12) = 0;
+        *(s32 *)(ch + 0x14) = *(s32 *)(s + 0x10);
+        ch[0x4F] = 0;
+        ch[0x4E] = 0x85;
+        vol = s[6];
+        if (D_800A4F1E != 0) {
+            vol = vol * 0x70;
+            vol >>= 7;
+        }
+        if (f & 0x1000) {
+            *(s16 *)(ch + 0x48) = f & 0x7F;
+        } else {
+            *(s16 *)(ch + 0x48) = 0x7F;
+        }
+        ch[0x34] = vol & 0x7F;
+        pan = s[7];
+        ch[0x35] = pan;
+        if (f & 0x8000) {
+            *(s32 *)(ch + 0x24) = *(u16 *)(s + 4) - 0x80;
+        } else {
+            *(s32 *)(ch + 0x24) = *(u16 *)(s + 4);
+        }
+        *(s32 *)(ch + 0x40) = (s32)PS1_FN_ADDR(func_80033324);
+        *(s32 *)(ch + 0x44) = i;
+        if ((f & 0x2000) && pan != 0) {
+            if ((f & 0x3000) == 0x3000) {
+                ch[0x53] = D_8006AED8[(f & 0xF00) >> 8];
+            } else {
+                ch[0x53] = f & 0x7F;
+            }
+        } else {
+            ch[0x53] = 0;
+        }
+        if (*(u16 *)(s + 2) == 0) {
+            func_800316F8(ch);
+        }
+        x = *(u16 *)(v + 0x18);
+        d = *(s32 *)(ch + 0x24);
+        w = x & 0xFF00;
+        o = w + ((s8)x << 1) - 0x3C00;
+        d -= o;
+        if (d >= 0x5300) {
+            *(u16 *)(v + 0x14) = 0x3FFF;
+        } else {
+            k = d >> 8;
+            w = D_8006AB30[k] * (0x100 - (d & 0xFF));
+            w += D_8006AB32[k] * (d & 0xFF);
+            w >>= 8;
+            *(u16 *)(v + 0x14) = w;
+        }
+        vol = D_8006AA30[ch[0x34]].v;
+        vol = (vol * D_800A4EFA) >> 7;
+        vol = (vol * *(s16 *)(ch + 0x48)) >> 7;
+        if (pan != 0) {
+            if (ch[0x53] != 0) {
+                q = pan + ch[0x53];
+                if (q >= 0x42) {
+                    pan = q - 0x40;
+                    if (pan >= 0x80) {
+                        pan = 0x7F;
+                    }
+                } else {
+                    pan = 1;
+                }
+            }
+            if (D_800A4F19 != 0) {
+                *(u16 *)(v + 0xA) = (vol * D_8007319E[pan]) >> 14;
+                *(u16 *)(v + 8) = (vol * (D_8007319E + 1)[0x7F - pan]) >> 14;
+            } else {
+                r2 = (vol * D_8007321E) >> 14;
+                *(u16 *)(v + 0xA) = r2;
+                *(u16 *)(v + 8) = r2;
+            }
+        } else {
+            r2 = vol;
+            *(u16 *)(v + 8) = r2;
+            *(u16 *)(v + 0xA) = r2;
+        }
+        ch[0x52] = pan;
+        *(s16 *)(v + 0xC) = 0;
+        *(s16 *)(v + 0xE) = 0;
+        *(s32 *)(v + 4) = 0x6009F;
+        if (D_800A4EF6 > s[10]) {
+            func_8002F064(1, *(s32 *)v);
+        } else {
+            func_8002F064(0, *(s32 *)v);
+        }
+        *(s32 *)(v + 0x40) = *(u16 *)(ch + 0xA);
+        v[0x45] = 0;
+        v[0x44] = 1;
+        if (*(u16 *)(s + 2) == 0) {
+            func_8002EFF8(1, *(s32 *)v);
+        }
+        (*(u16 *)(c + 0xC))++;
+        (c + n)[0xE] = 1;
+    next:
+        if (s[0xB] == 0) {
+            break;
+        }
+        s += 0x14;
+        prio = *(u16 *)s;
+    }
+    if (*(u16 *)(c + 0xC) == 0) {
+        *(u16 *)c = 0;
+    } else {
+        c[0xA] = 4;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/code_8002C8BC", func_80032A74);
+#endif
 
 s32 func_8003310C(s32 prio) {
     struct { u8 found; s32 best; u16 min; } s;
@@ -3795,7 +4015,389 @@ void func_800336A8(u8 *s) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_8002C8BC", func_8003388C);
+void func_800342E8(s32 a, s32 b);
+
+void func_8003388C(u8 *a, s32 idx) {
+    struct {
+        u16 h0;
+        u16 h2;
+        u16 h4;
+        u16 h6;
+        u8 b8;
+        u8 b9;
+        u8 bA;
+        u8 bB;
+        u8 bC;
+        u8 bD;
+        s32 w10;
+    } rec;
+    VagAtr atr;
+    u8 *s = a;
+    u8 *e;
+    u8 *p;
+    u8 *c;
+    u8 *v;
+    u8 *t;
+    s32 w;
+    s32 *q;
+    u32 i;
+    s32 n;
+    s32 bank;
+    s32 prog;
+    s32 k;
+    u8 b;
+    u8 flag;
+    s32 done;
+    u32 vol;
+    u32 d;
+    u32 r;
+    u32 m;
+    s32 addr;
+    SoundSlot *sl;
+    u16 cur;
+    u32 x;
+
+    if (*(u16 *)(s + 0x34) != 0 && *(u16 *)(s + 0x34) != D_800A4EF0) {
+        func_80034650(s, 0);
+        return;
+    }
+    if (*(u16 *)(s + 8) != 0) {
+        *(u16 *)(s + 8) -= 1;
+    }
+    e = s + 0x1C;
+    flag = 0;
+    for (i = 0; i < 3; i++, e += 8) {
+        if (e[6] != 0) {
+            cur = *(u16 *)e;
+            flag = 1;
+            if (cur == *(u16 *)(e + 4)) {
+                e[6] = 0;
+            } else if (cur < *(u16 *)(e + 4)) {
+                *(u16 *)e = cur + *(u16 *)(e + 2);
+                if (*(u16 *)e >= 0x4000) {
+                    *(u16 *)e = 0x3FFF;
+                }
+                if (*(u16 *)(e + 4) < *(u16 *)e) {
+                    *(u16 *)e = *(u16 *)(e + 4);
+                }
+            } else {
+                if (cur >= *(u16 *)(e + 2)) {
+                    *(u16 *)e = cur - *(u16 *)(e + 2);
+                } else {
+                    *(u16 *)e = 0;
+                }
+                if (*(u16 *)e < *(u16 *)(e + 4)) {
+                    *(u16 *)e = *(u16 *)(e + 4);
+                }
+            }
+        }
+    }
+    done = 0;
+    if (s[0x16] != 0) {
+        if (*(u16 *)(s + 0x18) > *(u16 *)(s + 0x1A)) {
+            *(u16 *)(s + 0x18) -= *(u16 *)(s + 0x1A);
+            func_800336A8(s);
+            done = 1;
+        } else {
+            func_80034650(s, 1);
+            return;
+        }
+    } else if (flag) {
+        func_800336A8(s);
+        done = 1;
+    }
+    if (s[0x39] != s[0x38]) {
+        if (!done) {
+            func_800336A8(s);
+        }
+        s[0x39] = s[0x38];
+    }
+    if (s[0x36] != 0) {
+        for (i = 0; i < 8; i++) {
+            if ((s + i)[0x3A] != 0) {
+                return;
+            }
+        }
+        *(s16 *)s = 0;
+        return;
+    }
+    if (--*(u16 *)(s + 0x14) != 0) {
+        return;
+    }
+    if (s[0x48] != 0) {
+        q = *(s32 **)(s + 0xC);
+        w = *q;
+        for (;;) {
+            switch ((u32)w >> 24) {
+            case 0x80:
+                q++;
+                rec.h6 = w;
+                rec.b8 = w >> 16;
+                w = *q;
+                q++;
+                rec.h2 = w;
+                rec.h0 = w >> 16;
+                w = *q;
+                q++;
+                s[0x4F] = rec.bC = w;
+                w >>= 8;
+                s[0x4E] = rec.bB = w;
+                w >>= 8;
+                s[0x4D] = rec.bA = w;
+                s[0x4C] = rec.b9 = (u32)w >> 8;
+                *(u16 *)(s + 0x4A) = rec.h4 = *(u16 *)q;
+                q++;
+                w = *q;
+                q++;
+                rec.bD = 0;
+                rec.w10 = w;
+                goto play;
+            case 0x81:
+                q++;
+                rec.h6 = w;
+                rec.b8 = w >> 16;
+                w = *q;
+                rec.h2 = w;
+                rec.h0 = w >> 16;
+                rec.bC = s[0x4F];
+                rec.bB = s[0x4E];
+                rec.bA = s[0x4D];
+                rec.b9 = s[0x4C];
+                rec.h4 = *(u16 *)(s + 0x4A);
+                q++;
+                rec.w10 = 0;
+                rec.bD = 0;
+                goto play;
+            case 0x82:
+                q++;
+                s[0x17] = w;
+                *(s32 **)(s + 0x44) = q;
+                w = *q;
+                continue;
+            case 0x83:
+                if (s[0x17] != 0) {
+                    if (--s[0x17] == 0) {
+                        q++;
+                        w = *q;
+                        continue;
+                    }
+                }
+                if (w & 0xFFFFFF) {
+                    *(u16 *)(s + 0x14) = w;
+                    *(s32 **)(s + 0xC) = *(s32 **)(s + 0x44);
+                    return;
+                }
+                q = *(s32 **)(s + 0x44);
+                w = *q;
+                continue;
+            case 0x85:
+                if (s[0x17] != 0) {
+                    if (--s[0x17] == 0) {
+                        q++;
+                        *(u16 *)(s + 0x50) = 0;
+                        *(u16 *)(s + 0x52) = 0;
+                        w = *q;
+                        continue;
+                    }
+                }
+                *(s16 *)(s + 0x52) += (s8)w * 16;
+                *(s16 *)(s + 0x50) += (s8)(w >> 8);
+                if (w & 0xFF0000) {
+                    *(u16 *)(s + 0x14) = (w & 0xFF0000) >> 16;
+                    *(s32 **)(s + 0xC) = *(s32 **)(s + 0x44);
+                    return;
+                }
+                q = *(s32 **)(s + 0x44);
+                w = *q;
+                continue;
+            case 0x84:
+                q++;
+                s[0x22] = 1;
+                *(s16 *)(s + 0x1E) = w >> 8;
+                *(s16 *)(s + 0x20) = ((w & 0x7F) * 0x3FFF) >> 7;
+                w = *q;
+                continue;
+            case 0x86:
+                r = ((u32)(w & 0x7F) * 0x3FFF) >> 7;
+                s[0x22] = 0;
+                *(u16 *)(s + 0x1C) = *(u16 *)(s + 0x20) = r;
+                q++;
+                w = *q;
+                continue;
+            case 0x87:
+                for (i = 0; i < 8; i++) {
+                    if ((s + i)[0x3A] != 0) {
+                        s[0x36] = 1;
+                        return;
+                    }
+                }
+                *(s16 *)s = 0;
+                return;
+            }
+        }
+    play:
+        *(s32 **)(s + 0xC) = q;
+        p = (u8 *)&rec;
+    } else {
+        p = *(u8 **)(s + 0xC);
+    }
+    if (*(u16 *)(p + 6) != 0) {
+        n = func_80030CA4(*(u16 *)(p + 4));
+        if (n != 0) {
+            prog = p[0xA];
+            n--;
+            if (!(prog & 0x80)) {
+                bank = D_800C5328[prog].lo;
+            } else {
+                bank = 4;
+            }
+            if (bank >= 0) {
+                c = (u8 *)&g_SoundChan[8] + n * 0x54;
+                v = (u8 *)&g_SoundChan[16] + n * 0x48;
+                if (!(prog & 0x80)) {
+                    t = D_8006A970[bank] + p[0xB] * 12;
+                    *(s32 *)(v + 0x1C) = *(s32 *)t;
+                    *(u16 *)(v + 0x18) = *(u16 *)(t + 4);
+                    *(u16 *)(v + 0x3A) = *(u16 *)(t + 6);
+                    *(u16 *)(v + 0x3C) = *(u16 *)(t + 8);
+                } else {
+                    sl = &g_SoundSlot[4];
+                    if (SsUtGetVagAtr(sl->unk2, prog & 0x7F, p[0xB], &atr) != 0) {
+                        goto next;
+                    }
+                    addr = SsUtGetVagAddr(sl->unk2, atr.vag);
+                    if (addr < 0) {
+                        goto next;
+                    }
+                    *(u16 *)(v + 0x18) = atr.center << 8;
+                    *(s32 *)(v + 0x1C) = addr;
+                    *(u16 *)(v + 0x3A) = atr.adsr1;
+                    *(u16 *)(v + 0x3C) = atr.adsr2;
+                }
+                v[0x44] = 1;
+                *(s32 *)(v + 0x40) = *(u16 *)(c + 0xA);
+                v[0x45] = 0;
+                c[0x4C] = 0;
+                *(s16 *)(c + 0x4A) = 0x7FFF;
+                c[0x4D] = 0;
+                *(s32 *)(c + 0) = 0;
+                *(s32 *)(c + 4) = 0;
+                *(u16 *)(c + 8) = *(u16 *)(p + 4);
+                *(u16 *)(c + 0xC) = p[0xB];
+                *(u16 *)(c + 0xE) = prog;
+                c[0x36] = 0;
+                *(s16 *)(c + 0x10) = bank;
+                *(s32 *)(c + 0x14) = *(s32 *)(p + 0x10);
+                b = c[0x35] = p[9];
+                c[0x52] = b;
+                if (s[0x38] != 0 && b != 0) {
+                    b += s[0x38];
+                    if (b >= 0x42) {
+                        b -= 0x40;
+                        if (b >= 0x80) {
+                            b = 0x7F;
+                        }
+                    } else {
+                        b = 1;
+                    }
+                }
+                *(s32 *)(c + 0x24) = *(u16 *)(p + 6) + *(s16 *)(s + 0x52);
+                *(s32 *)(c + 0x40) = (s32)PS1_FN_ADDR(func_800342E8);
+                *(s32 *)(c + 0x44) = idx;
+                c[0x4E] = 0x85;
+                c[0x53] = 0;
+                k = *(u16 *)(p + 2); /* through k, reused for the pitch offset below (k has two lives, so local-alloc leaves it alone) */
+                *(u16 *)(c + 0x12) = k;
+                c[0x4F] = 0;
+                *(s16 *)(c + 0x48) = 0;
+                (a + n)[0x3A] = 1;
+                func_800316F8(c);
+                *(s32 *)v = D_80073140[*(u16 *)(c + 0xA)];
+                x = *(u16 *)(v + 0x18);
+                k = (x & 0xFF00) + ((s32)(x << 24) >> 23);
+                k -= 0x3C00;
+                d = *(s32 *)(c + 0x24);
+                d -= k;
+                if (d >= 0x5300) {
+                    *(u16 *)(v + 0x14) = 0x3FFF;
+                } else {
+                    i = d >> 8;
+                    m = D_8006AB30[i] * (0x100 - (d & 0xFF));
+                    m += D_8006AB30[i + 1] * (d & 0xFF);
+                    m >>= 8;
+                    *(u16 *)(v + 0x14) = m;
+                }
+                vol = p[8];
+                if (*(u16 *)(s + 0x50) < vol) {
+                    vol -= *(u16 *)(s + 0x50);
+                } else {
+                    vol = 0;
+                }
+                if (D_800A4F1E != 0) {
+                    vol *= 0x70;
+                    vol >>= 7;
+                }
+                c[0x34] = vol;
+                vol = D_8006AA30[vol].v;
+                vol *= D_800A4EFA;
+                vol >>= 7;
+                if (s[0x16] != 0) {
+                    vol *= *(u16 *)(s + 0x18);
+                    vol >>= 15;
+                }
+                e = s + 0x1C;
+                for (i = 0; i < 3; i++, e += 8) {
+                    vol *= *(u16 *)e;
+                    vol >>= 14;
+                }
+                if (b != 0) {
+                    if (D_800A4F19 != 0) {
+                        *(u16 *)(v + 0xA) = (vol * D_8007319E[b]) >> 14;
+                        *(u16 *)(v + 8) = (vol * (D_8007319E + 1)[0x7F - b]) >> 14;
+                    } else {
+                        r = (vol * D_8007321E) >> 14;
+                        *(u16 *)(v + 0xA) = r;
+                        *(u16 *)(v + 8) = r;
+                    }
+                } else {
+                    r = vol;
+                    *(u16 *)(v + 8) = r;
+                    *(u16 *)(v + 0xA) = r;
+                }
+                *(s16 *)(v + 0xC) = 0;
+                *(s16 *)(v + 0xE) = 0;
+                *(s32 *)(v + 4) = 0x6009F;
+                if (D_800A4EF6 > p[0xC]) {
+                    func_8002F064(1, *(s32 *)v);
+                } else {
+                    func_8002F064(0, *(s32 *)v);
+                }
+                func_8002EFF8(1, *(s32 *)v);
+            }
+        }
+    }
+next:
+    if (*(u16 *)p == 0) {
+        for (i = 0; i < 8; i++) {
+            if ((s + i)[0x3A] != 0) {
+                s[0x36] = 1;
+                return;
+            }
+        }
+        *(s16 *)s = 0;
+        return;
+    }
+    *(u16 *)(s + 0x14) = *(u16 *)p;
+    if (s[0x48] != 0) {
+        return;
+    }
+    if (p[0xD] != 0 && (s[0x17] == 0 || --s[0x17] != 0)) {
+        *(u8 **)(s + 0xC) = *(u8 **)(a + 0x10) + (p[0xD] * 20 - 20);
+        return;
+    }
+    p += 0x14;
+    *(u8 **)(s + 0xC) = p;
+}
 
 void func_800342E8(s32 a, s32 b) {
     u8 *p = &((u8 *)g_SoundChan)[b * 0x54];
@@ -4310,7 +4912,270 @@ u32 func_80035210(s32 dst, s32 n) {
     return r;
 }
 
+typedef struct { u8 *tbl; u8 flag; s32 ofs[16]; } SndBank;
+extern SndBank D_8006A69C[];
+
+/* NON_MATCHING (r283, docs/phase1_rulings.md #5), 1 line: SsSetSerialVol(0, v, v), the original copies v into a1 then a1 into a2, ours copies it twice from s0; that shape needs a separate short-lived temporary, and no C form survives the compiler's clean-up. */
+#ifdef NON_MATCHING
+extern s16 D_800760F8;
+extern s32 D_80076100;
+extern u8 D_800760FC;
+extern u8 D_800760FD;
+extern s16 D_80076208;
+extern u8 D_80076210;
+extern int CdMode(void);
+extern int CdStatus(void);
+
+static inline u8 *func_80035270_ent(s32 bank, s32 row, s32 col) {
+    u8 *t = D_8006A69C[bank].tbl;
+    t += row * 64;
+    t += col * 4;
+    return t;
+}
+
+s32 func_80035270(Req *q) {
+    u8 res[8];
+    u8 param[8];
+    CdlLOC loc;
+    u8 *t;
+    s32 i;
+    s32 j;
+    s32 v;
+    s32 k;
+    s32 n;
+    u8 *p;
+    s32 r;
+    u32 now;
+    s16 col;
+    s16 c;
+    s16 row;
+    s16 bank;
+    u8 e;
+
+    row = (q->w[2] >> 4) & 0x1F;
+    c = q->w[2] & 0xF;
+    col = c;
+    bank = (q->w[2] >> 9) & 0x1F;
+    if (row & 1) {
+        col = c + 4;
+        if (D_8006A69C[bank].flag == 0) {
+            col = c + 8;
+        }
+    }
+    row = row >> 1;
+    if (q->b7 != 0) {
+        q->b7 = 0;
+        q->b3 = 17;
+        if (q->w[1] == 0) {
+            return 1;
+        }
+        if (q->w[9] + 1 != D_80078F10[0]) {
+            for (i = 1; i < 5; i++) {
+                if (D_80078F10[i] == q->w[9] + 1) {
+                    break;
+                }
+            }
+            if (i == 5) {
+                return 1;
+            }
+            j = 0;
+            n = D_8006AEE8;
+            if (i < n) {
+                do {
+                    D_80078F10[j] = D_80078F10[i];
+                    i++;
+                    j++;
+                } while (i < n);
+                D_8006AEE8 = j;
+            }
+        }
+        q->w[3] = 15;
+        D_800760F8 = 0;
+        D_80076100 = CdMode();
+    }
+    switch (q->b3) {
+    case 17:
+        p = &D_800760FC;
+        *p = 1;
+        D_800760FD = col;
+        if (CdControlB(0xD, p, res) == 0) {
+            D_800760F8++;
+            goto timeout;
+        }
+        q->b3 = 18;
+        SsSetSerialVol(0, 0, 0);
+        D_800760F8 = 0;
+    case 18:
+        param[0] = 0xC8;
+        if (CdControlB(CdlSetmode, param, res) == 0) {
+            D_800760F8++;
+            goto timeout;
+        }
+        if ((q->w[2] == 0x4486 || q->w[2] == 0x4364) && g_SoundSlot[3].unk10 == 0 &&
+            *(s16 *)g_SoundSlot[3].pad0 == 0x2B) {
+            goto attr;
+        }
+        r = (s32)D_8006A69C[bank].tbl;
+        t = (u8 *)(row * 64 + r) + col * 4;
+        e = t[1];
+        if (e & 0x20) {
+            if (e & 0x40) {
+            attr:
+                if (D_800A4EF6 >= 2) {
+                    SsSetSerialAttr(0, 1, 1);
+                } else {
+                    SsSetSerialAttr(0, 1, 0);
+                }
+            } else {
+                SsSetSerialAttr(0, 1, 1);
+            }
+        } else {
+            SsSetSerialAttr(0, 1, 0);
+        }
+        D_800760F8 = 0;
+        if (D_80076100 & CdlModeSpeed) {
+            q->b3 = 1;
+            goto seek;
+        }
+        q->b3 = 0;
+    case 0:
+        if (q->w[3] != 0) {
+            q->w[3]--;
+        }
+        if (++D_800760F8 < 10) {
+            return 0;
+        }
+        q->b3 = 1;
+        D_800760F8 = 0;
+    case 1:
+    seek:
+        if (q->w[3] != 0) {
+            q->w[3]--;
+        }
+        CdIntToPos(q->w[1], &loc);
+        D_800760F8++;
+        if (CdControlB(2, (u8 *)&loc, NULL) == 0) {
+            goto timeout;
+        }
+        if (CdControl(CdlSeekL, (u8 *)&loc, NULL) == 0) {
+            goto timeout;
+        }
+        D_800760F8 = 0;
+        q->b3 = 2;
+    case 2:
+        if (q->w[3] != 0) {
+            q->w[3]--;
+        }
+        i = CdSync(1, res);
+        if (i == 0) {
+            D_800760F8++;
+            goto timeout;
+        }
+        if (i == CdlDiskError) {
+            if (CdControl(CdlNop, param, res) == 0 && (res[0] & CdlStatShellOpen)) {
+                D_80076214 = 1;
+                return 1;
+            }
+            q->b3 = 1;
+            return 0;
+        }
+        D_80076208 = q->w[3];
+        q->b3 = 3;
+    case 3:
+        if (q->w[3] != 0) {
+            q->w[3]--;
+            break;
+        }
+        D_800760F8 = 0;
+        q->b3 = 4;
+    case 4:
+        CdIntToPos(q->w[1], &loc);
+        if (CdControl(0x1B, (u8 *)&loc, NULL) == 0) {
+            D_800760F8++;
+            goto timeout;
+        }
+        t = func_80035270_ent(bank, row, col);
+        D_80076210 = 0;
+        D_800760F8 = 0;
+        v = (t[0] * D_800A4EFA >> 7) & 0x7F;
+        SsSetSerialVol(0, v, v);
+        D_8006AEEC = v;
+        q->b3 = 5;
+    case 5:
+        r = CdSync(1, res);
+        if (r != CdlComplete) {
+            if (r == CdlDiskError) {
+                if (res[0] & CdlStatShellOpen) {
+                    goto flush;
+                }
+                CdFlush();
+                q->b3 = 4;
+                return 0;
+            }
+            D_800760F8++;
+            goto timeout;
+        }
+        q->b3 = 6;
+    case 6:
+        CdControl(CdlNop, NULL, NULL);
+        if (!((D_8007620C = CdStatus()) & 0x20)) {
+            return 0;
+        }
+        t = func_80035270_ent(bank, row, col);
+        now = D_800A4638;
+        q->w[4] = now;
+        q->w[3] = *(s16 *)(t + 2) + now;
+        if ((u32)q->w[3] < now) {
+            q->b6 = 1;
+        } else {
+            q->b6 = 0;
+        }
+        q->b3 = 7;
+    case 7:
+        if ((D_80076210++ & 3) == 0) {
+            CdControl(CdlNop, NULL, NULL);
+            if ((D_8007620C = CdStatus()) & 0x10) {
+                goto flush;
+            }
+        }
+        now = D_800A4638;
+        if (now < (u32)q->w[3]) {
+            return 0;
+        }
+        if (q->b6 != 0 && now >= (u32)q->w[4]) {
+            return 0;
+        }
+        q->b3 = 8;
+    case 8:
+        SsSetSerialVol(0, 0, 0);
+        if (CdControl(CdlPause, NULL, NULL) == 0) {
+            return 0;
+        }
+        D_8007620C = 0;
+        q->b3 = 9;
+    case 9:
+        i = CdSync(1, res);
+        if (i == 0) {
+            return 0;
+        }
+        if (i == CdlDiskError && (res[0] & CdlStatShellOpen)) {
+            D_80076214 = 1;
+        }
+        return 1;
+    }
+    return 0;
+timeout:
+    if (D_800760F8 < 301) {
+        return 0;
+    }
+flush:
+    CdFlush();
+    D_80076214 = 1;
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/code_8002C8BC", func_80035270);
+#endif
 
 extern s16 D_80076104;
 
@@ -4897,9 +5762,7 @@ s32 func_800363CC(s32 a, CdlLOC *loc, s32 c) {
     return 0;
 }
 
-typedef struct { u8 *tbl; u8 flag; s32 ofs[16]; } SndBank;
-extern SndBank D_8006A69C[];
-extern void func_80035270();
+extern s32 func_80035270();
 extern void func_800359B0();
 void func_80036D24(void);
 void func_80036FB0(s32 from, s32 to);
@@ -5712,7 +6575,49 @@ void func_80038668(s32 i, s32 j) {
     p[j] &= 0xFE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_8002C8BC", func_80038698);
+/* SeqReadHeader: MThd chunk, length 6, format 0, one track, division (not SMPTE) -> +0x1E6 */
+s32 func_80038698(u8 **pp) {
+    u8 *p;
+    s32 x;
+    s32 b;
+    s32 h;
+    s32 n;
+    s32 m;
+    s32 v;
+    b = *(*pp)++;
+    x = b | (*(*pp)++ << 8);
+    x |= *(*pp)++ << 16;
+    x |= *(*pp)++ << 24;
+    if (x != 0x6468544D) {
+        return -1;
+    }
+    b = *(*pp)++;
+    x = b << 8;
+    x |= *(*pp)++;
+    x <<= 8;
+    x |= *(*pp)++;
+    x <<= 8;
+    x |= *(*pp)++;
+    p = *pp;
+    h = p[0];
+    if (((h << 8) | p[1]) != 0) {
+        return -1;
+    }
+    h = p[2];
+    n = (h << 8) | p[3];
+    if ((s16)n != 1) {
+        return -1;
+    }
+    h = p[4];
+    m = (h << 8) | p[5];
+    v = (s16)m;
+    if (v & 0x8000) {
+        return -1;
+    }
+    *(s16 *)((u8 *)pp + 0x1E6) = v & 0x7FFF;
+    *pp += x;
+    return 0;
+}
 
 s32 func_800387C0(u8 **pp) {
     u8 *p = *pp;

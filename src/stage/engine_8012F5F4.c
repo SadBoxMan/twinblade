@@ -3279,7 +3279,95 @@ s32 func_80135D20(u8 *a, s32 f, SVECTOR *pos) {
     return 0;
 }
 
+/* NON_MATCHING (r283, docs/phase1_rulings.md #8), 18 lines: f and cy swapped in s3 / s2; cy needs about twice the counted uses it has, and each use is a real instruction, so none can be added for free. */
+#ifdef NON_MATCHING
+extern s32 D_801150D8;
+
+s32 func_80135EB0(s32 *node, s32 f) {
+    Box *b = (Box *)node;
+    s32 c;
+    s32 cy;
+    s32 c2;
+    s32 c2y;
+    s32 v;
+    if (D_8018DA9C->vx < b->x0) c = 1;
+    else c = (b->x1 < D_8018DA9C->vx) << 1;
+    if (D_8018DA9C->vz < b->z0) c |= 4;
+    else if (b->z1 < D_8018DA9C->vz) c |= 8;
+    if (D_8018DA9C->vy < b->y0) cy = 0x10;
+    else cy = (b->y1 < D_8018DA9C->vy) << 5;
+    if ((c | cy) == 0) {
+        SVECTOR *e = D_8018DA9C; SVECTOR *o = D_8018DAA4;
+        u16 x, z; s32 k;
+        o->vx = x = e->vx;
+        k = (b->x0 + b->x1) >> 1;
+        ((S16Cell *)&D_801152AA)->v = 0;
+        ((S16Cell *)&D_80126720)->v = k;
+        ((S16Cell *)&D_801152A8)->v = x - k;
+        o->vz = z = e->vz;
+        ((S16Cell *)&D_80126724)->v = k = (b->z0 + b->z1) >> 1;
+        ((S16Cell *)&D_801152AC)->v = z - k;
+        o->vy = e->vy;
+        ((S16Cell *)&D_80126722)->v = (b->y0 + b->y1) >> 1;
+        VectorNormalSS((SVECTOR *)&D_801152A8, (SVECTOR *)&D_801152A8);
+        D_801150D8 |= 1;
+        return 1;
+    }
+    if (D_8018DAA0->vx < b->x0) c2 = 1;
+    else c2 = (b->x1 < D_8018DAA0->vx) << 1;
+    if (D_8018DAA0->vz < b->z0) c2 |= 4;
+    else if (b->z1 < D_8018DAA0->vz) c2 |= 8;
+    if (D_8018DAA0->vy < b->y0) c2y = 0x10;
+    else c2y = (b->y1 < D_8018DAA0->vy) << 5;
+    if ((c | cy) & (c2 | c2y)) goto fail;
+    D_8018DAA8->vx = D_8018DAA0->vx - D_8018DA9C->vx;
+    D_8018DAA8->vy = D_8018DAA0->vy - D_8018DA9C->vy;
+    D_8018DAA8->vz = D_8018DAA0->vz - D_8018DA9C->vz;
+    switch (c) {
+    case 0:
+        break;
+    case 4:
+        if (func_80136334(b, (s16)f, b->z0)) goto found;
+        break;
+    case 1:
+        if (func_801365B8(b, (s16)f, b->x0)) goto hit;
+        break;
+    case 2:
+        if (func_801365B8(b, (s16)(f | 1), b->x1)) goto hit;
+        break;
+    case 5:
+        if (func_80136334(b, (s16)f, b->z0)) goto hit;
+        if (func_801365B8(b, (s16)f, b->x0)) goto hit;
+        break;
+    case 6:
+        if (func_80136334(b, (s16)f, b->z0)) goto hit;
+        if (func_801365B8(b, (s16)(f | 1), b->x1)) goto hit;
+        break;
+    case 9:
+        if (func_801365B8(b, (s16)f, b->x0)) goto hit;
+    case 8:
+        if (func_80136334(b, (s16)(f | 1), b->z1)) goto found;
+        break;
+    fail:
+        return 0;
+    default:
+    found:
+        return 1;
+    case 10:
+        if (func_801365B8(b, (s16)(f | 1), b->x1)) goto hit;
+        if (func_80136334(b, (s16)(f | 1), b->z1)) goto hit;
+        break;
+    }
+    if (cy == 0) goto fail;
+    if (cy == 0x10) v = func_80136824(b, (s16)f, b->y0);
+    else v = func_80136824(b, (s16)(f | 1), b->y1);
+    if (v == 0) goto fail;
+hit:
+    return 1;
+}
+#else
 INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80135EB0);
+#endif
 
 s32 func_80136334(Box *b, s16 f, s16 z) {
     s32 d;

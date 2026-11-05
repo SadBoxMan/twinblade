@@ -1175,7 +1175,22 @@ StageActor *func_8013E410(void) {
     return NULL;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_8013E448);
+extern s32 D_801274D8;
+extern s32 D_801274DC;
+extern s32 func_800132BC();
+extern s32 (*D_801274D0)(SpawnDef *d);  /* replaces the range test of func_8013E448 when set */
+
+s32 func_8013E448(SpawnDef *d) {
+    if (D_801274D0 == NULL) {
+        s32 r = func_800132BC(D_80126B58.focus, d);
+        HARD_V0(v) = 0; /* MATCH-TRICK: see HARD_V0 in common.h */
+        if (D_801274D8 < r) {
+            v = r < D_801274DC;
+        }
+        return v;
+    }
+    return D_801274D0(d);
+}
 
 /* the fixed list spawned, and the range list's definitions all marked free */
 void func_8013E4B4(void) {
@@ -2139,7 +2154,87 @@ void func_801407F4(void) {
     AF(o, u16, 0x1C) = *p;
 }
 
+/* NON_MATCHING (r283, docs/phase1_rulings.md #7), 14 lines: n, k and the mask rotated in three registers; the allocator ranks by mentions in the loop, n needs three more than the code has, and each extra one costs an instruction or is removed before it is counted. */
+#ifdef NON_MATCHING
+extern u16 D_8018E32C[];
+extern u16 D_8018E3AC[];
+extern s16 D_8018E88C[];
+extern s16 D_8018E89C[];
+extern u8 D_80115158[];
+
+s32 func_80140958(s32 p, s32 a0, s32 b0) {
+    s16 i;
+    s16 end = b0;
+    u16 *tbl;
+    s16 j;
+    s16 n;
+    u16 k;
+    s16 x;
+    s16 y;
+    s16 c;
+    s16 d;
+
+    for (i = a0; i < end; i++) {
+        if (D_80115110.unk0 == 0 && D_80115110.mode != 3 && D_80115110.mode < 6) {
+            if (i == D_80115110.unkA) {
+                p = func_80140D68(p, &D_8018E32C[i * 2], i, D_8018E88C[D_80115110.frames & 7], 0);
+            }
+        } else {
+            tbl = (u16 *)D_8018E470[i];
+            if (tbl != NULL && i == D_80115110.unkA && i != 6) {
+                if (i == 2 && D_80115110.unk18 != 0) {
+                    tbl = (u16 *)&D_8018E37C;
+                }
+                if (i != 3) {
+                    j = func_8014168C(i) * 2;
+                } else {
+                    j = (((u8 *)D_80115148)[6] - D_80115140[3].v) * 2;
+                }
+                p = func_80140D68(p, tbl, i, D_8018E89C[D_80115110.frames & 7], j);
+                if (i == 2 && D_80115110.unk18 == 1 && D_80115110.unk1E != 0) {
+                    p = func_80140D68(p, tbl, 2, 8, (D_80115110.unk1E & 0xF) * 2);
+                }
+            }
+        }
+        if (i == 3 && D_80115110.unkA == i && (D_80115110.frames & 8)) {
+            k = D_80115110.unkA;
+            for (n = 0; n < 2; n++) {
+                if (n == 0) {
+                    c = D_80115140[k].v;
+                    if (c == 0) {
+                        continue;
+                    }
+                    AF(p, u8, 0xD) = 0x30;
+                    y = D_8018E3AC[1] - 4;
+                    AF(p, s16, 0xA) = y;
+                } else {
+                    c = (s8)D_80115158[k << 1];
+                    d = ((s8 *)D_80115140)[k];
+                    if (c - d < 2) {
+                        continue;
+                    }
+                    AF(p, u8, 0xD) = 0x38;
+                    y = D_8018E3AC[1] + 3;
+                    AF(p, s16, 0xA) = y;
+                }
+                AF(p, s32, 0) = 0x04000000;
+                AF(p, s32, 4) = 0x64808080;
+                AF(p, u8, 0xC) = 0x78;
+                AF(p, s16, 0xE) = 0x4056;
+                x = D_8018E3AC[0] + AF(D_8011516A, u16, k << 2) + 0x4A;
+                AF(p, s16, 8) = x;
+                AF(p, s16, 0x12) = 8;
+                AF(p, s16, 0x10) = 8;
+                addPrim(D_800AE7B8[((u16 *)&D_800B9A08)[-3]].org + 2, p);
+                p += 0x14;
+            }
+        }
+    }
+    return p;
+}
+#else
 INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_80140958);
+#endif
 
 extern u16 D_8011516A[];
 extern GsOT D_800AE7B8[];

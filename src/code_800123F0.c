@@ -5472,7 +5472,92 @@ void func_8001D388(u8 *a, s32 *x) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_8001D3FC);
+void func_8001D70C(u8 *o);
+void func_8001D8C4(u8 *o, u8 *s, u8 *prim);
+
+void func_8001D3FC(u8 *o) {
+    u8 *s;
+    u8 *p;
+    u32 *ot;
+    u32 fl;
+    u32 z;
+    s32 tp, sh, tb;
+    u16 f;
+    u16 x, y;
+    u32 yy;
+    u16 u, u1;
+    s32 t;
+    s32 tpage, c;
+    u8 k;
+
+    z = *(u16 *)(o + 0x2C) & 0x3FFF;
+    if (z < 0x1000) {
+        fl = *(u32 *)(o + 4);
+        s = *(u8 **)(o + 0x20);
+        tp = (fl >> 24) & 3;
+        sh = 2 - tp;
+        ot = g_WorldOtTable[D_800B9A02] + z;
+        func_8001D70C(o);
+        tb = tp << 7;
+        do {
+            p = (u8 *)g_PrimNext;
+            f = *(u16 *)s;
+            x = *(u16 *)(o + 0x28) + (*(s16 *)(s + 4) >> sh);
+            yy = *(u16 *)(o + 0x2A) + *(u16 *)(s + 6);
+            y = yy;
+            g_PrimNext = (s32)(p + 0x28);
+            p[3] = 9;
+            p[7] = 0x2C;
+            if (fl & 0x40000000) {
+                p[7] = 0x2E;
+                tpage = tb | (((fl >> 28) & 3) << 5) | ((yy & 0x100) >> 4) | ((x & 0x3C0) >> 6) | ((yy & 0x200) << 2);
+            } else {
+                tpage = tb | (1 << 5) | ((yy & 0x100) >> 4) | ((x & 0x3C0) >> 6) | ((yy & 0x200) << 2);
+            }
+            *(u16 *)(p + 0x16) = tpage;
+            k = p[7];
+            p[7] = k | ((fl & 0x40) >> 6);
+            u = (x - ((tpage & 0xF) << 6)) << sh;
+            u1 = u + s[2] - 1;
+            if (u1 > 0xFF) u1 = 0xFF;
+            if (f & 0x100) {
+                p[0x14] = p[0x24] = u;
+                p[0xC] = p[0x1C] = u1;
+            } else {
+                p[0xC] = p[0x1C] = u;
+                p[0x14] = p[0x24] = u1;
+            }
+            t = y;
+            if (tpage & 0x10) {
+                u = t - 0x100;
+            } else {
+                u = t;
+            }
+            u1 = u + s[3] - 1;
+            if (u1 > 0xFF) u1 = 0xFF;
+            if (f & 0x200) {
+                p[0x1D] = p[0x25] = u;
+                p[0xD] = p[0x15] = u1;
+            } else {
+                p[0xD] = p[0x15] = u;
+                p[0x1D] = p[0x25] = u1;
+            }
+            c = (o[0x27] + 0x100) << 6;
+            if (o[0x27] < 0xE0) {
+                c |= 0x16;
+            } else {
+                c |= 0x10;
+            }
+            *(u16 *)(p + 0xE) = c;
+            p[4] = o[0x24];
+            p[5] = o[0x25];
+            p[6] = o[0x26];
+            func_8001D8C4(o, s, p);
+            addPrim(ot, p);
+            s += 0xC;
+        } while ((f & 0xFF) != 0xFF);
+    }
+}
 
 void func_8001D70C(u8 *o) {
     Mtx m;
@@ -6005,7 +6090,188 @@ void func_8001EA14(u8 *o) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_8001EFE0);
+extern void ScaleMatrix();
+extern void GsGetLs();
+s32 func_80021174();
+extern u8 *D_80072784;
+
+void func_8001EFE0(u8 *o) {
+    MATRIX m;
+    SVECTOR c;
+    VECTOR s;
+    SVECTOR v[2];
+    struct { u32 flg; MATRIX coord; MATRIX workm; void *param; void *super; void *sub; } co;
+    MATRIX ls;
+    SVECTOR col;
+    struct { s32 flag; s32 sz; s32 otz; s16 x0, y0; s16 x1, y1; } t;
+    Work *w = &D_800AF630;
+    u32 attr;
+    u8 *p;
+    u8 *prim;
+    s32 tp;
+    s32 sh;   /* on the stack (spilled): one declaration per line for pc/frames.txt */
+    s32 abr;
+    u32 *ot;
+    s32 z;
+    u32 f;
+    u16 x, y, k;
+    s32 vv; u16 ww;
+    s32 wd;
+    u16 tq, xx;
+    s16 hh;
+    u16 tpg;
+
+    attr = *(u32 *)(o + 4);
+    co.super = *(void **)(o + 0x78);
+    co.flg = 0;
+    if (*(u16 *)(o + 0x2C) & 1) {
+        *(u16 *)(o + 0x2C) &= ~1;
+        co.coord = *(MATRIX *)(o + 0x34);
+    } else {
+        RotMatrixZYX(o + 0x10, &co.coord);
+        co.coord.t[0] = *(s16 *)(o + 8);
+        co.coord.t[1] = *(s16 *)(o + 0xA);
+        co.coord.t[2] = *(s16 *)(o + 0xC);
+    }
+    s.vx = *(s16 *)(o + 0x18);
+    s.vy = *(s16 *)(o + 0x1A);
+    s.vz = *(s16 *)(o + 0x1C);
+    ScaleMatrix(&co.coord, &s);
+    GsGetLs(&co, &ls);
+    *(MATRIX *)(o + 0x34) = co.coord;
+    *(MATRIX *)(o + 0x54) = co.workm;
+    p = *(u8 **)(o + 0x20);
+    if (p == NULL) {
+        return;
+    }
+    if (func_80021174(*(s32 *)(o + 0x28), co.workm.t) == 0) {
+        return;
+    }
+    gte_SetRotMatrix(&ls);
+    gte_SetTransMatrix(&ls);
+    c.vx = c.vy = c.vz = 0;
+    gte_ldv0(&c);
+    gte_rtps();
+    gte_stsxy(&c);
+    gte_stflg(&t.flag);
+    gte_stsz(&t.sz);
+    gte_stszotz(&t.otz);
+    if (t.flag & ~0x1000) {
+        return;
+    }
+    z = t.otz + 1;
+    ot = g_WorldOtTable[w->frame];
+    k = *(u16 *)(o + 0x2E);
+    if (k & 0xC000) {
+        if ((k & 0xC000) == 0xC000) {
+            z -= k & 0xFFF;
+            if (z < 0) {
+                z = 0;
+            }
+        } else {
+            z += k & 0xFFF;
+        }
+    }
+    if ((u32)z >= 0x1000) {
+        return;
+    }
+    if (*(u16 *)(o + 0x2C) & 0x80) {
+        col = **(SVECTOR **)(o + 0x80);
+    } else {
+        col.vx = col.vy = col.vz = 0x80;
+    }
+    tp = (attr >> 24) & 3;
+    m.m[0][0] = *(u16 *)(o + 0x18);
+    m.m[0][1] = 0;
+    m.m[0][2] = 0;
+    m.m[1][0] = 0;
+    m.m[1][1] = *(u16 *)(o + 0x1A);
+    m.m[1][2] = 0;
+    m.m[2][0] = 0;
+    m.m[2][1] = 0;
+    m.m[2][2] = 0x1000;
+    m.t[0] = m.t[1] = m.t[2] = 0;
+    sh = 2 - tp;
+    abr = (attr >> 28) & 3;
+    gte_SetRotMatrix(&m);
+    gte_SetTransMatrix(&m);
+    do {
+        f = *(u32 *)p;
+        if ((f & 0xFF) != 8) {
+            prim = (u8 *)g_PrimNext;
+            x = *(u16 *)(p + 4);
+            y = *(u16 *)(p + 6);
+            g_PrimNext += 0x28;
+            prim[3] = 9;
+            prim[7] = 0x2C;
+            if (attr & 0x40000000) {
+                prim[7] = 0x2E;
+                if ((u32)(D_80072784[4] - 1) < 2) {
+                    tq = ((u8)tp << 9) | ((u8)abr << 7) | ((y & 0x300) >> 3);
+                    xx = (x & 0x3C0) >> 6;
+                    tpg = xx | tq;
+                } else {
+                    tpg = ((u8)tp << 7) | ((u8)abr << 5) | ((y & 0x100) >> 4) | ((x & 0x3C0) >> 6) | ((y & 0x200) << 2);
+                }
+                *(u16 *)(prim + 0x16) = tpg;
+            } else {
+                if ((u32)(D_80072784[4] - 1) < 2) {
+                    tq = ((u8)tp << 9) | (1 << 7) | ((y & 0x300) >> 3);
+                    xx = (x & 0x3C0) >> 6;
+                    tpg = xx | tq;
+                } else {
+                    tpg = ((u8)tp << 7) | (1 << 5) | ((y & 0x100) >> 4) | ((x & 0x3C0) >> 6) | ((y & 0x200) << 2);
+                }
+                *(u16 *)(prim + 0x16) = tpg;
+            }
+            prim[7] |= (attr & 0x40) >> 6;
+            prim[0xC] = (x - (*(u16 *)(prim + 0x16) & 0xF) * 64) << sh;
+            vv = y;
+            if ((*(u16 *)(prim + 0x16) & 0x10)) {
+                ww = vv - 0x100;
+            } else {
+                ww = vv;
+            }
+            prim[0xD] = ww;
+            wd = (f >> 16) & 0xFF;
+            prim[0x14] = prim[0xC] + wd;
+            prim[0x1D] = prim[0xD] + (f >> 24);
+            prim[0x15] = prim[0xD];
+            prim[0x1C] = prim[0xC];
+            prim[0x24] = prim[0x14];
+            prim[0x25] = prim[0x1D];
+            k = (f >> 8) & 0xFF;
+            *(u16 *)(prim + 0xE) = ((k + 0x100) << 6) | (((k < 0xE0) ? 0x160 : 0x100) >> 4);
+            prim[4] = col.vx;
+            prim[5] = col.vy;
+            prim[6] = col.vz;
+            v[0].vx = *(u16 *)(p + 8);
+            v[0].vy = *(u16 *)(p + 0xA);
+            v[0].vz = t.sz;
+            v[1].vx = (f >> 16) & 0xFF;
+            hh = f >> 24;
+            v[1].vy = hh;
+            v[1].vz = t.sz;
+            gte_ldv3(&v[0], &v[1], &v[1]);
+            gte_rtpt();
+            gte_stsxy0(&t.x0);
+            gte_stsxy1(&t.x1);
+            *(u16 *)(prim + 8) = t.x0 + c.vx;
+            *(u16 *)(prim + 0xA) = t.y0 + c.vy;
+            *(u16 *)(prim + 0x10) = *(u16 *)(prim + 8) + t.x1;
+            *(u16 *)(prim + 0x18) = *(u16 *)(prim + 8);
+            *(u16 *)(prim + 0x12) = *(u16 *)(prim + 0xA);
+            *(u16 *)(prim + 0x1A) = *(u16 *)(prim + 0xA) + t.y1;
+            *(u16 *)(prim + 0x20) = *(u16 *)(prim + 0x10);
+            *(u16 *)(prim + 0x22) = *(u16 *)(prim + 0x1A);
+            if (*(u32 *)(o + 4) & 0x8000000) {
+                func_8001F730(o + 0x10, (u8 *)&c, prim);
+            }
+            addPrim(ot + z, prim);
+        }
+        p += 0xC;
+    } while ((f & 0xFF) != 0xFF);
+}
 
 void func_8001F730(u8 *a, u8 *c, u8 *p) {
     MATRIX m;
@@ -6523,44 +6789,50 @@ s32 func_80020A28(s32 *list, u8 *d, MATRIX *m1, MATRIX *m2, s32 f) {
     return ret;
 }
 
+/* NON_MATCHING (r283, docs/phase1_rulings.md #10), 27 lines: every register sits in one block, in an order fixed by how the nine multiplications are scheduled; the original needs one value "more urgent" than the schedule allows (the unused s0 save is reload's own, no hidden variable). */
 #ifdef NON_MATCHING
-/* NOT YET MATCHING: functionally the same as the asm, but the original keeps a 0x18 byte frame (saves s0/s1, 16 bytes of
-   locals) and allocates registers differently. tools/try.ps1 rebuilds and diffs it (a3 versus a2 for the table pointer, then the
-   order of the products). */
 /* Angles are 12-bit (0x1000 = a full turn). The table holds one entry per angle: a word whose low half is sin and high half
    is cos, 4.12 fixed point; the code reads some entries as words and some as halves. */
 extern s32 *D_800636D4;
+typedef struct { s16 s; s16 c; } SinCos;
 
-/* Builds a 3x3 rotation matrix (9 s16, 4.12) from three 12-bit angles {x, y, z} */
-void func_80020DA4(u16 *angles, s16 *m) {
+/* Builds a 3x3 rotation matrix (9 s16, 4.12) from three 12-bit angles {x, y, z}; each table word is sin (low) / cos (high) */
+void func_80020DA4(u8 *p0, u8 *p1) {
+    u16 *angles = (u16 *)p0;
+    s16 *m = (s16 *)p1;
+    s32 pad[4];
     s32 *tab = D_800636D4;
     s32 xv = tab[angles[0] & 0xFFF];
-    s16 *z = (s16 *)&tab[angles[2] & 0xFFF];
     s32 xc = xv >> 16;
-    s16 zs = z[0];
+    s16 zs = ((SinCos *)tab)[angles[2] & 0xFFF].s;
     s32 c = xc * zs;
-    s16 zc = z[1];
+    s16 zc = ((SinCos *)tab)[angles[2] & 0xFFF].c;
     s32 b = xc * zc;
-    s16 *y = (s16 *)&tab[angles[1] & 0xFFF];
-    s16 ys = y[0];
-    s32 yv = *(s32 *)y;
+    s16 ys = ((SinCos *)tab)[angles[1] & 0xFFF].s;
+    s32 yv = tab[angles[1] & 0xFFF];
     s32 yc = yv >> 16;
-    s32 a = ((s16)xv * ys) >> 12;
+    s16 xs = xv;
+    s32 a = (xs * ys) >> 12;
+    s32 r1, r2;
 
-    m[6] = -yv;
+    r2 = (((b >> 12) * ys) >> 12) + ((xs * zs) >> 12);
+    r1 = ((a * zc) >> 12) - (c >> 12);
     m[0] = (zc * yc) >> 12;
+    m[1] = r1;
+    m[2] = r2;
     m[3] = (zs * yc) >> 12;
-    m[7] = (yc * (s16)xv) >> 12;
-    m[8] = (yc * xc) >> 12;
-    m[1] = ((a * zc) >> 12) - (c >> 12);
-    m[2] = (((b >> 12) * ys) >> 12) + (((s16)xv * zs) >> 12);
     m[4] = ((a * zs) >> 12) + (b >> 12);
-    m[5] = (((c >> 12) * ys) >> 12) - (((s16)xv * zc) >> 12);
+    m[5] = (((c >> 12) * ys) >> 12) - ((xs * zc) >> 12);
+    m[6] = -yv;
+    m[7] = (yc * xs) >> 12;
+    m[8] = (yc * xc) >> 12;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_80020DA4);
 #endif
 
+/* Hand-written assembly in the original, an instruction order no compiler produces: there is no C source to recover, so it
+   stays asm and counts as done (r283, docs/phase1_rulings.md #1). */
 INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_80020F34);
 
 void func_80021008(u8 *a) {
@@ -7534,7 +7806,128 @@ void func_8002374C(u8 *a) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_80023BF0);
+typedef struct { u32 tag; u32 col; s16 x, y; u16 uv, clut; } Spr8_23BF0;
+typedef struct { u32 tag; u32 col; s16 x, y; u16 uv, clut; s32 wh; } Spr_23BF0;
+
+void func_80023BF0(u8 *a) {
+    Work *w = &D_800AF630;
+    struct { SVECTOR v; s32 sxy; s32 p; s32 flag; s32 z; } t;
+    u16 *s = *(u16 **)(a + 0x20);
+    u32 f = *(u32 *)(a + 4);
+    u32 *ot = g_WorldOtTable[D_800B9A02];
+    u16 x, y, z;
+    u16 clut;
+    u32 col;
+    u8 *p;
+    if (f & 0x04000000) {
+        gte_SetRotMatrix(&w->wsm);
+        gte_SetTransMatrix(&w->wsm);
+        t.v.vx = *(u16 *)(a + 8) + *(u16 *)(a + 0x2E);
+        t.v.vy = *(u16 *)(a + 0xA) + *(u16 *)(a + 0x30);
+        t.v.vz = *(u16 *)(a + 0xC) + *(u16 *)(a + 0x32);
+        gte_ldv0(&t.v);
+        gte_rtps();
+        gte_stsxy(&t.sxy);
+        gte_stdp(&t.p);
+        gte_stflg(&t.flag);
+        gte_stszotz(&t.z);
+        if (t.z <= 0) {
+            return;
+        }
+        z = t.z + 1;
+        x = *(u16 *)(a + 0xE) + t.sxy;
+        y = t.sxy >> 16;
+    } else {
+        x = *(u16 *)(a + 0xE) + (*(u16 *)(a + 8) + *(u16 *)(a + 0x2E));
+        y = *(u16 *)(a + 0xA) + *(u16 *)(a + 0x30);
+        z = *(u16 *)(a + 0x2C);
+    }
+    clut = ((a[0x27] + 0x100) << 6) | ((a[0x27] < 0xE0 ? 0x160 : 0x100) >> 4);
+    p = (u8 *)g_PrimNext;
+    if (!(f & 0x400000)) {
+        u16 ch;
+        if (f & 0x40000000) {
+            u32 hi = a[0x26] << 16;
+            u32 cg = a[0x25] << 8;
+            u32 code = 0x76000000;
+            col = hi | (cg | code) | a[0x24];
+        } else {
+            u32 hi = a[0x26] << 16;
+            u32 cg = a[0x25] << 8;
+            u32 code = 0x74000000;
+            col = hi | (cg | code) | a[0x24];
+        }
+        while ((ch = *s) != 0xFFFF) {
+            switch (ch) {
+            case 0x1850:
+            case 0x1858:
+                ((Spr8_23BF0 *)p)->x = x + 4;
+                ((Spr8_23BF0 *)p)->y = y - 7;
+                break;
+            case 0x3870:
+                x += 7;
+                s++;
+                continue;
+            case 0x3871:
+                x += 4;
+                s++;
+                continue;
+            case 0x3872:
+                x += 2;
+                s++;
+                continue;
+            default:
+                ((Spr8_23BF0 *)p)->x = x;
+                x += 7;
+                ((Spr8_23BF0 *)p)->y = y;
+                break;
+            }
+            ((Spr8_23BF0 *)p)->tag = 0x03000000;
+            ((Spr8_23BF0 *)p)->col = col;
+            ((Spr8_23BF0 *)p)->uv = *s++;
+            ((Spr8_23BF0 *)p)->clut = clut;
+            ((Tag23570 *)p)->addr = ((Tag23570 *)&ot[z])->addr;
+            ((Tag23570 *)&ot[z])->addr = (u32)p;
+            p += sizeof(Spr8_23BF0);
+        }
+    } else {
+        u16 ch;
+        if (f & 0x40000000) {
+            u32 hi = a[0x26] << 16;
+            u32 cg = a[0x25] << 8;
+            u32 code = 0x66000000;
+            col = hi | (cg | code) | a[0x24];
+        } else {
+            u32 hi = a[0x26] << 16;
+            u32 cg = a[0x25] << 8;
+            u32 code = 0x64000000;
+            col = hi | (cg | code) | a[0x24];
+        }
+        while ((ch = *s) != 0xFFFF) {
+            if (ch == 0x3870) {
+                x += 0x10;
+                s++;
+                continue;
+            }
+            ((Spr_23BF0 *)p)->x = x;
+            x += 0x10;
+            ((Spr_23BF0 *)p)->y = y;
+            ((Spr_23BF0 *)p)->tag = 0x04000000;
+            ((Spr_23BF0 *)p)->col = col;
+            ((Spr_23BF0 *)p)->uv = *s++;
+            ((Spr_23BF0 *)p)->clut = clut;
+            ((Spr_23BF0 *)p)->wh = 0x00180010;
+            ((Tag23570 *)p)->addr = ((Tag23570 *)&ot[z])->addr;
+            ((Tag23570 *)&ot[z])->addr = (u32)p;
+            p += sizeof(Spr_23BF0);
+        }
+    }
+    setlen(p, 1);
+    ((u32 *)p)[1] = ((f >> 23) & 0x60) | 0xE1000015;
+    ((Tag23570 *)p)->addr = ((Tag23570 *)&ot[z])->addr;
+    g_PrimNext = (s32)(p + 0x40);
+    ((Tag23570 *)&ot[z])->addr = (u32)p;
+}
 
 extern u16 D_800636D8[];
 extern u16 D_80063770[];

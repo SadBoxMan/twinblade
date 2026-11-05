@@ -8172,7 +8172,31 @@ void func_8015369C(s32 arg0) {
     AF(arg0, u8, 0xDE) = 0x5A;
 }
 
-INCLUDE_ASM("asm/stage/nonmatchings/engine_801458E0", func_801536DC);
+s32 func_801536DC(s32 arg0) {
+    SVECTOR v;
+
+    if (D_8011DB28 != 0) {
+        D_8011DB28(arg0 + 0xA0);
+    }
+    AF(arg0, s16, 6) = func_80012C6C(AF(arg0, s16, 6), AF(arg0, s16, 0xA0), 8);
+    AF(arg0, s16, 0xA) = func_80012C6C(AF(arg0, s16, 0xA), AF(arg0, s16, 0xA2), 8);
+    ((s16 *)arg0)[7] = func_80012C6C(AF(arg0, s16, 0xE), AF(arg0, s16, 0xA4), 8);
+    if (D_8011DB28 != 0) {
+        func_80015978(arg0 + 4, &v);
+        if (func_80013294(&v, arg0 + 0xA0) < 0x40 || AF(arg0, u8, 0xDE) == 0) {
+            func_80015954(arg0 + 0xA0, arg0 + 4);
+            return 0;
+        }
+        AF(arg0, u8, 0xDE)--;
+    }
+    {
+        HARD_V0(r) = 1; /* MATCH-TRICK: see HARD_V0 in common.h */
+        if (AF(arg0, s16, 6) == AF(arg0, s16, 0xA0) && AF(arg0, s16, 0xA) == AF(arg0, s16, 0xA2)) {
+            r = AF(arg0, s16, 0xE) != AF(arg0, s16, 0xA4);
+        }
+        return r;
+    }
+}
 
 extern void func_800139C8();
 extern s32 func_80153978();

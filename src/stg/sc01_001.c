@@ -3114,7 +3114,75 @@ s32 func_sc01_001_80181A28(void) {
     return var_v0;
 }
 
+/* NON_MATCHING (r283, docs/phase1_rulings.md #11), 77 lines, two causes: a "largest of three" laid out as if the compiler had not simplified the if / else, and a per-turn pointer copy the compiler always deletes; even a dead-store trick leaves 67. */
+#ifdef NON_MATCHING
+extern s32 D_sc01_001_801F304C;
+extern s32 D_sc01_001_801F3050;
+extern s32 D_sc01_001_80188C78[];
+extern u16 D_800B99DC[];
+
+static inline s32 func_sc01_001_80181A4C_abs(s32 x) {
+    if (x < 0) return -x;
+    return x;
+}
+void func_sc01_001_80181A4C(void) {
+    s32 k;
+    s32 n;
+    s32 i;
+    s16 *a;
+    s16 *b;
+    V3 *d;
+    s32 dx, dy, dz;
+    s32 ax, ay, az;
+    s32 m;
+    D_sc01_001_801F3050++;
+    if ((D_sc01_001_801F3050 & 7) != 0) return;
+    k = D_sc01_001_801F304C;
+    for (n = k & 1; n < 16; n++) {
+        k = (k + 7) & 0xF;
+        for (i = 0; i < 256; i++) {
+            if (D_sc01_001_801EDA44[i].active == 0) {
+                D_sc01_001_801EDA44[i].active = 1;
+                D_sc01_001_801EDA44[i].tgt.x = 0;
+                D_sc01_001_801EDA44[i].tgt.y = 0xFCF50000;
+                D_sc01_001_801EDA44[i].tgt.z = 0;
+                D_sc01_001_801EDA44[i].pos.x.l = D_sc01_001_80188C78[k * 2] << 16;
+                D_sc01_001_801EDA44[i].pos.y.l = (D_sc01_001_80188C78[k * 2 + 1] << 16) + 0xFCF50000;
+                D_sc01_001_801EDA44[i].pos.z.l = (D_sc01_001_801F304C & 0x1F) << 19;
+                D_sc01_001_801EDA44[i].old = D_sc01_001_801EDA44[i].pos;
+                a = (s16 *)&D_sc01_001_801EDA44[i].pos;
+                b = (s16 *)&D_sc01_001_801EDA44[i].tgt;
+                d = &D_sc01_001_801EDA44[i].dir;
+                dx = b[1] - a[1];
+                dy = b[3] - a[3];
+                dz = b[5] - a[5];
+                ax = func_sc01_001_80181A4C_abs(dx);
+                ay = func_sc01_001_80181A4C_abs(dy);
+                az = func_sc01_001_80181A4C_abs(dz);
+                m = ax <= ay ? ay : ax;
+                if (m < az) m = az;
+                d->x = (dx << 16) / m;
+                d->y = (dy << 16) / m;
+                d->z = (dz << 16) / m;
+                D_sc01_001_801EDA44[i].vel.x = D_sc01_001_801EDA44[i].dir.x * 2;
+                D_sc01_001_801EDA44[i].vel.y = D_sc01_001_801EDA44[i].dir.y * 2;
+                D_sc01_001_801EDA44[i].vel.z = D_sc01_001_801EDA44[i].dir.z * 2;
+                D_sc01_001_801EDA44[i].vel.x = 0;
+                D_sc01_001_801EDA44[i].vel.y = 0;
+                D_sc01_001_801EDA44[i].vel.z = 0;
+                D_sc01_001_801EDA44[i].half.x = D_sc01_001_801EDA44[i].dir.x / 2;
+                D_sc01_001_801EDA44[i].half.y = D_sc01_001_801EDA44[i].dir.y / 2;
+                D_sc01_001_801EDA44[i].half.z = D_sc01_001_801EDA44[i].dir.z / 2;
+                D_sc01_001_801EDA44[i].timer = (D_800B99DC[0] & 7) + 10;
+                break;
+            }
+        }
+        D_sc01_001_801F304C += 7;
+    }
+}
+#else
 INCLUDE_ASM("asm/stg/sc01_001/nonmatchings/sc01_001", func_sc01_001_80181A4C);
+#endif
 
 void func_sc01_001_80181E04(void) {
     MtxDCM ls;
