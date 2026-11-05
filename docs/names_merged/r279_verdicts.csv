@@ -1902,3 +1902,74 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8017F878,stage:sc01_001,Cast1Main,Cast1Main,M,M,KEEP,cast 1's state table; a number name,0
 0x8017F894,stage:sc03_117,AfterWakeModelInit,AfterWakeModelInit,M,H,PROMOTE,"a model and the kind 0x1D7 actor into +0xCC, next state",0
 0x8017F8C8,stage:sc03_113,StepColumnMain,StepColumnMain,M,H,PROMOTE,D_801871A8[state](obj): the step column's state table,0
+0x8017F8D8,stage:sc03_092,EventByProgressArea,EventByProgressArea,M,M,KEEP,a switch by progress (lines not read in full); M,0
+0x8017F914,stage:sc05_003,CreatureStartIdle,CreatureStartIdle,M,H,PROMOTE,"a random idle timer, its flag cleared, StopWithGravity, the idle script",0
+0x8017F928,stage:sc05_001,ShiftDebrisMain,ShiftDebrisMain,M,H,PROMOTE,D_80189848[state](obj): the shift debris' state table,0
+0x8017F958,stage:sc03_013,CheckpointSpriteFlag,CheckpointSpriteFlag,M,H,PROMOTE,"when the checkpoint counter matches its own, timer 0x10 and next state",0
+0x8017F98C,stage:sc04_000,ArrivalWalker,ArrivalWalker,M,H,PROMOTE,BlendCameraThen to the room camera; at its last step it frees itself,0
+0x8017F998,stage:sc03_121,BigFoeHurt,BigFoeHurt,M,H,PROMOTE,"unless it hit Musashi itself: TakeDamageAndRecoil, the hurt script, SE 0xA99",0
+0x8017F9A8,stage:sc04_011,RoomEntryStart,RoomEntryStart,M,H,PROMOTE,"the room entry task's step: flags, sound, fade, step + 1",0
+0x8017F9B4,stage:sc04_015,VillagerTalk,VillagerTalk,M,M,KEEP,lines not read in full; M,0
+0x8017FA1C,stage:sc05_005,CreatureStartIdle,CreatureStartIdle,M,H,PROMOTE,"a random idle timer, its flag cleared, StopWithGravity, the idle script",0
+0x8017FA1C,stage:sc06_024,MechShotFly,MechShotFly,M,M,KEEP,lines not read in full; M,0
+0x8017FA74,stage:sc03_092,EventCutScene,EventCutScene,M,M,KEEP,"its script from a table, hit data (lines not all read); ""CutScene"" not shown",0
+0x8017FA78,stage:sc04_015,VillagerInit,VillagerInit,M,H,PROMOTE,"placed, matrix, shown, its script, a helper",0
+0x8017FAC8,stage:sc05_001,RopePropMain,RopePropMain,M,H,PROMOTE,D_8018989C[state](obj): the rope prop's state table,0
+0x8017FB38,stage:sc03_111,DrawMeshVariant,DrawMeshVariant,M,M,KEEP,a mesh drawn (lines not read in full); M,0
+0x8017FC44,stage:sc03_092,NpcPairInit,NpcPairInit,M,M,KEEP,"two kind 0x1AF actors and a placed partner; ""Pair"" rests on the helpers",0
+0x8017FD04,stage:sc04_000,EventSmokeAndSwap,EventSmokeAndSwap,M,H,PROMOTE,"two images moved into VRAM, SetProgress(0x302), 1",0
+0x8017FD38,stage:sc04_002,RoomCameraToggle,RoomCameraToggle,M,H,PROMOTE,"the camera's pitch by the focus height, the camera placed",0
+0x8017FD90,stage:sc03_001,WindowLitTime2,WindowLitTime2,M,M,KEEP,"the window table pointer and a helper with two times; ""Time2"" is a number name",0
+0x8017FDE4,stage:sc03_031,PushBlockStop,PushBlockStop,M,H,PROMOTE,"state 3, StopMotion, a local velocity, timer 0x40, SE 0x5C4",0
+0x8017FE08,stage:sc01_001,Cast2Main,Cast2Main,M,M,KEEP,cast 2's state table; number name,0
+0x8017FE3C,stage:sc06_010,RotorFlyerRoam,RotorFlyerRoam,M,H,PROMOTE,"its turn counter, and near Musashi state 2 with a timer",0
+0x8017FE88,stage:sc03_092,EventRunBandScript,EventRunBandScript,M,M,KEEP,a switch (lines not read in full); M,0
+0x8017FE9C,stage:sc06_030,ShotFly,ShotFly,M,H,PROMOTE,freed on a hit or when its timer runs out,0
+0x8017FEBC,stage:sc04_000,ItemTakerInit,ItemTakerInit,M,H,PROMOTE,its images moved into VRAM once progress >= 0x302 (lines not all read),0
+0x8017FFD8,stage:sc03_092,EventTestFlags101To104,EventTestFlags101To104,M,M,KEEP,"counts flags 0x101-0x104 into a table index; the range in the name is the r275 reading, M",0
+0x8017FFF0,stage:sc04_002,BarrierMain,BarrierMain,M,H,PROMOTE,"Musashi's x clamped at -0x580, then D_8018C560[state](obj)",0
+0x8017FFF8,stage:sc05_001,LiftFrameMain,LiftFrameMain,M,H,PROMOTE,D_80189AD4[state](obj): the lift frame's state table,0
+0x80180014,stage:sc03_002,RoomRestartMusic,RoomRestartMusic,M,H,PROMOTE,"ParkSoundStates, D_8012704C = 1",0
+0x80180020,stage:sc04_000,ItemTakerReceive,ItemTakerReceive,M,H,PROMOTE,the three items 0x60-0x62 taken,0
+0x80180070,stage:sc04_002,HasItem61,HasItem61,M,H,PROMOTE,FindItem(0x61) != 0,0
+0x80180084,stage:sc02_017,MultiHitBreak,MultiHitBreak,M,M,KEEP,lines not read in full; M,0
+0x80180090,stage:sc04_002,GateInit,GateInit,M,H,PROMOTE,"SetupActor; with flag 0xDB its script, talk marker, draw bit",0
+0x80180190,stage:sc04_002,GateWait,GateWait,M,H,PROMOTE,"IsEventDone: EndEvent, and lifted far enough timer 0 and SE 0xB1D",0
+0x801801F8,stage:sc03_105,BossInit,BossInit,M,H,PROMOTE,the boss's fields and parts set (lines not all read),0
+0x80180260,stage:sc05_001,LiftMain,LiftMain,M,H,PROMOTE,D_80189AF8[state](obj): the lift's state table,0
+0x80180290,stage:sc03_002,SceneCrashEnd,SceneCrashEnd,M,H,PROMOTE,"EndScene, his motion, a push up, the action's fields, BumpSub2Copy",0
+0x801802F4,stage:sc03_002,SceneCrashFall,SceneCrashFall,M,M,KEEP,lines not read in full; M,0
+0x801803BC,stage:sc04_000,BarrierMain,BarrierMain,M,H,PROMOTE,"Musashi's z clamped at 0x4FD, then D_801998F8[state](obj)",0
+0x801803F8,stage:sc05_001,ShiftWallMain,ShiftWallMain,M,H,PROMOTE,D_80189B18[state](obj): the shift wall's state table,0
+0x80180408,stage:sc05_018,EventStagedCollapse,EventStagedCollapse,M,M,KEEP,"a helper and three sounds; ""Staged"" not settled",0
+0x80180418,stage:sc04_000,BarrierInit,BarrierInit,M,H,PROMOTE,"SetupActor; past progress 0x2F8 its script and wait, StopWithGravity",0
+0x8018043C,stage:sc01_001,Cast3Main,Cast3Main,M,M,KEEP,cast 3's state table; number name,0
+0x80180484,stage:sc03_102,RoomCameraInit,RoomCameraInit,M,H,PROMOTE,"the room camera's targets, its update installed and snapped",0
+0x8018048C,stage:sc01_005,HostEventRunFade,HostEventRunFade,M,H,PROMOTE,"IsEventDone: EndEvent, TakePlayerControl, timer 0x10, next state",0
+0x801804EC,stage:sc03_031,HumSourceUpdate,HumSourceUpdate,M,H,PROMOTE,"at angle 0x800 state 2, a helper, SE 0x63F",0
+0x80180540,stage:sc01_009,ResidentMain,ResidentMain,M,H,PROMOTE,D_801EEDBC[state](obj): the resident's state table,0
+0x80180558,stage:sc03_102,CameraZoomToggle,CameraZoomToggle,M,H,PROMOTE,the focus clamped (z range) and the camera placed,0
+0x80180604,stage:sc04_000,ItemTakerOnHit,ItemTakerOnHit,M,H,PROMOTE,"its hit flags; hit by kind 0x24 before progress X: StartEvent, state 3",0
+0x80180660,stage:sc04_011,BossWaitShake,BossWaitShake,M,H,PROMOTE,TickTimer; every 16 frames a camera shake,0
+0x8018066C,stage:sc04_000,HasThreeItems,HasThreeItems,M,H,PROMOTE,"FindItem of 0x60, 0x61 and 0x62 all nonzero",0
+0x80180710,stage:sc03_002,SceneWaitTrack,SceneWaitTrack,M,H,PROMOTE,"StartMapMusic, then NextPlayerActionHandler",0
+0x80180724,stage:sc06_024,Spawner263,Spawner263,M,M,KEEP,"lines not read in full; ""263"" is the kind number",0
+0x801807CC,stage:sc04_011,BossSwingPart,BossSwingPart,M,H,PROMOTE,the current part's angle stepped toward 0 (a helper) while the timer runs,0
+0x801807F8,stage:sc05_001,LiftWeightInit,LiftWeightInit,M,H,PROMOTE,"InitModel, its flags, hit data, surface 8, next state",0
+0x80180864,stage:sc06_010,RotorFlyerInit,RotorFlyerInit,M,H,PROMOTE,"its model parts, flags and timers set",0
+0x801808D8,stage:sc01_001,Cast4Main,Cast4Main,M,M,KEEP,cast 4's state table; number name,0
+0x80180960,stage:sc03_030,FallingRockA,FallingRockA,M,M,KEEP,falling rock A; letter pair,0
+0x8018098C,stage:sc05_001,LiftWaitRider,LiftWaitRider,M,H,PROMOTE,"when Musashi rides it, LiftStartRide",0
+0x80180A20,stage:sc04_011,BossChargeTimer,BossChargeTimer,M,M,KEEP,lines not read in full; M,0
+0x80180A38,stage:sc03_002,CameraModeScene,CameraModeScene,M,H,PROMOTE,"the camera's distance kept at least 0x12C, a helper",0
+0x80180A38,stage:sc03_102,DropperSpawnVolley,DropperSpawnVolley,M,M,KEEP,lines not read in full; M,0
+0x80180A3C,stage:sc03_030,FallingRockB,FallingRockB,M,M,KEEP,falling rock B; letter pair,0
+0x80180A58,stage:sc03_001,VillagerSetScript,VillagerSetScript,M,H,PROMOTE,"state 7, its script",0
+0x80180BD8,stage:sc02_016,CreatureAppear,CreatureAppear,M,M,KEEP,lines not read in full; M,0
+0x80180C38,stage:sc03_102,DropPropFall,DropPropFall,M,H,PROMOTE,"falls until its timer runs out, then FreeProp",0
+0x80180D5C,stage:sc06_000,EventIntroMain,EventIntroMain,M,H,PROMOTE,D_8018C070[+0x216](obj): the intro event's phases,0
+0x80180D88,stage:sc03_089,RoomStart0,RoomStart0,M,M,KEEP,"room start 0 (spawn lists, sequence 0); number name",0
+0x80180DC8,stage:sc03_089,RoomStart1,RoomStart1,M,M,KEEP,room start 1; number name,0
+0x80180DD4,stage:sc06_000,EventIntroCamDrop,EventIntroCamDrop,M,H,PROMOTE,"the camera's height drops, and near its end BumpSub2Copy",0
+0x80180E04,stage:sc03_011,SceneActorsSetScript,SceneActorsSetScript,M,H,PROMOTE,two scene actors set to the same script,0
+0x80180E08,stage:sc03_089,RoomStart2,RoomStart2,M,M,KEEP,room start 2; number name,0
