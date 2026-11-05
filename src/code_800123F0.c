@@ -6788,55 +6788,43 @@ s32 func_80020A28(s32 *list, u8 *d, MATRIX *m1, MATRIX *m2, s32 f) {
     return ret;
 }
 
-/* NON_MATCHING (r287, docs/phase1_rulings.md #10), 5 lines: the multiply order and every long register now match; the x and z table indexes are computed in swapped order (v0 / v1). Computing x first lets xv take v1, which only yv could stop by outranking xv, and no statement order, type or early `-yv` gave that. */
-#ifdef NON_MATCHING
-/* Angles are 12-bit (0x1000 = a full turn). The table holds one entry per angle: a word whose low half is sin and high half
-   is cos, 4.12 fixed point; the code reads some entries as words and some as halves. */
+/* Angles are 12-bit (0x1000 = a full turn). The table holds one word per angle: the low half is sin and the high half is
+   cos, 4.12 fixed point. Every entry is read as a whole word and split into s16 halves; the compiler then folds some of
+   the splits into half loads, which is why the code reads x as a word, z as two halves and y as both (r290). */
 extern s32 *D_800636D4;
-typedef struct { s16 s; s16 c; } SinCos;
 
-/* Builds a 3x3 rotation matrix (9 s16, 4.12) from three 12-bit angles {x, y, z}; each table word is sin (low) / cos (high) */
+/* Builds a 3x3 rotation matrix (9 s16, 4.12) from three 12-bit angles {x, y, z} */
 void func_80020DA4(u8 *p0, u8 *p1) {
     u16 *angles = (u16 *)p0;
     s16 *m = (s16 *)p1;
-    s32 pad[4];
     s32 *tab = D_800636D4;
-    s32 xv;
-    s32 xc;
-    s16 zs;
-    s32 c;
-    s16 zc;
-    s32 b;
-    s16 ys;
-    s32 yv;
-    s32 yc;
-    s16 xs;
-    s32 a;
+    s32 xv, yv, zv;
+    s16 xs, ys, zs;
+    s16 xc, yc, zc;
+    s32 a, b, c;
 
-    zc = ((SinCos *)tab)[angles[2] & 0xFFF].c;
     xv = tab[angles[0] & 0xFFF];
     yv = tab[angles[1] & 0xFFF];
-    ys = ((SinCos *)tab)[angles[1] & 0xFFF].s;
+    zv = tab[angles[2] & 0xFFF];
+    xs = xv;
     xc = xv >> 16;
-    zs = ((SinCos *)tab)[angles[2] & 0xFFF].s;
+    ys = yv;
+    yc = yv >> 16;
+    zs = zv;
+    zc = zv >> 16;
     c = xc * zs;
     b = xc * zc;
-    xs = xv;
-    yc = yv >> 16;
     a = (xs * ys) >> 12;
     m[0] = (zc * yc) >> 12;
     m[1] = ((a * zc) >> 12) - (c >> 12);
-    m[6] = -yv;
     m[2] = (((b >> 12) * ys) >> 12) + ((xs * zs) >> 12);
     m[3] = (zs * yc) >> 12;
     m[4] = ((a * zs) >> 12) + (b >> 12);
     m[5] = (((c >> 12) * ys) >> 12) - ((xs * zc) >> 12);
+    m[6] = -ys;
     m[7] = (yc * xs) >> 12;
     m[8] = (yc * xc) >> 12;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_80020DA4);
-#endif
 
 /* Hand-written assembly in the original, an instruction order no compiler produces: there is no C source to recover, so it
    stays asm and counts as done (r283, docs/phase1_rulings.md #1). */

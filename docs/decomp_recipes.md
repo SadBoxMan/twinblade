@@ -3025,3 +3025,52 @@ The MATCH-TRICK sweep: 181 lines to 154. Removed: 3 HARD_V0, 11 nv, 3 v, 8 comma
 | the rest | the D_800B99DA struct view (5), call-type casts, volatile reads and single lines | the delete or unwrap test only, not a hand pass: each loses lines. Worth a pass with these levers if a trick-free tree matters |
 
 func_80020DA4 stays at 5 lines: the x and z index pipelines are swapped, which swaps v0 and v1. Computing x first lets xv take v1, which only yv could prevent by outranking xv (yv live <= 10, it is 15). Tried: about 50,000 statement orders with x first (best 18 lines), index and pointer locals (the pointer form flips addu's operands), `-yv` in an early local, the 16 s16 / s32 type combinations.
+
+### r290 rows (func_80020DA4, the last NON_MATCHING function; 5 Nov)
+
+func_80020DA4 matches in plain C: no pad, no marked line (merge 91c8a8d8). **The lever: when one function reads the same
+kind of table entry in different ways (a word here, halves there), write ONE idiom for all of them and let combine make
+the difference. The target's mix of `lw` and `lh` was the compiler's work on three identical word reads, not three
+different reads in the source.** Reading halves through a struct gave the right instructions but the wrong reference
+counts, and no statement order could repair that (r287's 50,000 orders).
+
+```c
+    xv = tab[angles[0] & 0xFFF];        /* s32 xv, yv, zv; s16 xs, ys, zs; s16 xc, yc, zc; s32 a, b, c; */
+    yv = tab[angles[1] & 0xFFF];
+    zv = tab[angles[2] & 0xFFF];
+    xs = xv;  xc = xv >> 16;
+    ys = yv;  yc = yv >> 16;
+    zs = zv;  zc = zv >> 16;
+    c = xc * zs;
+    b = xc * zc;
+    a = (xs * ys) >> 12;                /* then m[0] .. m[8] in index order, m[6] = -ys */
+```
+
+| Symptom | Fix | Example |
+|---|---|---|
+| a packed table entry (two s16 in one word) read as `lw` + sll / sra + sra for one index, two `lh` for another, `lh` + `lw` + sra for a third | read every entry as a word and split it into s16 locals: `v = tab[i]; s = v; c = v >> 16;`. combine folds "load, shift left 16, shift right 16" into a half load when the three insns are linked, and keeps the word load when the word has another use (its rule for two independent sets made from three insns). flow.c links a register's setter only to its FIRST use, and an s16 local is sign-extended where it is used, so the half that a multiply uses first decides: sin first folds to `lh` (and cos after it, if the word then dies), cos first keeps the `lw`. The order of the split statements does not matter | func_80020DA4: `c = xc * zs;` uses x's cos and z's sin first, so x keeps the word and z becomes two `lh`; `a = xs * ys` uses y's sin first, and y's word stays for `yc` and the negation: `lh` + `lw` |
+| a local-alloc quantity needs one more reference than the asm shows, in straight-line code with no repeated paths | a value that combine folds away still counts: refs are taken at flow, before combine. `ys = yv;` folded into `lh` leaves yv with 6 refs where the asm shows 5, so yv's priority is 4000 against the x word's 3947 and yv takes v1. The struct half read gave 5 refs, 3333, and the x word took v1 | func_80020DA4 (r287's rule, without any repeated source) |
+| an unused 16-byte frame area and an unused s0 save, until now a `s32 pad[4];` | the s16 cos locals (`s16 xc, yc, zc;` set from `v >> 16`): frame 24 with `vars= 16` and both saves, no pad. With s32 cos locals: frame 8 and 90 lines. Which slots make up the 16 bytes was not traced | func_80020DA4 |
+| two address chains take v0 / v1 the wrong way round | local-alloc gives v0 to the higher priority, floor_log2(refs) * refs / life. The chain read twice (9 refs, 27 / life) beats the chain read once (8 refs, 24 / life) only when their lives are about equal, which needs the once-read chain to start first: x first gives z 15000 and x 13333; z first gives x 24000 and z 10384. Print the quantities with an instrumented cc1 before trying orders | func_80020DA4 |
+| a search over statement orders stalls a few lines short | stop and ask what source would make the odd part of the target (here the load pattern), then read the pass that makes it. The match was the first compile of the new idiom, and 5 different statement orders of its set-up lines all match (a, b, c in that order does not: the multiply order follows source order) | func_80020DA4 |
+
+Tool: an instrumented local-alloc.c. About 20 lines before "Now propagate the register assignments" in block_alloc print,
+for each quantity in allocation order, its birth, death, refs, priority, hard register and pseudos. With the .lreg dump's
+insn order beside it, a register question becomes a table to read. The build is r284's GCC 2.7.2 tree under MSYS2
+(`make cc1`, about 20 s after the first build).
+
+**How it was found, in plain words (LuciDin's notes for decompiling other games).**
+
+1. The earlier rounds had every instruction and all but two registers right, and searched statement orders for the rest.
+2. The instrumented compiler showed why that search could not end. Reading x first made the x / z registers right, and
+   moved the error to the next variable: the y word needed one more reference than its instructions had. No order of
+   statements adds a reference.
+3. The target read three table entries in three different ways. A programmer writes such reads once and copies them, so
+   the question became: what single way of reading gives all three? The compiler's own folding of a word read does, and
+   the folded read is exactly where the missing reference comes from.
+4. So the fix was in how the source reads the table, not in the order of its lines. The same change removed the frame
+   pad, which was a second sign that it is what the original source said.
+
+The general lesson: when a function is a few lines off after a long search, the remaining difference is rarely a matter
+of order. Look for something in the target that the current C explains only by coincidence (here: mixed load widths, an
+unused frame area), and ask what plainer source the compiler would turn into it.
