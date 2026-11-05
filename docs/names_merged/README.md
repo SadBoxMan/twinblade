@@ -289,7 +289,7 @@ family), so the true rate of the lightly read rows is likely above what they sho
 `SetPlayerHittable`. Apply it with engine_H2, which renames its pair.
 
 **Clash checks.** `r279_clash_check.py` (r278's checks, input = the three H2 batches; also flags an H2 address an
-H batch already names) writes `r279_clash_check.txt`: 1,570 names, **0 clashes**. It caught four during the work
+H batch already names) writes `r279_clash_check.txt`: 1,570 names, **0 clashes**. It caught three during the work
 (`ClearHittable`, `SetPlayerActionScript`, `StopAllSound`, all renamed).
 
 **Not checked:** nothing in the three batches is unjudged. What is weak is the depth noted above.
