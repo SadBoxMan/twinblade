@@ -1836,3 +1836,69 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8017EAF4,stage:sc03_093,RoomCameraInit0,RoomCameraInit0,M,M,KEEP,camera set-up 0; number name,0
 0x8017EB04,stage:sc04_005,RoomEntryStartB,RoomEntryStartB,M,M,KEEP,the room entry B; letter pair,0
 0x8017EB2C,stage:sc03_023,ChaseRunnerLeave,ChaseRunnerLeave,M,H,PROMOTE,SE 0x526 every 10 frames as it leaves,0
+0x8017EB8C,stage:sc03_093,RoomCameraInit1,RoomCameraInit1,M,M,KEEP,camera set-up 1 (update mode 1); number name,0
+0x8017EBA8,stage:sc03_112,MachineMain,MachineMain,M,H,PROMOTE,D_801896A4[state](obj): the machine's state table,0
+0x8017EBE8,stage:sc04_000,AdvanceWarpActors,AdvanceWarpActors,M,H,PROMOTE,"every warp actor (0x3AF) to its next state, BumpSub2Copy",0
+0x8017EBE8,stage:sc06_022,BreakableExplode,BreakableExplode,M,H,PROMOTE,the breakable's pieces and then itself freed (lines not all read),0
+0x8017EC24,stage:sc03_093,RoomCameraInit2,RoomCameraInit2,M,M,KEEP,camera set-up 2 (update mode 2); number name,0
+0x8017EC30,stage:sc03_023,ChaseTalkCheck,ChaseTalkCheck,M,H,PROMOTE,"no action and close to Musashi: a helper, state 2",0
+0x8017EC64,stage:sc04_000,WaitWarpActorsGone,WaitWarpActorsGone,M,H,PROMOTE,no warp actor (0x3AF) left: NextPlayerActionHandler,0
+0x8017EC84,stage:sc03_100,CameraZoomToggle,CameraZoomToggle,M,M,KEEP,an angle picked by a test and the camera placed; no toggle in the lines read,0
+0x8017ECE8,stage:sc06_006,SparkMain,SparkMain,M,H,PROMOTE,D_80185F8C[state](obj): the spark's state table,0
+0x8017EE34,stage:sc03_105,LobbedPieceFly,LobbedPieceFly,M,M,KEEP,lines not read in full; M,0
+0x8017EE38,stage:sc03_093,CameraZoomToggle,CameraZoomToggle,M,M,KEEP,the focus clamped and the camera placed; no toggle in the lines read,0
+0x8017EE3C,stage:sc06_010,WheelPartMove,WheelPartMove,M,H,PROMOTE,the wheel part placed round its parent by the wheel angle,0
+0x8017EE50,stage:sc04_020,VillagerWalkRoute,VillagerWalkRoute,M,M,KEEP,lines not read in full; M,0
+0x8017EE5C,stage:sc04_000,RoomCameraToggle,RoomCameraToggle,M,M,KEEP,the focus clamped to a box and the camera placed; no toggle in the lines read,0
+0x8017EE68,stage:sc05_010,RoomSpawnSet,RoomSpawnSet,M,M,KEEP,"its counters cleared (lines not all read); ""SpawnSet"" not shown",0
+0x8017EEF0,stage:sc06_030,BossShotA,BossShotA,M,M,KEEP,boss shot A (SE 0x945); letter pair,0
+0x8017EF34,stage:sc06_029,BossAttackA,BossAttackA,M,M,KEEP,lines not read in full; M,0
+0x8017EF54,stage:sc03_097,PlayerActionSpawnEffect,PlayerActionSpawnEffect,M,H,PROMOTE,"effect 0x1A on the owner, BumpSub2Copy",0
+0x8017EFD4,stage:sc03_001,Villager1Schedule,Villager1Schedule,M,M,KEEP,lines not read in full; M,0
+0x8017EFD4,stage:sc03_007,ScaledWalkerInit,ScaledWalkerInit,M,H,PROMOTE,"its scale from a sine, state 1, matrix",0
+0x8017EFEC,stage:sc01_004,MenuHostMain,MenuHostMain,M,H,PROMOTE,D_8018C2EC[state](obj): the menu host's state table,0
+0x8017F074,stage:sc06_006,DrawSpark,DrawSpark,M,H,PROMOTE,a spark primitive and its draw mode added at its depth,0
+0x8017F090,stage:sc03_010,CountdownSpriteInit,CountdownSpriteInit,M,H,PROMOTE,"AllocActorSprite with its frame and value, next state",0
+0x8017F0A0,stage:sc06_030,BossShotB,BossShotB,M,M,KEEP,boss shot B; letter pair,0
+0x8017F0B8,stage:sc05_004,MachinePartInit,MachinePartInit,M,H,PROMOTE,"its hit data and flags by a test, next state",0
+0x8017F0DC,stage:sc04_020,VillagerTalk,VillagerTalk,M,M,KEEP,lines not read in full; M,0
+0x8017F0F4,stage:sc03_112,MachinePartInit,MachinePartInit,M,H,PROMOTE,"a part placed above it, SpawnMachinePart, next state",0
+0x8017F0FC,stage:sc03_097,RoomCameraInit0,RoomCameraInit0,M,M,KEEP,camera set-up 0; number name,0
+0x8017F124,stage:sc03_093,ShuttlePlatformInit,ShuttlePlatformInit,M,H,PROMOTE,"SetupActor, its script, the platform's speed and timer from the table, cull box",0
+0x8017F194,stage:sc03_097,RoomCameraInit1,RoomCameraInit1,M,M,KEEP,camera set-up 1; number name,0
+0x8017F1CC,stage:sc03_112,MachineUpdate,MachineUpdate,M,H,PROMOTE,in state 3 MachineHitPlayer sets the hit kind 0x6001 and damage 0x10; the surface copied,0
+0x8017F1D4,stage:sc04_020,VillagerInit,VillagerInit,M,H,PROMOTE,"its helper, state 2, hidden and placed, the talk marker",0
+0x8017F1E4,stage:sc05_001,IsPlayerFar,IsPlayerFar,M,H,PROMOTE,squared distance to g_Player +0x158.. (the focus) > 0x143FFF,0
+0x8017F1F8,stage:sc05_005,CollisionModelInit,CollisionModelInit,M,H,PROMOTE,"InitModel, state 1, its hit data, heading from +0xFC",0
+0x8017F204,stage:sc04_000,HasItem60,HasItem60,M,H,PROMOTE,FindItem(0x60) != 0,0
+0x8017F224,stage:sc04_000,FlagDaObjInit,FlagDaObjInit,M,H,PROMOTE,"its script, the talk marker, the model's draw bit",0
+0x8017F234,stage:sc03_110,StaticModelInit,StaticModelInit,M,H,PROMOTE,"model flags 0x60000000 and 0x40, next state",0
+0x8017F23C,stage:sc03_031,PushBlockPush,PushBlockPush,M,H,PROMOTE,"state 3, StopMotion, pushed back -0x20000, timer 0x41, SE 0x5C2",0
+0x8017F268,stage:sc06_030,BossCloseAttack,BossCloseAttack,M,M,KEEP,lines not read in full; M,0
+0x8017F270,stage:sc04_005,HasItem62,HasItem62,M,H,PROMOTE,FindItem(0x62) != 0,0
+0x8017F288,stage:sc05_008,SpawnScheduled,SpawnScheduled,M,M,KEEP,lines not read in full; M,0
+0x8017F290,stage:sc04_005,GateInit,GateInit,M,H,PROMOTE,"SetupActor; with flag 0xDC its script, talk marker and draw bit",0
+0x8017F2BC,stage:sc03_125,ScriptPickByFlag109,ScriptPickByFlag109,M,H,PROMOTE,"flag 0x109: ParkSoundStates and script 0x3F, else 0x27",0
+0x8017F2D8,stage:sc03_110,TexAnimMain,TexAnimMain,M,H,PROMOTE,StepTexAnim,0
+0x8017F304,stage:sc03_097,CameraZoomToggle0,CameraZoomToggle0,M,M,KEEP,"the focus clamped (x range) and the camera placed; no toggle, number name",0
+0x8017F30C,stage:sc05_002,ColumnSoundMain,ColumnSoundMain,M,H,PROMOTE,D_8019C7E4[state](obj): the column sound's state table,0
+0x8017F324,stage:sc04_000,FlagDaObjWait,FlagDaObjWait,M,H,PROMOTE,its wait ends with the model hidden and SE 0xB1D,0
+0x8017F330,stage:sc06_029,BossVolley,BossVolley,M,M,KEEP,lines not read in full; M,0
+0x8017F390,stage:sc04_005,GateWait,GateWait,M,H,PROMOTE,"IsEventDone: EndEvent, and lifted far enough timer 0 and SE 0xB1D",0
+0x8017F3A8,stage:sc05_001,ShiftBlockMain,ShiftBlockMain,M,H,PROMOTE,D_80189740[state](obj): the shift block's state table,0
+0x8017F3B8,stage:sc03_112,TalkerMain,TalkerMain,M,H,PROMOTE,D_80189708[state](obj): the talker's state table,0
+0x8017F3D4,stage:sc03_097,CameraZoomToggle1,CameraZoomToggle1,M,M,KEEP,"a fixed focus and the camera placed; no toggle, number name",0
+0x8017F424,stage:sc01_077,SensorMain,SensorMain,M,H,PROMOTE,D_8018A89C[state](obj): the sensor's state table,0
+0x8017F48C,stage:sc03_097,CameraZoomToggle2,CameraZoomToggle2,M,M,KEEP,"a fixed focus and the camera placed; no toggle, number name",0
+0x8017F4F8,stage:sc04_005,TalkNpcInit,TalkNpcInit,M,H,PROMOTE,"SetupActor, its flags, script and talk marker",0
+0x8017F5D4,stage:sc01_008,AdvisorMenuLoop,AdvisorMenuLoop,M,H,PROMOTE,UpdateScript; when done RunScript of the menu and state 2,0
+0x8017F65C,stage:sc06_030,EventBossScene,EventBossScene,M,M,KEEP,lines not read in full; M,0
+0x8017F704,stage:sc06_022,EventObjRise,EventObjRise,M,H,PROMOTE,"IsEventDone: EndEvent, next state",0
+0x8017F734,stage:sc05_002,ColumnMain,ColumnMain,M,H,PROMOTE,D_8019C818[state](obj): the column's state table,0
+0x8017F748,stage:sc04_015,SpawnVillageActors,SpawnVillageActors,M,H,PROMOTE,"eight kind 0x23B actors spawned, a helper, the limit 0x7FFF",0
+0x8017F784,stage:sc06_016,BladeSetUpdate,BladeSetUpdate,M,M,KEEP,lines not read in full; M,0
+0x8017F7C8,stage:sc04_002,RoomEntryStartA,RoomEntryStartA,M,M,KEEP,the room entry A; letter pair,0
+0x8017F838,stage:sc04_002,RoomEntryStartB,RoomEntryStartB,M,M,KEEP,the room entry B; letter pair,0
+0x8017F878,stage:sc01_001,Cast1Main,Cast1Main,M,M,KEEP,cast 1's state table; a number name,0
+0x8017F894,stage:sc03_117,AfterWakeModelInit,AfterWakeModelInit,M,H,PROMOTE,"a model and the kind 0x1D7 actor into +0xCC, next state",0
+0x8017F8C8,stage:sc03_113,StepColumnMain,StepColumnMain,M,H,PROMOTE,D_801871A8[state](obj): the step column's state table,0
