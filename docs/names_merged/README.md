@@ -213,69 +213,91 @@ verdicts), `r279_clash_check.py`.
 
 * **Order.** `r279_order.py` counts each row's references in src/ (.c and .h: call sites and function-table
   entries, not the definition or file-scope declarations; `calls` in the CSVs) and sorts engine_ML (M, then L),
-  exe_MM, stage_ML, most-referenced first (`r279_order.csv`, 2,099 rows).
-* **Judging.** For each row: the body, at least two call sites (one when there is one), the source card's evidence
-  line, every callee under its proposed name, and for data rows its reads and writes. r277's bar: PROMOTE (the name
-  says what the code does: H), FIX (misleading or vague: the right name, H or M), KEEP (plausible, the C in reach
-  cannot settle it: stays M, the reason says what would). A wrapper whose name rests on a callee that was not read
-  is KEEP, not PROMOTE. Flag-number names (`SetPlayerFlag7E2`, `PlayerEvent80`) are promoted under r278's rule:
-  the body only sets or tests that bit, so the name is accurate.
+  exe_MM (M, then L), stage_ML (M, then L), most-referenced first (`r279_order.csv`, 2,099 rows). **All 2,099 rows
+  were judged**, in that order.
+* **Judging.** For each row: the body, the call sites (two, one when there is one; none exist for the 0-reference
+  table entries), the source card's evidence line, every callee under its proposed name, and for data rows their
+  reads and writes. r277's bar: PROMOTE (the name says what the code does: H), FIX (misleading or vague: the right
+  name, H or M), KEEP (plausible, the C in reach cannot settle it: stays M / L, the reason says what would). A
+  wrapper whose name rests on a callee that was not read is KEEP; a long body that was not read in full is KEEP
+  ("lines not read in full"). Flag- / field- / kind-number names (`SetPlayerFlag7E2`, `PlayerEvent80`,
+  `SpawnKind205`) are promoted under r278's rule: the body only sets or tests that, so the name is accurate. A
+  letter or number pair whose difference is not settled (`RoomEntryStartA / B`, `RoomCameraInit0 / 1`) is KEEP.
+* **Depth of reading (read this before applying).** The first 235 rows (every engine_ML M row with more than 3
+  references) and the families taken with them were read in full with their callers and callees. Further down the
+  order the bodies get shorter and are mostly referenced 0-2 times; the stage_ML rows (seq 1554-2098) and the
+  0-reference engine rows were judged from the parts of the body shown (head and tail, long bodies cut) and one
+  call site, not line by line. Their PROMOTE verdicts are therefore weaker than the first block's, and the low FIX
+  rate in stage_ML (below) partly reflects that.
 * **Output.** `r279_verdicts.csv` (address, scope, old_name, new_name, old_conf, new_conf, verdict, reason, calls;
-  one row per judged row, in check order). `engine_H2.csv` holds every PROMOTE and FIX row, in the batch columns;
-  `note` starts with `r279 promote` or `r279 fix: was <old>`. `exe_H2.csv` and `stage_H2.csv` are empty (header
-  only): those batches were not reached.
+  2,099 rows in check order). `engine_H2.csv`, `exe_H2.csv`, `stage_H2.csv`: every PROMOTE and FIX row in the batch
+  columns; `note` starts with `r279 promote` or `r279 fix: was <old>`.
 
-| batch | judged | PROMOTE (H) | FIX (H) | FIX (M) | KEEP (M) | in H2 |
+| batch | rows | PROMOTE (H) | FIX (H) | FIX (M) | KEEP | in H2 |
 |---|---|---|---|---|---|---|
-| engine_ML, M rows | 235 | 161 | 25 | 4 | 45 | 190 |
-| engine_ML, L rows | 0 | | | | | |
-| exe_MM | 0 | | | | | 0 |
-| stage_ML | 0 | | | | | 0 |
+| engine_ML, M | 990 | 849 | 29 | 5 | 107 | |
+| engine_ML, L | 258 | 138 | 16 | 4 | 100 | |
+| engine_ML total | 1248 | 987 | 45 | 9 | 207 | 1041 |
+| exe_MM, M | 259 | 184 | 1 | 5 | 69 | |
+| exe_MM, L | 47 | 28 | 0 | 0 | 19 | |
+| exe_MM total | 306 | 212 | 1 | 5 | 88 | 218 |
+| stage_ML, M | 530 | 304 | 0 | 1 | 225 | |
+| stage_ML, L | 15 | 6 | 0 | 0 | 9 | |
+| stage_ML total | 545 | 310 | 0 | 1 | 234 | 311 |
+| **all** | **2099** | **1509** | **46** | **15** | **529** | **1570** |
 
-The 235 rows are all 193 engine_ML M rows with more than 3 references and 42 with 3 or fewer (in order, or taken
-with their family), 6,966 of the 7,488 references to engine M rows (93%). They include Musashi's movement (fall speed, move
-speed, ground / air / landing steps, carrying), his hit and guard code, the sword triggers and the camera fields.
-
-**Error rate.** FIX 29 of 235 = 12.3% (95% Wilson 8.7-17.2%); KEEP 45 = 19.1%. 18 of the 29 are one family (below);
-without it, 11 rows = 4.7% were misleading or vague. So the M rows run several times the H batches' 1.7%, as
-expected, and should not be applied unchecked.
+**Error rate.** FIX 61 of 2,099 = 2.9% (95% Wilson 2.3-3.7%); by batch engine_ML 4.3% (3.3-5.6), exe_MM 2.0%
+(0.9-4.2), stage_ML 0.2% (0.0-1.0). On the fully read first block it was 12.3% (29 of 235, 8.7-17.2; 18 of them one
+family), so the true rate of the lightly read rows is likely above what they show. KEEP is 25.2% overall (stage
+43%): those rows stay in the ML / MM batches.
 
 **Patterns.**
-1. **Accel is not an acceleration** (18 rows, renamed together). `AccelFacing`, `AccelMoveToWorld*`, `AccelWorld`,
-   `AddObj68Accel*` and their wrappers add to +0x24..+0x2C (AddMoveSpeedX / Y / ZLimit) and turn or copy that into
-   vel. engine_H already calls the field MoveSpeed (`AddMoveSpeedXLimit`, `MoveSpeedToWorld`), so: `AddMoveSpeed*`,
-   `AddMoveSpeedFacing*` (turned by the model's facing), `AddMoveSpeedSetVel` (copied as it is),
-   `SetVelFromMoveSpeed*`, `AddObj68MoveSpeed*`. Note that engine_H names the same field Push in r278's setters
-   (`SetObjPush`, `ClearObjPush`, `SetObjPushV`): two H words for +0x24. One of them should win in a ruling;
-   either way it is one mechanical rename of a known list.
-2. **Effect / Add words on generic movers:** `MoveEffect` (pos += vel on Musashi and walkers) -> `MoveObjByVel`;
-   `AddFallSpeed` (y += speed; engine_H's `AddFallSpeedLimited` is the gravity step) -> `ApplyFallSpeed`.
-3. **Letters and Alt / Ex:** `g_SpawnListA` / `B` -> `g_SpawnListFixed` / `g_SpawnListRanged` (M),
-   `g_CameraShakeB` -> `g_CameraShakeTargetY`, `SetupActorAlt` -> `SetupActorTrans` (M), `StepTowardEx` ->
-   `StepTowardSpeed`, `RunPlayerKindHandler` -> `LeavePlayerKind` (M: D_8018FBA8[kind] runs right before every
-   kind change seen).
-4. **Misleading:** `ClearHitPending` -> `ClearPlayerHittable` (bit 15 of +0x3C is re-armed every frame and a hit
-   taken while it is clear is dropped); `ModelPointsToWorld` -> `ScalePointsByModel` (M, scale only);
-   `SetPlayerActionList` -> `SwitchPlayerActionScript` (engine_H's `SetPlayerActionScript` is the full start).
-5. **KEEP groups:** the eB568 "Seq" family (9 rows: the player, its blocks, relocation, patches, points); the
-   scratchpad-stack wrappers whose Body was not read (PushBlock, ClipMoveToMap, GrabBar, PushOutOfSolidActors);
-   A / B pairs whose tables are stage data (LoadStageFileA / B, GetPosePointsA / B); long bodies not read in full.
-   Each row's reason says what would settle it.
+1. **Accel is not an acceleration** (18 rows, renamed together): `AddMoveSpeed*`, `AddMoveSpeedFacing*`,
+   `AddMoveSpeedSetVel`, `SetVelFromMoveSpeed*` (incl. `SetVelFromMoveSpeedKeepAxes`, was ResetObjMoveParams),
+   `AddObj68MoveSpeed*`. engine_H calls +0x24 MoveSpeed (`AddMoveSpeedXLimit`, `MoveSpeedToWorld`), but r278's
+   setters call the same field Push (`SetObjPush`): two H words for +0x24, one ruling.
+2. **Effect / Add / Fall words on generic code:** `MoveEffect` -> `MoveObjByVel`; `AddFallSpeed` -> `ApplyFallSpeed`;
+   `PlayerObjFallStep` / `PlayerObjGroundStep` (probes only) -> `ProbePlatformByMove` / `ProbeGroundByMove`.
+3. **Misleading:** `ClearHitPending` -> `ClearPlayerHittable` (bit 15 is re-armed each frame; a hit taken while it
+   is clear is dropped); `ModelPointsToWorld` -> `ScalePointsByModel` (M); `SetPlayerActionList` ->
+   `SwitchPlayerActionScript`; `SpawnSweepHitSparks` -> `ShowSweepHitNumbers` (it shows damage numbers);
+   `SetTargetPointToSafePos` -> `SetTargetPointToLastPos` (+0x90 is last frame's position, the safe point is +0xA0);
+   `ApplyQueuedHurt` -> `ShowQueuedDamageNumber`; `ScaleByDifficulty` -> `ScaleDownByStat1`; `SpawnShadowB` (kind
+   0x1C, not the shadow) -> `SpawnKind1C` / `SpawnKind1CAt`; `StopAllMusic` (music and all SFX) ->
+   `StopMusicAndSfx`; `SetPlayerCutMotion` (a face script) -> `SetPlayerCutFace` (M).
+4. **The `*NoDither` EXE helpers are reversed** (5 rows, M): `AddPrimNoDither` puts a DR_MODE with
+   `SetDrawMode(q, 0, 1, ..)` (dtd = 1, dithering on) next to the primitive where the plain AddPrim passes 0, so
+   `AddPrimDithered`, `AddPrimTexturedDithered`, `DrawPrimG4ScreenDithered`, `DrawPrimG4MtxDithered`,
+   `DrawPrimGT4ScreenDithered`. M because which of the two DR_MODE packets is drawn first rests on AddPrim's head
+   insertion; a look at a frame's OT (or the plain path's callers) would make it H.
+5. **Letters and kind words:** `g_SpawnListA / B` -> `g_SpawnListFixed` / `g_SpawnListRanged` (M);
+   `g_CameraShakeB` -> `g_CameraShakeTargetY`; `SetupActorAlt` -> `SetupActorTrans` (M); `StepTowardEx` ->
+   `StepTowardSpeed`; `RunPlayerKindHandler` -> `LeavePlayerKind` (M); `SetPlayerKind4` / `SetPlayerKindD` ->
+   `StartPlayerSlide` / `StartPlayerCarry`; `SpawnKind13` -> `SpawnHeadMarker` (M); `HitActorType1F` ->
+   `StrikeActorKind1F`; `ObjFlag80` / `PlayerFlag80B` -> `IsObjAsleep` / `IsPlayerAsleep` (M);
+   `StartPitFall` / `EndPitFall` (the hit) -> `StartPitFallHit` / `EndPitFallHit`, apart from `PitFallStart`.
+6. **Families made consistent:** `PlayerState1F4Bit1 / 2 / 8 / 100` -> `PlayerEvent01 / 02 / 08`,
+   `SetPlayerEvent100` (the +0x1F4 word's family); `GetStatsByteC0` -> `GetTechnique`, `CancelEC0Mode` ->
+   `CancelTechnique` (M; r276 ruling 2's word); `ClearStatsWords` / `GetStatsWord94` -> `CurePlayerPoison` /
+   `GetPoisonWord`.
+7. **KEEP groups:** the eB568 "Seq" family (the player, its blocks, relocation, patches, points); letter / number
+   pairs (LoadStageFileA / B, GetPosePointsA / B, the A / B fx and trail states, RoomEntryStartA / B, the numbered
+   camera set-ups and cast tables); kind 0x18 / 0x1C states; EXE sprite / model kind words that rest on
+   g_ModelDrawFuncs' entries (data); the sound driver's long bodies; most stage helpers with long bodies.
 
-**One H row to change by hand.** engine_H `SetHitPending` (0x8014900C) is the setter of the same bit and should be
-`SetPlayerHittable` before engine_H is applied (it is not in H2, so no address is named twice).
+**H rows to change by hand** (not in H2, so no address is named twice): engine_H `SetHitPending` (0x8014900C) ->
+`SetPlayerHittable`. Apply it with engine_H2, which renames its pair.
 
-**Clash checks.** `r279_clash_check.py` (r278's checks, input = the H2 batches; also flags an H2 address that an H
-batch already names) writes `r279_clash_check.txt`: 190 names, **0 clashes**. It caught two during the work:
-`ClearHittable` (engine_ML's actor-side name at 0x8012BF68, hence `ClearPlayerHittable`) and
-`SetPlayerActionScript` (engine_H 0x8016EFC8).
+**Clash checks.** `r279_clash_check.py` (r278's checks, input = the three H2 batches; also flags an H2 address an
+H batch already names) writes `r279_clash_check.txt`: 1,570 names, **0 clashes**. It caught four during the work
+(`ClearHittable`, `SetPlayerActionScript`, `StopAllSound`, all renamed).
 
-**Not checked:** engine_ML M rows with 3 references or fewer (755 rows); every engine_ML L row (258; 78 have 3 or
-more references, led by `SpawnShadowB` 246 and `SpawnTalkMarker` 185); all of exe_MM (306; the most-referenced
-names left in any batch: `InitSpriteModel` 350, `ClearTimeChime` 266, `GiveItem` 197, `g_WorldOtOrg` 172); all of
-stage_ML (545, at most 37 references each).
+**Not checked:** nothing in the three batches is unjudged. What is weak is the depth noted above.
 
-**Recommendation after r279:** apply `engine_H2.csv` as is with the usual match check, and change engine_H's
-`SetHitPending` to `SetPlayerHittable` with it. Its 4 FIX (M) rows are better names than the batch had; take them
-or filter `confidence == H` (186 rows). Leave the 45 KEEP rows in engine_ML. Next card: the same check on exe_MM's
-89 rows with 3 or more references, then engine_ML's 78 L rows with 3 or more, then the Push / MoveSpeed ruling.
+**Recommendation after r279:**
+1. `engine_H2.csv` and `exe_H2.csv`: apply with the usual match check, together with the SetHitPending hand fix.
+   Their 14 FIX (M) rows are better names than the batches had; take them or filter `confidence == H`.
+2. `stage_H2.csv`: before applying, run r277's sample check on it (60 rows, seeded) because its rows were read
+   lightly; apply if the sample holds (r277's bar). The same sample check on engine_H2's rows with 0-2 references
+   would be prudent.
+3. Rulings: Push vs MoveSpeed for +0x24; the NoDither direction (pattern 4); the Seq family's real word.

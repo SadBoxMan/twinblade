@@ -1,4 +1,4 @@
-r279 clash check: 1260 H2 names, 0 with a clash
+r279 clash check: 1570 H2 names, 0 with a clash
 
 0x8001282C exe            func_8001282C            -> NormalizeMatrix            ok
 0x800129CC exe            func_800129CC            -> VectorToAngles             ok
@@ -7,7 +7,6 @@ r279 clash check: 1260 H2 names, 0 with a clash
 0x800140B8 exe            func_800140B8            -> ApplyMatrixSVToFixed       ok
 0x80014554 exe            func_80014554            -> InitNop                    ok
 0x8001455C exe            func_8001455C            -> Init3DNop                  ok
-0x80014564 exe            func_80014564            -> ZeroRect                   ok
 0x80015A08 exe            func_80015A08            -> CopyVecLow16               ok
 0x800176F0 exe            func_800176F0            -> DrawPrimG4ScreenDithered   ok
 0x80017738 exe            func_80017738            -> DrawPrimG4MtxDithered      ok
@@ -1260,6 +1259,317 @@ r279 clash check: 1260 H2 names, 0 with a clash
 0x80178D40 engine         func_80178D40            -> ScriptStep                 ok
 0x8017AD0C engine         func_8017AD0C            -> LoadItemIcon               ok
 0x8017ADE8 engine         func_8017ADE8            -> ShowItemIcon               ok
+0x8017D0BC stage:sc01_000 func_sc01_000_8017D0BC   -> CameraInitFromStored       ok
+0x8017D164 stage:sc01_000 func_sc01_000_8017D164   -> SetCameraEyeTarget         ok
+0x8017D428 stage:sc01_000 func_sc01_000_8017D428   -> CopyCameraEyeTarget        ok
+0x8017D488 stage:sc01_000 func_sc01_000_8017D488   -> StageConstant80            ok
+0x8017D2D4 stage:sc01_001 func_sc01_001_8017D2D4   -> StageConstant8F            ok
+0x80180EEC stage:sc01_001 func_sc01_001_80180EEC   -> ArrivalMain                ok
+0x80182B68 stage:sc01_001 func_sc01_001_80182B68   -> LoadFaceTexture            ok
+0x80182BD0 stage:sc01_001 func_sc01_001_80182BD0   -> SetFaceTexture             ok
+0x80182C58 stage:sc01_001 func_sc01_001_80182C58   -> UpdateBlinkTexture         ok
+0x80182D04 stage:sc01_001 func_sc01_001_80182D04   -> SetRoomPartsShown          ok
+0x80182F58 stage:sc01_001 func_sc01_001_80182F58   -> DebrisMain                 ok
+0x801831EC stage:sc01_001 func_sc01_001_801831EC   -> SpawnSparkle               ok
+0x801832BC stage:sc01_001 func_sc01_001_801832BC   -> UpdateBladePoints          ok
+0x8017D254 stage:sc01_004 func_sc01_004_8017D254   -> CameraFixedView            ok
+0x8017EFEC stage:sc01_004 func_sc01_004_8017EFEC   -> MenuHostMain               ok
+0x8018048C stage:sc01_005 func_sc01_005_8018048C   -> HostEventRunFade           ok
+0x80180974 stage:sc01_005 func_sc01_005_80180974   -> HostRestState              ok
+0x8017F5D4 stage:sc01_008 func_sc01_008_8017F5D4   -> AdvisorMenuLoop            ok
+0x8017F360 stage:sc01_009 func_sc01_009_8017F360   -> LordMain                   ok
+0x80180540 stage:sc01_009 func_sc01_009_80180540   -> ResidentMain               ok
+0x80181380 stage:sc01_009 func_sc01_009_80181380   -> PickFlagLine               ok
+0x8017DB04 stage:sc01_074 func_sc01_074_8017DB04   -> SpawnRideEffect            ok
+0x8017E020 stage:sc01_074 func_sc01_074_8017E020   -> CableMain                  ok
+0x8017E4C8 stage:sc01_074 func_sc01_074_8017E4C8   -> PropMain                   ok
+0x8017F424 stage:sc01_077 func_sc01_077_8017F424   -> SensorMain                 ok
+0x8018331C stage:sc01_080 func_sc01_080_8018331C   -> UpdateMachineSound         ok
+0x8017E770 stage:sc01_084 func_sc01_084_8017E770   -> ActOpenBattleHud           ok
+0x80180E74 stage:sc01_084 func_sc01_084_80180E74   -> EncounterEnd               ok
+0x8017D468 stage:sc02_004 func_sc02_004_8017D468   -> RoomStartCameraPan         ok
+0x8017D6F0 stage:sc02_004 func_sc02_004_8017D6F0   -> EventWalkToExit            ok
+0x8017DA30 stage:sc02_004 func_sc02_004_8017DA30   -> DustInit                   ok
+0x801853EC stage:sc02_005 func_sc02_005_801853EC   -> BossPartHurt               ok
+0x80186304 stage:sc02_005 func_sc02_005_80186304   -> BossSetAnim                ok
+0x80190538 stage:sc02_005 func_sc02_005_80190538   -> PlayerThrownByBoss         ok
+0x80186C30 stage:sc02_011 func_sc02_011_80186C30   -> ItemActorInit              ok
+0x80189B64 stage:sc02_011 func_sc02_011_80189B64   -> TopplingInit               ok
+0x8017F33C stage:sc02_016 func_sc02_016_8017F33C   -> LiftMotorSound             ok
+0x80182558 stage:sc02_017 func_sc02_017_80182558   -> GateWaitHit                ok
+0x8017E4DC stage:sc02_021 func_sc02_021_8017E4DC   -> HazardBandHitsPlayer       ok
+0x80181D14 stage:sc02_027 func_sc02_027_80181D14   -> BouncerUpdate              ok  (warn: same name in another scope stage:sc03_023 0x8017E230; same name in another scope stage:sc03_023 0x8017E230)
+0x8017D5F0 stage:sc03_001 func_8017D5F0            -> AvoidActorPath             ok
+0x8017D734 stage:sc03_001 func_8017D734            -> WalkerWander               ok
+0x8017D8A8 stage:sc03_001 func_8017D8A8            -> WalkerApproach             ok
+0x8017E3D8 stage:sc03_001 func_8017E3D8            -> RoomFrame                  ok  (warn: same name in another scope stage:sc03_006 0x80182A44; same name in another scope stage:sc03_011 0x8017E5B8)
+0x8017EA1C stage:sc03_001 func_8017EA1C            -> CameraModeVillage          ok
+0x80180A58 stage:sc03_001 func_80180A58            -> VillagerSetScript          ok
+0x80180FF8 stage:sc03_001 func_80180FF8            -> Villager3Init              ok
+0x801856A8 stage:sc03_001 func_801856A8            -> Villager30TalkCheck        ok
+0x80186C54 stage:sc03_001 func_80186C54            -> Villager36Talk             ok
+0x80180014 stage:sc03_002 func_sc03_002_80180014   -> RoomRestartMusic           ok
+0x80180290 stage:sc03_002 func_sc03_002_80180290   -> SceneCrashEnd              ok
+0x80180710 stage:sc03_002 func_sc03_002_80180710   -> SceneWaitTrack             ok
+0x80180A38 stage:sc03_002 func_sc03_002_80180A38   -> CameraModeScene            ok
+0x801813E4 stage:sc03_002 func_sc03_002_801813E4   -> Villager14Talk             ok
+0x801816F0 stage:sc03_002 func_sc03_002_801816F0   -> Villager14Init             ok
+0x80181228 stage:sc03_006 func_sc03_006_80181228   -> CameraModePad              ok  (warn: same name in another scope stage:sc03_023 0x8017DBC4; same name in another scope stage:sc03_023 0x8017DBC4)
+0x8017EFD4 stage:sc03_007 func_sc03_007_8017EFD4   -> ScaledWalkerInit           ok
+0x8017D9BC stage:sc03_010 func_sc03_010_8017D9BC   -> RoomExitWaitTrack          ok
+0x8017E744 stage:sc03_010 func_sc03_010_8017E744   -> LaunchedModelInit          ok
+0x8017EE30 stage:sc03_010 func_sc03_010_8017EE30   -> ResetIndicator             ok
+0x8017F090 stage:sc03_010 func_sc03_010_8017F090   -> CountdownSpriteInit        ok
+0x8017DC08 stage:sc03_011 func_sc03_011_8017DC08   -> RoomStartScene             ok
+0x80180E04 stage:sc03_011 func_sc03_011_80180E04   -> SceneActorsSetScript       ok
+0x8017DBE4 stage:sc03_012 func_sc03_012_8017DBE4   -> QuakeSceneSway             ok
+0x8017DEF0 stage:sc03_012 func_sc03_012_8017DEF0   -> QuakeCameraUpdate          ok
+0x8017E008 stage:sc03_012 func_sc03_012_8017E008   -> DustSpriteInit             ok
+0x8017DB84 stage:sc03_013 func_sc03_013_8017DB84   -> ItemGateCheckFlag          ok
+0x8017EE28 stage:sc03_013 func_sc03_013_8017EE28   -> HazardFaceHit              ok
+0x8017F958 stage:sc03_013 func_sc03_013_8017F958   -> CheckpointSpriteFlag       ok
+0x8017D774 stage:sc03_023 func_sc03_023_8017D774   -> RewardCheckFreeSlot        ok
+0x8017DBC4 stage:sc03_023 func_sc03_023_8017DBC4   -> CameraModePad              ok  (warn: same name in another scope stage:sc03_006 0x80181228; same name in another scope stage:sc03_006 0x80181228)
+0x8017E230 stage:sc03_023 func_sc03_023_8017E230   -> BouncerUpdate              ok  (warn: same name in another scope stage:sc02_027 0x80181D14; same name in another scope stage:sc02_027 0x80181D14)
+0x8017EA40 stage:sc03_023 func_sc03_023_8017EA40   -> ChaseRunnerFlee            ok
+0x8017EB2C stage:sc03_023 func_sc03_023_8017EB2C   -> ChaseRunnerLeave           ok
+0x8017EC30 stage:sc03_023 func_sc03_023_8017EC30   -> ChaseTalkCheck             ok
+0x80186754 stage:sc03_028 func_sc03_028_80186754   -> BossMain                   ok  (warn: same name in another scope stage:sc06_030 0x8017E120)
+0x8017E090 stage:sc03_030 func_sc03_030_8017E090   -> RideReadAnalog             ok
+0x8017E5F8 stage:sc03_030 func_sc03_030_8017E5F8   -> CameraModeRide             ok
+0x8017E7D4 stage:sc03_030 func_sc03_030_8017E7D4   -> UpdateRideSounds           ok
+0x8017F23C stage:sc03_031 func_sc03_031_8017F23C   -> PushBlockPush              ok  (warn: same name in another scope stage:sc03_094 0x8017DEBC; same name in another scope stage:sc03_094 0x8017DEBC)
+0x8017FDE4 stage:sc03_031 func_sc03_031_8017FDE4   -> PushBlockStop              ok
+0x801804EC stage:sc03_031 func_sc03_031_801804EC   -> HumSourceUpdate            ok
+0x80181F9C stage:sc03_089 func_sc03_089_80181F9C   -> SoldierGateWait            ok
+0x801820A8 stage:sc03_089 func_sc03_089_801820A8   -> GateLeafInit               ok
+0x8018210C stage:sc03_089 func_sc03_089_8018210C   -> GateLeafSlide              ok
+0x80182150 stage:sc03_089 func_sc03_089_80182150   -> ShuttlePlatformInit        ok  (warn: same name in another scope stage:sc03_093 0x8017F124; same name in another scope stage:sc03_093 0x8017F124)
+0x8017E044 stage:sc03_092 func_sc03_092_8017E044   -> CameraFollowAction         ok
+0x8017E6A0 stage:sc03_092 func_sc03_092_8017E6A0   -> FlagBoardUse               ok
+0x8017E780 stage:sc03_092 func_sc03_092_8017E780   -> FlagBoardInit              ok
+0x80180150 stage:sc03_092 func_sc03_092_80180150   -> NpcTalkWait                ok
+0x8017F124 stage:sc03_093 func_sc03_093_8017F124   -> ShuttlePlatformInit        ok  (warn: same name in another scope stage:sc03_089 0x80182150; same name in another scope stage:sc03_089 0x80182150)
+0x8017DAC8 stage:sc03_094 func_sc03_094_8017DAC8   -> TargetTakeHit              ok
+0x8017DEBC stage:sc03_094 func_sc03_094_8017DEBC   -> PushBlockPush              ok  (warn: same name in another scope stage:sc03_031 0x8017F23C; same name in another scope stage:sc03_031 0x8017F23C)
+0x8017E52C stage:sc03_094 func_sc03_094_8017E52C   -> PushBlockIdle              ok
+0x8017E890 stage:sc03_094 func_sc03_094_8017E890   -> PushBlockInit              ok  (warn: same name in another scope stage:sc03_031 0x8017F0B0)
+0x8017D618 stage:sc03_095 func_sc03_095_8017D618   -> PlatformInit               ok  (warn: same name in another scope stage:sc06_014 0x8017EA2C)
+0x8017D758 stage:sc03_095 func_sc03_095_8017D758   -> PlatformPause              ok
+0x8017D05C stage:sc03_096 func_sc03_096_8017D05C   -> RoomCameraInit             ok  (warn: same name in another scope stage:sc01_004 0x8017D1B4; same name in another scope stage:sc04_000 0x8017ECC8; same name in another scope stage:sc04_002 0x8017FB28; same name in another scope stage:sc04_015 0x8017DAB8; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc04_012 0x8017D0BC; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc04_012 0x8017D0BC)
+0x8017EF54 stage:sc03_097 func_sc03_097_8017EF54   -> PlayerActionSpawnEffect    ok  (warn: same name in another scope stage:sc03_101 0x8017DDEC; same name in another scope stage:sc03_101 0x8017DDEC)
+0x80184324 stage:sc03_097 func_sc03_097_80184324   -> GlowCreatureWake           ok
+0x8017DDEC stage:sc03_101 func_sc03_101_8017DDEC   -> PlayerActionSpawnEffect    ok  (warn: same name in another scope stage:sc03_097 0x8017EF54; same name in another scope stage:sc03_097 0x8017EF54)
+0x80180484 stage:sc03_102 func_sc03_102_80180484   -> RoomCameraInit             ok  (warn: same name in another scope stage:sc01_004 0x8017D1B4; same name in another scope stage:sc04_000 0x8017ECC8; same name in another scope stage:sc04_002 0x8017FB28; same name in another scope stage:sc04_015 0x8017DAB8; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc04_012 0x8017D0BC; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc04_012 0x8017D0BC)
+0x80180558 stage:sc03_102 func_sc03_102_80180558   -> CameraZoomToggle           ok  (warn: same name in another scope stage:sc03_093 0x8017EE38; same name in another scope stage:sc03_096 0x8017D130; same name in another scope stage:sc03_099 0x8017D2AC; same name in another scope stage:sc03_100 0x8017EC84; same name in another scope stage:sc03_101 0x8017E0BC)
+0x80180C38 stage:sc03_102 func_sc03_102_80180C38   -> DropPropFall               ok
+0x801811F0 stage:sc03_102 func_sc03_102_801811F0   -> DropPropFree               ok
+0x80181260 stage:sc03_102 func_sc03_102_80181260   -> DropperSpawnProp           ok
+0x8017E5A4 stage:sc03_103 func_sc03_103_8017E5A4   -> CameraUpdateOffset         ok
+0x8017E80C stage:sc03_103 func_sc03_103_8017E80C   -> RoomAnimInit               ok
+0x8017E830 stage:sc03_103 func_sc03_103_8017E830   -> RoomAnimTick               ok  (warn: same name in another scope stage:sc03_102 0x80180810)
+0x8017E7E8 stage:sc03_105 func_sc03_105_8017E7E8   -> HomingShotInit             ok
+0x8017EA24 stage:sc03_105 func_sc03_105_8017EA24   -> HomingShotFly              ok
+0x801801F8 stage:sc03_105 func_sc03_105_801801F8   -> BossInit                   ok  (warn: same name in another scope stage:sc02_005 0x801816FC; same name in another scope stage:sc03_028 0x80186894; same name in another scope stage:sc06_016 0x80182334; same name in another scope stage:sc04_011 0x80186F44)
+0x8018388C stage:sc03_105 func_sc03_105_8018388C   -> BossBodyHitPlayer          ok
+0x801839A4 stage:sc03_105 func_sc03_105_801839A4   -> BossPartHitPlayer          ok
+0x80183DA0 stage:sc03_105 func_sc03_105_80183DA0   -> PlayBossSoundPanned        ok
+0x80183EE8 stage:sc03_105 func_sc03_105_80183EE8   -> StopBossSound              ok
+0x801861DC stage:sc03_105 func_sc03_105_801861DC   -> BossCtrlIntro              ok
+0x8017D540 stage:sc03_107 func_sc03_107_8017D540   -> StoryPropMain              ok  (warn: same name in another scope stage:sc05_000 0x8017D6D0; same name in another scope stage:sc05_000 0x8017D6D0)
+0x8017D698 stage:sc03_107 func_sc03_107_8017D698   -> VariantModelInit           ok
+0x8017D730 stage:sc03_107 func_sc03_107_8017D730   -> TalkerMain                 ok  (warn: same name in another scope stage:sc03_109 0x8017DCE4; same name in another scope stage:sc03_112 0x8017F3B8; same name in another scope stage:sc05_000 0x8017DC9C; same name in another scope stage:sc03_109 0x8017DCE4; same name in another scope stage:sc03_112 0x8017F3B8; same name in another scope stage:sc05_000 0x8017DC9C)
+0x80181A70 stage:sc03_107 func_sc03_107_80181A70   -> RoamObjPlace               ok
+0x8017D8A4 stage:sc03_109 func_sc03_109_8017D8A4   -> SpinPlatformMain           ok
+0x8017DCE4 stage:sc03_109 func_sc03_109_8017DCE4   -> TalkerMain                 ok  (warn: same name in another scope stage:sc03_107 0x8017D730; same name in another scope stage:sc03_112 0x8017F3B8; same name in another scope stage:sc05_000 0x8017DC9C; same name in another scope stage:sc03_107 0x8017D730; same name in another scope stage:sc03_112 0x8017F3B8; same name in another scope stage:sc05_000 0x8017DC9C)
+0x8017F234 stage:sc03_110 func_sc03_110_8017F234   -> StaticModelInit            ok  (warn: same name in another scope stage:sc05_000 0x8017D864; same name in another scope stage:sc05_000 0x8017D864)
+0x8017F2D8 stage:sc03_110 func_sc03_110_8017F2D8   -> TexAnimMain                ok
+0x80181178 stage:sc03_111 func_sc03_111_80181178   -> TurntableInit              ok
+0x80181574 stage:sc03_111 func_sc03_111_80181574   -> DrawGlowQuads              ok
+0x8017EBA8 stage:sc03_112 func_sc03_112_8017EBA8   -> MachineMain                ok
+0x8017F0F4 stage:sc03_112 func_sc03_112_8017F0F4   -> MachinePartInit            ok  (warn: same name in another scope stage:sc05_004 0x8017F0B8; same name in another scope stage:sc05_004 0x8017F0B8)
+0x8017F1CC stage:sc03_112 func_sc03_112_8017F1CC   -> MachineUpdate              ok
+0x8017F3B8 stage:sc03_112 func_sc03_112_8017F3B8   -> TalkerMain                 ok  (warn: same name in another scope stage:sc03_107 0x8017D730; same name in another scope stage:sc03_109 0x8017DCE4; same name in another scope stage:sc05_000 0x8017DC9C; same name in another scope stage:sc03_107 0x8017D730; same name in another scope stage:sc03_109 0x8017DCE4; same name in another scope stage:sc05_000 0x8017DC9C)
+0x8017F8C8 stage:sc03_113 func_sc03_113_8017F8C8   -> StepColumnMain             ok
+0x8017D704 stage:sc03_114 func_sc03_114_8017D704   -> DirectorMain               ok
+0x8017DCC0 stage:sc03_114 func_sc03_114_8017DCC0   -> DrawShadeQuad              ok
+0x8017D09C stage:sc03_115 func_sc03_115_8017D09C   -> PickUpSceneMain            ok
+0x8017D3B0 stage:sc03_115 func_sc03_115_8017D3B0   -> CameraClampFocus           ok  (warn: same name in another scope stage:sc05_000 0x8017D4A0; same name in another scope stage:sc05_006 0x8017EB74)
+0x8017D5B8 stage:sc03_115 func_sc03_115_8017D5B8   -> ItemStandMain              ok
+0x8017BEBC stage:sc03_116 func_sc03_116_8017BEBC   -> DrawRoomMesh               ok  (warn: same name in another scope stage:sc03_092 0x8017CE58)
+0x80180FBC stage:sc03_116 func_sc03_116_80180FBC   -> OpenEffectMain             ok
+0x801814B0 stage:sc03_116 func_sc03_116_801814B0   -> SpriteFxMain               ok
+0x801819F4 stage:sc03_116 func_sc03_116_801819F4   -> SwellingUpdate             ok
+0x80181F6C stage:sc03_116 func_sc03_116_80181F6C   -> BarrierMain                ok  (warn: same name in another scope stage:sc04_000 0x801803BC; same name in another scope stage:sc04_002 0x8017FFF0; same name in another scope stage:sc04_000 0x801803BC; same name in another scope stage:sc04_002 0x8017FFF0)
+0x8017EA1C stage:sc03_117 func_sc03_117_8017EA1C   -> WakeObjSpriteInit          ok
+0x8017F894 stage:sc03_117 func_sc03_117_8017F894   -> AfterWakeModelInit         ok
+0x8017F998 stage:sc03_121 func_sc03_121_8017F998   -> BigFoeHurt                 ok
+0x801819B8 stage:sc03_121 func_sc03_121_801819B8   -> NpcStartEvent              ok
+0x8017E780 stage:sc03_125 func_sc03_125_8017E780   -> ResetSceneCamera           ok
+0x8017F2BC stage:sc03_125 func_sc03_125_8017F2BC   -> ScriptPickByFlag109        ok
+0x8017E7B4 stage:sc04_000 func_sc04_000_8017E7B4   -> RoomEntryStart             ok  (warn: same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc01_004 0x8017CDF0)
+0x8017EBE8 stage:sc04_000 func_sc04_000_8017EBE8   -> AdvanceWarpActors          ok
+0x8017EC64 stage:sc04_000 func_sc04_000_8017EC64   -> WaitWarpActorsGone         ok
+0x8017F204 stage:sc04_000 func_sc04_000_8017F204   -> HasItem60                  ok
+0x8017F224 stage:sc04_000 func_sc04_000_8017F224   -> FlagDaObjInit              ok
+0x8017F324 stage:sc04_000 func_sc04_000_8017F324   -> FlagDaObjWait              ok
+0x8017F3F4 stage:sc04_000 func_sc04_000_8017F3F4   -> FlagDaObjTalkCheck         ok
+0x8017F98C stage:sc04_000 func_sc04_000_8017F98C   -> ArrivalWalker              ok
+0x8017FD04 stage:sc04_000 func_sc04_000_8017FD04   -> EventSmokeAndSwap          ok
+0x8017FEBC stage:sc04_000 func_sc04_000_8017FEBC   -> ItemTakerInit              ok
+0x80180020 stage:sc04_000 func_sc04_000_80180020   -> ItemTakerReceive           ok
+0x801803BC stage:sc04_000 func_sc04_000_801803BC   -> BarrierMain                ok  (warn: same name in another scope stage:sc03_116 0x80181F6C; same name in another scope stage:sc04_002 0x8017FFF0; same name in another scope stage:sc03_116 0x80181F6C; same name in another scope stage:sc04_002 0x8017FFF0)
+0x80180418 stage:sc04_000 func_sc04_000_80180418   -> BarrierInit                ok  (warn: same name in another scope stage:sc03_116 0x80181FA8)
+0x80180604 stage:sc04_000 func_sc04_000_80180604   -> ItemTakerOnHit             ok
+0x8018066C stage:sc04_000 func_sc04_000_8018066C   -> HasThreeItems              ok
+0x801806B8 stage:sc04_000 func_sc04_000_801806B8   -> ItemTakerTalkCheck         ok
+0x80182408 stage:sc04_000 func_sc04_000_80182408   -> WarpFlashWaitSound         ok
+0x8017FD38 stage:sc04_002 func_sc04_002_8017FD38   -> RoomCameraToggle           ok  (warn: same name in another scope stage:sc04_000 0x8017EE5C)
+0x8017FFF0 stage:sc04_002 func_sc04_002_8017FFF0   -> BarrierMain                ok  (warn: same name in another scope stage:sc03_116 0x80181F6C; same name in another scope stage:sc04_000 0x801803BC; same name in another scope stage:sc03_116 0x80181F6C; same name in another scope stage:sc04_000 0x801803BC)
+0x80180070 stage:sc04_002 func_sc04_002_80180070   -> HasItem61                  ok
+0x80180090 stage:sc04_002 func_sc04_002_80180090   -> GateInit                   ok  (warn: same name in another scope stage:sc04_005 0x8017F290; same name in another scope stage:sc04_005 0x8017F290)
+0x80180190 stage:sc04_002 func_sc04_002_80180190   -> GateWait                   ok  (warn: same name in another scope stage:sc04_005 0x8017F390; same name in another scope stage:sc04_005 0x8017F390)
+0x8017F270 stage:sc04_005 func_sc04_005_8017F270   -> HasItem62                  ok
+0x8017F290 stage:sc04_005 func_sc04_005_8017F290   -> GateInit                   ok  (warn: same name in another scope stage:sc04_002 0x80180090; same name in another scope stage:sc04_002 0x80180090)
+0x8017F390 stage:sc04_005 func_sc04_005_8017F390   -> GateWait                   ok  (warn: same name in another scope stage:sc04_002 0x80180190; same name in another scope stage:sc04_002 0x80180190)
+0x8017F4F8 stage:sc04_005 func_sc04_005_8017F4F8   -> TalkNpcInit                ok
+0x8017D268 stage:sc04_006 func_sc04_006_8017D268   -> RoomCameraFollowX          ok
+0x8017D3E4 stage:sc04_006 func_sc04_006_8017D3E4   -> RoomCameraApply            ok
+0x8017D5B4 stage:sc04_006 func_sc04_006_8017D5B4   -> HitBoxObjInit              ok
+0x8017EAD8 stage:sc04_007 func_sc04_007_8017EAD8   -> RoomCameraInit             ok  (warn: same name in another scope stage:sc01_004 0x8017D1B4; same name in another scope stage:sc04_000 0x8017ECC8; same name in another scope stage:sc04_002 0x8017FB28; same name in another scope stage:sc04_015 0x8017DAB8; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc04_012 0x8017D0BC; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc04_012 0x8017D0BC)
+0x8017CD9C stage:sc04_008 func_sc04_008_8017CD9C   -> RoomEntryStart             ok  (warn: same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc01_004 0x8017CDF0)
+0x8017D08C stage:sc04_008 func_sc04_008_8017D08C   -> RoomCameraInit             ok  (warn: same name in another scope stage:sc01_004 0x8017D1B4; same name in another scope stage:sc04_000 0x8017ECC8; same name in another scope stage:sc04_002 0x8017FB28; same name in another scope stage:sc04_015 0x8017DAB8; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc04_012 0x8017D0BC; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc04_012 0x8017D0BC)
+0x8017D168 stage:sc04_008 func_sc04_008_8017D168   -> RoomCameraStep             ok
+0x8017D3F8 stage:sc04_008 func_sc04_008_8017D3F8   -> DrawRainStreaks            ok
+0x8017CD9C stage:sc04_009 func_sc04_009_8017CD9C   -> RoomEntryStart             ok  (warn: same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc01_004 0x8017CDF0)
+0x8017D0C8 stage:sc04_009 func_sc04_009_8017D0C8   -> RoomCameraInit             ok  (warn: same name in another scope stage:sc01_004 0x8017D1B4; same name in another scope stage:sc04_000 0x8017ECC8; same name in another scope stage:sc04_002 0x8017FB28; same name in another scope stage:sc04_015 0x8017DAB8; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_012 0x8017D0BC; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_012 0x8017D0BC)
+0x8017D48C stage:sc04_009 func_sc04_009_8017D48C   -> SliderInit                 ok
+0x8017D4AC stage:sc04_009 func_sc04_009_8017D4AC   -> SliderOpen                 ok
+0x8017D5B8 stage:sc04_009 func_sc04_009_8017D5B8   -> SwitchTargetOnHit          ok
+0x8017D5E4 stage:sc04_009 func_sc04_009_8017D5E4   -> SwitchTargetSetStruck      ok
+0x8017D638 stage:sc04_009 func_sc04_009_8017D638   -> SwitchTargetStruckLook     ok
+0x8017D808 stage:sc04_009 func_sc04_009_8017D808   -> SwitchTargetInit           ok
+0x8017CD9C stage:sc04_010 func_sc04_010_8017CD9C   -> RoomEntryStart             ok  (warn: same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc01_004 0x8017CDF0)
+0x8017D08C stage:sc04_010 func_sc04_010_8017D08C   -> RoomScriptedEntry          ok
+0x8017D560 stage:sc04_010 func_sc04_010_8017D560   -> OrbOnHit                   ok
+0x8017D5DC stage:sc04_010 func_sc04_010_8017D5DC   -> OrbSpawnGlow               ok
+0x8017D7C4 stage:sc04_010 func_sc04_010_8017D7C4   -> OrbFreeChild               ok
+0x8017D844 stage:sc04_010 func_sc04_010_8017D844   -> BurstInit                  ok
+0x8017DA58 stage:sc04_010 func_sc04_010_8017DA58   -> OrbInit                    ok
+0x8017DB9C stage:sc04_010 func_sc04_010_8017DB9C   -> FixedModelInit             ok
+0x8017F9A8 stage:sc04_011 func_sc04_011_8017F9A8   -> RoomEntryStart             ok  (warn: same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc01_004 0x8017CDF0)
+0x80180660 stage:sc04_011 func_sc04_011_80180660   -> BossWaitShake              ok
+0x801807CC stage:sc04_011 func_sc04_011_801807CC   -> BossSwingPart              ok
+0x80186940 stage:sc04_011 func_sc04_011_80186940   -> BossTakeDamage             ok  (warn: same name in another scope stage:sc02_005 0x80183218)
+0x8017CDD8 stage:sc04_012 func_sc04_012_8017CDD8   -> RoomEntryStart             ok  (warn: same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_015 0x8017D610; same name in another scope stage:sc01_004 0x8017CDF0)
+0x8017CF5C stage:sc04_012 func_sc04_012_8017CF5C   -> RoomExitStep               ok  (warn: same name in another scope stage:sc01_000 0x8017CEC4; same name in another scope stage:sc02_015 0x8017D294; same name in another scope stage:sc02_016 0x8017EC70; same name in another scope stage:sc02_027 0x8017EB58; same name in another scope stage:sc03_112 0x8017DFBC; same name in another scope stage:sc03_116 0x80180B8C; same name in another scope stage:sc05_017 0x8017DEA0; same name in another scope stage:sc04_015 0x8017D7CC; same name in another scope stage:sc04_015 0x8017D7CC; same name in another scope stage: 0x8017E578)
+0x8017D028 stage:sc04_012 func_sc04_012_8017D028   -> RoomExitPrep               ok
+0x8017D0BC stage:sc04_012 func_sc04_012_8017D0BC   -> RoomCameraInit             ok  (warn: same name in another scope stage:sc01_004 0x8017D1B4; same name in another scope stage:sc04_000 0x8017ECC8; same name in another scope stage:sc04_002 0x8017FB28; same name in another scope stage:sc04_015 0x8017DAB8; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_009 0x8017D0C8; same name in another scope stage:sc03_096 0x8017D05C; same name in another scope stage:sc03_102 0x80180484; same name in another scope stage:sc04_007 0x8017EAD8; same name in another scope stage:sc04_008 0x8017D08C; same name in another scope stage:sc04_009 0x8017D0C8)
+0x8017D4CC stage:sc04_012 func_sc04_012_8017D4CC   -> DoorInit                   ok  (warn: same name in another scope stage: 0x80187F84)
+0x8017D610 stage:sc04_015 func_sc04_015_8017D610   -> RoomEntryStart             ok  (warn: same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc04_000 0x8017E7B4; same name in another scope stage:sc04_008 0x8017CD9C; same name in another scope stage:sc04_009 0x8017CD9C; same name in another scope stage:sc04_010 0x8017CD9C; same name in another scope stage:sc04_011 0x8017F9A8; same name in another scope stage:sc04_012 0x8017CDD8; same name in another scope stage:sc01_004 0x8017CDF0)
+0x8017D7CC stage:sc04_015 func_sc04_015_8017D7CC   -> RoomExitStep               ok  (warn: same name in another scope stage:sc01_000 0x8017CEC4; same name in another scope stage:sc02_015 0x8017D294; same name in another scope stage:sc02_016 0x8017EC70; same name in another scope stage:sc02_027 0x8017EB58; same name in another scope stage:sc03_112 0x8017DFBC; same name in another scope stage:sc03_116 0x80180B8C; same name in another scope stage:sc05_017 0x8017DEA0; same name in another scope stage:sc04_012 0x8017CF5C; same name in another scope stage:sc04_012 0x8017CF5C; same name in another scope stage: 0x8017E578)
+0x8017DF20 stage:sc04_015 func_sc04_015_8017DF20   -> EventNpcBecomeTalkable     ok
+0x8017E038 stage:sc04_015 func_sc04_015_8017E038   -> EventNpcTalkCheck          ok
+0x8017E0CC stage:sc04_015 func_sc04_015_8017E0CC   -> EventNpcWait               ok  (warn: same name in another scope stage:sc04_018 0x8017FF70)
+0x8017F748 stage:sc04_015 func_sc04_015_8017F748   -> SpawnVillageActors         ok
+0x8017FA78 stage:sc04_015 func_sc04_015_8017FA78   -> VillagerInit               ok  (warn: same name in another scope stage:sc04_020 0x8017F1D4; same name in another scope stage:sc04_020 0x8017F1D4; same name in another scope stage: 0x801815A0)
+0x8017FB40 stage:sc04_015 func_sc04_015_8017FB40   -> VillagerTalkCheck          ok  (warn: same name in another scope stage:sc04_020 0x8017F24C; same name in another scope stage:sc04_020 0x8017F24C; same name in another scope stage: 0x8017EF30)
+0x8017D118 stage:sc04_016 func_sc04_016_8017D118   -> CutsceneDirectorInit       ok
+0x8017D6D8 stage:sc04_016 func_sc04_016_8017D6D8   -> CutsceneFaceAnim           ok
+0x8017F1D4 stage:sc04_020 func_sc04_020_8017F1D4   -> VillagerInit               ok  (warn: same name in another scope stage:sc04_015 0x8017FA78; same name in another scope stage:sc04_015 0x8017FA78; same name in another scope stage: 0x801815A0)
+0x8017F24C stage:sc04_020 func_sc04_020_8017F24C   -> VillagerTalkCheck          ok  (warn: same name in another scope stage:sc04_015 0x8017FB40; same name in another scope stage:sc04_015 0x8017FB40; same name in another scope stage: 0x8017EF30)
+0x8017D6D0 stage:sc05_000 func_sc05_000_8017D6D0   -> StoryPropMain              ok  (warn: same name in another scope stage:sc03_107 0x8017D540; same name in another scope stage:sc03_107 0x8017D540)
+0x8017D828 stage:sc05_000 func_sc05_000_8017D828   -> StaticModelMain            ok
+0x8017D864 stage:sc05_000 func_sc05_000_8017D864   -> StaticModelInit            ok  (warn: same name in another scope stage:sc03_110 0x8017F234; same name in another scope stage:sc03_110 0x8017F234)
+0x8017D8DC stage:sc05_000 func_sc05_000_8017D8DC   -> SwarmMain                  ok
+0x8017DC9C stage:sc05_000 func_sc05_000_8017DC9C   -> TalkerMain                 ok  (warn: same name in another scope stage:sc03_107 0x8017D730; same name in another scope stage:sc03_109 0x8017DCE4; same name in another scope stage:sc03_112 0x8017F3B8; same name in another scope stage:sc03_107 0x8017D730; same name in another scope stage:sc03_109 0x8017DCE4; same name in another scope stage:sc03_112 0x8017F3B8)
+0x8017DDBC stage:sc05_000 func_sc05_000_8017DDBC   -> ScriptedModelInit          ok
+0x8017DE70 stage:sc05_000 func_sc05_000_8017DE70   -> ScriptNearPlayerCallback   ok
+0x8017DECC stage:sc05_000 func_sc05_000_8017DECC   -> ThrownHurtMain             ok
+0x8017F1E4 stage:sc05_001 func_sc05_001_8017F1E4   -> IsPlayerFar                ok
+0x8017F3A8 stage:sc05_001 func_sc05_001_8017F3A8   -> ShiftBlockMain             ok
+0x8017F928 stage:sc05_001 func_sc05_001_8017F928   -> ShiftDebrisMain            ok
+0x8017FAC8 stage:sc05_001 func_sc05_001_8017FAC8   -> RopePropMain               ok
+0x8017FFF8 stage:sc05_001 func_sc05_001_8017FFF8   -> LiftFrameMain              ok
+0x80180260 stage:sc05_001 func_sc05_001_80180260   -> LiftMain                   ok
+0x801803F8 stage:sc05_001 func_sc05_001_801803F8   -> ShiftWallMain              ok
+0x801807F8 stage:sc05_001 func_sc05_001_801807F8   -> LiftWeightInit             ok
+0x8018098C stage:sc05_001 func_sc05_001_8018098C   -> LiftWaitRider              ok
+0x801814A8 stage:sc05_001 func_sc05_001_801814A8   -> GlowSpriteMain             ok
+0x80182F68 stage:sc05_001 func_sc05_001_80182F68   -> StartKnockBack             ok
+0x80184920 stage:sc05_001 func_sc05_001_80184920   -> DripEmitterMain            ok
+0x8017F30C stage:sc05_002 func_sc05_002_8017F30C   -> ColumnSoundMain            ok
+0x8017F734 stage:sc05_002 func_sc05_002_8017F734   -> ColumnMain                 ok
+0x8017F914 stage:sc05_003 func_sc05_003_8017F914   -> CreatureStartIdle          ok  (warn: same name in another scope stage:sc05_005 0x8017FA1C; same name in another scope stage:sc05_005 0x8017FA1C)
+0x80180E34 stage:sc05_003 func_sc05_003_80180E34   -> ApplyActorMatrix           ok
+0x8017E808 stage:sc05_004 func_sc05_004_8017E808   -> SpawnSwitchGlow            ok
+0x8017E90C stage:sc05_004 func_sc05_004_8017E90C   -> ClearPlayerVar8C           ok
+0x8017F0B8 stage:sc05_004 func_sc05_004_8017F0B8   -> MachinePartInit            ok  (warn: same name in another scope stage:sc03_112 0x8017F0F4; same name in another scope stage:sc03_112 0x8017F0F4)
+0x8017F1F8 stage:sc05_005 func_sc05_005_8017F1F8   -> CollisionModelInit         ok
+0x8017FA1C stage:sc05_005 func_sc05_005_8017FA1C   -> CreatureStartIdle          ok  (warn: same name in another scope stage:sc05_003 0x8017F914; same name in another scope stage:sc05_003 0x8017F914)
+0x8017D380 stage:sc05_007 func_sc05_007_8017D380   -> RideMain                   ok
+0x8017D638 stage:sc05_007 func_sc05_007_8017D638   -> RideResetMove              ok
+0x8017D764 stage:sc05_007 func_sc05_007_8017D764   -> LampMain                   ok
+0x8017DDE0 stage:sc05_007 func_sc05_007_8017DDE0   -> PlayerDropMain             ok
+0x8017CDBC stage:sc05_009 func_sc05_009_8017CDBC   -> RoomStart                  ok  (warn: same name in another scope stage:sc06_000 0x80180A50; same name in another scope stage:sc06_022 0x8017CDE4; same name in another scope stage:sc06_022 0x8017CDE4)
+0x8017D4D8 stage:sc05_009 func_sc05_009_8017D4D8   -> CameraEaseToTargets        ok
+0x8017D118 stage:sc05_011 func_sc05_011_8017D118   -> RoomScrollTexture          ok
+0x8017E778 stage:sc05_017 func_sc05_017_8017E778   -> PickVillageTune            ok
+0x80181760 stage:sc05_018 func_sc05_018_80181760   -> EventLeaveVillage          ok
+0x80180D5C stage:sc06_000 func_sc06_000_80180D5C   -> EventIntroMain             ok
+0x80180DD4 stage:sc06_000 func_sc06_000_80180DD4   -> EventIntroCamDrop          ok
+0x80180E58 stage:sc06_000 func_sc06_000_80180E58   -> EventIntroCamBrake         ok
+0x801815E8 stage:sc06_000 func_sc06_000_801815E8   -> SetIntroCamera             ok
+0x80182348 stage:sc06_000 func_sc06_000_80182348   -> PlatformHubMain            ok
+0x80182950 stage:sc06_000 func_sc06_000_80182950   -> PlatformHubFloat           ok
+0x80183088 stage:sc06_000 func_sc06_000_80183088   -> BobPlatformMain            ok
+0x80183638 stage:sc06_000 func_sc06_000_80183638   -> SinkStepMain               ok
+0x80183EFC stage:sc06_000 func_sc06_000_80183EFC   -> DropObjMain                ok
+0x801846BC stage:sc06_000 func_sc06_000_801846BC   -> HitTargetMain              ok
+0x80185318 stage:sc06_000 func_sc06_000_80185318   -> AmbientParticleMain        ok
+0x8017D04C stage:sc06_006 func_sc06_006_8017D04C   -> SetPlayerCutFace           ok
+0x8017D428 stage:sc06_006 func_sc06_006_8017D428   -> Shot0                      ok
+0x8017DB90 stage:sc06_006 func_sc06_006_8017DB90   -> CastInit                   ok  (warn: same name in another scope stage:sc06_027 0x8017D708; same name in another scope stage:sc06_027 0x8017D708)
+0x8017DD28 stage:sc06_006 func_sc06_006_8017DD28   -> CastMain                   ok
+0x8017ECE8 stage:sc06_006 func_sc06_006_8017ECE8   -> SparkMain                  ok
+0x8017F074 stage:sc06_006 func_sc06_006_8017F074   -> DrawSpark                  ok
+0x8017FA2C stage:sc06_006 func_sc06_006_8017FA2C   -> DrawGlowQuad               ok
+0x8017C150 stage:sc06_008 func_sc06_008_8017C150   -> HazardMain                 ok
+0x8017DBB0 stage:sc06_008 func_sc06_008_8017DBB0   -> TrackNearestToPlayer       ok
+0x801848F0 stage:sc06_008 func_sc06_008_801848F0   -> KnockbackFall              ok
+0x80184AEC stage:sc06_008 func_sc06_008_80184AEC   -> KnockbackHit               ok
+0x8017D748 stage:sc06_010 func_sc06_010_8017D748   -> KnockbackLand              ok
+0x8017EE3C stage:sc06_010 func_sc06_010_8017EE3C   -> WheelPartMove              ok
+0x8017FE3C stage:sc06_010 func_sc06_010_8017FE3C   -> RotorFlyerRoam             ok  (warn: same name in another scope stage: 0x8017F2E8)
+0x80180864 stage:sc06_010 func_sc06_010_80180864   -> RotorFlyerInit             ok  (warn: same name in another scope stage: 0x80180000)
+0x80180A88 stage:sc06_010 func_sc06_010_80180A88   -> DrawMachineParts           ok
+0x8017DE14 stage:sc06_011 func_sc06_011_8017DE14   -> DrawBeam                   ok
+0x8017F8F8 stage:sc06_011 func_sc06_011_8017F8F8   -> WalkerPickHeading          ok
+0x8017D564 stage:sc06_013 func_sc06_013_8017D564   -> SwitchLiftUpdate           ok
+0x8017E9C0 stage:sc06_014 func_sc06_014_8017E9C0   -> CritterCry                 ok
+0x8017EADC stage:sc06_014 func_sc06_014_8017EADC   -> PlatformCarry              ok
+0x8017D4BC stage:sc06_015 func_sc06_015_8017D4BC   -> SetRoomCamera              ok  (warn: same name in another scope stage:sc06_020 0x8017D3CC; same name in another scope stage:sc06_027 0x8017D030; same name in another scope stage:sc06_020 0x8017D3CC; same name in another scope stage:sc06_027 0x8017D030)
+0x8017E114 stage:sc06_016 func_sc06_016_8017E114   -> BossAttackA                ok  (warn: same name in another scope stage:sc06_029 0x8017EF34)
+0x8017E9CC stage:sc06_016 func_sc06_016_8017E9CC   -> BossWarp                   ok
+0x8017EEFC stage:sc06_016 func_sc06_016_8017EEFC   -> BossSetPose                ok
+0x80180894 stage:sc06_016 func_sc06_016_80180894   -> DrawBladeTrail             ok
+0x80182744 stage:sc06_016 func_sc06_016_80182744   -> ShotFly                    ok  (warn: same name in another scope stage:sc06_030 0x8017FE9C; same name in another scope stage:sc06_030 0x8017FE9C)
+0x8017DD88 stage:sc06_018 func_sc06_018_8017DD88   -> EventObjInit               ok  (warn: same name in another scope stage:sc06_033 0x8017E60C; same name in another scope stage:sc06_033 0x8017E60C)
+0x8017D3CC stage:sc06_020 func_sc06_020_8017D3CC   -> SetRoomCamera              ok  (warn: same name in another scope stage:sc06_015 0x8017D4BC; same name in another scope stage:sc06_027 0x8017D030; same name in another scope stage:sc06_015 0x8017D4BC; same name in another scope stage:sc06_027 0x8017D030)
+0x8017CDE4 stage:sc06_022 func_sc06_022_8017CDE4   -> RoomStart                  ok  (warn: same name in another scope stage:sc06_000 0x80180A50; same name in another scope stage:sc05_009 0x8017CDBC; same name in another scope stage:sc05_009 0x8017CDBC)
+0x8017DC0C stage:sc06_022 func_sc06_022_8017DC0C   -> BreakableInit              ok
+0x8017EBE8 stage:sc06_022 func_sc06_022_8017EBE8   -> BreakableExplode           ok
+0x8017EFE0 stage:sc06_022 func_sc06_022_8017EFE0   -> BreakableHitTest           ok
+0x8017F704 stage:sc06_022 func_sc06_022_8017F704   -> EventObjRise               ok
+0x8017D89C stage:sc06_024 func_sc06_024_8017D89C   -> BigMechInit                ok
+0x8017DBFC stage:sc06_024 func_sc06_024_8017DBFC   -> BigMechMain                ok
+0x8017D030 stage:sc06_027 func_sc06_027_8017D030   -> SetRoomCamera              ok  (warn: same name in another scope stage:sc06_015 0x8017D4BC; same name in another scope stage:sc06_020 0x8017D3CC; same name in another scope stage:sc06_015 0x8017D4BC; same name in another scope stage:sc06_020 0x8017D3CC)
+0x8017D708 stage:sc06_027 func_sc06_027_8017D708   -> CastInit                   ok  (warn: same name in another scope stage:sc06_006 0x8017DB90; same name in another scope stage:sc06_006 0x8017DB90)
+0x8017FE9C stage:sc06_030 func_sc06_030_8017FE9C   -> ShotFly                    ok  (warn: same name in another scope stage:sc06_016 0x80182744; same name in another scope stage:sc06_016 0x80182744)
+0x8017DFE8 stage:sc06_033 func_sc06_033_8017DFE8   -> SwayUpdate                 ok
+0x8017E224 stage:sc06_033 func_sc06_033_8017E224   -> EmergerUpdate              ok
+0x8017E60C stage:sc06_033 func_sc06_033_8017E60C   -> EventObjInit               ok  (warn: same name in another scope stage:sc06_018 0x8017DD88; same name in another scope stage:sc06_018 0x8017DD88)
+0x8019171C stage:sc06_033 func_sc06_033_8019171C   -> ShellShotFly               ok
 
 Same engine / exe address named differently by two scopes (0):
 

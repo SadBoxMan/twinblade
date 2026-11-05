@@ -2044,3 +2044,57 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80182ED8,stage:sc06_029,WeakPointMove,WeakPointMove,M,M,KEEP,lines not read in full; M,0
 0x80182F58,stage:sc01_001,DebrisMain,DebrisMain,M,H,PROMOTE,D_80188E58[state](obj): the debris' state table,0
 0x80182F68,stage:sc05_001,StartKnockBack,StartKnockBack,M,H,PROMOTE,StopWithGravity and the knock-back's start (lines not all read),0
+0x80182FBC,stage:sc04_002,BlockThrowerWaitTurn,BlockThrowerWaitTurn,M,M,KEEP,lines not read in full; M,0
+0x80183008,stage:sc04_002,BlockThrowerTurn,BlockThrowerTurn,M,M,KEEP,lines not read in full; M,0
+0x80183088,stage:sc06_000,BobPlatformMain,BobPlatformMain,M,H,PROMOTE,D_8018C66C[state](obj): the bob platform's state table,0
+0x8018331C,stage:sc01_080,UpdateMachineSound,UpdateMachineSound,M,H,PROMOTE,"the machine's sound with a volume and pan by distance, else stopped",0
+0x80183638,stage:sc06_000,SinkStepMain,SinkStepMain,M,H,PROMOTE,D_8018C7FC[state](obj): the sink step's state table,0
+0x801836E0,stage:sc06_000,Actor15Main,Actor15Main,M,M,KEEP,actor 15's state table; a number name,0
+0x80183A1C,stage:sc06_000,SinkStepUpdate,SinkStepUpdate,M,M,KEEP,lines not read in full; M,0
+0x80183BF8,stage:sc03_024,SceneMoverUpdate,SceneMoverUpdate,M,M,KEEP,lines not read in full; M,0
+0x80183EFC,stage:sc06_000,DropObjMain,DropObjMain,M,H,PROMOTE,D_8018C964[state](obj): the drop object's state table,0
+0x801840F8,stage:sc06_000,DropObjSway,DropObjSway,M,M,KEEP,lines not read in full; M,0
+0x80184324,stage:sc03_097,GlowCreatureWake,GlowCreatureWake,M,H,PROMOTE,"its timer and Musashi near: state 2, timer 0",0
+0x801844AC,stage:sc05_010,EventAbilityLesson,EventAbilityLesson,M,M,KEEP,lines not read in full; M,0
+0x801846BC,stage:sc06_000,HitTargetMain,HitTargetMain,M,H,PROMOTE,D_8018CC08[state](obj): the hit target's state table,0
+0x80184700,stage:sc03_024,SceneHostInit,SceneHostInit,M,M,KEEP,lines not read in full; M,0
+0x801848F0,stage:sc06_008,KnockbackFall,KnockbackFall,M,H,PROMOTE,"collide, fall and ground steps, a helper, SE 0x92F, lifted 0x10, next state",0
+0x80184920,stage:sc05_001,DripEmitterMain,DripEmitterMain,M,H,PROMOTE,D_801AEAF8[state](obj): the drip emitter's state table,0
+0x80185318,stage:sc06_000,AmbientParticleMain,AmbientParticleMain,M,H,PROMOTE,D_8018CC70[state](obj): the ambient particle's state table,0
+0x801853EC,stage:sc02_005,BossPartHurt,BossPartHurt,M,H,PROMOTE,"HP -= the hit, the hit bit off, a helper, and SE 0x4F3 unless hit kind 0x1D",0
+0x8018574C,stage:sc03_007,CelebrationBurst,CelebrationBurst,M,M,KEEP,lines not read in full; M,0
+0x801859AC,stage:sc03_001,Villager30Walk,Villager30Walk,M,M,KEEP,lines not read in full; M,0
+0x801860D0,stage:sc03_105,BossCtrlInit,BossCtrlInit,M,M,KEEP,lines not read in full; M,0
+0x80186124,stage:sc03_001,FollowerInit,FollowerInit,M,M,KEEP,lines not read in full; M,0
+0x801861DC,stage:sc03_105,BossCtrlIntro,BossCtrlIntro,M,H,PROMOTE,before progress 0x258 state 2; once no action runs state 0xA and ClearPlayerMark4C,0
+0x80186754,stage:sc03_028,BossMain,BossMain,M,H,PROMOTE,D_80190C78[state](obj): the boss's state table,0
+0x80186868,stage:sc02_011,LoopSoundByDistance,LoopSoundByDistance,M,M,KEEP,"the tail sets a hit kind and damage, not a sound; the lines not read would settle the name",0
+0x80186C30,stage:sc02_011,ItemActorInit,ItemActorInit,M,H,PROMOTE,"RejectSpawn when flag 0x16 is set or no model, else its helper",0
+0x80186D0C,stage:sc03_028,BossSpinLand,BossSpinLand,M,M,KEEP,lines not read in full; M,0
+0x80186F44,stage:sc04_011,BossInit,BossInit,M,M,KEEP,lines not read in full; M,0
+0x80187068,stage:sc04_011,BossIntroTrigger,BossIntroTrigger,M,M,KEEP,lines not read in full; M,0
+0x801893BC,stage:sc03_105,PostBossMarker,PostBossMarker,M,M,KEEP,lines not read in full; M,0
+0x80189B64,stage:sc02_011,TopplingInit,TopplingInit,M,H,PROMOTE,"its hit data, surface 1, state 1, timer 0x1F, its script",0
+0x8018A1B4,stage:sc03_006,Enemy3Chase,Enemy3Chase,M,M,KEEP,enemy 3's chase; a number name,0
+0x8018ACD0,stage:sc03_006,Enemy3Init,Enemy3Init,M,M,KEEP,enemy 3's set-up; a number name,0
+0x8018C4BC,stage:sc04_011,EventHighLedge,EventHighLedge,M,M,KEEP,lines not read in full; M,0
+0x8018CD98,stage:sc03_001,ParticleTimer,ParticleTimer,M,M,KEEP,lines not read in full; M,0
+0x80190538,stage:sc02_005,PlayerThrownByBoss,PlayerThrownByBoss,M,H,PROMOTE,"thrown by the boss: StartPlayerSlide or the next kind, effect 2, DropTimedAbility",0
+0x80190CE0,stage:sc06_033,ShellEnemyInit,ShellEnemyInit,M,M,KEEP,lines not read in full; M,0
+0x80190E64,stage:sc06_033,ShellEnemyBreak,ShellEnemyBreak,M,M,KEEP,lines not read in full; M,0
+0x8019171C,stage:sc06_033,ShellShotFly,ShellShotFly,M,H,PROMOTE,freed when it falls below 0x20,0
+0x8018074C,stage:sc03_092,ShowIfInRange,ShowIfInRange,L,L,KEEP,lines not read in full; M,6
+0x80180810,stage:sc03_102,RoomAnimTick,RoomAnimTick,L,L,KEEP,lines not read in full; M,1
+0x8017D2D4,stage:sc01_001,StageConstant8F,StageConstant8F,L,H,PROMOTE,returns 0x8F,0
+0x8017D488,stage:sc01_000,StageConstant80,StageConstant80,L,H,PROMOTE,returns 0x80,0
+0x8017D9BC,stage:sc03_010,RoomExitWaitTrack,RoomExitWaitTrack,L,H,PROMOTE,"RequestBgmPack(0x2A); when ready a helper, timer 0x80, step + 1",0
+0x8017E2CC,stage:sc04_015,VillageEventController,VillageEventController,L,L,KEEP,lines not read in full; M,0
+0x8017E554,stage:sc01_074,ProgressToSetting,ProgressToSetting,L,L,KEEP,"a value by a and the daytime byte (0x32 / 0xF / 0x10); ""Setting"" is not shown",0
+0x8017E778,stage:sc05_017,PickVillageTune,PickVillageTune,L,H,PROMOTE,"0xF in daytime 1, else 0x10 (the village's tune id)",0
+0x8017E780,stage:sc03_103,SeqMeshStep,SeqMeshStep,L,L,KEEP,a sequence mesh step (the Seq family); M,0
+0x8017EA28,stage:sc03_002,FirstVisitWalkerStep,FirstVisitWalkerStep,L,L,KEEP,lines not read in full; M,0
+0x8017F068,stage:sc04_020,VillagerPickByClock,VillagerPickByClock,L,L,KEEP,lines not read in full; M,0
+0x8017F360,stage:sc01_009,LordMain,LordMain,L,H,PROMOTE,D_801E9A18[state](obj): the lord's state table,0
+0x80180974,stage:sc01_005,HostRestState,HostRestState,L,H,PROMOTE,"RestRestoreFade, EndEvent, TakePlayerControl, timer 0x10, next state",0
+0x80182DCC,stage:sc04_011,BossDefeatScene,BossDefeatScene,L,L,KEEP,lines not read in full; M,0
+0x8018624C,stage:sc03_105,BossCtrlPhase1,BossCtrlPhase1,L,L,KEEP,the boss controller's phase 1; a number name,0
