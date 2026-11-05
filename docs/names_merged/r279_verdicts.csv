@@ -1596,3 +1596,74 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80182B68,stage:sc01_001,LoadFaceTexture,LoadFaceTexture,M,H,PROMOTE,"MoveImage of face picture n into VRAM (0x280, 0x188); SetFaceTexture without the flag",2
 0x801831EC,stage:sc01_001,SpawnSparkle,SpawnSparkle,M,H,PROMOTE,up to 13 sparkle actors (SpawnKind205) placed round a counter,2
 0x80183EE8,stage:sc03_105,StopBossSound,StopBossSound,M,H,PROMOTE,"PlaySound(4, 0x730): the boss sound 0x730 stopped",2
+0x80186940,stage:sc04_011,BossTakeDamage,BossTakeDamage,M,H,PROMOTE,"marks the boss hit, adds the damage to its +0x60, flash timer 8, a sound by the HP left; the boss's hit steps",2
+0x80189240,stage:sc05_017,ItemMessageHandler,ItemMessageHandler,M,M,KEEP,255 lines not read in full; M,2
+0x8017BF08,stage:sc03_028,InitBossHpBar,InitBossHpBar,M,M,KEEP,only func_8017BF34 with the arguments; rests on that callee,1
+0x8017C010,stage:sc03_028,UpdateBossHpBar,UpdateBossHpBar,M,M,KEEP,"stores two words into the first actor of a kind; ""HpBar"" rests on that actor",1
+0x8017D08C,stage:sc04_010,RoomScriptedEntry,RoomScriptedEntry,M,H,PROMOTE,"StartPlayerActionScript of the room's entry script, sound 0x1D",1
+0x8017D09C,stage:sc03_115,PickUpSceneMain,PickUpSceneMain,M,H,PROMOTE,the phase table D_80183F28[+0x214](obj): the pick-up scene's action handler,1
+0x8017D164,stage:sc01_000,SetCameraEyeTarget,SetCameraEyeTarget,M,H,PROMOTE,the eye and target points (two SVECTORs) stored,1
+0x8017D254,stage:sc01_004,CameraFixedView,CameraFixedView,M,H,PROMOTE,"pad bits 0 / 1 toggle the distance preset, then a fixed eye and target set",1
+0x8017D4D8,stage:sc05_009,CameraEaseToTargets,CameraEaseToTargets,M,H,PROMOTE,"the camera's distance, angles and offset eased, the eye placed by LocalToWorld",1
+0x8017D5DC,stage:sc04_010,OrbSpawnGlow,OrbSpawnGlow,M,H,PROMOTE,a sprite in 0x7E-0x100 at the orb's position with the glow flags,1
+0x8017D638,stage:sc04_009,SwitchTargetStruckLook,SwitchTargetStruckLook,M,H,PROMOTE,"InitSpriteModel with the struck look, scale 0x2800, flags, its script",1
+0x8017D6E8,stage:sc03_023,SetPlayerPose,SetPlayerPose,M,M,KEEP,"only SetPlayerByte1C2; ""Pose"" is not shown",1
+0x8017D748,stage:sc06_010,KnockbackLand,KnockbackLand,M,H,PROMOTE,"SE, ShowQueuedDamageNumber, ClearPlayerHittable, +0xDE = 10, next state: the knockback's landing",1
+0x8017D774,stage:sc03_023,RewardCheckFreeSlot,RewardCheckFreeSlot,M,H,PROMOTE,"FindFreeItemSlot: SetActionMark1, else SetActionMark2",1
+0x8017D918,stage:sc01_074,RideArrive,RideArrive,M,M,KEEP,finds actors 0x19C / 0x29A and puts the second at a point; what arrives is not in reach,1
+0x8017DDDC,stage:sc04_003,RewardLightTrigger,RewardLightTrigger,M,M,KEEP,"state 2, a flag, StartEvent of the light's script; ""Reward"" not shown",1
+0x8017DDE0,stage:sc05_007,PlayerDropMain,PlayerDropMain,M,H,PROMOTE,the phase table D_801909E8[+0x214](obj): the drop scene's action handler,1
+0x8017DE14,stage:sc06_011,DrawBeam,DrawBeam,M,H,PROMOTE,two primitives of a beam added to the world OT,1
+0x8017DE70,stage:sc05_000,ScriptNearPlayerCallback,ScriptNearPlayerCallback,M,H,PROMOTE,"the talk marker's callback: near Musashi, the owner to state 2 and the action handler called, else NULL",1
+0x8017DF20,stage:sc04_015,EventNpcBecomeTalkable,EventNpcBecomeTalkable,M,H,PROMOTE,"state 2, model shown, its script, SpawnTalkMarker with EventNpcTalkCheck",1
+0x8017DFEC,stage:sc06_008,AnimateTexture,AnimateTexture,M,M,KEEP,28 lines not read in full; M,1
+0x8017E038,stage:sc04_015,EventNpcTalkCheck,EventNpcTalkCheck,M,H,PROMOTE,the talk marker's callback for the NPC (flag 0x13C clear and the owner in state 2),1
+0x8017E1B4,stage:sc03_001,DawnLightRestart,DawnLightRestart,M,M,KEEP,"resets four 0x24 records (lines not all read); ""Dawn"" rests on the scene",1
+0x8017E1E8,stage:sc05_000,SpawnThrownTrail,SpawnThrownTrail,M,M,KEEP,"SpawnEffect(3) (the configurable puff) at the actor; ""ThrownTrail"" is a reading",1
+0x8017E4B4,stage:sc03_112,CameraClipAngle,CameraClipAngle,M,M,KEEP,25 lines over clip records returning angles; M,1
+0x8017E5A4,stage:sc03_103,CameraUpdateOffset,CameraUpdateOffset,M,H,PROMOTE,"the camera's distance, angles and offset eased, fixed eye offset set",1
+0x8017E6A0,stage:sc03_092,FlagBoardUse,FlagBoardUse,M,H,PROMOTE,"for the kind 0x179 actor with its mark, sound 0x758, flag 0xB3, TakeItem(0x5A)",1
+0x8017E7D4,stage:sc03_030,UpdateRideSounds,UpdateRideSounds,M,H,PROMOTE,"the ride's sound table stepped by state (33 lines), the sounds played in turn",1
+0x8017E808,stage:sc05_004,SpawnSwitchGlow,SpawnSwitchGlow,M,H,PROMOTE,"a sprite in 0x7E-0x100 with a circle shape above the switch, the glow flags",1
+0x8017E910,stage:sc06_016,BossRingAttack,BossRingAttack,M,M,KEEP,"BossSetPose 0xB, timer, two follow-ups, sound 0x981; ""Ring"" rests on the follow-ups",1
+0x8017E9C0,stage:sc06_014,CritterCry,CritterCry,M,H,PROMOTE,sound 0x6FE with the volume falling with the distance to Musashi,1
+0x8017EADC,stage:sc06_024,BigMechAim,BigMechAim,M,M,KEEP,a debug line along an aim (DebugDrawLine); the aim reading rests on lines not read,1
+0x8017F24C,stage:sc04_020,VillagerTalkCheck,VillagerTalkCheck,M,H,PROMOTE,the villager's talk-marker callback by its state,1
+0x8017F33C,stage:sc02_016,LiftMotorSound,LiftMotorSound,M,H,PROMOTE,"the lift's motor sound by its distance, played once (+0x84)",1
+0x8017F3F4,stage:sc04_000,FlagDaObjTalkCheck,FlagDaObjTalkCheck,M,H,PROMOTE,"the talk-marker callback: near Musashi (ground distance) the owner to state 2 and the action handler""""""",1
+0x8017F4FC,stage:sc06_024,BigMechSparks,BigMechSparks,M,M,KEEP,36 lines not read in full; M,1
+0x8017FA2C,stage:sc06_006,DrawGlowQuad,DrawGlowQuad,M,H,PROMOTE,four glow quads along two points (DrawPrimG4Mtx) with colours from a table,1
+0x8017FB40,stage:sc04_015,VillagerTalkCheck,VillagerTalkCheck,M,H,PROMOTE,the talk-marker callback (flag 0x13A clear and the owner ready),1
+0x8017FCAC,stage:sc02_027,RoomSequencer,RoomSequencer,M,M,KEEP,"48 lines not read in full; ""Sequencer"" rests on the switch's cases",1
+0x8017FCFC,stage:sc02_017,MultiHitStep,MultiHitStep,M,M,KEEP,"27 lines not read in full; ""MultiHit"" not settled",1
+0x8017FD30,stage:sc02_028,RoomSequencer,RoomSequencer,M,M,KEEP,50 lines not read in full; see the sc02_027 copy,1
+0x80180150,stage:sc03_092,NpcTalkWait,NpcTalkWait,M,H,PROMOTE,"the talk-marker callback: the owner in state 1 and near Musashi, then state 2 and the handler",1
+0x801806B8,stage:sc04_000,ItemTakerTalkCheck,ItemTakerTalkCheck,M,H,PROMOTE,the talk-marker callback when Musashi stands in front (x / z window),1
+0x80180894,stage:sc06_016,DrawBladeTrail,DrawBladeTrail,M,H,PROMOTE,a blade trail primitive between two points (56 lines; the end adds it with a draw mode),1
+0x80180A88,stage:sc06_010,DrawMachineParts,DrawMachineParts,M,H,PROMOTE,"by the machine's step, its blocks relocated and its parts drawn with DrawMeshTris (107 lines)",1
+0x80181228,stage:sc03_006,CameraModePad,CameraModePad,M,H,PROMOTE,the camera's eased fields and the eye placed by LocalToWorld (the pad-preset camera update),1
+0x80181328,stage:sc02_027,EmitterHitCheck,EmitterHitCheck,M,M,KEEP,55 lines not read in full; M,1
+0x80181380,stage:sc01_009,PickFlagLine,PickFlagLine,M,H,PROMOTE,the first of a chain of flags 0x16.. that is clear picks the line to show; SetMessageText,1
+0x801813E4,stage:sc03_002,Villager14Talk,Villager14Talk,M,H,PROMOTE,the villager's talk-marker callback by its state,1
+0x8018144C,stage:sc01_009,MoveResidentProp,MoveResidentProp,M,M,KEEP,43 lines not read in full; M,1
+0x80181574,stage:sc03_111,DrawGlowQuads,DrawGlowQuads,M,H,PROMOTE,"textured glow quads at the screen (DrawPrimGT4Screen), 47 lines",1
+0x801815E8,stage:sc06_000,SetIntroCamera,SetIntroCamera,M,H,PROMOTE,"the intro camera's targets set, its update installed and snapped",1
+0x801817A8,stage:sc06_025,SyncSoundCmd27,SyncSoundCmd27,M,M,KEEP,"lines not read in full; ""Cmd27"" is a reading",1
+0x80181A70,stage:sc03_107,RoamObjPlace,RoamObjPlace,M,H,PROMOTE,"state 3, PlaceObject at the room's point, the height limit 0x7FFF",1
+0x801821B4,stage:sc03_002,SpawnWalkerDust,SpawnWalkerDust,M,M,KEEP,"lines not read in full; ""Dust"" rests on the effect kind",1
+0x801821D4,stage:sc03_024,CarriedObjectPlace,CarriedObjectPlace,M,M,KEEP,21 lines not read in full; M,1
+0x80182284,stage:sc01_001,UpdateLightRings,UpdateLightRings,M,M,KEEP,41 lines; the Ring family (SpawnLightRing) is not settled,1
+0x8018275C,stage:sc01_001,GrowLightRings,GrowLightRings,M,M,KEEP,36 lines; see UpdateLightRings,1
+0x80182C58,stage:sc01_001,UpdateBlinkTexture,UpdateBlinkTexture,M,H,PROMOTE,"the face picture swapped back and forth by a counter (MoveImage), unless SetFaceTexture holds it",1
+0x80182D04,stage:sc01_001,SetRoomPartsShown,SetRoomPartsShown,M,H,PROMOTE,"by the step, part bits of the room model shown / hidden (bit 24)",1
+0x801832BC,stage:sc01_001,UpdateBladePoints,UpdateBladePoints,M,H,PROMOTE,two blade points through the holder's matrix into the trail buffer,1
+0x80184398,stage:sc06_000,DropObjFall,DropObjFall,M,M,KEEP,22 lines not read in full; M,1
+0x80184AEC,stage:sc06_008,KnockbackHit,KnockbackHit,M,H,PROMOTE,"SEs, ResetPlayerAfterHit, HitPlayer(1, 0xC003, its heading, 0x10) at Musashi",1
+0x801856A8,stage:sc03_001,Villager30TalkCheck,Villager30TalkCheck,M,H,PROMOTE,the villager's talk-marker callback by its state (58 lines),1
+0x80186044,stage:sc06_029,FinalStateUpdate,FinalStateUpdate,M,M,KEEP,"clamps Musashi's y to -0x580..-0x100 (lines not all read); ""FinalState"" is the scene's reading",1
+0x80186C54,stage:sc03_001,Villager36Talk,Villager36Talk,M,H,PROMOTE,"the villager's talk-marker callback, state + 1, the handler",1
+0x8017BEBC,stage:sc03_116,DrawRoomMesh,DrawRoomMesh,M,H,PROMOTE,the room mesh's local matrix (GsGetLs / GsSetLsMatrix) and its draw with a z limit,0
+0x8017C150,stage:sc06_008,HazardMain,HazardMain,M,H,PROMOTE,D_80189220[state](obj): the hazard's state table,0
+0x8017CD9C,stage:sc04_003,RoomEntryStartA,RoomEntryStartA,M,M,KEEP,"the room entry's flags, sound, spawn lists; ""A"" (a second entry form) is not settled",0
+0x8017CD9C,stage:sc04_006,RoomEntryStartA,RoomEntryStartA,M,M,KEEP,"the same in sc04_006; ""A"" not settled",0
+0x8017CD9C,stage:sc04_008,RoomEntryStart,RoomEntryStart,M,H,PROMOTE,"the room entry's flags, sound, spawn lists and sequence start""""""",0
