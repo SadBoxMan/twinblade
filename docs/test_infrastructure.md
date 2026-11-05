@@ -690,13 +690,34 @@ docs/dispatcher_handoff.md):
 | Level | Command | Runs | Time | For |
 |---|---|---|---|---|
 | No game run | - | 0 | - | docs, tracker, tools that do not build the game, launcher text only (launcher_check if the launcher changed; `make regress` if src/ or the build changed) |
-| Quick Test | `port_accuracy_check.py --quick` | 1: windowed, `console`, software | ~2 min 30 s | changes that cannot reach game RAM, the picture or timing: exe resources (icons), settings plumbing whose default is unchanged, logging off by default, launcher behaviour |
-| Comprehensive Test | `port_accuracy_check.py` (or `--comprehensive`) | 18: 3 profiles x 3 modes x 2 renderers | ~45 min, the last ~8 hands off | anything touching game code, src/ the PC build compiles, the shims, the recompiler / gen.py, the renderers, window / display / input / pacing code, timing, the memory card or RAM; plus the A/B at both aspects where the picture can change. When unsure, Comprehensive |
+| Hash Test (r282) | `port_accuracy_check.py --hash-only` | 6 turbo replays: 3 profiles x 2 renderers | ~15-25 s | a quick look while working: RAM, shots and replay only. NOT a gate for a card: no display, Alt+Enter or timing |
+| Quick Test | `port_accuracy_check.py --quick` | 1 turbo, then 1 real-time: windowed, `console`, software | ~2 min 40 s | changes that cannot reach game RAM, the picture or timing: exe resources (icons), settings plumbing whose default is unchanged, logging off by default, launcher behaviour |
+| Comprehensive Test | `port_accuracy_check.py` (or `--comprehensive`) | 6 turbo, then 18 real-time: 3 profiles x 3 modes x 2 renderers | ~5 min 15 s for all but the exclusive runs, then ~8 min hands off (45 min before r282) | anything touching game code, src/ the PC build compiles, the shims, the recompiler / gen.py, the renderers, window / display / input / pacing code, timing, the memory card or RAM; plus the A/B at both aspects where the picture can change. When unsure, Comprehensive |
 
 The report's first line names the level. The three hardware full-screen runs come last: the check puts the game in
 front (DXGI's exclusive full screen needs the focus), so the PC must be left alone from the report's "HANDS OFF" line
 to "hands off over". While LuciDin uses the PC, `--exclusive skip` runs the other 15 and says so; `--exclusive only`
 runs the three later. A Comprehensive Test is whole only with both.
+
+**Turbo and side by side (r282, LuciDin 4 Nov: the tests dragged the project).** `replay_turbo = 1` (a file-only test key, pc/settings.c; it needs `input_play`, and As Shipped, the launcher's tabs and a game without a movie never see it) drops the host's waiting from a replay: no wait for the 60 Hz tick, no monitor watcher, no window, no picture to it, no controller. Every emulated vblank still runs in order, with its CD, card, sound chip and callback work. The check runs in three stages: turbo (ram, shots, replay; 15-35 x real time), the 15 real-time runs up to `--jobs` (12) at a time, muted, each with its own folder (`TWINBLADE_RUN_DIR`: run.log, shots), then the exclusive runs one at a time. The real-time runs still compare every area: display, Alt+Enter and timing need real speed, and their hashes are what shows turbo and real time agree on each build. `--no-turbo` is the check as before r282, one run at a time. `--write-baseline` and `--rebase-ram` never use turbo. `--sound` adds the area "sound": the MD5 of what the sound chip rendered must agree across a profile's runs, turbo and real time (RAM hashes do not see the sound chip). `tools/input_movie.py play --turbo` plays any movie the same way: `movie_20261102_120120_r266` took 192 s, IDENTICAL 826 / 826.
+
+**What depends on real time** (r282, every clock read in pc/ gone through; the game thread's only host wait is `window_wait_vblank`):
+
+| Where | What | In turbo |
+|---|---|---|
+| pc/win/window.c | the 60 Hz tick, the window's messages, the hand-over to the screen | the wait and the hand-over go, the messages stay |
+| pc/win/vblank.c | the monitor's refresh, for pacing | not started |
+| pc/win/audio.c | the sound card's own thread; the ring drops frames when full and feeds nothing back; `spu_render` runs per vblank, before it | `audio = 0` from the check; the chip still renders each vblank |
+| pc/psyq/cd.c, card.c, stream.c, mdec.c, spu.c, voice playback | counted in vblanks and sectors, no clock read | unchanged |
+| pc/psyq/pad.c (row sounds), custom_title.c (title pick) | clock-seeded picks, only without `deterministic` / with several titles | deterministic in every test |
+| pc/psyq/gpu.c, raster.c, voice.c, hw_render.c, maplog.c | clocks for log lines alone | unchanged, nothing reaches the game |
+| time() in movie.c, state.c, maplog.c | file names and header text | unchanged |
+| pc/win/crash.c | the watchdog, 5 s without a frame | unchanged |
+| pc/win/sony_pad.c | the controller's threads; rumble | not started: a replay does not read it, and must not buzz it |
+
+What truly needs real time, and stays so: **timing** (the tick's rate and resets over the whole route), **display** (the grabs: what the window shows), **Alt+Enter** (a real mode change mid-run) and the **exclusive** runs (a real swap chain in front).
+
+**Timing's one exception (r267, 5 Nov):** a clock reset on the very first line of the frame log does not count: that tick is the window's creation (104-113 ms on 7 software runs of the first daily test, 20261105_021559, with the rate in tolerance and the steady part clean). Every later reset counts, the boot's ticks included.
 
 **What a PASS proves**: game RAM, scratchpad and the rand seed equal on every main-loop frame (sp 0x801FFFF0) to vblank
 8900, in all 18 runs, against one baseline per profile (the renderer must not change game RAM); every shot

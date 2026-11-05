@@ -4470,8 +4470,6 @@ void func_sc06_032_80185F4C(u8 *o, s32 a0, s32 b0, s32 c0) {
 
     m = *(WMtx *)&D_800AE620;
     p = (u8 *)func_8012C658((s16)a0, (s16)b0, o);
-    do { /* MATCH-TRICK: empty do-while(0) ends cse's block so mp = &m gets its own pseudo after the call */
-    } while (0);
     mp = &m;
     if (p != 0) {
         AF(p, u16, 0xA) -= 0x80;

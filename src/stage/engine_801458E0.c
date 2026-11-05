@@ -8189,13 +8189,8 @@ s32 func_801536DC(s32 arg0) {
         }
         AF(arg0, u8, 0xDE)--;
     }
-    {
-        HARD_V0(r) = 1; /* MATCH-TRICK: see HARD_V0 in common.h */
-        if (AF(arg0, s16, 6) == AF(arg0, s16, 0xA0) && AF(arg0, s16, 0xA) == AF(arg0, s16, 0xA2)) {
-            r = AF(arg0, s16, 0xE) != AF(arg0, s16, 0xA4);
-        }
-        return r;
-    }
+    if (AF(arg0, s16, 6) == AF(arg0, s16, 0xA0) && AF(arg0, s16, 0xA) == AF(arg0, s16, 0xA2) && AF(arg0, s16, 0xE) == AF(arg0, s16, 0xA4)) return 0;
+    return 1;
 }
 
 extern void func_800139C8();

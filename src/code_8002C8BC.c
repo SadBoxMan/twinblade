@@ -124,7 +124,7 @@ extern u8 D_800BA1B8[];
 extern u8 D_800B9E92[];
 extern void func_8002EC10(void);
 extern void func_80036EB4();
-extern void SsSetSerialVol(s32 a, s32 b, s32 c);
+extern void SsSetSerialVol(char s_num, short voll, short volr); /* libsnd.h */
 
 extern s32 D_800760E0;
 extern void _SpuInit(s32 n);
@@ -3556,8 +3556,6 @@ end:
     return ret;
 }
 
-/* NON_MATCHING (r283, docs/phase1_rulings.md #9), 23 lines: the original's frame is 8 bytes bigger, a spill slot nothing uses, a by-product of a compiler step on a loop with a variable bound (this one's bound is constant); 22 lines are the offsets that follow, 1 an operand order. */
-#ifdef NON_MATCHING
 extern u8 D_8006AED8[];
 void func_80033324(s32 k, s32 i);
 
@@ -3584,11 +3582,12 @@ void func_80032A74(u8 *c, s32 i, u8 *s, u16 f) {
     u32 d;
     u32 w;
     u32 x;
+    u16 ta, tb;
     u32 o;
-    u8 *vb;
+    s32 vb;
     s32 z;
 
-    vb = (u8 *)D_800A4C28;
+    vb = (s32)D_800A4C28;
     prio = *(u16 *)(c + 2);
     for (z = 0; z < 8; z++) {
         c[0xE + z] = 0;
@@ -3628,7 +3627,7 @@ void func_80032A74(u8 *c, s32 i, u8 *s, u16 f) {
             goto next;
         }
         n--;
-        v = n * 0x48 + vb;
+        v = (u8 *)(n * 0x48 + vb);
         if (!(t & 0x80)) {
             r = D_8006A970[slot] + s[9] * 12;
             *(s32 *)(v + 0x1C) = *(s32 *)r;
@@ -3711,8 +3710,10 @@ void func_80032A74(u8 *c, s32 i, u8 *s, u16 f) {
             *(u16 *)(v + 0x14) = 0x3FFF;
         } else {
             k = d >> 8;
-            w = D_8006AB30[k] * (0x100 - (d & 0xFF));
-            w += D_8006AB32[k] * (d & 0xFF);
+            ta = D_8006AB30[k];
+            tb = D_8006AB30[k + 1];
+            w = ta * (0x100 - (d & 0xFF));
+            w += tb * (d & 0xFF);
             w >>= 8;
             *(u16 *)(v + 0x14) = w;
         }
@@ -3774,9 +3775,6 @@ void func_80032A74(u8 *c, s32 i, u8 *s, u16 f) {
         c[0xA] = 4;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/code_8002C8BC", func_80032A74);
-#endif
 
 s32 func_8003310C(s32 prio) {
     struct { u8 found; s32 best; u16 min; } s;
@@ -4915,8 +4913,6 @@ u32 func_80035210(s32 dst, s32 n) {
 typedef struct { u8 *tbl; u8 flag; s32 ofs[16]; } SndBank;
 extern SndBank D_8006A69C[];
 
-/* NON_MATCHING (r283, docs/phase1_rulings.md #5), 1 line: SsSetSerialVol(0, v, v), the original copies v into a1 then a1 into a2, ours copies it twice from s0; that shape needs a separate short-lived temporary, and no C form survives the compiler's clean-up. */
-#ifdef NON_MATCHING
 extern s16 D_800760F8;
 extern s32 D_80076100;
 extern u8 D_800760FC;
@@ -4940,7 +4936,7 @@ s32 func_80035270(Req *q) {
     u8 *t;
     s32 i;
     s32 j;
-    s32 v;
+    u8 v;
     s32 k;
     s32 n;
     u8 *p;
@@ -5173,9 +5169,6 @@ flush:
     D_80076214 = 1;
     return 1;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/code_8002C8BC", func_80035270);
-#endif
 
 extern s16 D_80076104;
 

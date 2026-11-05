@@ -1183,11 +1183,8 @@ extern s32 (*D_801274D0)(SpawnDef *d);  /* replaces the range test of func_8013E
 s32 func_8013E448(SpawnDef *d) {
     if (D_801274D0 == NULL) {
         s32 r = func_800132BC(D_80126B58.focus, d);
-        HARD_V0(v) = 0; /* MATCH-TRICK: see HARD_V0 in common.h */
-        if (D_801274D8 < r) {
-            v = r < D_801274DC;
-        }
-        return v;
+        if (D_801274D8 < r && r < D_801274DC) return 1;
+        return 0;
     }
     return D_801274D0(d);
 }
@@ -2154,8 +2151,8 @@ void func_801407F4(void) {
     AF(o, u16, 0x1C) = *p;
 }
 
-/* NON_MATCHING (r283, docs/phase1_rulings.md #7), 14 lines: n, k and the mask rotated in three registers; the allocator ranks by mentions in the loop, n needs three more than the code has, and each extra one costs an instruction or is removed before it is counted. */
-#ifdef NON_MATCHING
+/* r287: matched with the loop counter stepped on two paths (m = ++n). The allocator counts the extra site before
+   cross-jumping merges it, which ranks n above k and the mask, so they land in a2, a3 and t0. */
 extern u16 D_8018E32C[];
 extern u16 D_8018E3AC[];
 extern s16 D_8018E88C[];
@@ -2167,12 +2164,13 @@ s32 func_80140958(s32 p, s32 a0, s32 b0) {
     s16 end = b0;
     u16 *tbl;
     s16 j;
-    s16 n;
+    s32 n;
     u16 k;
     s16 x;
     s16 y;
     s16 c;
     s16 d;
+    s32 m;
 
     for (i = a0; i < end; i++) {
         if (D_80115110.unk0 == 0 && D_80115110.mode != 3 && D_80115110.mode < 6) {
@@ -2198,11 +2196,12 @@ s32 func_80140958(s32 p, s32 a0, s32 b0) {
         }
         if (i == 3 && D_80115110.unkA == i && (D_80115110.frames & 8)) {
             k = D_80115110.unkA;
-            for (n = 0; n < 2; n++) {
-                if (n == 0) {
+            n = 0;
+            do {
+                if ((s16)n == 0) {
                     c = D_80115140[k].v;
                     if (c == 0) {
-                        continue;
+                        goto nx;
                     }
                     AF(p, u8, 0xD) = 0x30;
                     y = D_8018E3AC[1] - 4;
@@ -2211,6 +2210,7 @@ s32 func_80140958(s32 p, s32 a0, s32 b0) {
                     c = (s8)D_80115158[k << 1];
                     d = ((s8 *)D_80115140)[k];
                     if (c - d < 2) {
+                        m = ++n;
                         continue;
                     }
                     AF(p, u8, 0xD) = 0x38;
@@ -2227,14 +2227,13 @@ s32 func_80140958(s32 p, s32 a0, s32 b0) {
                 AF(p, s16, 0x10) = 8;
                 addPrim(D_800AE7B8[((u16 *)&D_800B9A08)[-3]].org + 2, p);
                 p += 0x14;
-            }
+            nx:
+                m = ++n;
+            } while ((s16)m < 2);
         }
     }
     return p;
 }
-#else
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8013C98C", func_80140958);
-#endif
 
 extern u16 D_8011516A[];
 extern GsOT D_800AE7B8[];

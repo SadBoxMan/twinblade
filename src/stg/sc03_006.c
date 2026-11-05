@@ -6668,7 +6668,6 @@ void func_sc03_006_801897F8(u8 *arg0, s32 arg1) {
     u8 *p3;
     s32 old;
     s32 d;
-    s32 nv;
 
     if (func_8012BEE8((s32) arg0, arg1) != 0) {
         if (AF(arg0, s32, 0xDC) & 0x80) {
@@ -6688,11 +6687,8 @@ void func_sc03_006_801897F8(u8 *arg0, s32 arg1) {
         p3 = AF(arg0, u8 *, 0x20);
         old = AF(p3, s16, 0x18);
         d = (AF(arg0, s16, 0x100) - old) / 4;
-        /* MATCH-TRICK: the do-while(0) raises nv's loop-depth weight so old and p3 get the original's registers */
-        do {
-            nv = old + d;
-        } while (0);
-        AF(p3, s16, 0x18) = AF(p3, s16, 0x1C) = nv;
+        old += d;
+        AF(p3, s16, 0x18) = AF(p3, s16, 0x1C) = old;
     }
 }
 
@@ -7335,7 +7331,6 @@ void func_sc03_006_8018AF88(u8 *arg0) {
     u8 *p3;
     s32 old;
     s32 d;
-    s32 nv;
 
     if (func_8012BEE8((s32) arg0) != 0) {
         p2 = AF(arg0, u8 *, 0x20);
@@ -7349,11 +7344,8 @@ void func_sc03_006_8018AF88(u8 *arg0) {
         p3 = AF(arg0, u8 *, 0x20);
         old = AF(p3, s16, 0x18);
         d = (AF(arg0, s16, 0x100) - old) / 4;
-        /* MATCH-TRICK: the do-while(0) raises nv's loop-depth weight so old and p3 get the original's registers */
-        do {
-            nv = old + d;
-        } while (0);
-        AF(p3, s16, 0x18) = AF(p3, s16, 0x1C) = nv;
+        old += d;
+        AF(p3, s16, 0x18) = AF(p3, s16, 0x1C) = old;
     }
 }
 

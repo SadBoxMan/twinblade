@@ -1892,7 +1892,6 @@ void func_80015760(u8 *p, u8 *ot) {
     t = fl & 0xF;
     if (t == 0) {
         n = 8;
-        t = 8; /* MATCH-TRICK: dead store keeps jump.c from moving n = t above the test */
     } else {
         n = t;
     }
@@ -6789,7 +6788,7 @@ s32 func_80020A28(s32 *list, u8 *d, MATRIX *m1, MATRIX *m2, s32 f) {
     return ret;
 }
 
-/* NON_MATCHING (r283, docs/phase1_rulings.md #10), 27 lines: every register sits in one block, in an order fixed by how the nine multiplications are scheduled; the original needs one value "more urgent" than the schedule allows (the unused s0 save is reload's own, no hidden variable). */
+/* NON_MATCHING (r287, docs/phase1_rulings.md #10), 5 lines: the multiply order and every long register now match; the x and z table indexes are computed in swapped order (v0 / v1). Computing x first lets xv take v1, which only yv could stop by outranking xv, and no statement order, type or early `-yv` gave that. */
 #ifdef NON_MATCHING
 /* Angles are 12-bit (0x1000 = a full turn). The table holds one entry per angle: a word whose low half is sin and high half
    is cos, 4.12 fixed point; the code reads some entries as words and some as halves. */
@@ -6802,28 +6801,36 @@ void func_80020DA4(u8 *p0, u8 *p1) {
     s16 *m = (s16 *)p1;
     s32 pad[4];
     s32 *tab = D_800636D4;
-    s32 xv = tab[angles[0] & 0xFFF];
-    s32 xc = xv >> 16;
-    s16 zs = ((SinCos *)tab)[angles[2] & 0xFFF].s;
-    s32 c = xc * zs;
-    s16 zc = ((SinCos *)tab)[angles[2] & 0xFFF].c;
-    s32 b = xc * zc;
-    s16 ys = ((SinCos *)tab)[angles[1] & 0xFFF].s;
-    s32 yv = tab[angles[1] & 0xFFF];
-    s32 yc = yv >> 16;
-    s16 xs = xv;
-    s32 a = (xs * ys) >> 12;
-    s32 r1, r2;
+    s32 xv;
+    s32 xc;
+    s16 zs;
+    s32 c;
+    s16 zc;
+    s32 b;
+    s16 ys;
+    s32 yv;
+    s32 yc;
+    s16 xs;
+    s32 a;
 
-    r2 = (((b >> 12) * ys) >> 12) + ((xs * zs) >> 12);
-    r1 = ((a * zc) >> 12) - (c >> 12);
+    zc = ((SinCos *)tab)[angles[2] & 0xFFF].c;
+    xv = tab[angles[0] & 0xFFF];
+    yv = tab[angles[1] & 0xFFF];
+    ys = ((SinCos *)tab)[angles[1] & 0xFFF].s;
+    xc = xv >> 16;
+    zs = ((SinCos *)tab)[angles[2] & 0xFFF].s;
+    c = xc * zs;
+    b = xc * zc;
+    xs = xv;
+    yc = yv >> 16;
+    a = (xs * ys) >> 12;
     m[0] = (zc * yc) >> 12;
-    m[1] = r1;
-    m[2] = r2;
+    m[1] = ((a * zc) >> 12) - (c >> 12);
+    m[6] = -yv;
+    m[2] = (((b >> 12) * ys) >> 12) + ((xs * zs) >> 12);
     m[3] = (zs * yc) >> 12;
     m[4] = ((a * zs) >> 12) + (b >> 12);
     m[5] = (((c >> 12) * ys) >> 12) - ((xs * zc) >> 12);
-    m[6] = -yv;
     m[7] = (yc * xs) >> 12;
     m[8] = (yc * xc) >> 12;
 }

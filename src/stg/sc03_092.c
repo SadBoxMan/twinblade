@@ -1515,12 +1515,11 @@ void func_sc03_092_8017E580(u8 *o, SV8 *v, SV8 *p) {
     v->x = p->x + (p->y - p->x) / 2;
 }
 
-/* NON_MATCHING (r283, docs/phase1_rulings.md #6), 5 lines: a value and its 16-bit copy in each other's registers; the allocator would need a reason to avoid v1 that only another variable could give, and the original has none. */
-#ifdef NON_MATCHING
 void func_sc03_092_8017E60C(u8 *o, SV8 *v, SV8 *p) {
-    s16 a;
-    if (AF(o, s16, 0xA0) != 0x400 && AF(o, s16, 0xA0) != 0xC00) {
-        a = fold_angle((AF(o, u16, 0x1A) - 0x400) & 0xFFF);
+    s16 a = AF(o, s16, 0xA0);
+    if (a != 0x400 && a != 0xC00) {
+        a = (AF(o, u16, 0x1A) - 0x400) & 0xFFF;
+        a = fold_angle(a);
         if (a > 0x400) {
             AF(o, s16, 0xA0) = 0xC00;
         } else {
@@ -1529,9 +1528,6 @@ void func_sc03_092_8017E60C(u8 *o, SV8 *v, SV8 *p) {
     }
     v->z = p->z + (p->pad - p->z) / 2;
 }
-#else
-INCLUDE_ASM("asm/stg/sc03_092/nonmatchings/sc03_092", func_sc03_092_8017E60C);
-#endif
 
 void func_sc03_092_8017E6A0() {
     u8 *p;

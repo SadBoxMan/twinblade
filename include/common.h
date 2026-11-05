@@ -31,17 +31,4 @@ u32 pc_fn_addr(void *host);
 #define PS1_FN_ADDR(f) (f)
 #endif
 
-/*
- * MATCH-TRICK (ruled by LuciDin, 4 Nov 2026; docs/phase1_rulings.md, docs/decomp_recipes.md): the one accepted use of a
- * machine register in the source. HARD_V0(r) declares the result variable r pinned to v0 from its first line. Three
- * engine functions (func_8012CB64, func_8013E448, func_801536DC) keep their result in v0 across the compare blocks; our
- * GCC 2.7.2 only writes v0 directly for `return constant;` (jump.c, expr.c), so no plain C reaches the original's
- * registers. Every other compiler sees a plain local (the build runs cpp with -undef, so no __GNUC__ test here).
- */
-#if defined(PC) || defined(M2CTX) || defined(_MSC_VER)
-#define HARD_V0(r) s32 r
-#else
-#define HARD_V0(r) register s32 r asm("$2")
-#endif
-
 #endif /* COMMON_H */

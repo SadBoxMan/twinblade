@@ -5048,7 +5048,8 @@ void func_sc02_027_80186C0C(u8 *o) {
         k *= k;
         v = 0x7F - t / ((0x40000 - k) / 80);
     }
-    do { func_8002D59C(0x64E, (u16)(v | 0x5000), AF(o, u16, 0x104)); } while (0); /* MATCH-TRICK: one more ref on v so global-alloc gives v s0 and o s1 */
+    v = (u16)(v | 0x5000);
+    func_8002D59C(0x64E, v, AF(o, u16, 0x104));
 }
 
 void func_sc02_027_80186CE0(u8 *arg0, s32 arg1) {

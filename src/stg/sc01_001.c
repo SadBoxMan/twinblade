@@ -3114,8 +3114,6 @@ s32 func_sc01_001_80181A28(void) {
     return var_v0;
 }
 
-/* NON_MATCHING (r283, docs/phase1_rulings.md #11), 77 lines, two causes: a "largest of three" laid out as if the compiler had not simplified the if / else, and a per-turn pointer copy the compiler always deletes; even a dead-store trick leaves 67. */
-#ifdef NON_MATCHING
 extern s32 D_sc01_001_801F304C;
 extern s32 D_sc01_001_801F3050;
 extern s32 D_sc01_001_80188C78[];
@@ -3159,8 +3157,7 @@ void func_sc01_001_80181A4C(void) {
                 ax = func_sc01_001_80181A4C_abs(dx);
                 ay = func_sc01_001_80181A4C_abs(dy);
                 az = func_sc01_001_80181A4C_abs(dz);
-                m = ax <= ay ? ay : ax;
-                if (m < az) m = az;
+                m = (ax > ay) ? ((ax > az) ? ax : az) : ((ay > az) ? ay : az);
                 d->x = (dx << 16) / m;
                 d->y = (dy << 16) / m;
                 d->z = (dz << 16) / m;
@@ -3180,9 +3177,6 @@ void func_sc01_001_80181A4C(void) {
         D_sc01_001_801F304C += 7;
     }
 }
-#else
-INCLUDE_ASM("asm/stg/sc01_001/nonmatchings/sc01_001", func_sc01_001_80181A4C);
-#endif
 
 void func_sc01_001_80181E04(void) {
     MtxDCM ls;

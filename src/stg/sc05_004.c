@@ -1616,11 +1616,16 @@ void func_sc05_004_8017F210(u8 *arg0) {
         if (func_8012C354(arg0, &D_sc05_004_8019AE04) == 0) {
             return;
         }
-        /* MATCH-TRICK: the [0] store's address is expanded before the comma operand, so D_8019BA89 sits in a register */
-        D_sc05_004_8019F079[0] = (D_sc05_004_8019F079[-1] = D_sc05_004_8019F07A = 0xFF, 0);
-        D_sc05_004_8019F07A = 0;
-        D_sc05_004_8019F07C = 0;
-        func_800233CC(&D_sc05_004_8019F079[-1], 0x20);
+        {
+            u8 *q = D_sc05_004_8019F079;
+            u8 *r = q - 1;
+            D_sc05_004_8019F07A = 0xFF;
+            q[-1] = 0xFF;
+            q[0] = 0;
+            D_sc05_004_8019F07A = 0;
+            D_sc05_004_8019F07C = 0;
+            func_800233CC(r, 0x20);
+        }
         AF(arg0, u8, 0xC0) = 1;
         AF(arg0, s32, 0xB4) = -1;
         AF(arg0, s32, 0xBC) = (s32)&D_sc05_004_8019AED8;

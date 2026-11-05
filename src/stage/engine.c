@@ -2250,11 +2250,8 @@ void func_8012CAE4(StageActor *a) {
 }
 
 s32 func_8012CB64(SVECTOR *p, s32 x0, s32 x1, s32 z0, s32 z1) {
-    HARD_V0(r) = 0; /* MATCH-TRICK: see HARD_V0 in common.h */
-    if (p->vx >= x0 && p->vx < x1 && p->vz >= z0) {
-        r = p->vz < z1;
-    }
-    return r;
+    if (p->vx >= x0 && p->vx < x1 && p->vz >= z0 && p->vz < z1) return 1;
+    return 0;
 }
 
 s32 func_8012CBA4(Mover *m) {

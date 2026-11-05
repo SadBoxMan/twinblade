@@ -3279,8 +3279,8 @@ s32 func_80135D20(u8 *a, s32 f, SVECTOR *pos) {
     return 0;
 }
 
-/* NON_MATCHING (r283, docs/phase1_rulings.md #8), 18 lines: f and cy swapped in s3 / s2; cy needs about twice the counted uses it has, and each use is a real instruction, so none can be added for free. */
-#ifdef NON_MATCHING
+/* r287: matched by giving every arm its own y test. The allocator counts references before cross-jumping, so the
+   repeats lift cy above f (cy in s2, f in s3) and then merge into one test; arms 4 and 8 stay apart by jumping to it. */
 extern s32 D_801150D8;
 
 s32 func_80135EB0(s32 *node, s32 f) {
@@ -3298,15 +3298,15 @@ s32 func_80135EB0(s32 *node, s32 f) {
     else cy = (b->y1 < D_8018DA9C->vy) << 5;
     if ((c | cy) == 0) {
         SVECTOR *e = D_8018DA9C; SVECTOR *o = D_8018DAA4;
-        u16 x, z; s32 k;
+        u16 x, z; s32 mid;
         o->vx = x = e->vx;
-        k = (b->x0 + b->x1) >> 1;
+        mid = (b->x0 + b->x1) >> 1;
         ((S16Cell *)&D_801152AA)->v = 0;
-        ((S16Cell *)&D_80126720)->v = k;
-        ((S16Cell *)&D_801152A8)->v = x - k;
+        ((S16Cell *)&D_80126720)->v = mid;
+        ((S16Cell *)&D_801152A8)->v = x - mid;
         o->vz = z = e->vz;
-        ((S16Cell *)&D_80126724)->v = k = (b->z0 + b->z1) >> 1;
-        ((S16Cell *)&D_801152AC)->v = z - k;
+        ((S16Cell *)&D_80126724)->v = mid = (b->z0 + b->z1) >> 1;
+        ((S16Cell *)&D_801152AC)->v = z - mid;
         o->vy = e->vy;
         ((S16Cell *)&D_80126722)->v = (b->y0 + b->y1) >> 1;
         VectorNormalSS((SVECTOR *)&D_801152A8, (SVECTOR *)&D_801152A8);
@@ -3324,30 +3324,32 @@ s32 func_80135EB0(s32 *node, s32 f) {
     D_8018DAA8->vy = D_8018DAA0->vy - D_8018DA9C->vy;
     D_8018DAA8->vz = D_8018DAA0->vz - D_8018DA9C->vz;
     switch (c) {
-    case 0:
-        break;
     case 4:
         if (func_80136334(b, (s16)f, b->z0)) goto found;
-        break;
+        goto test;
     case 1:
         if (func_801365B8(b, (s16)f, b->x0)) goto hit;
+        if (cy == 0) goto fail;
         break;
     case 2:
         if (func_801365B8(b, (s16)(f | 1), b->x1)) goto hit;
+        if (cy == 0) goto fail;
         break;
     case 5:
         if (func_80136334(b, (s16)f, b->z0)) goto hit;
         if (func_801365B8(b, (s16)f, b->x0)) goto hit;
+        if (cy == 0) goto fail;
         break;
     case 6:
         if (func_80136334(b, (s16)f, b->z0)) goto hit;
         if (func_801365B8(b, (s16)(f | 1), b->x1)) goto hit;
+        if (cy == 0) goto fail;
         break;
     case 9:
         if (func_801365B8(b, (s16)f, b->x0)) goto hit;
     case 8:
         if (func_80136334(b, (s16)(f | 1), b->z1)) goto found;
-        break;
+        goto test;
     fail:
         return 0;
     default:
@@ -3356,18 +3358,17 @@ s32 func_80135EB0(s32 *node, s32 f) {
     case 10:
         if (func_801365B8(b, (s16)(f | 1), b->x1)) goto hit;
         if (func_80136334(b, (s16)(f | 1), b->z1)) goto hit;
+    case 0:
+    test:
+        if (cy == 0) goto fail;
         break;
     }
-    if (cy == 0) goto fail;
     if (cy == 0x10) v = func_80136824(b, (s16)f, b->y0);
     else v = func_80136824(b, (s16)(f | 1), b->y1);
     if (v == 0) goto fail;
 hit:
     return 1;
 }
-#else
-INCLUDE_ASM("asm/stage/nonmatchings/engine_8012F5F4", func_80135EB0);
-#endif
 
 s32 func_80136334(Box *b, s16 f, s16 z) {
     s32 d;
