@@ -1714,3 +1714,65 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8017D588,stage:sc04_016,CutsceneRunSignals,CutsceneRunSignals,M,M,KEEP,"lines not read in full; ""Signals"" not settled",0
 0x8017D59C,stage:sc05_007,RideCheckPlayerState,RideCheckPlayerState,M,M,KEEP,"a counter +1, 1; the player-state check is not visible",0
 0x8017D5B4,stage:sc04_006,HitBoxObjInit,HitBoxObjInit,M,H,PROMOTE,"the hit box object's flags, hit data, surface 2, next state""""""",0
+0x8017D5B8,stage:sc03_115,ItemStandMain,ItemStandMain,M,H,PROMOTE,D_80184110[state](obj): the item stand's state table,0
+0x8017D5B8,stage:sc04_009,SwitchTargetOnHit,SwitchTargetOnHit,M,H,PROMOTE,SwitchTargetSetStruck and SE 0xC5F,0
+0x8017D610,stage:sc04_015,RoomEntryStart,RoomEntryStart,M,H,PROMOTE,"technique byte bit 7 cleared, StartPlayerAction of the room's action, fade, step + 1",0
+0x8017D618,stage:sc03_095,PlatformInit,PlatformInit,M,H,PROMOTE,"the platform's state, model flag 0x80 and its collision data, the start height kept",0
+0x8017D638,stage:sc05_007,RideResetMove,RideResetMove,M,H,PROMOTE,"+0xDC / +0xFE = 0, +0xFC = x: the ride's move reset",0
+0x8017D688,stage:sc06_027,HidePlayerOverlay,HidePlayerOverlay,M,M,KEEP,"a switch of two helpers (lines not read in full); ""HidePlayerOverlay"" not shown",0
+0x8017D698,stage:sc03_107,VariantModelInit,VariantModelInit,M,H,PROMOTE,"by the variant +0x70 its hit data, flags, surface 4, next state",0
+0x8017D6A8,stage:sc04_009,SwitchPairInit,SwitchPairInit,M,M,KEEP,"InitModel or RejectSpawn, next state; ""Pair"" is not in the lines read",0
+0x8017D6D0,stage:sc05_000,StoryPropMain,StoryPropMain,M,H,PROMOTE,D_80181E10[state](obj): the story prop's state table,0
+0x8017D6D8,stage:sc04_016,CutsceneFaceAnim,CutsceneFaceAnim,M,H,PROMOTE,"with flag 0x130 a face image queued (QueueImage), timer 0",0
+0x8017D6F0,stage:sc02_004,EventWalkToExit,EventWalkToExit,M,H,PROMOTE,WalkToPoint to the exit; on arrival timer 0x20 and the next phase,0
+0x8017D704,stage:sc03_095,PlatformMoveA,PlatformMoveA,M,M,KEEP,"the platform's move A (timer, state, CarryPlayer); letter pair with PlatformMoveB",0
+0x8017D704,stage:sc03_114,DirectorMain,DirectorMain,M,H,PROMOTE,D_80183228[state](obj): the director's state table,0
+0x8017D708,stage:sc06_027,CastInit,CastInit,M,H,PROMOTE,its cast actors placed and turned (lines not all read),0
+0x8017D730,stage:sc03_107,TalkerMain,TalkerMain,M,H,PROMOTE,D_8018614C[state](obj): the talker's state table,0
+0x8017D730,stage:sc06_006,ShotRumbleSounds,ShotRumbleSounds,M,M,KEEP,"a sound 0x407 by a level (lines not all read); ""Rumble"" not settled",0
+0x8017D734,stage:sc03_001,WalkerWander,WalkerWander,M,H,PROMOTE,"the walker's wander states: turn, local velocity (lines not all read)",0
+0x8017D750,stage:sc03_115,ItemStandNoteOffset,ItemStandNoteOffset,M,M,KEEP,"an offset from Musashi stored and SE 0x6A6; ""Note"" is not in the C",0
+0x8017D758,stage:sc03_095,PlatformPause,PlatformPause,M,H,PROMOTE,"a pause from the platform's table, state 3, CarryPlayer",0
+0x8017D764,stage:sc05_007,LampMain,LampMain,M,H,PROMOTE,D_80184634[state](obj): the lamp's state table,0
+0x8017D7B0,stage:sc03_095,PlatformMoveB,PlatformMoveB,M,M,KEEP,the platform's move B; letter pair,0
+0x8017D7C4,stage:sc04_010,OrbFreeChild,OrbFreeChild,M,H,PROMOTE,"the orb's child freed, a follow-up, SE 0xA49",0
+0x8017D7C8,stage:sc03_114,CastSetMotionA,CastSetMotionA,M,M,KEEP,the cast's motion record A set on the linked actor; letter pair,0
+0x8017D7CC,stage:sc04_015,RoomExitStep,RoomExitStep,M,H,PROMOTE,"the room exit task's step (a sound command), step + 1",0
+0x8017D7E0,stage:sc06_033,CamPadSteer,CamPadSteer,M,M,KEEP,the camera placed twice from D_801274E8; no pad read in the lines seen,0
+0x8017D7F0,stage:sc04_012,DoorSwingA,DoorSwingA,M,M,KEEP,door swing A to 0x400; letter pair,0
+0x8017D7F8,stage:sc03_114,CastSetMotionB,CastSetMotionB,M,M,KEEP,cast motion record B; letter pair,0
+0x8017D808,stage:sc04_009,SwitchTargetInit,SwitchTargetInit,M,H,PROMOTE,"its hit data, the struck look when flag 0xDD is set, next state",0
+0x8017D828,stage:sc05_000,StaticModelMain,StaticModelMain,M,H,PROMOTE,D_80181E5C[state](obj): the static model's state table,0
+0x8017D844,stage:sc04_010,BurstInit,BurstInit,M,H,PROMOTE,"the model's scale cleared, SE 0x90F, next state",0
+0x8017D864,stage:sc05_000,StaticModelInit,StaticModelInit,M,H,PROMOTE,"SetupActor, cull box, its pose data, next state",0
+0x8017D894,stage:sc04_012,DoorSwingB,DoorSwingB,M,M,KEEP,door swing B; letter pair,0
+0x8017D89C,stage:sc06_024,BigMechInit,BigMechInit,M,H,PROMOTE,"its five parts set up (lines not all read), state 1",0
+0x8017D8A4,stage:sc03_109,SpinPlatformMain,SpinPlatformMain,M,H,PROMOTE,D_80181E94[state](obj): the spin platform's state table,0
+0x8017D8A8,stage:sc03_001,WalkerApproach,WalkerApproach,M,H,PROMOTE,"close to its point: state 3, its script, the heading to the point",0
+0x8017D8DC,stage:sc05_000,SwarmMain,SwarmMain,M,H,PROMOTE,D_80181ED8[state](obj): the swarm's state table,0
+0x8017DA30,stage:sc02_004,DustInit,DustInit,M,H,PROMOTE,"a random spread of its angles, next state",0
+0x8017DA58,stage:sc04_010,OrbInit,OrbInit,M,H,PROMOTE,"its flags, OrbSpawnGlow into +0xCC, a follow-up, next state",0
+0x8017DAC8,stage:sc03_094,TargetTakeHit,TargetTakeHit,M,H,PROMOTE,"its HP and reaction cleared, flash 0x10, the hittable bit off",0
+0x8017DB10,stage:sc05_000,SwarmBugCircle,SwarmBugCircle,M,M,KEEP,lines not read in full; M,0
+0x8017DB84,stage:sc03_013,ItemGateCheckFlag,ItemGateCheckFlag,M,H,PROMOTE,"no flag or the flag set: SetActionMark1, else SetActionMark2",0
+0x8017DB90,stage:sc06_006,CastInit,CastInit,M,H,PROMOTE,state +1 with its position and +0x34 cleared,0
+0x8017DB9C,stage:sc04_010,FixedModelInit,FixedModelInit,M,H,PROMOTE,"model flag 0x40, a fixed position, next state",0
+0x8017DBB0,stage:sc06_008,TrackNearestToPlayer,TrackNearestToPlayer,M,H,PROMOTE,keeps the owner's nearest-to-Musashi distance (+0xDC) up to date,0
+0x8017DBE4,stage:sc03_012,QuakeSceneSway,QuakeSceneSway,M,H,PROMOTE,the scene sways by a sine and SpawnQuakeDebris,0
+0x8017DBFC,stage:sc06_024,BigMechMain,BigMechMain,M,H,PROMOTE,"the big mech's states with BigMechSweepHit, its image animation stepped",0
+0x8017DC08,stage:sc03_011,RoomStartScene,RoomStartScene,M,H,PROMOTE,TakePlayerControl and BlendCameraThen into the room's scene,0
+0x8017DC0C,stage:sc06_022,BreakableInit,BreakableInit,M,H,PROMOTE,"its parts mapped (MapPartsTmd), immunity 0x2000, next state",0
+0x8017DC9C,stage:sc05_000,TalkerMain,TalkerMain,M,H,PROMOTE,D_80181F54[state](obj): the talker's state table,0
+0x8017DCC0,stage:sc03_114,DrawShadeQuad,DrawShadeQuad,M,H,PROMOTE,a grey-to-black shade quad at the model's matrix (DrawPrimG4MtxDithered),0
+0x8017DCE4,stage:sc03_109,TalkerMain,TalkerMain,M,H,PROMOTE,D_80181F18[state](obj): the talker's state table,0
+0x8017DD28,stage:sc06_006,CastMain,CastMain,M,H,PROMOTE,D_80185F58[state](obj): the cast's state table,0
+0x8017DD88,stage:sc06_018,EventObjInit,EventObjInit,M,H,PROMOTE,"state 1, surface 0, its script, timer 10",0
+0x8017DDBC,stage:sc05_000,ScriptedModelInit,ScriptedModelInit,M,H,PROMOTE,"model flag 0x10, scale 0x4000, counters cleared",0
+0x8017DDE0,stage:sc06_014,LiftAUpdate,LiftAUpdate,M,M,KEEP,lift A's step with its sound once on screen; letter pair,0
+0x8017DDEC,stage:sc03_101,PlayerActionSpawnEffect,PlayerActionSpawnEffect,M,H,PROMOTE,"BumpSub2Copy, effect 0x19 on the owner, a follow-up",0
+0x8017DE58,stage:sc03_103,RoomStart2,RoomStart2,M,M,KEEP,the spawn lists and sequence 2; a number name,0
+0x8017DE74,stage:sc03_109,Talker2Main,Talker2Main,M,M,KEEP,talker 2's state table; a number name,0
+0x8017DEBC,stage:sc03_094,PushBlockPush,PushBlockPush,M,H,PROMOTE,"the push's end: +0xFC = 0, flags5C swapped, SE 0x743",0
+0x8017DECC,stage:sc05_000,ThrownHurtMain,ThrownHurtMain,M,H,PROMOTE,D_80181FD0[state](obj): the thrown hazard's state table,0
+0x8017DEF0,stage:sc03_012,QuakeCameraUpdate,QuakeCameraUpdate,M,H,PROMOTE,"the model's pitch steps by +0xE2, next at 0x400",0
+0x8017DF08,stage:sc06_014,LiftBUpdate,LiftBUpdate,M,M,KEEP,lift B's step; letter pair,0
