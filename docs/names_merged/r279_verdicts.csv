@@ -1459,3 +1459,97 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x8001C558,exe,InitNullModelKind7,InitNullModelKind7,M,H,PROMOTE,"kind 7, no data",0
 0x8001C5B8,exe,InitPresetModelKind8,InitPresetModelKind8,M,H,PROMOTE,a kind-8 preset model; a kind-number name,0
 0x8001C6E4,exe,InitNullModelKind8,InitNullModelKind8,M,H,PROMOTE,"kind 8, no data",0
+0x8001C744,exe,InitModelKind2,InitModelKind2,M,H,PROMOTE,"type 1, kind 2, coord, +0x24 = data; a kind-number name",0
+0x8001C7B0,exe,InitNullModelKind2,InitNullModelKind2,M,H,PROMOTE,"kind 2, no data",0
+0x8001C8C4,exe,InitNullTransModel,InitNullTransModel,M,M,KEEP,"kind 5, no data; ""Trans"" rests on g_ModelDrawFuncs[5] as InitTransModel",0
+0x8001CCA0,exe,InitSpriteKind9,InitSpriteKind9,M,H,PROMOTE,"ResetSprite, kind 9, VRAM x / y, +0x20 = frames",0
+0x8001CDE8,exe,InitSpriteKind7,InitSpriteKind7,M,H,PROMOTE,"ResetSprite, kind 7, +0x20 = data",0
+0x8001CFB8,exe,AllocReservedModel,AllocReservedModel,M,M,KEEP,"AllocModelInRange(0, 4); ""Reserved"" for slots 0-4 is not in the C",0
+0x8001D050,exe,AllocReservedSprite,AllocReservedSprite,M,M,KEEP,"AllocSpriteInRange(0, 4); see AllocReservedModel",0
+0x8001D8C4,exe,TransformSpriteQuad2D,TransformSpriteQuad2D,M,M,KEEP,lines not read in full; M,0
+0x8001DA34,exe,DrawSprite3D,DrawSprite3D,M,M,KEEP,a long body not read in full; M,0
+0x8001EA14,exe,DrawSpriteBillboard,DrawSpriteBillboard,M,M,KEEP,a long body not read in full; M,0
+0x8001F97C,exe,UpdateModelMatrix,UpdateModelMatrix,M,H,PROMOTE,"RotMatrixZYXFast of the angles +0x10 into +0x34, translation from +8.., flag +0x2C bit 0",0
+0x80021284,exe,DrawShape2D,DrawShape2D,M,M,KEEP,a long body not read in full; M,0
+0x800215F4,exe,DrawShape3D,DrawShape3D,M,M,KEEP,a long body not read in full; M,0
+0x80021D38,exe,DrawShapeProjected,DrawShapeProjected,M,M,KEEP,a long body not read in full; M,0
+0x800221A8,exe,DrawShapeModel,DrawShapeModel,M,M,KEEP,a long body not read in full; M,0
+0x800241C0,exe,FormatNumberGlyphs,FormatNumberGlyphs,M,M,KEEP,lines not read in full; M,0
+0x80028694,exe,DebugMoveScreen,DebugMoveScreen,M,M,KEEP,lines not read in full; M,0
+0x8002954C,exe,SetFoundCount,SetFoundCount,M,M,KEEP,"D_80078E84 = a; ""Found"" as GetFoundCount",0
+0x80029A58,exe,HalveSlotMoney,HalveSlotMoney,M,M,KEEP,word 0xE of save slot i >>= 1; that word 0xE is the money rests on SaveStateSlot's layout,0
+0x80029EC0,exe,GetActorExp,GetActorExp,M,M,KEEP,"the s16 at the init record + 0x2E; ""Exp"" rests on GainStat0FromActor reading it",0
+0x8002D4B8,exe,IsCdFadeOut,IsCdFadeOut,M,H,PROMOTE,returns g_CdFadeOut,0
+0x8002D678,exe,PlaySfxHandle,PlaySfxHandle,M,M,KEEP,lines not read in full; M,0
+0x8002D6D8,exe,StopSfxHandle,StopSfxHandle,M,M,KEEP,lines not read in full; M,0
+0x8002F0F4,exe,AllocSoundTimer,AllocSoundTimer,M,H,PROMOTE,"the first free of the 8 sound timers, else 0",0
+0x8002F12C,exe,PlayTimerSfx,PlayTimerSfx,M,H,PROMOTE,PlaySfx of the timer's id; the sound timer callback,0
+0x8002F150,exe,BendSfxDown,BendSfxDown,M,M,KEEP,lines not read in full; M,0
+0x8002F1CC,exe,BendSfxUp,BendSfxUp,M,M,KEEP,lines not read in full; M,0
+0x8002F648,exe,GetStageSfxTableId,GetStageSfxTableId,M,H,PROMOTE,returns g_StageSfxTableId,0
+0x800301C8,exe,LoadBankFromRam,LoadBankFromRam,M,M,KEEP,lines not read in full; M,0
+0x80030CA4,exe,AllocSfxVoice,AllocSfxVoice,M,H,PROMOTE,"the free or lowest-priority SFX voice, keyed off and taken, its index + 1",0
+0x80033324,exe,DetachSfxVoice,DetachSfxVoice,M,M,KEEP,lines not read in full; M,0
+0x800336A8,exe,UpdateScriptSfxVolume,UpdateScriptSfxVolume,M,M,KEEP,lines not read in full; M,0
+0x800342E8,exe,DetachScriptSfxVoice,DetachScriptSfxVoice,M,M,KEEP,lines not read in full; M,0
+0x800347C8,exe,ReleaseScriptSfx,ReleaseScriptSfx,M,M,KEEP,lines not read in full; M,0
+0x80034B3C,exe,PeekCdAudioState,PeekCdAudioState,M,M,KEEP,lines not read in full; M,0
+0x800351E8,exe,SetSpuXferAddr,SetSpuXferAddr,M,H,PROMOTE,"D_80076218 = a, a returned when inside SPU RAM (0x1010-0x7FFFF)",0
+0x80035210,exe,TransferSpu,TransferSpu,M,H,PROMOTE,"SpuSetTransferStartAddr of the running address, then the transfer; the address advances",0
+0x80037028,exe,QueueBankStream,QueueBankStream,M,H,PROMOTE,a bank stream queued (seq + VAB),0
+0x80037EA0,exe,SetEndedBgmVoicesRR,SetEndedBgmVoicesRR,M,M,KEEP,lines not read in full; M,0
+0x80037F3C,exe,FlushBgmVoiceAttrs,FlushBgmVoiceAttrs,M,M,KEEP,lines not read in full; M,0
+0x800388E8,exe,ScaleBySeqVolume,ScaleBySeqVolume,M,H,PROMOTE,b * the player's volume (+0x10) << 2 >> 16,0
+0x80038958,exe,FreeEndedSeqVoices,FreeEndedSeqVoices,M,H,PROMOTE,voices whose notes ended released,0
+0x80038A00,exe,FindReleasedSeqVoice,FindReleasedSeqVoice,M,H,PROMOTE,"the first released voice, else -1",0
+0x800391D4,exe,NoteOffSeqVoices,NoteOffSeqVoices,M,M,KEEP,lines not read in full; M,0
+0x80039F14,exe,SeqSetNrpnLsb,SeqSetNrpnLsb,M,M,KEEP,three bytes of a channel record set from c; the NRPN LSB reading rests on SeqNrpnMsb (exe_H),0
+0x8003A3D8,exe,SwapBytes32,SwapBytes32,M,H,PROMOTE,the four bytes of a word reversed,0
+0x8003A404,exe,SwapBytes16,SwapBytes16,M,H,PROMOTE,the two bytes of a half reversed,0
+0x8002959C,exe,GainBonus,GainBonus,L,L,KEEP,GainStat3(0x32) and D_80078E88 += 1; what the bonus is is not in the C,10
+0x8001B710,exe,PlayProgressSounds,PlayProgressSounds,L,L,KEEP,sounds by vars 0x44 / 0x5C; lines not read in full,6
+0x80029524,exe,IsProgress200To599,IsProgress200To599,L,H,PROMOTE,"200 <= g_Progress < 600; a range name, accurate",5
+0x8002AE60,exe,AllItemsMarked,AllItemsMarked,L,L,KEEP,a count over the items compared with 0x2A; what marks them is not shown,4
+0x80028DE0,exe,GetOptionD,GetOptionD,L,H,PROMOTE,flag 0xD; a flag-number name like the r278 kept ones,3
+0x80028E00,exe,SetOptionD,SetOptionD,L,H,PROMOTE,"SetFlag(0xD, a)",3
+0x80029094,exe,ClearVarBlock60,ClearVarBlock60,L,H,PROMOTE,ZeroFill of g_VarBlock60 (0x60 bytes); ResetGameState,3
+0x8002AB64,exe,IncStartCount,IncStartCount,L,L,KEEP,lines not read in full; L,3
+0x800BA2B8,exe,g_VarBlock60,g_VarBlock60,L,H,PROMOTE,the 0x60 bytes SaveStateSlot / LoadStateSlot copy with the slot (+0x27C),3
+0x8001B23C,exe,LoadExtraSoundFile,LoadExtraSoundFile,L,L,KEEP,"D_800C6D34 = v, LoadExtraSoundFileStep, D_800C6D10; L",2
+0x800290BC,exe,SetFlag7F,SetFlag7F,L,H,PROMOTE,"SetFlag(0x7F, 1)",2
+0x80029254,exe,ClearEndingPending,ClearEndingPending,L,L,KEEP,"D_80075838 = 0; ""Ending"" rests on its readers",2
+0x8002941C,exe,ClearItemValue0,ClearItemValue0,L,H,PROMOTE,the first item value (2 bytes) zeroed,2
+0x8001455C,exe,Init3DNop,Init3DNop,L,H,PROMOTE,empty; Init3DScene's slot,1
+0x8001B26C,exe,LoadExtraSoundFileStep,LoadExtraSoundFileStep,L,L,KEEP,lines not read in full; L,1
+0x800290E0,exe,ClearFlag7F,ClearFlag7F,L,H,PROMOTE,"SetFlag(0x7F, 0)",1
+0x80029104,exe,GetFlag7F,GetFlag7F,L,H,PROMOTE,GetFlag(0x7F); the player update skips the clock on it,1
+0x80029240,exe,SetEndingPending,SetEndingPending,L,L,KEEP,D_80075838 = 1; see ClearEndingPending,1
+0x80029264,exe,GetEndingPending,GetEndingPending,L,L,KEEP,returns D_80075838; see ClearEndingPending,1
+0x8002AC98,exe,AgeItemValues,AgeItemValues,L,L,KEEP,"lines not read in full here (r274's reading: values moved by rand, clamped); L",1
+0x80014554,exe,InitNop,InitNop,L,H,PROMOTE,empty,0
+0x80014564,exe,ZeroRect,ZeroRect,L,H,PROMOTE,"memset of 0x10 bytes (a RECT-sized block, two words of a RECT pair or one 16-byte RECT record)",0
+0x8001ABB4,exe,LoadNop,LoadNop,L,H,PROMOTE,empty,0
+0x8001D16C,exe,AppendModelChain,AppendModelChain,L,H,PROMOTE,"+0x80 = the next link (address | 0x01000000), its link cleared",0
+0x80028E24,exe,GetOptionE,GetOptionE,L,H,PROMOTE,flag 0xE; a flag-number name,0
+0x80028E44,exe,SetOptionE,SetOptionE,L,H,PROMOTE,"SetFlag(0xE, a)",0
+0x80028E68,exe,GetOptionF,GetOptionF,L,H,PROMOTE,flag 0xF,0
+0x80028E88,exe,SetOptionF,SetOptionF,L,H,PROMOTE,"SetFlag(0xF, a)",0
+0x80028EAC,exe,GetOption10,GetOption10,L,H,PROMOTE,flag 0x10,0
+0x80028ECC,exe,SetOption10,SetOption10,L,H,PROMOTE,"SetFlag(0x10, a)",0
+0x80028EF0,exe,GetOption11,GetOption11,L,H,PROMOTE,flag 0x11,0
+0x80028F10,exe,SetOption11,SetOption11,L,H,PROMOTE,"SetFlag(0x11, a)",0
+0x80028F34,exe,GetOption12,GetOption12,L,H,PROMOTE,flag 0x12,0
+0x80028F54,exe,SetOption12,SetOption12,L,H,PROMOTE,"SetFlag(0x12, a)",0
+0x80028F78,exe,GetOption13,GetOption13,L,H,PROMOTE,flag 0x13,0
+0x80028F98,exe,SetOption13,SetOption13,L,H,PROMOTE,"SetFlag(0x13, a)",0
+0x8002957C,exe,GetBonusCount,GetBonusCount,L,L,KEEP,returns D_80078E88; what GainBonus counts is not in the C,0
+0x8002958C,exe,SetBonusCount,SetBonusCount,L,L,KEEP,D_80078E88 = a; see GetBonusCount,0
+0x80029E94,exe,ScaleByActorInit30,ScaleByActorInit30,L,L,KEEP,lines not read in full; L,0
+0x8002AF60,exe,GetCardDirWord,GetCardDirWord,L,H,PROMOTE,returns the first word of g_CardDir,0
+0x8002D7F4,exe,SoundNop,SoundNop,L,H,PROMOTE,empty,0
+0x8002F658,exe,GetSlot3Bank,GetSlot3Bank,L,L,KEEP,"sound slot 3's bank when loaded; lines not all read, L",0
+0x80030470,exe,BankLoadClaimSpu,BankLoadClaimSpu,L,L,KEEP,lines not read in full; L,0
+0x800304C8,exe,BankLoadWaitSpu,BankLoadWaitSpu,L,L,KEEP,lines not read in full; L,0
+0x80030538,exe,BankLoadSendBody,BankLoadSendBody,L,L,KEEP,lines not read in full; L,0
+0x80030634,exe,BankLoadSendBodyNext,BankLoadSendBodyNext,L,L,KEEP,lines not read in full; L,0
+0x80039300,exe,SeqNop,SeqNop,L,H,PROMOTE,empty,0
