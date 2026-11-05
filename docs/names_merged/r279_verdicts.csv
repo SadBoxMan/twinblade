@@ -1973,3 +1973,74 @@ address,scope,old_name,new_name,old_conf,new_conf,verdict,reason,calls
 0x80180DD4,stage:sc06_000,EventIntroCamDrop,EventIntroCamDrop,M,H,PROMOTE,"the camera's height drops, and near its end BumpSub2Copy",0
 0x80180E04,stage:sc03_011,SceneActorsSetScript,SceneActorsSetScript,M,H,PROMOTE,two scene actors set to the same script,0
 0x80180E08,stage:sc03_089,RoomStart2,RoomStart2,M,M,KEEP,room start 2; number name,0
+0x80180E48,stage:sc03_089,RoomStart3,RoomStart3,M,M,KEEP,room start 3; number name,0
+0x80180E58,stage:sc06_000,EventIntroCamBrake,EventIntroCamBrake,M,H,PROMOTE,the camera's drop slows; at the end a timer and BumpSub2Copy,0
+0x80180E74,stage:sc01_084,EncounterEnd,EncounterEnd,M,H,PROMOTE,at its last step EndActionTable2 and the follow-up actor spawned,0
+0x80180EEC,stage:sc01_001,ArrivalMain,ArrivalMain,M,H,PROMOTE,"D_80188E20[state](obj), and from state 2 with the blade on UpdateBladePoints",0
+0x80180FB4,stage:sc03_111,ClockObjMain,ClockObjMain,M,M,KEEP,lines not read in full; M,0
+0x80180FBC,stage:sc03_116,OpenEffectMain,OpenEffectMain,M,H,PROMOTE,D_80186324[state](obj): the opening effect's state table,0
+0x80180FE0,stage:sc03_110,HummingCreatureMain,HummingCreatureMain,M,M,KEEP,lines not read in full; M,0
+0x80180FF8,stage:sc03_001,Villager3Init,Villager3Init,M,H,PROMOTE,"its helper, height limit 0x7FFF, the talk marker",0
+0x8018103C,stage:sc01_077,EnemyVariantStep,EnemyVariantStep,M,M,KEEP,random timers by a case (lines not all read); M,0
+0x80181178,stage:sc03_111,TurntableInit,TurntableInit,M,H,PROMOTE,"SetupActor, its script, state 1, surface 2, its kind 0x1C4 part",0
+0x801812D8,stage:sc03_104,RoomCameraInit0,RoomCameraInit0,M,M,KEEP,camera set-up 0; number name,0
+0x8018139C,stage:sc03_102,AmbientSoundSource,AmbientSoundSource,M,M,KEEP,lines not read in full; M,0
+0x80181440,stage:sc03_104,CameraZoomToggle0,CameraZoomToggle0,M,M,KEEP,"the focus clamped and the camera placed; number name, no toggle in the lines read",0
+0x801814A8,stage:sc05_001,GlowSpriteMain,GlowSpriteMain,M,H,PROMOTE,D_801A8E54[state](obj): the glow sprite's state table,0
+0x801814B0,stage:sc03_116,SpriteFxMain,SpriteFxMain,M,H,PROMOTE,D_80186344[state](obj): the sprite effect's state table,0
+0x801814E8,stage:sc01_084,SpawnerStep,SpawnerStep,M,M,KEEP,lines not read in full; M,0
+0x80181528,stage:sc03_104,CameraZoomToggle1,CameraZoomToggle1,M,M,KEEP,a fixed focus and the camera placed; number name,0
+0x80181538,stage:sc03_089,RoomCameraInit0,RoomCameraInit0,M,M,KEEP,camera set-up 0; number name,0
+0x801815AC,stage:sc03_002,Villager14Walk,Villager14Walk,M,M,KEEP,lines not read in full; M,0
+0x801815D4,stage:sc03_089,RoomCameraInit1,RoomCameraInit1,M,M,KEEP,camera set-up 1; number name,0
+0x8018166C,stage:sc03_089,RoomCameraInit2,RoomCameraInit2,M,M,KEEP,camera set-up 2; number name,0
+0x801816F0,stage:sc03_002,Villager14Init,Villager14Init,M,H,PROMOTE,"two talk markers, one placed at its point",0
+0x80181708,stage:sc03_089,RoomCameraInit3,RoomCameraInit3,M,M,KEEP,camera set-up 3; number name,0
+0x80181760,stage:sc05_018,EventLeaveVillage,EventLeaveVillage,M,H,PROMOTE,"by its phase RequestMapChange to the next map, phase 3",0
+0x801817E0,stage:sc03_089,CameraZoomToggleFixed,CameraZoomToggleFixed,M,M,KEEP,pad bits 0 / 1 and a fixed focus; the name's suffix is not settled,0
+0x8018183C,stage:sc01_001,UpdateLightPillar,UpdateLightPillar,M,M,KEEP,lines not read in full; M,0
+0x8018188C,stage:sc03_089,CameraZoomToggleClamped,CameraZoomToggleClamped,M,M,KEEP,the focus clamped; the name's suffix is not settled,0
+0x801818B0,stage:sc03_090,CameraZoomToggle0,CameraZoomToggle0,M,M,KEEP,the focus clamped; number name,0
+0x80181968,stage:sc04_004,BlockThrowerLift,BlockThrowerLift,M,M,KEEP,lines not read in full; M,0
+0x80181970,stage:sc03_090,CameraZoomToggle1,CameraZoomToggle1,M,M,KEEP,the focus clamped; number name,0
+0x80181984,stage:sc02_005,BossIdle,BossIdle,M,M,KEEP,lines not read in full; M,0
+0x801819B8,stage:sc03_121,NpcStartEvent,NpcStartEvent,M,H,PROMOTE,its timer; at 0xF StartEvent of its script,0
+0x801819F4,stage:sc03_116,SwellingUpdate,SwellingUpdate,M,H,PROMOTE,"D_801864BC[state](obj), then while live its loop sound and hit check",0
+0x80181A68,stage:sc03_089,CameraZoomToggle2,CameraZoomToggle2,M,M,KEEP,pad bits 0 / 1 and a fixed focus; number name,0
+0x80181AA0,stage:sc03_090,CameraZoomToggle2,CameraZoomToggle2,M,M,KEEP,pad bits 0 / 1 and a fixed focus; number name,0
+0x80181AB4,stage:sc06_000,CamPadSteer,CamPadSteer,M,M,KEEP,the focus clamped and two placements; no pad read in the lines seen,0
+0x80181AB8,stage:sc03_107,FollowKind17E,FollowKind17E,M,M,KEEP,"lines not read in full; ""17E"" is the kind number",0
+0x80181B14,stage:sc03_089,CameraZoomToggle3,CameraZoomToggle3,M,M,KEEP,the focus clamped; number name,0
+0x80181B50,stage:sc03_090,CameraZoomToggle3,CameraZoomToggle3,M,M,KEEP,the focus clamped; number name,0
+0x80181C80,stage:sc03_090,CameraZoomToggle4,CameraZoomToggle4,M,M,KEEP,pad bits 0 / 1 and a fixed focus; number name,0
+0x80181D14,stage:sc02_027,BouncerUpdate,BouncerUpdate,M,H,PROMOTE,freed when it falls below or when its timer runs out,0
+0x80181D78,stage:sc03_002,SceneWalkerUpdate,SceneWalkerUpdate,M,M,KEEP,lines not read in full; M,0
+0x80181D9C,stage:sc03_089,SoldierGateInit,SoldierGateInit,M,M,KEEP,lines not read in full; M,0
+0x80181F6C,stage:sc03_116,BarrierMain,BarrierMain,M,H,PROMOTE,D_80186578[state](obj): the barrier's state table,0
+0x80181F78,stage:sc06_000,ScrollSurfaceTexture,ScrollSurfaceTexture,M,M,KEEP,lines not read in full; M,0
+0x80181F9C,stage:sc03_089,SoldierGateWait,SoldierGateWait,M,H,PROMOTE,"once Musashi is near (0x12C), its flag and SE 0x6EB",0
+0x801820A8,stage:sc03_089,GateLeafInit,GateLeafInit,M,H,PROMOTE,"SetupActor, its script, state 1, surface 0, cull box",0
+0x8018210C,stage:sc03_089,GateLeafSlide,GateLeafSlide,M,H,PROMOTE,slides by its step while its counter runs,0
+0x80182150,stage:sc03_089,ShuttlePlatformInit,ShuttlePlatformInit,M,H,PROMOTE,"SetupActor by its variant, its script, state 1, matrix, cull box",0
+0x801822CC,stage:sc03_006,SetPieceInit,SetPieceInit,M,M,KEEP,lines not read in full; M,0
+0x80182348,stage:sc06_000,PlatformHubMain,PlatformHubMain,M,H,PROMOTE,D_8018C548[state](obj): the platform hub's state table,0
+0x80182408,stage:sc04_000,WarpFlashWaitSound,WarpFlashWaitSound,M,H,PROMOTE,"TickTimer: a sound from its table, next state",0
+0x801824B4,stage:sc06_025,RivalEventFlags,RivalEventFlags,M,M,KEEP,lines not read in full; M,0
+0x80182534,stage:sc03_024,CarriedObjectMatch,CarriedObjectMatch,M,M,KEEP,lines not read in full; M,0
+0x80182558,stage:sc02_017,GateWaitHit,GateWaitHit,M,H,PROMOTE,"with flag 0x96: hit data, StartActionTable, timer 0x10, next state",0
+0x801825EC,stage:sc06_025,RivalMsgFlags,RivalMsgFlags,M,M,KEEP,lines not read in full; M,0
+0x80182614,stage:sc06_000,SurfaceDrainStep,SurfaceDrainStep,M,M,KEEP,lines not read in full; M,0
+0x801826C8,stage:sc03_091,CameraZoomToggle0,CameraZoomToggle0,M,M,KEEP,the focus clamped; number name,0
+0x8018270C,stage:sc06_000,SurfaceDrainDone,SurfaceDrainDone,M,M,KEEP,lines not read in full; M,0
+0x80182714,stage:sc02_011,SteeredObjectControl,SteeredObjectControl,M,M,KEEP,lines not read in full; M,0
+0x80182744,stage:sc06_016,ShotFly,ShotFly,M,H,PROMOTE,near Musashi a helper and freed,0
+0x80182788,stage:sc03_091,CameraZoomToggle1,CameraZoomToggle1,M,M,KEEP,the focus clamped; number name,0
+0x801828B8,stage:sc03_091,CameraZoomToggle2,CameraZoomToggle2,M,M,KEEP,pad bits 0 / 1 and a fixed focus; number name,0
+0x80182950,stage:sc06_000,PlatformHubFloat,PlatformHubFloat,M,H,PROMOTE,"D_8018C5F8[state](obj), its height from the surface, matrix, hum volume",0
+0x80182968,stage:sc03_091,CameraZoomToggle3,CameraZoomToggle3,M,M,KEEP,the focus clamped; number name,0
+0x80182A98,stage:sc03_091,CameraZoomToggle4,CameraZoomToggle4,M,M,KEEP,pad bits 0 / 1 and a fixed focus; number name,0
+0x80182E2C,stage:sc03_028,BossPartMain,BossPartMain,M,M,KEEP,lines not read in full; M,0
+0x80182E38,stage:sc06_000,ArmFollowHub,ArmFollowHub,M,M,KEEP,lines not read in full; M,0
+0x80182ED8,stage:sc06_029,WeakPointMove,WeakPointMove,M,M,KEEP,lines not read in full; M,0
+0x80182F58,stage:sc01_001,DebrisMain,DebrisMain,M,H,PROMOTE,D_80188E58[state](obj): the debris' state table,0
+0x80182F68,stage:sc05_001,StartKnockBack,StartKnockBack,M,H,PROMOTE,StopWithGravity and the knock-back's start (lines not all read),0
