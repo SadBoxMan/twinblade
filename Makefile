@@ -5,6 +5,7 @@
 #   make split    - regenerate asm/ and the linker scripts (EXE and overlays)
 #   make check-abil - rebuild and check the 35 ability packages (check-ovlNN: one of them)
 #   make check-stg  - rebuild and check the 139 other stage images (check-sc02_031: one; STG=SC03_005: only those)
+#   make check-blk  - rebuild and check the 34 code blocks behind stage images, MAIN.CD 12 and 9 (check-sc02_009: one)
 #   make          - build the EXE and every overlay, checking each against the original
 #   make progress - count game functions decompiled to C in src/
 
@@ -52,7 +53,9 @@ LD_FLAGS := -nostdlib --no-check-sections -Map $(BUILD)/$(BASENAME).map \
 # The mode overlays (ovl39 on) are the exact code blocks `make overlays` writes to disc/overlays/code/
 # (docs/overlays.md).
 OVERLAYS     := ovl38 stage ovl39 ovl36 ovl37 ovl3a ovl3b
-ovl38_TARGET := disc/overlays/main_01.bin
+# r673: ovl38 is checked against MAIN.CD entry 1's code block as the game loads it (tools/gen_block_cfgs.py --extract),
+# not the sector-padded entry disc/overlays/main_01.bin
+ovl38_TARGET := disc/payload/ovl38.bin
 stage_TARGET := disc/pac4/SC03_001.bin
 ovl39_TARGET := disc/overlays/code/ovl39.bin
 ovl36_TARGET := disc/overlays/code/ovl36.bin
@@ -73,15 +76,27 @@ ABIL := $(patsubst abil/%.yaml,%,$(wildcard abil/*.yaml))
 # and checks only those stages.
 STG_ALL := $(patsubst stg/%.yaml,%,$(wildcard stg/*.yaml))
 override STG := $(if $(STG),$(shell echo $(STG) | tr A-Z a-z),$(STG_ALL))
+# r673: the two raw (not LZSS) stage images are checked against their payload (PAC size - 0x800, rounded up to a word:
+# tools/gen_block_cfgs.py --extract), disc/payload/stg/<NAME>.bin; the others against disc/pac4/<NAME>.bin
+STG_PAYLOAD := sc02_037 sc03_107
+stg_dir = $(if $(filter $(1),$(STG_PAYLOAD)),disc/payload/stg,disc/pac4)
 $(if $(filter-out $(STG_ALL),$(STG)),$(error STG: no stg/<name>.yaml for $(filter-out $(STG_ALL),$(STG))))
 
+# The code blocks loaded behind a stage image, MAIN.CD entry 12 (r442) and 9 (r674; docs/type1_blocks.md): blk/<name>.yaml,
+# written by tools/gen_block_cfgs.py (`make split-blk`; the images: `make blocks`, r673: disc/payload/blk/<name>.bin,
+# exactly the bytes the game loads),
+# asm/blk/<name>/, src/blk/<name>.c, build/blk/<name>/. Symbols carry the block's name; outside ones the host's.
+BLK := $(patsubst blk/%.yaml,%,$(wildcard blk/*.yaml))
+
 # asm/nonmatchings/ is pulled into the C files by INCLUDE_ASM, not assembled alone
-NOT_OVL := $(foreach o,$(OVERLAYS),-not -path 'asm/$(o)/*' -not -path 'src/$(o)/*') -not -path 'asm/abil/*' -not -path 'src/abil/*' -not -path 'asm/stg/*' -not -path 'src/stg/*'
+NOT_OVL := $(foreach o,$(OVERLAYS),-not -path 'asm/$(o)/*' -not -path 'src/$(o)/*') -not -path 'asm/abil/*' -not -path 'src/abil/*' -not -path 'asm/stg/*' -not -path 'src/stg/*' \
+           -not -path 'asm/blk/*' -not -path 'src/blk/*'
 S_FILES := $(shell find asm -name '*.s' -not -path 'asm/nonmatchings/*' $(NOT_OVL) 2>/dev/null)
 C_FILES := $(shell find src -name '*.c' $(NOT_OVL) 2>/dev/null)
 O_FILES := $(patsubst %.s,$(BUILD)/%.o,$(S_FILES)) $(patsubst %.c,$(BUILD)/%.o,$(C_FILES))
 
-.PHONY: all split split-abil split-stg stg-cfgs stage-progress check check-main check-abil check-stg clean progress overlays \
+.PHONY: all split split-abil split-stg stg-cfgs split-blk blocks stage-progress check check-main check-abil check-stg check-blk \
+        clean progress overlays \
         regress regress-targets coverage
 
 all: check
@@ -94,6 +109,7 @@ split:
 	$(foreach o,$(OVERLAYS),$(SPLAT) $(o).yaml &&) true
 	$(PYTHON) tools/gen_ability_ovls.py --split
 	$(PYTHON) tools/gen_stage_cfgs.py --resplit
+	$(PYTHON) tools/gen_block_cfgs.py --resplit
 
 split-abil:
 	$(PYTHON) tools/gen_ability_ovls.py --split
@@ -106,7 +122,16 @@ split-stg:
 stg-cfgs:
 	$(PYTHON) tools/gen_stage_cfgs.py --split --all
 
-check: check-main $(addprefix check-,$(OVERLAYS)) check-abil check-stg
+# blocks: extract the payload targets (r442, r673): the 36 block images to disc/payload/blk, and disc/payload/stg/SC02_037.bin,
+# SC03_107.bin, disc/payload/ovl38.bin; split-blk: regenerate their configs and symbol files (needs
+# the hosts built: their maps name the outside symbols)
+blocks:
+	$(PYTHON) tools/gen_block_cfgs.py --extract
+
+split-blk:
+	$(PYTHON) tools/gen_block_cfgs.py --split
+
+check: check-main $(addprefix check-,$(OVERLAYS)) check-abil check-stg check-blk
 
 # make regress: every check above in one PASS/FAIL table with timings, exit 1 on any failure (tools/regress.py,
 # docs/test_infrastructure.md). Quick mode: `make regress R="abil"` or `R="sc03_005 sc02_031"` (areas or image names;
@@ -125,11 +150,14 @@ regress-targets:
 	@echo "main main $(EXE) $(TARGET)"
 	@$(foreach o,$(OVERLAYS),echo "ovl $(o) $(BUILD)/$(o)/$(o).bin $($(o)_TARGET)";) true
 	@for n in $(ABIL); do echo "abil $$n $(BUILD)/abil/$$n/$$n.bin disc/overlays/code/$$n.bin"; done
-	@for n in $(STG); do echo "stg $$n $(BUILD)/stg/$$n/$$n.bin disc/pac4/$$n.bin"; done
+	@$(foreach n,$(STG),echo "stg $(n) $(BUILD)/stg/$(n)/$(n).bin $(call stg_dir,$(n))/$(n).bin";) true
+	@for n in $(BLK); do echo "blk $$n $(BUILD)/blk/$$n/$$n.bin disc/payload/blk/$$n.bin"; done
 
 check-abil: $(addprefix check-,$(ABIL))
 
 check-stg: $(addprefix check-,$(STG))
+
+check-blk: $(addprefix check-,$(BLK))
 
 check-main: $(EXE)
 	@echo "$$(sha1sum < $(TARGET) | cut -d' ' -f1)  $(EXE)" | sha1sum -c -
@@ -147,14 +175,15 @@ $(BUILD)/%.o: %.s
 # cpp -> cc1 -> maspsx -> jtbl_relabel -> as, keeping the intermediates for inspection. jtbl_relabel points a
 # matched function's jump tables at the original ones in the split's data (tools/jtbl_relabel.py says why); it
 # reads the tables of the file's own segment: asm/<overlay> for src/<overlay>/, asm for the EXE.
-# (r209: src/stg/<stage>_o0.c and _post.c read their stage's asm/stg/<stage>)
-JTBL_ASM = $(firstword $(foreach o,$(OVERLAYS),$(if $(filter $(o)/%,$*),asm/$(o))) $(if $(filter abil/% stg/%,$*),asm/$(patsubst %_o0,%,$(patsubst %_post,%,$*))) asm)
+# (r209: src/stg/<stage>_o0.c and _post.c read their stage's asm/stg/<stage>; r379: a package's own abil/ symbol file
+# is passed too, so a named package function with a jump table finds its address)
+JTBL_ASM = $(firstword $(foreach o,$(OVERLAYS),$(if $(filter $(o)/%,$*),asm/$(o))) $(if $(filter abil/% stg/% blk/%,$*),asm/$(patsubst %_o0,%,$(patsubst %_post,%,$*))) asm)
 $(BUILD)/src/%.o: src/%.c tools/jtbl_relabel.py $(shell find include -type f 2>/dev/null)
 	@mkdir -p $(dir $@)
 	$(CPP) $(CPP_FLAGS) $< > $(BUILD)/src/$*.i
 	$(CC1) $(CC1_FLAGS) $(BUILD)/src/$*.i -o $(BUILD)/src/$*.cc1.s
 	$(MASPSX) $(BUILD)/src/$*.cc1.s > $(BUILD)/src/$*.maspsx.s
-	$(PYTHON) tools/jtbl_relabel.py $(JTBL_ASM) $(BUILD)/src/$*.maspsx.s $(BUILD)/src/$*.s $(wildcard symbol_addrs*.txt)
+	$(PYTHON) tools/jtbl_relabel.py $(JTBL_ASM) $(BUILD)/src/$*.maspsx.s $(BUILD)/src/$*.s $(wildcard symbol_addrs*.txt) $(wildcard abil/symbol_addrs_$(notdir $*).txt) $(if $(filter blk/%,$*),$(wildcard blk/symbol_addrs_$(notdir $*).txt))
 	$(AS) $(AS_FLAGS) -o $@ $(BUILD)/src/$*.s
 
 # Raw binary pieces of a split (splat `bin` segments, written to assets/): linked as .data
@@ -221,9 +250,34 @@ $(BUILD)/stg/$(1)/$(1).bin: $(BUILD)/stg/$(1)/$(1).elf
 	$(OBJCOPY) -O binary $$< $$@
 
 check-$(1): $(BUILD)/stg/$(1)/$(1).bin
-	@echo "$$$$(sha1sum < disc/pac4/$$(shell echo $(1) | tr a-z A-Z).bin | cut -d' ' -f1)  $$<" | sha1sum -c -
+	@echo "$$$$(sha1sum < $(call stg_dir,$(1))/$$(shell echo $(1) | tr a-z A-Z).bin | cut -d' ' -f1)  $$<" | sha1sum -c -
 endef
 $(foreach o,$(STG),$(eval $(call STG_RULES,$(o))))
+
+# r442: a block links like a split stage (EXE symbols by name; its host's and the engine's through its symbol file)
+define BLK_RULES
+$(1)_S := $$(wildcard asm/blk/$(1)/data/*.s)
+$(1)_B := $$(patsubst assets/%.bin,$(BUILD)/assets/%.o,$$(wildcard assets/blk/$(1)_*.bin))
+$(1)_O := $$(patsubst %.s,$(BUILD)/%.o,$$($(1)_S)) $(BUILD)/src/blk/$(1).o $$($(1)_B)
+
+# the C file pulls its asm in with INCLUDE_ASM: a re-split that renames a symbol there must rebuild the object (r442: a
+# stale object kept an old outside name and the link failed)
+$(BUILD)/src/blk/$(1).o: $$(wildcard asm/blk/$(1)/nonmatchings/$(1)/*.s)
+
+$(BUILD)/blk/$(1)/$(1).elf: $$($(1)_O) $(BUILD)/blk/$(1)/$(1).ld $(EXE_SYMS)
+	$(LD) -nostdlib --no-check-sections -Map $(BUILD)/blk/$(1)/$(1).map \
+	    -T $(BUILD)/blk/$(1)/$(1).ld \
+	    -T $(BUILD)/blk/$(1)/undefined_syms_auto.txt \
+	    -T $(BUILD)/blk/$(1)/undefined_funcs_auto.txt \
+	    -T $(EXE_SYMS) -o $$@
+
+$(BUILD)/blk/$(1)/$(1).bin: $(BUILD)/blk/$(1)/$(1).elf
+	$(OBJCOPY) -O binary $$< $$@
+
+check-$(1): $(BUILD)/blk/$(1)/$(1).bin
+	@echo "$$$$(sha1sum < disc/payload/blk/$(1).bin | cut -d' ' -f1)  $$<" | sha1sum -c -
+endef
+$(foreach o,$(BLK),$(eval $(call BLK_RULES,$(o))))
 
 # Game functions in src/ that are real C rather than INCLUDE_ASM, per unit, with splat's empty stubs counted apart
 # (r142: they used to count as decompiled). Reads the sources only; tools/coverage.py --progress.
@@ -244,3 +298,4 @@ clean:
 	rm -f $(foreach o,$(OVERLAYS),$(BUILD)/$(o)/$(o).elf $(BUILD)/$(o)/$(o).bin $(BUILD)/$(o)/$(o).map)
 	rm -f $(foreach o,$(ABIL),$(BUILD)/abil/$(o)/$(o).elf $(BUILD)/abil/$(o)/$(o).bin $(BUILD)/abil/$(o)/$(o).map)
 	rm -f $(foreach o,$(STG),$(BUILD)/stg/$(o)/$(o).elf $(BUILD)/stg/$(o)/$(o).bin $(BUILD)/stg/$(o)/$(o).map)
+	rm -f $(foreach o,$(BLK),$(BUILD)/blk/$(o)/$(o).elf $(BUILD)/blk/$(o)/$(o).bin $(BUILD)/blk/$(o)/$(o).map)

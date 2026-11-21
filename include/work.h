@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
     /* 0x0000 */ PrimPool pool[2];
-    /* 0x0018 */ MATRIX wsm;         /* the world-to-screen matrix, copied each frame once the view is set (stage func_80129CF8) */
+    /* 0x0018 */ MATRIX wsm;         /* the world-to-screen matrix, copied each frame once the view is set (stage UpdateCamera) */
     /* 0x0038 */ DRAWENV draw[2];
     /* 0x00F0 */ u8 padF0[0x5C];
     /* 0x014C */ DISPENV disp[2];
@@ -49,10 +49,10 @@ typedef struct {
     /* 0xA3D2 */ u16 frame;        /* double-buffer index (0/1) */
     /* 0xA3D4 */ u16 exitLoop;     /* nonzero leaves the main frame loop */
     /* 0xA3D6 */ u8 padA3D6[2];
-    /* 0xA3D8 */ s16 mapId;        /* the stage map being loaded (func_801457A4 finds its room record) */
-    /* 0xA3DA */ s16 mapGroup;      /* the map id's group (id & 0xF000); with unkA3DC, how it was entered: 0x1000/0x1000 places Musashi from D_800AE6A8 */
+    /* 0xA3D8 */ s16 mapId;        /* the stage map being loaded (GetRoomRecord finds its room record) */
+    /* 0xA3DA */ s16 mapGroup;      /* the map id's group (id & 0xF000); with unkA3DC, how it was entered: 0x1000/0x1000 places Musashi from g_EntryPoint */
     /* 0xA3DC */ s16 unkA3DC;
-    /* 0xA3DE */ s16 unkA3DE;      /* cleared by the debug menu's entry (ovl37 func_800CEF00) */
+    /* 0xA3DE */ s16 unkA3DE;      /* cleared by the debug menu's entry (ovl37 DebugMenuInit) */
     /* 0xA3E0 */ u8 mapLive;        /* cleared by the reset mode handler ModeReset */
     /* 0xA3E1 */ u8 unkA3E1;
     /* 0xA3E2 */ u8 padA3E2;

@@ -122,7 +122,7 @@ def _addr_of(name):
         return int(m[1], 16)
     if _ADDRS is None:
         _ADDRS = {}
-        for d in ('', 'stg', 'abil'):
+        for d in ('', 'stg', 'abil', 'blk'):     # r442: blk/ (the code blocks; their outside names are their hosts')
             p = os.path.join(ROOT, d)
             for f in os.listdir(p) if os.path.isdir(p) else []:
                 if (f.startswith('symbol_addrs') or f.startswith('undefined_syms')) and f.endswith('.txt'):
@@ -157,8 +157,8 @@ def link_symbols(func):
     else:
         return None
     rel = os.path.relpath(dirpath, os.path.join(ROOT, 'asm')).replace(os.sep, '/').split('/')
-    if rel[0] == 'stg':
-        maps = [f'build/stg/{rel[1]}/{rel[1]}.map']
+    if rel[0] in ('stg', 'blk'):     # r442: a code block's map is build/blk/<name>/<name>.map
+        maps = [f'build/{rel[0]}/{rel[1]}/{rel[1]}.map']
     elif rel[0] == 'nonmatchings':
         maps = glob.glob(os.path.join(ROOT, 'build', '*.map'))
     else:

@@ -14,6 +14,11 @@ desktop.ini
 
 # Disc image (copyrighted game data, never commit)
 disc/
+disc_jp/
+disc_millennium/
+disc_proto/
+disc_opm16/
+disc_sep98/
 
 # Build output
 build/

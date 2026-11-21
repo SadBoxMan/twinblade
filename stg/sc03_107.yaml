@@ -2,10 +2,10 @@
 # Loaded to 0x80128158 like every stage: the engine is matched once in stage.yaml (the village), here a bin piece;
 # symbols carry the stage (func_sc03_107_8017BEA4), the engine's functions keep their plain names.
 name: Stage image SC03_107
-sha1: 288eef24400db594994a9929f569deaf370b7c41
+sha1: 702d5ad36510208176c646c838cfcbd03a167e8d
 options:
   basename: sc03_107
-  target_path: disc/pac4/SC03_107.bin
+  target_path: disc/payload/stg/SC03_107.bin
   elf_path: build/stg/sc03_107/sc03_107.elf
   base_path: ..
   platform: psx
@@ -59,5 +59,4 @@ segments:
       - {start: 0x0, type: bin, name: sc03_107_engine, linker_section_order: .rodata}  # the shared engine, matched in src/stage (placed first: a .data piece would follow the .text)
       - [0x53D44, c, sc03_107]     # the stage's own code, 0x8017BE9C-0x8018245C
       - [0x5A304, data, sc03_107_data]
-      - [0x743E4, bin, sc03_107_tail]  # the image length is not a multiple of 4
-  - [0x743E7]
+  - [0x73BE8]

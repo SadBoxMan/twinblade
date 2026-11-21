@@ -1,16 +1,16 @@
 // Package 0x21 (MAIN.CD entry 27, abil/ovl21.yaml): ability 24, Sublime
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Sublime_Update = 0x800CAE44; // type:func
+Sublime_MusashiUpdate = 0x800CAF90; // type:func
+Sublime_StateLieDown = 0x800CB06C; // type:func
+Sublime_StateWait = 0x800CB1A0; // type:func
+Sublime_SpiritUpdate = 0x800CB270; // type:func
+Sublime_SpiritInit = 0x800CB2CC; // type:func
+Sublime_ProjectQuad = 0x800CBA44; // type:func
+Sublime_ClampToMap = 0x800CBCB4; // type:func
+Sublime_MusashiStates = 0x800CC140;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80012F74 = 0x80012F74; // type:func
-func_800134FC = 0x800134FC; // type:func
-func_80015954 = 0x80015954; // type:func
-func_80015978 = 0x80015978; // type:func
-func_8001599C = 0x8001599C; // type:func
-func_800178EC = 0x800178EC; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001C2C4 = 0x8001C2C4; // type:func
 func_8001CD04 = 0x8001CD04; // type:func
-func_800233CC = 0x800233CC; // type:func
 D_80078EC1 = 0x80078EC1;
 D_80078EC8 = 0x80078EC8;
 D_800B9A08 = 0x800B9A08;

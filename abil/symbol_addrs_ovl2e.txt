@@ -1,9 +1,11 @@
 // Package 0x2E (MAIN.CD entry 40, abil/ovl2e.yaml): ability 29, Grenade
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Grenade_Update = 0x800CAE44; // type:func
+Grenade_ObjUpdate = 0x800CAFC4; // type:func
+Grenade_ObjFly = 0x800CB114; // type:func
+Grenade_ObjExplode = 0x800CB304; // type:func
+Grenade_FlameUpdate = 0x800CB488; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80015978 = 0x80015978; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001C214 = 0x8001C214; // type:func
-func_8001CC3C = 0x8001CC3C; // type:func
 D_80078EC1 = 0x80078EC1;
 D_800D57F4 = 0x800D57F4;
 D_801202A0 = 0x801202A0;

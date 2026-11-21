@@ -1,0 +1,12 @@
+// Mode overlay ovl3b (ovl3b.yaml): its own names (docs/symbol_scheme.md B1; read only by ovl3b.yaml, after symbol_addrs.txt)
+// ---- r379 naming batch (ovl; docs/names_merged/r379_plan.csv)
+TrialEndMain = 0x800CEDFC; // type:func
+TrialEndInit = 0x800CEE44; // type:func
+TrialEndFadeIn = 0x800CEE8C; // type:func
+TrialEndHold = 0x800CEEC0; // type:func
+TrialEndFadeOut = 0x800CEF1C; // type:func
+TrialEndDraw = 0x800CEF50; // type:func
+g_TrialEndSteps = 0x800CF0FC;
+g_TrialEndSprtLeft = 0x800CF10C;
+g_TrialEndSprtRight = 0x800CF124;
+g_TrialEndTimer = 0x800CF13C;

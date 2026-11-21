@@ -1,14 +1,19 @@
 // Package 0x25 (MAIN.CD entry 31, abil/ovl25.yaml): ability 26, Map
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Map_BuildPalette = 0x800CAE74; // type:func
+Map_Update = 0x800CAF58; // type:func
+Map_StepOpen = 0x800CB0B0; // type:func
+Map_StepShow = 0x800CB1CC; // type:func
+Map_StepClose = 0x800CB288; // type:func
+Map_Cleanup = 0x800CB3B4; // type:func
+Map_BlinkCurrentArea = 0x800CB428; // type:func
+Map_PulseColour = 0x800CB5C8; // type:func
+Map_DrawLayer = 0x800CB6A0; // type:func
+Map_DrawBacking = 0x800CB964; // type:func
+Map_TrailUpdate = 0x800CBCD4; // type:func
+Map_ClampToBox = 0x800CBED8; // type:func
+Map_TrailHistory = 0x800CC13C;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80012ABC = 0x80012ABC; // type:func
-func_80013B64 = 0x80013B64; // type:func
-func_80016ED4 = 0x80016ED4; // type:func
-func_80017714 = 0x80017714; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001CB00 = 0x8001CB00; // type:func
-func_80029178 = 0x80029178; // type:func
-func_80029204 = 0x80029204; // type:func
 D_80078EC1 = 0x80078EC1;
 D_8011F9D0 = 0x8011F9D0;
 D_801270C0 = 0x801270C0;

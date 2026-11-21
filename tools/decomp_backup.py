@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Hourly decomp backup to the external drive (no assets).
 
-Writes F:/Claude/Project Twinblade/decomp_backups/<date>_<time>.zip with the decomp sources (src, include, asm, the splat
+Writes E:/Claude/Project Twinblade/decomp_backups/ (r897, 19 Nov: moved from F:)<date>_<time>.zip with the decomp sources (src, include, asm, the splat
 configs, symbol and linker files, Makefile, tools without the downloaded toolchains) and the scratch templates in build/work (top level only: its subfolders are the bulk sweep's per-stage drafts), plus a git bundle of the whole
 repository history (decomp_backups/repo.bundle, rewritten each time: `git clone repo.bundle` restores every commit).
 Keeps the last 48 zips. Prints one line.
@@ -24,7 +24,7 @@ import time
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEST = sys.argv[1] if len(sys.argv) > 1 else r'F:\Claude\Project Twinblade\decomp_backups'
+DEST = sys.argv[1] if len(sys.argv) > 1 else r'E:\Claude\Project Twinblade\decomp_backups'   # r897: was F:
 DIRS = ['src', 'include', 'asm', 'tools', 'build/work']
 SKIP = ('tools/toolchain', 'tools/bin', 'tools/psyq_sigs', 'tools/compilers', 'tools/fluidsynth', 'tools/m2c_download',
         'tools/__pycache__',   # downloaded binaries: re-fetchable, not our work

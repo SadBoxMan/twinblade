@@ -2,9 +2,9 @@
 #include "abil.h"
 
 extern s32 D_ovl1e_800CAF34;
-extern void func_800183E0();
+extern void QueueImage();
 void func_ovl1e_800CAE0C(void) {
-    func_800183E0(&D_ovl1e_800CAF34);
+    QueueImage(&D_ovl1e_800CAF34);
 }
 
 extern AbilStep D_ovl1e_800CAF08[];

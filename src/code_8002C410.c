@@ -1,6 +1,6 @@
 #include "common.h"
 
-void func_8002C410(void) {
+void ForceLibraryLink(void) {
     ClearImage(0, 0, 0, 0);
     DrawSync(0);
     LoadImage(0, 0);

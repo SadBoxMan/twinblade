@@ -3,7 +3,7 @@ put_func.py (make check-stage); a failing group is halved until the culprits are
 declarations clash with another draft's (or whose signature cannot follow the file's prototype) wait for the next
 round: m2c_stage.py then picks up the declarations placed meanwhile. Run from PowerShell.
 usage: place_stage.py <dir>     ($env:TWINBLADE_STG = "sc02_031": a split stage, src/stg/sc02_031.c and
-                                 check-sc02_031, r143)
+                                 check-sc02_031, r143; r442: a code block too, "sc02_009": src/blk/sc02_009.c)
 r142 (22 Oct): the drafts' #include lines go in too (GTE drafts had been deferred as "build differs" without gte.h),
 declarations are compared without comments and skipped when the file already declares their names (no duplicate
 typedef), and a draft's static helper the file lacks is inserted with the declarations.
@@ -151,6 +151,9 @@ def bindiff(limit=8):
     built, ref = (f'build/stg/{STG}/{STG}.bin', f'disc/pac4/{STG.upper()}.bin') if STG else \
         ('build/stage/stage.bin', 'disc/pac4/SC03_001.bin')
     base = 0x80128158 if STG else 0x80127000
+    if STG and U.area(STG) == 'blk':     # r442: a code block (blk/, disc/payload/blk/<name>.bin at its load address)
+        ref, base, _ = U.image(STG)
+        built = f'build/blk/{STG}/{STG}.bin'
     try:
         a, b = open(built, 'rb').read(), open(ref, 'rb').read()
     except OSError:

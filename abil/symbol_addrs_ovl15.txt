@@ -1,16 +1,21 @@
 // Package 0x15 (MAIN.CD entry 15, abil/ovl15.yaml): ability 8, Gunshot
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Gunshot_Step2Draw = 0x800CAF0C; // type:func
+Gunshot_Step3Fire = 0x800CAF9C; // type:func
+Gunshot_Step4Holster = 0x800CB140; // type:func
+Gunshot_BulletUpdate = 0x800CB1C0; // type:func
+Gunshot_BulletInit = 0x800CB21C; // type:func
+Gunshot_BulletFly = 0x800CB2E0; // type:func
+Gunshot_FlashUpdate = 0x800CB494; // type:func
+Gunshot_FlashInit = 0x800CB4F0; // type:func
+Gunshot_DrawFlashFan = 0x800CB6FC; // type:func
+Gunshot_GlowUpdate = 0x800CB830; // type:func
+Gunshot_GlowInit = 0x800CB88C; // type:func
+Gunshot_DrawGlowFan = 0x800CB988; // type:func
+Gunshot_HolsterAnim = 0x800CBAE0;
+Gunshot_FireAnim = 0x800CBB00;
+Gunshot_StepTable = 0x800CBB24;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800123F0 = 0x800123F0; // type:func
-func_80012558 = 0x80012558; // type:func
-func_800126C4 = 0x800126C4; // type:func
-func_80012ABC = 0x80012ABC; // type:func
-func_80013E94 = 0x80013E94; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80017758 = 0x80017758; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_80017E68 = 0x80017E68; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001C2C4 = 0x8001C2C4; // type:func
 func_8001C810 = 0x8001C810; // type:func
 D_80062BD0 = 0x80062BD0;
 D_800636C8 = 0x800636C8;

@@ -1,7 +1,13 @@
 // Package 0x29 (MAIN.CD entry 35, abil/ovl29.yaml): ability 10, Hurl
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Hurl_BeginThrow = 0x800CAF14; // type:func
+Hurl_ThrowUpdate = 0x800CAF48; // type:func
+Hurl_ThrowStart = 0x800CAFEC; // type:func
+Hurl_ThrowStep = 0x800CB080; // type:func
+Hurl_HoldUpdate = 0x800CB13C; // type:func
+Hurl_Release = 0x800CB1F8; // type:func
+Hurl_LiftPath = 0x800CB290;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80015978 = 0x80015978; // type:func
-func_800183E0 = 0x800183E0; // type:func
 D_80078EC8 = 0x80078EC8;
 D_801151D4 = 0x801151D4;
 func_80146CA0 = 0x80146CA0; // type:func

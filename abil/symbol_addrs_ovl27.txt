@@ -1,15 +1,24 @@
 // Package 0x27 (MAIN.CD entry 33, abil/ovl27.yaml): ability 11, Fence
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Fence_QueueImages = 0x800CAE0C; // type:func
+Fence_Update = 0x800CAE44; // type:func
+Fence_StepWait = 0x800CAE88; // type:func
+Fence_StepStart = 0x800CAED0; // type:func
+Fence_StepThrust = 0x800CAF24; // type:func
+Fence_ProjUpdate = 0x800CAFE8; // type:func
+Fence_ProjInit = 0x800CB058; // type:func
+Fence_ProjFly = 0x800CB190; // type:func
+Fence_ProjFade = 0x800CB2C8; // type:func
+Fence_ProjHitAt = 0x800CB3D8; // type:func
+Fence_ProjHitTest = 0x800CB4EC; // type:func
+Fence_GlowUpdate = 0x800CB580; // type:func
+Fence_GlowInit = 0x800CB5DC; // type:func
+Fence_GlowFollow = 0x800CB76C; // type:func
+Fence_StepTable = 0x800CB8A4;
+Fence_ProjCount = 0x800CB984;
+Fence_ProjMatrices = 0x800CB988;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80012ABC = 0x80012ABC; // type:func
-func_8001382C = 0x8001382C; // type:func
-func_800139C8 = 0x800139C8; // type:func
-func_80013E94 = 0x80013E94; // type:func
-func_80015954 = 0x80015954; // type:func
-func_80015978 = 0x80015978; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001CB6C = 0x8001CB6C; // type:func
 func_8001CD50 = 0x8001CD50; // type:func
-func_800233CC = 0x800233CC; // type:func
 D_80078EC1 = 0x80078EC1;
 D_80114EB0 = 0x80114EB0;
 D_80126B18 = 0x80126B18;

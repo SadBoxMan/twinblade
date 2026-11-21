@@ -32,6 +32,7 @@ options:
   symbol_addrs_path:
     - symbol_addrs.txt
     - symbol_addrs_psyq.txt
+    - symbol_addrs_ovl36.txt
   reloc_addrs_path:
     - reloc_addrs.txt
 

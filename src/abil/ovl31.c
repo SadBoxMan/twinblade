@@ -39,7 +39,7 @@ extern void func_80147460();
 extern void func_80147AD4();
 extern void func_801473EC();
 extern s32 func_80161450();
-extern s32 func_ovl31_800CCE24();
+extern s32 ScrollEarth_SlamQuake();
 extern void func_80146E90();
 
 void func_ovl31_800CCB20(s32 arg0) {
@@ -52,12 +52,12 @@ void func_ovl31_800CCB20(s32 arg0) {
     func_ovl31_800CCEA0(arg0);
 }
 
-extern AbilStep D_ovl31_800CD6DC[];
+extern AbilStep ScrollEarth_SlamStepTable[];
 
 void func_ovl31_800CCB8C(u8 *arg0) {
     s32 i = AF(arg0, u16, 2) - 2;
 
-    D_ovl31_800CD6DC[i]();
+    ScrollEarth_SlamStepTable[i]();
 }
 
 void func_ovl31_800CCBCC(s32 arg0) {
@@ -104,7 +104,7 @@ void func_ovl31_800CCD04(s32 arg0) {
     }
     temp_v0 = func_80161450(arg0);
     if (temp_v0 & 5) {
-        func_ovl31_800CCE24(arg0);
+        ScrollEarth_SlamQuake(arg0);
         func_80146E90(arg0, 0x10);
         func_80146CA0(arg0);
     }
@@ -124,7 +124,7 @@ void func_ovl31_800CCDC4(u8 *arg0) {
     func_80161208(arg0);
 }
 
-s32 func_ovl31_800CCE24(s32 arg0) {
+s32 ScrollEarth_SlamQuake(s32 arg0) {
     func_8014B5C4(arg0, 2, 0);
     func_8013C9C4((s32) &D_800D3414);
     func_801466F0(5, arg0, 0, 0, /* extra? */ 0, /* extra? */ 0, /* extra? */ 0, /* extra? */ 1);
@@ -136,10 +136,10 @@ void func_ovl31_800CCEA0(u8 *arg0) {
     AF(arg0, s32, 0x234) = 0x96;
 }
 
-extern void func_80013F3C();
-extern void func_800126C4();
-extern void func_800123F0();
-extern void func_80012558();
+extern void SetIdentityRot();
+extern void RotateMatrixX();
+extern void RotateMatrixZ();
+extern void RotateMatrixY();
 extern s16 D_800B9A08;
 
 s32 func_ovl31_800CCEAC(u8 *arg0) {
@@ -155,16 +155,16 @@ s32 func_ovl31_800CCEAC(u8 *arg0) {
     return 0;
 }
 
-void func_ovl31_800CCF14(u8 *a) {
+void ScrollEarth_ShockwaveUpdate(u8 *a) {
     D_ovl31_800CD6EC[AF(a, u16, 2)](a);
 }
 
-extern s32 func_800233CC();
+extern s32 SetShapeCircle();
 
 extern u8 D_801202A0[];
 extern s32 func_8014C308();
 extern s32 func_8014C278();
-extern void func_80015978();
+extern void PosToSVec();
 extern void func_8014C3A4();
 
 extern u8 D_ovl31_800CD704;
@@ -207,7 +207,7 @@ void func_ovl31_800CCF50(u8 *arg0) {
     func_ovl31_800CD1D4(arg0);
 }
 
-extern s32 func_80012FC8();
+extern s32 EaseValueFracStep();
 extern void func_ovl31_800CD31C();
 
 void func_ovl31_800CD054(u8 *arg0) {
@@ -231,7 +231,7 @@ void func_ovl31_800CD054(u8 *arg0) {
         }
         func_80147324(0x47E);
     }
-    v = AF(m, s16, 0x1A) + func_80012FC8(AF(m, s16, 0x1A), 0x5000, 0xA, 1);
+    v = AF(m, s16, 0x1A) + EaseValueFracStep(AF(m, s16, 0x1A), 0x5000, 0xA, 1);
     AF(m, s16, 0x1A) = v;
     AF(m, s16, 0x18) = v;
     t = AF(arg0, u16, 0x60) + 0x20;
@@ -260,9 +260,9 @@ void func_ovl31_800CD1D4(void) {
 
 void func_ovl31_800CD1F4(u8 *arg0, u8 *arg1) {
     if (AF(arg0, s32, 0x50) == 0) {
-        func_800233CC(arg1, 0x40);
+        SetShapeCircle(arg1, 0x40);
     } else {
-        func_800233CC(arg1, 0x30);
+        SetShapeCircle(arg1, 0x30);
     }
     AF(arg1, u8, 0) = 0;
     AF(arg1, u8, 1) = 0;
@@ -290,11 +290,11 @@ void func_ovl31_800CD27C(u8 *arg0) {
     void *temp_s0;
 
     temp_s0 = AF(arg0, void *, 0x20);
-    func_80013F3C(&sp10);
-    func_800126C4(&sp10, AF(temp_s0, s16, 0x10));
-    func_800123F0(&sp10, AF(temp_s0, s16, 0x14));
-    func_80012558(&sp10, AF(temp_s0, s16, 0x12));
-    func_800126C4(&sp10, 0x400);
+    SetIdentityRot(&sp10);
+    RotateMatrixX(&sp10, AF(temp_s0, s16, 0x10));
+    RotateMatrixZ(&sp10, AF(temp_s0, s16, 0x14));
+    RotateMatrixY(&sp10, AF(temp_s0, s16, 0x12));
+    RotateMatrixX(&sp10, 0x400);
     *AF(temp_s0, AMtx *, 0x34) = sp10;
 }
 
@@ -304,14 +304,14 @@ void func_ovl31_800CD31C(u8 *arg0) {
 
     for (p = D_801202A0; p < D_801202A0 + 0x6480; p += 0x10C) {
         if (func_8014C308(arg0, p, 0x22, 0) != 0 && func_8014C278(arg0, p, 0x80) != 0) {
-            func_80015978(p + 4, &v);
+            PosToSVec(p + 4, &v);
             v.pad = 0;
             func_8014C3A4(arg0, p, 0x22, &v);
         }
     }
 }
 
-void func_ovl31_800CD3C8(u8 *a) {
+void ScrollEarth_ShockwaveRippleUpdate(u8 *a) {
     D_ovl31_800CD6F8[AF(a, u16, 2)](a);
 }
 
@@ -364,7 +364,7 @@ void func_ovl31_800CD57C(u8 *arg0) {
 
     temp_s0 = AF(arg0, void *, 0x20);
     func_ovl31_800CD6D4(arg0, &D_ovl31_800CD764[AF(arg0, s32, 0x50) << 6]);
-    sum = AF(temp_s0, u16, 0x1A) + func_80012FC8(AF(temp_s0, s16, 0x1A), 0x5000, 0xA, 1);
+    sum = AF(temp_s0, u16, 0x1A) + EaseValueFracStep(AF(temp_s0, s16, 0x1A), 0x5000, 0xA, 1);
     AF(temp_s0, s16, 0x1A) = sum;
     AF(temp_s0, s16, 0x18) = sum;
     d = (s16) sum;
@@ -386,7 +386,7 @@ void func_ovl31_800CD650(void) {
 void func_ovl31_800CD670(u8 *arg0, u8 *arg1) {
     u8 t;
 
-    func_800233CC(arg1, 0x40);
+    SetShapeCircle(arg1, 0x40);
     AF(arg1, u8, 0) = 0;
     AF(arg1, u8, 1) = 0;
     AF(arg1, u8, 2) = 0;

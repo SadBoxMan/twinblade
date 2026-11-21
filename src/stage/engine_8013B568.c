@@ -174,7 +174,7 @@ void func_8013BC7C(SeqPlayer *p) {
     D_8018D4BC[p->state](p);
 }
 
-void func_8013BCDC(void) {
+void RunSeqHook(void) {
     s32 unused[4];
 
     if (D_8018DC60 != NULL) {
@@ -336,10 +336,10 @@ void func_8013C414(u8 *a, s32 *b) {
     }
 }
 
-void func_8013C938(void) {
+void StartSeqPlayer(void) {
     D_801EF3F8.active = 1;
 }
 
-void func_8013C964(void) {
+void StopSeqPlayer(void) {
     D_801EF3F8.active = 0;
 }

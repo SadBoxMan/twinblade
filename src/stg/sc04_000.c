@@ -1,6 +1,7 @@
 #include "common.h"
 #include "gte.h"
 #include "psyq.h"
+#include "game.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
 void func_sc04_000_8017BE9C(void) {
@@ -21,70 +22,69 @@ extern void (*D_sc04_000_80186D80[])();
 typedef struct { s16 x, y; } XY;
 typedef struct { XY p; s16 n; s16 pad; XY q; s32 pad2; s32 col; s32 z; s32 code; } L181E88;
 typedef struct { s32 x, y, z; } V3;
-extern u8 D_80126B58;
-extern void func_8014BCEC();
-extern void func_8014BD24();
-extern void func_8002D4C8();
+extern void AddMaxBp();
+extern void AddBp();
+extern void PlaySoundId();
 extern void func_sc04_000_8017CD9C();
 extern s16 D_80115214;
 extern u16 D_801152BA;
 extern s32 func_80128CFC();
-extern void func_8001C214();
-extern s32 func_8012C1B8();
+extern void InitModel();
+extern s32 AllocActorModel();
 extern void func_800D20C0();
 extern void func_800D23D0();
-extern void func_80178B18();
-extern s32 func_80178970();
-extern void func_80178D18();
-extern void func_800291A0();
+extern void StartEvent();
+extern s32 IsEventDone();
+extern void EndEvent();
+extern void SetVar();
 extern void func_8002955C();
 extern s32 func_8002953C();
-extern void func_8002AC00();
-extern void func_8012C218();
-extern void func_80146A6C();
+extern void GiveItem();
+extern void FreeActor();
+extern void SpawnEffect();
 extern void (*D_sc04_000_80186DD8[])();
-extern void func_80147324();
+extern void PlaySe();
 extern void func_sc04_000_8017DF10();
-extern void func_8014708C();
-extern void func_801472C8();
-extern void func_80146C3C();
+extern void HidePlayerScene();
+extern void SetPlayerFlag7E2();
+extern void FreeEffect();
 extern void (*D_sc04_000_80186DEC[])();
-extern void func_80147084();
-extern void func_801472B4();
+extern void ShowPlayerScene();
+extern void ClearPlayerFlag7E2();
 extern void (*D_sc04_000_80186E00[])();
 extern void func_800D22E4();
 extern void func_sc04_000_8017E608();
 extern void (*D_sc04_000_80186F94[])();
-extern s32 func_800167F0();
+extern s32 FadeStep();
 extern void (*D_sc04_000_80186F9C[])();
 void func_sc04_000_8017EB34(void);
 extern void func_800D1EBC();
 extern void (*D_sc04_000_80186FA8[])();
 extern void (*D_sc04_000_80186FB4[])();
 extern u8 D_sc04_000_80186FBC;
-extern void func_8016EE40();
+extern void StartPlayerActionScript();
 extern u8 D_sc04_000_80186FC0;
 extern void (*D_sc04_000_80186FD4[])();
 extern u8 D_sc04_000_80186FCC;
 extern void func_sc04_000_8017EE20();
 extern void (*D_sc04_000_80186FE4[])();
-extern void func_80178CBC();
+extern void RunScript();
 extern u8 D_sc04_000_80187040;
 extern void (*D_sc04_000_801870F0[])();
 extern void (*D_sc04_000_8018712C[])();
 extern void (*D_sc04_000_80199760[])();
 extern void (*D_sc04_000_8019977C[])();
 extern void (*D_sc04_000_8019D328[])();
-extern s32 func_8012C354();
-extern s32 func_801788B8();
+extern s32 SetupActor();
+extern s32 SpawnTalkMarker();
 extern u8 D_sc04_000_801835B0;
-extern s32 func_80029178();
-extern void func_8012CAE4();
+extern s32 GetFlag();
+extern void RejectSpawn();
 extern u8 D_sc04_000_8019D018;
 extern s32 * func_sc04_000_80180EC4();
 extern s32 D_sc04_000_8019D080[];
-extern s32 func_8012C658();
-extern void func_80029124();
+extern s32 SpawnActorArg();
+extern void SetFlag();
 extern s32 D_sc04_000_8019D24C;
 extern s32 D_sc04_000_8019D250;
 extern s32 D_sc04_000_8019D264;
@@ -92,11 +92,11 @@ extern s32 D_sc04_000_8019D278;
 extern s32 D_sc04_000_8019D2E4;
 extern s32 D_sc04_000_8019D1C8[];
 extern s32 D_sc04_000_8019D144[];
-extern s32 func_801789AC();
-extern void func_80029514();
-extern void func_80145EE8();
+extern s32 UpdateScript();
+extern void SetProgress();
+extern void UploadFlagImages();
 extern s32 func_sc04_000_80180C6C();
-extern void func_8014ADA8();
+extern void AddMoney();
 extern s32 func_80174764();
 extern void (*D_sc04_000_8019D350[])();
 extern u8 D_sc04_000_8019D04C;
@@ -109,55 +109,55 @@ extern void (*D_sc04_000_801A6E0C[])();
 extern void (*D_sc04_000_801A700C[])();
 extern u8 D_sc04_000_801A6FBC;
 
-extern void func_8001BFD0();
+extern void ClearTimeChime();
 extern void func_800D0C48();
 extern void func_800D1E28();
 
-extern void func_80016714();
+extern void ZeroFill();
 extern u8 D_sc04_000_801A6F0C;
 extern s32 * func_sc04_000_801830E4();
 extern s32 D_sc04_000_801AAEFC;
-extern void func_800296F8();
+extern void SaveContinuePoint();
 
-extern void func_80171990();
-extern void func_8012BF4C();
-extern void func_8012AD50();
-extern void func_80146E90();
+extern void BumpSub2Copy();
+extern void SetMoverTimer();
+extern void NextState();
+extern void SetObjTimer();
 extern u8 D_sc04_000_80187120;
-extern void func_800159E4();
-extern void func_8001CC3C();
-extern s32 func_80146E98();
-extern s32 func_8012BEE8();
+extern void CopyPosInt();
+extern void InitSpriteKind3();
+extern s32 TickObjTimer();
+extern s32 TickTimer();
 extern u16 D_sc04_000_801A12E6;
 extern u8 D_sc04_000_801A69B8;
-extern s32 func_8012BCCC();
+extern s32 DistSqToTarget();
 
-extern void func_80015978();
+extern void PosToSVec();
 extern s32 func_sc04_000_80182800();
 extern void func_sc04_000_80182D78();
-extern void func_80016940();
-extern s32 func_80016978();
+extern void StartFadeWhite();
+extern s32 FadeWhiteStep();
 
 extern s32 D_8011F9C4;
-extern void func_800291F0();
+extern void SetVar32();
 void func_sc04_000_8017EB0C(void);
-extern void func_800167B8();
+extern void StartFade();
 void func_sc04_000_8017ECA0(void);
-extern s32 func_8012E544();
-extern void func_80171928();
-extern u8 D_80126948;
-extern s32 D_80126954;
-extern s32 D_8012695C;
-extern s16 D_80126968;
+extern s32 FindActorByKind();
+extern void NextPlayerActionHandler();
+extern u8 g_Camera;
+extern s32 g_CameraProjTarget;
+extern s32 g_CameraDistTarget;
+extern s16 g_CameraAngleTarget;
 extern s16 D_8012696A;
 extern s16 D_8012696C;
-extern s16 D_80126976;
+extern s16 g_CameraOfsTarget;
 extern s16 D_80126978;
 extern s16 D_8012697A;
-extern void func_8012A018();
-extern void func_8012A094();
+extern void SetCameraUpdate();
+extern void SnapCamera();
 extern s8 D_8012694D;
-extern s32 D_80126958;
+extern s32 g_CameraDist;
 extern s32 func_800D0F8C();
 extern u8 D_sc04_000_80199468;
 extern u8 D_sc04_000_8019976C;
@@ -165,38 +165,38 @@ extern u8 D_sc04_000_80199774;
 extern u8 D_sc04_000_801997EC;
 extern u8 D_sc04_000_80199820;
 extern s32 * func_sc04_000_801806B8();
-extern s32 func_80029504();
-extern void func_8001D0E8();
+extern s32 GetProgress();
+extern void SetModelCullBox();
 extern u8 D_sc04_000_80199570;
 extern u8 D_sc04_000_8019CF90;
-extern s32 func_80143970();
-extern void func_8012B23C();
+extern s32 SpawnShadow();
+extern void StopWithGravity();
 extern u8 D_sc04_000_80199618;
-extern void func_801292C8();
-extern s16 D_80126B5E;
+extern void FreeProp();
+extern s16 g_PlayerX;
 extern s16 D_80126B66;
-extern void func_80172710();
-extern void func_80178BF8();
+extern void CallActionHandler();
+extern void ResetScriptVM();
 extern u8 D_sc04_000_80199830;
 extern u8 D_sc04_000_80199868;
 extern u8 D_sc04_000_801A69C8;
 extern u8 D_sc04_000_801A6A90;
 extern s32 func_sc04_000_801816DC();
-extern void func_80130D48();
+extern void DropItem();
 extern void func_sc04_000_80181ABC();
 
 extern u8 D_sc04_000_801A12E4;
 extern u8 D_sc04_000_801A1318;
-extern s32 func_8012BD14();
+extern s32 DistSqToPlayer();
 
 extern u8 D_sc04_000_8019979C;
 extern u8 D_sc04_000_801A6E48[];
 extern u8 D_sc04_000_801A6E4C[];
-extern void func_8012C098();
+extern void DespawnActor();
 
-extern s32 func_8017267C();
+extern s32 PlayerEvent08();
 extern void func_sc04_000_8017F628();
-extern void *D_80126B78;
+extern void *g_PlayerModel;
 
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } MtxDCM;
 typedef struct { u32 x; u32 y; u32 z; u32 n; u32 *poly; } ChunkDCM;
@@ -206,17 +206,17 @@ extern u16 D_800B9A02;
 extern u32 g_WorldOtTable[2][0x1000];
 typedef struct { s16 vx, vy, vz, pad; } SV;
 typedef struct { u16 v[6]; } U12;
-extern s32 func_800291B4();
+extern s32 GetVar();
 extern s16 D_80126B62;
-extern s32 D_80126B5C;
-extern u16 D_801202A0;
+extern s32 g_PlayerPosX;
+extern u16 g_Actors;
 extern u16 D_800B99DA;
 extern s16 D_800B9A08;
 extern u8 D_sc04_000_80186D30;
 extern u8 D_sc04_000_80186CCC[];
-extern s32 func_80013328();
-extern void func_801746A4();
-extern void func_800233CC();
+extern s32 PosDist();
+extern void TakePlayerControl();
+extern void SetShapeCircle();
 extern u8 D_sc04_000_801A9AD8;
 extern u8 D_sc04_000_801A9AD9;
 extern u8 D_sc04_000_801A9ADA;
@@ -226,13 +226,13 @@ extern u8 D_sc04_000_801A9ADE;
 extern s32 D_sc04_000_801A9CDC;
 extern s32 D_sc04_000_801A9CE0;
 extern s32 D_sc04_000_801A9CE4;
-extern s32 func_8001D074();
+extern s32 AllocSpriteInRange();
 extern void func_8001CD50();
 extern u16 D_sc04_000_8019DFB8;
 
 void func_sc04_000_8017BEBC(u8 *obj) {
     s32 tmp[3];
-    volatile SV8 box[8];
+    SV8 box[8];
     SV8 scr[8];
     MtxDCM ls;
     GteDCM g;
@@ -495,18 +495,18 @@ typedef struct { s16 x, y, z, pad; } SV4;
 typedef struct { SV4 p[4]; CV4 c[4]; s32 code; } QuadArg;
 typedef struct { s32 x, y, z, pad; } V4;
 extern s8 D_sc04_000_80186DAC[];
-extern void func_80017DC4();
-extern void func_80017E68();
-extern void func_80017758();
-extern WMtx D_800AE620;
-extern void func_80016A5C();
+extern void SetScaleMatrix();
+extern void SetMatrixTrans();
+extern void DrawPrimG4Mtx();
+extern WMtx GsIDMATRIX;
+extern void DrawPrimLineG2Mtx();
 typedef struct { u16 active; s16 y; s16 dy; s16 ang; s32 x; s32 z; } Pt16;
 typedef struct { s16 a, b, c, g; u8 d, e; s16 f; Pt16 pts[16]; } PtSys;
 typedef struct { u32 *ot; u8 pad[0x10]; } OtRef;
 typedef struct { u8 b[0x14]; } Ot14;
 typedef struct { unsigned addr : 24; unsigned len : 8; } PTag;
-extern void func_80128ED8();
-extern s32 func_80132EF4();
+extern void StepSpriteAnim();
+extern s32 SpawnPropFrom();
 extern void func_sc04_000_801821D0();
 
 extern u8 D_sc04_000_801A6E8C;
@@ -514,8 +514,8 @@ extern u8 D_sc04_000_801A9DA8;
 extern void func_sc04_000_80182564();
 
 extern u8 D_sc04_000_801870F8;
-extern s32 func_801290DC();
-extern void func_80149350();
+extern s32 SpawnPropAt();
+extern void ObjLocalToWorld();
 
 typedef struct { U12 e[9]; } U12x9;
 typedef struct { s32 vx, vy, vz, pad; } V4F20;
@@ -548,7 +548,7 @@ extern u8 D_sc04_000_801A9AA4;
 extern u8 D_sc04_000_801A9B18;
 extern void func_8001C810();
 
-extern u8 *func_8012913C();
+extern u8 *SpawnProp();
 extern void func_800D0F4C();
 extern u8 D_sc04_000_801A9CE8;
 extern u8 D_sc04_000_801A9CE9;
@@ -563,32 +563,32 @@ extern u8 D_sc04_000_801A9D29;
 extern u8 D_sc04_000_801A9D2A;
 extern u8 D_sc04_000_801A9D2C;
 
-extern u8 D_80078EAE;
-extern u8 D_80078E78[];
-extern s32 func_8012B864();
-extern s32 func_8012B70C();
+extern u8 g_Daytime;
+extern u8 g_Status[];
+extern s32 HeadingToTarget();
+extern s32 HeadingToSV();
 extern u8 D_800D3918;
-extern u8 D_801152B0;
+extern u8 g_WallNormal;
 extern s32 D_sc04_000_801A6E28[];
-extern void func_800134FC();
-extern void func_8001382C();
+extern void RotateVectorX();
+extern void RotateVectorY();
 
-extern s32 func_80148800();
+extern s32 GetObjPadPressed();
 extern s16 D_sc04_000_80186FE8[];
-extern SV8 D_80126940;
+extern SV8 g_CameraFocus;
 extern void func_sc04_000_8017F000();
 extern u8 D_sc04_000_801995A4;
 extern u8 D_sc04_000_801995AC;
 extern u8 D_sc04_000_8019CF08;
-extern s32 func_8012B744();
-extern s32 func_8012B608();
-extern void func_8012B2CC();
-extern s32 func_8012B1B4();
-extern s32 func_8012CBA4();
-extern s32 func_8012BA10();
-extern void func_8001AAA0();
-extern void func_8012A568();
-extern s32 func_80143C74();
+extern s32 HeadingToPoint();
+extern s32 TurnStep();
+extern void UpdateModelZYX();
+extern s32 SetLocalVelocityXZ();
+extern s32 MoveOnGround();
+extern s32 TurnStepToPlayer();
+extern s32 RequestBgmPack();
+extern void BlendCameraThen();
+extern s32 SpawnKind205();
 
 typedef struct { u8 r, g, b, cd; } CV;
 typedef struct { u32 addr : 24; u32 len : 8; } PTAG;
@@ -604,27 +604,26 @@ typedef struct { u8 b[8]; } B8;
 typedef struct { s16 m[3][3]; s32 t[3]; } FeMtx;
 typedef struct { s16 x, y, z, pad; } FeSv;
 typedef struct { unsigned lo : 31; unsigned top : 1; } TB;
-extern s32 func_80012C6C();
-extern s32 func_80012ABC();
-extern void func_8012F14C();
+extern s32 EaseValue();
+extern s32 EaseAngle();
+extern void LocalToWorld();
 
-extern void func_80131E00();
-extern void func_8012ADE4();
-extern s32 func_8012AF0C();
-extern s32 func_8012F568();
+extern void SetReactionStep();
+extern void RestorePrevPos();
+extern s32 UndoMoveIntoObject();
+extern s32 HitPlayer();
 extern void func_sc04_000_80182724();
 extern SV4 D_sc04_000_801A6ECC;
 extern SV4 D_sc04_000_801A6ED4;
 extern SV4 D_sc04_000_801A6EDC;
 extern SV4 D_sc04_000_801A6EE4;
-extern s32 func_80017E30();
-extern s32 func_80016EF8();
+extern s32 RotateMatrixByZYX();
+extern s32 DrawPrimFT4Mtx();
 extern SV8 D_sc04_000_801A7028[];
-extern s32 func_80135888();
-extern s32 func_8012BDBC();
+extern s32 PathHitsModel();
+extern s32 TargetInFront();
 extern s32 RotTransSV();
 
-typedef struct { s16 x, y, z, kind, unk8; u16 flags; s16 unkC, unkE; s32 unk10; } SpawnDef;
 extern s32 D_sc04_000_801A9A6C;
 extern s32 D_sc04_000_801A9A70;
 extern s32 D_sc04_000_801A9A78;
@@ -674,7 +673,7 @@ void func_sc04_000_8017CD9C(u8 *arg0, s32 arg1_0) {
     D_sc04_000_801A9A70 = D_sc04_000_801A9A80 = D_sc04_000_801A9A90 = v.vz;
 }
 
-void func_sc04_000_8017CECC(u8 *arg0) {
+void func_sc04_000_8017CECC(StageActor *arg0) {
     u8 *o;
     u8 *p;
     U12x9 *s;
@@ -683,24 +682,24 @@ void func_sc04_000_8017CECC(u8 *arg0) {
     U12x9 *b2;
     s16 j;
 
-    if (func_800291B4(*AF(arg0, u8 *, 0xDC) + 0x3A) & 0xFF) {
-        func_8012CAE4(arg0);
+    if (GetVar(*(u8 *)arg0->message + 0x3A) & 0xFF) {
+        RejectSpawn(arg0);
         return;
     }
-    if (AF(arg0, s32, 0x20) == 0) {
-        if (func_8012C354(arg0, &D_sc04_000_80186C98) == 0) {
+    if ((s32)arg0->model == 0) {
+        if (SetupActor(arg0, &D_sc04_000_80186C98) == 0) {
             return;
         }
-        func_8001C810(AF(arg0, s32, 0x20), &D_sc04_000_8019DF90);
+        func_8001C810(arg0->model, &D_sc04_000_8019DF90);
         SetScript(arg0, (s16) D_801152BA * 16 + (s32) &D_sc04_000_80186CD4);
-        AF(AF(arg0, u8 *, 0x20), u16, 0x2C) |= 0x20;
-        AF(AF(arg0, u8 *, 0x20), u8 *, 0x80) = &D_sc04_000_801A9A68;
-        AF(AF(arg0, u8 *, 0x20), s32, 4) |= 0x40000000;
+        arg0->model->flags |= 0x20;
+        arg0->model->unk80 = &D_sc04_000_801A9A68;
+        arg0->model->unk04 |= 0x40000000;
         AF(arg0, s16, 0xAE) = -3;
     }
-    o = (u8 *) func_8001D074(0x7E, 0x100);
+    o = (u8 *) AllocSpriteInRange(0x7E, 0x100);
     if (o != 0) {
-        AF(arg0, u8 *, 0xCC) = o;
+        arg0->ext0 = o;
         p = &D_sc04_000_801A9A98;
         func_8001CD50(o, p);
         D_sc04_000_801A9A9A = 0x80;
@@ -709,14 +708,14 @@ void func_sc04_000_8017CECC(u8 *arg0) {
         D_sc04_000_801A9A9D = 0;
         D_sc04_000_801A9A9C = 0;
         D_sc04_000_801A9A9E = 0;
-        func_800233CC(p, 0x38);
+        SetShapeCircle(p, 0x38);
         s = (U12x9 *) &D_sc04_000_8019DFB8;
         b = (U12x9 *) &D_sc04_000_801A9B18;
         d = &b[(s16) D_801152BA];
         AF(o, s16, 0x10) = 0x400;
-        AF(o, u16, 8) = AF(arg0, u16, 6);
-        AF(o, u16, 0xA) = AF(arg0, u16, 0xA) -= 4;
-        AF(o, u16, 0xC) = AF(arg0, u16, 0xE);
+        AF(o, u16, 8) = (u16)arg0->pos[0].h.i;
+        AF(o, u16, 0xA) = arg0->pos[1].h.i -= 4;
+        AF(o, u16, 0xC) = (u16)arg0->pos[2].h.i;
         AF(o, s32, 4) |= 0x50000000;
         D_sc04_000_801A9A96 = 0xFF;
         D_sc04_000_801A9AA4 = 0xFF;
@@ -731,12 +730,12 @@ void func_sc04_000_8017CECC(u8 *arg0) {
         b2 = (U12x9 *) &D_sc04_000_801A9B18;
         AF(arg0, U12x9 *, 0xD8) = &b2[(s16) D_801152BA];
         for (j = 5; j < 0x28; j++) {
-            if (func_800291B4(j + 0x3B) & 0xFF) {
+            if (GetVar(j + 0x3B) & 0xFF) {
                 break;
             }
         }
         if (j != 0x28) {
-            AF(arg0, s16, 0x10A) = 1;
+            arg0->work10A = 1;
         }
         D_80115214 = 0;
         D_801152BA += 1;
@@ -756,13 +755,13 @@ void func_sc04_000_8017D258(u8 *arg0) {
 
     obj = AF(arg0, u8 *, 0x20);
     if (!(D_800B99DA & 0xF)) {
-        for (p = (u8 *) &D_801202A0, end = p + 0x6480; p < end; p += 0x10C) {
+        for (p = (u8 *) &g_Actors, end = p + 0x6480; p < end; p += 0x10C) {
             if (*(u16 *) p == 0x128) {
                 found = p == arg0;
                 break;
             }
         }
-        d = func_80013328(arg0 + 4, &D_80126B5C);
+        d = PosDist(arg0 + 4, &g_PlayerPosX);
         if (d < 0x800) {
             w = 0x44 - ((d >> 5) & 0x38);
         } else {
@@ -777,7 +776,7 @@ void func_sc04_000_8017D258(u8 *arg0) {
     if (AF(arg0, u16, 0x5E) != 0) {
         for (i = 0; i < 8; i++) {
             if (AF(arg0, u16, 0x5E) == D_sc04_000_80186CCC[(s16) i]) {
-                func_801746A4();
+                TakePlayerControl();
                 AF(arg0, s32, 0x1C) = 0x20;
                 AF(arg0, u16, 2) += 1;
             }
@@ -787,7 +786,7 @@ void func_sc04_000_8017D258(u8 *arg0) {
     }
     if (AF(arg0, s16, 0x10A) == 0) {
         for (j = 5; j < 0x28; j++) {
-            if (func_800291B4(j + 0x3B) & 0xFF) {
+            if (GetVar(j + 0x3B) & 0xFF) {
                 break;
             }
         }
@@ -795,7 +794,7 @@ void func_sc04_000_8017D258(u8 *arg0) {
             AF(arg0, s16, 0x10A) = 1;
             return;
         }
-        if (func_8012BD14(arg0) < 0x2A40) {
+        if (DistSqToPlayer(arg0) < 0x2A40) {
             if (D_800B9A08 == 0x3028) {
                 if ((u16) (AF(arg0, u16, 0xA) - (*(u16 *)&D_80126B62) + 4) < 4) {
                     AF(arg0, u16, 0x106) += 1;
@@ -804,7 +803,7 @@ void func_sc04_000_8017D258(u8 *arg0) {
                     return;
                 }
             }
-            func_80178B18(arg0, &D_sc04_000_80186D30);
+            StartEvent(arg0, &D_sc04_000_80186D30);
             AF(arg0, s16, 0x10A) = 1;
             AF(arg0, u16, 2) = 0xA;
         } else {
@@ -813,7 +812,7 @@ void func_sc04_000_8017D258(u8 *arg0) {
     }
 }
 
-void func_sc04_000_8017D4D0(u8 *arg0) {
+void func_sc04_000_8017D4D0(StageActor *arg0) {
     SV v;
     SV r;
     s32 *m;
@@ -821,9 +820,9 @@ void func_sc04_000_8017D4D0(u8 *arg0) {
     u8 *p;
     s32 *q;
 
-    o = (u8 *) func_8001D074(0x7E, 0x100);
+    o = (u8 *) AllocSpriteInRange(0x7E, 0x100);
     if (o != 0) {
-        AF(arg0, u8 *, 0xD0) = o;
+        arg0->ext1 = o;
         p = &D_sc04_000_801A9AD8;
         func_8001CD50(o, p);
         D_sc04_000_801A9AD9 = 0xFF;
@@ -832,10 +831,10 @@ void func_sc04_000_8017D4D0(u8 *arg0) {
         D_sc04_000_801A9ADE = 8;
         D_sc04_000_801A9ADC = 8;
         D_sc04_000_801A9ADD = 0x18;
-        func_800233CC(p, 0x100);
-        v.vx = AF(arg0, u16, 6);
-        v.vy = AF(arg0, u16, 0xA) - 0x38;
-        v.vz = AF(arg0, u16, 0xE);
+        SetShapeCircle(p, 0x100);
+        v.vx = (u16)arg0->pos[0].h.i;
+        v.vy = (u16)arg0->pos[1].h.i - 0x38;
+        v.vz = (u16)arg0->pos[2].h.i;
         func_800D20C0(&v, &r, 5);
         q = &D_sc04_000_801A9CDC;
         q[0] = v.vx;
@@ -848,11 +847,11 @@ void func_sc04_000_8017D4D0(u8 *arg0) {
         AF(o, s16, 0x1A) = 0;
         AF(o, s16, 0x18) = 0;
         AF(o, s32, 4) |= 0x50000000;
-        AF(arg0, u16, 2) += 1;
+        arg0->state += 1;
     }
 }
 
-void func_sc04_000_8017D618(u8 *arg0) {
+void func_sc04_000_8017D618(StageActor *arg0) {
     U12 *t;
     U12 *r;
     u8 *p;
@@ -862,14 +861,14 @@ void func_sc04_000_8017D618(u8 *arg0) {
 
     t = (U12 *) &D_sc04_000_8019DFB8;
     r = AF(arg0, U12 *, 0xD8);
-    p = AF(arg0, u8 *, 0xDC);
-    o = AF(arg0, u8 *, 0xD0);
-    s4 = AF(arg0, s16 *, 0x20);
-    if (p[1] != 0 && AF(arg0, s16, 0x108) == 0) {
-        AF(arg0, s16, 0x108) = func_80128CFC(AF(p, u16, 2));
+    p = (u8 *)arg0->message;
+    o = (u8 *)arg0->ext1;
+    s4 = (s16 *)arg0->model;
+    if (p[1] != 0 && arg0->work108 == 0) {
+        arg0->work108 = func_80128CFC(AF(p, u16, 2));
     }
     AF(o, u16, 0x18) = AF(o, u16, 0x1A) += 0x80;
-    if (--AF(arg0, s32, 0x1C) != -1) {
+    if (--arg0->timer != -1) {
         func_sc04_000_8017CD9C(arg0, 0);
         for (i = 0; i < 9; i++, t++, r++) {
             r->v[0] += (s16) t->v[0] >> 1;
@@ -883,21 +882,21 @@ void func_sc04_000_8017D618(u8 *arg0) {
         }
     } else {
         *s4 = 0;
-        AF(arg0, u16, 2) += 1;
+        arg0->state += 1;
     }
 }
 
-void func_sc04_000_8017D798(u8 *arg0) {
-    D_sc04_000_80186D80[AF(arg0, u16, 2)]();
+void func_sc04_000_8017D798(StageActor *arg0) {
+    D_sc04_000_80186D80[arg0->state]();
 }
 
 void func_sc04_000_8017D7D4(void) {
-    func_8014BCEC((s32) &D_80126B58, 5);
-    func_8014BD24((s32) &D_80126B58, 0x270F);
-    func_8002D4C8(0xBFE, 0);
+    AddMaxBp((s32) &g_Player, 5);
+    AddBp((s32) &g_Player, 0x270F);
+    PlaySoundId(0xBFE, 0);
 }
 
-void func_sc04_000_8017D820(u8 *arg0) {
+void func_sc04_000_8017D820(StageActor *arg0) {
     s32 pad[4];
     s16 *temp_s2;
     s32 temp_v0_2;
@@ -905,134 +904,134 @@ void func_sc04_000_8017D820(u8 *arg0) {
     void *temp_s1;
     void *temp_v1;
 
-    temp_v1 = AF(arg0, void *, 0xDC);
-    temp_s2 = AF(arg0, s16 *, 0xCC);
-    temp_s1 = AF(arg0, void *, 0xD0);
-    if ((AF(temp_v1, u8, 1) != 0) && (AF(arg0, s16, 0x108) == 0)) {
-        AF(arg0, s16, 0x108) = func_80128CFC((s32) AF(temp_v1, u16, 2));
+    temp_v1 = arg0->message;
+    temp_s2 = (s16 *)arg0->ext0;
+    temp_s1 = arg0->ext1;
+    if ((AF(temp_v1, u8, 1) != 0) && (arg0->work108 == 0)) {
+        arg0->work108 = func_80128CFC((s32) AF(temp_v1, u16, 2));
     }
     temp_v0 = AF(temp_s1, u16, 0x1A) + 0x20;
     AF(temp_s1, u16, 0x1A) = temp_v0;
     AF(temp_s1, u16, 0x18) = temp_v0;
-    temp_v0_2 = AF(arg0, s32, 0x1C) - 1;
-    AF(arg0, s32, 0x1C) = temp_v0_2;
+    temp_v0_2 = arg0->timer - 1;
+    arg0->timer = temp_v0_2;
     if (temp_v0_2 != -1) {
         func_sc04_000_8017CD9C((s32) arg0, rand() & 1);
         return;
     }
     D_80115214 = 4;
     D_801152BA -= 1;
-    func_8002D4C8(0x62E, 0);
+    PlaySoundId(0x62E, 0);
     *temp_s2 = 0;
-    AF(arg0, s32, 0x1C) = 0x28;
-    AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
+    arg0->timer = 0x28;
+    arg0->state = (u16) (arg0->state + 1);
 }
 
-extern s32 func_8012BE54();
+extern s32 GroundDistSqToPlayer();
 
 typedef struct { s16 x, y, z; } SV6;
 typedef struct { s32 w[4]; } W16;
 typedef struct { s16 x, y; s32 col; } Star8;
 typedef struct { SV8 p[3]; CV4 c[3]; s32 code; } TriArg;
-extern void func_80128EA8();
+extern void StartSpriteAnim();
 extern u8 D_sc04_000_801A6DC0;
 extern u8 D_sc04_000_801A6DCC;
 extern s32 func_sc04_000_80182178();
-extern s32 func_8012C194();
-extern void func_8012EC04();
-extern s32 func_8012C51C();
-void func_sc04_000_80182290(s32 o, s16 *v, s16 arg2);
+extern s32 AllocActorSprite();
+extern void GetPartWorldMatrix();
+extern s32 SpawnActorFromDef();
+void func_sc04_000_80182290(StageActor *o, s16 *v, s16 arg2);
 
-void func_sc04_000_8017D914(u8 *arg0) {
+void func_sc04_000_8017D914(StageActor *arg0) {
     u8 *p;
     s16 v;
     s32 t;
 
-    p = AF(arg0, u8 *, 0xDC);
+    p = (u8 *)arg0->message;
     if (AF(p, u8, 1) == 0) {
         v = 1;
     } else {
-        if (AF(arg0, s16, 0x108) == 0) {
-            AF(arg0, s16, 0x108) = func_80128CFC(AF(p, u16, 2));
+        if (arg0->work108 == 0) {
+            arg0->work108 = func_80128CFC(AF(p, u16, 2));
         }
-        t = AF(arg0, s16, 0x108);
+        t = arg0->work108;
         v = t;
     }
     if (v != 0) {
-        AF(arg0, u16, 2)++;
+        arg0->state++;
     }
 }
 
-void func_sc04_000_8017D994(u8 *arg0) {
+void func_sc04_000_8017D994(StageActor *arg0) {
     SV8 sp10;
     SV8 sp18;
-    s32 temp_v0;
+    ModelObj *temp_v0;
     u8 *temp_s0;
 
-    temp_s0 = AF(arg0, u8 *, 0xDC);
-    temp_v0 = func_8012C1B8();
-    AF(arg0, s32, 0x20) = temp_v0;
+    temp_s0 = (u8 *)arg0->message;
+    temp_v0 = AllocActorModel();
+    arg0->model = temp_v0;
     if (temp_v0 != 0) {
-        func_8001C214(temp_v0, AF(temp_s0, s32, 4));
+        InitModel(temp_v0, AF(temp_s0, s32, 4));
         SetScript((s32) arg0, AF(temp_s0, s32, 8));
-        AF(arg0, s16, 0x5C) = 0;
-        AF(arg0, s32, 0x58) = 0;
-        sp10.x = AF(arg0, u16, 6);
-        sp10.y = AF(arg0, u16, 0xA);
-        sp10.z = AF(arg0, u16, 0xE);
+        arg0->hitState = 0;
+        arg0->hitData = 0;
+        sp10.x = (u16)arg0->pos[0].h.i;
+        sp10.y = (u16)arg0->pos[1].h.i;
+        sp10.z = (u16)arg0->pos[2].h.i;
         func_800D20C0((s32) &sp10, (s32) &sp18, 0);
         func_800D23D0((s32) &sp18);
-        AF(AF(arg0, s32, 0x20), s16, 0x12) = (s16) (sp18.y + 0x800);
-        AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
+        arg0->model->rot.vy = (s16) (sp18.y + 0x800);
+        arg0->state = (u16) (arg0->state + 1);
     }
 }
 
-void func_sc04_000_8017DA48(u8 *arg0) {
+void func_sc04_000_8017DA48(StageActor *arg0) {
     u16 v;
     u8 *t;
     u8 *d;
 
-    t = AF(arg0, u8 *, 0xD0);
-    d = AF(arg0, u8 *, 0xDC);
+    t = (u8 *)arg0->ext1;
+    d = (u8 *)arg0->message;
     v = AF(t, u16, 0x1A) - 0xC0;
     AF(t, u16, 0x1A) = v;
     AF(t, u16, 0x18) = v;
     if ((s16) v < 0) {
         AF(t, s16, 0) = 0;
-        func_80178B18((s32) arg0, AF(d, s32, 0xC));
-        AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
+        StartEvent((s32) arg0, AF(d, s32, 0xC));
+        arg0->state = (u16) (arg0->state + 1);
     }
 }
 
-void func_sc04_000_8017DAB4(u8 *arg0, s32 arg1) {
+void func_sc04_000_8017DAB4(StageActor *arg0, s32 arg1) {
     u8 *temp_s1;
 
-    temp_s1 = AF(arg0, u8 *, 0xDC);
-    if (func_80178970((s32) arg0, arg1) != 0) {
-        func_80178D18((s32) arg0);
-        func_800291A0(*temp_s1 + 0x3A, 1);
+    temp_s1 = (u8 *)arg0->message;
+    if (IsEventDone((s32) arg0, arg1) != 0) {
+        EndEvent((s32) arg0);
+        SetVar(*temp_s1 + 0x3A, 1);
         func_8002955C();
         if (func_8002953C() >= 0x23U) {
-            func_8002AC00(0x25);
+            GiveItem(0x25);
         }
-        AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
+        arg0->state = (u16) (arg0->state + 1);
     }
 }
 
-void func_sc04_000_8017DB40(s32 arg0, s32 arg1) {
-    func_8012C218(arg0, arg1);
+void func_sc04_000_8017DB40(StageActor *arg0, s32 arg1) {
+    FreeActor(arg0, arg1);
 }
 
-void func_sc04_000_8017DB60(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+void func_sc04_000_8017DB60(StageActor *arg0, s32 arg1, s32 arg2, s32 arg3) {
     func_sc04_000_8017CD9C(arg0, rand(arg0, arg1, arg2, arg3) & 0xF);
-    if (func_80178970(arg0) != 0) {
-        func_80178D18(arg0);
-        AF(arg0, s16, 2) = 1;
+    if (IsEventDone(arg0) != 0) {
+        EndEvent(arg0);
+        arg0->state = 1;
     }
 }
 
 void func_sc04_000_8017DBB4(s32 arg0) {
-    func_80146A6C(0x19, arg0, 0, 0, /* extra? */ 0, /* extra? */ 0, /* extra? */ 1);
+    SpawnEffect(0x19, arg0, 0, 0, /* extra? */ 0, /* extra? */ 0, /* extra? */ 1);
 }
 
 void func_sc04_000_8017DBF0(u8 *arg0) {
@@ -1041,7 +1040,7 @@ void func_sc04_000_8017DBF0(u8 *arg0) {
 
 void func_sc04_000_8017DC2C(u8 *arg0) {
     if (AF(arg0, s32, 0x30) == 0) {
-        func_80147324((s32) AF(arg0, u16, 0x2E));
+        PlaySe((s32) AF(arg0, u16, 0x2E));
     }
     AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
 }
@@ -1069,7 +1068,7 @@ void func_sc04_000_8017DCD8(u8 *arg0) {
         AF(arg0, u16, 0x2A) = (u16) (AF(arg0, u16, 0x2A) - 0x10);
     } else {
         if (AF(arg0, s32, 0x30) == 0) {
-            func_80147324((s32) AF(arg0, u16, 0x2C));
+            PlaySe((s32) AF(arg0, u16, 0x2C));
         }
         AF(arg0, s32, 0x1C) = 0;
         AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
@@ -1110,14 +1109,14 @@ void func_sc04_000_8017DD5C(u8 *arg0) {
         }
         var_s1 = 0;
         do {
-            func_80146A6C(0x1B, (s32) temp_s0, 0, 0, /* extra? */ 0, /* extra? */ 0, /* extra? */ 0);
+            SpawnEffect(0x1B, (s32) temp_s0, 0, 0, /* extra? */ 0, /* extra? */ 0, /* extra? */ 0);
             temp_v0_4 = var_s1 + 1;
             var_s1 = temp_v0_4;
         } while (temp_v0_4 < 3);
     } else {
         if (AF(arg0, s32, 0x30) == 0) {
-            func_8014708C((s32) temp_s0);
-            func_801472C8((s32) temp_s0);
+            HidePlayerScene((s32) temp_s0);
+            SetPlayerFlag7E2((s32) temp_s0);
         } else {
             temp_v0_5 = AF(temp_s0, void *, 0x20);
             AF(temp_v0_5, s32, 4) = (s32) (AF(temp_v0_5, s32, 4) | 0x80000000);
@@ -1137,7 +1136,7 @@ void func_sc04_000_8017DEC4(u8 *arg0) {
         func_sc04_000_8017DF10((s32) arg0);
         return;
     }
-    func_80146C3C((s32) arg0);
+    FreeEffect((s32) arg0);
 }
 
 void func_sc04_000_8017DF10(u8 *arg0) {
@@ -1154,7 +1153,7 @@ void func_sc04_000_8017DF10(u8 *arg0) {
 
     o = AF(arg0, u8 *, 0x34);
     r.x = r.y = r.z = AF(arg0, u16, 0x12);
-    func_80017DC4(&r, &m);
+    SetScaleMatrix(&r, &m);
     q.p[1].x = q.p[1].y = q.p[1].z = 0;
     q.p[0].y = q.p[2].y = q.p[3].y = 0;
     q.c[1].r = q.c[1].g = q.c[1].b = 0;
@@ -1167,7 +1166,7 @@ void func_sc04_000_8017DF10(u8 *arg0) {
     r.x = AF(o, u16, 6);
     r.y = AF(o, u16, 0xA) - 8;
     r.z = AF(o, u16, 0xE);
-    func_80017E68(&r, &m);
+    SetMatrixTrans(&r, &m);
     t = D_sc04_000_80186DAC;
     for (i = 0; i < 10; i++) {
         q.p[0].x = *t++;
@@ -1177,7 +1176,7 @@ void func_sc04_000_8017DF10(u8 *arg0) {
         q.p[3].x = *t++;
         q.p[3].z = *t++;
         t -= 2;
-        func_80017758(&q, &m);
+        DrawPrimG4Mtx(&q, &m);
     }
     t = D_sc04_000_80186DAC;
     q.c[0].r = q.c[0].g = q.c[0].b = 0;
@@ -1195,7 +1194,7 @@ void func_sc04_000_8017DF10(u8 *arg0) {
         q.p[3].z = k;
         q.p[1].z = k << 1;
         t -= 2;
-        func_80017758(&q, &m);
+        DrawPrimG4Mtx(&q, &m);
     }
     if (AF(arg0, s16, 0x2A) != 0) {
         t = D_sc04_000_80186DAC;
@@ -1206,7 +1205,7 @@ void func_sc04_000_8017DF10(u8 *arg0) {
             q.p[1].z = q.p[3].z = *t++;
             q.p[0].y = q.p[1].y = AF(arg0, u16, 0x2A);
             t -= 2;
-            func_80017758(&q, &m);
+            DrawPrimG4Mtx(&q, &m);
         }
     }
 }
@@ -1216,7 +1215,7 @@ void func_sc04_000_8017E21C(u8 *arg0) {
 }
 
 void func_sc04_000_8017E258(u8 *arg0) {
-    func_80147324((s32) AF(arg0, u16, 0x2E));
+    PlaySe((s32) AF(arg0, u16, 0x2E));
     AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
 }
 
@@ -1249,9 +1248,9 @@ void func_sc04_000_8017E308(u8 *arg0) {
     if (temp_v0 < 0x20) {
         AF(arg0, u16, 0x2A) = (u16) (AF(arg0, u16, 0x2A) - 0x10);
     } else {
-        func_80147324((s32) AF(arg0, u16, 0x2C));
-        func_80147084(temp_s1);
-        func_801472B4(temp_s1);
+        PlaySe((s32) AF(arg0, u16, 0x2C));
+        ShowPlayerScene(temp_s1);
+        ClearPlayerFlag7E2(temp_s1);
         AF(arg0, s32, 0x1C) = 0;
         AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
     }
@@ -1275,7 +1274,7 @@ void func_sc04_000_8017E394(u8 *arg0) {
         AF(temp_s0, u16, 0x60) = temp_v0_2;
         AF(temp_s0, u16, 0x62) = (u16) (AF(temp_s0, u16, 0x62) - 0x100);
         do {
-            func_80146A6C(0x1B, (s32) temp_s0, 0, 0, /* extra? */ 0, /* extra? */ 1, /* extra? */ 0);
+            SpawnEffect(0x1B, (s32) temp_s0, 0, 0, /* extra? */ 0, /* extra? */ 1, /* extra? */ 0);
             temp_v0_3 = var_s2 + 1;
             var_s2 = temp_v0_3;
         } while (temp_v0_3 < 3);
@@ -1300,7 +1299,7 @@ void func_sc04_000_8017E468(u8 *arg0) {
     AF(temp_v1, s16, 0x64) = 0x1000;
     AF(temp_v1, s16, 0x62) = 0x1000;
     AF(temp_v1, s16, 0x60) = 0x1000;
-    func_80146C3C((s32) arg0);
+    FreeEffect((s32) arg0);
 }
 
 void func_sc04_000_8017E4BC(u8 *arg0) {
@@ -1339,7 +1338,7 @@ void func_sc04_000_8017E5AC(u8 *arg0) {
         func_sc04_000_8017E608((s32) arg0);
         return;
     }
-    func_80146C3C((s32) arg0);
+    FreeEffect((s32) arg0);
 }
 
 void func_sc04_000_8017E608(u8 *arg0) {
@@ -1375,9 +1374,9 @@ void func_sc04_000_8017E608(u8 *arg0) {
         l.c1.r = l.c1.g = l.c1.b = 0xFF;
         break;
     }
-    m = D_800AE620;
+    m = GsIDMATRIX;
     l.code = 0x50000000;
-    func_80016A5C(&l, &m);
+    DrawPrimLineG2Mtx(&l, &m);
 }
 
 void func_sc04_000_8017E778(u8 *arg0) {
@@ -1386,17 +1385,17 @@ void func_sc04_000_8017E778(u8 *arg0) {
 
 s32 func_sc04_000_8017E7B4(u8 *arg0) {
     D_8011F9C4 = 1;
-    func_80029124(0xC7, 1);
-    func_800291F0(4, 0xC7);
-    func_8002D4C8(6, 0);
+    SetFlag(0xC7, 1);
+    SetVar32(4, 0xC7);
+    PlaySoundId(6, 0);
     func_sc04_000_8017EB0C();
-    func_800167B8(0);
+    StartFade(0);
     AF(arg0, u8, 0x15) = (u8) (AF(arg0, u8, 0x15) + 1);
     return 0;
 }
 
 s32 func_sc04_000_8017E82C(void) {
-    return (func_800167F0(0) & 0xFFFF) != 0;
+    return (FadeStep(0) & 0xFFFF) != 0;
 }
 
 void func_sc04_000_8017E850(u8 *arg0) {
@@ -1416,9 +1415,9 @@ s32 func_sc04_000_8017E8CC(u8 *arg0) {
     temp_v0 = AF(arg0, s32, 0x28) - 1;
     AF(arg0, s32, 0x28) = temp_v0;
     if (temp_v0 == -1) {
-        func_8002D4C8(0x1C, 0);
-        func_8001BFD0();
-        func_8002D4C8(0x1D, 0);
+        PlaySoundId(0x1C, 0);
+        ClearTimeChime();
+        PlaySoundId(0x1D, 0);
         func_800D0C48(1);
         func_800D1E28();
         AF(arg0, u8, 0x15) = (u8) (AF(arg0, u8, 0x15) + 1);
@@ -1440,9 +1439,9 @@ s32 func_sc04_000_8017E9A4(u8 *arg0) {
     temp_v0 = AF(arg0, s32, 0x28) - 1;
     AF(arg0, s32, 0x28) = temp_v0;
     if (temp_v0 == -1) {
-        func_8002D4C8(0x1C, 0);
-        func_8001BFD0();
-        func_8002D4C8(0x1D, 0);
+        PlaySoundId(0x1C, 0);
+        ClearTimeChime();
+        PlaySoundId(0x1D, 0);
         func_800D1E28();
         AF(arg0, u8, 0x15) = (u8) (AF(arg0, u8, 0x15) + 1);
     }
@@ -1455,29 +1454,29 @@ void func_sc04_000_8017EA18(u8 *arg0) {
 
 s32 func_sc04_000_8017EA54(u8 *arg0) {
     D_8011F9C4 = 1;
-    func_80029124(0xC7, 1);
-    func_800291F0(4, 0xC7);
-    func_8002D4C8(6, 0);
+    SetFlag(0xC7, 1);
+    SetVar32(4, 0xC7);
+    PlaySoundId(6, 0);
     func_sc04_000_8017ECA0();
-    func_800167B8(0);
+    StartFade(0);
     AF(arg0, u8, 0x15) = (u8) (AF(arg0, u8, 0x15) + 1);
     return 0;
 }
 
 s32 func_sc04_000_8017EACC(void) {
-    if (func_800167F0(0) & 0xFFFF) {
-        func_80171990((s32) &D_80126B58);
+    if (FadeStep(0) & 0xFFFF) {
+        BumpSub2Copy((s32) &g_Player);
         return 1;
     }
     return 0;
 }
 
 void func_sc04_000_8017EB0C(void) {
-    func_8016EE40((s32) &D_sc04_000_80186FBC, 0x01000000);
+    StartPlayerActionScript((s32) &D_sc04_000_80186FBC, 0x01000000);
 }
 
 void func_sc04_000_8017EB34(void) {
-    func_8016EE40((s32) &D_sc04_000_80186FC0, 0x01000000);
+    StartPlayerActionScript((s32) &D_sc04_000_80186FC0, 0x01000000);
 }
 
 void func_sc04_000_8017EB5C(u8 *arg0) {
@@ -1485,9 +1484,9 @@ void func_sc04_000_8017EB5C(u8 *arg0) {
 }
 
 void func_sc04_000_8017EB98(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_80171990(arg0, arg1, arg2, arg3);
-    func_8014708C(arg0);
-    func_801472C8(arg0);
+    BumpSub2Copy(arg0, arg1, arg2, arg3);
+    HidePlayerScene(arg0);
+    SetPlayerFlag7E2(arg0);
     EndScene(arg0);
     func_sc04_000_8017EBE0(arg0);
 }
@@ -1532,74 +1531,74 @@ typedef struct { u32 wx, wy, wz, count; u32 *faces; } Rec;
 extern void func_sc04_000_801818E8();
 extern s32 func_sc04_000_80181BA4();
 
-extern void func_800139C8();
+extern void RotateSVectorY();
 
 s32 func_sc04_000_8018159C(u8 *o);
 s32 func_sc04_000_8018175C(u8 *o);
-extern s32 func_8012E778();
+extern s32 IsOnScreen();
 
 extern u8 D_sc04_000_801A6C50;
-extern void func_8012EFB8();
-extern void func_8002A04C();
-extern void func_801439C0();
+extern void ProjectPoint();
+extern void GainStat0FromActor();
+extern void FreeShadow();
 extern void func_8001CD9C();
 extern u8 D_sc04_000_801AAEA8;
 extern s32 D_sc04_000_801AAEAC;
-extern s32 func_8012E57C();
+extern s32 FindActorByKindArg();
 
 
 void func_sc04_000_8017EBE8(u8 *o) {
     s32 i;
-    u8 *p;
+    StageActor *p;
 
     for (i = 0; i < 0x60; i++) {
-        p = (u8 *)&D_801202A0 + i * 0x10C;
-        if (AF(p, u16, 0) == 0x3AF) {
-            func_8012AD50(p);
+        p = (u8 *)&g_Actors + i * 0x10C;
+        if (p->kind == 0x3AF) {
+            NextState(p);
         }
     }
-    func_80171990(o);
+    BumpSub2Copy(o);
 }
 
 void func_sc04_000_8017EC64(s32 arg0) {
-    if (func_8012E544(0x3AF) == 0) {
-        func_80171928(arg0);
+    if (FindActorByKind(0x3AF) == 0) {
+        NextPlayerActionHandler(arg0);
     }
 }
 
 void func_sc04_000_8017ECA0(void) {
-    func_8016EE40((s32) &D_sc04_000_80186FCC, 0x01000000);
+    StartPlayerActionScript((s32) &D_sc04_000_80186FCC, 0x01000000);
 }
 
-void func_sc04_000_8017ECC8(void) {
-    D_80126954 = 0x190;
-    D_8012695C = 0x3E8;
-    D_80126968 = 0xE3;
+void RoomCameraInit(void) {
+    g_CameraProjTarget = 0x190;
+    g_CameraDistTarget = 0x3E8;
+    g_CameraAngleTarget = 0xE3;
     D_8012696A = 0x800;
     D_8012696C = 0;
-    D_80126976 = 0;
+    g_CameraOfsTarget = 0;
     D_80126978 = -0x50;
     D_8012697A = 0;
-    func_8012A018((s32) func_sc04_000_8017EE20, 0);
-    func_8012A094((s32) &D_80126948);
-    func_sc04_000_8017EE20((s32) &D_80126948);
+    SetCameraUpdate((s32) func_sc04_000_8017EE20, 0);
+    SnapCamera((s32) &g_Camera);
+    func_sc04_000_8017EE20((s32) &g_Camera);
 }
 
-void func_sc04_000_8017ED64(void) {
-    D_80126954 = 0x190;
-    D_8012695C = 0x3E8;
-    D_80126968 = 0xE3;
+void RoomCameraInitNear(void) {
+    g_CameraProjTarget = 0x190;
+    g_CameraDistTarget = 0x3E8;
+    g_CameraAngleTarget = 0xE3;
     D_8012696A = 0x800;
     D_8012696C = 0;
-    D_80126976 = 0;
+    g_CameraOfsTarget = 0;
     D_80126978 = -0x50;
     D_8012697A = 0;
-    func_8012A018((s32) func_sc04_000_8017EE20, 0);
-    func_8012A094((s32) &D_80126948);
-    func_sc04_000_8017EE20((s32) &D_80126948);
+    SetCameraUpdate((s32) func_sc04_000_8017EE20, 0);
+    SnapCamera((s32) &g_Camera);
+    func_sc04_000_8017EE20((s32) &g_Camera);
     D_8012694D = 1;
-    D_80126958 = 0x12C;
-    D_8012695C = 0x12C;
+    g_CameraDist = 0x12C;
+    g_CameraDistTarget = 0x12C;
 }
 
 void func_sc04_000_8017EE20(s32 arg0) {
@@ -1610,12 +1609,12 @@ void func_sc04_000_8017EE5C(u8 *o) {
     SV8 a;
     SV8 b;
 
-    if (func_80148800(&D_80126B58) & 3) {
+    if (GetObjPadPressed(&g_Player) & 3) {
         AF(o, u8, 5) = (AF(o, u8, 5) + 1) & 1;
         AF(o, s32, 0x14) = D_sc04_000_80186FE8[AF(o, u8, 5)];
     }
-    a = D_80126940;
-    b = D_80126940;
+    a = g_CameraFocus;
+    b = g_CameraFocus;
     if (a.x < -0x140) a.x = -0x140;
     if (a.x > 0x140) a.x = 0x140;
     if (a.y < -0x260) a.y = -0x260;
@@ -1634,14 +1633,14 @@ void func_sc04_000_8017F000(u8 *arg0, u8 *arg1, u8 *arg2) {
     FeSv v;
     FeSv o;
 
-    AF(arg0, s32, 8) = (s16) func_80012C6C(AF(arg0, s16, 8), AF(arg0, s16, 0xC), 4);
-    AF(arg0, s32, 0x10) = (s16) func_80012C6C(AF(arg0, s16, 0x10), AF(arg0, s16, 0x14), 4);
-    AF(arg0, s16, 0x18) = func_80012ABC(AF(arg0, s16, 0x18), AF(arg0, s16, 0x20), 4);
-    AF(arg0, s16, 0x1A) = func_80012ABC(AF(arg0, s16, 0x1A), AF(arg0, s16, 0x22), 4);
-    AF(arg0, s16, 0x1C) = func_80012ABC(AF(arg0, s16, 0x1C), AF(arg0, s16, 0x24), 4);
-    AF(arg0, s16, 0x28) = func_80012C6C(AF(arg0, s16, 0x28), AF(arg0, s16, 0x2E), 0x10);
-    AF(arg0, s16, 0x2A) = func_80012C6C(AF(arg0, s16, 0x2A), AF(arg0, s16, 0x30), 0x10);
-    AF(arg0, s16, 0x2C) = func_80012C6C(AF(arg0, s16, 0x2C), AF(arg0, s16, 0x32), 0x10);
+    AF(arg0, s32, 8) = (s16) EaseValue(AF(arg0, s16, 8), AF(arg0, s16, 0xC), 4);
+    AF(arg0, s32, 0x10) = (s16) EaseValue(AF(arg0, s16, 0x10), AF(arg0, s16, 0x14), 4);
+    AF(arg0, s16, 0x18) = EaseAngle(AF(arg0, s16, 0x18), AF(arg0, s16, 0x20), 4);
+    AF(arg0, s16, 0x1A) = EaseAngle(AF(arg0, s16, 0x1A), AF(arg0, s16, 0x22), 4);
+    AF(arg0, s16, 0x1C) = EaseAngle(AF(arg0, s16, 0x1C), AF(arg0, s16, 0x24), 4);
+    AF(arg0, s16, 0x28) = EaseValue(AF(arg0, s16, 0x28), AF(arg0, s16, 0x2E), 0x10);
+    AF(arg0, s16, 0x2A) = EaseValue(AF(arg0, s16, 0x2A), AF(arg0, s16, 0x30), 0x10);
+    AF(arg0, s16, 0x2C) = EaseValue(AF(arg0, s16, 0x2C), AF(arg0, s16, 0x32), 0x10);
     AF(arg0, s32, 0x48) = AF(arg0, s16, 0x28) + AF(arg2, s16, 0);
     AF(arg0, s32, 0x4C) = AF(arg0, s16, 0x2A) + AF(arg2, s16, 2);
     AF(arg0, s32, 0x50) = AF(arg0, s16, 0x2C) + AF(arg2, s16, 4);
@@ -1652,7 +1651,7 @@ void func_sc04_000_8017F000(u8 *arg0, u8 *arg1, u8 *arg2) {
     v.x = 0;
     v.y = 0;
     v.z = AF(arg0, s32, 0x10);
-    func_8012F14C(&m, &v, &o);
+    LocalToWorld(&m, &v, &o);
     AF(arg0, s32, 0x3C) = o.x;
     AF(arg0, s32, 0x40) = o.y;
     AF(arg0, s32, 0x44) = o.z;
@@ -1662,7 +1661,7 @@ extern void (*D_sc04_000_801870E0[])();
 
 void func_sc04_000_8017F1A4(u8 *o) {
     if (AF(o, u16, 2) != 0) {
-        func_8012B2CC(o);
+        UpdateModelZYX(o);
     }
     D_sc04_000_801870E0[AF(o, u16, 2)](o);
 }
@@ -1674,56 +1673,56 @@ s32 func_sc04_000_8017F204(void) {
 extern u8 D_sc04_000_80186FFC;
 extern s32 *func_sc04_000_8017F3F4();
 
-void func_sc04_000_8017F224(s32 arg0) {
-    void *temp_a0;
+void func_sc04_000_8017F224(StageActor *arg0) {
+    ModelObj *temp_a0;
 
-    if (func_8012C354(arg0, (s32) &D_sc04_000_80186FFC) != 0) {
-        if ((u8)func_80029178(0xDA) != 0) {
-            func_8012C218(arg0);
+    if (SetupActor(arg0, (s32) &D_sc04_000_80186FFC) != 0) {
+        if ((u8)GetFlag(0xDA) != 0) {
+            FreeActor(arg0);
             return;
         }
-        AF(arg0, u8, 0xC0) = 1;
-        AF(arg0, u8, 0x75) = 2;
+        arg0->reactive = 1;
+        arg0->targetClass = 2;
         AF(arg0, s16, 0xAE) = -1;
-        AF(arg0, s32, 0xB4) = 0;
-        AF(arg0, s16, 2) = 1;
-        AF(arg0, s32, 0xC4) = (s32) (AF(arg0, s32, 0xC4) | 3);
+        arg0->reactMask = 0;
+        arg0->state = 1;
+        arg0->reactOpts = (s32) ((s32)arg0->reactOpts | 3);
         SetScript(arg0, (s32) &D_sc04_000_801835B0);
-        AF(arg0, s32, 0x6C) = func_801788B8(arg0, (s32) &func_sc04_000_8017F3F4);
-        temp_a0 = AF(arg0, void *, 0x20);
-        AF(temp_a0, s32, 4) = (s32) (AF(temp_a0, s32, 4) | 0x01000000);
+        arg0->link = SpawnTalkMarker(arg0, (s32) &func_sc04_000_8017F3F4);
+        temp_a0 = arg0->model;
+        temp_a0->unk04 = (s32) ((s32)temp_a0->unk04 | 0x01000000);
     }
 }
 
 void func_sc04_000_8017F2E4(void) {
 }
 
-void func_sc04_000_8017F2EC(s32 arg0) {
-    func_80178CBC(arg0, (s32) &D_sc04_000_80187040);
-    AF(arg0, s16, 2) = 3;
+void func_sc04_000_8017F2EC(StageActor *arg0) {
+    RunScript(arg0, (s32) &D_sc04_000_80187040);
+    arg0->state = 3;
 }
 
-void func_sc04_000_8017F324(s32 arg0, s32 arg1) {
-    void *temp_v0;
+void func_sc04_000_8017F324(StageActor *arg0, s32 arg1) {
+    ModelObj *temp_v0;
 
-    if (func_80178970(arg0, arg1) != 0) {
-        func_80178D18(arg0);
-        AF(arg0, s16, 2) = 1;
-        if (AF(arg0, u16, 0x34) != 0) {
-            func_80029124(0xDA, 1);
-            func_8012C218(AF(arg0, s32, 0x6C));
-            func_8012C218(arg0);
+    if (IsEventDone(arg0, arg1) != 0) {
+        EndEvent(arg0);
+        arg0->state = 1;
+        if (arg0->stateCount != 0) {
+            SetFlag(0xDA, 1);
+            FreeActor(arg0->link);
+            FreeActor(arg0);
             return;
         }
     }
-    if (AF(arg0, s16, 0x10A) != 0) {
-        AF(arg0, u16, 0xA) = (u16) (AF(arg0, u16, 0xA) - 2);
-        AF(arg0, u16, 0xE) = (u16) (AF(arg0, u16, 0xE) ^ 2);
-        if ((AF(arg0, s16, 0x8A) - (s16) AF(arg0, u16, 0xA)) >= 0xE1) {
-            temp_v0 = AF(arg0, void *, 0x20);
-            AF(arg0, s16, 0x10A) = 0;
-            AF(temp_v0, s32, 4) = (s32) (AF(temp_v0, s32, 4) | 0x80000000);
-            func_8002D4C8(4, 0xB1D, 0x80000000);
+    if (arg0->work10A != 0) {
+        arg0->pos[1].h.i = (u16) ((u16)arg0->pos[1].h.i - 2);
+        arg0->pos[2].h.i = (u16) ((u16)arg0->pos[2].h.i ^ 2);
+        if ((arg0->origin[1] - (s16) (u16)arg0->pos[1].h.i) >= 0xE1) {
+            temp_v0 = arg0->model;
+            arg0->work10A = 0;
+            temp_v0->unk04 = (s32) ((s32)temp_v0->unk04 | 0x80000000);
+            PlaySoundId(4, 0xB1D, 0x80000000);
         }
     }
 }
@@ -1731,17 +1730,17 @@ void func_sc04_000_8017F324(s32 arg0, s32 arg1) {
 s32 *func_sc04_000_8017F3F4(u8 *arg0) {
     s32 *r;
 
-    if (func_8012BE54(AF(arg0, s32, 0x64)) < 0x2401) {
+    if (GroundDistSqToPlayer(AF(arg0, s32, 0x64)) < 0x2401) {
         AF(AF(arg0, s32, 0x64), s16, 2) = 2;
-        func_80178BF8();
-        r = (s32 *) &func_80172710;
+        ResetScriptVM();
+        r = (s32 *) &CallActionHandler;
     } else {
         r = NULL;
     }
     return r;
 }
 
-s32 func_sc04_000_8017F450(s32 arg0) {
+s32 PickByProgress2F8(s32 arg0) {
     s32 var_v0;
 
     var_v0 = 0x55;
@@ -1751,13 +1750,13 @@ s32 func_sc04_000_8017F450(s32 arg0) {
     return var_v0;
 }
 
-void func_sc04_000_8017F468(u8 *arg0) {
-    D_sc04_000_801870F0[AF(arg0, u16, 2)]();
+void func_sc04_000_8017F468(StageActor *arg0) {
+    D_sc04_000_801870F0[arg0->state]();
 }
 
 void func_sc04_000_8017F4A4(s32 arg0) {
-    func_8012BF4C(arg0, 0);
-    func_8012AD50(arg0);
+    SetMoverTimer(arg0, 0);
+    NextState(arg0);
 }
 
 void func_sc04_000_8017F4D8(s32 arg0) {
@@ -1765,11 +1764,11 @@ void func_sc04_000_8017F4D8(s32 arg0) {
     s32 var_s0;
     s32 var_s0_2;
 
-    if (func_8012BEE8(arg0) != 0) {
+    if (TickTimer(arg0) != 0) {
         temp_v1 = AF(arg0, s16, 0x70);
         switch (temp_v1) {                          /* irregular */
         case 0:
-            if ((AF(D_80126B78, s32, 4) >= 0) && (func_8017267C((s32) &D_80126B58) == 0)) {
+            if ((AF(g_PlayerModel, s32, 4) >= 0) && (PlayerEvent08((s32) &g_Player) == 0)) {
             case 1:
                 func_sc04_000_8017F628(arg0);
                 var_s0 = 0;
@@ -1800,7 +1799,7 @@ loop_7:
             } while (var_s0_2 <= 0);
             break;
         }
-        func_8012BF4C(arg0, (rand() & 0x1F) | 0x20);
+        SetMoverTimer(arg0, (rand() & 0x1F) | 0x20);
     }
 }
 
@@ -1816,22 +1815,22 @@ void func_sc04_000_8017F628(s32 arg0) {
     p = (t * 8) + (u8 *)&D_sc04_000_801870F8;
     switch (t) {
     case 0:
-        func_80149350((s32) &D_80126B58, (s32) p, (s32) &sp10);
-        func_801290DC(0x56, (s32) &sp10);
+        ObjLocalToWorld((s32) &g_Player, (s32) p, (s32) &sp10);
+        SpawnPropAt(0x56, (s32) &sp10);
         break;
     case 1:
-        v = func_8012E544(0x245);
+        v = FindActorByKind(0x245);
         if (v != 0) {
             FaceHelper(v, (s32) p, (s32) &sp10);
-            func_801290DC(0x56, (s32) &sp10);
+            SpawnPropAt(0x56, (s32) &sp10);
         }
         break;
     default:
-        q = (u8 *)&D_801202A0;
+        q = (u8 *)&g_Actors;
         for (i = 0; i < 0x60; i++, q += 0x10C) {
             if (*(u16 *)q == AF(p, s16, 6)) {
                 FaceHelper((s32) q, (s32) p, (s32) &sp10);
-                func_801290DC(0x56, (s32) &sp10);
+                SpawnPropAt(0x56, (s32) &sp10);
             }
         }
         break;
@@ -1847,8 +1846,8 @@ void func_sc04_000_8017F750(u8 *arg0) {
     s32 temp_s1;
 
     temp_s1 = AF(arg0, s32, 0x20);
-    func_800159E4(arg0 + 4, (s32) (arg0 + 0x10));
-    func_8001CC3C(temp_s1, (s32) &D_sc04_000_80187120, 0x270, 0x100);
+    CopyPosInt(arg0 + 4, (s32) (arg0 + 0x10));
+    InitSpriteKind3(temp_s1, (s32) &D_sc04_000_80187120, 0x270, 0x100);
     AF(temp_s1, u8, 0x27) = 0x9C;
     AF(temp_s1, u8, 0x26) = 0x40;
     AF(temp_s1, u8, 0x25) = 0x40;
@@ -1858,7 +1857,7 @@ void func_sc04_000_8017F750(u8 *arg0) {
     AF(arg0, s16, 0x30) = (s16) ((rand() & 3) + 1);
     temp_s0 = rand();
     AF(temp_s1, s16, 0x12) = (s16) (((temp_s0 & 3) << 0xA) + ((rand() & 0xF) * 0x44));
-    func_80146E90((s32) arg0, rand() & 0xF);
+    SetObjTimer((s32) arg0, rand() & 0xF);
     AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
 }
 
@@ -1866,9 +1865,9 @@ void func_sc04_000_8017F834(u8 *arg0) {
     void *temp_s1;
 
     temp_s1 = AF(arg0, void *, 0x20);
-    if (func_80146E98((s32) arg0) != 0) {
+    if (TickObjTimer((s32) arg0) != 0) {
         AF(temp_s1, s32, 4) = (s32) (AF(temp_s1, s32, 4) & 0x7FFFFFFF);
-        func_80146E90((s32) arg0, 0x10);
+        SetObjTimer((s32) arg0, 0x10);
         AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
     }
 }
@@ -1883,15 +1882,15 @@ void func_sc04_000_8017F8A0(u8 *o) {
     AF(o, u16, 0x2C) = a;
     v.z = rsin((s16)a) / 256;
     v.x = v.y = 0;
-    func_800139C8(AF(p, s16, 0x12), &v, &v);
+    RotateSVectorY(AF(p, s16, 0x12), &v, &v);
     AF(o, s16, 6) = AF(o, s16, 0x12) + v.x;
     AF(o, s16, 0xE) = AF(o, s16, 0x1A) + v.z;
     AF(o, s16, 0xA) -= AF(o, s16, 0x30);
     AF(o, s16, 0x2E) += 0x10;
     AF(p, s16, 0x18) = AF(p, s16, 0x1A) = AF(p, s16, 0x1A) + AF(o, s16, 0x2E);
     AF(p, u8, 0x24) = AF(p, u8, 0x25) = AF(p, u8, 0x26) = AF(p, u8, 0x26) - 4;
-    if (func_80146E98(o) != 0) {
-        func_801292C8(o);
+    if (TickObjTimer(o) != 0) {
+        FreeProp(o);
     }
 }
 
@@ -1902,23 +1901,23 @@ void func_sc04_000_8017F98C(u8 *o) {
     case 0:
         break;
     case 1:
-        v = func_8012B744(o + 4, &D_sc04_000_801995A4);
-        v = func_8012B608(AF(AF(o, u8 *, 0x20), s16, 0x12), v, 4);
+        v = HeadingToPoint(o + 4, &D_sc04_000_801995A4);
+        v = TurnStep(AF(AF(o, u8 *, 0x20), s16, 0x12), v, 4);
         AF(AF(o, u8 *, 0x20), u16, 0x12) += v;
         AF(AF(o, u8 *, 0x20), u16, 0x12) &= 0xFFF;
         if (--AF(o, s32, 0x1C) == 0) {
             AF(o, u16, 0x34)++;
-            func_8012B2CC(o);
-            func_8012B1B4(o, &D_sc04_000_801995AC);
+            UpdateModelZYX(o);
+            SetLocalVelocityXZ(o, &D_sc04_000_801995AC);
             AF(o, s32, 0x1C) = 0xF;
             SetScript(o, &D_sc04_000_8019CF08);
         }
         break;
     case 2:
-        func_8012CBA4(o);
+        MoveOnGround(o);
         break;
     case 3:
-        func_8012CBA4(o);
+        MoveOnGround(o);
         if (--AF(o, s32, 0x1C) == 0) {
             AF(o, s32, 0x1C) = 0xF;
             AF(o, u16, 0x34)++;
@@ -1926,65 +1925,65 @@ void func_sc04_000_8017F98C(u8 *o) {
         }
         break;
     case 4:
-        AF(AF(o, u8 *, 0x20), u16, 0x12) += func_8012BA10(o, 4);
+        AF(AF(o, u8 *, 0x20), u16, 0x12) += TurnStepToPlayer(o, 4);
         break;
     case 5:
-        v = func_8012B744(o + 4, &D_sc04_000_801995A4);
-        v = func_8012B608(AF(AF(o, u8 *, 0x20), s16, 0x12), v, 4);
+        v = HeadingToPoint(o + 4, &D_sc04_000_801995A4);
+        v = TurnStep(AF(AF(o, u8 *, 0x20), s16, 0x12), v, 4);
         AF(AF(o, u8 *, 0x20), u16, 0x12) += v;
         AF(AF(o, u8 *, 0x20), u16, 0x12) &= 0xFFF;
         if (--AF(o, s32, 0x1C) == 0) {
             AF(o, u16, 0x34)++;
-            func_8012B2CC(o);
-            func_8012B1B4(o, &D_sc04_000_801995AC);
+            UpdateModelZYX(o);
+            SetLocalVelocityXZ(o, &D_sc04_000_801995AC);
             SetScript(o, &D_sc04_000_8019CF08);
         }
         break;
     case 6:
-        func_8012CBA4(o);
+        MoveOnGround(o);
         if (AF(o, s16, 0xE) < -0x398) {
             AF(o, s16, 0xE) = -0x600;
             AF(o, u16, 0x34)++;
             func_800D0C48(1);
             AF(o, s32, 0x1C) = 0x1E;
-            func_8002AC00(0x17);
+            GiveItem(0x17);
         }
         break;
     case 7:
         if (--AF(o, s32, 0x1C) == 0) {
             AF(o, u16, 0x34) = 0;
-            func_8001AAA0(0x55);
+            RequestBgmPack(0x55);
             AF(o, u16, 0xFC) |= 1;
         }
         break;
     }
-    if (AF(o, s16, 0xFC) < 2 && func_801789AC(o) != 0) {
-        func_80178D18(o);
-        func_80029514(0x2F8);
+    if (AF(o, s16, 0xFC) < 2 && UpdateScript(o) != 0) {
+        EndEvent(o);
+        SetProgress(0x2F8);
         AF(o, u16, 0xFC) |= 2;
-        func_8012A568(func_sc04_000_8017ECC8);
+        BlendCameraThen(RoomCameraInit);
     }
     if (AF(o, s16, 0xFC) == 3) {
-        func_8012C218(o);
+        FreeActor(o);
     }
 }
 
-void func_sc04_000_8017FC8C(u8 *arg0) {
-    D_sc04_000_80199760[AF(arg0, u16, 2)]();
+void func_sc04_000_8017FC8C(StageActor *arg0) {
+    D_sc04_000_80199760[arg0->state]();
 }
 
 void func_sc04_000_8017FCC8(u8 *arg0) {
     D_sc04_000_8019977C[AF(arg0, u16, 2)]();
 }
 
-s32 func_sc04_000_8017FD04(u8 *o) {
+s32 func_sc04_000_8017FD04(StageActor *o) {
     s32 i;
     u8 *e;
     u8 *m;
 
-    if (AF(o, s16, 0xFE) < 0x1F) {
+    if (o->workFE < 0x1F) {
         for (i = 0; i < 6; i++) {
-            e = (u8 *)func_80143C74(o, 0);
+            e = (u8 *)SpawnKind205(o, 0);
             if (e != 0) {
                 m = AF(e, u8 *, 0xCC);
                 AF(m, s16, 0x18) = rand() % 0x2000 + 0x3000;
@@ -1995,68 +1994,68 @@ s32 func_sc04_000_8017FD04(u8 *o) {
                 AF(e, s16, 0x16) -= 8;
             }
         }
-        AF(o, s16, 0xFE)++;
+        o->workFE++;
         return 0;
     }
     MoveImage((s32) &D_sc04_000_8019976C, 0x300, 0x180);
     MoveImage((s32) &D_sc04_000_80199774, 0x100, 0x1E8);
-    func_80029514(0x302);
+    SetProgress(0x302);
     return 1;
 }
 
-void func_sc04_000_8017FEBC(s32 arg0) {
-    void *temp_a0;
+void func_sc04_000_8017FEBC(StageActor *arg0) {
+    ModelObj *temp_a0;
 
-    if (func_8012C354(arg0, (s32) &D_sc04_000_801997EC) != 0) {
-        if (func_80029504() >= 0x30CU) {
-            func_8012C218(arg0);
+    if (SetupActor(arg0, (s32) &D_sc04_000_801997EC) != 0) {
+        if (GetProgress() >= 0x30CU) {
+            FreeActor(arg0);
             return;
         }
-        AF(arg0, u8, 0xC0) = 1;
-        AF(arg0, s32 *, 0xBC) = &D_sc04_000_80199820;
-        AF(arg0, u8, 0x75) = 2;
+        arg0->reactive = 1;
+        arg0->params = &D_sc04_000_80199820;
+        arg0->targetClass = 2;
         AF(arg0, s16, 0xAE) = -5;
-        AF(arg0, s32, 0xB4) = 0;
-        AF(arg0, s16, 2) = 1;
-        AF(arg0, s32, 0xC4) = (s32) (AF(arg0, s32, 0xC4) | 3);
+        arg0->reactMask = 0;
+        arg0->state = 1;
+        arg0->reactOpts = (s32) ((s32)arg0->reactOpts | 3);
         SetScript(arg0, (s32) &D_sc04_000_801835B0);
-        temp_a0 = AF(arg0, void *, 0x20);
-        AF(temp_a0, s32, 4) = (s32) (AF(temp_a0, s32, 4) | 0x01000000);
-        if (AF(arg0, s16, 0x70) != 0) {
-            func_8001C214((s32) AF(arg0, void *, 0x20), (s32) &D_sc04_000_80199468);
-            AF(arg0, s16, 0x5C) = 0;
-            AF(arg0, u16, 6) = (u16) (AF(arg0, u16, 6) + 0x100);
+        temp_a0 = arg0->model;
+        temp_a0->unk04 = (s32) ((s32)temp_a0->unk04 | 0x01000000);
+        if (arg0->param != 0) {
+            InitModel((s32) arg0->model, (s32) &D_sc04_000_80199468);
+            arg0->hitState = 0;
+            arg0->pos[0].h.i = (u16) ((u16)arg0->pos[0].h.i + 0x100);
         } else {
-            AF(arg0, s32, 0x6C) = func_801788B8(arg0, (s32) &func_sc04_000_801806B8);
-            AF(arg0, s32, 0xCC) = func_8012C658(0x246, 1, arg0);
+            arg0->link = SpawnTalkMarker(arg0, (s32) &func_sc04_000_801806B8);
+            arg0->ext0 = SpawnActorArg(0x246, 1, arg0);
         }
-        func_8001D0E8((s32) AF(arg0, void *, 0x20), 0x258, 0xF0);
-        if (func_80029504() >= 0x302U) {
+        SetModelCullBox((s32) arg0->model, 0x258, 0xF0);
+        if (GetProgress() >= 0x302U) {
             MoveImage((s32) &D_sc04_000_8019976C, 0x300, 0x180);
             MoveImage((s32) &D_sc04_000_80199774, 0x100, 0x1E8);
         }
     }
 }
 
-void func_sc04_000_80180020(u8 *o) {
+void func_sc04_000_80180020(StageActor *o) {
     u8 *p;
     u8 *q;
     u8 unused[8];
 
-    switch (AF(o, s16, 0x10A)) {
+    switch (o->work10A) {
     case 0:
         break;
     case 1:
-        p = func_8012913C(0x6D);
+        p = SpawnProp(0x6D);
         if (p == 0) {
             break;
         }
-        AF(o, u8 *, 0xD0) = p;
+        o->ext1 = p;
         {
         u8 *c = &D_sc04_000_801A9CE8;
-        AF(p, u16, 6) = AF(o, u16, 6) + 0x80;
-        AF(p, u16, 0xA) = AF(o, u16, 0xA) - 0x38;
-        AF(p, u16, 0xE) = AF(o, u16, 0xE) - 0x28;
+        AF(p, u16, 6) = (u16)o->pos[0].h.i + 0x80;
+        AF(p, u16, 0xA) = (u16)o->pos[1].h.i - 0x38;
+        AF(p, u16, 0xE) = (u16)o->pos[2].h.i - 0x28;
         func_8001CD50(AF(p, s32, 0x20), c);
         D_sc04_000_801A9CE9 = 0;
         D_sc04_000_801A9CEA = 0;
@@ -2064,26 +2063,26 @@ void func_sc04_000_80180020(u8 *o) {
         D_sc04_000_801A9CE9 = 0;
         D_sc04_000_801A9CEA = 0;
         c[0] = 0xFF;
-        func_800233CC(c, 0x40);
+        SetShapeCircle(c, 0x40);
         }
-        AF(o, s16, 0x10A) = 2;
-        AF(o, s16, 0xFC) = 0x20;
+        o->work10A = 2;
+        o->unkFC = 0x20;
         break;
     case 2:
-        if (AF(o, s16, 0xFC) != 0) {
-            AF(o, s16, 0xFC)--;
+        if (o->unkFC != 0) {
+            o->unkFC--;
             break;
         }
-        p = func_8012913C(0x6D);
+        p = SpawnProp(0x6D);
         if (p == 0) {
             break;
         }
         AF(o, u8 *, 0xD8) = p;
         {
         u8 *c = &D_sc04_000_801A9D68;
-        AF(p, u16, 6) = AF(o, u16, 6) + 0x68;
-        AF(p, u16, 0xA) = AF(o, u16, 0xA) - 0x20;
-        AF(p, u16, 0xE) = AF(o, u16, 0xE) - 0x28;
+        AF(p, u16, 6) = (u16)o->pos[0].h.i + 0x68;
+        AF(p, u16, 0xA) = (u16)o->pos[1].h.i - 0x20;
+        AF(p, u16, 0xE) = (u16)o->pos[2].h.i - 0x28;
         func_8001CD50(AF(p, s32, 0x20), c);
         D_sc04_000_801A9D69 = 0;
         D_sc04_000_801A9D6A = 0;
@@ -2091,26 +2090,26 @@ void func_sc04_000_80180020(u8 *o) {
         c[0] = 0;
         D_sc04_000_801A9D69 = 0;
         D_sc04_000_801A9D6A = 0xFF;
-        func_800233CC(c, 0x40);
+        SetShapeCircle(c, 0x40);
         }
-        AF(o, s16, 0x10A) = 3;
-        AF(o, s16, 0xFC) = 0x20;
+        o->work10A = 3;
+        o->unkFC = 0x20;
         break;
     case 3:
-        if (AF(o, s16, 0xFC) != 0) {
-            AF(o, s16, 0xFC)--;
+        if (o->unkFC != 0) {
+            o->unkFC--;
             break;
         }
-        p = func_8012913C(0x6D);
+        p = SpawnProp(0x6D);
         if (p == 0) {
             break;
         }
         AF(o, u8 *, 0xD4) = p;
         {
         u8 *c = &D_sc04_000_801A9D28;
-        AF(p, u16, 6) = AF(o, u16, 6) + 0x9C;
-        AF(p, u16, 0xA) = AF(o, u16, 0xA) - 0x20;
-        AF(p, u16, 0xE) = AF(o, u16, 0xE) - 0x28;
+        AF(p, u16, 6) = (u16)o->pos[0].h.i + 0x9C;
+        AF(p, u16, 0xA) = (u16)o->pos[1].h.i - 0x20;
+        AF(p, u16, 0xE) = (u16)o->pos[2].h.i - 0x28;
         func_8001CD50(AF(p, s32, 0x20), c);
         D_sc04_000_801A9D29 = 0;
         D_sc04_000_801A9D2A = 0;
@@ -2118,50 +2117,50 @@ void func_sc04_000_80180020(u8 *o) {
         c[0] = 0;
         D_sc04_000_801A9D2A = 0;
         D_sc04_000_801A9D29 = 0xFF;
-        func_800233CC(c, 0x40);
+        SetShapeCircle(c, 0x40);
         }
-        AF(o, s16, 0x10A) = 4;
-        AF(o, s16, 0xFC) = 0x20;
+        o->work10A = 4;
+        o->unkFC = 0x20;
         break;
     case 4:
-        if (AF(o, s16, 0xFC) != 0) {
-            AF(o, s16, 0xFC)--;
+        if (o->unkFC != 0) {
+            o->unkFC--;
             break;
         }
-        AF(AF(o, u8 *, 0xD0), u16, 2) += 1;
+        AF(o->ext1, u16, 2) += 1;
         AF(AF(o, u8 *, 0xD4), u16, 2) += 1;
         AF(AF(o, u8 *, 0xD8), u16, 2) += 1;
-        AF(o, s16, 0x10A) = 5;
-        AF(o, s16, 0xFC) = 0x20;
+        o->work10A = 5;
+        o->unkFC = 0x20;
         break;
     case 5:
-        if (AF(o, s16, 0xFC) != 0) {
-            AF(o, s16, 0xFC)--;
+        if (o->unkFC != 0) {
+            o->unkFC--;
             break;
         }
-        AF(o, s16, 0x10A) = 6;
-        func_8002D4C8(0xC1F, 0);
+        o->work10A = 6;
+        PlaySoundId(0xC1F, 0);
         break;
     case 6:
-        AF(o, u16, 6) -= 2;
-        AF(o, u16, 0xA) ^= 2;
-        q = AF(o, u8 *, 0xCC);
+        o->pos[0].h.i -= 2;
+        o->pos[1].h.i ^= 2;
+        q = (u8 *)o->ext0;
         AF(q, u16, 6) += 2;
         AF(q, u16, 0xA) ^= 2;
-        if (AF(o, s16, 0x88) - AF(o, s16, 6) > 0x80) {
-            AF(o, s16, 0x10A) = 0;
-            func_8002D4C8(4, 0xC1F);
+        if (o->origin[0] - o->pos[0].h.i > 0x80) {
+            o->work10A = 0;
+            PlaySoundId(4, 0xC1F);
         }
         break;
     }
-    if (func_80178970(o) != 0) {
-        func_80178D18(o);
-        AF(o, s16, 2) = 1;
-        if (AF(o, u16, 0x34) != 0) {
-            func_80029514(0x30C);
-            func_8012C218(AF(o, s32, 0xCC));
-            func_8012C218(AF(o, s32, 0x6C));
-            func_8012C218(o);
+    if (IsEventDone(o) != 0) {
+        EndEvent(o);
+        o->state = 1;
+        if (o->stateCount != 0) {
+            SetProgress(0x30C);
+            FreeActor(o->ext0);
+            FreeActor(o->link);
+            FreeActor(o);
             func_800D0F4C(0x60);
             func_800D0F4C(0x61);
             func_800D0F4C(0x62);
@@ -2171,39 +2170,39 @@ void func_sc04_000_80180020(u8 *o) {
 
 extern void (*D_sc04_000_801998F8[])();
 
-void func_sc04_000_801803BC(u8 *o) {
+void func_sc04_000_801803BC(StageActor *o) {
     s16 *p = &D_80126B66;
 
     if (*p >= 0x4FD) {
         *p = 0x4FD;
     }
-    D_sc04_000_801998F8[AF(o, u16, 2)](o);
+    D_sc04_000_801998F8[o->state](o);
 }
 
 void func_sc04_000_80180418(s32 arg0) {
-    if (func_8012C354(arg0, (s32) &D_sc04_000_80199570) != 0) {
-        if (func_80029504() >= 0x2F8U) {
-            func_8012C218(arg0);
+    if (SetupActor(arg0, (s32) &D_sc04_000_80199570) != 0) {
+        if (GetProgress() >= 0x2F8U) {
+            FreeActor(arg0);
             return;
         }
         AF(arg0, u8, 0xC0) = 1;
         AF(arg0, s32, 0xB4) = -1;
-        func_80143970(arg0);
+        SpawnShadow(arg0);
         SetScript(arg0, (s32) &D_sc04_000_8019CF90);
         AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
-        func_8012B23C(arg0);
+        StopWithGravity(arg0);
         AF(arg0, s32, 0x1C) = 0xF;
     }
 }
 
-void func_sc04_000_801804B4(u8 *arg0) {
+void BarrierStartEvent(u8 *arg0) {
     s32 temp_v0;
 
     temp_v0 = AF(arg0, s32, 0x1C) - 1;
     AF(arg0, s32, 0x1C) = temp_v0;
     if (temp_v0 == 0) {
         AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
-        func_80178B18((s32) arg0, (s32) &D_sc04_000_80199618);
+        StartEvent((s32) arg0, (s32) &D_sc04_000_80199618);
         AF(arg0, s32, 0x1C) = 5;
     }
 }
@@ -2220,7 +2219,7 @@ void func_sc04_000_8018050C(u8 *arg0) {
     AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
 }
 
-void func_sc04_000_80180548(u8 *arg0) {
+void PropScaleIn(u8 *arg0) {
     s16 temp_v0_2;
     s32 temp_v0;
     void *temp_s0;
@@ -2239,7 +2238,7 @@ void func_sc04_000_80180548(u8 *arg0) {
 void func_sc04_000_801805A8(void) {
 }
 
-void func_sc04_000_801805B0(u8 *arg0) {
+void PropScaleOut(u8 *arg0) {
     s16 temp_v0_2;
     s32 temp_v0;
     void *temp_s0;
@@ -2248,7 +2247,7 @@ void func_sc04_000_801805B0(u8 *arg0) {
     temp_v0 = AF(arg0, s32, 0x2C) - 0x20;
     AF(arg0, s32, 0x2C) = temp_v0;
     if (temp_v0 <= 0) {
-        func_801292C8((s32) arg0);
+        FreeProp((s32) arg0);
         return;
     }
     temp_v0_2 = rsin(temp_v0);
@@ -2259,8 +2258,8 @@ void func_sc04_000_801805B0(u8 *arg0) {
 void func_sc04_000_80180604(u8 *arg0, s32 arg1, s32 arg2) {
     AF(arg0, u16, 0x5C) = 0x8800;
     AF(arg0, u8, 0xC1) = 0;
-    if ((AF(arg0, u8, 0x5E) == 0x24) && (func_80029504((s32) arg0, arg1, arg2) < 0x302U)) {
-        func_80178B18((s32) arg0, (s32) &D_sc04_000_8019979C);
+    if ((AF(arg0, u8, 0x5E) == 0x24) && (GetProgress((s32) arg0, arg1, arg2) < 0x302U)) {
+        StartEvent((s32) arg0, (s32) &D_sc04_000_8019979C);
         AF(arg0, s16, 2) = 3;
     }
 }
@@ -2274,10 +2273,10 @@ s32 func_sc04_000_8018066C(void) {
 
 s32 *func_sc04_000_801806B8(u8 *arg0) {
     if ((AF(arg0, s16, 0xE) - D_80126B66) < 0x50) {
-        if ((u32) (D_80126B5E - AF(arg0, s16, 6)) < 0x101U) {
+        if ((u32) (g_PlayerX - AF(arg0, s16, 6)) < 0x101U) {
             AF(AF(arg0, void *, 0x64), s16, 2) = 2;
-            func_80178BF8();
-            return &func_80172710;
+            ResetScriptVM();
+            return &CallActionHandler;
         }
         /* Duplicate return node #4. Try simplifying control flow for better match */
         return NULL;
@@ -2288,73 +2287,73 @@ s32 *func_sc04_000_801806B8(u8 *arg0) {
 void func_sc04_000_80180730(void) {
 }
 
-void func_sc04_000_80180738(s32 arg0, s32 arg1, s32 arg2) {
+void ItemTakerTalk(s32 arg0, s32 arg1, s32 arg2) {
     s16 var_v0;
 
-    if (func_80029504(arg0, arg1, arg2) >= 0x302U) {
-        func_80178CBC(arg0, (s32) &D_sc04_000_80199868);
+    if (GetProgress(arg0, arg1, arg2) >= 0x302U) {
+        RunScript(arg0, (s32) &D_sc04_000_80199868);
         var_v0 = 4;
     } else {
-        func_80178CBC(arg0, (s32) &D_sc04_000_80199830);
+        RunScript(arg0, (s32) &D_sc04_000_80199830);
         var_v0 = 3;
     }
     AF(arg0, s16, 2) = var_v0;
 }
 
-void func_sc04_000_8018079C(s32 arg0) {
-    if (func_80178970(arg0) != 0) {
-        func_80178D18(arg0);
-        AF(arg0, s16, 2) = 1;
+void func_sc04_000_8018079C(StageActor *arg0) {
+    if (IsEventDone(arg0) != 0) {
+        EndEvent(arg0);
+        arg0->state = 1;
     }
 }
 
-void func_sc04_000_801807DC(u8 *arg0) {
-    D_sc04_000_8019D328[AF(arg0, u16, 2)]();
+void func_sc04_000_801807DC(StageActor *arg0) {
+    D_sc04_000_8019D328[arg0->state]();
 }
 
-void func_sc04_000_80180818(s32 arg0) {
-    s32 temp_v0;
+void func_sc04_000_80180818(StageActor *arg0) {
+    StageActor *temp_v0;
 
-    if (func_8012C354(arg0, (s32) &D_sc04_000_8019D018) != 0) {
-        if (!(func_80029178(D_sc04_000_8019D080[AF(AF(arg0, void *, 0xDC), u16, 0xA)]) & 0xFF)) {
-            AF(arg0, s32, 0xCC) = func_801788B8(arg0, (s32) &func_sc04_000_80180EC4);
+    if (SetupActor(arg0, (s32) &D_sc04_000_8019D018) != 0) {
+        if (!(GetFlag(D_sc04_000_8019D080[AF(arg0->message, u16, 0xA)]) & 0xFF)) {
+            arg0->ext0 = SpawnTalkMarker(arg0, (s32) &func_sc04_000_80180EC4);
         } else {
-            AF(arg0, u16, 0x70) = (u16) (AF(arg0, u16, 0x70) | 0x4000);
+            arg0->param = (u16) ((u16)arg0->param | 0x4000);
         }
-        temp_v0 = func_8012C658(0x8F, (s32) (s16) AF(arg0, u16, 0x70), arg0);
-        AF(arg0, s32, 0x6C) = temp_v0;
+        temp_v0 = SpawnActorArg(0x8F, (s32) (s16) (u16)arg0->param, arg0);
+        arg0->link = temp_v0;
         if (temp_v0 == 0) {
-            func_8012CAE4(arg0);
+            RejectSpawn(arg0);
             return;
         }
         SetScript(arg0, (s32) &D_sc04_000_801835B0);
-        AF(arg0, s16, 2) = 1;
+        arg0->state = 1;
     }
 }
 
-void func_sc04_000_801808EC(u8 *arg0) {
-    AF(AF(AF(arg0, void *, 0x6C), void *, 0x20), s16, 0x12) = (s16) ((AF(AF(arg0, void *, 0x20), u16, 0x12) + 0x800) & 0xFFF);
-    AF(arg0, s16, 2) = 2;
+void func_sc04_000_801808EC(StageActor *arg0) {
+    arg0->link->model->rot.vy = (s16) (((u16)arg0->model->rot.vy + 0x800) & 0xFFF);
+    arg0->state = 2;
 }
 
 void func_sc04_000_80180914(void) {
 }
 
-void func_sc04_000_8018091C(u8 *arg0) {
+void func_sc04_000_8018091C(StageActor *arg0) {
     s32 *var_a1;
     s32 var_v0;
     void *temp_s0;
 
-    temp_s0 = AF(arg0, void *, 0xDC);
+    temp_s0 = arg0->message;
     if (!(AF(temp_s0, u16, 8) & 0x8000)) {
-        if (func_80029178(0x1D) & 0xFF) {
+        if (GetFlag(0x1D) & 0xFF) {
             D_sc04_000_8019D264 = AF(temp_s0, s32, 4);
             if (!(AF(temp_s0, u16, 8) & 0x4000)) {
                 var_v0 = D_sc04_000_8019D1C8[AF(temp_s0, u16, 0xC)];
                 goto block_6;
             }
             D_sc04_000_8019D250 = 0;
-            func_80029124(D_sc04_000_8019D1C8[AF(temp_s0, u16, 0xC)], 1);
+            SetFlag(D_sc04_000_8019D1C8[AF(temp_s0, u16, 0xC)], 1);
             D_sc04_000_8019D24C = 2;
         } else {
             D_sc04_000_8019D264 = AF(temp_s0, s32, 0);
@@ -2363,43 +2362,43 @@ block_6:
             D_sc04_000_8019D24C = 0;
             D_sc04_000_8019D250 = var_v0;
         }
-        func_80178CBC((s32) arg0, (s32) &D_sc04_000_8019D278);
+        RunScript((s32) arg0, (s32) &D_sc04_000_8019D278);
     } else {
         var_a1 = &D_sc04_000_8019D2E4;
         *var_a1 = AF(temp_s0, s32, 0);
-        func_80178CBC((s32) arg0, (s32) (var_a1 - 7));
+        RunScript((s32) arg0, (s32) (var_a1 - 7));
     }
-    AF(arg0, s16, 2) = 4;
-    AF(arg0, u16, 0x70) = (u16) (AF(arg0, u16, 0x70) | 0x8000);
+    arg0->state = 4;
+    arg0->param = (u16) ((u16)arg0->param | 0x8000);
 }
 
-void func_sc04_000_80180A68(u8 *arg0) {
+void func_sc04_000_80180A68(StageActor *arg0) {
     void *temp_s2;
 
-    temp_s2 = AF(arg0, void *, 0xDC);
-    if (func_801789AC((s32) arg0) != 0) {
-        func_80178D18((s32) arg0);
-        if (func_80029178(D_sc04_000_8019D080[AF(temp_s2, u16, 0xA)]) & 0xFF) {
+    temp_s2 = arg0->message;
+    if (UpdateScript((s32) arg0) != 0) {
+        EndEvent((s32) arg0);
+        if (GetFlag(D_sc04_000_8019D080[AF(temp_s2, u16, 0xA)]) & 0xFF) {
             if (D_sc04_000_8019D080[AF(temp_s2, u16, 0xA)] == 0x54) {
-                func_80029514(0x5A);
-                func_80029124(0xEA, 1);
+                SetProgress(0x5A);
+                SetFlag(0xEA, 1);
             }
-            if ((AF(temp_s2, u16, 8) & 0x4000) && (func_80029178(0x1D) & 0xFF)) {
-                func_80145EE8(0);
+            if ((AF(temp_s2, u16, 8) & 0x4000) && (GetFlag(0x1D) & 0xFF)) {
+                UploadFlagImages(0);
             }
             if (func_sc04_000_80180C6C() == 1) {
-                func_8002AC00(0x26);
+                GiveItem(0x26);
             }
-            AF(arg0, u16, 0x70) = (u16) (AF(arg0, u16, 0x70) & 0x8000);
-            func_8012C218(AF(arg0, s32, 0xCC));
+            arg0->param = (u16) ((u16)arg0->param & 0x8000);
+            FreeActor(arg0->ext0);
         }
-        AF(arg0, s16, 2) = 2;
+        arg0->state = 2;
     }
 }
 
-void func_sc04_000_80180B88(u8 *arg0) {
-    AF(arg0, s16, 2) = 2;
-    func_8012C218(AF(arg0, s32, 0xCC));
+void func_sc04_000_80180B88(StageActor *arg0) {
+    arg0->state = 2;
+    FreeActor(arg0->ext0);
 }
 
 void func_sc04_000_80180BB4(u8 *arg0) {
@@ -2411,11 +2410,11 @@ void func_sc04_000_80180BC4(u8 *arg0) {
 }
 
 void func_sc04_000_80180BD4(u8 *arg0) {
-    func_80029124(D_sc04_000_8019D080[AF(AF(arg0, void *, 0xDC), u16, 0xA)], 1);
+    SetFlag(D_sc04_000_8019D080[AF(AF(arg0, void *, 0xDC), u16, 0xA)], 1);
 }
 
 void func_sc04_000_80180C14(u8 *arg0) {
-    func_8014ADA8((s32) &D_80126B58, (s32) AF(AF(arg0, void *, 0xDC), u16, 0xC));
+    AddMoney((s32) &g_Player, (s32) AF(AF(arg0, void *, 0xDC), u16, 0xC));
 }
 
 s32 func_sc04_000_80180C48(void) {
@@ -2426,64 +2425,64 @@ s32 func_sc04_000_80180C6C(void) {
     s32 i;
 
     for (i = 0; i < 0x26; i++) {
-        if (!(func_80029178(D_sc04_000_8019D080[i]) & 0xFF)) {
+        if (!(GetFlag(D_sc04_000_8019D080[i]) & 0xFF)) {
             return 0;
         }
     }
     return 1;
 }
 
-void func_sc04_000_80180CD0(u8 *arg0) {
-    D_sc04_000_8019D350[AF(arg0, u16, 2)]();
+void func_sc04_000_80180CD0(StageActor *arg0) {
+    D_sc04_000_8019D350[arg0->state]();
 }
 
-void func_sc04_000_80180D0C(s32 arg0) {
-    if (func_8012C354(arg0, (s32) &D_sc04_000_8019D04C) != 0) {
-        AF(arg0, u16, 0xFC) = (u16) AF(AF(arg0, void *, 0x64), u16, 0x36);
-        if (AF(arg0, u16, 0x70) & 0x4000) {
+void func_sc04_000_80180D0C(StageActor *arg0) {
+    if (SetupActor(arg0, (s32) &D_sc04_000_8019D04C) != 0) {
+        arg0->unkFC = (u16) arg0->parent->id;
+        if ((u16)arg0->param & 0x4000) {
             SetScript(arg0, (s32) &D_sc04_000_8019DA10);
-            AF(arg0, s16, 0x5C) = 0;
+            arg0->hitState = 0;
         } else {
             SetScript(arg0, (s32) &D_sc04_000_8019D7F0);
         }
-        AF(arg0, s16, 2) = 1;
+        arg0->state = 1;
     }
 }
 
-void func_sc04_000_80180D94(u8 *arg0, s32 arg1) {
+void func_sc04_000_80180D94(StageActor *arg0, s32 arg1) {
     s16 temp_v1;
 
-    if (AF(arg0, s16, 0xFC) != AF(AF(arg0, void *, 0x64), s16, 0x36)) {
-        func_8012C218((s32) arg0, arg1);
+    if (arg0->unkFC != (s16)arg0->parent->id) {
+        FreeActor((s32) arg0, arg1);
         return;
     }
-    temp_v1 = AF(arg0, s16, 0xFE);
+    temp_v1 = arg0->workFE;
     if (temp_v1 == 1) {
-        AF(arg0, s16, 2) = 2;
-        AF(arg0, s32, 0x1C) = 0x20;
+        arg0->state = 2;
+        arg0->timer = 0x20;
         SetScript((s32) arg0, (s32) &D_sc04_000_8019D800);
-        AF(arg0, s16, 0x5C) = 0;
-        func_8002D4C8(0x5BF, 0);
+        arg0->hitState = 0;
+        PlaySoundId(0x5BF, 0);
     } else if (temp_v1 == 2) {
-        AF(arg0, s16, 2) = 2;
-        AF(arg0, s32, 0x1C) = 0x20;
+        arg0->state = 2;
+        arg0->timer = 0x20;
         SetScript((s32) arg0, (s32) &D_sc04_000_8019D908);
-        AF(arg0, u16, 0x5C) = 0x8C00;
+        arg0->hitState = 0x8C00;
     }
 }
 
-void func_sc04_000_80180E54(u8 *arg0) {
+void func_sc04_000_80180E54(StageActor *arg0) {
     s32 f;
 
-    if (AF(arg0, s16, 0x98) == 0) {
-        f = AF(arg0, s16, 0xFE);
-        AF(arg0, s16, 2) = 1;
+    if (arg0->animTimer == 0) {
+        f = arg0->workFE;
+        arg0->state = 1;
         if (f == 1) {
             SetScript((s32) arg0, (s32) &D_sc04_000_8019DA10);
         } else {
             SetScript((s32) arg0, (s32) &D_sc04_000_8019D7F0);
         }
-        AF(arg0, s16, 0xFE) = 0;
+        arg0->workFE = 0;
     }
 }
 
@@ -2491,47 +2490,47 @@ s32 *func_sc04_000_80180EC4(u8 *o) {
     SV8 a;
     SV8 b;
     s32 f;
-    u8 *p;
+    Mover *p;
     s32 *r;
 
     p = AF(o, u8 *, 0x64);
-    gte_SetRotMatrix((u8 *) D_80126B78 + 0x34);
-    gte_SetTransMatrix((u8 *) D_80126B78 + 0x34);
+    gte_SetRotMatrix((u8 *) g_PlayerModel + 0x34);
+    gte_SetTransMatrix((u8 *) g_PlayerModel + 0x34);
     RotTransSV(&D_sc04_000_8019D340[0], &a, &f);
     RotTransSV(&D_sc04_000_8019D340[1], &b, &f);
-    if (func_80135888(AF(p, s32, 0x20), AF(p, s32, 0x58), &a, &b) != 0 && func_8012BDBC(p, 0x300) != 0) {
-        AF(p, s16, 2) = 3;
-        func_80178BF8();
-        r = (s32 *) &func_80172710;
+    if (PathHitsModel(p->model, p->hitData, &a, &b) != 0 && TargetInFront(p, 0x300) != 0) {
+        p->state = 3;
+        ResetScriptVM();
+        r = (s32 *) &CallActionHandler;
     } else {
         r = NULL;
     }
     return r;
 }
 
-void func_sc04_000_80180FBC(u8 *arg0) {
-    D_sc04_000_801A1380[AF(arg0, u16, 2)]();
+void func_sc04_000_80180FBC(StageActor *arg0) {
+    D_sc04_000_801A1380[arg0->state]();
 }
 
-void func_sc04_000_80180FF8(s32 arg0) {
-    void *temp_a0;
+void func_sc04_000_80180FF8(StageActor *arg0) {
+    ModelObj *temp_a0;
 
-    if (func_8012C354(arg0, (s32) &D_sc04_000_801A12E4) != 0) {
-        AF(arg0, u8, 0xC0) = 1;
-        AF(arg0, s32 *, 0xBC) = &D_sc04_000_801A1318;
-        AF(arg0, s32, 0xB4) = -0x2021;
+    if (SetupActor(arg0, (s32) &D_sc04_000_801A12E4) != 0) {
+        arg0->reactive = 1;
+        arg0->params = &D_sc04_000_801A1318;
+        arg0->reactMask = -0x2021;
         AF(arg0, s16, 0xDE) = 0;
-        AF(arg0, s32, 0xC4) = (s32) (AF(arg0, s32, 0xC4) | 1);
+        arg0->reactOpts = (s32) ((s32)arg0->reactOpts | 1);
         SetScript(arg0, (s32) &D_sc04_000_801A69B8);
-        if (AF(arg0, u16, 0x70) & 1) {
-            temp_a0 = AF(arg0, void *, 0x20);
-            AF(arg0, s16, 2) = 1;
-            AF(arg0, s16, 0x5C) = 0;
-            AF(temp_a0, s32, 4) = (s32) (AF(temp_a0, s32, 4) | 0x80000000);
+        if ((u16)arg0->param & 1) {
+            temp_a0 = arg0->model;
+            arg0->state = 1;
+            arg0->hitState = 0;
+            temp_a0->unk04 = (s32) ((s32)temp_a0->unk04 | 0x80000000);
             return;
         }
-        AF(arg0, s16, 2) = 3;
-        AF(arg0, s32, 0xCC) = func_80143970(arg0);
+        arg0->state = 3;
+        arg0->ext0 = SpawnShadow(arg0);
     }
 }
 
@@ -2540,7 +2539,7 @@ void func_sc04_000_801810B0(s32 arg0) {
     void *temp_v1_2;
     void *temp_v1_3;
 
-    if (func_8012BD14(arg0) > 0x18FFF) {
+    if (DistSqToPlayer(arg0) > 0x18FFF) {
         temp_v1 = AF(arg0, void *, 0x20);
         AF(arg0, s16, 2) = 2;
         AF(arg0, s32, 0x1C) = 0x10;
@@ -2551,7 +2550,7 @@ void func_sc04_000_801810B0(s32 arg0) {
         AF(temp_v1_3, s16, 0x1C) = 1;
         AF(temp_v1_3, s16, 0x1A) = 1;
         AF(temp_v1_3, s16, 0x18) = 1;
-        AF(arg0, s32, 0xCC) = func_80143970(arg0);
+        AF(arg0, s32, 0xCC) = SpawnShadow(arg0);
         AF(arg0, u16, 0x76) = (u16) *AF(arg0, u16 *, 0x78);
     }
 }
@@ -2561,7 +2560,7 @@ void func_sc04_000_80181154(s32 arg0, s32 arg1) {
     void *temp_v1;
     void *temp_v1_2;
 
-    if (func_8012BEE8(arg0, arg1) != 0) {
+    if (TickTimer(arg0, arg1) != 0) {
         temp_v1 = AF(arg0, void *, 0x20);
         AF(temp_v1, u16, 0x2C) = (u16) (AF(temp_v1, u16, 0x2C) & 0xFFEF);
         AF(arg0, s16, 2) = 3;
@@ -2575,32 +2574,32 @@ void func_sc04_000_80181154(s32 arg0, s32 arg1) {
     AF(temp_v1_2, s16, 0x18) = temp_v0;
 }
 
-void func_sc04_000_801811DC(u8 *arg0, s32 arg1, s32 arg2) {
-    AF(arg0, s16, 2) = 4;
+void func_sc04_000_801811DC(StageActor *arg0, s32 arg1, s32 arg2) {
+    arg0->state = 4;
     SetScript((s32) arg0, (s32) &D_sc04_000_801A69B8, arg2);
 }
 
 void func_sc04_000_80181208(s32 arg0, s32 arg1) {
-    if (func_8012BCCC(arg0, arg1) <= 0x18000) {
+    if (DistSqToTarget(arg0, arg1) <= 0x18000) {
         AF(arg0, s16, 2) = 5;
     }
 }
 
-void func_sc04_000_80181248(u8 *arg0) {
-    AF(arg0, s16, 2) = 6;
+void func_sc04_000_80181248(StageActor *arg0) {
+    arg0->state = 6;
     SetScript((s32) arg0, (s32) &D_sc04_000_801A69C8);
-    AF(arg0, s32, 0x1C) = 0x17;
+    arg0->timer = 0x17;
 }
 
 void func_sc04_000_80181288(s32 arg0) {
-    if (func_8012BEE8(arg0) != 0) {
+    if (TickTimer(arg0) != 0) {
         AF(arg0, s16, 2) = 7;
     }
 }
 
 void func_sc04_000_801812BC(u8 *arg0) {
     AF(arg0, s16, 2) = 8;
-    func_8012B23C((s32) arg0);
+    StopWithGravity((s32) arg0);
     func_sc04_000_801816DC((s32) arg0);
     SetScript((s32) arg0, (s32) &D_sc04_000_801A6A90);
     AF(arg0, s32, 0x1C) = 0x23;
@@ -2615,12 +2614,12 @@ void func_sc04_000_80181310(u8 *o) {
     AF(p, u16, 0x12) -= 0x71;
     func_sc04_000_8018175C(o);
     if (AF(o, u16, 0x72) & 0x4000) {
-        if (func_8012E778(o, 0x8C00B4) == 1) {
-            func_8002D4C8(0x662, 0);
+        if (IsOnScreen(o, 0x8C00B4) == 1) {
+            PlaySoundId(0x662, 0);
         }
     }
     r = func_sc04_000_8018159C(o);
-    if (r != -1 && func_8012BEE8(o) != 0) {
+    if (r != -1 && TickTimer(o) != 0) {
         if (r != 0) {
             func_sc04_000_801816DC((s32) o);
         }
@@ -2628,22 +2627,22 @@ void func_sc04_000_80181310(u8 *o) {
     }
 }
 
-void func_sc04_000_801813CC(u8 *o) {
+void func_sc04_000_801813CC(StageActor *o) {
     SV8 a;
     SV8 b;
     s32 x;
 
-    AF(o, s16, 0x5C) = 0;
-    AF(o, s32, 0x1C) = 0x37;
-    AF(AF(o, u8 *, 0x20), s16, 0x10) = 0;
+    o->hitState = 0;
+    o->timer = 0x37;
+    o->model->rot.vx = 0;
     SetScript(o, &D_sc04_000_801A6C50);
-    AF(o, s16, 0x34) = 0;
-    a.x = AF(o, s16, 6);
-    a.y = AF(o, s16, 0xA);
-    a.z = AF(o, s16, 0xE);
-    func_8012EFB8(&a, &b);
+    o->stateCount = 0;
+    a.x = o->pos[0].h.i;
+    a.y = o->pos[1].h.i;
+    a.z = o->pos[2].h.i;
+    ProjectPoint(&a, &b);
     if ((b.x < 0 ? -b.x : b.x) < 0xB5 && (b.y < 0 ? -b.y : b.y) < 0xA1) {
-        func_8002D4C8(0x98A, 0);
+        PlaySoundId(0x98A, 0);
     }
 }
 
@@ -2654,9 +2653,9 @@ void func_sc04_000_801814A8(u8 *arg0) {
         temp_v0 = AF(arg0, void *, 0x20);
         AF(temp_v0, s32, 4) = (s32) (AF(temp_v0, s32, 4) ^ 0x80000000);
     }
-    if (func_8012BEE8((s32) arg0) != 0) {
+    if (TickTimer((s32) arg0) != 0) {
         if (!(rand() & 3)) {
-            func_80130D48((s32) arg0);
+            DropItem((s32) arg0);
         }
         AF(arg0, s32, 0x1C) = 0x3C;
         AF(AF(arg0, void *, 0x20), s32, 4) = 0x80000000;
@@ -2672,10 +2671,10 @@ void func_sc04_000_80181540(u8 *arg0) {
 void func_sc04_000_80181554(void) {
 }
 
-void func_sc04_000_8018155C(u8 *o) {
+void func_sc04_000_8018155C(StageActor *o) {
     s16 v[3];
 
-    if (AF(o, u16, 0x5E) == 0x24) {
+    if (o->hitCode == 0x24) {
         v[2] = 0;
         v[0] = 0;
         v[1] = -8;
@@ -2690,31 +2689,31 @@ s32 func_sc04_000_8018159C(u8 *o) {
     s32 i;
 
     r = 1;
-    v = func_8012CBA4();
+    v = MoveOnGround();
     if (v == 0) {
-        func_8012ADE4(o);
+        RestorePrevPos(o);
         func_sc04_000_801818E8(o, 2);
         r = 0;
     } else if ((v & 0xFF) == 2) {
-        func_80131E00(o, 0x12);
+        SetReactionStep(o, 0x12);
         return -1;
     } else if ((v & 0xFF) == 0x1A) {
         func_sc04_000_80181ABC(o);
         return -1;
     } else if (v & 0x8000) {
         if (!(v & 0x2000)) {
-            func_8012ADE4(o);
+            RestorePrevPos(o);
         }
         func_sc04_000_801818E8(o, 5);
         r = 0;
     } else if (v & 0x4000) {
-        func_8012ADE4(o);
+        RestorePrevPos(o);
         func_sc04_000_801818E8(o, 2);
         r = 0;
     }
-    q = (u8 *)&D_801202A0;
+    q = (u8 *)&g_Actors;
     for (i = 0; i < 0x60; i++) {
-        if (AF(q, u16, 0) != 0 && AF(o, u16, 0) == AF(q, u16, 0) && o != q && func_8012AF0C(o, q) != 0) {
+        if (AF(q, u16, 0) != 0 && AF(o, u16, 0) == AF(q, u16, 0) && o != q && UndoMoveIntoObject(o, q) != 0) {
             if (r != 0) {
                 func_sc04_000_801818E8(o, 2);
             }
@@ -2730,7 +2729,7 @@ s32 func_sc04_000_801816DC(s32 arg0) {
         func_sc04_000_801818E8(arg0, 4);
         return 0;
     }
-    if ((func_8012BCCC(arg0) > 0x24000) || (func_sc04_000_80181BA4(arg0) == 0)) {
+    if ((DistSqToTarget(arg0) > 0x24000) || (func_sc04_000_80181BA4(arg0) == 0)) {
         func_sc04_000_801818E8(arg0, 3);
         return 0;
     }
@@ -2744,7 +2743,7 @@ s32 func_sc04_000_8018175C(u8 *o) {
     SV8 d;
     u8 *p;
 
-    a.x = D_80126B5E;
+    a.x = g_PlayerX;
     a.y = D_80126B62;
     a.z = D_80126B66;
     b.x = AF(o, s16, 6);
@@ -2765,7 +2764,7 @@ s32 func_sc04_000_8018175C(u8 *o) {
     d.y = a.y - b.y;
     d.z = a.z - b.z;
     VectorNormalSS(&d, &d);
-    func_8012F568(1, 0x2001, AF(o, s16, 0xDC), 0xE, &a, &d);
+    HitPlayer(1, 0x2001, AF(o, s16, 0xDC), 0xE, &a, &d);
     return 1;
 }
 
@@ -2777,9 +2776,9 @@ void func_sc04_000_801818E8(u8 *o, s32 mode) {
     s32 a;
     s32 b;
 
-    g = D_80078E78;
+    g = g_Status;
     v.x = v.y = 0;
-    if (D_80078EAE) {
+    if (g_Daytime) {
         v.z = -0x60000;
     } else {
         v.z = -0x80000;
@@ -2790,7 +2789,7 @@ void func_sc04_000_801818E8(u8 *o, s32 mode) {
             break;
         }
     case 1:
-        AF(o, s16, 0xDC) = func_8012B864(o);
+        AF(o, s16, 0xDC) = HeadingToTarget(o);
         break;
     case 2:
         AF(o, s16, 0xDC) += 0x800;
@@ -2800,17 +2799,17 @@ void func_sc04_000_801818E8(u8 *o, s32 mode) {
         }
         break;
     case 4:
-        AF(o, s16, 0xDC) = (func_8012B864(o) + 0x800) & 0xFFF;
+        AF(o, s16, 0xDC) = (HeadingToTarget(o) + 0x800) & 0xFFF;
         break;
     case 5:
         s.x = AF(o, s32, 0x10) >> 8;
         s.z = AF(o, s32, 0x18) >> 8;
-        a = func_8012B70C(&D_800D3918, &D_801152B0);
-        b = func_8012B70C(&s, &D_800D3918);
+        a = HeadingToSV(&D_800D3918, &g_WallNormal);
+        b = HeadingToSV(&s, &D_800D3918);
         AF(o, s16, 0xDC) = (a * 2 - b) & 0xFFF;
         break;
     }
-    m = D_800AE620;
+    m = GsIDMATRIX;
     RotMatrixY(AF(o, s16, 0xDC), &m);
     ApplyMatrixLV(&m, &v, o + 0x10);
 }
@@ -2819,7 +2818,7 @@ void func_sc04_000_80181ABC(u8 *o) {
     u8 *p;
     u8 *q;
     u8 *r;
-    s32 t;
+    StageActor *t;
 
     AF(o, s16, 0x76) = 0;
     if (AF(o, s32, 0xE4) == 0) {
@@ -2837,14 +2836,14 @@ void func_sc04_000_80181ABC(u8 *o) {
         AF(o, s16, 0xA) = AF(o, s16, 0x8A);
         AF(o, s16, 0xE) = AF(o, s16, 0x8C);
         SetScript(o, &D_sc04_000_801A69B8);
-        func_8012B2CC(o);
-        func_8002A04C(o);
+        UpdateModelZYX(o);
+        GainStat0FromActor(o);
         t = AF(o, s32, 0xCC);
         if (t != 0) {
-            func_801439C0(t);
+            FreeShadow(t);
         }
     } else {
-        func_8012C098(o);
+        DespawnActor(o);
     }
 }
 
@@ -2860,38 +2859,38 @@ s32 func_sc04_000_80181BA4(u8 *o) {
     return d.x + d.z < 0x190000;
 }
 
-void func_sc04_000_80181C1C(u8 *arg0) {
-    D_sc04_000_801A6E0C[AF(arg0, u16, 2)]();
+void func_sc04_000_80181C1C(StageActor *arg0) {
+    D_sc04_000_801A6E0C[arg0->state]();
 }
 
-void func_sc04_000_80181C58(u8 *arg0) {
+void func_sc04_000_80181C58(StageActor *arg0) {
     s32 temp_v0;
     s32 temp_a2;
     u16 x;
 
-    if ((func_sc04_000_80182178() == 1) || (temp_v0 = func_8012C194(), (temp_v0 == 0))) {
-        func_8012CAE4((s32) arg0);
+    if ((func_sc04_000_80182178() == 1) || (temp_v0 = AllocActorSprite(), (temp_v0 == 0))) {
+        RejectSpawn((s32) arg0);
         return;
     }
-    AF(arg0, s32, 0xCC) = temp_v0;
-    func_8001CC3C(temp_v0, (s32) &D_sc04_000_801A6DC0, 0x214, 0x168);
+    arg0->ext0 = temp_v0;
+    InitSpriteKind3(temp_v0, (s32) &D_sc04_000_801A6DC0, 0x214, 0x168);
     AF(temp_v0, s32, 4) = 0x50000000;
     AF(temp_v0, u8, 0x27) = 0x24;
-    func_80128EA8(temp_v0, (s32) (arg0 + 0xDC), (s32) &D_sc04_000_801A6DCC);
+    StartSpriteAnim(temp_v0, (s32) ((u8 *)arg0 + 0xDC), (s32) &D_sc04_000_801A6DCC);
     func_sc04_000_801821D0((s32) arg0);
-    AF(temp_v0, u16, 8) = (u16) AF(arg0, u16, 6);
-    AF(temp_v0, u16, 0xA) = (u16) AF(arg0, u16, 0xA);
-    AF(temp_v0, u16, 0xC) = (u16) AF(arg0, u16, 0xE);
+    AF(temp_v0, u16, 8) = (u16) (u16)arg0->pos[0].h.i;
+    AF(temp_v0, u16, 0xA) = (u16) (u16)arg0->pos[1].h.i;
+    AF(temp_v0, u16, 0xC) = (u16) (u16)arg0->pos[2].h.i;
     AF(temp_v0, s16, 0x1A) = 0x2000;
     AF(temp_v0, s16, 0x18) = 0x2000;
     AF(temp_v0, u16, 0x2C) = 0xC010;
-    x = AF(arg0, u16, 2);
+    x = arg0->state;
     x++;
-    temp_a2 = AF(AF(arg0, void *, 0x64), u16, 0x36);
-    AF(arg0, s32, 0x1C) = 0x180;
-    AF(arg0, u16, 2) = x;
-    AF(arg0, u16, 0x10A) = temp_a2;
-    func_8002D4C8(0xAA0, 0, temp_a2);
+    temp_a2 = arg0->parent->id;
+    arg0->timer = 0x180;
+    arg0->state = x;
+    arg0->work10A = temp_a2;
+    PlaySoundId(0xAA0, 0, temp_a2);
 }
 
 void func_sc04_000_80181D54(u8 *arg0) {
@@ -2912,7 +2911,7 @@ void func_sc04_000_80181D54(u8 *arg0) {
             AF(q, s16, 0x80) = AF(arg0, s16, 0xE);
         }
         if (!(AF(arg0, s32, 0x1C) & 7)) {
-            o = func_80132EF4(arg0, 0x22);
+            o = SpawnPropFrom(arg0, 0x22);
             if (o != 0) {
                 AF(o, s16, 6) += (rand() & 0x1F) - 0x10;
                 AF(o, s16, 0xE) += (rand() & 0x1F) - 0x10;
@@ -2926,7 +2925,7 @@ void func_sc04_000_80181D54(u8 *arg0) {
         }
         p = AF(arg0, u8 *, 0xCC);
         if (p != 0) {
-            func_80128ED8(p, arg0 + 0xDC);
+            StepSpriteAnim(p, arg0 + 0xDC);
             func_sc04_000_801821D0(arg0);
             AF(p, s16, 8) = AF(arg0, s16, 6);
             AF(p, s16, 0xA) = AF(arg0, s16, 0xA);
@@ -2937,29 +2936,29 @@ void func_sc04_000_80181D54(u8 *arg0) {
         if (AF(q, u16, 0x5E) == 0x23) {
             AF(arg0, s16, 2)++;
         }
-        if (func_8012BEE8(arg0) == 0) {
+        if (TickTimer(arg0) == 0) {
             return;
         }
     }
     func_sc04_000_8018224C(arg0);
 }
 
-void func_sc04_000_80181FE4(u8 *arg0) {
+void func_sc04_000_80181FE4(StageActor *arg0) {
     u8 *p;
     u8 *o;
 
-    p = AF(arg0, u8 *, 0xCC);
+    p = (u8 *)arg0->ext0;
     if (p != 0) {
-        func_80128ED8(p, arg0 + 0xDC);
+        StepSpriteAnim(p, (u8 *)arg0 + 0xDC);
         func_sc04_000_801821D0(arg0);
-        AF(p, s16, 8) = AF(arg0, s16, 6);
-        AF(p, s16, 0xA) = AF(arg0, s16, 0xA);
-        AF(p, s16, 0xC) = AF(arg0, s16, 0xE);
+        AF(p, s16, 8) = arg0->pos[0].h.i;
+        AF(p, s16, 0xA) = arg0->pos[1].h.i;
+        AF(p, s16, 0xC) = arg0->pos[2].h.i;
         AF(p, s16, 0x18) -= 0x200;
         AF(p, s16, 0x1A) -= 0x200;
         if (AF(p, s16, 0x18) >= 0) {
             if (D_800B99DA % 5 == 0) {
-                o = func_80132EF4(arg0, 0x22);
+                o = SpawnPropFrom(arg0, 0x22);
                 if (o != 0) {
                     AF(o, s16, 6) += (rand() & 0x1F) - 0x10;
                     AF(o, s16, 0xE) += (rand() & 0x1F) - 0x10;
@@ -2979,7 +2978,7 @@ s32 func_sc04_000_80182178(u8 *p) {
     u8 *o;
     s32 i;
 
-    for (o = (u8 *) &D_801202A0, i = 0; i < 0x60; i++, o += 0x10C) {
+    for (o = (u8 *) &g_Actors, i = 0; i < 0x60; i++, o += 0x10C) {
         if (AF(o, u16, 0) == 0x35C && AF(p, s32, 0x64) == AF(o, s32, 0x64) && p != o) {
             return 1;
         }
@@ -2990,29 +2989,29 @@ s32 func_sc04_000_80182178(u8 *p) {
 void func_sc04_000_801821D0(u8 *o) {
     SMtx m;
     SV8 c;
-    u8 *p;
+    StageActor *p;
 
     p = AF(o, u8 *, 0x64);
-    if (AF(p, s16, 0x36) == AF(o, s16, 0x10A)) {
-        func_8012EC04(p, AF(o, s16, 0xFC), &m);
-        func_8012F14C(&m, o + 0x88, &c);
+    if ((s16)p->id == AF(o, s16, 0x10A)) {
+        GetPartWorldMatrix(p, AF(o, s16, 0xFC), &m);
+        LocalToWorld(&m, o + 0x88, &c);
         AF(o, s16, 6) = c.x;
         AF(o, s16, 0xA) = c.y;
         AF(o, s16, 0xE) = c.z;
     }
 }
 
-void func_sc04_000_8018224C(s32 arg0) {
+void func_sc04_000_8018224C(StageActor *arg0) {
     s32 temp_a0;
 
-    temp_a0 = AF(arg0, s32, 0xCC);
+    temp_a0 = (s32)arg0->ext0;
     if (temp_a0 != 0) {
-        func_80016714(temp_a0, 0x38);
+        ZeroFill(temp_a0, 0x38);
     }
-    func_8012C218(arg0);
+    FreeActor(arg0);
 }
 
-void func_sc04_000_80182290(s32 o, s16 *v, s16 arg2) {
+void func_sc04_000_80182290(StageActor *o, s16 *v, s16 arg2) {
     SpawnDef d;
 
     d.x = v[0];
@@ -3024,19 +3023,19 @@ void func_sc04_000_80182290(s32 o, s16 *v, s16 arg2) {
     d.unkE = arg2;
     d.unk10 = 0;
     d.unkC = 0x7FFF;
-    func_8012C51C(&d, o);
+    SpawnActorFromDef(&d, o);
 }
 
 extern void (*D_sc04_000_801A6E58[])();
 extern void (*D_sc04_000_801A6E68[])();
 
-void func_sc04_000_801822F0(u8 *o) {
-    switch (AF(o, s16, 0x70)) {
+void func_sc04_000_801822F0(StageActor *o) {
+    switch (o->param) {
     case 0:
-        D_sc04_000_801A6E58[AF(o, u16, 2)](o);
+        D_sc04_000_801A6E58[o->state](o);
         break;
     case 1:
-        D_sc04_000_801A6E68[AF(o, u16, 2)](o);
+        D_sc04_000_801A6E68[o->state](o);
         break;
     }
 }
@@ -3049,24 +3048,24 @@ void func_sc04_000_80182374(u8 *arg0) {
     s32 i;
 
     p = (u8 *)&D_sc04_000_801A9DA8;
-    func_80016714((s32) &D_sc04_000_801A9DA8, 0x1100);
+    ZeroFill((s32) &D_sc04_000_801A9DA8, 0x1100);
     AF(arg0, void *, 0xDC) = (void *) ((AF(arg0, s16, 0xFC) << 5) + &D_sc04_000_801A6E8C);
     for (i = 0; i < 0x40; i++) {
         func_sc04_000_80182564((s32) p, (s32) AF(arg0, void *, 0xDC));
         p += 0x44;
     }
-    func_8012BF4C((s32) arg0, 0xA);
-    func_8012AD50((s32) arg0);
+    SetMoverTimer((s32) arg0, 0xA);
+    NextState((s32) arg0);
 }
 
 void func_sc04_000_80182408(s32 arg0) {
-    if (func_8012BEE8(arg0) != 0) {
-        func_8002D4C8((s32) (*(u16 *)&D_sc04_000_801A6E48[(AF(arg0, s16, 0xFC) * 8)]), 0);
-        func_8012AD50(arg0);
+    if (TickTimer(arg0) != 0) {
+        PlaySoundId((s32) (*(u16 *)&D_sc04_000_801A6E48[(AF(arg0, s16, 0xFC) * 8)]), 0);
+        NextState(arg0);
     }
 }
 
-void func_sc04_000_80182460(u8 *o) {
+void func_sc04_000_80182460(StageActor *o) {
     s32 i;
     u8 *p;
 
@@ -3081,7 +3080,7 @@ void func_sc04_000_80182460(u8 *o) {
             break;
         case 1:
             if (--AF(p, s16, 2) == -1) {
-                func_sc04_000_80182564(p, AF(o, void *, 0xDC));
+                func_sc04_000_80182564(p, o->message);
             } else {
                 func_sc04_000_801827B4(o, p);
                 func_sc04_000_80182724(p);
@@ -3114,10 +3113,10 @@ void func_sc04_000_80182564(u8 *p, u8 *q) {
     AF(p, s16, 0xC) = -AF(p, s16, 0x3E);
     AF(p, s16, 0xE) = (0x800 - AF(p, s16, 0x3C)) & 0xFFF;
     AF(p, s32, 8) = D_sc04_000_801A6E28[rand() & 7];
-    func_800134FC(AF(p, s16, 0xC), q, p + 0x1C);
-    func_8001382C(AF(p, s16, 0xE), p + 0x1C, p + 0x1C);
-    func_800134FC(AF(p, s16, 0xC), q + 0x10, p + 0x2C);
-    func_8001382C(AF(p, s16, 0xE), p + 0x2C, p + 0x2C);
+    RotateVectorX(AF(p, s16, 0xC), q, p + 0x1C);
+    RotateVectorY(AF(p, s16, 0xE), p + 0x1C, p + 0x1C);
+    RotateVectorX(AF(p, s16, 0xC), q + 0x10, p + 0x2C);
+    RotateVectorY(AF(p, s16, 0xE), p + 0x2C, p + 0x2C);
     AF(p, s16, 0x16) = 0x1000;
     if (rand() & 1) {
         AF(p, s16, 0x14) = 0x1000;
@@ -3141,7 +3140,7 @@ void func_sc04_000_80182724(u8 *p) {
 s32 func_sc04_000_801827B4(s32 arg0, s32 arg1) {
     s32 sp18;
 
-    func_80015978(arg0 + 4, (s32) &sp18);
+    PosToSVec(arg0 + 4, (s32) &sp18);
     return func_sc04_000_80182800(arg1 + 0x14, arg1 + 0xC, (s32) &sp18, arg1 + 8, /* extra? */ (arg1 + 0x3C));
 }
 
@@ -3163,35 +3162,35 @@ s32 func_sc04_000_80182800(s32 r, s32 t, s16 *a, s32 *c, s16 *b) {
     g.uv[2] = 0x11F09C0;
     g.uv[3] = 0x11F09DF;
     g.col = k;
-    func_80017DC4(r, &m);
-    func_80017E30(t, &m);
+    SetScaleMatrix(r, &m);
+    RotateMatrixByZYX(t, &m);
     m.t[0] = a[0] + b[0];
     m.t[1] = a[1] + b[1];
     m.t[2] = a[2] + b[2];
-    return func_80016EF8(&g, &m);
+    return DrawPrimFT4Mtx(&g, &m);
 }
 
 void func_sc04_000_80182984(void) {
 }
 
-void func_sc04_000_8018298C(u8 *o) {
+void func_sc04_000_8018298C(StageActor *o) {
     u8 *d;
     u8 *p;
 
     d = &D_sc04_000_801AAEA8;
-    AF(o, u8 *, 0x20) = p = (u8 *)func_8012C194();
+    o->model = p = (u8 *)AllocActorSprite();
     if (p == 0) {
-        func_8012CAE4(o);
+        RejectSpawn(o);
         return;
     }
     func_8001CD9C(p, d);
     AF(p, s16, 0x2C) = 3;
     AF(p, s16, 0x18) = AF(p, s16, 0x1A) = 0;
     AF(p, s32, 4) |= 0x50000000;
-    func_800233CC(d, 0x80);
+    SetShapeCircle(d, 0x80);
     D_sc04_000_801AAEAC = 0;
     func_sc04_000_80182D78(o);
-    func_8012AD50(o);
+    NextState(o);
 }
 
 void func_sc04_000_80182A38(u8 *arg0) {
@@ -3207,95 +3206,95 @@ void func_sc04_000_80182A38(u8 *arg0) {
     }
     AF(temp_s0, u16, 0x1A) = (u16) AF(temp_s0, u16, 0x18);
     if ((s16) AF(temp_s0, u16, 0x18) == 0x1000) {
-        func_8012BF4C((s32) arg0, 0x78);
-        func_8012AD50((s32) arg0);
+        SetMoverTimer((s32) arg0, 0x78);
+        NextState((s32) arg0);
     }
 }
 
 void func_sc04_000_80182AC0(s32 arg0) {
     func_sc04_000_80182D78(arg0);
-    if (func_8012BEE8(arg0) != 0) {
-        func_8002D4C8((s32) (*(u16 *)&D_sc04_000_801A6E4C[(AF(arg0, s16, 0xFC) * 8)]), 0);
-        func_8012AD50(arg0);
+    if (TickTimer(arg0) != 0) {
+        PlaySoundId((s32) (*(u16 *)&D_sc04_000_801A6E4C[(AF(arg0, s16, 0xFC) * 8)]), 0);
+        NextState(arg0);
     }
 }
 
-void func_sc04_000_80182B20(u8 *arg0) {
+void func_sc04_000_80182B20(StageActor *arg0) {
     u16 temp_v0;
-    void *temp_s0;
+    ModelObj *temp_s0;
 
-    temp_s0 = AF(arg0, void *, 0x20);
+    temp_s0 = arg0->model;
     func_sc04_000_80182D78((s32) arg0);
-    temp_v0 = AF(temp_s0, u16, 0x18) + 0x200;
-    AF(temp_s0, u16, 0x18) = temp_v0;
+    temp_v0 = (u16)temp_s0->scale.vx + 0x200;
+    temp_s0->scale.vx = temp_v0;
     if ((s16) temp_v0 >= 0x7001) {
-        AF(temp_s0, u16, 0x18) = 0x7000U;
+        temp_s0->scale.vx = 0x7000U;
     }
-    AF(temp_s0, u16, 0x1A) = (u16) AF(temp_s0, u16, 0x18);
-    if ((s16) AF(temp_s0, u16, 0x18) == 0x7000) {
-        func_80016940(4);
-        func_8012AD50((s32) arg0);
+    temp_s0->scale.vy = (u16) (u16)temp_s0->scale.vx;
+    if ((s16) (u16)temp_s0->scale.vx == 0x7000) {
+        StartFadeWhite(4);
+        NextState((s32) arg0);
     }
 }
 
-void func_sc04_000_80182BA8(u8 *o) {
-    u8 *p;
-    s32 r;
+void func_sc04_000_80182BA8(StageActor *o) {
+    Player *p;
+    StageActor *r;
 
     func_sc04_000_80182D78(o);
-    p = &D_80126B58;
-    if (func_80016978(4) & 0xFFFF) {
-        r = func_8012E57C(0x3AF, 0);
+    p = &g_Player;
+    if (FadeWhiteStep(4) & 0xFFFF) {
+        r = FindActorByKindArg(0x3AF, 0);
         if (r != 0) {
-            func_8012C098(r);
+            DespawnActor(r);
         }
-        if (AF(o, s16, 0xFC) == 0) {
-            func_8014708C((s32) p);
-            func_801472C8((s32) p);
+        if (o->unkFC == 0) {
+            HidePlayerScene((s32) p);
+            SetPlayerFlag7E2((s32) p);
         } else {
-            func_80147084((s32) p);
-            func_801472B4((s32) p);
+            ShowPlayerScene((s32) p);
+            ClearPlayerFlag7E2((s32) p);
         }
-        func_8012AD50(o);
+        NextState(o);
     }
 }
 
-void func_sc04_000_80182C4C(s32 arg0) {
+void func_sc04_000_80182C4C(StageActor *arg0) {
     func_sc04_000_80182D78(arg0);
-    if (func_80016978(0) & 0xFFFF) {
-        func_8012AD50(arg0);
+    if (FadeWhiteStep(0) & 0xFFFF) {
+        NextState(arg0);
     }
 }
 
-void func_sc04_000_80182C90(u8 *arg0) {
+void func_sc04_000_80182C90(StageActor *arg0) {
     u16 temp_v0;
-    void *temp_s0;
+    ModelObj *temp_s0;
 
-    temp_s0 = AF(arg0, void *, 0x20);
+    temp_s0 = arg0->model;
     func_sc04_000_80182D78((s32) arg0);
-    temp_v0 = AF(temp_s0, u16, 0x1A) - 0x800;
-    AF(temp_s0, u16, 0x1A) = temp_v0;
+    temp_v0 = (u16)temp_s0->scale.vy - 0x800;
+    temp_s0->scale.vy = temp_v0;
     if ((s16) temp_v0 < 0x100) {
-        AF(temp_s0, u16, 0x1A) = 0x100U;
+        temp_s0->scale.vy = 0x100U;
     }
-    if ((s16) AF(temp_s0, u16, 0x1A) == 0x100) {
-        func_8012AD50((s32) arg0);
+    if ((s16) (u16)temp_s0->scale.vy == 0x100) {
+        NextState((s32) arg0);
     }
 }
 
-void func_sc04_000_80182D08(u8 *arg0) {
+void func_sc04_000_80182D08(StageActor *arg0) {
     u16 temp_v0;
-    void *temp_s0;
+    ModelObj *temp_s0;
 
-    temp_s0 = AF(arg0, void *, 0x20);
+    temp_s0 = arg0->model;
     func_sc04_000_80182D78((s32) arg0);
-    temp_v0 = AF(temp_s0, u16, 0x18) - 0x800;
-    AF(temp_s0, u16, 0x18) = temp_v0;
+    temp_v0 = (u16)temp_s0->scale.vx - 0x800;
+    temp_s0->scale.vx = temp_v0;
     if ((s16) (temp_v0) < 0) {
-        AF(temp_s0, u16, 0x18) = 0U;
+        temp_s0->scale.vx = 0U;
     }
-    if ((s16) AF(temp_s0, s16, 0x18) == 0) {
-        func_8012C098((s32) arg0);
+    if ((s16) temp_s0->scale.vx == 0) {
+        DespawnActor((s32) arg0);
     }
 }
 
@@ -3309,81 +3308,81 @@ void func_sc04_000_80182D78() {
     }
 }
 
-void func_sc04_000_80182DAC(u8 *arg0) {
-    D_sc04_000_801A700C[AF(arg0, u16, 2)]();
+void func_sc04_000_80182DAC(StageActor *arg0) {
+    D_sc04_000_801A700C[arg0->state]();
 }
 
-void func_sc04_000_80182DE8(u8 *arg0) {
-    s32 temp_v0;
+void func_sc04_000_80182DE8(StageActor *arg0) {
+    StageActor *temp_v0;
 
-    if (func_8012C354((s32) arg0, (s32) (((AF(arg0, u16, 0x70) & 0xF) * 0x34) + &D_sc04_000_801A6F0C)) != 0) {
-        if (!(AF(arg0, u16, 0x70) & 1)) {
-            temp_v0 = func_8012C658(0x1E3, 1, (s32) arg0);
-            AF(arg0, s32, 0x6C) = temp_v0;
+    if (SetupActor((s32) arg0, (s32) ((((u16)arg0->param & 0xF) * 0x34) + &D_sc04_000_801A6F0C)) != 0) {
+        if (!((u16)arg0->param & 1)) {
+            temp_v0 = SpawnActorArg(0x1E3, 1, (s32) arg0);
+            arg0->link = temp_v0;
             if (temp_v0 == 0) {
-                func_8012CAE4((s32) arg0);
+                RejectSpawn((s32) arg0);
                 return;
             }
-            AF(arg0, s16, 2) = 1;
-            AF(arg0, s32, 0xCC) = func_801788B8((s32) arg0, (s32) &func_sc04_000_801830E4);
+            arg0->state = 1;
+            arg0->ext0 = SpawnTalkMarker((s32) arg0, (s32) &func_sc04_000_801830E4);
             return;
         }
-        AF(arg0, s16, 2) = 5;
-        AF(arg0, u16, 0x100) = (u16) AF(AF(arg0, void *, 0x64), u16, 0x36);
+        arg0->state = 5;
+        arg0->work100 = (u16) arg0->parent->id;
         SetScript((s32) arg0, (s32) &D_sc04_000_8019D7F0);
     }
 }
 
-void func_sc04_000_80182EC0(u8 *arg0) {
-    AF(AF(AF(arg0, void *, 0x6C), void *, 0x20), s16, 0x12) = (s16) ((AF(AF(arg0, void *, 0x20), u16, 0x12) + 0x800) & 0xFFF);
-    AF(arg0, s16, 2) = 2;
+void func_sc04_000_80182EC0(StageActor *arg0) {
+    arg0->link->model->rot.vy = (s16) (((u16)arg0->model->rot.vy + 0x800) & 0xFFF);
+    arg0->state = 2;
 }
 
 void func_sc04_000_80182EE8(void) {
 }
 
-void func_sc04_000_80182EF0(u8 *arg0) {
-    AF(arg0, s16, 2) = 4;
-    func_80178CBC((s32) arg0, (s32) &D_sc04_000_801A6FBC);
+void func_sc04_000_80182EF0(StageActor *arg0) {
+    arg0->state = 4;
+    RunScript((s32) arg0, (s32) &D_sc04_000_801A6FBC);
 }
 
-void func_sc04_000_80182F1C(s32 arg0) {
-    if (func_801789AC(arg0) != 0) {
-        func_80178D18(arg0);
-        AF(arg0, s16, 2) = 2;
+void func_sc04_000_80182F1C(StageActor *arg0) {
+    if (UpdateScript(arg0) != 0) {
+        EndEvent(arg0);
+        arg0->state = 2;
     }
 }
 
-void func_sc04_000_80182F5C(u8 *arg0, s32 arg1) {
+void func_sc04_000_80182F5C(StageActor *arg0, s32 arg1) {
     s16 temp_v1;
 
-    if (AF(arg0, s16, 0x100) != AF(AF(arg0, void *, 0x64), s16, 0x36)) {
-        func_8012C218((s32) arg0, arg1);
+    if (arg0->work100 != (s16)arg0->parent->id) {
+        FreeActor((s32) arg0, arg1);
         return;
     }
-    temp_v1 = AF(arg0, s16, 0xFE);
+    temp_v1 = arg0->workFE;
     if (temp_v1 == 1) {
-        AF(arg0, s16, 2) = 6;
-        AF(arg0, s32, 0x1C) = 0x20;
+        arg0->state = 6;
+        arg0->timer = 0x20;
         SetScript((s32) arg0, (s32) &D_sc04_000_8019D800);
-        AF(arg0, s16, 0x5C) = 0;
-        func_8002D4C8(0x5BF, 0);
+        arg0->hitState = 0;
+        PlaySoundId(0x5BF, 0);
     } else if (temp_v1 == 2) {
-        AF(arg0, s16, 2) = 6;
-        AF(arg0, s32, 0x1C) = 0x20;
+        arg0->state = 6;
+        arg0->timer = 0x20;
         SetScript((s32) arg0, (s32) &D_sc04_000_8019D908);
-        AF(arg0, u16, 0x5C) = 0x8C00;
+        arg0->hitState = 0x8C00;
     }
 }
 
-void func_sc04_000_8018301C(u8 *arg0, s32 arg1, s32 arg2) {
-    if (AF(arg0, s16, 0x98) == 0) {
-        if (AF(arg0, s16, 0xFE) == 2) {
-            func_8002D4C8(0x888, 0, arg2);
+void func_sc04_000_8018301C(StageActor *arg0, s32 arg1, s32 arg2) {
+    if (arg0->animTimer == 0) {
+        if (arg0->workFE == 2) {
+            PlaySoundId(0x888, 0, arg2);
             SetScript((s32) arg0, (s32) &D_sc04_000_8019D7F0);
         }
-        AF(arg0, s16, 2) = 5;
-        AF(arg0, s16, 0xFE) = 0;
+        arg0->state = 5;
+        arg0->workFE = 0;
     }
 }
 
@@ -3400,7 +3399,7 @@ s32 func_sc04_000_801830A8(void) {
 }
 
 void func_sc04_000_801830C0(u8 *arg0) {
-    func_800296F8(AF(arg0, s32, 0xDC));
+    SaveContinuePoint(AF(arg0, s32, 0xDC));
 }
 
 s32 *func_sc04_000_801830E4(u8 *o) {
@@ -3408,19 +3407,19 @@ s32 *func_sc04_000_801830E4(u8 *o) {
     SV8 a;
     SV8 b;
     s32 flag;
-    u8 *q;
+    Mover *q;
 
     q = AF(o, u8 *, 0x64);
-    m = AF(D_80126B78, WMtx, 0x34);
+    m = AF(g_PlayerModel, WMtx, 0x34);
     gte_SetRotMatrix(&m);
     gte_SetTransMatrix(&m);
     RotTransSV(&D_sc04_000_801A7028[0], &a, &flag);
     RotTransSV(&D_sc04_000_801A7028[1], &b, &flag);
-    if (func_80135888(AF(AF(o, u8 *, 0x64), s32, 0x20), AF(AF(o, u8 *, 0x64), s32, 0x58), &a, &b) != 0
-        && func_8012BDBC(q, 0x300) != 0) {
-        AF(q, s16, 2) = 3;
-        func_80178BF8();
-        return (s32 *)&func_80172710;
+    if (PathHitsModel(AF(AF(o, u8 *, 0x64), s32, 0x20), AF(AF(o, u8 *, 0x64), s32, 0x58), &a, &b) != 0
+        && TargetInFront(q, 0x300) != 0) {
+        q->state = 3;
+        ResetScriptVM();
+        return (s32 *)&CallActionHandler;
     }
     return 0;
 }

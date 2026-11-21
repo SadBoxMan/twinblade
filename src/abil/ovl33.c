@@ -13,10 +13,10 @@ extern AbilStep D_ovl33_800CD6B0[];
 extern void func_ovl33_800CD5BC();
 extern AbilStep D_ovl33_800CD6C4[];
 extern void func_ovl33_800CCE80();
-extern void func_800123F0();
-extern void func_80012558();
-extern void func_800126C4();
-extern void func_80013F3C();
+extern void RotateMatrixZ();
+extern void RotateMatrixY();
+extern void RotateMatrixX();
+extern void SetIdentityRot();
 extern s32 MulMatrix();
 extern s32 RotMatrixY();
 extern void func_80020F34();
@@ -40,11 +40,11 @@ extern s32 func_8014C088();
 
 extern u8 D_ovl33_800CD66C;
 extern s32 func_80146578();
-extern void func_8001CC3C();
+extern void InitSpriteKind3();
 extern void func_ovl33_800CD204();
 
 extern AbilStep D_ovl33_800CD684[];
-extern s32 func_80012ABC();
+extern s32 EaseAngle();
 extern void func_8014ACC0();
 
 extern u16 D_ovl33_800CD690[];
@@ -57,7 +57,7 @@ extern void func_80149374();
 extern void func_80146DE8();
 extern void func_80146E90();
 
-extern AbilStep D_ovl33_800CD668[];
+extern AbilStep ScrollFire_FlameStepTable[];
 extern void func_80149020();
 
 void func_ovl33_800CCB28(u8 *arg0) {
@@ -65,10 +65,10 @@ void func_ovl33_800CCB28(u8 *arg0) {
 
     func_80149020(arg0);
     i = AF(arg0, u16, 2) - 2;
-    D_ovl33_800CD668[i](arg0);
+    ScrollFire_FlameStepTable[i](arg0);
 }
 
-void func_ovl33_800CCB78(u8 *arg0) {
+void ScrollFire_FlameStart(u8 *arg0) {
     func_80147324(0x8DF);
     func_801466F0(0x10, arg0, 0, 0, 0, 0, 0, 0);
     func_801466F0(0x11, arg0, 0, 0, 0, 0, 0, 0);
@@ -91,7 +91,7 @@ void func_ovl33_800CCC54(u8 *arg0) {
     temp_a0_2 = AF(arg0, void *, 0x20);
     AF(temp_a0_2, s32, 4) = (s32) (AF(temp_a0_2, s32, 4) | (AF(AF(temp_s0, void *, 0x20), s32, 4) & 0x80000000));
     AF(arg0, s16, 0x60) = 0;
-    D_ovl33_800CE050 = func_80012ABC((s32) D_ovl33_800CE050, (s32) AF(AF(temp_s0, void *, 0x20), s16, 0x12), 0xA);
+    D_ovl33_800CE050 = EaseAngle((s32) D_ovl33_800CE050, (s32) AF(AF(temp_s0, void *, 0x20), s16, 0x12), 0xA);
     func_8014ACC0((s32) temp_s0, 1);
     if (func_80161A00((s32) temp_s0) == 0) {
         func_80147364(4, 0x8E0);
@@ -163,14 +163,14 @@ void func_ovl33_800CCE80(u8 *arg0) {
     temp_s0 = temp_s1 + 0x34;
     AF(arg0, s16, 0xA) = (s16) (AF(temp_a0, s32, 0x4C) - 0x20);
     AF(arg0, s16, 0xE) = (s16) AF(temp_a0, s32, 0x50);
-    func_80013F3C(temp_s0);
+    SetIdentityRot(temp_s0);
     RotMatrixY(AF(temp_s1, s16, 0x12), temp_s0);
     MulMatrix(temp_s0, AF(temp_s2, void *, 0x20) + 0x34);
     func_80020F34(temp_s0, temp_s1 + 0x18);
     AF(temp_s1, u16, 0x2C) = (u16) (AF(temp_s1, u16, 0x2C) | 1);
 }
 
-void func_ovl33_800CCF28(s32 arg0) {
+void ScrollFire_FlameHoldNotify(s32 arg0) {
     s32 temp_v0;
 
     temp_v0 = func_8014C088(arg0, 0x10);
@@ -179,7 +179,7 @@ void func_ovl33_800CCF28(s32 arg0) {
     }
 }
 
-void func_ovl33_800CCF58(u8 *arg0) {
+void ScrollFire_FlameCancel(u8 *arg0) {
     func_ovl33_800CCF84();
     AF(arg0, s16, 0x1C8) = 0;
 }
@@ -204,7 +204,7 @@ void func_ovl33_800CD010(s32 arg0, s32 arg1) {
     temp_v0 = func_80146578(arg0, arg1);
     AF(arg0, s32, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_8001CC3C(temp_v0, (s32) &D_ovl33_800CD66C, 0x220, 0x168);
+        InitSpriteKind3(temp_v0, (s32) &D_ovl33_800CD66C, 0x220, 0x168);
         AF(temp_v0, u8, 0x27) = 0x24;
         AF(temp_v0, u8, 0x24) = 0xFF;
         AF(temp_v0, u8, 0x25) = 0x40;
@@ -251,9 +251,9 @@ extern void func_80162FC0();
 
 extern u8 D_ovl33_800CD6BC;
 extern s32 func_8012A758();
-extern void func_80013694();
-extern void func_800139C8();
-extern s32 func_80015954();
+extern void RotateSVectorX();
+extern void RotateSVectorY();
+extern s32 SVecToPos();
 
 void func_ovl33_800CD204(u8 *arg0) {
     AVec v;
@@ -265,8 +265,8 @@ void func_ovl33_800CD204(u8 *arg0) {
     o = AF(arg0, void *, 0x4C);
     m = AF(arg0, void *, 0x20);
     a = func_8012A758();
-    func_80013694(AF(m, s16, 0x10), &D_ovl33_800CD6BC, &v);
-    func_800139C8((s16) (a + 0x400), &v, &v);
+    RotateSVectorX(AF(m, s16, 0x10), &D_ovl33_800CD6BC, &v);
+    RotateSVectorY((s16) (a + 0x400), &v, &v);
     p = AF(o, void *, 0x20);
     v.vx += AF(p, s32, 0x48);
     v.vy += AF(p, s32, 0x4C) - 0x20;
@@ -274,10 +274,10 @@ void func_ovl33_800CD204(u8 *arg0) {
     v.vx += rcos(AF(arg0, s16, 0x60)) / 512;
     v.vy += rsin(AF(arg0, s16, 0x60)) / 256;
     AF(arg0, s16, 0x60) = (AF(arg0, s16, 0x60) + 0x38) & 0xFFF;
-    func_80015954(&v, arg0 + 4);
+    SVecToPos(&v, arg0 + 4);
 }
 
-void func_ovl33_800CD328(u8 *arg0) {
+void ScrollFire_FlameShotUpdate(u8 *arg0) {
     s32 temp_s0;
 
     temp_s0 = AF(arg0, s32, 0x4C);
@@ -295,7 +295,7 @@ void func_ovl33_800CD390(u8 *arg0, s32 arg1) {
     temp_v0 = (AModel *) func_80146578((s32) arg0, arg1);
     AF(arg0, AModel *, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_8001CC3C(temp_v0, (s32) &D_ovl33_800CD66C, 0x220, 0x168);
+        InitSpriteKind3(temp_v0, (s32) &D_ovl33_800CD66C, 0x220, 0x168);
         AF(temp_v0, u8, 0x27) = 0x24;
         AF(temp_v0, u8, 0x24) = 0xFF;
         AF(temp_v0, u8, 0x25) = 0x40;
@@ -352,11 +352,11 @@ void func_ovl33_800CD5DC(u8 *arg0, s32 arg1) {
     void *temp_s2;
 
     temp_s2 = AF(arg0, void *, 0x20);
-    func_80013F3C(arg1);
-    func_800126C4(arg1, AF(arg0, s16, 0x60));
-    func_800123F0(arg1, AF(arg0, s16, 0x64));
-    func_80012558(arg1, AF(arg0, s16, 0x62));
-    func_80012558(arg1, AF(temp_s2, s16, 0x12));
-    func_800126C4(arg1, AF(temp_s2, s16, 0x10));
-    func_800123F0(arg1, AF(temp_s2, s16, 0x14));
+    SetIdentityRot(arg1);
+    RotateMatrixX(arg1, AF(arg0, s16, 0x60));
+    RotateMatrixZ(arg1, AF(arg0, s16, 0x64));
+    RotateMatrixY(arg1, AF(arg0, s16, 0x62));
+    RotateMatrixY(arg1, AF(temp_s2, s16, 0x12));
+    RotateMatrixX(arg1, AF(temp_s2, s16, 0x10));
+    RotateMatrixZ(arg1, AF(temp_s2, s16, 0x14));
 }

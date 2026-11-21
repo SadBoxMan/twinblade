@@ -1,15 +1,13 @@
 // Package 0x1C (MAIN.CD entry 22, abil/ovl1c.yaml): ability 4, Antidote
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Antidote_Cure = 0x800CAEE8; // type:func
+Antidote_KindUpdate = 0x800CAFAC; // type:func
+Antidote_RingUpdate = 0x800CB10C; // type:func
+Antidote_DrawSparkle = 0x800CBB38; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80015954 = 0x80015954; // type:func
-func_80017758 = 0x80017758; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_80017DF8 = 0x80017DF8; // type:func
-func_800183E0 = 0x800183E0; // type:func
 func_8001CD50 = 0x8001CD50; // type:func
 func_8001CD9C = 0x8001CD9C; // type:func
-func_800233CC = 0x800233CC; // type:func
 D_80078EC1 = 0x80078EC1;
-D_800AE620 = 0x800AE620;
 D_800B99DA = 0x800B99DA;
 func_800D20C0 = 0x800D20C0; // type:func
 func_800D2294 = 0x800D2294; // type:func

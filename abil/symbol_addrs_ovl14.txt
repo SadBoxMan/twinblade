@@ -1,9 +1,19 @@
 // Package 0x14 (MAIN.CD entry 14, abil/ovl14.yaml): ability 5, Perfume
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Perfume_Update = 0x800CAE34; // type:func
+Perfume_Step1Start = 0x800CAEB0; // type:func
+Perfume_Step2WaitTimer = 0x800CAF20; // type:func
+Perfume_CloudUpdate = 0x800CAF54; // type:func
+Perfume_DrawCloud = 0x800CAF90; // type:func
+Perfume_CloudStart = 0x800CB164; // type:func
+Perfume_PuffGrow = 0x800CB254; // type:func
+Perfume_PuffDrift = 0x800CB358; // type:func
+Perfume_PuffFade = 0x800CB470; // type:func
+Perfume_CloudEmit = 0x800CB4D8; // type:func
+Perfume_StepTable = 0x800CB5BC;
+Perfume_FanVerts = 0x800CB5C8;
+Perfume_CloudStates = 0x800CB5DC;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80017758 = 0x80017758; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_80017E68 = 0x80017E68; // type:func
-func_800183E0 = 0x800183E0; // type:func
 D_80078EC1 = 0x80078EC1;
 D_80078EC8 = 0x80078EC8;
 func_800D20C0 = 0x800D20C0; // type:func

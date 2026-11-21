@@ -234,6 +234,31 @@ python tools/regdump.py t.c func_X -O2           how GCC placed each variable: r
 | (r166) three stores at equal scheduler priority in the other order (`sb; sb; sh i` where yours gives `sh i; addiu i; sb; sb`) with the counter's increment and the offset's increment both in the loop | the `for` header's increments in the other order: `for (i = 0, off = 0; i < 2; off += 0x1FC, i++)`: with every insn at priority 1 sched1 falls back to insn order, and the increments' order decides which store is anti-dependent on the insn scheduled last | func_80037D98 |
 | (r166) two early `return 0`s (`beqz; bltz` to one shared `v0 = 0` block, the second with `v0 = 0` stolen into its slot), the work after them, and a two-way tail `jal; sw; j end; v0 = 0` / `jal; j end; v0 = 1` where yours inverts the first branch | the early returns as one nested condition with the work inside: `if (f() != 0 && s >= 0) { g += a; if (h() != 0) { if (s != 0) { g = f(); return 0; } k(); return 1; } } return 0;` (a chain of early returns, or a shared `ret0:` label, both invert the first branch) | func_8002A108, func_8002A354 |
 
+## MATCH-TRICK replacements, r696 (11 Nov 2026, pristine 20ffdfa8)
+
+r696 replaced 15 MATCH-TRICK lines in 15 functions on `pristine` by natural forms, each 218 / 218 and both engine
+checks. The MATCH-TRICK count on pristine is now **146 lines (was 161)**. Records: C:/tw/pristine
+docs/match_trick_review.md (step 3: census, triage, these replacements; section 3 has them) and C:/tw/pristine
+docs/phase1_hand_asm.md (step 2: the hand-asm records).
+
+| Try | Lines | Before -> after | Where |
+|---|---|---|---|
+| T1 | 2 | func_80156370 casts dropped (file declares and defines it K&R) | src/stage/engine_801458E0.c |
+| T2 | 3 | `s32 func_8016F1AC(s32 arg0);` -> K&R `s32 func_8016F1AC();`; five `((s32 (*)())func_8016F1AC)()` -> `func_8016F1AC()` | engine_801458E0.c |
+| T3 | 5 | `extern void func_80029504();` -> `extern s32 func_80029504();`; six casts dropped | engine_801458E0.c |
+| T4 | 2 | `extern void SpuSetTransferStartAddr(s32 a);` -> `extern s32 ...`; two casts dropped | src/code_8002C8BC.c |
+| T5 | 1 | func_8014B310 cast dropped (K&R in the file) | engine_801458E0.c |
+| T7 | 1 | func_sc01_080_80180174 given a K&R definition; the call loses its cast | src/stg/sc01_080.c |
+| T8 | 1 | func_80021174 given a K&R definition; func_800221A8's call loses its cast | src/code_800123F0.c |
+
+**Ruling (LuciDin, Wed 11 Nov ~13:55 Eastern, r696 T6, sc02_017 801807DC):** a dead store written as an initialiser
+(`u8 *q = 0;` where q is set before any read) counts as a dead store and stays a marked MATCH-TRICK. An initialised
+local is natural only where its value is used (sc05_001 `s32 n = 0;`, 30 Oct).
+
+**Main's readable src/ is not changed by r700.** It may carry the same lines; carrying T3 / T4 (`extern void
+func_80029504()` and `SpuSetTransferStartAddr` void -> s32) to main's src/ needs a PC build (`pcuild.bat`) in that
+card.
+
 ## 3. Prototype and declaration rules that bit us
 
 * `extern u8 D_80076214;` (not s8), `extern u8 D_800A63E4;` (both files), `typedef struct { u8 flag; } Flag8;
@@ -3016,7 +3041,7 @@ The MATCH-TRICK sweep: 181 lines to 154. Removed: 3 HARD_V0, 11 nv, 3 v, 8 comma
 
 | Lines | Family | Why it stayed |
 |---|---|---|
-| 69 | frame pads (unused locals) | not steering: an unused local is what the frame shows. Not touched |
+| 69 | frame pads (unused locals) | not steering: an unused local is what the frame shows. Not touched (r292: 3 removed; an unused area can be leaked pseudos, see the r292 rows) |
 | 9 | `pq = &D_800AF630` dead store in func_sc06_018_8018F060 and its 2 clones | 216 per-site forms on sc06_018: changing any one site leaves 6 lines, a `MATRIX *` inline parameter 9 at best |
 | 6 + 2 | `umn` / `yl` do-while(0) | sc03_089: 96 combinations of declaration order and arm order stop at 6 lines (pa / pb in a1 / a0). The trick keeps the original's `umn = pa` first; the form that lifts umn needs the other arm order. yl not tried |
 | 2 | `x = (s16)t` in func_80145C54 | 8 forms: removal gives 1 extra insn at best, as the original's delay-slot `move a1,v1` needs the copy after the test |
@@ -3050,7 +3075,7 @@ counts, and no statement order could repair that (r287's 50,000 orders).
 |---|---|---|
 | a packed table entry (two s16 in one word) read as `lw` + sll / sra + sra for one index, two `lh` for another, `lh` + `lw` + sra for a third | read every entry as a word and split it into s16 locals: `v = tab[i]; s = v; c = v >> 16;`. combine folds "load, shift left 16, shift right 16" into a half load when the three insns are linked, and keeps the word load when the word has another use (its rule for two independent sets made from three insns). flow.c links a register's setter only to its FIRST use, and an s16 local is sign-extended where it is used, so the half that a multiply uses first decides: sin first folds to `lh` (and cos after it, if the word then dies), cos first keeps the `lw`. The order of the split statements does not matter | func_80020DA4: `c = xc * zs;` uses x's cos and z's sin first, so x keeps the word and z becomes two `lh`; `a = xs * ys` uses y's sin first, and y's word stays for `yc` and the negation: `lh` + `lw` |
 | a local-alloc quantity needs one more reference than the asm shows, in straight-line code with no repeated paths | a value that combine folds away still counts: refs are taken at flow, before combine. `ys = yv;` folded into `lh` leaves yv with 6 refs where the asm shows 5, so yv's priority is 4000 against the x word's 3947 and yv takes v1. The struct half read gave 5 refs, 3333, and the x word took v1 | func_80020DA4 (r287's rule, without any repeated source) |
-| an unused 16-byte frame area and an unused s0 save, until now a `s32 pad[4];` | the s16 cos locals (`s16 xc, yc, zc;` set from `v >> 16`): frame 24 with `vars= 16` and both saves, no pad. With s32 cos locals: frame 8 and 90 lines. Which slots make up the 16 bytes was not traced | func_80020DA4 |
+| an unused 16-byte frame area and an unused s0 save, until now a `s32 pad[4];` | the s16 cos locals (`s16 xc, yc, zc;` set from `v >> 16`): frame 24 with `vars= 16` and both saves, no pad. With s32 cos locals: frame 8 and 90 lines. The 16 bytes are two leaked pseudos, the `sll` halves of the s16 sign extensions (traced by r292, see its rows) | func_80020DA4 |
 | two address chains take v0 / v1 the wrong way round | local-alloc gives v0 to the higher priority, floor_log2(refs) * refs / life. The chain read twice (9 refs, 27 / life) beats the chain read once (8 refs, 24 / life) only when their lives are about equal, which needs the once-read chain to start first: x first gives z 15000 and x 13333; z first gives x 24000 and z 10384. Print the quantities with an instrumented cc1 before trying orders | func_80020DA4 |
 | a search over statement orders stalls a few lines short | stop and ask what source would make the odd part of the target (here the load pattern), then read the pass that makes it. The match was the first compile of the new idiom, and 5 different statement orders of its set-up lines all match (a, b, c in that order does not: the multiply order follows source order) | func_80020DA4 |
 
@@ -3074,3 +3099,122 @@ insn order beside it, a register question becomes a table to read. The build is 
 The general lesson: when a function is a few lines off after a long search, the remaining difference is rarely a matter
 of order. Look for something in the target that the current C explains only by coincidence (here: mixed load widths, an
 unused frame area), and ask what plainer source the compiler would turn into it.
+
+### r292 rows (the frame-pad sweep with r290's lever; 7 Nov)
+
+3 of the 56 frame pads go, each in plain C with no pad: func_80132784, func_80132F40 and func_801397B0
+(src/stage/engine_8012F5F4.c). 52 stay, each with a cause (notes folder r292_kept.md). **The lever, now traced: each
+unused 8 bytes of these frames is a pseudo that combine folded away. In a three-insn combination whose first value
+stays live elsewhere, combine re-emits that set as the new i2 and folds the middle insn into i3. try_combine clears a
+dead register's reference count only when there is no new i2 (its "zero its use count" step), so the middle pseudo
+keeps the count flow gave it. regclass then finds no uses ("ST_REGS or none"), global gives it no register, and
+reload's alter_reg gives it a stack slot (8 bytes, BIGGEST_ALIGNMENT) that nothing ever touches.** r290's 16 bytes
+are two of these: the `sll` halves of its s16 sign extensions. So an unused frame area is not always an unused local.
+Count the leaks it needs (bytes / 8) and look for the source that makes them.
+
+| Symptom | Fix | Example |
+|---|---|---|
+| N unused frame bytes, nothing stored, held by a pad array | look in the original for the fingerprint of a leak, which is always a narrow load made from a value that stays live: two loads from one aligned word in one block with no store or call between (`lw` + `lbu 1`, `lh 0` + `lh 2`), or an `lh` whose value is used both extended (compare, arithmetic) and plain (copy, store). Write the source that makes it: read the word once and take the part with shifts, or load an s16 local once and use it both ways. Each fold gives 8 bytes | func_80132784: byte 1 of a packed entry as `(w >> 8) & 0xFF` gives `lbu 1` and keeps the `lw` (1 leak); func_801397B0: the Pos16 entry as `v = *(s32 *)e; x = (s16)v; y = v >> 16;` gives `lh 0` + `lh 2` (1 leak); func_80132F40: `s16 y0` and `y1`, each compared and copied (2 leaks) |
+| a pad in a function with no `lh` / `lb` and no second read of a loaded word | keep it: no source form can make combine leak a slot there. CSE turns a constant pointer to a global back into symbols, a half of a loaded word into a half load, and folds address arithmetic, all before flow counts anything. So the plain explanation is an unused local, as the C says | 25 functions, the sc03_001 80187690 leaf and its 9 copies (one load, used only in compares), the func_80152254 family (5) |
+| the pad's size does not match the leaks you can make | the current C may already leak: compile with the pad removed and count before planning. The explicit pad sits on top of those | func_80132F40 already leaked 1 of its 2; func_8014EA4C leaks 2 of 4, sc05_010 80180AA0 1 of 3 (both on the Fable list) |
+| a min written `y = y0; if (y1 < y0) y = y1;` loads the halves the wrong way round once y0 and y1 are s16 | `if (y0 > y1) y = y1; else y = y0;` (all three read orders and three declaration orders match) | func_80132F40 |
+| checking a candidate for leaks | cc1 with `-dr -dg`: in the .greg dump a leaked pseudo is listed under "regs to allocate" with an empty conflict list and is missing from "Register dispositions"; the .rtl dump shows what set it. The r292 lab (notes folder r292_lab/lab.py, LAB_DUMP=1) prints them and recompiles a whole unit in under a second | all three |
+
+### r373 rows (the frame-pad lines not worded "pad"; 7 Nov)
+
+The 10 lines r292's search missed (9 functions). 2 go, 8 stay with a cause. **New check, before any variant: where is
+the unused area?** Reload's leaked slots are allocated after every declared local, so they sit at the TOP of the
+locals area. An unused area with a used local above it (an addressed local at a higher offset) is a real unused local,
+whatever the code; only a top area can be leaks, and then the r292 fingerprint decides.
+
+| Function (file:line on main 6431309a) | Line | Result |
+|---|---|---|
+| func_sc03_014_801898BC (sc03_014_post.c:2830), func_sc03_015_801898BC (sc03_015_post.c:2828) | `u8 c[0];` | REMOVED: the zero-size local was inert; the current C already leaks the leaf's 16 bytes (the `sll` halves of the two `AF(p, s16, 0x18 / 0x1A)` values, each compared and then decremented: r292's s16 fold twice). 0 lines, every other function of both units unchanged |
+| func_8015094C (engine_801458E0.c:6695 / 6697) | `MATRIX m;` `VECTOR w;` | kept: m's 0x20 lies between v (sp+16) and c (sp+64): a local. The 0x20 above c holds w and the 2 slots the current C already leaks (`AF(arg0, s16, 6 / 0xE)` each compared and incremented); w would need 2 more leaks and the function has no other narrow load of a live value. c itself is a dead copy of D_801EC5FC: edited-out code, so unused locals are what the source had |
+| func_sc06_006_8017F934 (sc06_006.c:1596) | `u8 unused[0x20];` | kept: the area is between m (sp+16) and r (sp+80): a local. No lh/lb of a live value (the s32 scale is a `lw` stored as halves) |
+| func_sc06_027_8017D104 (sc06_027.c:487) | `SV8 unused;` | kept: the area is sp+16, below a and b: a local. The struct copies go through the stack, the halves re-read from memory: no narrow load of a register value |
+| func_sc06_029_8017C954 (sc06_029.c:888) | `SV8 v[3];` | kept: the 0x18 area (0xA0-0xB7) is below v3 and the other stack locals: a local. (The current C already leaks 37 slots, all inside the frame as matched) |
+| func_sc06_029_80184564 (sc06_029.c:3820) | `SV8 v[5];` | kept: v[4] (sp+88) lies below flag (sp+96): an array slot, not a leak. The current C leaks 6 (the three min/max compares); tried s16 locals for the `0xFE` index and for the q->x/y/z copies (still 6) |
+| func_80147514 (engine_801458E0.c:2266) | `SVECTOR unused;` | kept: the 8 bytes ARE at the top (above v, sp+24), but the SVECTOR copy goes through the stack (lwl/swl) and its halves are re-read with lhu, used only plain (or, add): no fingerprint, nothing leaks with the pad removed: an unused local |
+| func_sc06_029_8018A084 (sc06_029.c:6018) | `V3 v;` | kept: top area, but no lh/lb at all (r292's settled class); m is itself a dead copy of D_800AE620, so the unused V3 fits the same edited-out code |
+
+
+### r374 rows (r373's layout test over r292's 52 kept pads; 7 Nov)
+
+Docs only. Each pad's place in the frame, against r373's rule (reload's leaked slots sit at the TOP of the locals, so an
+unused area below a used local is a real local). Per-row reasons in the notes folder's r292_kept.md (Layout column).
+
+| Layout reason | Functions (lines) | Which |
+|---|---|---|
+| settled: below a used local | 12 (12) | 80147DC0, 8014D820, 8014EA4C, 801523F4, 80162FF4, 801630C4, 80163194, 80163C2C (`MATRIX unused`), 8016A290, 8016BFD0, 8016DF5C, sc05_010 80188234 |
+| top area, no fingerprint | 34 + 1 line (35) | the rest, plus 80163C2C's `SVECTOR rot` (above m); the current C leaks nothing in any of them |
+| top area, fingerprint tried and closed | 5 (5) | the 80152254 family: one `lhu 136 / 138` pair explains at most 8 of the 16 bytes, and r292's word-read and s16 forms leak nothing |
+| top area with a fingerprint: still a lead | 1 (1) | sc05_010 80180AA0 (the current C already leaks 1 slot above the pad; 2 more needed): stays on the Fable list |
+
+9 of r292's 15 "scan only" lines are now settled. **func_8014EA4C leaves the Fable list**: its `VECTOR w` (sp+16) lies
+below the SVECTOR v at sp+32 (written by an swl/swr struct copy); the current C's 2 leaks sit above v, which is all the
+frame needs.
+
+| Symptom | Fix | Example |
+|---|---|---|
+| need the frame layout of the current C (which declared local sits where) | compile the unit with `-g` added to cc1: the SDB `.def` line of each auto local (`.scl 1`) gives `.val` (sp offset = .val + frame size) and `.size`; the code is unchanged. A gap between the top declared local and the end of `vars=` is the current C's own leaks (or 4 bytes of rounding). Notes folder r292_lab/layout.py does it for a pad list | all 52 r374 rows |
+| is the used object above the gap really a local, not a reload spill (spills also land at the top) | it must be something reload cannot make: an address taken (`addiu $r,$sp,N`), an swl/swr or lwl/lwr struct copy, or several fields stored with constants and read back (reload re-makes a constant, it does not spill it). A lone aligned `sw`/`lw` pair could be a spill | 8014D820 (VECTOR v zeroed then read), 8014EA4C (swl/swr) |
+
+### r683 / r685 rows (type-1 blocks on pristine, 10-11 Nov; notes folder r683_sc07.md, r685_mopup.md)
+
+| The diff shows | Write the source as | Example |
+|---|---|---|
+| a global's load kept below a run of field stores written as `AF(o, T, off) = v`, where the original hoists it above them | `AF()` stores are plain `*(T *)` casts, not struct accesses, so GCC 2.7 lets nothing move past them; use a real struct type for the object (an m2c-style typedef with `u8 padN[]` arrays) or array-form field access (`((s32 *)o)[0x33]`): both are in-struct, so the scalar load may move up | func_sc07_004_801A2E90, func_sc07_004_801A6908, func_sc07_004_801A0230 |
+| `return f1() != 0 \|\| f2() != 0;` lays the calls and the 0 / 1 out differently | `if (f1() == 0) { return f2() != 0; } return 1;` | func_sc07_004_801AA4EC, func_sc07_004_801AA584 |
+| m2c's scattered stack scalars (`sp10`, `sp12`, ...) vanish (dead-store-eliminated) or land in other slots | one stack object per area, in slot order: `RECT`, `SVECTOR`, `VECTOR` or `u8 buf[N]` locals; field store order follows the target (x before y in func_sc07_004_801AD2CC) | func_sc07_004_801AD2CC |
+| a 24-bit OT link (`& 0xFFFFFF`, `& 0xFF000000`, `or`) whose masks and order differ from yours | the block's `struct_4_4` bitfield type for the tag word, not mask expressions | func_sc07_004_801A5E60 |
+| put_func rewrites an `s16` parameter to `s32 argN_0` plus a narrowing local | a K&R extern earlier in the file makes it do that; a full prototype just above the definition keeps the plain `s16` parameter | func_sc07_004_801ADBB0 |
+| a byte flag masked once where it is set (`negu; andi s7,v0,0xFF`) and then copied into other saved registers before each loop (`move s6,s7`, `move s0,s7`), where yours masks it at every use (`u8`) or never copies it (`s32`) | an `s16` local holding a `(u8)` value: `s16 dim = (u8)-((u16)D_8011511A != idx);` | func_main_12_8017CBC8, func_sc03_076_801F03C0 |
+| an inlined three-way 0 / 1 test whose last arm comes out as `sltiu` (jump.c's store-flag), with the global store merged after it | one condition with a shared true label: `if ((u32)(t - 200) >= 100 && (t < 300 \|\| !(func_80029178(250) & 0xFF))) r = 1; else r = 0;` and the store in each arm (`if (r != 0) AF(D, void *, 4) = &A; else AF(D, void *, 4) = &B;`), which cross-jumping turns into the doubled load | func_sc03_076_801F2348 (and 801F23D0, 801F2458, 801F24DC) |
+| an address-taken out-parameter's frame too small by a few slots (0x18 here) with the code otherwise right | the local is an array passed by name (`s32 c[8];` ... `f(..., c)`, read as `c[0]`), not a scalar passed as `&col` | func_sc03_076_801F03C0 |
+| three products that prefer LO given the wrong registers (one slot off), the target keeping all three live at once | finish each channel right after its product (`r = x & 0x1F; r = (r + (pr >> 16)) & 0x1F;` then g, then b): the shorter live range lifts the first product in global-alloc's order | func_sc07_003_801A2EC8 |
+| an argument register set before a test (`li a1,0x160` in a `beqz` slot) that m2c turned into an extra argument of the first call | check how many arguments the callee takes (its other callers): reorg pulled the second call's argument into the slot; write `f(arg0)` and give the constant to the call that uses it | func_sc07_004_801AC54C |
+| a load and a store of one global through one CSE'd address register, where the original addresses each with its own `%lo` | write the store's address as an element of the neighbouring symbol (`(&D_sc07_004_801F89B8)[1].field_0 = c;` for D_801F89BC, `(&D_sc07_004_801F8D18)[0x10]` for D_801F8D58): the same address as another expression, so CSE does not share the register (splat cut one array into these symbols) | func_sc07_004_801A80C0, func_sc07_004_801AD068 |
+| a repeated `field++` tail that must cross-jump back into one copy while its load is hoisted above an earlier store | every copy in array form (`((u16 *)arg0)[0x1A]++`): in-struct, so the load may move, and identical, so cross-jumping merges them | func_sc07_004_801A1470 |
+| an earlier K&R extern (`extern void f();`) meets a definition with `u16` / `u8` parameters ("default promotion can't match an empty parameter name list"), and put_func's `s32 argN_0` rewrite changes the scheduling | turn the extern into the full prototype: callers passing constants and `lbu` values compile the same | func_sc07_004_801AB21C |
+
+### r687a rows (the last 16 type-1 block functions, 14 Nov; pristine merge f6e0d1ed; Fable, compiler source read for each; notes folder r687a_notes.md)
+
+All 16 matched, 12 in plain C. **The lever of the day: before any search, ask what the compiler pass that makes the
+odd part of the target needs to see, and read that pass. Five of the eight causes were one condition in one function
+of GCC (make_regs_eqv, combine_movables, birthing_insn_p, jump.c's max_uid test, true_dependence), and each fix was
+then the first compile.** Also: an older or sibling build of a matched function is the best template there is; and
+check every SDK call's prototype against the SDK header.
+
+| The diff shows | Write the source as | Example |
+|---|---|---|
+| a register copy the original keeps (`move a0,v0`, then tests v0 and uses a0) that GCC folds away in every form | the variable receiving the copy must already be referenced before the block the copy is in: cse.c make_regs_eqv makes the NEW register the class's canonical one only when it is referenced outside the current extended basic block (first use before its start, or last use after its end) and dies later than the old one; then later uses keep it and the copy stays (global-alloc does not coalesce two pseudos). The parameter reused, a variable with an earlier set, or a marked dead initialiser all do it | func_sc07_004_801A3594 (`s32 x = 0;` marked) |
+| `subu v1,v0,v1` (the result in the SECOND operand's register) where an expression gives `subu v1,v1,v0` | user scratch variables reused: `a = X; b = Y; b = a - b;` | func_sc07_004_801A3594 |
+| two hoisted loop-invariant addresses in the wrong order in the prologue (registers right) | loop.c scans the outer loop's body in insn order and emits each hoisted set before the loop in that order; combine_movables makes later temporaries that load the same constant "match" the first one, so a table indexed directly in two inner loops becomes ONE register whose place in the order is the first temporary's (inside the first inner loop, so after anything that loop's own pass already moved out). A pointer local assigned at the top of the outer loop is hoisted first instead. Also: `insn_count *= 2` for a register "already moved" from an inner loop is never undone within one move_movables call, so it decides whether a LATER candidate is hoisted too (r685's `lim = D_3450` local fixed the order and then hoisted an extra `li 4`) | func_sc03_076_801F0F28 (`D_801F31C4[i]` in both loops, no `names` local) |
+| the return value's `addiu v0,p,8` used early as a load-delay filler, temporaries pushed out of v0, saved registers swapped; the original computes it last | sched.c birthing_insn_p gives top priority to the set of a live register only when `reg_n_sets == 1`. A call to an implicitly declared (int) function is a second set of v0. Declare the SDK function `void` as its header does; then the return-value set is v0's only set, sched1 leaves it last, and local-alloc can use v0 for the temporaries | func_sc03_076_801F1520 (`extern void SetDrawMode(...)`) |
+| a run of constant stores to one global struct with two `li` swapped | sched1 keeps each `li` with its first store; sched2 then orders the ready `li`s by original position, so the statement-group order decides: search the group permutations (720 in 3 minutes at --par 4), then write the winner with the real struct type | func_sc07_004_801ADF5C |
+| a global index reloaded before every use (`lui; lhu` eight times) that your C loads once, or that only AF()-style stores keep reloading; register allocation off by one saved register | the global is a MEMBER of a struct (the work block): stores through another struct pointer may alias a struct member but not a plain scalar (sched.c true_dependence, cse's invalidation). Declare the block's base and read the member; in an older build find the base from two known members | func_main_09_800CD674 / 800CD92C (`w->field_A3D2`, D_800B0A50 = D_800BAE22 - 0xA3D2) |
+| the same function in an older or retail build is already matched | start from its source text and change only what the build differs in; do not start from m2c's draft | func_main_09_800CD674 from ovl3a's func_800CF408 (first compile) |
+| a stack struct stored twice (`sw; addu; sw` to one slot), the first store "dead" | a read-modify-write: `*(s32 *)&c = *(s32 *)p; *(s32 *)&c += step; *p = c;`. GCC 2.7 has no dead-store elimination for memory, so both stores stay, and nothing in the source is dead. The step read in array form (`((s32 *)o)[0xC]`) so it may move above the first store | func_sc07_004_801AB818 |
+| two s16 values packed into one register with `andi 0xFFFF; sll 16; or`, read back with `sra 16` and as the low half; 8 unexplained bytes at the top of the frame | a word-sized union holding the pair (`union { s32 l; struct { s16 x, y; } s; } e;`, address not taken): GCC keeps it in a register, builds it with exactly that packing, and combine's folds leak one frame slot. A struct of two s16 alone is BLKmode (alignment 16) and goes to the stack | func_sc07_004_801AF368 (`union_4_2 e`) |
+| a frame pad that an earlier round added "for the top 8 bytes" | compile without it before keeping it: the current C may already leak that slot (an s16 local used extended and plain) | func_sc07_004_801AEC38 (`unused2[1]` was not needed) |
+| two byte-identical blocks that both jump into the middle of a third (to its final store); a shared arm or a goto gives one copy | the original has two arms with the same body. Cross-jumping first merges each arm's tail into the third block and creates a NEW label there; jump.c tries a jump against other jumps to its label only when `INSN_UID (label) < max_uid` (the label existed before the pass), so two jumps to a label made in the pass are never merged. Arms that jump to an OLD label (the default label) do merge: that is why the 0x2000 arms are one block and the 0x4000 arms are two. Needs LuciDin's ruling each time (given for this one, 14 Nov) | func_sc07_003_801A43E8 |
+| a hand name the C needs that no asm references (a struct base) | add it to the hand part of blk/symbol_addrs_<block>.txt (the line after the header) and re-split; no `:` or `;` in the comment, splat reads them as attributes / line ends | D_800B9A78 (sc07_004), D_800B0A50 (main_09) |
+
+### r741 rows (pristine's final C carried onto main with main's names, 14 Nov)
+
+`tools/carry_pristine.py`: `blk NAME...` rewrites a block file from pristine, `img FILE...` merges pristine's changes
+since phase1-pristine-comments into main's file (3-way, both sides translated to main's names, line conflicts
+re-merged per token, the rest left with markers). Run `make -j4 regress` after every carry: a byte-identical build is
+what proves the merge.
+
+| The carry shows | Do this | Example |
+|---|---|---|
+| a pristine address name (func_/D_ + address, scoped or not) | main's name at that address in the IMAGE's own symbol files (its yaml's symbol_addrs_path, last file first); no main name = splat's name, which pristine's already is | every block file |
+| link error "undefined reference" to a name only the C uses (a struct base) | pristine added it to the hand part of the block's symbol file: carry that line too, comment in main's names, and re-split | main_09 D_800B0A50, sc07_004 D_800B9A78 |
+| jtbl_relabel "no address for func_main_12_..." | jtbl_relabel.py's name patterns need `main_\d\d_` (pristine r687a) | main_12 |
+| a pristine K&R definition (`f(a, b) s32 a; s32 b; {`) against main's typed ANSI one | K&R with main's types (`Mover *a;`): the non-prototype definition is the natural form, main's types are readability | sc02_005 80182F78, sc06_022 / 024 / 032 / 033 |
+| pristine's `extern s32 f();` against main's typed prototype | take pristine's non-prototype declaration (callers with other argument counts need it); the definition keeps main's types | sc06_018 / 020 / 022, sc02_016 |
+| a new type pristine introduced | use main's existing type where main has the same layout, with main's field names | G63 union_2 = ovl36 ClockDiff (w, b.lo, b.hi); G21 struct_10_3 = LightDir (vx..b) |
+| a token re-merge that moves a cast to the neighbouring argument | the byte check catches it (it changes pointer arithmetic); put main's cast back where main had it | sc03_007 80180388 (`(u8 *)arg0 + 4`) |
+

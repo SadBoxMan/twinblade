@@ -15,7 +15,7 @@ typedef struct {
 } Pad;
 
 extern u8 D_800BA118[];
-extern s32 D_800AE610;
+extern s32 g_PadLostFrames;
 extern Pad g_Pads[2];
 extern s32 g_StageImageEntry;
 
@@ -45,78 +45,78 @@ extern CdFileLoc g_ArchiveFileLoc[];
 #define LIST_BUF ((ListEntry *)0x80180000)
 extern s32 D_800747D0;
 extern s32 D_800747D4;
-extern s32 D_80063074;
-extern s32 D_800747D8;
+extern s32 g_TitleMovieCount;
+extern s32 g_LicenceShown;
 
 extern void ResetLoader(void);
 extern s32 LoadFileStep(CdlFILE *file, void *dest, s32 arg2, s32 arg3);
-extern void func_80016714(void *p, s32 size); /* zero-fills size bytes */
+extern void ZeroFill(void *p, s32 size); /* zero-fills size bytes */
 extern void ResetGameState(void);
 extern void ResetMallocHeap(void);
 extern void InitDisplay(void);
 extern void Init3DScene(void);
-extern void func_8001C044(void);
+extern void ClearObjectPools(void);
 extern void ClearImageQueue(void);
-extern void func_80015310(void);
-extern void func_80028A48(void);
-extern void func_80028C50(void);
+extern void ClearDebugText(void);
+extern void InitFCall4(void);
+extern void InitFCall5(void);
 extern void StopPadRumble(void);
 
 extern s16 D_800AF7CE;
 extern s32 D_800747C8;
-extern s32 D_800A654C;
+extern s32 g_BgmPackPlaying;
 extern s32 D_800747EC;
 extern s32 D_80075838;
-extern s32 D_80078E80;
+extern s32 g_Progress;
 extern s32 D_80078E84;
 extern s32 D_80078E88;
-extern s32 D_80078F08;
-extern s32 D_80078EE4;
+extern s32 g_Odometer;
+extern s32 g_Stat0Level;
 extern s32 D_80078EF0;
 extern s32 D_80078F00;
 extern s32 D_80078EF8;
-extern s32 D_800760C8;
-extern s32 D_80075A40;
-extern s32 D_800A2B70;
-extern s32 D_800BA0FC;
+extern s32 g_SaveRequest;
+extern s32 g_CardDir;
+extern s32 g_TimeChime;
+extern s32 g_TimeChimeTimer;
 extern s32 g_LzssState;
 extern s32 g_LzssDst;
-extern s32 D_800760AC;
-extern s32 D_8007609C;
+extern s32 g_CardStep;
+extern s32 g_CardStatus;
 extern s32 D_800760A0;
 extern s32 D_800760A4;
 extern s32 D_800760A8;
 extern s32 g_RumbleScript;
-extern s32 D_800AE7EC;
-extern s32 D_800747FC;
+extern s32 g_BgmPackStep;
+extern s32 g_WipeStep;
 extern s32 D_80078EFC;
-extern u8 D_800BA1B8[];
-extern s32 D_800A5E58[];
+extern u8 g_Vars[];
+extern s32 g_StateSlotUsed[];
 extern s32 ApplyMatrixSV();
-extern s32 func_80016A7C();
-extern s32 func_80017294();
-extern s32 func_800173DC();
-extern s32 func_8001751C();
-extern s32 func_80017778();
-extern s32 func_80017930();
-extern s32 func_80034B98();
+extern s32 DrawPrimLineG2();
+extern s32 DrawPrimF4();
+extern s32 DrawPrimG3();
+extern s32 DrawPrimGT3();
+extern s32 DrawPrimG4();
+extern s32 DrawPrimGT4();
+extern s32 GetCdAudioState();
 extern s32 libc_memset();
-extern s32 func_80016F18();
-extern s32 func_8001CFDC();
-extern s32 func_8001D074();
-extern s32 func_80029124();
-extern s32 func_800291A0();
-extern s32 func_8002A544();
-extern void func_8001B34C();
-extern s32 D_80078E90;
-extern void func_80029344();
+extern s32 DrawPrimFT4();
+extern s32 AllocModelInRange();
+extern s32 AllocSpriteInRange();
+extern s32 SetFlag();
+extern void SetVar();
+extern s32 GainStat3();
+extern void ForgetBgmPack();
+extern s32 g_Clock;
+extern void UpdateClockPhase();
 extern s32 D_80078EE8;
 extern s32 D_80078EEC;
 extern s32 D_80078EF4;
 extern void ApplyMatrixLV();
-extern s32 func_8002A7B4(s32 d);
-extern s32 D_800747F8;
-extern s32 D_800AE6A8;
+extern s32 GainStat2(s32 d);
+extern s32 g_BgmPackEntry;
+extern s32 g_EntryPoint;
 typedef struct {
     /* 0x0 */ s32 vx;
     /* 0x4 */ s32 vy;
@@ -127,35 +127,35 @@ typedef struct {
 } LightDir; /* GsF_LIGHT */
 extern void GsSetFlatLight(s32 id, LightDir *light);
 
-extern s32 func_80029178(s32 n);
+extern s32 GetFlag(s32 n);
 extern u16 D_800638FA[];
 extern u16 D_800638FC[];
 
-extern s16 func_80012AB0(s16 a, s16 b);
-extern s32 func_80012B04(s16 a, s16 b, s16 c);
+extern s16 AngleSub(s16 a, s16 b);
+extern s32 EaseAngleStep(s16 a, s16 b, s16 c);
 
-extern void func_800128B4(void *p);
-extern void func_80013ED0(u16 *m, u16 *x, u16 *y, u16 *z);
-extern void func_80013F98(u8 *a, u8 *b);
-extern void func_80013FBC(u8 *a, u8 *b);
-extern void func_80013FE0(u8 *n, void *a);
-extern s16 func_80012D0C(s16 a, s16 b, s16 c, s16 *d);
-extern s32 func_80012E0C(s16 a, s16 b, s16 c, s16 d);
+extern void NormalizeSVector(void *p);
+extern void SetMatrixColumns(u16 *m, u16 *x, u16 *y, u16 *z);
+extern void GetMatrixColumn0(u8 *a, u8 *b);
+extern void GetMatrixColumn1(u8 *a, u8 *b);
+extern void GetMatrixColumn2(u8 *n, void *a);
+extern s16 EaseValueStepRec(s16 a, s16 b, s16 c, s16 *d);
+extern s32 EaseAngleFracStep(s16 a, s16 b, s16 c, s16 d);
 
 extern s32 Lzc(s32 v);
 extern void VectorNormalS(VECTOR *v, SVECTOR *out);
 
-extern s16 func_80013028(s16 a, s16 b, s16 c, s16 d, s16 *e);
-extern s32 func_8001311C(s16 a, s16 b, s16 c);
+extern s16 EaseValueFracStepImpl(s16 a, s16 b, s16 c, s16 d, s16 *e);
+extern s32 ApproachStep(s16 a, s16 b, s16 c);
 extern void Square0(VECTOR *in, VECTOR *out);
-extern void func_80029044(void);
-extern void func_8002906C(void);
-extern void func_80029094(void);
-extern s32 func_80028FDC(s32 a);
-extern s32 func_80029020(s32 a);
-extern s32 func_80028DBC(s32 a);
-extern s32 func_80028E00(s32 a);
-extern void func_80029274(void);
+extern void ClearFlags(void);
+extern void ClearVars(void);
+extern void ClearVarBlock60(void);
+extern void SetMusicVolume(s32 a);
+extern void SetEffectsVolume(s32 a);
+extern s32 SetSoundMode(s32 a);
+extern s32 SetOptionD(s32 a);
+extern void LoadDefaultStatus(void);
 
 extern s32 D_80126950;
 extern void InitGeom(void);
@@ -164,9 +164,9 @@ extern void GsInit3D(void);
 extern void GsInitCoordinate2(void *super, void *c);
 extern void GsSetLightMode(s32 m);
 extern void InitDefaultView(void);
-extern void func_8001455C(void);
-extern void func_8002850C(s16 r, s16 g, s16 b);
-extern void func_8002823C(void);
+extern void Init3DNop(void);
+extern void SetAmbientColor(s16 r, s16 g, s16 b);
+extern void InitLights(void);
 extern void ClearImage(RECT *r, s32 a, s32 b, s32 c);
 extern void EnterCriticalSection(void);
 extern void ExitCriticalSection(void);
@@ -192,89 +192,89 @@ extern u8 D_80063906[];
 
 extern u8 D_800638FE[];
 extern u8 D_80063900[];
-extern u8 D_800638F8[];
-extern u8 D_8006AEF4;
-extern s16 D_800A46CC;
-extern s32 D_800BA0F8;
+extern u8 g_StatTable[];
+extern u8 g_SpuXferFlags;
+extern s16 g_BankLoadStep;
+extern s32 g_SpuXferOwner;
 extern u8 D_80076251[];
 
 extern u16 D_8006A990;
-extern u16 D_800A4E8E;
-extern u8 D_800A4F17;
-extern s32 D_800A4F24;
+extern u16 g_BgmFlags;
+extern u8 g_SoundLock;
+extern s32 g_SoundFrameHook;
 extern u8 D_800B9E92[];
-extern void func_8002EC10(void);
-extern void func_80036EB4();
+extern void StopBgm(void);
+extern void StopCdTrack();
 extern void SsSetSerialVol(s32 a, s32 b, s32 c);
 
 extern s32 D_800760E0;
 extern void _SpuInit(s32 n);
 extern u8 D_80063904[];
-extern u8 D_800BA2B8[];
-extern void func_80031B7C();
-extern void func_80034844();
-extern s32 func_80036EE8();
+extern u8 g_VarBlock60[];
+extern void FadeOutFlaggedSfxVoices();
+extern void ReleaseAllScriptSfx();
+extern s32 StopCdAudio();
 extern s16 D_800760E8;
 extern s16 D_800760EC;
-extern void func_8002FA3C();
+extern void StepMovieFade();
 
 extern u8 D_80063902[];
-extern s32 func_8002A738();
-extern s32 func_8002A748();
-extern s32 func_8002A4C8();
-extern s32 func_8002A4D8();
-extern s32 func_8002A9A8();
-extern s32 func_8002A9B8();
-extern s32 func_8002A27C();
-extern s32 func_8002A28C();
-extern void func_80036F18();
-extern u8 D_800A4F1A;
-extern s32 D_800C6D28;
-extern void func_8001CF48();
+extern s32 GetStat3Exp();
+extern s32 GetStat3ExpNeeded();
+extern s32 GetStat1Exp();
+extern s32 GetStat1ExpNeeded();
+extern s32 GetStat2Exp();
+extern s32 GetStat2ExpNeeded();
+extern s32 GetStat0Exp();
+extern s32 GetStat0ExpNeeded();
+extern void PauseCdAudio();
+extern u8 g_XaPlaying;
+extern s32 g_PausedCdTrack;
+extern void ResetSprite();
 
 extern u8 D_800B9ED2[];
 extern u8 D_800B9ED3[];
-extern void func_80016224(s32 a, s32 b);
-extern void func_8001D1C4();
-extern void func_8001F9F8();
+extern void DrawFadeBlack(s32 a, s32 b);
+extern void DrawAllSprites();
+extern void DrawAllModels();
 extern u8 D_800B9A11;
-extern s32 func_8002A088(s16 a);
+extern s32 GainStat0(s16 a);
 extern void func_8001B26C();
 extern s32 D_800C6D10;
 extern s32 D_800C6D34;
 
 extern void GsGetLw(void *c, void *m);
-extern void func_8001C9D0(u8 *a);
+extern void ResetModelFields(u8 *a);
 extern void SpuRead(s32 a, s32 n);
 extern void SpuSetTransferStartAddr(s32 a);
 extern s32 D_80076218;
-extern s32 func_8002DC68(u32 a, s32 b);
-extern void func_80038308(s16 n);
-extern s16 D_800A4E86;
+extern s32 PlaySfx(u32 a, s32 b);
+extern void PlaySeq(s16 n);
+extern s16 g_BgmSeq;
 
-extern s32 D_8006AEE8;
-extern s32 D_80078F10;
+extern s32 g_CdAudioReqCount;
+extern s32 g_CdAudioReqIds;
 extern void CdMix(u8 *v);
-extern u8 D_800A4F19;
+extern u8 g_SoundStereo;
 
 typedef struct { s16 entry; s16 b; s16 sound; } SoundPack;   /* a sound request: its package's archive entry, ?, the sound id */
-extern SoundPack D_80063138[];
+extern SoundPack g_BgmPacks[];
 extern s32 D_8007623C;
-extern u8 D_80076243;
-extern void func_80038908(u8 *p);
-extern u8 D_800B9CD8[];
+extern u8 g_StreamPhase;
+extern void UpdateSeqVolume(u8 *p);
+extern u8 g_SeqPlayer[];
 
 extern s32 CdReadyCallback();
 extern s32 D_8006AEF0;
 extern u8 D_80076110;
-extern s32 func_8002A2B0();
+extern s32 GetStat0Value();
 extern void MulMatrix2(void *a, void *b);
 extern void RotMatrix(void *r, void *m);
 
-extern LightDir D_800A5E88[3];
-extern void func_80028620(s32 id, LightDir *src);
-extern s32 func_8002A728();
-extern s32 func_8002AA00(s32 n);
+extern LightDir g_Lights[3];
+extern void ApplyLight(s32 id, LightDir *src);
+extern s32 GetStat3Level();
+extern s32 IsLevelCapped(s32 n);
 extern s8 D_80062BBC;
 extern s8 D_80062BBD;
 extern s8 g_RumbleActSmall;
@@ -283,36 +283,36 @@ extern s16 D_800760E4;
 extern void SsSetSerialAttr(s32 a, s32 b, s32 c);
 extern void GsMapModelingData(s32 p);
 
-extern u8 D_800AE648[];
+extern u8 g_Flags[];
 extern void GsSetFogParam(void *p);
-extern s16 D_800C6D18;
+extern s16 g_FogParam;
 extern s32 D_800C6D1C;
 extern s8 D_800C6D20;
 extern s8 D_800C6D22;
 extern void GsSetAmbient(s16 r, s16 g, s16 b);
-extern s16 D_800AE7E0;
+extern s16 g_AmbientColor;
 extern s16 D_800AE7E2;
 extern s16 D_800AE7E4;
 
-extern s32 func_8002A998();
-extern void func_8001BC6C(void *p, s32 n);
+extern s32 GetStat2Level();
+extern void AddScreenSprite(void *p, s32 n);
 extern u8 D_800630E8[];
 
-extern s32 func_80029CD4(s32 n);
-extern s32 func_80029E30();
+extern s32 RandRange(s32 n);
+extern s32 CalcPower03();
 typedef struct { s32 w[0xB7]; } Blob2DC;
-extern Blob2DC D_80075CC0;
-extern void func_8001BBBC(s32 a, s32 b, s32 c);
+extern Blob2DC g_CardSaveBuf;
+extern void AddWipeBar(s32 a, s32 b, s32 c);
 extern s32 D_80074808;
 extern s32 D_8007480C;
 extern s32 g_PrimNext;
-extern void func_80024448();
-extern void func_80026D64();
-extern s32 D_80078D88;
-extern s32 D_800A2B78;
+extern void SortTransObjectLit();
+extern void SortTransObjectUnlit();
+extern s32 g_SortAttr;
+extern s32 g_SortBlendRate;
 
-extern s32 func_8002A76C();
-extern u8 D_80078F28[];
+extern s32 GetStat3Value();
+extern u8 g_StateSlots[];
 
 extern u8 GetPadType(u8 n);
 extern u8 GetPadByte(u8 a, s32 b);
@@ -324,41 +324,41 @@ extern void WideStickDeadzone(u16 *p);
 
 typedef struct { u8 b[8]; } B8;
 
-extern s32 func_8002A26C();
-extern s32 func_8002A4B8();
+extern s32 GetStat0Level();
+extern s32 GetStat1Level();
 
-extern s32 func_80029504();
+extern s32 GetProgress();
 extern void AddPrim(void *ot, void *p);
 typedef struct { u8 *ot; u8 pad[0x10]; } OtRec;
-extern OtRec D_800A651C[];
+extern OtRec g_WorldOtOrg[];
 extern u16 D_800B9A02;
 
-extern void (*D_8006351C[])(u8 *, s32 *);
-extern s32 func_8002A4FC();
-extern s32 func_8002A4FC();
+extern void (*g_SpriteDrawFuncs[])(u8 *, s32 *);
+extern s32 GetStat1Value();
+extern s32 GetStat1Value();
 
-extern s32 func_80029DB4();
-extern s32 func_8002A9DC();
-extern void func_8002CCD8();
+extern s32 CalcPower02();
+extern s32 GetStat2Value();
+extern void ShutdownSound();
 
-extern s32 D_800747F0;
-extern s32 D_800747F4;
-extern s32 D_800BA1B4;
+extern s32 g_LoadKind;
+extern s32 g_LoadKey;
+extern s32 g_LoadQueueState;
 
 extern s32 D_80063108;
 extern s32 D_80063120;
 extern u32 g_WorldOtTable[2][0x1000];
 
-extern s32 func_8002A354();
-extern void func_8002D4C8(s32 a, s32 b);
+extern s32 AddStat1Exp();
+extern void PlaySoundId(s32 a, s32 b);
 extern void func_8016E918(s32 a, s16 b);
-extern s32 func_8002A354();
-extern void func_8002AAAC();
-extern void func_8002D4C8(s32 a, s32 b);
+extern s32 AddStat1Exp();
+extern void LevelUpHook();
+extern void PlaySoundId(s32 a, s32 b);
 extern void func_8016E918(s32 a, s16 b);
 
-extern s32 func_8002A108();
-extern s32 D_80078E8C;
+extern s32 AddStat0Exp();
+extern s32 g_Money;
 extern s16 D_80078EB2;
 extern s16 D_80078EB4;
 extern s16 D_80078EB6;
@@ -372,12 +372,12 @@ extern s8 D_800AF7C4;
 extern void StreamStep(s32 n);
 extern s32 catan(s32 a, s32 b);
 typedef struct { s32 len; u32 *ot; s32 c; s32 d; s32 e; } OtEnt;
-extern OtEnt D_800A6518[];
+extern OtEnt g_WorldOt[];
 
-extern s32 D_800638A0[];
+extern s32 g_RankTable[];
 extern s32 D_800638EC;
 
-extern u8 D_80078E7C;
+extern u8 g_PlayTime;
 extern u8 D_80078E7D;
 extern u8 D_80078E7E;
 extern u8 D_80078E7F;
@@ -394,25 +394,25 @@ extern u16 D_800AF7C0;
 
 extern void SetLineG2(void *p);
 extern u8 *AllocPrim(s32 n);
-extern void func_80017E8C(s32 n);
-extern void func_80018094(void *p, s32 z, u32 a);
+extern void SetGteLocalMatrix(s32 n);
+extern void AddPrimFlat(void *p, s32 z, u32 a);
 extern void SetDrawMode(void *p, s32 a, s32 b, s32 c, s32 d);
 extern s32 RotTransPers3(void *a, void *b, void *c, void *d, void *e, void *f, s32 *flag, s32 *p);
 
 extern s16 D_800B9ECA;
-extern void func_80027C10();
+extern void SortPresetObjectGBody();
 extern void GsGetLw(void *coord, void *m);
 
-extern s32 D_800747E4;
-extern s32 D_800747E8;
+extern s32 g_XaClipStep;
+extern s32 g_XaClipState;
 
-extern s32 func_8002A834(s32 d);
+extern s32 AddStat2Exp(s32 d);
 
 extern s32 D_80076040;
-extern s32 func_800291B4(s32 a);
-extern void func_8002AC00(s32 n);
+extern s32 GetVar(s32 a);
+extern void GiveItem(s32 n);
 
-extern void func_80016638(void *o, s32 a, s32 b);
+extern void AddDrawModeAbr(void *o, s32 a, s32 b);
 extern s32 RotTransPers4(void *a, void *b, void *c, void *d, void *e, void *f, void *g, void *h, s32 *flag, s32 *p);
 extern void SetPolyF4(void *p);
 typedef struct {
@@ -427,9 +427,9 @@ typedef struct {
 typedef struct { s16 m[3][3]; s16 pad; s32 t[3]; } Mtx;
 extern s32 rsin(s32 a);
 extern s32 rcos(s32 a);
-extern void func_8001282C(u8 *n);
+extern void NormalizeMatrix(u8 *n);
 
-inline void func_800123F0(Mtx *m, s32 a) {
+inline void RotateMatrixZ(Mtx *m, s32 a) {
     Mtx r;
     s32 s = rsin(a);
     s32 c = rcos(a);
@@ -452,10 +452,10 @@ inline void func_800123F0(Mtx *m, s32 a) {
     gte_ldclmv(&r.m[0][2]);
     gte_rtir();
     gte_stclmv(&m->m[0][2]);
-    func_8001282C((u8 *)m);
+    NormalizeMatrix((u8 *)m);
 }
 
-inline void func_80012558(Mtx *m, s32 a) {
+inline void RotateMatrixY(Mtx *m, s32 a) {
     Mtx r;
     s16 s = rsin(a);
     s32 c = rcos(a);
@@ -478,10 +478,10 @@ inline void func_80012558(Mtx *m, s32 a) {
     gte_ldclmv(&r.m[0][2]);
     gte_rtir();
     gte_stclmv(&m->m[0][2]);
-    func_8001282C((u8 *)m);
+    NormalizeMatrix((u8 *)m);
 }
 
-inline void func_800126C4(Mtx *m, s32 a) {
+inline void RotateMatrixX(Mtx *m, s32 a) {
     Mtx r;
     s32 s = rsin(a);
     s32 c = rcos(a);
@@ -504,34 +504,34 @@ inline void func_800126C4(Mtx *m, s32 a) {
     gte_ldclmv(&r.m[0][2]);
     gte_rtir();
     gte_stclmv(&m->m[0][2]);
-    func_8001282C((u8 *)m);
+    NormalizeMatrix((u8 *)m);
 }
 
-void func_8001282C(u8 *n) {
+void NormalizeMatrix(u8 *n) {
     s16 c[4];
     s16 b[4];
     s16 a[4];
-    func_80013FE0(n, a);
-    func_800128B4(a);
-    func_80013FBC(n, (u8 *)b);
-    func_800128B4(b);
-    func_80013F98(n, (u8 *)c);
-    func_800128B4(c);
-    func_80013ED0((u16 *)n, (u16 *)c, (u16 *)b, (u16 *)a);
+    GetMatrixColumn2(n, a);
+    NormalizeSVector(a);
+    GetMatrixColumn1(n, (u8 *)b);
+    NormalizeSVector(b);
+    GetMatrixColumn0(n, (u8 *)c);
+    NormalizeSVector(c);
+    SetMatrixColumns((u16 *)n, (u16 *)c, (u16 *)b, (u16 *)a);
 }
 
-extern void func_80013F3C(Mtx *m);
+extern void SetIdentityRot(Mtx *m);
 
-extern Mtx D_800AE688;
+extern Mtx g_ViewMatrix;
 
 extern void SetLineG4(void *p);
 
-extern void func_80018194(u8 *prim, u32 z, s32 flags);
+extern void AddPrimTextured(u8 *prim, u32 z, s32 flags);
 extern void SetPolyGT3(void *p);
 extern u16 GetTPage(s32 tp, s32 abr, s32 x, s32 y);
 extern u16 GetClut(s32 x, s32 y);
 
-extern void func_8001820C(u8 *prim, u32 z, s32 flags);
+extern void AddPrimTexturedDithered(u8 *prim, u32 z, s32 flags);
 extern void SetPolyGT4(void *p);
 
 extern void SetPolyFT4(void *p);
@@ -539,34 +539,34 @@ extern void SetPolyFT4(void *p);
 typedef struct { s16 vx, vy, vz, pad; } SVec;
 typedef struct { s32 vx, vy, vz, pad; } LVec;
 
-extern u8 D_800A46BA;
-extern u8 D_800A6588[];
-extern s32 func_80013228();
-extern s32 func_800132BC();
-extern s32 func_800133E4();
+extern u8 g_CdFadeOut;
+extern u8 g_ItemValues[];
+extern s32 VecDistSq();
+extern s32 SVecDistSq();
+extern s32 SVecPosDistSq();
 extern s32 SquareRoot0(s32 a);
-extern void func_80016714(void *p, s32 size); /* zero-fills size bytes */
-extern s32 func_80016F18(u8 *a, s32 m, s32 k);
-extern s32 func_80017294(u8 *a, s32 m);
-extern s32 func_80034B98(void);
+extern void ZeroFill(void *p, s32 size); /* zero-fills size bytes */
+extern s32 DrawPrimFT4(u8 *a, s32 m, s32 k);
+extern s32 DrawPrimF4(u8 *a, s32 m);
+extern s32 GetCdAudioState(void);
 
-extern s32 func_80013350();
-extern s32 func_80013478();
-extern void func_80014070();
-extern void func_800128EC();
-extern s32 func_80013154(s32 a, s32 b, s32 c);
-extern s32 func_8001ABBC(s32 kind, s32 id, s32 *file, s32 c, s32 d);
-extern void func_8001B3C4(void);
+extern s32 PosDistSq();
+extern s32 PosSVecDistSq();
+extern void SVecToVec();
+extern void VectorNormalSScaled();
+extern s32 ApproachStepImpl(s32 a, s32 b, s32 c);
+extern s32 RequestLoad(s32 kind, s32 id, s32 *file, s32 c, s32 d);
+extern void BgmPackStepImpl(void);
 extern void ApplyBgColor(void);
 extern u16 g_Pad0PrevHeld;
 
-void func_800128B4(void *p) {
+void NormalizeSVector(void *p) {
     s32 v[3];
-    func_80014070(p, v);
-    func_800128EC(v, p);
+    SVecToVec(p, v);
+    VectorNormalSScaled(v, p);
 }
 
-void func_800128EC(VECTOR *a, SVECTOR *out) {
+void VectorNormalSScaled(VECTOR *a, SVECTOR *out) {
     VECTOR v = *a;
     s32 m;
     s32 t;
@@ -593,36 +593,36 @@ extern s32 D_800A4ED0;
 extern u16 D_800A4ED4;
 extern u16 D_800A4ED6;
 extern void SpuSetReverbModeParam();
-extern void func_80016450(u8 a, s32 b);
+extern void DrawFadeWhite(u8 a, s32 b);
 extern void RotMatrixZYX(void *r, void *m);
-extern u8 D_800C5328[];
+extern u8 g_BankSlotMap[];
 extern u8 D_800C532A[];
-extern s32 func_8002AA3C(void);
+extern s32 GetLevelCap(void);
 extern u8 D_800B9A64;
 extern u8 D_800747C4;
 extern u8 D_800747C5;
-extern void func_80028620();
-extern s16 func_80012CB8(s16 a, s16 b, s16 c);
-extern s16 D_800A4EFC;
-extern void func_80030F80(void);
-extern void func_8002D320(void);
-extern void func_80031BE0(void);
-extern s16 func_80012B58(s16 a, s16 b, s16 c, s16 *p);
+extern void ApplyLight();
+extern s16 EaseValueStep(s16 a, s16 b, s16 c);
+extern s16 g_SfxMuteTimer;
+extern void UpdateSfxVoices(void);
+extern void FlushSfxVoices(void);
+extern void UpdateSfxTracks(void);
+extern s16 EaseAngleStepRec(s16 a, s16 b, s16 c, s16 *p);
 
-extern s32 D_800A2BA0;
-extern s32 D_800C7D2C;
+extern s32 g_ReverbOffBits;
+extern s32 g_ReverbOnBits;
 extern u8 *D_8006A970[];
 extern s32 D_80065504[];
 typedef struct { s32 w[9]; } Blk24;
-extern Blk24 D_80079204;
-extern void func_80029218(void);
+extern Blk24 g_ContinueMapRecord;
+extern void ClearEntryPoint(void);
 extern void ClearRumbleScript(void);
-extern void func_8001B324(void);
-extern s16 func_80012E6C(s32 a, s32 b, s16 n, s16 m, s16 *f);
-extern s16 func_80012FC8(s16 a, s16 b, s16 c, s16 d);
+extern void ResetBgmPacks(void);
+extern s16 EaseAngleFracStepImpl(s32 a, s32 b, s16 n, s16 m, s16 *f);
+extern s16 EaseValueFracStep(s16 a, s16 b, s16 c, s16 d);
 extern s32 StageAlwaysReloads(s32 n);
 extern s32 rand(void);
-extern void func_8002992C(s32 a);
+extern void LoadStateSlot(s32 a);
 
 extern s32 D_80126984;
 extern s32 D_80126988;
@@ -636,22 +636,22 @@ extern u8 D_800C6E2A[];
 extern s32 g_PadConnected;
 extern s32 D_800A5E5C;
 extern s32 SpuIsTransferCompleted(s32 n);
-extern s32 func_8002A5C4();
+extern s32 AddStat3Exp();
 extern void CheckSelectHold(u8 *pad);
 extern void ClearPadInput(u8 *p);
 extern s32 PollPad(s32 i);
 extern void LatchPadInput(u8 *p);
 extern void UpdatePadState(u8 *p);
-extern void func_80029774(s32 a);
+extern void SaveStateSlot(s32 a);
 extern void func_80020DA4(u8 *a, u8 *b);
 extern void func_80020F34(u8 *a, u8 *b);
-extern void func_800373D0(void);
+extern void OpenStreamedMusic(void);
 extern void GsSetProjection(s32 a);
 extern void GsSetRefView2();
 
 typedef struct { u8 flag; } Flag8;
 extern Flag8 D_80076242;
-extern void (*D_80063500[])(u8 *o);
+extern void (*g_ModelDrawFuncs[])(u8 *o);
 
 extern u16 D_800A4E8A;
 extern s16 D_800A4EF4;
@@ -669,11 +669,11 @@ extern void SetBackColor(s32 r, s32 g, s32 b);
 extern void CompMatrix();
 extern void SetRotMatrix();
 extern void SetTransMatrix();
-extern void func_80016714(void *p, s32 size); /* zero-fills size bytes */
-extern void func_8002EE90(void);
-extern void func_8003819C(s32 i, s16 a, s16 b, s16 c);
+extern void ZeroFill(void *p, s32 size); /* zero-fills size bytes */
+extern void StopMusic(void);
+extern void SetSeqFade(s32 i, s16 a, s16 b, s16 c);
 
-void func_800129CC(s16 *v, s16 *out) {
+void VectorToAngles(s16 *v, s16 *out) {
     if (v[2] != 0) {
         out[0] = (ratan2(-v[1], v[2]) - 0x400) & 0xFFF;
     } else {
@@ -687,31 +687,31 @@ void func_800129CC(s16 *v, s16 *out) {
     }
 }
 
-s16 func_80012A60(s16 a, s16 b) {
-    s16 r = func_80012AB0(a, b);
+s16 AngleDist(s16 a, s16 b) {
+    s16 r = AngleSub(a, b);
     if (r >= 0x800) {
         r = 0xFFF - r;
     }
     return r;
 }
 
-s16 func_80012AB0(s16 a, s16 b) {
+s16 AngleSub(s16 a, s16 b) {
     return (a - b) & 0xFFF;
 }
 
-s32 func_80012ABC(s32 a, s32 b, s32 c) {
-    return (a + func_80012B04(a, b, c)) & 0xFFF;
+s32 EaseAngle(s32 a, s32 b, s32 c) {
+    return (a + EaseAngleStep(a, b, c)) & 0xFFF;
 }
 
-s32 func_80012B04(s16 a, s16 b, s16 c) {
+s32 EaseAngleStep(s16 a, s16 b, s16 c) {
     s16 t = 4;
     if (a == b) {
         return 0;
     }
-    return func_80012B58(a, b, c, &t);
+    return EaseAngleStepRec(a, b, c, &t);
 }
 
-s16 func_80012B58(s16 a, s16 b, s16 c, s16 *p) {
+s16 EaseAngleStepRec(s16 a, s16 b, s16 c, s16 *p) {
     s16 d;
     s16 t;
     s16 r;
@@ -725,28 +725,28 @@ s16 func_80012B58(s16 a, s16 b, s16 c, s16 *p) {
     r = (s16)d / c;
     if ((s16)r == 0) {
         *p = t - 1;
-        return func_80012B58(a, b, c / 2, p);
+        return EaseAngleStepRec(a, b, c / 2, p);
     }
     return r;
 }
 
-s16 func_80012C6C(s16 a, s16 b, s16 c) {
-    return a + func_80012CB8(a, b, c);
+s16 EaseValue(s16 a, s16 b, s16 c) {
+    return a + EaseValueStep(a, b, c);
 }
 
-s16 func_80012CB8(s16 a, s16 b, s16 c) {
+s16 EaseValueStep(s16 a, s16 b, s16 c) {
     s16 v = 4;
     if (a == b) {
         return 0;
     }
-    return func_80012D0C(a, b, c, &v);
+    return EaseValueStepRec(a, b, c, &v);
 }
 
 typedef struct { s32 w[0x26]; } Blk98;
-extern Blk98 D_80072C84;
-extern Blk98 D_80078E78;
+extern Blk98 g_DefaultStatus;
+extern Blk98 g_Status;
 
-s16 func_80012D0C(s16 a, s16 b, s16 c, s16 *p) {
+s16 EaseValueStepRec(s16 a, s16 b, s16 c, s16 *p) {
     s16 d;
     s16 t;
     s16 r;
@@ -758,24 +758,24 @@ s16 func_80012D0C(s16 a, s16 b, s16 c, s16 *p) {
     r = (s16)d / c;
     if ((s16)r == 0) {
         *p = t - 1;
-        return func_80012D0C(a, b, c / 2, p);
+        return EaseValueStepRec(a, b, c / 2, p);
     }
     return r;
 }
 
-s32 func_80012DBC(s32 a, s32 b, s32 c, s32 d) {
-    return (a + func_80012E0C(a, b, c, d)) & 0xFFF;
+s32 EaseAngleFrac(s32 a, s32 b, s32 c, s32 d) {
+    return (a + EaseAngleFracStep(a, b, c, d)) & 0xFFF;
 }
 
-s32 func_80012E0C(s16 a, s16 b, s16 c, s16 d) {
+s32 EaseAngleFracStep(s16 a, s16 b, s16 c, s16 d) {
     s16 t = 4;
     if (a == b) {
         return 0;
     }
-    return func_80012E6C(a, b, c, d, &t);
+    return EaseAngleFracStepImpl(a, b, c, d, &t);
 }
 
-s16 func_80012E6C(s32 a, s32 b, s16 n, s16 m, s16 *f) {
+s16 EaseAngleFracStepImpl(s32 a, s32 b, s16 n, s16 m, s16 *f) {
     s16 d;
     s16 w;
     s32 r;
@@ -795,19 +795,19 @@ s16 func_80012E6C(s32 a, s32 b, s16 n, s16 m, s16 *f) {
     return r;
 }
 
-s16 func_80012F74(s16 a, s16 b, s16 c, s16 d) {
-    return a + func_80012FC8(a, b, c, d);
+s16 EaseValueFrac(s16 a, s16 b, s16 c, s16 d) {
+    return a + EaseValueFracStep(a, b, c, d);
 }
 
-s16 func_80012FC8(s16 a, s16 b, s16 c, s16 d) {
+s16 EaseValueFracStep(s16 a, s16 b, s16 c, s16 d) {
     s16 v = 4;
     if (a == b) {
         return 0;
     }
-    return func_80013028(a, b, c, d, &v);
+    return EaseValueFracStepImpl(a, b, c, d, &v);
 }
 
-s16 func_80013028(s16 a, s16 b, s16 n, s16 m, s16 *f) {
+s16 EaseValueFracStepImpl(s16 a, s16 b, s16 n, s16 m, s16 *f) {
     s16 d = b - a;
     s32 r;
     if (*f == 0 || n == 0) {
@@ -823,15 +823,15 @@ s16 func_80013028(s16 a, s16 b, s16 n, s16 m, s16 *f) {
     return r;
 }
 
-s16 func_800130D0(s32 a, s32 b, s32 c) {
-    return a + func_8001311C(a, b, c);
+s16 ApproachValue(s32 a, s32 b, s32 c) {
+    return a + ApproachStep(a, b, c);
 }
 
-s32 func_8001311C(s16 a, s16 b, s16 c) {
-    return (s16)func_80013154(a, b, c);
+s32 ApproachStep(s16 a, s16 b, s16 c) {
+    return (s16)ApproachStepImpl(a, b, c);
 }
 
-extern u32 D_80063548[];
+extern u32 g_DefaultPose[];
 
 extern void SetLineG3();
 
@@ -841,21 +841,21 @@ extern void ClearVram(void);
 
 extern void SetPolyF3();
 
-extern s32 D_800C6D2C;      /* load request (kind 0): byte count, 0 = a PAC archive */
-extern void *D_800AE6E4;    /* load request: the file */
-extern s32 D_800BA318;      /* load request (kind 0): destination */
-extern s32 D_800A6550;      /* load request (kind 0): sound table */
+extern s32 g_LoadSize;      /* load request (kind 0): byte count, 0 = a PAC archive */
+extern void *g_LoadFile;    /* load request: the file */
+extern s32 g_LoadDest;      /* load request (kind 0): destination */
+extern s32 g_LoadSoundTable;      /* load request (kind 0): sound table */
 extern s32 D_800AE640;      /* load request (kind 1): the sound id */
 extern s32 D_800A6430;      /* load request (kind 3): the id */
-extern s32 func_8001ACF0(s32 kind, s32 id, s32 *file, s32 dest, s32 table);
-extern s32 func_8001B394(s32 a);
-extern s32 func_8001B7C4(s32 *p);
-extern s32 func_8001B0D4(void *file, s16 b);
+extern s32 QueueLoad(s32 kind, s32 id, s32 *file, s32 dest, s32 table);
+extern s32 BgmPackStep(s32 a);
+extern s32 ReadHeaderStep(s32 *p);
+extern s32 XaClipStep(void *file, s16 b);
 extern s32 D_800747E0;
-extern void func_80036AF8(void *file, s16 b);
+extern void PlayXa(void *file, s16 b);
 extern s32 DiscCheckStep(void);
 extern s32 g_CdSyncResult;      /* the last CdSync result */
-extern s32 func_8002FD14(s32 a, s32 b);
+extern s32 OpenSoundBank(s32 a, s32 b);
 extern void StartDiscCheck(void);
 extern void StreamReadyCallback(u8 intr, u8 *result);
 extern u8 D_80078E40[12];       /* the sector's header: position and subheader */
@@ -866,13 +866,13 @@ extern s32 D_80079A78;          /* PAC header: item count */
 extern s32 D_80079A7C;          /* PAC header: block size (header sector included) */
 extern u8 D_8007A280[0x800];    /* a CLUT list sector: RECTs, then the colours from +0x90 */
 extern s32 D_80072C80;          /* where a type-7 block's payload goes */
-extern void func_8002FDC8(void);
-extern s32 func_8002FB08(s32 a);
-extern s32 func_8002FC64(s32 bytes, u8 *buf);
+extern void AbortBankUpload(void);
+extern s32 BeginBankUpload(s32 a);
+extern s32 UploadBankData(s32 bytes, u8 *buf);
 extern void StartLzssDecode(s32 a);
 extern s32 LzssDecodeSector(u8 *p);
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
-extern s32 D_8006387C;
+extern s32 g_ColorFT3;
 
 extern s32 D_80063880;
 
@@ -895,7 +895,7 @@ typedef struct {
     u8 u2, v2;
     u16 pad2;
 } GT3;
-extern u8 D_8006388C[];
+extern u8 g_EnvMapTex[];
 extern u8 D_8006389C[];
 
 typedef struct {
@@ -918,7 +918,7 @@ typedef struct {
     u16 pad3;
 } GT4;
 
-extern s16 D_800C7C74;
+extern s16 g_BufferIndex;
 
 typedef struct {
      u8 pad0[2];
@@ -930,12 +930,12 @@ typedef struct {
      s32 spuAddr;
 } SoundSlot;
 extern SoundSlot g_SoundSlot[5];
-extern s16 func_8003836C(s32 a);
+extern s16 IsSeqPlaying(s32 a);
 
 typedef struct { s16 active; s16 pad2; s32 val; u8 pad8[5]; u8 unkD; u8 padE[2]; } Slot183E0;
 typedef struct { u8 pad[0xA1A8]; Slot183E0 slot[32]; } Work183E0;
 
-s32 func_80013154(s32 a0, s32 a1, s32 a2) {
+s32 ApproachStepImpl(s32 a0, s32 a1, s32 a2) {
     s16 a = a0;
     s16 b = a1;
     s16 c = a2;
@@ -961,11 +961,11 @@ s32 func_80013154(s32 a0, s32 a1, s32 a2) {
     return (s16)(b - a);
 }
 
-s32 func_80013200(void *a, void *b) {
-    return SquareRoot0(func_80013228(a, b));
+s32 VecDist(void *a, void *b) {
+    return SquareRoot0(VecDistSq(a, b));
 }
 
-s32 func_80013228(VECTOR *a, VECTOR *b) {
+s32 VecDistSq(VECTOR *a, VECTOR *b) {
     VECTOR d;
     VECTOR sq;
     d.vx = a->vx - b->vx;
@@ -975,11 +975,11 @@ s32 func_80013228(VECTOR *a, VECTOR *b) {
     return sq.vx + sq.vy + sq.vz;
 }
 
-s32 func_80013294(s16 *a, s16 *b) {
-    return SquareRoot0(func_800132BC(a, b));
+s32 SVecDist(s16 *a, s16 *b) {
+    return SquareRoot0(SVecDistSq(a, b));
 }
 
-s32 func_800132BC(s16 *a, s16 *b) {
+s32 SVecDistSq(s16 *a, s16 *b) {
     VECTOR d;
     VECTOR sq;
     d.vx = a[0] - b[0];
@@ -989,11 +989,11 @@ s32 func_800132BC(s16 *a, s16 *b) {
     return sq.vx + sq.vy + sq.vz;
 }
 
-s32 func_80013328(s16 *a, s16 *b) {
-    return SquareRoot0(func_80013350(a, b));
+s32 PosDist(s16 *a, s16 *b) {
+    return SquareRoot0(PosDistSq(a, b));
 }
 
-s32 func_80013350(s16 *a, s16 *b) {
+s32 PosDistSq(s16 *a, s16 *b) {
     VECTOR d;
     VECTOR sq;
     d.vx = a[1] - b[1];
@@ -1003,11 +1003,11 @@ s32 func_80013350(s16 *a, s16 *b) {
     return sq.vx + sq.vy + sq.vz;
 }
 
-s32 func_800133BC(s16 *a, s16 *b) {
-    return SquareRoot0(func_800133E4(a, b));
+s32 SVecPosDist(s16 *a, s16 *b) {
+    return SquareRoot0(SVecPosDistSq(a, b));
 }
 
-s32 func_800133E4(s16 *a, s16 *b) {
+s32 SVecPosDistSq(s16 *a, s16 *b) {
     VECTOR d;
     VECTOR sq;
     d.vx = a[0] - b[1];
@@ -1017,11 +1017,11 @@ s32 func_800133E4(s16 *a, s16 *b) {
     return sq.vx + sq.vy + sq.vz;
 }
 
-s32 func_80013450(s16 *a, s16 *b) {
-    return SquareRoot0(func_80013478(a, b));
+s32 PosSVecDist(s16 *a, s16 *b) {
+    return SquareRoot0(PosSVecDistSq(a, b));
 }
 
-s32 func_80013478(s16 *a, s16 *b) {
+s32 PosSVecDistSq(s16 *a, s16 *b) {
     s32 v[3];
     s32 r[3];
     v[0] = a[1] - b[0];
@@ -1033,53 +1033,53 @@ s32 func_80013478(s16 *a, s16 *b) {
     return r[0] + r[1] + r[2];
 }
 
-void func_800134FC(s16 a, void *in, void *out) {
+void RotateVectorX(s16 a, void *in, void *out) {
     Mtx m;
-    func_80013F3C(&m);
-    func_800126C4(&m, a);
+    SetIdentityRot(&m);
+    RotateMatrixX(&m, a);
     ApplyMatrixLV(&m, in, out);
 }
 
-void func_80013694(s16 a, void *in, void *out) {
+void RotateSVectorX(s16 a, void *in, void *out) {
     Mtx m;
-    func_80013F3C(&m);
-    func_800126C4(&m, a);
+    SetIdentityRot(&m);
+    RotateMatrixX(&m, a);
     ApplyMatrixSV(&m, in, out);
 }
 
-void func_8001382C(s16 a, void *in, void *out) {
+void RotateVectorY(s16 a, void *in, void *out) {
     Mtx m;
-    func_80013F3C(&m);
-    func_80012558(&m, a);
+    SetIdentityRot(&m);
+    RotateMatrixY(&m, a);
     ApplyMatrixLV(&m, in, out);
 }
 
-void func_800139C8(s16 a, void *in, void *out) {
+void RotateSVectorY(s16 a, void *in, void *out) {
     Mtx m;
-    func_80013F3C(&m);
-    func_80012558(&m, a);
+    SetIdentityRot(&m);
+    RotateMatrixY(&m, a);
     ApplyMatrixSV(&m, in, out);
 }
 
-void func_80013B64(s16 a, void *in, void *out) {
+void RotateVectorZ(s16 a, void *in, void *out) {
     Mtx m;
-    func_80013F3C(&m);
-    func_800123F0(&m, a);
+    SetIdentityRot(&m);
+    RotateMatrixZ(&m, a);
     ApplyMatrixLV(&m, in, out);
 }
 
-void func_80013CFC(s16 a, void *in, void *out) {
+void RotateSVectorZ(s16 a, void *in, void *out) {
     Mtx m;
-    func_80013F3C(&m);
-    func_800123F0(&m, a);
+    SetIdentityRot(&m);
+    RotateMatrixZ(&m, a);
     ApplyMatrixSV(&m, in, out);
 }
 
-void func_80013E94(u16 *a, u32 *b) {
+void PackAngles10(u16 *a, u32 *b) {
     *b = (((u32)(a[0] << 19) >> 22) << 20) | (((u32)(a[1] << 19) >> 22) << 10) | ((u32)(a[2] << 19) >> 22);
 }
 
-void func_80013ED0(u16 *m, u16 *x, u16 *y, u16 *z) {
+void SetMatrixColumns(u16 *m, u16 *x, u16 *y, u16 *z) {
     m[0] = x[0];
     m[1] = y[0];
     m[2] = z[0];
@@ -1091,7 +1091,7 @@ void func_80013ED0(u16 *m, u16 *x, u16 *y, u16 *z) {
     m[8] = z[2];
 }
 
-void func_80013F3C(Mtx *m) {
+void SetIdentityRot(Mtx *m) {
     s16 *v = (s16 *)m;
     v[0] = 0x1000;
     v[1] = 0;
@@ -1104,7 +1104,7 @@ void func_80013F3C(Mtx *m) {
     v[8] = 0x1000;
 }
 
-void func_80013F68(u8 *a) {
+void SetRotYMinus90(u8 *a) {
     *(s16 *)(a + 0x4) = 0xfffff000;
     *(s16 *)a = 0;
     *(s16 *)(a + 0x2) = 0;
@@ -1116,19 +1116,19 @@ void func_80013F68(u8 *a) {
     *(s16 *)(a + 0x10) = 0;
 }
 
-void func_80013F98(u8 *a, u8 *b) {
+void GetMatrixColumn0(u8 *a, u8 *b) {
     *(s16 *)b = *(u16 *)a;
     *(s16 *)(b + 0x2) = *(u16 *)(a + 0x6);
     *(s16 *)(b + 0x4) = *(u16 *)(a + 0xc);
 }
 
-void func_80013FBC(u8 *a, u8 *b) {
+void GetMatrixColumn1(u8 *a, u8 *b) {
     *(s16 *)b = *(u16 *)(a + 0x2);
     *(s16 *)(b + 0x2) = *(u16 *)(a + 0x8);
     *(s16 *)(b + 0x4) = *(u16 *)(a + 0xe);
 }
 
-void func_80013FE0(u8 *n, void *a) {
+void GetMatrixColumn2(u8 *n, void *a) {
     u16 *s = (u16 *)n;
     u16 *d = a;
     d[0] = s[2];
@@ -1136,37 +1136,37 @@ void func_80013FE0(u8 *n, void *a) {
     d[2] = s[8];
 }
 
-void func_80014004(u8 *a, u8 *b) {
+void SetMatrixColumn0(u8 *a, u8 *b) {
     *(s16 *)a = *(u16 *)b;
     *(s16 *)(a + 0x6) = *(u16 *)(b + 0x2);
     *(s16 *)(a + 0xc) = *(u16 *)(b + 0x4);
 }
 
-void func_80014028(u16 *a, u16 *b) {
+void SetMatrixColumn1(u16 *a, u16 *b) {
     a[1] = b[0];
     a[4] = b[1];
     a[7] = b[2];
 }
 
-void func_8001404C(u8 *a, u8 *b) {
+void SetMatrixColumn2(u8 *a, u8 *b) {
     *(s16 *)(a + 0x4) = *(u16 *)b;
     *(s16 *)(a + 0xa) = *(u16 *)(b + 0x2);
     *(s16 *)(a + 0x10) = *(u16 *)(b + 0x4);
 }
 
-void func_80014070(s16 *a, s32 *b) {
+void SVecToVec(s16 *a, s32 *b) {
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
 }
 
-void func_80014094(u8 *a, u8 *b) {
+void VecToSVec(u8 *a, u8 *b) {
     *(s16 *)b = *(s32 *)a;
     *(s16 *)(b + 0x2) = *(s32 *)(a + 0x4);
     *(s16 *)(b + 0x4) = *(s32 *)(a + 0x8);
 }
 
-void func_800140B8(Mtx *m, s16 *v, s32 *out) {
+void ApplyMatrixSVToFixed(Mtx *m, s16 *v, s32 *out) {
     gte_SetRotMatrix(m);
     gte_ldv0(v);
     gte_rtv0();
@@ -1205,7 +1205,7 @@ void InitGraph(void)
     ResetGraph(0);
     SetGraphDebug(0);
     SetDispMask(0);
-    func_80016714(D_800BA118, 0x98);
+    ZeroFill(D_800BA118, 0x98);
     ResetGameState();
 }
 
@@ -1216,43 +1216,43 @@ void ResetSystems(void)
     ResetGraph(1);
     SetDispMask(0);
     VSync(0);
-    func_80016714(&D_800AF630, sizeof(Work));
+    ZeroFill(&D_800AF630, sizeof(Work));
     InitDisplay();
     Init3DScene();
-    func_8001C044();
+    ClearObjectPools();
     ClearImageQueue();
-    func_80015310();
-    func_80028A48();
-    func_80028C50();
+    ClearDebugText();
+    InitFCall4();
+    InitFCall5();
     ResetGameState();
     SetDispMask(1);
 }
 
 /* Clear the game's flag bits, byte vars and load state; set vars 0x2C/0x2D to 7, clear flags 0xC/0xD */
 void ResetGameState(void) {
-    func_80029044();
-    func_8002906C();
-    func_80029094();
-    func_80029218();
+    ClearFlags();
+    ClearVars();
+    ClearVarBlock60();
+    ClearEntryPoint();
     ClearRumbleScript();
     StopPadRumble();
-    func_8001B324();
-    func_80028FDC(7);
-    func_80029020(7);
-    func_80028DBC(0);
-    func_80028E00(0);
+    ResetBgmPacks();
+    SetMusicVolume(7);
+    SetEffectsVolume(7);
+    SetSoundMode(0);
+    SetOptionD(0);
 }
 
-/* Clear flags and vars to their new-game values and copy the default stats block into D_80078E78 */
+/* Clear flags and vars to their new-game values and copy the default stats block into g_Status */
 void ResetGameProgress(void) {
-    func_80029044();
-    func_8002906C();
-    func_80029094();
-    func_80028FDC(7);
-    func_80029020(7);
-    func_80028DBC(0);
-    func_80028E00(0);
-    func_80029274();
+    ClearFlags();
+    ClearVars();
+    ClearVarBlock60();
+    SetMusicVolume(7);
+    SetEffectsVolume(7);
+    SetSoundMode(0);
+    SetOptionD(0);
+    LoadDefaultStatus();
 }
 
 /* Arm the frame loop: clear Work.exitLoop and run at one frame per 2 vblanks */
@@ -1269,7 +1269,7 @@ void InitDisplay(void) {
     SetScreenMode(1);
     VSync(0);
     unused_ot = g_WorldOtTable[0]; i = 0; D_800AF7C4 = 0; D_800AF7C3 = 0; D_800AF7C2 = 0;
-    do { D_800A6518[i].ot = g_WorldOtTable[i]; D_800A6518[i].len = 0xC; D_800A6518[i].c = 0; D_800A6518[i].d = 0; i++; } while (i < 2);
+    do { g_WorldOt[i].ot = g_WorldOtTable[i]; g_WorldOt[i].len = 0xC; g_WorldOt[i].c = 0; g_WorldOt[i].d = 0; i++; } while (i < 2);
 }
 
 /* GTE and libgs 3D setup: screen distance, default view, ambient, lights, two coordinate systems */
@@ -1280,9 +1280,9 @@ void Init3DScene(void) {
     SetGeomScreen(0x3E8);
     GsInit3D();
     InitDefaultView();
-    func_8001455C();
-    func_8002850C(0x800, 0x800, 0x800);
-    func_8002823C();
+    Init3DNop();
+    SetAmbientColor(0x800, 0x800, 0x800);
+    InitLights();
     GsInitCoordinate2(0, w + 0x1A0);
     GsInitCoordinate2((void *)1, w + 0x1F0);
     GsSetLightMode(0);
@@ -1303,10 +1303,10 @@ void InitDefaultView(void) {
     GsSetRefView2(&D_80126984);
 }
 
-void func_80014554(void) {
+void InitNop(void) {
 }
 
-void func_8001455C(void) {
+void Init3DNop(void) {
 }
 
 s32 func_80014564(s32 a) {
@@ -1688,29 +1688,29 @@ void FrameEndNop(void) {
 }
 
 extern s16 D_800B9A04;
-extern void func_8003500C();
-extern void func_8002D034();
-extern void func_8002F67C();
+extern void RunCdAudioRequests();
+extern void UpdateSound();
+extern void FreeStageBanks();
 extern s32 GetLoadRequestId(void);
 
-s32 func_80015144(void) {
+s32 SoftReset(void) {
     Work *w = &D_800AF630;
-    if (func_80034B98() != 0) {
-        func_8002D4C8(2, 0);
+    if (GetCdAudioState() != 0) {
+        PlaySoundId(2, 0);
         do {
-            func_8003500C();
-            func_8002D034();
+            RunCdAudioRequests();
+            UpdateSound();
             VSync(w->vsyncMode);
-        } while (func_80034B98() != 0);
+        } while (GetCdAudioState() != 0);
         w->exitLoop = 1;
     } else {
         if (GetLoadRequestId() != 0) {
             return 0;
         }
         D_800B9A04 = 1;
-        func_8002D4C8(2, 0);
+        PlaySoundId(2, 0);
     }
-    func_8002F67C();
+    FreeStageBanks();
     ResetLoader();
     return 1;
 }
@@ -1742,11 +1742,11 @@ void CheckPauseStart(void) {
     }
 }
 
-void func_800152F4(s16 n) {
+void ClearDebugTextLine(s16 n) {
     D_800B93D8[n].flag = 0;
 }
 
-void func_80015310(void) {
+void ClearDebugText(void) {
     s32 pad[2];
     Ent10 *p;
     for (p = D_800B93D8; p < D_800B97D8; p++) {
@@ -1754,12 +1754,12 @@ void func_80015310(void) {
     }
 }
 
-void func_8001534C(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d) {
+void SetDebugText(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d) {
     register Work *w = &D_800AF630;
-    func_800153A4((u8 *)w + 0x9DA8 + n * 16, x, a, b, c, d);
+    SetDebugTextRec((u8 *)w + 0x9DA8 + n * 16, x, a, b, c, d);
 }
 
-void func_800153A4(u8 *p, s32 x, s16 a, s16 b, u8 c, u8 d) {
+void SetDebugTextRec(u8 *p, s32 x, s16 a, s16 b, u8 c, u8 d) {
     *(s16 *)(p + 0) = 1;
     *(s16 *)(p + 2) = a;
     *(s16 *)(p + 4) = b;
@@ -1768,12 +1768,12 @@ void func_800153A4(u8 *p, s32 x, s16 a, s16 b, u8 c, u8 d) {
     p[0xD] = d;
 }
 
-void func_800153CC(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d) {
+void SetDebugNumber(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d) {
     register Work *w = &D_800AF630;
-    func_80015424((u8 *)w + 0x9DA8 + n * 16, x, a, b, c, d);
+    SetDebugNumberRec((u8 *)w + 0x9DA8 + n * 16, x, a, b, c, d);
 }
 
-void func_80015424(u8 *p, s32 x, s16 a, s16 b, u8 c, u8 d) {
+void SetDebugNumberRec(u8 *p, s32 x, s16 a, s16 b, u8 c, u8 d) {
     *(s16 *)(p + 0) = 2;
     *(s16 *)(p + 2) = a;
     *(s16 *)(p + 4) = b;
@@ -1782,7 +1782,7 @@ void func_80015424(u8 *p, s32 x, s16 a, s16 b, u8 c, u8 d) {
     p[0xD] = d;
 }
 
-Ent10 *func_8001544C(void) {
+Ent10 *FindFreeDebugText(void) {
     Ent10 *p;
     s32 pad[2];
     for (p = D_800B93D8; p < D_800B97D8; p++) {
@@ -1793,13 +1793,13 @@ Ent10 *func_8001544C(void) {
     return 0;
 }
 
-extern void func_80015608(u8 *p, u8 *ot);
-extern void func_80015760(u8 *p, u8 *ot);
+extern void DrawDebugString(u8 *p, u8 *ot);
+extern void DrawDebugNumber(u8 *p, u8 *ot);
 
 /* Draw the 64 debug-text records (Work+0x9DA8) into the OT, then the font's texture page */
 void DrawDebugText(void) {
     u8 *w = (u8 *)&D_800AF630;
-    u8 *ot = D_800A651C[D_800B9A02].ot;
+    u8 *ot = g_WorldOtOrg[D_800B9A02].ot;
     u8 *p;
     u8 *prim;
 
@@ -1807,10 +1807,10 @@ void DrawDebugText(void) {
         for (p = w + 0x9DA8; p < w + 0xA1A8; p += 16) {
             switch (*(s16 *)p) {
             case 1:
-                func_80015608(p, ot);
+                DrawDebugString(p, ot);
                 break;
             case 2:
-                func_80015760(p, ot);
+                DrawDebugNumber(p, ot);
                 break;
             case 0:
                 break;
@@ -1824,9 +1824,9 @@ void DrawDebugText(void) {
     }
 }
 
-extern u16 * func_80015908();
+extern u16 * DebugFontUV();
 
-void func_80015608(u8 *p, u8 *ot) {
+void DrawDebugString(u8 *p, u8 *ot) {
     u8 *s;
     u16 f;
     s16 x;
@@ -1858,7 +1858,7 @@ void func_80015608(u8 *p, u8 *ot) {
         pk[1] = code | 0x808080;
         pk[2] = (x & 0xFFFF) | (y << 16);
         x += w;
-        pk[3] = *func_80015908(*s++, f) | clut;
+        pk[3] = *DebugFontUV(*s++, f) | clut;
         t = *(u32 *)ot & 0xFFFFFF;
         u = (u32)pk & 0xFFFFFF;
         pk[0] = t | len;
@@ -1869,9 +1869,9 @@ void func_80015608(u8 *p, u8 *ot) {
 }
 
 extern u8 D_80062B78[];
-u32 func_80015A74(u32 n);
+u32 BcdFromInt(u32 n);
 
-void func_80015760(u8 *p, u8 *ot) {
+void DrawDebugNumber(u8 *p, u8 *ot) {
     u16 fl;
     s32 x;
     u16 y;
@@ -1896,7 +1896,7 @@ void func_80015760(u8 *p, u8 *ot) {
         n = t;
     }
     if (fl & 0x40) {
-        val = func_80015A74(raw);
+        val = BcdFromInt(raw);
     } else {
         val = raw;
     }
@@ -1924,7 +1924,7 @@ void func_80015760(u8 *p, u8 *ot) {
         prim[2] = (x & 0xFFFF) | (y << 16);
         x += step;
         n--;
-        prim[3] = *func_80015908((s16)c, fl) | clut;
+        prim[3] = *DebugFontUV((s16)c, fl) | clut;
         a = *(u32 *)ot & 0xFFFFFF;
         b = (u32)prim & 0xFFFFFF;
         prim[0] = a | tag;
@@ -1934,17 +1934,17 @@ void func_80015760(u8 *p, u8 *ot) {
     g_PrimNext = (s32)prim;
 }
 
-extern u16 D_80062A78[];
+extern u16 g_DebugFontUV8[];
 extern u16 D_80062AF8[];
 
-u16 *func_80015908(s32 c, s32 flags) {
+u16 *DebugFontUV(s32 c, s32 flags) {
     s32 i;
     s32 j;
     switch (flags & 0x80) {
     case 0:
         i = (c & 0xFF) - 0x20;
         i *= 2;
-        return (u16 *)((u8 *)D_80062A78 + i);
+        return (u16 *)((u8 *)g_DebugFontUV8 + i);
     case 0x80:
         j = (c & 0xFF) - 0x20;
         j *= 2;
@@ -1952,55 +1952,55 @@ u16 *func_80015908(s32 c, s32 flags) {
     }
 }
 
-void func_80015954(u16 *a, u16 *b) {
+void SVecToPos(u16 *a, u16 *b) {
     b[1] = a[0];
     b[3] = a[1];
     b[5] = a[2];
 }
 
-void func_80015978(u8 *a, u8 *b) {
+void PosToSVec(u8 *a, u8 *b) {
     *(s16 *)b = *(u16 *)(a + 0x2);
     *(s16 *)(b + 0x2) = *(u16 *)(a + 0x6);
     *(s16 *)(b + 0x4) = *(u16 *)(a + 0xa);
 }
 
-void func_8001599C(s32 *a, s32 *b) {
+void CopyVec(s32 *a, s32 *b) {
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
 }
 
-void func_800159C0(u8 *a, u8 *b) {
+void CopyVecAlt(u8 *a, u8 *b) {
     *(s32 *)b = *(s32 *)a;
     *(s32 *)(b + 0x4) = *(s32 *)(a + 0x4);
     *(s32 *)(b + 0x8) = *(s32 *)(a + 0x8);
 }
 
-void func_800159E4(u16 *a, u16 *b) {
+void CopyPosInt(u16 *a, u16 *b) {
     b[1] = a[1];
     b[3] = a[3];
     b[5] = a[5];
 }
 
-void func_80015A08(u8 *a, u8 *b) {
+void CopyVecLow16(u8 *a, u8 *b) {
     *(s16 *)b = *(u16 *)a;
     *(s16 *)(b + 0x4) = *(u16 *)(a + 0x4);
     *(s16 *)(b + 0x8) = *(u16 *)(a + 0x8);
 }
 
-void func_80015A2C(s16 *a, s32 *b) {
+void SVecToVecAlt(s16 *a, s32 *b) {
     b[0] = a[0];
     b[1] = a[1];
     b[2] = a[2];
 }
 
-void func_80015A50(u8 *a, u8 *b) {
+void VecToSVecAlt(u8 *a, u8 *b) {
     *(s16 *)b = *(s32 *)a;
     *(s16 *)(b + 0x2) = *(s32 *)(a + 0x4);
     *(s16 *)(b + 0x4) = *(s32 *)(a + 0x8);
 }
 
-u32 func_80015A74(u32 n) {
+u32 BcdFromInt(u32 n) {
     u32 d = 1000000000;
     u32 r = 0;
     s32 i;
@@ -2030,8 +2030,8 @@ s32 func_80015AD0(s16 x, s16 y) {
     return r;
 }
 
-void func_80015B6C(s16 x, s16 y, s16 w, s16 h, u8 r0, u8 g0, u8 b0, u8 r1, u8 g1, u8 b1) {
-    u8 *ot = D_800A651C[D_800B9A02].ot;
+void DrawGradientRect(s16 x, s16 y, s16 w, s16 h, u8 r0, u8 g0, u8 b0, u8 r1, u8 g1, u8 b1) {
+    u8 *ot = g_WorldOtOrg[D_800B9A02].ot;
     u8 *p = AllocPrim(0x34);
     u8 *q;
     setlen(p, 1);
@@ -2068,7 +2068,7 @@ void func_80015B6C(s16 x, s16 y, s16 w, s16 h, u8 r0, u8 g0, u8 b0, u8 r1, u8 g1
     addPrim(ot + 0x3FFC, p);
 }
 
-void func_80015D4C(s32 x0, s32 y0, s32 w0, s32 h0, s32 r0, s32 g0, s32 b0, s32 z0, s32 m0) {
+void DrawRect(s32 x0, s32 y0, s32 w0, s32 h0, s32 r0, s32 g0, s32 b0, s32 z0, s32 m0) {
     s16 x = x0;
     s16 y = y0;
     s16 w = w0;
@@ -2097,18 +2097,18 @@ void func_80015D4C(s32 x0, s32 y0, s32 w0, s32 h0, s32 r0, s32 g0, s32 b0, s32 z
     *(s16 *)(prim + 0x12) = y + h;
     *(s16 *)(prim + 0x14) = x + w;
     *(s16 *)(prim + 0x16) = y + h;
-    v = (*(u32 *)(D_800A651C[D_800B9A02].ot + z * 4)) & 0xFFFFFF;
+    v = (*(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4)) & 0xFFFFFF;
     t = *(u32 *)prim;
     t &= 0xFF000000;
     t |= v;
     *(u32 *)prim = t;
-    (*(u32 *)(D_800A651C[D_800B9A02].ot + z * 4)) = ((*(u32 *)(D_800A651C[D_800B9A02].ot + z * 4)) & 0xFF000000) | ((u32)prim & 0xFFFFFF);
+    (*(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4)) = ((*(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4)) & 0xFF000000) | ((u32)prim & 0xFFFFFF);
     if (m < 4) {
-        func_80016638(&D_800A6518[D_800B9A02], z, m);
+        AddDrawModeAbr(&g_WorldOt[D_800B9A02], z, m);
     }
 }
 
-void func_80015F04(s32 x0, s32 y0, s32 w0, s32 h0, s32 r0, s32 g0, s32 b0, s32 z0, s32 abr0) {
+void DrawRectOutline(s32 x0, s32 y0, s32 w0, s32 h0, s32 r0, s32 g0, s32 b0, s32 z0, s32 abr0) {
     s16 x = x0;
     s16 y = y0;
     s16 w = w0;
@@ -2146,13 +2146,13 @@ void func_80015F04(s32 x0, s32 y0, s32 w0, s32 h0, s32 r0, s32 g0, s32 b0, s32 z
         j = i + 1;
         p->x1 = pts[j][0];
         p->y1 = pts[j][1];
-        addPrim(D_800A651C[wk->frame].ot + z * 4, p);
+        addPrim(g_WorldOtOrg[wk->frame].ot + z * 4, p);
         p++;
     }
     p[-1].x1 = pts[0][0];
     p[-1].y1 = pts[0][1];
     if (abr < 4) {
-        func_80016638(&D_800A6518[wk->frame], z, abr);
+        AddDrawModeAbr(&g_WorldOt[wk->frame], z, abr);
     }
 }
 
@@ -2174,17 +2174,17 @@ void func_80016110(void) {
     *(s16 *)(p + 0x12) = 0x78;
     t = *(u32 *)p;
     t &= 0xFF000000;
-    t |= *(u32 *)D_800A651C[D_800B9A02].ot & 0xFFFFFF;
+    t |= *(u32 *)g_WorldOtOrg[D_800B9A02].ot & 0xFFFFFF;
     *(u32 *)p = t;
-    *(u32 *)D_800A651C[D_800B9A02].ot = (*(u32 *)D_800A651C[D_800B9A02].ot & 0xFF000000) | ((u32)p & 0xFFFFFF);
-    func_80016638(&D_800A6518[D_800B9A02], 0, 0);
+    *(u32 *)g_WorldOtOrg[D_800B9A02].ot = (*(u32 *)g_WorldOtOrg[D_800B9A02].ot & 0xFF000000) | ((u32)p & 0xFFFFFF);
+    AddDrawModeAbr(&g_WorldOt[D_800B9A02], 0, 0);
 }
 
-extern OtRec D_800AE7BC[];
-extern OtEnt D_800AE7B8[];
+extern OtRec g_FrontOtOrg[];
+extern OtEnt g_FrontOt[];
 typedef struct { u16 v; } U16S;
 
-void func_80016224(s32 a, s32 b) {
+void DrawFadeBlack(s32 a, s32 b) {
     u8 *p;
     u16 z;
     p = AllocPrim(0x18);
@@ -2199,27 +2199,27 @@ void func_80016224(s32 a, s32 b) {
     if (z != 0) {
         u32 t;
         u32 v;
-        v = *(u32 *)(D_800A651C[D_800B9A02].ot + z * 4) & 0xFFFFFF;
+        v = *(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4) & 0xFFFFFF;
         t = *(u32 *)p;
         t &= 0xFF000000;
         t |= v;
         *(u32 *)p = t;
-        *(u32 *)(D_800A651C[D_800B9A02].ot + z * 4) = (*(u32 *)(D_800A651C[D_800B9A02].ot + z * 4) & 0xFF000000) | ((u32)p & 0xFFFFFF);
-        func_80016638(&D_800A6518[D_800B9A02], z, 2);
+        *(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4) = (*(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4) & 0xFF000000) | ((u32)p & 0xFFFFFF);
+        AddDrawModeAbr(&g_WorldOt[D_800B9A02], z, 2);
     } else {
         u32 t;
         u32 v;
-        v = *(u32 *)D_800AE7BC[D_800B9A02].ot & 0xFFFFFF;
+        v = *(u32 *)g_FrontOtOrg[D_800B9A02].ot & 0xFFFFFF;
         t = *(u32 *)p;
         t &= 0xFF000000;
         t |= v;
         *(u32 *)p = t;
-        *(u32 *)D_800AE7BC[D_800B9A02].ot = (*(u32 *)D_800AE7BC[D_800B9A02].ot & 0xFF000000) | ((u32)p & 0xFFFFFF);
-        func_80016638(&D_800AE7B8[D_800B9A02], 0, 2);
+        *(u32 *)g_FrontOtOrg[D_800B9A02].ot = (*(u32 *)g_FrontOtOrg[D_800B9A02].ot & 0xFF000000) | ((u32)p & 0xFFFFFF);
+        AddDrawModeAbr(&g_FrontOt[D_800B9A02], 0, 2);
     }
 }
 
-void func_80016450(c, z)
+void DrawFadeWhite(c, z)
     u8 c;
     u16 z;
 {
@@ -2234,34 +2234,34 @@ void func_80016450(c, z)
     if (z != 0) {
         u32 t;
         u32 v;
-        v = *(u32 *)(D_800A651C[D_800B9A02].ot + z * 4) & 0xFFFFFF;
+        v = *(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4) & 0xFFFFFF;
         t = *(u32 *)p;
         t &= 0xFF000000;
         t |= v;
         *(u32 *)p = t;
-        *(u32 *)(D_800A651C[D_800B9A02].ot + z * 4) = (*(u32 *)(D_800A651C[D_800B9A02].ot + z * 4) & 0xFF000000) | ((u32)p & 0xFFFFFF);
-        func_80016638(&D_800A6518[D_800B9A02], z, 1);
+        *(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4) = (*(u32 *)(g_WorldOtOrg[D_800B9A02].ot + z * 4) & 0xFF000000) | ((u32)p & 0xFFFFFF);
+        AddDrawModeAbr(&g_WorldOt[D_800B9A02], z, 1);
     } else {
         u32 t;
         u32 v;
-        v = *(u32 *)D_800AE7BC[D_800B9A02].ot & 0xFFFFFF;
+        v = *(u32 *)g_FrontOtOrg[D_800B9A02].ot & 0xFFFFFF;
         t = *(u32 *)p;
         t &= 0xFF000000;
         t |= v;
         *(u32 *)p = t;
-        *(u32 *)D_800AE7BC[D_800B9A02].ot = (*(u32 *)D_800AE7BC[D_800B9A02].ot & 0xFF000000) | ((u32)p & 0xFFFFFF);
-        func_80016638(&D_800AE7B8[D_800B9A02], 0, 1);
+        *(u32 *)g_FrontOtOrg[D_800B9A02].ot = (*(u32 *)g_FrontOtOrg[D_800B9A02].ot & 0xFF000000) | ((u32)p & 0xFFFFFF);
+        AddDrawModeAbr(&g_FrontOt[D_800B9A02], 0, 1);
     }
 }
 
-void func_80016638(void *o, s32 z, s32 tpage) {
+void AddDrawModeAbr(void *o, s32 z, s32 tpage) {
     u8 *p = AllocPrim(8);
     setlen(p, 1);
     *(u32 *)(p + 4) = ((tpage << 5) & 0x9FF) | 0xE1000000;
     addPrim(((OtEnt *)o)->ot + z, p);
 }
 
-void func_800166E8(s8 *p, s32 n) {
+void ZeroBytes(s8 *p, s32 n) {
     s32 i = n - 1;
     s32 pad[2];
     if (n != 0) {
@@ -2273,7 +2273,7 @@ void func_800166E8(s8 *p, s32 n) {
     }
 }
 
-void func_80016714(void *p0, s32 n) {
+void ZeroFill(void *p0, s32 n) {
     u8 *p = p0;
     if (n < 4) {
         while (--n != -1) {
@@ -2299,24 +2299,24 @@ void func_80016714(void *p0, s32 n) {
     }
 }
 
-void func_800167B8(s32 a) {
+void StartFade(s32 a) {
     D_800AF7CE = 0;
-    func_80016224((u16)a < 4 ? 0xFF : 0, 0);
+    DrawFadeBlack((u16)a < 4 ? 0xFF : 0, 0);
 }
 
 extern s32 D_800B9A18;
-extern u8 D_80062BA0[];
+extern u8 g_FadeSpeeds[];
 
-s32 func_800167F0(u16 b) {
+s32 FadeStep(u16 b) {
     u8 *w = (u8 *)&D_800AF630;
     u16 i = b & 3;
     u16 cur;
     u16 t;
     u16 v;
     if (i == 0) {
-        D_800AF7CE += D_80062BA0[D_800B9A18];
+        D_800AF7CE += g_FadeSpeeds[D_800B9A18];
     } else {
-        D_800AF7CE += D_80062BA0[i];
+        D_800AF7CE += g_FadeSpeeds[i];
     }
     t = *(u16 *)(w + 0x19E);
     if (t >= 0xFF) {
@@ -2329,24 +2329,24 @@ s32 func_800167F0(u16 b) {
     } else {
         v = cur;
     }
-    func_80016224(v & 0xFF, 0);
+    DrawFadeBlack(v & 0xFF, 0);
     return *(u16 *)(w + 0x19E) >= 0xFF;
 }
 
-void func_800168B4(void) {
+void ResetFade(void) {
     D_800AF7CE = 0;
 }
 
 extern s32 D_800B9A18;
-extern u8 D_80062BA0[];
+extern u8 g_FadeSpeeds[];
 
 s32 func_800168C4(s32 a) {
     register u8 *w = (u8 *)&D_800AF630;
     a &= 3;
     if (a == 0) {
-        D_800AF7CE += D_80062BA0[D_800B9A18];
+        D_800AF7CE += g_FadeSpeeds[D_800B9A18];
     } else {
-        D_800AF7CE += D_80062BA0[a];
+        D_800AF7CE += g_FadeSpeeds[a];
     }
     if (*(u16 *)(w + 0x19E) >= 0xFF && *(u16 *)(w + 0x188) != 0) {
         return 1;
@@ -2354,45 +2354,47 @@ s32 func_800168C4(s32 a) {
     return 0;
 }
 
-void func_80016940(u16 a) {
+void StartFadeWhite(u16 a) {
     D_800AF7CE = 0;
-    func_80016450(-(a < 4), 0);
+    DrawFadeWhite(-(a < 4), 0);
 }
 
-s32 func_80016978(s32 a0) {
+s32 FadeWhiteStep(s32 a0) {
     s16 a = a0;
     u8 *w = (u8 *)&D_800AF630;
     u16 i = a & 3;
-    s32 t;
+    u16 t;
+    u16 cur;
     u16 x;
     if (i == 0) {
-        D_800AF7CE += D_80062BA0[D_800B9A18];
+        D_800AF7CE += g_FadeSpeeds[D_800B9A18];
     } else {
-        D_800AF7CE += D_80062BA0[i];
+        D_800AF7CE += g_FadeSpeeds[i];
     }
-    t = *(volatile u16 *)(w + 0x19E); /* MATCH-TRICK: the qualified read keeps the load and its copy apart */
-    i = t;
-    if (i >= 0xFF) {
-        i = 0xFF;
+    t = *(u16 *)(w + 0x19E);
+    if (t >= 0xFF) {
+        cur = 0xFF;
+    } else {
+        cur = t;
     }
     if ((u16)a < 4) {
-        x = 0xFF - i;
+        x = 0xFF - cur;
     } else {
-        x = i;
+        x = cur;
     }
-    func_80016450(x, 0);
+    DrawFadeWhite(x, 0);
     return *(u16 *)(w + 0x19E) >= 0xFF;
 }
 
-s32 func_80016A3C(u8 *a) {
-    return func_80016A7C(a, 0);
+s32 DrawPrimLineG2Screen(u8 *a) {
+    return DrawPrimLineG2(a, 0);
 }
 
-s32 func_80016A5C(void) {
-    return func_80016A7C();
+s32 DrawPrimLineG2Mtx(void) {
+    return DrawPrimLineG2();
 }
 
-s32 func_80016A7C(u8 *a, s32 m) {
+s32 DrawPrimLineG2(u8 *a, s32 m) {
     s32 flag;
     s32 p;
     s32 z;
@@ -2401,7 +2403,7 @@ s32 func_80016A7C(u8 *a, s32 m) {
     *(s32 *)(prim + 0xC) = *(s32 *)(a + 0x14);
     SetLineG2(prim);
     if (m != 0) {
-        func_80017E8C(m);
+        SetGteLocalMatrix(m);
         z = RotTransPers3(a, a + 8, a + 8, prim + 8, prim + 0x10, prim + 0x10, &flag, &p);
     } else {
         *(s32 *)(prim + 8) = *(s32 *)(a + 0);
@@ -2410,11 +2412,11 @@ s32 func_80016A7C(u8 *a, s32 m) {
         p = 0;
     }
     if (!(p & ~0x1000)) {
-        func_80018094(prim, z, *(s32 *)(a + 0x18));
+        AddPrimFlat(prim, z, *(s32 *)(a + 0x18));
     }
 }
 
-void func_80016B60(u8 *o, void *m) {
+void DrawPrimLineG3Mtx(u8 *o, void *m) {
     u8 *p = AllocPrim(0x20);
     s32 flag;
     s32 otz;
@@ -2423,14 +2425,14 @@ void func_80016B60(u8 *o, void *m) {
     *(u32 *)(p + 0xC) = *(u32 *)(o + 0x1C);
     *(u32 *)(p + 0x14) = *(u32 *)(o + 0x20);
     SetLineG3(p);
-    func_80017E8C((s32)m);
+    SetGteLocalMatrix((s32)m);
     r = RotTransPers3(o, o + 8, o + 0x10, p + 8, p + 0x10, p + 0x18, &otz, &flag);
     if (!(flag & ~0x1000)) {
-        func_80018094(p, r, *(s32 *)(o + 0x24));
+        AddPrimFlat(p, r, *(s32 *)(o + 0x24));
     }
 }
 
-void func_80016C28(u8 *a, s32 m) {
+void DrawPrimLineG4Mtx(u8 *a, s32 m) {
     struct { s32 flag; s32 flag2; s32 otz; } t;
     u8 *prim = AllocPrim(0x28);
     SetLineG4(prim);
@@ -2438,7 +2440,7 @@ void func_80016C28(u8 *a, s32 m) {
     *(s32 *)(prim + 0xC) = *(s32 *)(a + 0x24);
     *(s32 *)(prim + 0x14) = *(s32 *)(a + 0x28);
     *(s32 *)(prim + 0x1C) = *(s32 *)(a + 0x2C);
-    func_80017E8C(m);
+    SetGteLocalMatrix(m);
     gte_ldv3(a, a + 8, a + 0x10);
     gte_rtpt();
     gte_stflg(&t.flag);
@@ -2451,13 +2453,13 @@ void func_80016C28(u8 *a, s32 m) {
     gte_avsz4();
     gte_stotz(&t.otz);
     if (!(t.flag & ~0x1000)) {
-        func_80018094(prim, t.otz, *(s32 *)(a + 0x30));
+        AddPrimFlat(prim, t.otz, *(s32 *)(a + 0x30));
     }
 }
 
 extern void SetPolyFT3(void *p);
 
-void func_80016D78(u8 *a, s32 m) {
+void DrawPrimFT3Mtx(u8 *a, s32 m) {
     s32 p;
     s32 flag;
     s32 otz;
@@ -2465,7 +2467,7 @@ void func_80016D78(u8 *a, s32 m) {
     u8 *prim = AllocPrim(0x20);
     *(s32 *)(prim + 4) = *(s32 *)(a + 0x24);
     SetPolyFT3(prim);
-    func_80017E8C(m);
+    SetGteLocalMatrix(m);
     otz = RotTransPers3(a, a + 8, a + 0x10, prim + 8, prim + 0x10, prim + 0x18, &p, &flag);
     w = *(u32 *)(a + 0x18); prim[0xC] = w; prim[0xD] = w >> 16;
     w = *(u32 *)(a + 0x1C); prim[0x14] = w; prim[0x15] = w >> 16;
@@ -2474,30 +2476,30 @@ void func_80016D78(u8 *a, s32 m) {
                                      *(u16 *)(a + 0x1A) & 0xFF00);
     *(u16 *)(prim + 0xE) = GetClut(a[0x2C] < 0xE0 ? 0x160 : 0x100, a[0x2C] | 0x100);
     if (!(flag & ~0x1000)) {
-        func_80018194(prim, otz, *(s32 *)(a + 0x28));
+        AddPrimTextured(prim, otz, *(s32 *)(a + 0x28));
     }
 }
 
-void func_80016EB0(s32 a) {
-    func_80016F18((u8 *)a, 0, 1);
+void DrawPrimFT4Screen16(s32 a) {
+    DrawPrimFT4((u8 *)a, 0, 1);
 }
 
-s32 func_80016ED4(s32 a) {
-    return func_80016F18((u8 *)a, 0, 0);
+s32 DrawPrimFT4Screen(s32 a) {
+    return DrawPrimFT4((u8 *)a, 0, 0);
 }
 
-s32 func_80016EF8(u8 *a, s32 m) {
-    return func_80016F18(a, m, 0);
+s32 DrawPrimFT4Mtx(u8 *a, s32 m) {
+    return DrawPrimFT4(a, m, 0);
 }
 
-s32 func_80016F18(u8 *a, s32 m, s32 k) {
+s32 DrawPrimFT4(u8 *a, s32 m, s32 k) {
     struct { s32 flag; s32 flag2; s32 otz; } t;
     u32 w;
     u8 *prim = AllocPrim(0x28);
     *(s32 *)(prim + 4) = *(s32 *)(a + 0x30);
     SetPolyFT4(prim);
     if (m != 0) {
-        func_80017E8C(m);
+        SetGteLocalMatrix(m);
         gte_ldv3(a, a + 8, a + 0x10);
         gte_rtpt();
         gte_stflg(&t.flag);
@@ -2528,11 +2530,11 @@ s32 func_80016F18(u8 *a, s32 m, s32 k) {
     }
     *(u16 *)(prim + 0xE) = GetClut(a[0x38] < 0xE0 ? 0x160 : 0x100, a[0x38] | 0x100);
     if (!(t.flag & ~0x1000)) {
-        func_80018194(prim, t.otz, *(s32 *)(a + 0x34));
+        AddPrimTextured(prim, t.otz, *(s32 *)(a + 0x34));
     }
 }
 
-void func_80017168(u8 *o, void *m) {
+void DrawPrimF3(u8 *o, void *m) {
     u8 *p = AllocPrim(0x14);
     s32 otz;
     s32 flag;
@@ -2540,7 +2542,7 @@ void func_80017168(u8 *o, void *m) {
     *(u32 *)(p + 4) = *(u32 *)(o + 0x18);
     SetPolyF3(p);
     if (m != 0) {
-        func_80017E8C((s32)m);
+        SetGteLocalMatrix((s32)m);
         r = RotTransPers3(o, o + 8, o + 0x10, p + 8, p + 0xC, p + 0x10, &otz, &flag);
     } else {
         *(u32 *)(p + 8) = *(u32 *)o;
@@ -2550,19 +2552,19 @@ void func_80017168(u8 *o, void *m) {
         flag = 0;
     }
     if (!(flag & ~0x1000)) {
-        func_80018094(p, r, *(s32 *)(o + 0x1C));
+        AddPrimFlat(p, r, *(s32 *)(o + 0x1C));
     }
 }
 
-s32 func_80017254(s32 a) {
-    return func_80017294((u8 *)a, 0);
+s32 DrawPrimF4Screen(s32 a) {
+    return DrawPrimF4((u8 *)a, 0);
 }
 
-s32 func_80017274(u8 *a, s32 m) {
-    return func_80017294(a, m);
+s32 DrawPrimF4Mtx(u8 *a, s32 m) {
+    return DrawPrimF4(a, m);
 }
 
-s32 func_80017294(u8 *a, s32 m) {
+s32 DrawPrimF4(u8 *a, s32 m) {
     s32 flag;
     s32 p;
     s32 z;
@@ -2570,7 +2572,7 @@ s32 func_80017294(u8 *a, s32 m) {
     *(s32 *)(prim + 4) = *(s32 *)(a + 0x20);
     SetPolyF4(prim);
     if (m != 0) {
-        func_80017E8C(m);
+        SetGteLocalMatrix(m);
         z = RotTransPers4(a, a + 8, a + 0x10, a + 0x18, prim + 8, prim + 0xC, prim + 0x10, prim + 0x14, &flag, &p);
     } else {
         *(s32 *)(prim + 8) = *(s32 *)(a + 0);
@@ -2581,21 +2583,21 @@ s32 func_80017294(u8 *a, s32 m) {
         p = 0;
     }
     if (!(p & ~0x1000)) {
-        func_80018094(prim, z, *(s32 *)(a + 0x24));
+        AddPrimFlat(prim, z, *(s32 *)(a + 0x24));
     }
 }
 
-s32 func_8001739C(u8 *a) {
-    return func_800173DC(a, 0);
+s32 DrawPrimG3Screen(u8 *a) {
+    return DrawPrimG3(a, 0);
 }
 
-s32 func_800173BC(void) {
-    return func_800173DC();
+s32 DrawPrimG3Mtx(void) {
+    return DrawPrimG3();
 }
 
 extern void SetPolyG3();
 
-s32 func_800173DC(u8 *a, s32 m) {
+s32 DrawPrimG3(u8 *a, s32 m) {
     s32 flag;
     s32 p;
     s32 z;
@@ -2605,7 +2607,7 @@ s32 func_800173DC(u8 *a, s32 m) {
     *(s32 *)(prim + 0x14) = *(s32 *)(a + 0x20);
     SetPolyG3(prim);
     if (m != 0) {
-        func_80017E8C(m);
+        SetGteLocalMatrix(m);
         z = RotTransPers3(a, a + 8, a + 0x10, prim + 8, prim + 0x10, prim + 0x18, &flag, &p);
     } else {
         *(s32 *)(prim + 8) = *(s32 *)(a + 0);
@@ -2615,19 +2617,19 @@ s32 func_800173DC(u8 *a, s32 m) {
         p = 0;
     }
     if (!(p & ~0x1000)) {
-        func_80018094(prim, z, *(s32 *)(a + 0x24));
+        AddPrimFlat(prim, z, *(s32 *)(a + 0x24));
     }
 }
 
-s32 func_800174DC(s32 a) {
-    return func_8001751C(a, 0);
+s32 DrawPrimGT3Screen(s32 a) {
+    return DrawPrimGT3(a, 0);
 }
 
-s32 func_800174FC(u8 *a, s32 m) {
-    return func_8001751C(a, m);
+s32 DrawPrimGT3Mtx(u8 *a, s32 m) {
+    return DrawPrimGT3(a, m);
 }
 
-s32 func_8001751C(u8 *a, s32 m) {
+s32 DrawPrimGT3(u8 *a, s32 m) {
     struct { s32 p; s32 flag; s32 otz; } t;
     u32 w;
     u8 *prim = AllocPrim(0x28);
@@ -2636,7 +2638,7 @@ s32 func_8001751C(u8 *a, s32 m) {
     *(s32 *)(prim + 0x1C) = *(s32 *)(a + 0x2C);
     SetPolyGT3(prim);
     if (m != 0) {
-        func_80017E8C(m);
+        SetGteLocalMatrix(m);
         gte_RotTransPers3(a, a + 8, a + 0x10, prim + 8, prim + 0x14, prim + 0x20, &t.p, &t.flag, &t.otz);
     } else {
         *(s32 *)(prim + 8) = *(s32 *)(a + 0);
@@ -2649,31 +2651,31 @@ s32 func_8001751C(u8 *a, s32 m) {
                                      (*(u16 *)(a + 0x18) >> 2) & 0x3FC0, *(u16 *)(a + 0x1A) & 0xFF00);
     *(u16 *)(prim + 0xE) = GetClut(a[0x34] < 0xE0 ? 0x160 : 0x100, a[0x34] | 0x100);
     if (!(t.p & ~0x1000)) {
-        func_80018194(prim, t.otz, *(s32 *)(a + 0x30));
+        AddPrimTextured(prim, t.otz, *(s32 *)(a + 0x30));
     }
 }
 
-s32 func_800176F0(u8 *a) {
-    return func_80017778(a, 0, 1);
+s32 DrawPrimG4ScreenDithered(u8 *a) {
+    return DrawPrimG4(a, 0, 1);
 }
 
-s32 func_80017714(s32 a) {
-    return func_80017778(a, 0, 0);
+s32 DrawPrimG4Screen(s32 a) {
+    return DrawPrimG4(a, 0, 0);
 }
 
-s32 func_80017738(u8 *a, s32 m) {
-    return func_80017778(a, m, 1);
+s32 DrawPrimG4MtxDithered(u8 *a, s32 m) {
+    return DrawPrimG4(a, m, 1);
 }
 
-s32 func_80017758(s32 a, s32 b) {
-    return func_80017778(a, b, 0);
+s32 DrawPrimG4Mtx(s32 a, s32 b) {
+    return DrawPrimG4(a, b, 0);
 }
 
-extern void func_80017F14(void *p, s32 z, u32 a);
+extern void AddPrimDithered(void *p, s32 z, u32 a);
 
 extern void SetPolyG4();
 
-s32 func_80017778(u8 *a, s32 m, s32 g) {
+s32 DrawPrimG4(u8 *a, s32 m, s32 g) {
     s32 flag;
     s32 p;
     s32 z;
@@ -2684,7 +2686,7 @@ s32 func_80017778(u8 *a, s32 m, s32 g) {
     *(s32 *)(prim + 0x1C) = *(s32 *)(a + 0x2C);
     SetPolyG4(prim);
     if (m != 0) {
-        func_80017E8C(m);
+        SetGteLocalMatrix(m);
         z = RotTransPers4(a, a + 8, a + 0x10, a + 0x18, prim + 8, prim + 0x10, prim + 0x18, prim + 0x20, &flag, &p);
     } else {
         *(s32 *)(prim + 8) = *(s32 *)(a + 0);
@@ -2696,26 +2698,26 @@ s32 func_80017778(u8 *a, s32 m, s32 g) {
     }
     if (!(p & ~0x1000)) {
         if (g != 0) {
-            func_80017F14(prim, z, *(s32 *)(a + 0x30));
+            AddPrimDithered(prim, z, *(s32 *)(a + 0x30));
         } else {
-            func_80018094(prim, z, *(s32 *)(a + 0x30));
+            AddPrimFlat(prim, z, *(s32 *)(a + 0x30));
         }
     }
 }
 
-s32 func_800178C8(s32 a) {
-    return func_80017930(a, 0, 1);
+s32 DrawPrimGT4ScreenDithered(s32 a) {
+    return DrawPrimGT4(a, 0, 1);
 }
 
-s32 func_800178EC(u8 *a) {
-    return func_80017930(a, 0, 0);
+s32 DrawPrimGT4Screen(u8 *a) {
+    return DrawPrimGT4(a, 0, 0);
 }
 
-s32 func_80017910(s32 a, s32 b) {
-    return func_80017930(a, b, 0);
+s32 DrawPrimGT4Mtx(s32 a, s32 b) {
+    return DrawPrimGT4(a, b, 0);
 }
 
-s32 func_80017930(u8 *a, s32 m, s32 k) {
+s32 DrawPrimGT4(u8 *a, s32 m, s32 k) {
     struct { s32 flag; s32 flag2; s32 otz; } t;
     u32 w;
     u8 *prim = AllocPrim(0x34);
@@ -2725,7 +2727,7 @@ s32 func_80017930(u8 *a, s32 m, s32 k) {
     *(s32 *)(prim + 0x28) = *(s32 *)(a + 0x3C);
     SetPolyGT4(prim);
     if (m != 0) {
-        func_80017E8C(m);
+        SetGteLocalMatrix(m);
         gte_ldv3(a, a + 8, a + 0x10);
         gte_rtpt();
         gte_stflg(&t.flag);
@@ -2753,14 +2755,14 @@ s32 func_80017930(u8 *a, s32 m, s32 k) {
     *(u16 *)(prim + 0xE) = GetClut(a[0x44] < 0xE0 ? 0x160 : 0x100, a[0x44] | 0x100);
     if (!(t.flag & ~0x1000)) {
         if (k != 0) {
-            func_8001820C(prim, t.otz, *(s32 *)(a + 0x40));
+            AddPrimTexturedDithered(prim, t.otz, *(s32 *)(a + 0x40));
         } else {
-            func_80018194(prim, t.otz, *(s32 *)(a + 0x40));
+            AddPrimTextured(prim, t.otz, *(s32 *)(a + 0x40));
         }
     }
 }
 
-void func_80017B98(u8 *a) {
+void DrawSpriteRec(u8 *a) {
     u8 *w = (u8 *)&D_800AF630;
     u8 *prim = AllocPrim(0x2C);
     u8 *s;
@@ -2787,10 +2789,10 @@ void func_80017B98(u8 *a) {
     if (z >= 0x1000) {
         z = 0xFFF;
     }
-    addPrim(D_800A651C[*(u16 *)(w + 0xA3D2)].ot + z * 4, prim);
+    addPrim(g_WorldOtOrg[*(u16 *)(w + 0xA3D2)].ot + z * 4, prim);
 }
 
-void func_80017D98(u8 *a) {
+void SetIdentityRotAlt(u8 *a) {
     *(s16 *)a = 0x1000;
     *(s16 *)(a + 0x2) = 0;
     *(s16 *)(a + 0x4) = 0;
@@ -2802,7 +2804,7 @@ void func_80017D98(u8 *a) {
     *(s16 *)(a + 0x10) = 0x1000;
 }
 
-void func_80017DC4(u16 *a, u16 *b) {
+void SetScaleMatrix(u16 *a, u16 *b) {
     b[0] = a[0];
     b[1] = 0;
     b[2] = 0;
@@ -2814,63 +2816,63 @@ void func_80017DC4(u16 *a, u16 *b) {
     b[8] = a[2];
 }
 
-void func_80017DF8(void *r, void *m) {
+void RotateMatrixBy(void *r, void *m) {
     u8 tmp[0x20];
     RotMatrix(r, tmp);
     MulMatrix2(tmp, m);
 }
 
-void func_80017E30(void *r, void *m) {
+void RotateMatrixByZYX(void *r, void *m) {
     Mtx t;
     RotMatrixZYX(r, &t);
     MulMatrix2(&t, m);
 }
 
-void func_80017E68(u8 *a, u8 *b) {
+void SetMatrixTrans(u8 *a, u8 *b) {
     *(s32 *)(b + 0x14) = *(s16 *)a;
     *(s32 *)(b + 0x18) = *(s16 *)(a + 0x2);
     *(s32 *)(b + 0x1c) = *(s16 *)(a + 0x4);
 }
 
-void func_80017E8C(s32 n) {
+void SetGteLocalMatrix(s32 n) {
     Mtx m = *(Mtx *)n;
     CompMatrix(&D_800AF648, &m, &m);
     SetRotMatrix(&m);
     SetTransMatrix(&m);
 }
 
-void func_80017F14(void *p, s32 z, u32 a) {
+void AddPrimDithered(void *p, s32 z, u32 a) {
     u8 *q;
     if ((u32)z >= 0x1000) {
         z = 0xFFF;
     }
     q = AllocPrim(0xC);
     SetDrawMode(q, 0, 0, GetTPage(2, (a >> 28) & 3, 0x280, 0), 0);
-    AddPrim(D_800A651C[D_800B9A02].ot + z * 4, q);
-    AddPrim(D_800A651C[D_800B9A02].ot + z * 4, p);
+    AddPrim(g_WorldOtOrg[D_800B9A02].ot + z * 4, q);
+    AddPrim(g_WorldOtOrg[D_800B9A02].ot + z * 4, p);
     if (a & 0x40000000) {
         ((u8 *)p)[7] |= 2;
     }
     q = AllocPrim(0xC);
     SetDrawMode(q, 0, 1, GetTPage(2, (a >> 28) & 3, 0x280, 0), 0);
-    AddPrim(D_800A651C[D_800B9A02].ot + z * 4, q);
+    AddPrim(g_WorldOtOrg[D_800B9A02].ot + z * 4, q);
 }
 
-void func_80018094(void *p, s32 z, u32 a) {
+void AddPrimFlat(void *p, s32 z, u32 a) {
     u8 *q;
     if ((u32)z >= 0x1000) {
         z = 0xFFF;
     }
-    AddPrim(D_800A651C[D_800B9A02].ot + z * 4, p);
+    AddPrim(g_WorldOtOrg[D_800B9A02].ot + z * 4, p);
     if (a & 0x40000000) {
         ((u8 *)p)[7] |= 2;
         q = AllocPrim(0xC);
         SetDrawMode(q, 0, 0, GetTPage(2, (a >> 28) & 3, 0x280, 0), 0);
-        AddPrim(D_800A651C[D_800B9A02].ot + z * 4, q);
+        AddPrim(g_WorldOtOrg[D_800B9A02].ot + z * 4, q);
     }
 }
 
-void func_80018194(u8 *prim, u32 z, s32 flags) {
+void AddPrimTextured(u8 *prim, u32 z, s32 flags) {
     s32 f = flags & 0x40000000;
     if (f != 0) {
         *(s32 *)(prim + 4) |= 0x02000000;
@@ -2878,10 +2880,10 @@ void func_80018194(u8 *prim, u32 z, s32 flags) {
     if (z >= 0x1000) {
         z = 0xFFF;
     }
-    AddPrim(*(u8 **)((u8 *)D_800A651C + D_800B9A02 * 0x14) + z * 4, prim);
+    AddPrim(*(u8 **)((u8 *)g_WorldOtOrg + D_800B9A02 * 0x14) + z * 4, prim);
 }
 
-void func_8001820C(u8 *prim, u32 z, s32 flags) {
+void AddPrimTexturedDithered(u8 *prim, u32 z, s32 flags) {
     u8 *q;
     u32 t;
     if (flags & 0x40000000) {
@@ -2893,22 +2895,22 @@ void func_8001820C(u8 *prim, u32 z, s32 flags) {
     q = AllocPrim(0xC);
     t = ((u32)flags >> 28) & 3;
     SetDrawMode(q, 0, 0, GetTPage(2, t, 0x280, 0), 0);
-    AddPrim(D_800A651C[D_800B9A02].ot + z * 4, q);
-    AddPrim(D_800A651C[D_800B9A02].ot + z * 4, prim);
+    AddPrim(g_WorldOtOrg[D_800B9A02].ot + z * 4, q);
+    AddPrim(g_WorldOtOrg[D_800B9A02].ot + z * 4, prim);
     q = AllocPrim(0xC);
     SetDrawMode(q, 0, 1, GetTPage(2, t, 0x280, 0), 0);
-    AddPrim(D_800A651C[D_800B9A02].ot + z * 4, q);
+    AddPrim(g_WorldOtOrg[D_800B9A02].ot + z * 4, q);
 }
 
-void func_80018384(u32 *ot, u32 *prim) {
-    if ((u32)&D_800AE610 < (u32)ot) {
+void AddPrimChecked(u32 *ot, u32 *prim) {
+    if ((u32)&g_PadLostFrames < (u32)ot) {
         while (1) {}
     }
     *prim = (*prim & 0xFF000000) | (*ot & 0xFFFFFF);
     *ot = (*ot & 0xFF000000) | ((u32)prim & 0xFFFFFF);
 }
 
-s32 func_800183E0(s32 a) {
+s32 QueueImage(s32 a) {
     register Work183E0 *w = (Work183E0 *)&D_800AF630;
     s32 r = 0;
     s32 i;
@@ -2927,7 +2929,7 @@ s32 func_800183E0(s32 a) {
 typedef struct { s16 active; s16 pad2; s32 val; u16 unk8; u16 unkA; u8 unkC; u8 unkD; u8 padE[2]; } Slot18450;
 typedef struct { u8 pad[0xA1A8]; Slot18450 slot[32]; } Work18450;
 
-s32 func_80018450(u8 *a, s32 v) {
+s32 QueueImageAt(u8 *a, s32 v) {
     Work18450 *w = (Work18450 *)&D_800AF630;
     s32 r = 0;
     s32 i;
@@ -3120,10 +3122,10 @@ void InitPad(void)
     u32 i;
     Pad *p;
 
-    D_800AE610 = 0;
+    g_PadLostFrames = 0;
     for (i = 0; i < 2; i++) {
         p = &g_Pads[i];
-        func_80016714(p, sizeof(Pad));
+        ZeroFill(p, sizeof(Pad));
         p->unk4 = 8;
     }
     StopPadRumble();
@@ -3152,7 +3154,7 @@ extern s32 PadGetState(s32 port);
 extern s32 PadInfoMode(s32 port, s32 term, s32 offs);
 extern s32 PadSetAct(s32 port, u8 *data, s32 len);
 extern s32 PadSetActAlign(s32 port, u8 *data);
-extern s32 func_80028D58(void);
+extern s32 GetVibrationOff(void);
 extern u8 D_80062BAC[];
 extern u8 D_80062BB4[];
 
@@ -3173,8 +3175,8 @@ s32 PollPad(s32 index) {
     switch (PadGetState(port)) {
     case 0:
         if (index == 0) {
-            if ((u32)D_800AE610++ >= 10) {
-                D_800AE610 = 0;
+            if ((u32)g_PadLostFrames++ >= 10) {
+                g_PadLostFrames = 0;
                 g_PadConnected = 0;
             }
         }
@@ -3183,9 +3185,9 @@ s32 PollPad(s32 index) {
         return 0;
     case 2:
         if (index == 0) {
-            D_800AE610 = 0;
+            g_PadLostFrames = 0;
             if (PadInfoMode(port, 2, 0) == 0) {
-                if (func_80028D58() == 0) {
+                if (GetVibrationOff() == 0) {
                     if (p[0x4A] | p[0x4B]) {
                         D_80062BBD = 1;
                     } else {
@@ -3203,9 +3205,9 @@ s32 PollPad(s32 index) {
         return 1;
     case 6:
         if (index == 0) {
-            D_800AE610 = 0;
+            g_PadLostFrames = 0;
             if (PadInfoMode(port, 2, 0) != 0) {
-                if (func_80028D58() == 0) {
+                if (GetVibrationOff() == 0) {
                     g_RumbleActSmall = p[0x4A];
                     g_RumbleActLarge = p[0x4B];
                     p[0x4B] = 0;
@@ -3245,7 +3247,7 @@ void ApplyStickDeadzone(u8 *pad);
 void UpdatePadState(u8 *pad) {
     s32 i;
     if (pad == g_Pad1) {
-        func_80016714(g_Pad1, 0x4C);
+        ZeroFill(g_Pad1, 0x4C);
         return;
     }
     switch (pad[0]) {
@@ -3281,14 +3283,14 @@ void UpdatePadState(u8 *pad) {
         ApplyStickDeadzone(pad);
         break;
     default:
-        func_80016714(pad, 0x4C);
+        ZeroFill(pad, 0x4C);
         break;
     }
 }
 
 /* Restart the Select hold count (var 0xE2) */
 void ResetSelectHold(void) {
-    func_800291A0(0xE2, 0);
+    SetVar(0xE2, 0);
 }
 
 /* Pad 1 only: Select held for 90 reads in a row turns vibration off (flag 0xB) */
@@ -3296,14 +3298,14 @@ void CheckSelectHold(u8 *pad) {
     s32 count;
     if (pad == (u8 *)g_Pads) {
         if (g_Pad0Held & 0x100) {
-            count = func_800291B4(0xE2) + 1;
+            count = GetVar(0xE2) + 1;
             if ((u32)(count & 0xFF) >= 0x5A) {
                 count = 0;
-                func_80028D78(1);
+                SetVibrationOff(1);
             }
-            func_800291A0(0xE2, count & 0xFF);
+            SetVar(0xE2, count & 0xFF);
         } else {
-            func_800291A0(0xE2, 0);
+            SetVar(0xE2, 0);
         }
     }
 }
@@ -3369,7 +3371,7 @@ void DisableRumbleScripts(void) {
 
 /* Stop the running rumble pattern (zero script pointer, step and frame count) */
 void ClearRumbleScript(void) {
-    func_80016714(&g_RumbleScript, 8);
+    ZeroFill(&g_RumbleScript, 8);
 }
 
 /* Start a rumble pattern (3-byte steps: large motor, small motor, frames) unless blocked or a demo plays */
@@ -3526,13 +3528,13 @@ s32 StageAlwaysReloads(s32 entry) {
 
 /* Drop a queued .STR stream request (load queue state 5) and stop it if it already started */
 void CancelStreamLoad(void) {
-    if (D_800BA1B4 == 5) {
-        if (D_800747E4 != 0) {
-            func_8002D4C8(0x16, 0);
+    if (g_LoadQueueState == 5) {
+        if (g_XaClipStep != 0) {
+            PlaySoundId(0x16, 0);
         }
-        D_800BA1B4 = 0;
-        D_800747E8 = 0;
-        D_800747E4 = 0;
+        g_LoadQueueState = 0;
+        g_XaClipState = 0;
+        g_XaClipStep = 0;
     }
 }
 
@@ -3546,11 +3548,11 @@ void SetDebugBinPresent(s32 present) {
     D_800747D0 = present;
 }
 
-s32 func_80019398(void) {
+s32 CdFilesReady(void) {
     return D_800747D4;
 }
 
-void func_800193A8(s32 a) {
+void SetCdFilesReady(s32 a) {
     D_800747D4 = a;
 }
 
@@ -3572,8 +3574,8 @@ void InitCdFilesAtLba(s32 lba) {
     ResetLoader();
     lba++;
     D_800747D0 = 0;
-    D_80063074 = 0;
-    D_800747D8 = 0;
+    g_TitleMovieCount = 0;
+    g_LicenceShown = 0;
     CdIntToPos(lba, &loc.pos);
     while (!LoadFileStep((CdlFILE *)&loc, LIST_BUF, 0x800, 0)) {
         VSync(0);
@@ -3637,8 +3639,8 @@ void InitCdFiles(void)
 
     D_800747D0 = found != NULL;
     D_800747D4 = 1;
-    D_80063074 = 0;
-    D_800747D8 = 0;
+    g_TitleMovieCount = 0;
+    g_LicenceShown = 0;
 
     for (i = 0; i < sizeof(g_FileTable) / sizeof(g_FileTable[0]) - 1; i++) {
         while ((u32)CdSearchFile(&g_FileTable[i].file, g_FileTable[i].name) + 1 < 2) {
@@ -3722,9 +3724,9 @@ inline void ResetStreamStep(void) {
 void ResetLoader(void) {
     g_CdStream.cursor = 0x80010000;
     g_CdStream.request = 0;
-    D_800BA1B4 = 0;
-    D_800747F0 = 0;
-    D_800747F4 = 0;
+    g_LoadQueueState = 0;
+    g_LoadKind = 0;
+    g_LoadKey = 0;
     g_CdStream.state = 0;
     g_CdStream.sub = 0;
     g_CdStream.unkC = 0;
@@ -3744,7 +3746,7 @@ void ForgetStageImageAlt(void) {
 /* Ask for (or keep stepping) a read of a disc file to dest; returns 1 on the frame it completes */
 inline s32 LoadFileStep(CdlFILE *file, void *dest, s32 size, s32 soundTable) {
     s32 id;
-    if (func_80034B98() != 0) {
+    if (GetCdAudioState() != 0) {
         return 0;
     }
     if (g_CdStream.request != 0 && *(s32 *)file != g_CdStream.request) {
@@ -3884,7 +3886,7 @@ void StreamStep(s32 seekOnly) {
         break;
     case 7:
         for (i = 0; i < g_CdStream.soundCount; i++) {
-            while (func_8002FD14(((s32 *)g_CdStream.soundTable)[i * 2], ((s32 *)g_CdStream.soundTable)[i * 2 + 1]) == 0) {
+            while (OpenSoundBank(((s32 *)g_CdStream.soundTable)[i * 2], ((s32 *)g_CdStream.soundTable)[i * 2 + 1]) == 0) {
             }
         }
         g_CdStream.state++;
@@ -4012,7 +4014,7 @@ void StreamReadyCallback(u8 intr, u8 *result) {
         pos = CdPosToInt((CdlLOC *)D_80078E40);
         if (pos != cd->sector) {
             if (cd->sub == 4) {
-                func_8002FDC8();
+                AbortBankUpload();
             }
             cd->done = 2;
             return;
@@ -4112,7 +4114,7 @@ void StreamReadyCallback(u8 intr, u8 *result) {
                     cd->sub = 2;
                     break;
                 }
-                while (func_8002FB08(((s32 *)cd->soundTable)[cd->soundCount * 2]) == 0) {
+                while (BeginBankUpload(((s32 *)cd->soundTable)[cd->soundCount * 2]) == 0) {
                 }
                 cd->sub = 4;
                 cd->words = D_80079A7C - 0x800;
@@ -4170,8 +4172,8 @@ void StreamReadyCallback(u8 intr, u8 *result) {
             if (cd->words <= 0x800) {
                 pos = (cd->words + 3) / 4;
                 CdGetSector(D_80079A70, pos);
-                if (func_8002FC64(cd->words, D_80079A70) == 0) {
-                    func_8002FDC8();
+                if (UploadBankData(cd->words, D_80079A70) == 0) {
+                    AbortBankUpload();
                     cd->sub = 7;
                     break;
                 }
@@ -4184,11 +4186,11 @@ void StreamReadyCallback(u8 intr, u8 *result) {
                 break;
             }
             CdGetSector(D_80079A70, 0x200);
-            n = func_8002FC64(0x800, D_80079A70);
+            n = UploadBankData(0x800, D_80079A70);
             cd->cursor += 0x800;
             cd->words -= 0x800;
             if (n == 0) {
-                func_8002FDC8();
+                AbortBankUpload();
                 cd->sub = 7;
             }
             break;
@@ -4223,7 +4225,7 @@ void StreamReadyCallback(u8 intr, u8 *result) {
     }
     if (intr == CdlDiskError) {
         if (cd->sub == 4) {
-            func_8002FDC8();
+            AbortBankUpload();
         }
         cd->done = 2;
     }
@@ -4231,7 +4233,7 @@ void StreamReadyCallback(u8 intr, u8 *result) {
 
 /* Return the stream driver's request state (0 idle; 1, 2, 4 busy; 8 finished) */
 s32 GetStreamState(void) {
-    return func_80034B98();
+    return GetCdAudioState();
 }
 
 /* Link the two NOW LOADING sprites (texpage + SPRT pairs at 0x80063108/0x80063120) into OT entry 1 */
@@ -4259,13 +4261,13 @@ void SetLoadRequestId(s32 id) {
 void LoadPatPicture(void) {
 }
 
-void func_8001AAA0(s32 id) {
-    func_8001ABBC(1, id, 0, 0, 0);
+s32 RequestBgmPack(s32 id) {
+    return RequestLoad(1, id, 0, 0, 0);
 }
 
 /* Load request kind 3 (a sound bank file) for one of the files g_FileTable[9..20] (n = 0..11; anything else:
-   g_FileTable[0]); clears a finished bank request first. Returns func_8001ABBC's answer. */
-s32 func_8001AAD0(s32 n, s32 id) {
+   g_FileTable[0]); clears a finished bank request first. Returns RequestLoad's answer. */
+s32 RequestXaClip(s32 n, s32 id) {
     s32 i;
     switch (n) {
     case 0: i = 9; break;
@@ -4282,101 +4284,101 @@ s32 func_8001AAD0(s32 n, s32 id) {
     case 11: i = 20; break;
     default: i = 0; break;
     }
-    if (D_800BA1B4 == 5) {
-        D_800BA1B4 = 0;
+    if (g_LoadQueueState == 5) {
+        g_LoadQueueState = 0;
     }
-    return func_8001ABBC(3, id, (s32 *)&g_FileTable[i].file, 0, 0);
+    return RequestLoad(3, id, (s32 *)&g_FileTable[i].file, 0, 0);
 }
 
-void func_8001ABB4(void) {
+void LoadNop(void) {
 }
 
-/* Ask for a load. kind 0: a file read (id = byte count, 0 for a PAC archive); 1: a sound by id (D_80063138): done
+/* Ask for a load. kind 0: a file read (id = byte count, 0 for a PAC archive); 1: a sound by id (g_BgmPacks): done
    at once when its package is the one loaded; 2: a header read; 3: a sound bank file. Returns 1 when the request
    is done, 0 while it waits (another request in flight, or this one just queued for the pump, LoadQueueStep). */
-s32 func_8001ABBC(s32 kind, s32 id, s32 *file, s32 c, s32 d) {
+s32 RequestLoad(s32 kind, s32 id, s32 *file, s32 c, s32 d) {
     if (kind == 1) {
-        if (id == D_800A654C) {
+        if (id == g_BgmPackPlaying) {
             return 1;
         }
-        if (D_80063138[id].entry == D_800747F8) {
-            if (D_80063138[id].sound != 0) {
-                func_8002D4C8((u16)D_80063138[id].sound, 0);
-                D_800A654C = id;
+        if (g_BgmPacks[id].entry == g_BgmPackEntry) {
+            if (g_BgmPacks[id].sound != 0) {
+                PlaySoundId((u16)g_BgmPacks[id].sound, 0);
+                g_BgmPackPlaying = id;
             }
             return 1;
         }
     }
-    if (D_800BA1B4 != 0) {
-        if (D_800BA1B4 != 3) {
+    if (g_LoadQueueState != 0) {
+        if (g_LoadQueueState != 3) {
             return 0;
         }
-        if (func_8001AE90(kind, id, file)) {
+        if (IsQueuedLoad(kind, id, file)) {
             goto done;
         }
     }
-    if (func_8001ACF0(kind, id, file, c, d) != 0) {
+    if (QueueLoad(kind, id, file, c, d) != 0) {
 done:
-        D_800BA1B4 = 0;
+        g_LoadQueueState = 0;
         return 1;
     }
     return 0;
 }
 
-/* Queue a load request for the pump (LoadQueueStep): D_800BA1B4 = 1 file read, 2 sound package, 4 header read,
+/* Queue a load request for the pump (LoadQueueStep): g_LoadQueueState = 1 file read, 2 sound package, 4 header read,
    5 sound bank. A sound whose package is already loaded starts at once (returns 1). */
-s32 func_8001ACF0(s32 kind, s32 id, s32 *file, s32 dest, s32 table) {
-    D_800747F0 = kind;
+s32 QueueLoad(s32 kind, s32 id, s32 *file, s32 dest, s32 table) {
+    g_LoadKind = kind;
     switch (kind) {
     case 0:
-        D_800C6D2C = id;
-        D_800AE6E4 = file;
-        D_800BA318 = dest;
-        D_800A6550 = table;
-        D_800747F4 = *file;
-        D_800BA1B4 = 1;
+        g_LoadSize = id;
+        g_LoadFile = file;
+        g_LoadDest = dest;
+        g_LoadSoundTable = table;
+        g_LoadKey = *file;
+        g_LoadQueueState = 1;
         break;
     case 1:
-        D_800BA1B4 = 2;
-        if (id == D_800A654C) {
+        g_LoadQueueState = 2;
+        if (id == g_BgmPackPlaying) {
             return 1;
         }
-        if (D_80063138[id].entry == D_800747F8) {
-            if (D_80063138[id].sound != 0) {
-                func_8002D4C8((u16)D_80063138[id].sound, 0);
-                D_800A654C = id;
+        if (g_BgmPacks[id].entry == g_BgmPackEntry) {
+            if (g_BgmPacks[id].sound != 0) {
+                PlaySoundId((u16)g_BgmPacks[id].sound, 0);
+                g_BgmPackPlaying = id;
             }
             return 1;
         }
         D_800AE640 = id;
-        D_800747F4 = id;
+        g_LoadKey = id;
         break;
     case 2:
-        D_800AE6E4 = file;
-        D_800747F4 = *file;
-        D_800BA1B4 = 4;
+        g_LoadFile = file;
+        g_LoadKey = *file;
+        g_LoadQueueState = 4;
         break;
     case 3:
         D_800A6430 = id;
-        D_800AE6E4 = file;
-        D_800747F4 = id;
-        D_800BA1B4 = 5;
-        D_800747E4 = 0;
-        D_800747E8 = 1;
+        g_LoadFile = file;
+        g_LoadKey = id;
+        g_LoadQueueState = 5;
+        g_XaClipStep = 0;
+        g_XaClipState = 1;
         break;
     }
     return 0;
 }
 
-s32 func_8001AE90(s32 kind, s32 a, s32 *b) {
+s32 IsQueuedLoad(s32 kind, s32 a, s32 *b) {
     s32 r;
     switch (kind) {
     case 0:
     case 2:
-        r = *b == D_800747F4;
+        r = *b == g_LoadKey;
         break;
     case 1:
-        r = a == D_800747F4;
+        r = a == g_LoadKey;
         break;
     default:
         r = 0;
@@ -4385,106 +4387,106 @@ s32 func_8001AE90(s32 kind, s32 a, s32 *b) {
     return r;
 }
 
-s32 func_8001AF04(void) {
-    if (D_800BA1B4 == 0) {
+s32 GetLoadQueueState(void) {
+    if (g_LoadQueueState == 0) {
         return 0;
-    } else if (D_800BA1B4 == 3) {
+    } else if (g_LoadQueueState == 3) {
         return 1;
     } else {
         return 2;
     }
 }
 
-/* The load pump, run every frame: works on the queued request (D_800BA1B4: 1 a file read, through the inlined
+/* The load pump, run every frame: works on the queued request (g_LoadQueueState: 1 a file read, through the inlined
    LoadFileStep; 2 a sound package; 4 a header read; 5 a sound bank) and sets 3 when it is done. 0 and 3 idle. */
 void LoadQueueStep(void) {
-    func_80034B98();
-    switch (D_800BA1B4) {
+    GetCdAudioState();
+    switch (g_LoadQueueState) {
     case 0:
     case 3:
         break;
     case 1:
-        if (LoadFileStep(D_800AE6E4, (void *)D_800BA318, D_800C6D2C, D_800A6550)) {
-            D_800BA1B4 = 3;
+        if (LoadFileStep(g_LoadFile, (void *)g_LoadDest, g_LoadSize, g_LoadSoundTable)) {
+            g_LoadQueueState = 3;
         }
         break;
     case 2:
-        if (func_8001B394(D_800AE640)) {
-            D_800BA1B4 = 3;
+        if (BgmPackStep(D_800AE640)) {
+            g_LoadQueueState = 3;
         }
         break;
     case 4:
-        if (func_8001B7C4((s32 *)D_800AE6E4)) {
-            D_800BA1B4 = 3;
+        if (ReadHeaderStep((s32 *)g_LoadFile)) {
+            g_LoadQueueState = 3;
         }
         break;
     case 5:
-        if (func_8001B0D4(D_800AE6E4, D_800A6430)) {
-            D_800747E4 = 0;
-            D_800BA1B4 = 3;
+        if (XaClipStep(g_LoadFile, D_800A6430)) {
+            g_XaClipStep = 0;
+            g_LoadQueueState = 3;
         }
         break;
     }
 }
 
-/* Load a sound bank file (load request kind 3, run by the pump): start it (func_80036AF8), then follow the sound
-   driver's load state (func_80034B98) to the end. D_800747E8 is the state reported to the caller. 1 = done. */
-s32 func_8001B0D4(void *file, s16 b) {
+/* Load a sound bank file (load request kind 3, run by the pump): start it (PlayXa), then follow the sound
+   driver's load state (GetCdAudioState) to the end. g_XaClipState is the state reported to the caller. 1 = done. */
+s32 XaClipStep(void *file, s16 b) {
     s32 r;
-    switch (D_800747E4) {
+    switch (g_XaClipStep) {
     case 0:
-        func_80036AF8(file, b);
-        D_800747E8 = 1;
-        D_800747E4++;
+        PlayXa(file, b);
+        g_XaClipState = 1;
+        g_XaClipStep++;
         break;
     case 1:
-        r = func_80034B98();
+        r = GetCdAudioState();
         switch (r) {
         case 0:
             D_800747E0 = 1;
             return 0;
         case 1:
-            D_800747E8 = r;
+            g_XaClipState = r;
             return 0;
         case 8:
-            D_800747E8 = 4;
-            D_800747E4 = 4;
+            g_XaClipState = 4;
+            g_XaClipStep = 4;
             break;
         case 2:
         case 4:
-            D_800747E8 = r;
-            D_800747E4++;
+            g_XaClipState = r;
+            g_XaClipStep++;
             break;
         }
         break;
     case 2:
-        r = func_80034B98();
+        r = GetCdAudioState();
         switch (r) {
         case 0:
         case 8:
-            D_800747E8 = 0;
+            g_XaClipState = 0;
             return 1;
         case 1:
         case 2:
         case 4:
-            D_800747E8 = r;
+            g_XaClipState = r;
             break;
         }
         break;
     case 3:
         if (DiscCheckStep() != 0) {
-            D_800747E4 = 0;
+            g_XaClipStep = 0;
         }
         break;
     case 4:
-        D_800747E8 = 0;
+        g_XaClipState = 0;
         return 1;
     }
     return 0;
 }
 
-s32 func_8001B22C(void) {
-    return D_800747E8;
+s32 GetXaClipState(void) {
+    return g_XaClipState;
 }
 
 s32 func_8001B23C(s32 v) {
@@ -4493,9 +4495,9 @@ s32 func_8001B23C(s32 v) {
     return D_800C6D10;
 }
 
-extern s32 D_800C7C60;
+extern s32 g_SoundLoadTable;
 extern u8 *D_800C7C64;
-extern u8 D_800A2E20[];
+extern u8 g_SoundLoadBuf[];
 extern s32 D_800AEC78[];
 
 void func_8001B26C(void) {
@@ -4503,22 +4505,22 @@ void func_8001B26C(void) {
     s32 *p;
 
     if (D_800C6D34 == 0) {
-        p = &D_800C7C60;
+        p = &g_SoundLoadTable;
         *p = 8;
-        D_800C7C64 = D_800A2E20;
-        r = D_800BA1B4;
+        D_800C7C64 = g_SoundLoadBuf;
+        r = g_LoadQueueState;
         if (r != 0) {
             if (r != 3) {
                 r = 0;
                 goto end;
             }
-            if (func_8001AE90(0, 0, D_800AEC78)) {
+            if (IsQueuedLoad(0, 0, D_800AEC78)) {
                 goto done;
             }
         }
-        if (func_8001ACF0(0, 0, D_800AEC78, 0, (s32)p) != 0) {
+        if (QueueLoad(0, 0, D_800AEC78, 0, (s32)p) != 0) {
 done:
-            D_800BA1B4 = 0;
+            g_LoadQueueState = 0;
             r = 1;
         } else {
             r = 0;
@@ -4529,123 +4531,123 @@ end:
     D_800C6D10 = r;
 }
 
-void func_8001B324(void) {
-    D_800AE7EC = 0;
-    func_8001B34C();
+void ResetBgmPacks(void) {
+    g_BgmPackStep = 0;
+    ForgetBgmPack();
 }
 
-void func_8001B34C(void) {
-    D_800A654C = 0;
-    D_800747F8 = 0;
-    D_800A2B70 = 0;
-    D_800BA0FC = 0;
+void ForgetBgmPack(void) {
+    g_BgmPackPlaying = 0;
+    g_BgmPackEntry = 0;
+    g_TimeChime = 0;
+    g_TimeChimeTimer = 0;
 }
 
-s32 func_8001B374(void) {
-    return D_800A654C;
+s32 GetBgmPack(void) {
+    return g_BgmPackPlaying;
 }
 
-void func_8001B384(void) {
-    D_800AE7EC = 0;
+void ResetBgmPackStep(void) {
+    g_BgmPackStep = 0;
 }
 
-s32 func_8001B394(s32 a) {
+s32 BgmPackStep(s32 a) {
     D_800C6D34 = a;
-    func_8001B3C4();
+    BgmPackStepImpl();
     return D_800C6D10;
 }
 
-extern s32 func_800363CC(s32 a, CdFileLoc *loc, s32 c);
-extern void func_80036D58(s32 n);
+extern s32 LoadBgmStep(s32 a, CdFileLoc *loc, s32 c);
+extern void PlayCdTrack(s32 n);
 void func_8001B710(void);
-s32 func_8001B788(s16 n);
-extern s32 D_800AE708;
+s32 GetBgmPackPos(s16 n);
+extern s32 g_BgmPackPos;
 
-void func_8001B3C4(void) {
+void BgmPackStepImpl(void) {
     s32 r = 0;
     s32 v;
     u8 unused[8];
 
-    switch ((u32)D_800AE7EC) {
+    switch ((u32)g_BgmPackStep) {
     case 0:
-        if (D_800C6D34 == D_800A654C) {
+        if (D_800C6D34 == g_BgmPackPlaying) {
             D_800C6D10 = 1;
             return;
         }
-        if (D_80063138[D_800C6D34].entry == D_800747F8 && D_80063138[D_800C6D34].sound != 0) {
-            func_8002D4C8((u16)D_80063138[D_800C6D34].sound, 0);
+        if (g_BgmPacks[D_800C6D34].entry == g_BgmPackEntry && g_BgmPacks[D_800C6D34].sound != 0) {
+            PlaySoundId((u16)g_BgmPacks[D_800C6D34].sound, 0);
             D_800C6D10 = 1;
-            D_800A654C = D_800C6D34;
+            g_BgmPackPlaying = D_800C6D34;
             return;
         }
-        if (func_80034B98() != 0) {
+        if (GetCdAudioState() != 0) {
             break;
         }
-        if (D_80063138[D_800C6D34].entry < 0) {
-            func_80036D58(D_80063138[D_800C6D34].b);
+        if (g_BgmPacks[D_800C6D34].entry < 0) {
+            PlayCdTrack(g_BgmPacks[D_800C6D34].b);
             goto done;
         }
-        if (func_8001B788(D_800C6D34) == 0) {
+        if (GetBgmPackPos(D_800C6D34) == 0) {
 done:
             D_800C6D10 = 1;
             return;
         }
-        if (D_800AE708 != 0 && *(s32 *)&g_ArchiveFileLoc[D_80063138[D_800C6D34].entry].pos != D_800AE708) {
+        if (g_BgmPackPos != 0 && *(s32 *)&g_ArchiveFileLoc[g_BgmPacks[D_800C6D34].entry].pos != g_BgmPackPos) {
             break;
         }
-        v = *(s32 *)&g_ArchiveFileLoc[D_80063138[D_800C6D34].entry].pos;
-        D_800AE7EC++;
-        D_800AE708 = v;
+        v = *(s32 *)&g_ArchiveFileLoc[g_BgmPacks[D_800C6D34].entry].pos;
+        g_BgmPackStep++;
+        g_BgmPackPos = v;
     case 1:
-        r = func_800363CC(D_80063138[D_800C6D34].b, &g_ArchiveFileLoc[D_80063138[D_800C6D34].entry], 0x10);
+        r = LoadBgmStep(g_BgmPacks[D_800C6D34].b, &g_ArchiveFileLoc[g_BgmPacks[D_800C6D34].entry], 0x10);
         if (r == 2) {
-            D_800AE7EC++;
+            g_BgmPackStep++;
             r = 0;
         }
         break;
     case 2:
         g_CdStream.check = 0;
         g_CdStream.unk1C = 0;
-        D_800AE7EC = 3;
+        g_BgmPackStep = 3;
     case 3:
         if (DiscCheckStep() != 0) {
-            D_800AE7EC = 0;
+            g_BgmPackStep = 0;
         }
         break;
     }
     if (r != 0) {
-        D_800747F8 = D_80063138[D_800C6D34].entry;
-        if (D_80063138[D_800C6D34].sound > 0) {
-            func_8002D4C8((u16)D_80063138[D_800C6D34].sound, 0);
-            D_800A654C = D_800C6D34;
+        g_BgmPackEntry = g_BgmPacks[D_800C6D34].entry;
+        if (g_BgmPacks[D_800C6D34].sound > 0) {
+            PlaySoundId((u16)g_BgmPacks[D_800C6D34].sound, 0);
+            g_BgmPackPlaying = D_800C6D34;
             if (D_800C6D34 == 0x3D) {
                 func_8001B710();
             }
         }
-        D_800AE7EC = 0;
-        D_800AE708 = 0;
+        g_BgmPackStep = 0;
+        g_BgmPackPos = 0;
     }
     D_800C6D10 = r;
 }
 
 void func_8001B710(void) {
-    if ((func_800291B4(0x44) & 0xFF) >= 2) {
-        func_8002D4C8(0x24, 0);
+    if ((GetVar(0x44) & 0xFF) >= 2) {
+        PlaySoundId(0x24, 0);
     }
-    if ((func_800291B4(0x56) & 0xFF) >= 2) {
-        func_8002D4C8(0x25, 0);
+    if ((GetVar(0x56) & 0xFF) >= 2) {
+        PlaySoundId(0x25, 0);
     }
-    if ((func_800291B4(0x5C) & 0xFF) >= 2) {
-        func_8002D4C8(0x26, 0);
+    if ((GetVar(0x5C) & 0xFF) >= 2) {
+        PlaySoundId(0x26, 0);
     }
 }
 
-s32 func_8001B788(s16 n) {
-    return *(s32 *)&g_ArchiveFileLoc[D_80063138[n].entry].pos;
+s32 GetBgmPackPos(s16 n) {
+    return *(s32 *)&g_ArchiveFileLoc[g_BgmPacks[n].entry].pos;
 }
 
-s32 func_8001B7C4(s32 *p) {
-    if (func_80034B98() != 0) {
+s32 ReadHeaderStep(s32 *p) {
+    if (GetCdAudioState() != 0) {
         return 0;
     }
     if (g_CdStream.request != 0) {
@@ -4663,59 +4665,59 @@ s32 func_8001B7C4(s32 *p) {
     return g_CdStream.complete;
 }
 
-void func_8001B85C(void) {
-    D_800747FC = 0;
+void ResetScreenWipe(void) {
+    g_WipeStep = 0;
 }
 
 extern s32 D_80074800;
 extern s32 D_80074804;
 extern u8 g_PrimBuf[2][0x13880];
 
-s32 func_8001B86C(s32 a) {
+s32 ScreenWipeStep(s32 a) {
     Work *w = &D_800AF630;
 
-    switch ((u32)D_800747FC) {
+    switch ((u32)g_WipeStep) {
     case 0:
         g_PrimNext = (s32)g_PrimBuf[WORK->frame];
-        D_800A6518[WORK->frame].ot = g_WorldOtTable[WORK->frame];
-        D_800A6518[WORK->frame].e = (s32)(g_WorldOtTable[WORK->frame] + 1);
-        ClearOTagR(D_800A6518[WORK->frame].ot, 2);
-        func_8001BA84();
+        g_WorldOt[WORK->frame].ot = g_WorldOtTable[WORK->frame];
+        g_WorldOt[WORK->frame].e = (s32)(g_WorldOtTable[WORK->frame] + 1);
+        ClearOTagR(g_WorldOt[WORK->frame].ot, 2);
+        DrawScreenCopy();
         D_80074800 = 0x80;
-        D_800747FC++;
+        g_WipeStep++;
         break;
     case 1:
         D_80074804 = 1;
-        D_800747FC = 2;
+        g_WipeStep = 2;
         break;
     case 2:
         PutDispEnv(&w->disp[1]);
-        ClearOTagR(D_800A6518[WORK->frame].ot, 2);
-        func_8001BB60();
-        D_800747FC++;
+        ClearOTagR(g_WorldOt[WORK->frame].ot, 2);
+        InitWipeBars();
+        g_WipeStep++;
     case 3:
         if (D_80074804++ >= 2) {
             D_80074804 = 1;
-            if (func_8001BADC(D_8007480C, 1)) {
+            if (SetWipeBars(D_8007480C, 1)) {
                 return 1;
             }
             D_8007480C++;
         } else {
-            func_8001BADC(D_8007480C, 0);
+            SetWipeBars(D_8007480C, 0);
         }
         break;
     }
     return 0;
 }
 
-void func_8001BA84(void) {
-    func_8001BC6C(D_800630E8, 0x80);
-    func_8001BC6C(D_800630E8 + 8, 0x80);
-    func_8001BC6C(D_800630E8 + 0x10, 0x80);
-    func_8001BC6C(D_800630E8 + 0x18, 0x80);
+void DrawScreenCopy(void) {
+    AddScreenSprite(D_800630E8, 0x80);
+    AddScreenSprite(D_800630E8 + 8, 0x80);
+    AddScreenSprite(D_800630E8 + 0x10, 0x80);
+    AddScreenSprite(D_800630E8 + 0x18, 0x80);
 }
 
-s32 func_8001BADC(s32 n, s32 flag) {
+s32 SetWipeBars(s32 n, s32 flag) {
     s32 i;
     u32 c;
     u32 w;
@@ -4735,17 +4737,17 @@ s32 func_8001BADC(s32 n, s32 flag) {
     return n >= 0x2C;
 }
 
-void func_8001BB60(void) {
+void InitWipeBars(void) {
     s32 i = 0;
     D_80074808 = g_PrimNext;
     do {
-        func_8001BBBC(0, i * 8, 0);
+        AddWipeBar(0, i * 8, 0);
         i++;
     } while (i < 0x1E);
     D_8007480C = 0;
 }
 
-void func_8001BBBC(s32 x, s32 y, s32 c) {
+void AddWipeBar(s32 x, s32 y, s32 c) {
     u32 *ot;
     u8 *p = (u8 *)g_PrimNext;
     ot = g_WorldOtTable[D_800B9A02];
@@ -4761,7 +4763,7 @@ void func_8001BBBC(s32 x, s32 y, s32 c) {
     g_PrimNext = (s32)(p + 0x14);
 }
 
-void func_8001BC6C(void *a, s32 c) {
+void AddScreenSprite(void *a, s32 c) {
     u16 *s = a;
     s32 tp;
     u16 x, y, w, h, u;
@@ -4801,8 +4803,8 @@ void func_8001BC6C(void *a, s32 c) {
     g_PrimNext = (s32)(p + 6);
 }
 
-s32 func_8001BD80(void) {
-    return func_80034B98() != 0;
+s32 IsSoundLoading(void) {
+    return GetCdAudioState() != 0;
 }
 
 extern void DrawSyncCallback();
@@ -4810,8 +4812,8 @@ extern void PadStopCom();
 extern void StopRCnt();
 extern void StopCallback();
 
-void func_8001BDA0(void) {
-    func_8002CCD8();
+void ShutdownSystems(void) {
+    ShutdownSound();
     DrawSync(0);
     DrawSyncCallback(0);
     ResetGraph(0);
@@ -4826,49 +4828,49 @@ void func_8001BDA0(void) {
     StopCallback();
 }
 
-void func_8001BE20(void) {
+void ResetXaCancel(void) {
     D_800747EC = 0;
 }
 
-extern s32 D_800AE708;
+extern s32 g_BgmPackPos;
 
-s32 func_8001BE30(void) {
+s32 CancelXaClipStep(void) {
     s32 r;
     switch (D_800747EC) {
     case 0:
-        r = func_80034B98();
-        if (D_800BA1B4 == 5) {
-            if (D_800747E4 != 0) {
-                func_8002D4C8(0x16, 0);
+        r = GetCdAudioState();
+        if (g_LoadQueueState == 5) {
+            if (g_XaClipStep != 0) {
+                PlaySoundId(0x16, 0);
             }
-            D_800BA1B4 = 0;
-            D_800747E8 = 0;
-            D_800747E4 = 0;
+            g_LoadQueueState = 0;
+            g_XaClipState = 0;
+            g_XaClipStep = 0;
             D_800747EC = 3;
             break;
         }
         if (r == 1 || r == 4 || r == 2) {
-            func_8002D4C8(0x16, 0);
+            PlaySoundId(0x16, 0);
             D_800747EC++;
             break;
         }
-        if (D_800AE708 == 0) {
+        if (g_BgmPackPos == 0) {
             return 1;
         }
         D_800747EC = 2;
         break;
     case 1:
-        if (func_80034B98() == 0) {
+        if (GetCdAudioState() == 0) {
             return 1;
         }
         break;
     case 2:
-        if (D_800AE708 == 0) {
+        if (g_BgmPackPos == 0) {
             return 1;
         }
         break;
     case 3:
-        if (D_800747E8 == 0) {
+        if (g_XaClipState == 0) {
             return 1;
         }
         break;
@@ -4876,64 +4878,64 @@ s32 func_8001BE30(void) {
     return 0;
 }
 
-s32 func_8001BFA0(void) {
-    return (D_80063074 & 0x1);
+s32 GetTitleMovieIndex(void) {
+    return (g_TitleMovieCount & 0x1);
 }
 
-void func_8001BFB0(void) {
-    D_80063074 = (D_80063074 + 0x1);
+void NextTitleMovie(void) {
+    g_TitleMovieCount = (g_TitleMovieCount + 0x1);
 }
 
-void func_8001BFD0(void) {
-    D_800A2B70 = 0;
-    D_800BA0FC = 0;
+void ClearTimeChime(void) {
+    g_TimeChime = 0;
+    g_TimeChimeTimer = 0;
 }
 
-s32 func_8001BFE8(void) {
-    return D_800747D8;
+s32 LicenceShown(void) {
+    return g_LicenceShown;
 }
 
-void func_8001BFF8(void) {
-    D_800747D8 = 1;
+void SetLicenceShown(void) {
+    g_LicenceShown = 1;
 }
 
-void func_8001C00C(void) {
+void DrawModelsAndSprites(void) {
     if (D_800B9A11 != 1) {
-        func_8001F9F8();
-        func_8001D1C4();
+        DrawAllModels();
+        DrawAllSprites();
     }
 }
 
-void func_8001C044(void) {
+void ClearObjectPools(void) {
     u8 *w = (u8 *)&D_800AF630;
     u8 *p;
     s32 i;
     p = w + 0x65A8;
     for (i = 0; i < 0x100; i++, p += 0x38) {
-        func_80016714(p, 0x38);
+        ZeroFill(p, 0x38);
     }
     p = w + 0x2A8;
     for (i = 0; i < 0xC0; i++, p += 0x84) {
-        func_80016714(p, 0x84);
+        ZeroFill(p, 0x84);
     }
     *(s16 *)(w + 0x19C) = 0;
 }
 
-void func_8001C0C8(void) {
+void ClearObjectPoolsAlt(void) {
     register u8 *w = (u8 *)&D_800AF630;
     u8 *p;
     s32 i;
     p = w + 0x65A8;
     i = 0;
     do {
-        func_80016714(p, 0x38);
+        ZeroFill(p, 0x38);
         i++;
         p += 0x38;
     } while (i < 0x100);
     p = w + 0x2A8;
     i = 0;
     do {
-        func_80016714(p, 0x84);
+        ZeroFill(p, 0x84);
         i++;
         p += 0x84;
     } while (i < 0xC0);
@@ -4944,30 +4946,30 @@ void func_8001C14C(void) {
     u8 *w = (u8 *)&D_800AF630;
     u8 *p;
     for (p = w + 0x65A8; p < w + 0x6688; p += 0x38) {
-        func_80016714(p, 0x38);
+        ZeroFill(p, 0x38);
     }
     for (p = w + 0x2A8; p < w + 0x4B8; p += 0x84) {
-        func_80016714(p, 0x84);
+        ZeroFill(p, 0x84);
     }
 }
 
-void func_8001C1E4(u8 *o, u8 *c) {
+void SetModelParent(u8 *o, u8 *c) {
     s32 m[8];
     *(u8 **)(o + 0x78) = c + 0x30;
     *(s32 *)(o + 0x30) = 0;
     GsGetLw(o + 0x30, m);
 }
 
-void func_8001C214(u8 *o, s32 *p) {
+void InitModel(u8 *o, s32 *p) {
     Mtx m;
-    func_8001C9D0(o);
+    ResetModelFields(o);
     *(s16 *)o = 1;
     *(s16 *)(o + 2) = 0;
     GsInitCoordinate2(0, o + 0x30);
     GsGetLw(o + 0x30, &m);
     *(s32 **)(o + 0x24) = p;
     if (p != 0) {
-        *(u32 **)(o + 0x20) = D_80063548;
+        *(u32 **)(o + 0x20) = g_DefaultPose;
         while (*p != 0) {
             GsMapModelingData((*p & 0x80FFFFFF) + 4);
             p++;
@@ -4975,9 +4977,9 @@ void func_8001C214(u8 *o, s32 *p) {
     }
 }
 
-void func_8001C2C4(u8 *a) {
+void InitNullModel(u8 *a) {
     u8 lw[0x20];
-    func_8001C9D0(a);
+    ResetModelFields(a);
     *(s16 *)(a + 0) = 1;
     *(s16 *)(a + 2) = 0;
     GsInitCoordinate2(0, a + 0x30);
@@ -4985,31 +4987,31 @@ void func_8001C2C4(u8 *a) {
     *(s32 *)(a + 0x24) = 0;
 }
 
-extern u8 D_800A5BD0[];
+extern u8 g_PresetObjs[];
 extern void GsLinkObject5(u32 data, void *obj, s32 n);
 extern u32 *GsPresetObject(void *obj, u32 *base);
 
-void func_8001C320(u8 *o, s32 *p) {
+void InitPresetModel(u8 *o, s32 *p) {
     Mtx m;
     u8 *w = (u8 *)&D_800AF630;
     u32 *base;
     u32 d;
     u8 *obj;
-    func_8001C9D0(o);
+    ResetModelFields(o);
     *(s16 *)o = 1;
     *(s16 *)(o + 2) = 1;
     GsInitCoordinate2(0, o + 0x30);
     GsGetLw(o + 0x30, &m);
     *(s32 **)(o + 0x24) = p;
     if (p != 0) {
-        *(u32 **)(o + 0x20) = D_80063548;
+        *(u32 **)(o + 0x20) = g_DefaultPose;
         base = *(u32 **)(w + 0x198);
         *(u16 *)(o + 0x2E) = *(u16 *)(w + 0x19C);
         while (*p != 0) {
             d = *p++ & 0x80FFFFFF;
             d += 4;
             GsMapModelingData(d);
-            obj = D_800A5BD0 + (*(u16 *)(w + 0x19C))++ * 0x14;
+            obj = g_PresetObjs + (*(u16 *)(w + 0x19C))++ * 0x14;
             GsLinkObject5(d + 8, obj, 0);
             base = GsPresetObject(obj, base);
         }
@@ -5017,9 +5019,9 @@ void func_8001C320(u8 *o, s32 *p) {
     }
 }
 
-void func_8001C448(u8 *a) {
+void InitNullPresetModel(u8 *a) {
     u8 lw[0x20];
-    func_8001C9D0(a);
+    ResetModelFields(a);
     *(s16 *)(a + 0) = 1;
     *(s16 *)(a + 2) = 1;
     GsInitCoordinate2(0, a + 0x30);
@@ -5027,16 +5029,16 @@ void func_8001C448(u8 *a) {
     *(s32 *)(a + 0x24) = 0;
 }
 
-void func_8001C4A4(u8 *o, s32 *p) {
+void InitModelKind7(u8 *o, s32 *p) {
     Mtx m;
-    func_8001C9D0(o);
+    ResetModelFields(o);
     *(s16 *)o = 1;
     *(s16 *)(o + 2) = 7;
     GsInitCoordinate2(0, o + 0x30);
     GsGetLw(o + 0x30, &m);
     *(s32 **)(o + 0x24) = p;
     if (p != 0) {
-        *(u32 **)(o + 0x20) = D_80063548;
+        *(u32 **)(o + 0x20) = g_DefaultPose;
         while (*p != 0) {
             GsMapModelingData((*p & 0x80FFFFFF) + 4);
             p++;
@@ -5044,9 +5046,9 @@ void func_8001C4A4(u8 *o, s32 *p) {
     }
 }
 
-void func_8001C558(u8 *a) {
+void InitNullModelKind7(u8 *a) {
     u8 lw[0x20];
-    func_8001C9D0(a);
+    ResetModelFields(a);
     *(s16 *)(a + 0) = 1;
     *(s16 *)(a + 2) = 7;
     GsInitCoordinate2(0, a + 0x30);
@@ -5057,21 +5059,21 @@ void func_8001C558(u8 *a) {
 extern s32 D_800AF7C8;
 extern u16 D_800AF7CC;
 
-void func_8001C5B8(u8 *o, s32 *p) {
+void InitPresetModelKind8(u8 *o, s32 *p) {
     u8 lw[0x20];
     u8 *w = (u8 *)&D_800AF630;
     s32 r;
     s32 m;
     u8 *h;
     u16 n;
-    func_8001C9D0(o);
+    ResetModelFields(o);
     *(s16 *)o = 1;
     *(s16 *)(o + 2) = 8;
     GsInitCoordinate2(0, o + 0x30);
     GsGetLw(o + 0x30, lw);
     *(s32 **)(o + 0x24) = p;
     if (p != 0) {
-        *(u32 **)(o + 0x20) = D_80063548;
+        *(u32 **)(o + 0x20) = g_DefaultPose;
         r = D_800AF7C8;
         *(u16 *)(o + 0x2E) = D_800AF7CC;
         while (*p != 0) {
@@ -5080,7 +5082,7 @@ void func_8001C5B8(u8 *o, s32 *p) {
             m += 4;
             GsMapModelingData(m);
             n = *(u16 *)(w + 0x19C);
-            h = D_800A5BD0 + n * 0x14;
+            h = g_PresetObjs + n * 0x14;
             *(u16 *)(w + 0x19C) = n + 1;
             GsLinkObject5(m + 8, h, 0);
             r = (s32)GsPresetObject(h, (u32 *)r);
@@ -5089,9 +5091,9 @@ void func_8001C5B8(u8 *o, s32 *p) {
     }
 }
 
-void func_8001C6E4(u8 *a) {
+void InitNullModelKind8(u8 *a) {
     u8 lw[0x20];
-    func_8001C9D0(a);
+    ResetModelFields(a);
     *(s16 *)(a + 0) = 1;
     *(s16 *)(a + 2) = 8;
     GsInitCoordinate2(0, a + 0x30);
@@ -5099,9 +5101,9 @@ void func_8001C6E4(u8 *a) {
     *(s32 *)(a + 0x24) = 0;
 }
 
-void func_8001C744(u8 *o, void *p) {
+void InitModelKind2(u8 *o, void *p) {
     Mtx m;
-    func_8001C9D0(o);
+    ResetModelFields(o);
     *(s16 *)o = 1;
     *(s16 *)(o + 2) = 2;
     GsInitCoordinate2(0, o + 0x30);
@@ -5109,9 +5111,9 @@ void func_8001C744(u8 *o, void *p) {
     *(void **)(o + 0x24) = p;
 }
 
-void func_8001C7B0(u8 *a) {
+void InitNullModelKind2(u8 *a) {
     u8 lw[0x20];
-    func_8001C9D0(a);
+    ResetModelFields(a);
     *(s16 *)(a + 0) = 1;
     *(s16 *)(a + 2) = 2;
     GsInitCoordinate2(0, a + 0x30);
@@ -5121,14 +5123,14 @@ void func_8001C7B0(u8 *a) {
 
 void func_8001C810(u8 *o, s32 *p) {
     Mtx m;
-    func_8001C9D0(o);
+    ResetModelFields(o);
     *(s16 *)o = 1;
     *(s16 *)(o + 2) = 5;
     GsInitCoordinate2(0, o + 0x30);
     GsGetLw(o + 0x30, &m);
     *(s32 **)(o + 0x24) = p;
     if (p != 0) {
-        *(u32 **)(o + 0x20) = D_80063548;
+        *(u32 **)(o + 0x20) = g_DefaultPose;
         while (*p != 0) {
             GsMapModelingData((*p & 0x80FFFFFF) + 4);
             p++;
@@ -5138,7 +5140,7 @@ void func_8001C810(u8 *o, s32 *p) {
 
 void func_8001C8C4(u8 *a) {
     u8 lw[0x20];
-    func_8001C9D0(a);
+    ResetModelFields(a);
     *(s16 *)(a + 0) = 1;
     *(s16 *)(a + 2) = 5;
     GsInitCoordinate2(0, a + 0x30);
@@ -5146,7 +5148,7 @@ void func_8001C8C4(u8 *a) {
     *(s32 *)(a + 0x24) = 0;
 }
 
-void func_8001C924(u8 *o, s32 *p) {
+void SetModelParts(u8 *o, s32 *p) {
     *(s32 **)(o + 0x24) = p;
     while (*p != 0) {
         GsMapModelingData(*p + 4);
@@ -5154,7 +5156,7 @@ void func_8001C924(u8 *o, s32 *p) {
     }
 }
 
-void func_8001C97C(s32 *p) {
+void MapPartsTmd(s32 *p) {
     s32 *q = p;
     if (*q != 0) {
         do {
@@ -5165,7 +5167,7 @@ void func_8001C97C(s32 *p) {
     }
 }
 
-void func_8001C9D0(u8 *a) {
+void ResetModelFields(u8 *a) {
     *(s16 *)(a + 0x1C) = 0x1000;
     *(s16 *)(a + 0x1A) = 0x1000;
     *(s16 *)(a + 0x18) = 0x1000;
@@ -5186,7 +5188,7 @@ void func_8001C9D0(u8 *a) {
 
 void func_8001CA1C(u8 *a, s32 v) {
     u8 lw[0x20];
-    func_8001C9D0(a);
+    ResetModelFields(a);
     *(s16 *)(a + 0) = 1;
     *(s16 *)(a + 2) = 3;
     GsInitCoordinate2(0, a + 0x30);
@@ -5196,7 +5198,7 @@ void func_8001CA1C(u8 *a, s32 v) {
 
 void func_8001CA88(u8 *o, void *p) {
     Mtx m;
-    func_8001C9D0(o);
+    ResetModelFields(o);
     *(s16 *)o = 1;
     *(s16 *)(o + 2) = 4;
     GsInitCoordinate2(0, o + 0x30);
@@ -5207,8 +5209,8 @@ void func_8001CA88(u8 *o, void *p) {
     *(s16 *)(o + 0x1E) = 0;
 }
 
-void func_8001CB00(u8 *a, s32 v, s16 x, s16 y) {
-    func_8001CF48();
+void InitSpriteKind1(u8 *a, s32 v, s16 x, s16 y) {
+    ResetSprite();
     *(s16 *)(a + 2) = 1;
     *(s16 *)(a + 0x28) = x;
     *(s16 *)(a + 0x2A) = y;
@@ -5217,8 +5219,8 @@ void func_8001CB00(u8 *a, s32 v, s16 x, s16 y) {
     *(s16 *)(a + 0x2C) = 0;
 }
 
-void func_8001CB6C(u8 *o, void *p, s16 x, s16 y) {
-    func_8001CF48(o);
+void InitSpriteKind2(u8 *o, void *p, s16 x, s16 y) {
+    ResetSprite(o);
     *(s16 *)(o + 2) = 2;
     *(s16 *)(o + 0x28) = x;
     *(s16 *)(o + 0x2A) = y;
@@ -5227,8 +5229,8 @@ void func_8001CB6C(u8 *o, void *p, s16 x, s16 y) {
     *(s16 *)(o + 0x2C) = 0;
 }
 
-void func_8001CBDC(u8 *a, s32 v, s16 x, s16 y) {
-    func_8001CF48();
+void InitSpriteKind0(u8 *a, s32 v, s16 x, s16 y) {
+    ResetSprite();
     *(s16 *)(a + 2) = 0;
     *(s16 *)(a + 0x28) = x;
     *(s16 *)(a + 0x2A) = y;
@@ -5236,8 +5238,8 @@ void func_8001CBDC(u8 *a, s32 v, s16 x, s16 y) {
     *(s16 *)(a + 0x2C) = 0;
 }
 
-void func_8001CC3C(u8 *o, void *p, s16 x, s16 y) {
-    func_8001CF48(o);
+void InitSpriteKind3(u8 *o, void *p, s16 x, s16 y) {
+    ResetSprite(o);
     *(s16 *)(o + 2) = 3;
     *(s16 *)(o + 0x28) = x;
     *(s16 *)(o + 0x2A) = y;
@@ -5245,8 +5247,8 @@ void func_8001CC3C(u8 *o, void *p, s16 x, s16 y) {
     *(s16 *)(o + 0x2C) = 0;
 }
 
-void func_8001CCA0(u8 *a, s32 v, s16 x, s16 y) {
-    func_8001CF48();
+void InitSpriteKind9(u8 *a, s32 v, s16 x, s16 y) {
+    ResetSprite();
     *(s16 *)(a + 2) = 9;
     *(s16 *)(a + 0x28) = x;
     *(s16 *)(a + 0x2A) = y;
@@ -5255,7 +5257,7 @@ void func_8001CCA0(u8 *a, s32 v, s16 x, s16 y) {
 }
 
 void func_8001CD04(u8 *o, void *p) {
-    func_8001CF48(o);
+    ResetSprite(o);
     *(s16 *)(o + 2) = 4;
     *(void **)(o + 0x20) = p;
     *(s16 *)(o + 0xE) = 0;
@@ -5264,7 +5266,7 @@ void func_8001CD04(u8 *o, void *p) {
 }
 
 void func_8001CD50(u8 *a, s32 v) {
-    func_8001CF48();
+    ResetSprite();
     *(s16 *)(a + 2) = 5;
     *(s32 *)(a + 0x20) = v;
     *(s16 *)(a + 0xE) = 0;
@@ -5273,7 +5275,7 @@ void func_8001CD50(u8 *a, s32 v) {
 }
 
 void func_8001CD9C(u8 *o, void *p) {
-    func_8001CF48(o);
+    ResetSprite(o);
     *(s16 *)(o + 2) = 6;
     *(void **)(o + 0x20) = p;
     *(s16 *)(o + 0xE) = 0;
@@ -5281,34 +5283,34 @@ void func_8001CD9C(u8 *o, void *p) {
     *(s16 *)(o + 0x2C) = 0;
 }
 
-void func_8001CDE8(u8 *a, s32 v) {
-    func_8001CF48();
+void InitSpriteKind7(u8 *a, s32 v) {
+    ResetSprite();
     *(s16 *)(a + 2) = 7;
     *(s32 *)(a + 0x20) = v;
 }
 
-void func_8001CE28(u8 *o, void *p) {
-    func_8001CF48(o);
+void InitTextSprite(u8 *o, void *p) {
+    ResetSprite(o);
     *(s16 *)(o + 2) = 8;
     *(void **)(o + 0x20) = p;
 }
 
-void func_8001CE68(u8 *a, s32 v) {
-    func_8001CF48();
+void InitNumberSprite(u8 *a, s32 v) {
+    ResetSprite();
     *(s16 *)(a + 2) = 8;
     a[0x27] = 0xBA;
     *(s32 *)(a + 0x20) = v;
     *(s32 *)(a + 4) = *(s32 *)(a + 4) | 0x400000;
 }
 
-void func_8001CEC0(u8 *o, void *p) {
-    func_8001CF48(o);
+void InitSpriteKindA(u8 *o, void *p) {
+    ResetSprite(o);
     *(s16 *)(o + 2) = 0xA;
     *(void **)(o + 0x20) = p;
 }
 
-void func_8001CF00(u8 *p) {
-    func_8001CF48();
+void InitNullSprite(u8 *p) {
+    ResetSprite();
     *(s16 *)(p + 2) = 0xB;
 }
 
@@ -5316,7 +5318,7 @@ void func_8001CF30(u8 *a) {
     *(s32 *)(a + 0x4) = ((*(s32 *)(a + 0x4) & 0xffffffbf) | 0x1000);
 }
 
-void func_8001CF48(u8 *a) {
+void ResetSprite(u8 *a) {
     *(s16 *)(a + 0) = 2;
     *(s16 *)(a + 0x1C) = 0x1000;
     *(s16 *)(a + 0x1A) = 0x1000;
@@ -5344,10 +5346,10 @@ void func_8001CF48(u8 *a) {
 }
 
 s32 func_8001CFB8(void) {
-    return func_8001CFDC(0, 4);
+    return AllocModelInRange(0, 4);
 }
 
-s32 func_8001CFDC(s32 a, s32 b) {
+s32 AllocModelInRange(s32 a, s32 b) {
     u8 *w = (u8 *)&D_800AF630;
     s32 off;
     if ((u32)a < 0xC0) {
@@ -5365,10 +5367,10 @@ s32 func_8001CFDC(s32 a, s32 b) {
 }
 
 s32 func_8001D050(void) {
-    return func_8001D074(0, 4);
+    return AllocSpriteInRange(0, 4);
 }
 
-s32 func_8001D074(s32 a, s32 b) {
+s32 AllocSpriteInRange(s32 a, s32 b) {
     u8 *w = (u8 *)&D_800AF630;
     s32 off;
     if ((u32)a < 0x100) {
@@ -5385,27 +5387,27 @@ s32 func_8001D074(s32 a, s32 b) {
     return 0;
 }
 
-void func_8001D0E8(u8 *a, s32 b, s32 c) {
+void SetModelCullBox(u8 *a, s32 b, s32 c) {
     *(s16 *)(a + 0x28) = b;
     *(s16 *)(a + 0x2a) = c;
 }
 
-void func_8001D0F4(u32 *p) {
+void PartShowAll(u32 *p) {
     while (*p != 0) {
         *p &= 0x80FFFFFF;
         p++;
     }
 }
 
-void func_8001D130(s32 a, s32 b) {
+void PartShow(s32 a, s32 b) {
     *(s32 *)((b << 2) + a) = (*(s32 *)((b << 2) + a) & 0x80ffffff);
 }
 
-void func_8001D150(u32 *p, s32 i) {
+void PartHide(u32 *p, s32 i) {
     p[i] |= 0x1000000;
 }
 
-void func_8001D16C(u8 *a, u32 *x) {
+void AppendModelChain(u8 *a, u32 *x) {
     u32 *p = (u32 *)(a + 0x80);
     if (*p & 0x80FFFFFF) {
         do {
@@ -5416,14 +5418,14 @@ void func_8001D16C(u8 *a, u32 *x) {
     *x = 0;
 }
 
-void func_8001D388(u8 *a, s32 *x);
+void DrawSprite(u8 *a, s32 *x);
 extern u8 D_800B5CB8[];
 extern u8 D_800B5D28[];
 extern u8 D_800B60A8[];
 extern u8 D_800B6968[];
 extern u8 D_800B7768[];
 
-void func_8001D1C4(void) {
+void DrawAllSprites(void) {
     s32 x;
     u8 f;
     u8 *p;
@@ -5432,46 +5434,46 @@ void func_8001D1C4(void) {
     x = 0;
     f = *q;
     for (p = q - 0x3E39; p < q - 0x3D59; p += 0x38) {
-        func_8001D388(p, &x);
+        DrawSprite(p, &x);
     }
     if (!(f & 4)) {
         for (p = D_800B5CB8; p < D_800B5CB8 + 0x70; p += 0x38) {
-            func_8001D388(p, &x);
+            DrawSprite(p, &x);
         }
     }
     if (!(f & 0x10)) {
         for (p = D_800B5D28; p < D_800B5D28 + 0x380; p += 0x38) {
-            func_8001D388(p, &x);
+            DrawSprite(p, &x);
         }
     }
     if (!(f & 0x20)) {
         for (p = D_800B60A8; p < D_800B60A8 + 0x8C0; p += 0x38) {
-            func_8001D388(p, &x);
+            DrawSprite(p, &x);
         }
     }
     if (!(f & 0x40)) {
         for (p = D_800B6968; p < D_800B6968 + 0xE00; p += 0x38) {
-            func_8001D388(p, &x);
+            DrawSprite(p, &x);
         }
     }
     if (!(f & 0x80)) {
         for (p = D_800B7768; p < D_800B7768 + 0x1C70; p += 0x38) {
-            func_8001D388(p, &x);
+            DrawSprite(p, &x);
         }
     }
 }
 
-void func_8001D388(u8 *a, s32 *x) {
+void DrawSprite(u8 *a, s32 *x) {
     u16 k;
     if (*(s32 *)(a + 4) >= 0 && *(s32 *)(a + 0x20) != 0 && *(u16 *)a == 2) {
         k = *(u16 *)(a + 2);
         if (k < 0xB) {
-            PS1_FN(D_8006351C[k])(a, x);
+            PS1_FN(g_SpriteDrawFuncs[k])(a, x);
         }
     }
 }
 
-void func_8001D70C(u8 *o);
+void SetSpriteMatrix2D(u8 *o);
 void func_8001D8C4(u8 *o, u8 *s, u8 *prim);
 
 void func_8001D3FC(u8 *o) {
@@ -5496,7 +5498,7 @@ void func_8001D3FC(u8 *o) {
         tp = (fl >> 24) & 3;
         sh = 2 - tp;
         ot = g_WorldOtTable[D_800B9A02] + z;
-        func_8001D70C(o);
+        SetSpriteMatrix2D(o);
         tb = tp << 7;
         do {
             p = (u8 *)g_PrimNext;
@@ -5558,7 +5560,7 @@ void func_8001D3FC(u8 *o) {
     }
 }
 
-void func_8001D70C(u8 *o) {
+void SetSpriteMatrix2D(u8 *o) {
     Mtx m;
     Mtx s;
     s32 pad[2];
@@ -5624,9 +5626,9 @@ void func_8001D8C4(u8 *o, u8 *s, u8 *prim) {
 
 extern MATRIX D_800A63F0;
 extern void SetLightMatrix(MATRIX *m);
-extern void func_8001E094(u8 *o);
-extern void func_8001E378(u8 *o);
-s32 func_8001E668(u8 *o, u8 *s, u8 *prim, s32 *flag);
+extern void SetSpriteMatrixLinked(u8 *o);
+extern void SetSpriteMatrix(u8 *o);
+s32 ProjectSpriteQuad(u8 *o, u8 *s, u8 *prim, s32 *flag);
 
 void func_8001DA34(u8 *o) {
     u8 pad0[0x20];
@@ -5682,9 +5684,9 @@ void func_8001DA34(u8 *o) {
         }
     }
     if (*(u8 **)(o + 0x34) != 0) {
-        func_8001E094(o);
+        SetSpriteMatrixLinked(o);
     } else {
-        func_8001E378(o);
+        SetSpriteMatrix(o);
     }
     do {
         prim = (u8 *)g_PrimNext;
@@ -5744,7 +5746,7 @@ void func_8001DA34(u8 *o) {
             prim[5] = r[1];
             prim[6] = r[2];
         }
-        z = func_8001E668(o, s, prim, &flag);
+        z = ProjectSpriteQuad(o, s, prim, &flag);
         if (!(flag & ~0x1000)) {
             z++;
             w = *(u16 *)(o + 0x2C);
@@ -5766,7 +5768,7 @@ void func_8001DA34(u8 *o) {
     } while ((f & 0xFF) != 0xFF);
 }
 
-void func_8001E094(u8 *o) {
+void SetSpriteMatrixLinked(u8 *o) {
     Mtx s;
     Mtx m;
     Mtx *g = &D_800AF648;
@@ -5810,7 +5812,7 @@ void func_8001E094(u8 *o) {
     gte_SetTransMatrix(&m);
 }
 
-void func_8001E378(u8 *o) {
+void SetSpriteMatrix(u8 *o) {
     Mtx s;
     Mtx m;
     Mtx *d;
@@ -5856,7 +5858,7 @@ void func_8001E378(u8 *o) {
     gte_SetTransMatrix(&m);
 }
 
-s32 func_8001E668(u8 *o, u8 *s, u8 *prim, s32 *flag) {
+s32 ProjectSpriteQuad(u8 *o, u8 *s, u8 *prim, s32 *flag) {
     SVec v[4];
     struct { s32 flag2; s32 otz; } t;
     v[0].vx = *(u16 *)(o + 0x2E) + *(u16 *)(s + 8);
@@ -5896,7 +5898,7 @@ typedef struct {
 } GsSPRITE;
 extern void GsSortFastSprite(GsSPRITE *s, OtEnt *ot, u16 pri);
 
-void func_8001E7E0(u8 *o) {
+void DrawSpriteFast(u8 *o) {
     GsSPRITE s;
     u32 pri;
     u8 *p;
@@ -5914,7 +5916,7 @@ void func_8001E7E0(u8 *o) {
         by = *(u16 *)(o + 0xA);
         tp = (attr >> 24) & 3;
         sh = 2 - tp;
-        ot = &D_800A6518[D_800B9A02];
+        ot = &g_WorldOt[D_800B9A02];
         do {
             f = *(u16 *)p;
             x = *(u16 *)(o + 0x28) + (*(s16 *)(p + 4) >> sh);
@@ -5947,7 +5949,7 @@ void func_8001E7E0(u8 *o) {
     }
 }
 
-void func_8001F730(u8 *a, u8 *c, u8 *p);
+void RotateQuadAround(u8 *a, u8 *c, u8 *p);
 
 void func_8001EA14(u8 *o) {
     Mtx m;
@@ -6078,7 +6080,7 @@ void func_8001EA14(u8 *o) {
                 *(u16 *)(prim + 0x20) = *(u16 *)(prim + 0x10);
                 *(u16 *)(prim + 0x22) = *(u16 *)(prim + 0x1A);
                 if (*(u32 *)(o + 4) & 0x08000000) {
-                    func_8001F730(o + 0x10, (u8 *)sxy, prim);
+                    RotateQuadAround(o + 0x10, (u8 *)sxy, prim);
                 }
                 *(u32 *)prim = (*(u32 *)prim & 0xFF000000) | (ot[pri] & 0xFFFFFF);
                 ot[pri] = (ot[pri] & 0xFF000000) | ((u32)prim & 0xFFFFFF);
@@ -6091,7 +6093,7 @@ void func_8001EA14(u8 *o) {
 
 extern void ScaleMatrix();
 extern void GsGetLs();
-s32 func_80021174();
+s32 IsPointOnScreen();
 extern u8 *D_80072784;
 
 void func_8001EFE0(u8 *o) {
@@ -6143,7 +6145,7 @@ void func_8001EFE0(u8 *o) {
     if (p == NULL) {
         return;
     }
-    if (func_80021174(*(s32 *)(o + 0x28), co.workm.t) == 0) {
+    if (IsPointOnScreen(*(s32 *)(o + 0x28), co.workm.t) == 0) {
         return;
     }
     gte_SetRotMatrix(&ls);
@@ -6264,7 +6266,7 @@ void func_8001EFE0(u8 *o) {
             *(u16 *)(prim + 0x20) = *(u16 *)(prim + 0x10);
             *(u16 *)(prim + 0x22) = *(u16 *)(prim + 0x1A);
             if (*(u32 *)(o + 4) & 0x8000000) {
-                func_8001F730(o + 0x10, (u8 *)&c, prim);
+                RotateQuadAround(o + 0x10, (u8 *)&c, prim);
             }
             addPrim(ot + z, prim);
         }
@@ -6272,7 +6274,7 @@ void func_8001EFE0(u8 *o) {
     } while ((f & 0xFF) != 0xFF);
 }
 
-void func_8001F730(u8 *a, u8 *c, u8 *p) {
+void RotateQuadAround(u8 *a, u8 *c, u8 *p) {
     MATRIX m;
     SVec v[4];
     LVec r[4];
@@ -6315,7 +6317,7 @@ void func_8001F730(u8 *a, u8 *c, u8 *p) {
 void func_8001F974(void) {
 }
 
-void func_8001F97C(u8 *o) {
+void UpdateModelMatrix(u8 *o) {
     func_80020DA4(o + 0x10, o + 0x34);
     if (*(u16 *)(o + 0x2C) & 0x10) {
         func_80020F34(o + 0x34, o + 0x18);
@@ -6332,9 +6334,9 @@ extern u8 D_800AFBF0[];
 extern u8 D_800B0430[];
 extern u8 D_800B0C70[];
 extern u8 D_800B3DF0[];
-void func_8001FB8C(u8 *o, s32 *cnt);
+void DrawModel(u8 *o, s32 *cnt);
 
-void func_8001F9F8(void) {
+void DrawAllModels(void) {
     u8 f = D_800B9A11;
     s32 cnt;
     s32 i;
@@ -6342,69 +6344,69 @@ void func_8001F9F8(void) {
 
     cnt = 0;
     for (i = 0, p = D_800AF8D8; i < 4; i++, p += 0x84) {
-        func_8001FB8C(p, &cnt);
+        DrawModel(p, &cnt);
     }
     if (!(f & 2)) {
         for (i = 0, p = D_800AF8D8 + 0x210; i < 1; i++, p += 0x84) {
-            func_8001FB8C(p, &cnt);
+            DrawModel(p, &cnt);
         }
     }
     if (!(f & 8)) {
         for (i = 0, p = D_800AFB6C; i < 1; i++, p += 0x84) {
-            func_8001FB8C(p, &cnt);
+            DrawModel(p, &cnt);
         }
     }
     if (!(f & 0x10)) {
         for (i = 0, p = D_800AFBF0; i < 16; i++, p += 0x84) {
-            func_8001FB8C(p, &cnt);
+            DrawModel(p, &cnt);
         }
     }
     if (!(f & 0x20)) {
         for (i = 0, p = D_800B0430; i < 16; i++, p += 0x84) {
-            func_8001FB8C(p, &cnt);
+            DrawModel(p, &cnt);
         }
     }
     if (!(f & 0x40)) {
         for (i = 0, p = D_800B0C70; i < 96; i++, p += 0x84) {
-            func_8001FB8C(p, &cnt);
+            DrawModel(p, &cnt);
         }
     }
     if (!(f & 0x80)) {
         for (i = 0, p = D_800B3DF0; i < 58; i++, p += 0x84) {
-            func_8001FB8C(p, &cnt);
+            DrawModel(p, &cnt);
         }
     }
 }
 
-void func_8001FB8C(u8 *o, s32 *cnt) {
+void DrawModel(u8 *o, s32 *cnt) {
     if (*(s32 *)(o + 4) >= 0 && *(u16 *)o == 1 && *(u16 *)(o + 2) < 9) {
-        PS1_FN(D_80063500[*(u16 *)(o + 2)])(o);
+        PS1_FN(g_ModelDrawFuncs[*(u16 *)(o + 2)])(o);
         (*cnt)++;
     }
 }
 
 extern s32 D_80062BA8;
-extern MATRIX D_80074818[];
-extern MATRIX D_80075018[];
+extern MATRIX g_PartLightMatrices[];
+extern MATRIX g_PartScreenMatrices[];
 extern void GsGetLws(void *coord, MATRIX *lw, MATRIX *ls);
 extern void GsLinkObject4(u32 tmd, void *obj, s32 n);
 extern void GsSetLightMatrix2(MATRIX *m);
 extern void GsSetLsMatrix(MATRIX *m);
 extern void GsSortObject4(void *obj, OtEnt *ot, s32 shift, s32 scratch);
 extern void GsSortObject5(void *obj, OtEnt *ot, s32 shift, s32 scratch);
-extern s32 func_80020248();
+extern s32 CalcPartMatrices();
 extern void func_80020598(u32 *parts, u32 pose, MATRIX *lw, MATRIX *ls);
-extern s32 func_80020A28();
+extern s32 CalcPartMatricesPacked();
 extern void func_800CAE80();
-void func_80021008(u8 *a);
-void func_80021050();
-void func_8002109C(s32 a, s16 **pp);
-void func_80021120();
-s32 func_80021174();
-void func_800243EC();
-void func_80027BF0();
+void ApplyModelLights(u8 *a);
+void RestoreLights();
+void ApplyPartBackColor(s32 a, s16 **pp);
+void RestoreAmbientNextPart();
+s32 IsPointOnScreen();
+void SortTransObject();
+void SortPresetObjectG();
 
-void func_8001FC08(u8 *o) {
+void DrawTmdModel(u8 *o) {
     struct { u32 attr; void *coord2; u32 tmd; u32 packet; u32 id; } obj;
     MATRIX lw;
     MATRIX ls;
@@ -6426,7 +6428,7 @@ void func_8001FC08(u8 *o) {
     u32 t;
     u32 m;
 
-    ot = &D_800A6518[D_800B9A02];
+    ot = &g_WorldOt[D_800B9A02];
     attr = *(u32 *)(o + 4);
     kind = *(u16 *)(o + 2);
     flags = *(u16 *)(o + 0x2C);
@@ -6471,23 +6473,23 @@ void func_8001FC08(u8 *o) {
     if (pose == 0) {
         return;
     }
-    if (func_80021174(*(s32 *)(o + 0x28), c.workm.t) == 0) {
+    if (IsPointOnScreen(*(s32 *)(o + 0x28), c.workm.t) == 0) {
         return;
     }
     if (kind == 1 || kind == 6) {
-        h = D_800A5BD0 + *(u16 *)(o + 0x2E) * 0x14;
+        h = g_PresetObjs + *(u16 *)(o + 0x2E) * 0x14;
         obj.attr = attr;
         obj.id = 0;
     } else {
         obj.attr = attr;
     }
     if (d != 0) {
-        func_80021008(d);
+        ApplyModelLights(d);
     }
     if (!(pose & 0x1000000) && !(flags & 0x40)) {
-        if (func_80020248(parts, pose, &lw, &ls, attr & 0x40) == 0) {
-            lp = D_80074818;
-            sp = D_80075018;
+        if (CalcPartMatrices(parts, pose, &lw, &ls, attr & 0x40) == 0) {
+            lp = g_PartLightMatrices;
+            sp = g_PartScreenMatrices;
         } else {
             lp = (MATRIX *)0x1F800000;
             sp = (MATRIX *)0x1F8000E0;
@@ -6502,27 +6504,27 @@ void func_8001FC08(u8 *o) {
                 }
                 GsSetLsMatrix(sp);
                 if (bg.p != 0) {
-                    func_8002109C(bg.n, &bg.p);
+                    ApplyPartBackColor(bg.n, &bg.p);
                 }
                 if (kind == 0) {
                     GsSortObject4(&obj, ot, 0, scratch);
                 } else if (kind == 5) {
-                    func_800243EC(&obj, ot, 0);
+                    SortTransObject(&obj, ot, 0);
                 }
             }
             if (bg.p != 0) {
-                func_80021120(&bg.n, bg.p);
+                RestoreAmbientNextPart(&bg.n, bg.p);
             }
         }
     } else {
         m = pose & ~0x1000000;
         if (flags & 0x40) {
             func_80020598(parts, m, &lw, &ls);
-            lp = D_80074818;
-            sp = D_80075018;
-        } else if (func_80020A28(parts, m, &lw, &ls, attr & 0x40) == 0) {
-            lp = D_80074818;
-            sp = D_80075018;
+            lp = g_PartLightMatrices;
+            sp = g_PartScreenMatrices;
+        } else if (CalcPartMatricesPacked(parts, m, &lw, &ls, attr & 0x40) == 0) {
+            lp = g_PartLightMatrices;
+            sp = g_PartScreenMatrices;
         } else {
             lp = (MATRIX *)0x1F800000;
             sp = (MATRIX *)0x1F8000E0;
@@ -6549,13 +6551,13 @@ void func_8001FC08(u8 *o) {
                 }
                 GsSetLsMatrix(sp);
                 if (!(flags & 0x40) && bg.p != 0) {
-                    func_8002109C(bg.n, &bg.p);
+                    ApplyPartBackColor(bg.n, &bg.p);
                 }
                 if (kind == 0) {
                     GsSortObject4(&obj, ot, 0, scratch);
                 } else if (kind == 1) {
                     if (cnt < 2) {
-                        func_80027BF0(&obj, ot, 0);
+                        SortPresetObjectG(&obj, ot, 0);
                         cnt++;
                     } else {
                         GsSortObject5(&obj, ot, 0, scratch);
@@ -6563,20 +6565,20 @@ void func_8001FC08(u8 *o) {
                 } else if (kind == 6) {
                     func_800CAE80(&obj, ot, 0);
                 } else if (kind == 5) {
-                    func_800243EC(&obj, ot, 0);
+                    SortTransObject(&obj, ot, 0);
                 }
             }
             if (!(flags & 0x40) && bg.p != 0) {
-                func_80021120(&bg.n, bg.p);
+                RestoreAmbientNextPart(&bg.n, bg.p);
             }
         }
     }
     if (d != 0) {
-        func_80021050(d);
+        RestoreLights(d);
     }
 }
 
-s32 func_80020248(s32 *list, u8 *p, MATRIX *base, MATRIX *parent, s32 noLocal) {
+s32 CalcPartMatrices(s32 *list, u8 *p, MATRIX *base, MATRIX *parent, s32 noLocal) {
     MATRIX m;
     s32 n;
     s32 ret;
@@ -6590,8 +6592,8 @@ s32 func_80020248(s32 *list, u8 *p, MATRIX *base, MATRIX *parent, s32 noLocal) {
         n++;
     }
     if (n >= 8) {
-        lm = D_80074818;
-        wm = D_80075018;
+        lm = g_PartLightMatrices;
+        wm = g_PartScreenMatrices;
     } else {
         lm = (MATRIX *)0x1F800000;
         wm = (MATRIX *)0x1F8000E0;
@@ -6649,7 +6651,7 @@ void func_80020598(u32 *list, u32 pose, MATRIX *a, MATRIX *b) {
     u16 s;
 
     i = 0;
-    o = D_80074818;
+    o = g_PartLightMatrices;
     while (*list != 0) {
         switch (i) {
         case 0:
@@ -6658,7 +6660,7 @@ void func_80020598(u32 *list, u32 pose, MATRIX *a, MATRIX *b) {
             v.vy = ((w >> 8) & 0xFF) | (w & 0xF) << 8;
             v.vz = ((w >> 16) & 0xFF) | (w & 0xF0) << 4;
             func_80020DA4((u8 *)&v, (u8 *)&m);
-            ((void (*)())func_80012558)(&m, 0x800); /* MATCH-TRICK: the original calls it out of line (its caller sat in another source file); the cast stops GCC inlining it */
+            ((void (*)())RotateMatrixY)(&m, 0x800); /* MATCH-TRICK: the original calls it out of line (its caller sat in another source file); the cast stops GCC inlining it */
             m.t[0] = (s8)((u8 *)pose)[0];
             m.t[1] = (s8)((u8 *)pose)[1];
             m.t[2] = (s8)((u8 *)pose)[2];
@@ -6729,7 +6731,7 @@ void func_80020598(u32 *list, u32 pose, MATRIX *a, MATRIX *b) {
     }
 }
 
-s32 func_80020A28(s32 *list, u8 *d, MATRIX *m1, MATRIX *m2, s32 f) {
+s32 CalcPartMatricesPacked(s32 *list, u8 *d, MATRIX *m1, MATRIX *m2, s32 f) {
     MATRIX m;
     u16 r[4];
     s32 n = 0;
@@ -6742,8 +6744,8 @@ s32 func_80020A28(s32 *list, u8 *d, MATRIX *m1, MATRIX *m2, s32 f) {
         n++;
     }
     if (n >= 8) {
-        a = D_80074818;
-        b = D_80075018;
+        a = g_PartLightMatrices;
+        b = g_PartScreenMatrices;
     } else {
         a = (MATRIX *)0x1F800000;
         b = (MATRIX *)0x1F8000E0;
@@ -6791,13 +6793,13 @@ s32 func_80020A28(s32 *list, u8 *d, MATRIX *m1, MATRIX *m2, s32 f) {
 /* Angles are 12-bit (0x1000 = a full turn). The table holds one word per angle: the low half is sin and the high half is
    cos, 4.12 fixed point. Every entry is read as a whole word and split into s16 halves; the compiler then folds some of
    the splits into half loads, which is why the code reads x as a word, z as two halves and y as both (r290). */
-extern s32 *D_800636D4;
+extern s32 *g_SinCosTable;
 
 /* Builds a 3x3 rotation matrix (9 s16, 4.12) from three 12-bit angles {x, y, z} */
 void func_80020DA4(u8 *p0, u8 *p1) {
     u16 *angles = (u16 *)p0;
     s16 *m = (s16 *)p1;
-    s32 *tab = D_800636D4;
+    s32 *tab = g_SinCosTable;
     s32 xv, yv, zv;
     s16 xs, ys, zs;
     s16 xc, yc, zc;
@@ -6830,19 +6832,19 @@ void func_80020DA4(u8 *p0, u8 *p1) {
    stays asm and counts as done (r283, docs/phase1_rulings.md #1). */
 INCLUDE_ASM("asm/nonmatchings/code_800123F0", func_80020F34);
 
-void func_80021008(u8 *a) {
-    func_80028620(0, (LightDir *)a);
-    func_80028620(1, (LightDir *)(a + 0x10));
-    func_80028620(2, (LightDir *)(a + 0x20));
+void ApplyModelLights(u8 *a) {
+    ApplyLight(0, (LightDir *)a);
+    ApplyLight(1, (LightDir *)(a + 0x10));
+    ApplyLight(2, (LightDir *)(a + 0x20));
 }
 
-void func_80021050(void) {
-    func_80028620(0, &D_800A5E88[0]);
-    func_80028620(1, &D_800A5E88[1]);
-    func_80028620(2, &D_800A5E88[2]);
+void RestoreLights(void) {
+    ApplyLight(0, &g_Lights[0]);
+    ApplyLight(1, &g_Lights[1]);
+    ApplyLight(2, &g_Lights[2]);
 }
 
-void func_8002109C(s32 a, s16 **pp) {
+void ApplyPartBackColor(s32 a, s16 **pp) {
     s16 *p = *pp;
     if (p[3] == -2) {
         SetBackColor(p[0], p[1], p[2]);
@@ -6852,19 +6854,23 @@ void func_8002109C(s32 a, s16 **pp) {
     }
 }
 
-void func_80021120(s32 *p) {
-    GsSetAmbient(D_800AE7E0, D_800AE7E2, D_800AE7E4);
+void RestoreAmbientNextPart(s32 *p) {
+    GsSetAmbient(g_AmbientColor, D_800AE7E2, D_800AE7E4);
     *p += 1;
 }
 
-s32 func_80021174(s32 wh, s32 *v, s32 unused) {
+s32 IsPointOnScreen(wh, v, unused)
+s32 wh;
+s32 *v;
+s32 unused;
+{
     struct { s16 sx, sy; s32 flag; s32 z; } t;
     s32 w, h;
     if (wh == 0x7FFF7FFF) {
         return 1;
     }
-    gte_SetRotMatrix(&D_800AE688);
-    gte_SetTransMatrix(&D_800AE688);
+    gte_SetRotMatrix(&g_ViewMatrix);
+    gte_SetTransMatrix(&g_ViewMatrix);
     gte_ldlv0(v);
     gte_rtps();
     gte_stsxy(&t.sx);
@@ -6907,7 +6913,7 @@ void func_80021284(Obj21284 *o) {
     s32 i;
     u8 code;
     g_PrimNext = (s32)(p + 6);
-    func_8001D70C((u8 *)o);
+    SetSpriteMatrix2D((u8 *)o);
     a.vx = o->x;
     a.vy = o->y;
     a.vz = o->zz;
@@ -6965,9 +6971,9 @@ void func_80021284(Obj21284 *o) {
     }
 }
 
-extern void func_800226C0();
+extern void EmitShapePrims();
 #ifdef PC
-/* PORT NOTE: func_800226C0 reads its local n before setting it; on the console n is the low half of the
+/* PORT NOTE: EmitShapePrims reads its local n before setting it; on the console n is the low half of the
    caller's s2, which its three callers hold as below (set before each call) */
 static u32 s2_800226C0;
 #endif
@@ -6992,9 +6998,9 @@ void func_800215F4(u8 *o) {
     ot = g_WorldOtTable[D_800B9A02];
     d = *(PtSet **)(o + 0x20);
     if (*(s32 *)(o + 0x34) != 0) {
-        func_8001E094(o);
+        SetSpriteMatrixLinked(o);
     } else {
-        func_8001E378(o);
+        SetSpriteMatrix(o);
     }
     if (*(s32 *)(o + 4) & 0x100) {
         v[1].vx = 16;
@@ -7132,7 +7138,7 @@ void func_800215F4(u8 *o) {
 #ifdef PC
             s2_800226C0 = (u32)ot;
 #endif
-            func_800226C0(o, (u8 *)d, out, ot);
+            EmitShapePrims(o, (u8 *)d, out, ot);
         }
     } else {
         for (i = 0; i < 12; i += 3) {
@@ -7152,7 +7158,7 @@ void func_800215F4(u8 *o) {
 #ifdef PC
         s2_800226C0 = (u32)ot;
 #endif
-        func_800226C0(o, (u8 *)d, out, ot + w);
+        EmitShapePrims(o, (u8 *)d, out, ot + w);
     }
 }
 
@@ -7269,7 +7275,7 @@ void func_80021D38(u8 *o) {
 #ifdef PC
     s2_800226C0 = (u32)ot;
 #endif
-    func_800226C0(o, m, sxy, &ot[n]);
+    EmitShapePrims(o, m, sxy, &ot[n]);
 }
 
 extern void ScaleMatrix();
@@ -7320,7 +7326,7 @@ void func_800221A8(u8 *o) {
     if (p == 0) {
         return;
     }
-    if (((s32 (*)())func_80021174)(*(s32 *)(o + 0x28), c.workm.t) == 0) { /* MATCH-TRICK: the call passes no third argument */
+    if (IsPointOnScreen(*(s32 *)(o + 0x28), c.workm.t) == 0) {
         return;
     }
     ot = g_WorldOtTable[w->frame];
@@ -7396,12 +7402,12 @@ void func_800221A8(u8 *o) {
 #ifdef PC
     s2_800226C0 = (u32)p;
 #endif
-    func_800226C0(o, p, sxy, ot + z);
+    EmitShapePrims(o, p, sxy, ot + z);
 }
 
 typedef struct { s16 x, y; } XY226C0;
 
-void func_800226C0(u8 *a, u8 *c, XY226C0 *v, u32 *ot) {
+void EmitShapePrims(u8 *a, u8 *c, XY226C0 *v, u32 *ot) {
     XY226C0 b[12];
     u32 f;
     s32 sel;
@@ -7643,7 +7649,7 @@ void func_80023138(u8 *a, u8 *c, u8 *v, u32 *ot) {
     }
 }
 
-void func_800233CC(u8 *o, s32 r0) {
+void SetShapeCircle(u8 *o, s32 r0) {
     u16 r = r0;
     s32 i;
     for (i = 0; i < 4; i++) {
@@ -7662,7 +7668,7 @@ void func_800233CC(u8 *o, s32 r0) {
     }
 }
 
-void func_800234E4(u8 *o, u16 r, u16 a) {
+void SetShapeCircleAt(u8 *o, u16 r, u16 a) {
     s32 i;
     for (i = 0; i < 12; i++) {
         *(s16 *)(o + i * 4 + 0x10) = (rsin(a + i * 0x155) * r) >> 12;
@@ -7674,7 +7680,7 @@ typedef struct { unsigned addr : 24; unsigned len : 8; } Tag23570;
 typedef struct { u32 tag; u8 r, g, b, code; s16 x, y, w, h; } Tile23570;
 typedef struct { u8 r, g, b, end; u16 x, y, w, h; } Rect23570;
 
-void func_80023570(u8 *a) {
+void DrawTileList(u8 *a) {
     Rect23570 *s = *(Rect23570 **)(a + 0x20);
     Tile23570 *p = (Tile23570 *)g_PrimNext;
     u32 f = *(u32 *)(a + 4);
@@ -7714,7 +7720,7 @@ void func_80023570(u8 *a) {
 
 typedef union { s32 w; struct { s16 x, y; } s; } Xy2374C;
 
-void func_8002374C(u8 *a) {
+void DrawPrimList2D(u8 *a) {
     u8 *e;
     s32 dx, dy;
     u32 *ot;
@@ -7928,7 +7934,7 @@ extern u16 D_800636D8[];
 extern u16 D_80063770[];
 extern u16 D_80063818[];
 
-s16 func_80024054(u8 *p, s16 *q) {
+s16 SjisToGlyphs(u8 *p, s16 *q) {
     s32 n;
     u8 c;
     u8 b;
@@ -7987,7 +7993,7 @@ end:
     return n;
 }
 
-extern s16 D_80063870[];
+extern s16 g_Pow10[];
 
 void func_800241C0(s32 v0, s16 *d, s32 n0) {
     s16 v = v0;
@@ -8005,7 +8011,7 @@ void func_800241C0(s32 v0, s16 *d, s32 n0) {
             *d = D_800636D8[0];
         }
         t = v;
-        p = D_80063870[i];
+        p = g_Pow10[i];
         q = t / p;
         if (q != 0) {
             f++;
@@ -8021,7 +8027,7 @@ void func_800241C0(s32 v0, s16 *d, s32 n0) {
 extern u16 D_80063858[];
 extern u16 D_8006386C;
 
-void func_800242D0(s32 x, s16 *p, s32 flags) {
+void FormatDigitGlyphs(s32 x, s16 *p, s32 flags) {
     s16 i;
     s16 q;
     s16 d;
@@ -8035,7 +8041,7 @@ void func_800242D0(s32 x, s16 *p, s32 flags) {
         i = 4;
     }
     for (i--; i >= 0; i--) {
-        q = v / (d = D_80063870[i]);
+        q = v / (d = g_Pow10[i]);
         if (q != 0) {
             *p = D_80063858[q];
             v -= q * d;
@@ -8050,33 +8056,33 @@ void func_800242D0(s32 x, s16 *p, s32 flags) {
     *p = -1;
 }
 
-void func_800243EC(s32 *p) {
+void SortTransObject(s32 *p) {
     s32 v = *p;
-    D_80078D88 = v;
-    D_800A2B78 = (v >> 0x1C) & 7;
+    g_SortAttr = v;
+    g_SortBlendRate = (v >> 0x1C) & 7;
     if (v & 0x40) {
-        func_80026D64();
+        SortTransObjectUnlit();
         return;
     }
-    func_80024448();
+    SortTransObjectLit();
 }
 
-u8 *func_800249F0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80024BC0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80024DE8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80025000(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_8002528C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80025504(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80025818(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80025A30(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80025CBC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80025EB8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80026128(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_800262D8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80026514(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot, s32 idx);
-u8 *func_800268D0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot, s32 idx);
+u8 *DrawPolyF3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyF4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyF3GradLit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyF4GradLit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyG3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyG4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyG3GradLit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyG4GradLit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyFT3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyFT4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyGT3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyGT4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyG3EnvMap(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot, s32 idx);
+u8 *DrawPolyG4EnvMap(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot, s32 idx);
 
-void func_80024448(u8 *obj, u8 *cam, s32 shift) {
+void SortTransObjectLit(u8 *obj, u8 *cam, s32 shift) {
     s32 *h;
     u8 *p;
     s32 cnt;
@@ -8097,12 +8103,12 @@ void func_80024448(u8 *obj, u8 *cam, s32 shift) {
         switch ((w >> 24) & 0xFC) {
         case 0x20:
             if (flag) {
-                g_PrimNext = (s32)func_80024DE8(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+                g_PrimNext = (s32)DrawPolyF3GradLit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 24;
             } else {
-                g_PrimNext = (s32)func_800249F0(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+                g_PrimNext = (s32)DrawPolyF3Lit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 16;
@@ -8110,47 +8116,47 @@ void func_80024448(u8 *obj, u8 *cam, s32 shift) {
             break;
         case 0x28:
             if (flag) {
-                g_PrimNext = (s32)func_80025000(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+                g_PrimNext = (s32)DrawPolyF4GradLit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 32;
             } else {
-                g_PrimNext = (s32)func_80024BC0(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+                g_PrimNext = (s32)DrawPolyF4Lit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 20;
             }
             break;
         case 0x24:
-            g_PrimNext = (s32)func_80025CBC(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+            g_PrimNext = (s32)DrawPolyFT3Lit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
             n = *(u16 *)p;
             cnt -= n;
             p += n * 24;
             break;
         case 0x2C:
-            g_PrimNext = (s32)func_80025EB8(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+            g_PrimNext = (s32)DrawPolyFT4Lit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
             n = *(u16 *)p;
             cnt -= n;
             p += n * 32;
             break;
         case 0x30:
             if (flag) {
-                g_PrimNext = (s32)func_80025818(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+                g_PrimNext = (s32)DrawPolyG3GradLit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 28;
-            } else if (D_80078D88 & 0x10000) {
-                g_PrimNext = (s32)func_80026514(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4), 0);
+            } else if (g_SortAttr & 0x10000) {
+                g_PrimNext = (s32)DrawPolyG3EnvMap(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4), 0);
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 20;
-            } else if (D_80078D88 & 0x20000) {
-                g_PrimNext = (s32)func_80026514(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4), 1);
+            } else if (g_SortAttr & 0x20000) {
+                g_PrimNext = (s32)DrawPolyG3EnvMap(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4), 1);
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 20;
             } else {
-                g_PrimNext = (s32)func_8002528C(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+                g_PrimNext = (s32)DrawPolyG3Lit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 20;
@@ -8158,35 +8164,35 @@ void func_80024448(u8 *obj, u8 *cam, s32 shift) {
             break;
         case 0x38:
             if (flag) {
-                g_PrimNext = (s32)func_80025A30(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+                g_PrimNext = (s32)DrawPolyG4GradLit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 36;
-            } else if (D_80078D88 & 0x10000) {
-                g_PrimNext = (s32)func_800268D0(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4), 0);
+            } else if (g_SortAttr & 0x10000) {
+                g_PrimNext = (s32)DrawPolyG4EnvMap(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4), 0);
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 24;
-            } else if (D_80078D88 & 0x20000) {
-                g_PrimNext = (s32)func_800268D0(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4), 1);
+            } else if (g_SortAttr & 0x20000) {
+                g_PrimNext = (s32)DrawPolyG4EnvMap(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4), 1);
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 24;
             } else {
-                g_PrimNext = (s32)func_80025504(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+                g_PrimNext = (s32)DrawPolyG4Lit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
                 n = *(u16 *)p;
                 cnt -= n;
                 p += n * 24;
             }
             break;
         case 0x34:
-            g_PrimNext = (s32)func_80026128(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+            g_PrimNext = (s32)DrawPolyGT3Lit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
             n = *(u16 *)p;
             cnt -= n;
             p += n * 28;
             break;
         case 0x3C:
-            g_PrimNext = (s32)func_800262D8(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
+            g_PrimNext = (s32)DrawPolyGT4Lit(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(cam + 4));
             n = *(u16 *)p;
             cnt -= n;
             p += n * 36;
@@ -8195,7 +8201,7 @@ void func_80024448(u8 *obj, u8 *cam, s32 shift) {
     }
 }
 
-u8 *func_800249F0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyF3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -8220,10 +8226,10 @@ u8 *func_800249F0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 *(u32 *)pk = (*e & 0xFFFFFF) | 0x04000000;
                 *e = (u32)pk & 0xFFFFFF;
                 pk += 0x14;
-                if (D_800A2B78 != 0 && (pk[-0xD] & 2)) {
+                if (g_SortBlendRate != 0 && (pk[-0xD] & 2)) {
                     e = ot + (t.z >> shift);
                     pk[3] = 1;
-                    *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                    *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 8;
@@ -8237,7 +8243,7 @@ u8 *func_800249F0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80024BC0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyF4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -8267,10 +8273,10 @@ u8 *func_80024BC0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x05000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 0x18;
-                    if (D_800A2B78 != 0 && (pk[-0x11] & 2)) {
+                    if (g_SortBlendRate != 0 && (pk[-0x11] & 2)) {
                         e = ot + (t.z >> shift);
                         pk[3] = 1;
-                        *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                        *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                         *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                         *e = (u32)pk & 0xFFFFFF;
                         pk += 8;
@@ -8285,7 +8291,7 @@ u8 *func_80024BC0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80024DE8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyF3GradLit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -8317,10 +8323,10 @@ u8 *func_80024DE8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 *(u32 *)pk = (*e & 0xFFFFFF) | 0x06000000;
                 *e = (u32)pk & 0xFFFFFF;
                 pk += 0x1C;
-                if (D_800A2B78 != 0 && (pk[-0x15] & 2)) {
+                if (g_SortBlendRate != 0 && (pk[-0x15] & 2)) {
                     e = ot + (t.z >> shift);
                     pk[3] = 1;
-                    *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                    *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 8;
@@ -8334,7 +8340,7 @@ u8 *func_80024DE8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80025000(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyF4GradLit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -8374,10 +8380,10 @@ u8 *func_80025000(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x08000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 0x24;
-                    if (D_800A2B78 != 0 && (pk[-0x1D] & 2)) {
+                    if (g_SortBlendRate != 0 && (pk[-0x1D] & 2)) {
                         e = ot + (t.z >> shift);
                         pk[3] = 1;
-                        *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                        *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                         *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                         *e = (u32)pk & 0xFFFFFF;
                         pk += 8;
@@ -8392,7 +8398,7 @@ u8 *func_80025000(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_8002528C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyG3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; s32 sz[3]; } t;
     u32 *e;
     u8 *pk;
@@ -8408,7 +8414,7 @@ u8 *func_8002528C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
             gte_stopz(&t.z);
             if (t.z > 0) {
                 gte_stsxy3_g3(pk);
-                if (D_80078D88 & 0x8000) {
+                if (g_SortAttr & 0x8000) {
                     gte_stsz3(&t.sz[0], &t.sz[1], &t.sz[2]);
                     if (t.sz[0] > t.sz[1]) {
                         m = t.sz[0];
@@ -8434,10 +8440,10 @@ u8 *func_8002528C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 *(u32 *)pk = (*e & 0xFFFFFF) | 0x06000000;
                 *e = (u32)pk & 0xFFFFFF;
                 pk += 0x1C;
-                if (D_800A2B78 != 0 && (pk[-0x15] & 2)) {
+                if (g_SortBlendRate != 0 && (pk[-0x15] & 2)) {
                     e = ot + (t.z >> shift);
                     pk[3] = 1;
-                    *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                    *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 8;
@@ -8451,7 +8457,7 @@ u8 *func_8002528C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80025504(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyG4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; s32 sz[4]; } t;
     u32 *e;
     u8 *pk;
@@ -8473,7 +8479,7 @@ u8 *func_80025504(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 gte_stflg(&t.flag);
                 if (!(t.flag & ~0x1000)) {
                     gte_stsxy(pk + 0x20);
-                    if (D_80078D88 & 0x8000) {
+                    if (g_SortAttr & 0x8000) {
                         gte_stsz4(&t.sz[0], &t.sz[1], &t.sz[2], &t.sz[3]);
                         m2 = t.sz[2];
                         if (m2 < t.sz[3]) {
@@ -8502,10 +8508,10 @@ u8 *func_80025504(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x08000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 0x24;
-                    if (D_800A2B78 != 0 && (pk[-0x1D] & 2)) {
+                    if (g_SortBlendRate != 0 && (pk[-0x1D] & 2)) {
                         e = ot + (t.z >> shift);
                         pk[3] = 1;
-                        *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                        *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                         *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                         *e = (u32)pk & 0xFFFFFF;
                         pk += 8;
@@ -8520,7 +8526,7 @@ u8 *func_80025504(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80025818(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyG3GradLit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -8552,10 +8558,10 @@ u8 *func_80025818(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 *(u32 *)pk = (*e & 0xFFFFFF) | 0x06000000;
                 *e = (u32)pk & 0xFFFFFF;
                 pk += 0x1C;
-                if (D_800A2B78 != 0 && (pk[-0x15] & 2)) {
+                if (g_SortBlendRate != 0 && (pk[-0x15] & 2)) {
                     e = ot + (t.z >> shift);
                     pk[3] = 1;
-                    *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                    *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 8;
@@ -8569,7 +8575,7 @@ u8 *func_80025818(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80025A30(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyG4GradLit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -8609,10 +8615,10 @@ u8 *func_80025A30(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x08000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 0x24;
-                    if (D_800A2B78 != 0 && (pk[-0x1D] & 2)) {
+                    if (g_SortBlendRate != 0 && (pk[-0x1D] & 2)) {
                         e = ot + (t.z >> shift);
                         pk[3] = 1;
-                        *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                        *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                         *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                         *e = (u32)pk & 0xFFFFFF;
                         pk += 8;
@@ -8627,12 +8633,12 @@ u8 *func_80025A30(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80025CBC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyFT3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; } t;
     u32 *e;
     u8 *pk;
     pk = pkt;
-    gte_ldrgb(&D_8006387C);
+    gte_ldrgb(&g_ColorFT3);
     if (n != 0) {
     do {
         gte_ldv3(verts + *(u16 *)(prim + 0x12) * 8, verts + *(u16 *)(prim + 0x14) * 8, verts + *(u16 *)(prim + 0x16) * 8);
@@ -8646,7 +8652,7 @@ u8 *func_80025CBC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
             gte_stopz(&t.z);
             if (t.z > 0) {
                 gte_stsxy3_ft3(pk);
-                if (D_80078D88 & 0x8000) {
+                if (g_SortAttr & 0x8000) {
                     gte_stsz3(&t.sz0, &t.sz1, &t.sz2);
                     t.z = ((t.sz0 > t.sz1) ? ((t.sz0 > t.sz2) ? t.sz0 : t.sz2) : ((t.sz1 > t.sz2) ? t.sz1 : t.sz2)) >> 2;
                 } else {
@@ -8669,7 +8675,7 @@ u8 *func_80025CBC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80025EB8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyFT4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } t;
     u32 *e;
     u8 *pk;
@@ -8694,7 +8700,7 @@ u8 *func_80025EB8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 if (!(t.flag & ~0x1000)) {
                     gte_stsxy(pk + 0x20);
                     *(u32 *)(pk + 0x24) = *(u32 *)(prim + 0x10);
-                    if (D_80078D88 & 0x8000) {
+                    if (g_SortAttr & 0x8000) {
                         gte_stsz4(&t.sz0, &t.sz1, &t.sz2, &t.sz3);
                         t.z = MAX(MAX(t.sz0, t.sz1), MAX(t.sz2, t.sz3)) >> 2;
                     } else {
@@ -8718,7 +8724,7 @@ u8 *func_80025EB8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80026128(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyGT3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -8755,7 +8761,7 @@ u8 *func_80026128(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_800262D8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyGT4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -8802,7 +8808,7 @@ u8 *func_800262D8(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80026514(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot, s32 idx) {
+u8 *DrawPolyG3EnvMap(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot, s32 idx) {
     u8 c[4];
     s32 flag;
     s32 z;
@@ -8818,10 +8824,10 @@ u8 *func_80026514(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     u16 u0, v0, u1, v1, u2, v2;
     pk = pkt;
     w = (u8 *)&D_800AF630;
-    tp = D_8006388C + idx * 8;
+    tp = g_EnvMapTex + idx * 8;
     b = D_8006389C[idx];
     clut = ((b + 0x100) << 6) | (b < 0xE0 ? 0x16 : 0x10);
-    tpage = ((D_800A2B78 & 3) << 5) | ((*(u16 *)(tp + 2) >> 4) & 0x10) | ((*(u16 *)tp & 0x3FF) >> 6) |
+    tpage = ((g_SortBlendRate & 3) << 5) | ((*(u16 *)(tp + 2) >> 4) & 0x10) | ((*(u16 *)tp & 0x3FF) >> 6) |
             ((*(u16 *)(tp + 2) & 0x200) << 2);
     du = dv = w[0xA3AA];
     if (idx == 0) {
@@ -8852,7 +8858,7 @@ u8 *func_80026514(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 v1 = *(u16 *)(tp + 2) + ((dv + *(s16 *)(pk + 0x16) / 2) & 0x1F);
                 u2 = ((du + *(s16 *)(pk + 0x20) / 2) & 0x1F) + ((*tp << 2) & 0xFF);
                 v2 = *(u16 *)(tp + 2) + ((dv + *(s16 *)(pk + 0x22) / 2) & 0x1F);
-                if (D_800A2B78 != 0) {
+                if (g_SortBlendRate != 0) {
                     pk[7] |= 2;
                 }
                 pk[0xC] = u0;
@@ -8876,7 +8882,7 @@ u8 *func_80026514(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_800268D0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot, s32 idx) {
+u8 *DrawPolyG4EnvMap(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot, s32 idx) {
     u8 c[4];
     s32 flag;
     s32 z;
@@ -8892,10 +8898,10 @@ u8 *func_800268D0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     u16 u0, v0, u1, v1, u2, v2, u3, v3;
     pk = pkt;
     w = (u8 *)&D_800AF630;
-    tp = D_8006388C + idx * 8;
+    tp = g_EnvMapTex + idx * 8;
     b = D_8006389C[idx];
     clut = ((b + 0x100) << 6) | (b < 0xE0 ? 0x16 : 0x10);
-    tpage = ((D_800A2B78 & 3) << 5) | ((*(u16 *)(tp + 2) >> 4) & 0x10) | ((*(u16 *)tp & 0x3FF) >> 6) |
+    tpage = ((g_SortBlendRate & 3) << 5) | ((*(u16 *)(tp + 2) >> 4) & 0x10) | ((*(u16 *)tp & 0x3FF) >> 6) |
             ((*(u16 *)(tp + 2) & 0x200) << 2);
     du = dv = w[0xA3AA];
     if (idx == 0) {
@@ -8936,7 +8942,7 @@ u8 *func_800268D0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                     v2 = *(u16 *)(tp + 2) + ((dv + *(s16 *)(pk + 0x22) / 2) & 0x1F);
                     u3 = ((du + *(s16 *)(pk + 0x2C) / 2) & 0x1F) + ((*tp << 2) & 0xFF);
                     v3 = *(u16 *)(tp + 2) + ((dv + *(s16 *)(pk + 0x2E) / 2) & 0x1F);
-                    if (D_800A2B78 != 0) {
+                    if (g_SortBlendRate != 0) {
                         pk[7] |= 2;
                     }
                     pk[0xC] = u0;
@@ -8963,14 +8969,14 @@ u8 *func_800268D0(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_80027058(u8 *p, u8 *verts, u32 *e, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80027200(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_800273F4(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_800275BC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_800277DC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_800279AC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyF3(u8 *p, u8 *verts, u32 *e, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyF4(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyF3Grad(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyF4Grad(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyFT3(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPolyFT4(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
 
-void func_80026D64(u8 *o, u8 *a1, s32 shift) {
+void SortTransObjectUnlit(u8 *o, u8 *a1, s32 shift) {
     u8 **h = *(u8 ***)(o + 8);
     u8 *p = h[4];
     s32 n = (s32)h[5];
@@ -8982,22 +8988,22 @@ void func_80026D64(u8 *o, u8 *a1, s32 shift) {
         switch ((w >> 24) & 0xFD) {
         case 0x20:
             if (f) {
-                g_PrimNext = (s32)func_800273F4(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
+                g_PrimNext = (s32)DrawPolyF3Grad(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
                 n -= *(u16 *)p;
                 p += *(u16 *)p * 24;
             } else {
-                g_PrimNext = (s32)func_80027058(p, verts, (u32 *)norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
+                g_PrimNext = (s32)DrawPolyF3(p, verts, (u32 *)norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
                 n -= *(u16 *)p;
                 p += *(u16 *)p * 16;
             }
             break;
         case 0x28:
             if (f) {
-                g_PrimNext = (s32)func_800275BC(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
+                g_PrimNext = (s32)DrawPolyF4Grad(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
                 n -= *(u16 *)p;
                 p += *(u16 *)p * 32;
             } else {
-                g_PrimNext = (s32)func_80027200(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
+                g_PrimNext = (s32)DrawPolyF4(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
                 n -= *(u16 *)p;
                 p += *(u16 *)p * 20;
             }
@@ -9023,12 +9029,12 @@ void func_80026D64(u8 *o, u8 *a1, s32 shift) {
             p += *(u16 *)p * 36;
             break;
         case 0x25:
-            g_PrimNext = (s32)func_800277DC(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
+            g_PrimNext = (s32)DrawPolyFT3(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
             n -= *(u16 *)p;
             p += *(u16 *)p * 28;
             break;
         case 0x2D:
-            g_PrimNext = (s32)func_800279AC(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
+            g_PrimNext = (s32)DrawPolyFT4(p, verts, norms, (u8 *)g_PrimNext, *(u16 *)p, shift, *(u32 **)(a1 + 4));
             n -= *(u16 *)p;
             p += *(u16 *)p * 32;
             break;
@@ -9040,7 +9046,7 @@ void func_80026D64(u8 *o, u8 *a1, s32 shift) {
     }
 }
 
-u8 *func_80027058(u8 *p, u8 *verts, u32 *e, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyF3(u8 *p, u8 *verts, u32 *e, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     if (n == 0) { return pkt; }
     do {
@@ -9059,10 +9065,10 @@ u8 *func_80027058(u8 *p, u8 *verts, u32 *e, u8 *pkt, s32 n, s32 shift, u32 *ot) 
                 *(u32 *)pkt = (*e & 0xFFFFFF) | 0x04000000;
                 *e = (u32)pkt & 0xFFFFFF;
                 pkt += 0x14;
-                if (D_800A2B78 != 0 && (pkt[-0xD] & 2)) {
+                if (g_SortBlendRate != 0 && (pkt[-0xD] & 2)) {
                     e = ot + (t.z >> shift);
                     pkt[3] = 1;
-                    *(u32 *)(pkt + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                    *(u32 *)(pkt + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                     *(u32 *)pkt = (*e & 0xFFFFFF) | 0x01000000;
                     *e = (u32)pkt & 0xFFFFFF;
                     pkt += 8;
@@ -9074,7 +9080,7 @@ u8 *func_80027058(u8 *p, u8 *verts, u32 *e, u8 *pkt, s32 n, s32 shift, u32 *ot) 
     return pkt;
 }
 
-u8 *func_80027200(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyF4(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -9101,10 +9107,10 @@ u8 *func_80027200(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x05000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 0x18;
-                    if (D_800A2B78 != 0 && (pk[-0x11] & 2)) {
+                    if (g_SortBlendRate != 0 && (pk[-0x11] & 2)) {
                         e = ot + (t.z >> shift);
                         pk[3] = 1;
-                        *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                        *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                         *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                         *e = (u32)pk & 0xFFFFFF;
                         pk += 8;
@@ -9119,7 +9125,7 @@ u8 *func_80027200(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_800273F4(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyF3Grad(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -9144,10 +9150,10 @@ u8 *func_800273F4(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 *(u32 *)pk = (*e & 0xFFFFFF) | 0x06000000;
                 *e = (u32)pk & 0xFFFFFF;
                 pk += 0x1C;
-                if (D_800A2B78 != 0 && (pk[-0x15] & 2)) {
+                if (g_SortBlendRate != 0 && (pk[-0x15] & 2)) {
                     e = ot + (t.z >> shift);
                     pk[3] = 1;
-                    *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                    *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 8;
@@ -9161,7 +9167,7 @@ u8 *func_800273F4(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_800275BC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyF4Grad(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; } t;
     u32 *e;
     u8 *pk;
@@ -9192,10 +9198,10 @@ u8 *func_800275BC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                     *(u32 *)pk = (*e & 0xFFFFFF) | 0x08000000;
                     *e = (u32)pk & 0xFFFFFF;
                     pk += 0x24;
-                    if (D_800A2B78 != 0 && (pk[-0x1D] & 2)) {
+                    if (g_SortBlendRate != 0 && (pk[-0x1D] & 2)) {
                         e = ot + (t.z >> shift);
                         pk[3] = 1;
-                        *(u32 *)(pk + 4) = ((D_800A2B78 & 3) << 5) | 0xE100000A;
+                        *(u32 *)(pk + 4) = ((g_SortBlendRate & 3) << 5) | 0xE100000A;
                         *(u32 *)pk = (*e & 0xFFFFFF) | 0x01000000;
                         *e = (u32)pk & 0xFFFFFF;
                         pk += 8;
@@ -9210,7 +9216,7 @@ u8 *func_800275BC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_800277DC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyFT3(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; } t;
     u32 *e;
     u8 *pk;
@@ -9228,7 +9234,7 @@ u8 *func_800277DC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
             gte_stopz(&t.z);
             if (t.z > 0) {
                 gte_stsxy3_ft3(pk);
-                if (D_80078D88 & 0x8000) {
+                if (g_SortAttr & 0x8000) {
                     gte_stsz3(&t.sz0, &t.sz1, &t.sz2);
                     t.z = ((t.sz0 > t.sz1) ? ((t.sz0 > t.sz2) ? t.sz0 : t.sz2) : ((t.sz1 > t.sz2) ? t.sz1 : t.sz2)) >> 2;
                 } else {
@@ -9249,7 +9255,7 @@ u8 *func_800277DC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-u8 *func_800279AC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPolyFT4(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     struct { s32 flag; s32 z; s32 sz0; s32 sz1; s32 sz2; s32 sz3; } t;
     u32 *e;
     u8 *pk;
@@ -9273,7 +9279,7 @@ u8 *func_800279AC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
                 if (!(t.flag & ~0x1000)) {
                     gte_stsxy(pk + 0x20);
                     *(u32 *)(pk + 0x24) = *(u32 *)(prim + 0x10);
-                    if (D_80078D88 & 0x8000) {
+                    if (g_SortAttr & 0x8000) {
                         gte_stsz4(&t.sz0, &t.sz1, &t.sz2, &t.sz3);
                         t.z = MAX(MAX(t.sz0, t.sz1), MAX(t.sz2, t.sz3)) >> 2;
                     } else {
@@ -9295,14 +9301,14 @@ u8 *func_800279AC(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     return pk;
 }
 
-void func_80027BF0(void) {
-    func_80027C10();
+void SortPresetObjectG(void) {
+    SortPresetObjectGBody();
 }
 
-u8 *func_80027D20(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
-u8 *func_80027F4C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPresetPolyG3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
+u8 *DrawPresetPolyG4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot);
 
-void func_80027C10(u8 *o, u8 *b, s32 shift) {
+void SortPresetObjectGBody(u8 *o, u8 *b, s32 shift) {
     u8 *m = *(u8 **)(o + 8);
     u32 *p = *(u32 **)(o + 0xC);
     u8 *verts = *(u8 **)(m + 0);
@@ -9317,11 +9323,11 @@ void func_80027C10(u8 *o, u8 *b, s32 shift) {
         p += 2;
         switch ((tag >> 24) & 0xFC) {
         case 0x30:
-            func_80027D20(prim, verts, norms, (u8 *)p, n, shift, *(u32 **)(b + 4));
+            DrawPresetPolyG3Lit(prim, verts, norms, (u8 *)p, n, shift, *(u32 **)(b + 4));
             prim += n * 20;
             break;
         case 0x38:
-            func_80027F4C(prim, verts, norms, (u8 *)p, n, shift, *(u32 **)(b + 4));
+            DrawPresetPolyG4Lit(prim, verts, norms, (u8 *)p, n, shift, *(u32 **)(b + 4));
             prim += n * 24;
             break;
         }
@@ -9329,7 +9335,7 @@ void func_80027C10(u8 *o, u8 *b, s32 shift) {
     } while (tag & 0xFFFFFF);
 }
 
-u8 *func_80027D20(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPresetPolyG3Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     s32 flag;
     s32 z;
     s32 sz0;
@@ -9338,7 +9344,7 @@ u8 *func_80027D20(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     s32 m;
     u8 *pk;
 
-    pk = pkt + D_800C7C74 * 0x1C;
+    pk = pkt + g_BufferIndex * 0x1C;
     for (; n != 0; n--, prim += 0x14, pk += 0x38) {
         gte_ldv3(verts + *(u16 *)(prim + 0xA) * 8, verts + *(u16 *)(prim + 0xE) * 8, verts + *(u16 *)(prim + 0x12) * 8);
         gte_rtpt();
@@ -9372,12 +9378,12 @@ u8 *func_80027D20(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
         gte_ldv3(norms + *(u16 *)(prim + 8) * 8, norms + *(u16 *)(prim + 0xC) * 8, norms + *(u16 *)(prim + 0x10) * 8);
         gte_ncct();
         gte_strgb3_g3(pk);
-        func_80028200((u8 *)ot, z, shift, (s32 *)pk, 0x06000000);
+        AddPrimAtDepth((u8 *)ot, z, shift, (s32 *)pk, 0x06000000);
     }
     return pk;
 }
 
-u8 *func_80027F4C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
+u8 *DrawPresetPolyG4Lit(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32 *ot) {
     s32 flag;
     s32 z;
     s32 sz0;
@@ -9388,7 +9394,7 @@ u8 *func_80027F4C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
     s32 m2;
     u8 *pk;
 
-    pk = pkt + D_800C7C74 * 0x24;
+    pk = pkt + g_BufferIndex * 0x24;
     for (; n != 0; n--, prim += 0x18, pk += 0x48) {
         gte_ldv3(verts + *(u16 *)(prim + 0xA) * 8, verts + *(u16 *)(prim + 0xE) * 8, verts + *(u16 *)(prim + 0x12) * 8);
         gte_rtpt();
@@ -9432,12 +9438,12 @@ u8 *func_80027F4C(u8 *prim, u8 *verts, u8 *norms, u8 *pkt, s32 n, s32 shift, u32
         gte_ldv0(norms + *(u16 *)(prim + 0x14) * 8);
         gte_nccs();
         gte_strgb(pk + 0x1C);
-        func_80028200((u8 *)ot, z, shift, (s32 *)pk, 0x08000000);
+        AddPrimAtDepth((u8 *)ot, z, shift, (s32 *)pk, 0x08000000);
     }
     return pk;
 }
 
-void func_80028200(u8 *tab, s32 z, s32 shift, s32 *prim, s32 tag) {
+void AddPrimAtDepth(u8 *tab, s32 z, s32 shift, s32 *prim, s32 tag) {
     s32 *e = (s32 *)(tab + (z >> shift) * 4);
     *prim = (*e & 0xFFFFFF) | tag;
     *e = (s32)prim & 0xFFFFFF;
@@ -9446,87 +9452,87 @@ void func_80028200(u8 *tab, s32 z, s32 shift, s32 *prim, s32 tag) {
 void func_80028234(void) {
 }
 
-void func_8002823C(void) {
+void InitLights(void) {
     s32 i;
     for (i = 0; i < 3; i++) {
-        D_800A5E88[i].vx = 0x800;
-        D_800A5E88[i].vy = 0x800;
-        D_800A5E88[i].vz = 0;
-        D_800A5E88[i].r = 0x20;
-        D_800A5E88[i].g = 0x20;
-        D_800A5E88[i].b = 0x20;
-        func_80028620(i, &D_800A5E88[i]);
+        g_Lights[i].vx = 0x800;
+        g_Lights[i].vy = 0x800;
+        g_Lights[i].vz = 0;
+        g_Lights[i].r = 0x20;
+        g_Lights[i].g = 0x20;
+        g_Lights[i].b = 0x20;
+        ApplyLight(i, &g_Lights[i]);
     }
 }
 
 void func_800282FC(void) {
 }
 
-void func_80028304(s32 id, s32 x, s32 y, s32 z, u8 r, u8 g, u8 b) {
+void SetLight(s32 id, s32 x, s32 y, s32 z, u8 r, u8 g, u8 b) {
     u32 a = id & 0xFFFF;
     if (a < 3) {
-        D_800A5E88[a].vx = x;
-        D_800A5E88[a].vy = y;
-        D_800A5E88[a].vz = z;
-        D_800A5E88[a].r = r;
-        D_800A5E88[a].g = g;
-        D_800A5E88[a].b = b;
-        func_80028620(a, &D_800A5E88[a]);
+        g_Lights[a].vx = x;
+        g_Lights[a].vy = y;
+        g_Lights[a].vz = z;
+        g_Lights[a].r = r;
+        g_Lights[a].g = g;
+        g_Lights[a].b = b;
+        ApplyLight(a, &g_Lights[a]);
     }
 }
 
-void func_80028394(u16 id, s32 dx, s32 dy, s32 dz) {
+void MoveLightDir(u16 id, s32 dx, s32 dy, s32 dz) {
     if (id < 3) {
-        D_800A5E88[id].vx += dx;
-        D_800A5E88[id].vy += dy;
-        D_800A5E88[id].vz += dz;
-        func_80028620(id, &D_800A5E88[id]);
+        g_Lights[id].vx += dx;
+        g_Lights[id].vy += dy;
+        g_Lights[id].vz += dz;
+        ApplyLight(id, &g_Lights[id]);
     }
 }
 
-void func_80028428(s32 id, s8 r, s8 g, s8 b) {
+void SetLightColor(s32 id, s8 r, s8 g, s8 b) {
     u32 a = id & 0xFFFF;
     if (a < 3) {
-        D_800A5E88[a].r = r;
-        D_800A5E88[a].g = g;
-        D_800A5E88[a].b = b;
-        func_80028620(a, &D_800A5E88[a]);
+        g_Lights[a].r = r;
+        g_Lights[a].g = g;
+        g_Lights[a].b = b;
+        ApplyLight(a, &g_Lights[a]);
     }
 }
 
-void func_80028488(u16 id) {
+void ClearLight(u16 id) {
     if (id < 3) {
-        D_800A5E88[id].vz = 0x64;
-        D_800A5E88[id].vx = 0;
-        D_800A5E88[id].vy = 0;
-        D_800A5E88[id].r = 0;
-        D_800A5E88[id].g = 0;
-        D_800A5E88[id].b = 0;
-        func_80028620(id, &D_800A5E88[id]);
+        g_Lights[id].vz = 0x64;
+        g_Lights[id].vx = 0;
+        g_Lights[id].vy = 0;
+        g_Lights[id].r = 0;
+        g_Lights[id].g = 0;
+        g_Lights[id].b = 0;
+        ApplyLight(id, &g_Lights[id]);
     }
 }
 
-void func_8002850C(s16 r, s16 g, s16 b) {
-    D_800AE7E0 = r;
+void SetAmbientColor(s16 r, s16 g, s16 b) {
+    g_AmbientColor = r;
     D_800AE7E2 = g;
     D_800AE7E4 = b;
     GsSetAmbient(r, g, b);
 }
 
-void func_80028558(s32 id, s8 r, s8 g, s8 b) {
+void SetLightColorUnchecked(s32 id, s8 r, s8 g, s8 b) {
     s32 a = id & 0xFFFF;
-    D_800A5E88[a].r = r;
-    D_800A5E88[a].g = g;
-    D_800A5E88[a].b = b;
-    func_80028620(a, &D_800A5E88[a]);
+    g_Lights[a].r = r;
+    g_Lights[a].g = g;
+    g_Lights[a].b = b;
+    ApplyLight(a, &g_Lights[a]);
 }
 
-void func_800285AC(void) {
+void DisableFog(void) {
     GsSetLightMode(0);
 }
 
-void func_800285CC(void) {
-    register s16 *fp = &D_800C6D18;
+void EnableFog(void) {
+    register s16 *fp = &g_FogParam;
     *fp = -0x106;
     D_800C6D1C = 0x01F40000;
     D_800C6D20 = 0;
@@ -9535,10 +9541,10 @@ void func_800285CC(void) {
     GsSetLightMode(1);
 }
 
-/* PORT NOTE (r254): the stage code calls this from its scratchpad stack and then builds func_80017758's colour records
+/* PORT NOTE (r254): the stage code calls this from its scratchpad stack and then builds DrawPrimG4Mtx's colour records
    over the dead frame without setting their pad bytes, so this frame's saved ra becomes a POLY_G4 pad byte in game
    RAM. The PC runs it in its console frame with the console's ra (pc/frames.txt `ra`). */
-void func_80028620(s32 id, LightDir *src) {
+void ApplyLight(s32 id, LightDir *src) {
     LightDir light;
 
     light = *src;
@@ -9557,7 +9563,7 @@ extern u8 D_800AF737;
 extern RECT D_800AF77C;
 extern RECT D_800AF790;
 extern RECT D_800AF7A4;
-extern s32 D_80075818;
+extern s32 g_ScreenOfsX;
 extern s32 D_8007581C;
 extern RECT D_80075820;
 extern RECT D_80075828;
@@ -9569,7 +9575,7 @@ void func_80028694(void) {
     if (D_800B9A15 == 0) {
         if ((s16)TestPadAll(1, 0, 2)) {
             D_800AF67F = D_800AF6DB = D_800AF737 = 1;
-            D_80075818 = D_8007581C = 0;
+            g_ScreenOfsX = D_8007581C = 0;
             D_80075820.x = D_800AF77C.x;
             D_80075820.y = D_800AF77C.y;
             D_80075820.w = D_800AF77C.w;
@@ -9608,16 +9614,16 @@ void func_80028694(void) {
             }
             switch (GetPadHeldDir(1) & 0xA000) {
             case 0x8000:
-                D_80075818 -= w->vsyncMode * 2;
+                g_ScreenOfsX -= w->vsyncMode * 2;
                 break;
             case 0x2000:
-                D_80075818 += w->vsyncMode * 2;
+                g_ScreenOfsX += w->vsyncMode * 2;
                 break;
             }
             if ((s16)TestPadAll(1, 1, 8)) {
-                SetDefDispEnv(&w->disp[w->dispIdx], D_80075818, D_8007581C, 0x140, 0xF0);
+                SetDefDispEnv(&w->disp[w->dispIdx], g_ScreenOfsX, D_8007581C, 0x140, 0xF0);
             } else {
-                SetDefDispEnv(&w->disp[w->dispIdx], D_80075818, D_8007581C, 0x280, 0x1E0);
+                SetDefDispEnv(&w->disp[w->dispIdx], g_ScreenOfsX, D_8007581C, 0x280, 0x1E0);
             }
         }
     }
@@ -9697,7 +9703,7 @@ extern void (*D_800A2CE4)();
 extern void GsTMDfastG4GNL();
 extern void (*D_800A2CEC)();
 
-void func_80028A48(void) {
+void InitFCall4(void) {
     D_800A2BC0 = PS1_FN_ADDR(GsTMDfastF3L);
     D_800A2BC8 = PS1_FN_ADDR(GsTMDfastF3NL);
     D_800A2BD8 = PS1_FN_ADDR(GsTMDfastNF3);
@@ -9765,7 +9771,7 @@ extern void (*D_800A2DD0)();
 extern void GsPrstTG4NL();
 extern void (*D_800A2DD8)();
 
-void func_80028C50(void) {
+void InitFCall5(void) {
     D_800A2CF0 = PS1_FN_ADDR(GsPrstF3L);
     D_800A2CF8 = PS1_FN_ADDR(GsPrstF3NL);
     D_800A2D10 = PS1_FN_ADDR(GsPrstG3L);
@@ -9784,168 +9790,168 @@ void func_80028C50(void) {
     D_800A2DD8 = PS1_FN_ADDR(GsPrstTG4NL);
 }
 
-s32 func_80028D58(void) {
-    return func_80029178(0xB) & 0xFF;
+s32 GetVibrationOff(void) {
+    return GetFlag(0xB) & 0xFF;
 }
 
-s32 func_80028D78(s32 a) {
-    return func_80029124(0xb, (a & 0xff));
+s32 SetVibrationOff(s32 a) {
+    return SetFlag(0xb, (a & 0xff));
 }
 
-s32 func_80028D9C(void) {
-    return func_80029178(0xC) & 0xFF;
+s32 GetSoundMode(void) {
+    return GetFlag(0xC) & 0xFF;
 }
 
-s32 func_80028DBC(s32 a) {
-    return func_80029124(0xc, (a & 0xff));
+s32 SetSoundMode(s32 a) {
+    return SetFlag(0xc, (a & 0xff));
 }
 
-s32 func_80028DE0(void) {
-    return func_80029178(0xD) & 0xFF;
+s32 GetOptionD(void) {
+    return GetFlag(0xD) & 0xFF;
 }
 
-s32 func_80028E00(s32 a) {
-    return func_80029124(0xd, (a & 0xff));
+s32 SetOptionD(s32 a) {
+    return SetFlag(0xd, (a & 0xff));
 }
 
-s32 func_80028E24(void) {
-    return func_80029178(0xE) & 0xFF;
+s32 GetOptionE(void) {
+    return GetFlag(0xE) & 0xFF;
 }
 
-s32 func_80028E44(s32 a) {
-    return func_80029124(0xe, (a & 0xff));
+s32 SetOptionE(s32 a) {
+    return SetFlag(0xe, (a & 0xff));
 }
 
-s32 func_80028E68(void) {
-    return func_80029178(0xF) & 0xFF;
+s32 GetOptionF(void) {
+    return GetFlag(0xF) & 0xFF;
 }
 
-s32 func_80028E88(s32 a) {
-    return func_80029124(0xf, (a & 0xff));
+s32 SetOptionF(s32 a) {
+    return SetFlag(0xf, (a & 0xff));
 }
 
-s32 func_80028EAC(void) {
-    return func_80029178(0x10) & 0xFF;
+s32 GetOption10(void) {
+    return GetFlag(0x10) & 0xFF;
 }
 
-s32 func_80028ECC(s32 a) {
-    return func_80029124(0x10, (a & 0xff));
+s32 SetOption10(s32 a) {
+    return SetFlag(0x10, (a & 0xff));
 }
 
-s32 func_80028EF0(void) {
-    return func_80029178(0x11) & 0xFF;
+s32 GetOption11(void) {
+    return GetFlag(0x11) & 0xFF;
 }
 
-s32 func_80028F10(s32 a) {
-    return func_80029124(0x11, (a & 0xff));
+s32 SetOption11(s32 a) {
+    return SetFlag(0x11, (a & 0xff));
 }
 
-s32 func_80028F34(void) {
-    return func_80029178(0x12) & 0xFF;
+s32 GetOption12(void) {
+    return GetFlag(0x12) & 0xFF;
 }
 
-s32 func_80028F54(s32 a) {
-    return func_80029124(0x12, (a & 0xff));
+s32 SetOption12(s32 a) {
+    return SetFlag(0x12, (a & 0xff));
 }
 
-s32 func_80028F78(void) {
-    return func_80029178(0x13) & 0xFF;
+s32 GetOption13(void) {
+    return GetFlag(0x13) & 0xFF;
 }
 
-s32 func_80028F98(s32 a) {
-    return func_80029124(0x13, (a & 0xff));
+s32 SetOption13(s32 a) {
+    return SetFlag(0x13, (a & 0xff));
 }
 
-s32 func_80028FBC(void) {
-    return func_800291B4(0x2C) & 0xFF;
+s32 GetMusicVolume(void) {
+    return GetVar(0x2C) & 0xFF;
 }
 
-s32 func_80028FDC(s32 a) {
-    return func_800291A0(0x2c, (a & 0xff));
+void SetMusicVolume(s32 a) {
+    SetVar(0x2c, (a & 0xff));
 }
 
-s32 func_80029000(void) {
-    return func_800291B4(0x2D) & 0xFF;
+s32 GetEffectsVolume(void) {
+    return GetVar(0x2D) & 0xFF;
 }
 
-s32 func_80029020(s32 a) {
-    return func_800291A0(0x2d, (a & 0xff));
+void SetEffectsVolume(s32 a) {
+    SetVar(0x2d, (a & 0xff));
 }
 
-void func_80029044(void) {
+void ClearFlags(void) {
     u32 i = 0;
     do {
-        D_800AE648[i] = 0;
+        g_Flags[i] = 0;
         i++;
     } while (i < 0x40);
 }
 
-void func_8002906C(void) {
+void ClearVars(void) {
     u32 i = 0;
     do {
-        D_800BA1B8[i] = 0;
+        g_Vars[i] = 0;
         i++;
     } while (i < 0x100);
 }
 
-void func_80029094(void) {
-    func_80016714(D_800BA2B8, 0x60);
+void ClearVarBlock60(void) {
+    ZeroFill(g_VarBlock60, 0x60);
 }
 
-s32 func_800290BC(void) {
-    return func_80029124(0x7f, 1);
+s32 SetFlag7F(void) {
+    return SetFlag(0x7f, 1);
 }
 
-void func_800290E0(void) {
-    func_80029124(0x7F, 0);
+void ClearFlag7F(void) {
+    SetFlag(0x7F, 0);
 }
 
-s32 func_80029104(void) {
-    return func_80029178(0x7F) & 0xFF;
+s32 GetFlag7F(void) {
+    return GetFlag(0x7F) & 0xFF;
 }
 
-s32 func_80029124(u32 bit, s32 on) {
+s32 SetFlag(u32 bit, s32 on) {
     u32 idx = bit >> 3;
     s32 mask = 1 << (bit & 7);
     if (on & 0xFF) {
-        D_800AE648[idx] |= mask;
+        g_Flags[idx] |= mask;
     } else {
-        D_800AE648[idx] &= ~mask;
+        g_Flags[idx] &= ~mask;
     }
 }
 
-s32 func_80029178(s32 n) {
+s32 GetFlag(s32 n) {
     u32 idx = (u32)n >> 3;
     s32 mask = 1 << (n & 7);
-    return (D_800AE648[idx] & mask) != 0;
+    return (g_Flags[idx] & mask) != 0;
 }
 
-s32 func_800291A0(s32 i, s32 v) {
-    D_800BA1B8[i] = v;
+void SetVar(s32 i, s32 v) {
+    g_Vars[i] = v;
 }
 
-s32 func_800291B4(s32 a) {
-    return D_800BA1B8[a];
+s32 GetVar(s32 a) {
+    return g_Vars[a];
 }
 
-void func_800291C8(s32 i, s16 v) {
-    *(s16 *)(D_800BA1B8 + i) = v;
+void SetVar16(s32 i, s16 v) {
+    *(s16 *)(g_Vars + i) = v;
 }
 
-s16 func_800291DC(s32 i) {
-    return *(s16 *)(D_800BA1B8 + i);
+s16 GetVar16(s32 i) {
+    return *(s16 *)(g_Vars + i);
 }
 
-void func_800291F0(s32 i, s32 v) {
-    *(s32 *)(D_800BA1B8 + i) = v;
+void SetVar32(s32 i, s32 v) {
+    *(s32 *)(g_Vars + i) = v;
 }
 
-s32 func_80029204(s32 i) {
-    return *(s32 *)(D_800BA1B8 + i);
+s32 GetVar32(s32 i) {
+    return *(s32 *)(g_Vars + i);
 }
 
-void func_80029218(void) {
-    func_80016714(&D_800AE6A8, 0x3c);
+void ClearEntryPoint(void) {
+    ZeroFill(&g_EntryPoint, 0x3c);
 }
 
 void func_80029240(void) {
@@ -9960,27 +9966,27 @@ s32 func_80029264(void) {
     return D_80075838;
 }
 
-void func_80029274(void) {
-    Blk98 t = D_80072C84;
-    D_80078E78 = t;
+void LoadDefaultStatus(void) {
+    Blk98 t = g_DefaultStatus;
+    g_Status = t;
 }
 
-void func_8002931C(s32 a) {
-    D_80078E90 = a;
-    func_80029344();
+void SetClock(s32 a) {
+    g_Clock = a;
+    UpdateClockPhase();
 }
 
-extern u16 D_80078E92;
-extern s8 D_80078EAE;
+extern u16 g_ClockMinutes;
+extern s8 g_Daytime;
 
-void func_80029344(void) {
-    u8 *s = (u8 *)&D_80078E78;
-    u16 v = D_80078E92;
+void UpdateClockPhase(void) {
+    u8 *s = (u8 *)&g_Status;
+    u16 v = g_ClockMinutes;
     s16 t;
     if ((u16)(v - 0x1A4) >= 0x2D0) {
-        D_80078EAE = 0;
+        g_Daytime = 0;
     } else {
-        D_80078EAE = 1;
+        g_Daytime = 1;
     }
     t = v;
     if (t >= 0x528) {
@@ -10000,36 +10006,36 @@ void func_80029344(void) {
     s[0x38] = (s16)v % 60;
 }
 
-void func_8002941C(void) {
-    func_80016714(D_800A6588, 2);
+void ClearItemValue0(void) {
+    ZeroFill(g_ItemValues, 2);
 }
 
-void func_80029444(void) {
+void TickPlayTime(void) {
     u8 t;
-    t = ++D_80078E7C; if (t >= 0x1E) {
-        D_80078E7C = 0;
+    t = ++g_PlayTime; if (t >= 0x1E) {
+        g_PlayTime = 0;
         t = ++D_80078E7D; if (t >= 0x3C) {
             D_80078E7D = 0;
             D_80078E7E++; if (D_80078E7E >= 0x3C) {
                 D_80078E7E = 0;
                 t = ++D_80078E7F; if (t >= 0x64) {
-                    *(u32 *)&D_80078E7C = 0x633B3B00;
+                    *(u32 *)&g_PlayTime = 0x633B3B00;
                 }
             }
         }
     }
 }
 
-s32 func_80029504(void) {
-    return D_80078E80;
+s32 GetProgress(void) {
+    return g_Progress;
 }
 
-void func_80029514(s32 a) {
-    D_80078E80 = a;
+void SetProgress(s32 a) {
+    g_Progress = a;
 }
 
-s32 func_80029524(void) {
-    return (u32)(D_80078E80 - 0xC8) < 0x190U;
+s32 IsProgress200To599(void) {
+    return (u32)(g_Progress - 0xC8) < 0x190U;
 }
 
 s32 func_8002953C(void) {
@@ -10053,161 +10059,161 @@ void func_8002958C(s32 a) {
 }
 
 void func_8002959C(void) {
-    func_8002A544(0x32);
+    GainStat3(0x32);
     D_80078E88 += 1;
 }
 
-void func_800295D4(void) {
+void SetupDemoStatus(void) {
     D_80078EB4 = 0xFA;
     D_80078EB2 = 0xFA;
     D_80078EB8 = 0xFA;
     D_80078EB6 = 0xFA;
-    func_80029124(0x1E, 1);
+    SetFlag(0x1E, 1);
     D_80078EC0 = 1;
-    func_80029124(0x80, 1);
-    D_80078E8C = 0x64;
-    func_80029124(0x82, 1);
-    func_80029124(0x83, 1);
-    func_80029124(0x85, 1);
+    SetFlag(0x80, 1);
+    g_Money = 0x64;
+    SetFlag(0x82, 1);
+    SetFlag(0x83, 1);
+    SetFlag(0x85, 1);
 }
 
-void func_80029664(void) {
-    D_80078E90 = 0x528;
-    func_80029344();
+void SetClockNight(void) {
+    g_Clock = 0x528;
+    UpdateClockPhase();
 }
 
-void func_80029690(void) {
+void ClearStateSlots(void) {
     s32 i = 0;
-    u8 *p = D_80078F28;
-    s32 *q = D_800A5E58;
+    u8 *p = g_StateSlots;
+    s32 *q = g_StateSlotUsed;
     do {
         *q = 0;
-        func_80016714(p, 0x5B8);
+        ZeroFill(p, 0x5B8);
         p += 0x2DC;
         i++;
         q += 1;
     } while (i < 2);
 }
 
-void func_800296F8(Blk24 *src) {
-    func_80029774(1);
-    D_80079204 = *src;
+void SaveContinuePoint(Blk24 *src) {
+    SaveStateSlot(1);
+    g_ContinueMapRecord = *src;
     D_800A5E5C = 1;
 }
 
 typedef struct { u8 b[4]; } B4;
 
-void func_80029774(s32 a) {
-    u8 *p = D_80078F28 + a * 0x2DC;
+void SaveStateSlot(s32 a) {
+    u8 *p = g_StateSlots + a * 0x2DC;
     s32 i;
 
-    *(Blk98 *)(p + 0x24) = D_80078E78;
+    *(Blk98 *)(p + 0x24) = g_Status;
     for (i = 0; i < 0x40; i++) {
-        ((u16 *)(p + 0xBC))[i] = ((u16 *)D_800A6588)[i];
+        ((u16 *)(p + 0xBC))[i] = ((u16 *)g_ItemValues)[i];
     }
     for (i = 0; i < 0x40; i++) {
-        (p + i)[0x13C] = D_800AE648[i];
+        (p + i)[0x13C] = g_Flags[i];
     }
     for (i = 0; i < 0x100; i++) {
-        (p + i)[0x17C] = D_800BA1B8[i];
+        (p + i)[0x17C] = g_Vars[i];
     }
     for (i = 0; i < 0x18; i++) {
-        ((B4 *)(p + 0x27C))[i] = ((B4 *)D_800BA2B8)[i];
+        ((B4 *)(p + 0x27C))[i] = ((B4 *)g_VarBlock60)[i];
     }
-    D_800A5E58[a] = 1;
+    g_StateSlotUsed[a] = 1;
 }
 
-void func_800298BC(Blk24 *dst) {
-    func_8002992C(1);
-    *dst = D_80079204;
+void LoadContinuePoint(Blk24 *dst) {
+    LoadStateSlot(1);
+    *dst = g_ContinueMapRecord;
 }
 
-void func_8002992C(s32 a) {
-    u8 *p = D_80078F28 + a * 0x2DC;
+void LoadStateSlot(s32 a) {
+    u8 *p = g_StateSlots + a * 0x2DC;
     s32 i;
-    D_80078E78 = *(Blk98 *)(p + 0x24);
+    g_Status = *(Blk98 *)(p + 0x24);
     for (i = 0; i < 0x40; i++) {
-        ((u16 *)D_800A6588)[i] = *(u16 *)(p + 0xBC + i * 2);
+        ((u16 *)g_ItemValues)[i] = *(u16 *)(p + 0xBC + i * 2);
     }
     for (i = 0; i < 0x40; i++) {
-        D_800AE648[i] = (p + i)[0x13C];
+        g_Flags[i] = (p + i)[0x13C];
     }
     for (i = 0; i < 0x100; i++) {
-        D_800BA1B8[i] = (p + i)[0x17C];
+        g_Vars[i] = (p + i)[0x17C];
     }
     for (i = 0; i < 0x18; i++) {
-        ((B4 *)D_800BA2B8)[i] = ((B4 *)(p + 0x27C))[i];
+        ((B4 *)g_VarBlock60)[i] = ((B4 *)(p + 0x27C))[i];
     }
 }
 
 void func_80029A58(s32 i) {
-    u32 *p = (u32 *)(D_80078F28 + i * 0x2DC);
+    u32 *p = (u32 *)(g_StateSlots + i * 0x2DC);
     p[0xE] >>= 1;
 }
 
-s32 func_80029A94(s32 a) {
-    return D_800A5E58[a];
+s32 IsStateSlotUsed(s32 a) {
+    return g_StateSlotUsed[a];
 }
 
-s32 func_80029AAC(void) {
-    return (func_8002A2B0() * 0x4B) / 100;
+s32 CalcStat0Power(void) {
+    return (GetStat0Value() * 0x4B) / 100;
 }
 
-s32 func_80029AF4(void) {
-    s32 t = func_80029E30();
-    return (t * (func_80029CD4(0x28) + 0xC8)) / 100;
+s32 CalcPower03Rand40(void) {
+    s32 t = CalcPower03();
+    return (t * (RandRange(0x28) + 0xC8)) / 100;
 }
 
-s32 func_80029B4C(s16 a, s16 b) {
-    s32 t = func_80029DB4();
-    return (t * (a + func_80029CD4(b))) / 100;
+s32 CalcPower02Rand(s16 a, s16 b) {
+    s32 t = CalcPower02();
+    return (t * (a + RandRange(b))) / 100;
 }
 
 s32 func_80029BC8(s16 a, s16 b) {
-    s32 x = func_80029E30();
-    x = x * (a + func_80029CD4(b));
+    s32 x = CalcPower03();
+    x = x * (a + RandRange(b));
     return x / 100;
 }
 
-s32 func_80029C44(s16 a, s16 b) {
-    s32 t = func_80029DB4();
-    s32 u = func_80029E30();
-    return ((t + u) * (a + func_80029CD4(b))) / 100;
+s32 CalcPowerBothRand(s16 a, s16 b) {
+    s32 t = CalcPower02();
+    s32 u = CalcPower03();
+    return ((t + u) * (a + RandRange(b))) / 100;
 }
 
-s32 func_80029CD4(s32 n) {
+s32 RandRange(s32 n) {
     if (n == 0) {
         return 0;
     }
     return rand() % n;
 }
 
-s32 func_80029D3C(s32 v) {
+s32 ReduceByStat1(s32 v) {
     s32 r;
     s32 f;
     if (v <= 0) {
         return 0;
     }
-    f = func_8002A4FC() * 0x3C; r = v - (v * f) / 4800;
+    f = GetStat1Value() * 0x3C; r = v - (v * f) / 4800;
     if (r <= 0) {
         r = 1;
     }
     return r;
 }
 
-s32 func_80029DB4(void) {
+s32 CalcPower02(void) {
     s32 m = 0x7D;
     s32 t;
-    if (func_80029178(0x81) & 0xFF) {
+    if (GetFlag(0x81) & 0xFF) {
         m = 0x96;
     }
-    t = func_8002A9DC();
-    return ((t + func_8002A2B0()) * m) / 100;
+    t = GetStat2Value();
+    return ((t + GetStat0Value()) * m) / 100;
 }
 
-s32 func_80029E30(void) {
-    s32 t = func_8002A76C();
-    return ((t + func_8002A2B0()) * 0xAF) / 100;
+s32 CalcPower03(void) {
+    s32 t = GetStat3Value();
+    return ((t + GetStat0Value()) * 0xAF) / 100;
 }
 
 s32 func_80029E94(u8 *o, s32 k) {
@@ -10225,157 +10231,157 @@ s32 func_80029EC0(u8 *a) {
 
 extern u32 D_80078F04;
 extern u32 D_80078F0C;
-extern s32 func_8002A2D4();
+extern s32 GainStat1();
 
-void func_80029ED4(s32 n) {
+void AddWalkDistance(s32 n) {
     u32 t;
     s32 d;
-    if (func_80029504() >= 10) {
+    if (GetProgress() >= 10) {
         t = D_80078F04 + n;
         D_80078F04 = t;
         if (t >= 102) {
-            D_80078F08++;
+            g_Odometer++;
             D_80078F04 = t % 102;
-            if ((u32)D_80078F08 > 9999999) {
-                D_80078F08 = 9999999;
+            if ((u32)g_Odometer > 9999999) {
+                g_Odometer = 9999999;
             }
-            d = D_80078F08 - D_80078F0C;
+            d = g_Odometer - D_80078F0C;
             if (d >= 10) {
-                D_80078F0C = D_80078F08;
-                func_8002A2D4(d / 10);
+                D_80078F0C = g_Odometer;
+                GainStat1(d / 10);
             }
         }
     }
 }
 
-s32 func_80029FD4(void) {
-    return D_80078F08;
+s32 GetOdometer(void) {
+    return g_Odometer;
 }
 
-s32 func_80029FE4(void) {
-    s32 a = func_8002A26C();
-    s32 b = func_8002A4B8();
-    s32 c = func_8002A728();
-    return (a + b + c + func_8002A998()) / 4;
+s32 GetAverageLevel(void) {
+    s32 a = GetStat0Level();
+    s32 b = GetStat1Level();
+    s32 c = GetStat3Level();
+    return (a + b + c + GetStat2Level()) / 4;
 }
 
-s32 func_8002A04C(u8 *p) {
+s32 GainStat0FromActor(u8 *p) {
     u8 *q = *(u8 **)(p + 0x78);
     if (q != 0) {
-        return func_8002A088(*(s16 *)(q + 0x2E));
+        return GainStat0(*(s16 *)(q + 0x2E));
     }
     return 0;
 }
 
-s32 func_8002A088(s16 unused) {
+s32 GainStat0(s16 unused) {
     s32 k;
     s32 r;
-    if (func_8002A108()) {
-        k = func_8002A26C();
+    if (AddStat0Exp()) {
+        k = GetStat0Level();
         func_8016E918(0, *(u16 *)((u8 *)D_800638FA + (k << 4)) - *(u16 *)((u8 *)D_800638FA + ((k - 1) << 4)));
-        func_8002D4C8(0xB2C, 0);
-        func_8002AAAC();
+        PlaySoundId(0xB2C, 0);
+        LevelUpHook();
         return 1;
     }
     r = 0;
     return r;
 }
 
-extern s32 func_8002A200();
-extern void func_8002A234(void);
+extern s32 Stat0ExpReached();
+extern void Stat0LevelUp(void);
 
-s32 func_8002A108(s32 a) {
-    s32 s = func_8002AA00(func_8002A26C() + 1);
-    if (func_8002A28C() != 0 && s >= 0) {
+s32 AddStat0Exp(s32 a) {
+    s32 s = IsLevelCapped(GetStat0Level() + 1);
+    if (GetStat0ExpNeeded() != 0 && s >= 0) {
         D_80078EE8 += a;
-        if (func_8002A200() != 0) {
+        if (Stat0ExpReached() != 0) {
             if (s != 0) {
-                D_80078EE8 = func_8002A28C();
+                D_80078EE8 = GetStat0ExpNeeded();
                 return 0;
             }
-            func_8002A234();
+            Stat0LevelUp();
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_8002A1B4(void) {
-    if (func_8002AA00(func_8002A26C() + 1) != 0) {
-        return func_8002A27C() == func_8002A28C();
+s32 IsStat0Full(void) {
+    if (IsLevelCapped(GetStat0Level() + 1) != 0) {
+        return GetStat0Exp() == GetStat0ExpNeeded();
     }
     return 0;
 }
 
-s32 func_8002A200(void) {
-    s32 b = func_8002A28C();
-    return func_8002A27C() >= b;
+s32 Stat0ExpReached(void) {
+    s32 b = GetStat0ExpNeeded();
+    return GetStat0Exp() >= b;
 }
 
-void func_8002A234(void) {
-    s32 n = D_80078EE4 + 1;
+void Stat0LevelUp(void) {
+    s32 n = g_Stat0Level + 1;
     if (n >= 0x1F) {
         n = 0x1E;
     }
-    D_80078EE4 = n;
+    g_Stat0Level = n;
     D_80078EE8 = 0;
 }
 
-s32 func_8002A26C(void) {
-    return D_80078EE4;
+s32 GetStat0Level(void) {
+    return g_Stat0Level;
 }
 
-s32 func_8002A27C(void) {
+s32 GetStat0Exp(void) {
     return D_80078EE8;
 }
 
-s32 func_8002A28C(void) {
-    return *(u16 *)(D_800638F8 + (D_80078EE4 << 4));
+s32 GetStat0ExpNeeded(void) {
+    return *(u16 *)(g_StatTable + (g_Stat0Level << 4));
 }
 
-s32 func_8002A2B0(void) {
-    return *(u16 *)((u8 *)D_800638FA + (D_80078EE4 << 4));
+s32 GetStat0Value(void) {
+    return *(u16 *)((u8 *)D_800638FA + (g_Stat0Level << 4));
 }
 
-s32 func_8002A2D4(void) {
+s32 GainStat1(void) {
     s32 k;
     s32 r;
-    if (func_8002A354()) { k = func_8002A4B8(); func_8016E918(1, *(u16 *)(D_800638FE + (k << 4)) - *(u16 *)(D_800638FE + ((k - 1) << 4))); func_8002D4C8(0xB2C, 0); func_8002AAAC(); return 1; } r = 0;
+    if (AddStat1Exp()) { k = GetStat1Level(); func_8016E918(1, *(u16 *)(D_800638FE + (k << 4)) - *(u16 *)(D_800638FE + ((k - 1) << 4))); PlaySoundId(0xB2C, 0); LevelUpHook(); return 1; } r = 0;
     return r;
 }
 
-extern s32 func_8002A44C();
-extern void func_8002A480(void);
+extern s32 Stat1ExpReached();
+extern void Stat1LevelUp(void);
 
-s32 func_8002A354(s32 a) {
-    s32 s = func_8002AA00(func_8002A4B8() + 1);
-    if (func_8002A4D8() != 0 && s >= 0) {
+s32 AddStat1Exp(s32 a) {
+    s32 s = IsLevelCapped(GetStat1Level() + 1);
+    if (GetStat1ExpNeeded() != 0 && s >= 0) {
         D_80078EF0 += a;
-        if (func_8002A44C() != 0) {
+        if (Stat1ExpReached() != 0) {
             if (s != 0) {
-                D_80078EF0 = func_8002A4D8();
+                D_80078EF0 = GetStat1ExpNeeded();
                 return 0;
             }
-            func_8002A480();
+            Stat1LevelUp();
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_8002A400(void) {
-    if (func_8002AA00(func_8002A4B8() + 1) != 0) {
-        return func_8002A4C8() == func_8002A4D8();
+s32 IsStat1Full(void) {
+    if (IsLevelCapped(GetStat1Level() + 1) != 0) {
+        return GetStat1Exp() == GetStat1ExpNeeded();
     }
     return 0;
 }
 
-s32 func_8002A44C(void) {
-    s32 b = func_8002A4D8();
-    return func_8002A4C8() >= b;
+s32 Stat1ExpReached(void) {
+    s32 b = GetStat1ExpNeeded();
+    return GetStat1Exp() >= b;
 }
 
-void func_8002A480(void) {
+void Stat1LevelUp(void) {
     s32 v = D_80078EEC + 1;
     if (v >= 0x1F) {
         v = 0x1E;
@@ -10384,67 +10390,67 @@ void func_8002A480(void) {
     D_80078EF0 = 0;
 }
 
-s32 func_8002A4B8(void) {
+s32 GetStat1Level(void) {
     return D_80078EEC;
 }
 
-s32 func_8002A4C8(void) {
+s32 GetStat1Exp(void) {
     return D_80078EF0;
 }
 
-s32 func_8002A4D8(void) {
+s32 GetStat1ExpNeeded(void) {
     return *(u16 *)((u8 *)D_800638FC + (D_80078EEC << 4));
 }
 
-s32 func_8002A4FC(void) {
+s32 GetStat1Value(void) {
     return *(u16 *)(D_800638FE + (D_80078EEC << 4));
 }
 
-s32 func_8002A520(u8 *a) {
-    return func_8002A544(*(u8 *)(a + 0xc8));
+s32 GainStat3FromActor(u8 *a) {
+    return GainStat3(*(u8 *)(a + 0xc8));
 }
 
-s32 func_8002A544(void) {
+s32 GainStat3(void) {
     s32 n;
-    if (func_8002A5C4() != 0) {
-        n = func_8002A728();
+    if (AddStat3Exp() != 0) {
+        n = GetStat3Level();
         func_8016E918(3, *(u16 *)(D_80063902 + (n << 4)) - *(u16 *)(D_80063902 + ((n - 1) << 4)));
-        func_8002D4C8(0xB2C, 0);
-        func_8002AAAC();
+        PlaySoundId(0xB2C, 0);
+        LevelUpHook();
         return 1;
     }
     return 0;
 }
 
-s32 func_8002A5C4(s32 d) {
-    s32 t = func_8002AA00(func_8002A728() + 1);
-    if (func_8002A748() != 0 && t >= 0) {
+s32 AddStat3Exp(s32 d) {
+    s32 t = IsLevelCapped(GetStat3Level() + 1);
+    if (GetStat3ExpNeeded() != 0 && t >= 0) {
         D_80078F00 += d;
-        if (func_8002A6BC() != 0) {
+        if (Stat3ExpReached() != 0) {
             if (t != 0) {
-                D_80078F00 = func_8002A748();
+                D_80078F00 = GetStat3ExpNeeded();
                 return 0;
             }
-            func_8002A6F0();
+            Stat3LevelUp();
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_8002A670(void) {
-    if (func_8002AA00(func_8002A728() + 1) != 0) {
-        return func_8002A738() == func_8002A748();
+s32 IsStat3Full(void) {
+    if (IsLevelCapped(GetStat3Level() + 1) != 0) {
+        return GetStat3Exp() == GetStat3ExpNeeded();
     }
     return 0;
 }
 
-s32 func_8002A6BC(void) {
-    s32 b = func_8002A748();
-    return func_8002A738() >= b;
+s32 Stat3ExpReached(void) {
+    s32 b = GetStat3ExpNeeded();
+    return GetStat3Exp() >= b;
 }
 
-void func_8002A6F0(void) {
+void Stat3LevelUp(void) {
     s32 v = D_80078EFC + 1;
     if (v >= 0x1F) {
         v = 0x1E;
@@ -10453,69 +10459,69 @@ void func_8002A6F0(void) {
     D_80078F00 = 0;
 }
 
-s32 func_8002A728(void) {
+s32 GetStat3Level(void) {
     return D_80078EFC;
 }
 
-s32 func_8002A738(void) {
+s32 GetStat3Exp(void) {
     return D_80078F00;
 }
 
-s32 func_8002A748(void) {
+s32 GetStat3ExpNeeded(void) {
     return *(u16 *)(D_80063900 + (D_80078EFC << 4));
 }
 
-s32 func_8002A76C(void) {
+s32 GetStat3Value(void) {
     return *(u16 *)(D_80063902 + (D_80078EFC << 4));
 }
 
-void func_8002A790(u8 *a) {
-    func_8002A7B4(*(u8 *)(a + 0xc9));
+void GainStat2FromActor(u8 *a) {
+    GainStat2(*(u8 *)(a + 0xc9));
 }
 
-s32 func_8002A7B4(s32 d) {
+s32 GainStat2(s32 d) {
     s32 k;
     s32 r;
-    if (func_8002A834(d)) {
-        k = func_8002A998();
+    if (AddStat2Exp(d)) {
+        k = GetStat2Level();
         func_8016E918(2, *(u16 *)(D_80063906 + (k << 4)) - *(u16 *)(D_80063906 + ((k - 1) << 4)));
-        func_8002D4C8(0xB2C, 0);
-        func_8002AAAC();
+        PlaySoundId(0xB2C, 0);
+        LevelUpHook();
         return 1;
     }
     r = 0;
     return r;
 }
 
-s32 func_8002A834(s32 d) {
-    s32 t = func_8002AA00(func_8002A998() + 1);
-    if (func_8002A9B8() != 0 && t >= 0) {
+s32 AddStat2Exp(s32 d) {
+    s32 t = IsLevelCapped(GetStat2Level() + 1);
+    if (GetStat2ExpNeeded() != 0 && t >= 0) {
         D_80078EF8 += d;
-        if (func_8002A92C() != 0) {
+        if (Stat2ExpReached() != 0) {
             if (t != 0) {
-                D_80078EF8 = func_8002A9B8();
+                D_80078EF8 = GetStat2ExpNeeded();
                 return 0;
             }
-            func_8002A960();
+            Stat2LevelUp();
             return 1;
         }
     }
     return 0;
 }
 
-s32 func_8002A8E0(void) {
-    if (func_8002AA00(func_8002A998() + 1) != 0) {
-        return func_8002A9A8() == func_8002A9B8();
+s32 IsStat2Full(void) {
+    if (IsLevelCapped(GetStat2Level() + 1) != 0) {
+        return GetStat2Exp() == GetStat2ExpNeeded();
     }
     return 0;
 }
 
-s32 func_8002A92C(void) {
-    s32 b = func_8002A9B8();
-    return func_8002A9A8() >= b;
+s32 Stat2ExpReached(void) {
+    s32 b = GetStat2ExpNeeded();
+    return GetStat2Exp() >= b;
 }
 
-void func_8002A960(void) {
+void Stat2LevelUp(void) {
     s32 v = D_80078EF4 + 1;
     if (v >= 0x1F) {
         v = 0x1E;
@@ -10524,24 +10530,24 @@ void func_8002A960(void) {
     D_80078EF8 = 0;
 }
 
-s32 func_8002A998(void) {
+s32 GetStat2Level(void) {
     return D_80078EF4;
 }
 
-s32 func_8002A9A8(void) {
+s32 GetStat2Exp(void) {
     return D_80078EF8;
 }
 
-s32 func_8002A9B8(void) {
+s32 GetStat2ExpNeeded(void) {
     return *(u16 *)(D_80063904 + (D_80078EF4 << 4));
 }
 
-s32 func_8002A9DC(void) {
+s32 GetStat2Value(void) {
     return *(u16 *)(D_80063906 + (D_80078EF4 << 4));
 }
 
-s32 func_8002AA00(s32 a) {
-    s32 r = func_8002AA3C();
+s32 IsLevelCapped(s32 a) {
+    s32 r = GetLevelCap();
     s32 v;
     if (r == 0) {
         v = -1;
@@ -10551,8 +10557,8 @@ s32 func_8002AA00(s32 a) {
     return v;
 }
 
-s32 func_8002AA3C(void) {
-    s32 v = func_80029504();
+s32 GetLevelCap(void) {
+    s32 v = GetProgress();
     if (v >= 0x4B0) {
         return 0x63;
     }
@@ -10571,43 +10577,42 @@ s32 func_8002AA3C(void) {
     return 0;
 }
 
-void func_8002AAAC(void) {
+void LevelUpHook(void) {
 }
 
-s32 func_8002AAB4(void) {
-    s32 a = func_8002A26C();
-    s32 b = func_8002A4B8();
-    s32 c = func_8002A728();
-    s32 q = ((a + b + c) + func_8002A998()) / 4;
-    s32 i = 0; s32 lim; while ((lim = D_800638A0[i * 2]) != 0) { if (q >= lim) { return D_800638A0[i * 2 + 1]; } i++; }
+s32 GetRankTitle(void) {
+    s32 a = GetStat0Level();
+    s32 b = GetStat1Level();
+    s32 c = GetStat3Level();
+    s32 q = ((a + b + c) + GetStat2Level()) / 4;
+    s32 i = 0; s32 lim; while ((lim = g_RankTable[i * 2]) != 0) { if (q >= lim) { return g_RankTable[i * 2 + 1]; } i++; }
     return D_800638EC;
 }
 
 void func_8002AB64(void) {
     s16 i;
-    u8 n = func_800291B4(0x2E) + 1;
-    func_800291A0(0x2E, n);
+    u8 n = GetVar(0x2E) + 1;
+    SetVar(0x2E, n);
     if (n == 1) {
         for (i = 1; i < 7; i++) {
-            func_8002AC00(i & 0xFF);
+            GiveItem(i & 0xFF);
         }
         for (i = 0x3B; i < 0x40; i++) {
-            func_800291A0(i, 3);
+            SetVar(i, 3);
         }
     }
 }
 
 extern u8 D_8010F46C[];
 
-void func_8002AC00(s32 n) {
+void GiveItem(s32 n) {
     u8 id = n + 0x62;
     u8 k = n;
-    u16 *tbl = (u16 *)D_800A6588;
+    u16 *tbl = (u16 *)g_ItemValues;
     s32 o;
-    if (!(func_800291B4(id) & 0x80)) {
+    if (!(GetVar(id) & 0x80)) {
         o = k * 8;
-        /* MATCH-TRICK: void call of the s32-defined func_800291A0 (no return value): v0 then has one set, so sched1 keeps the table address before the first call */
-        ((void (*)())func_800291A0)(id, D_8010F46C[o + 2] | 0x80);
+        SetVar(id, D_8010F46C[o + 2] | 0x80);
         tbl[k - 1] = *(u16 *)(D_8010F46C + o);
     }
 }
@@ -10621,10 +10626,10 @@ void func_8002AC98(void) {
     s32 j;
     s16 v; /* PORT NOTE: read before set, as the original (t == 2 with r == 0, or t > 3, keeps the previous value) */
     s16 lim;
-    u16 *p = (u16 *)D_800A6588;
+    u16 *p = (u16 *)g_ItemValues;
     if (D_80078EBA == 0) {
         for (i = 0; i < 0x40; i++) {
-            t = func_800291B4(i + 0x63) & 0xF;
+            t = GetVar(i + 0x63) & 0xF;
             if (t != 0) {
                 r = rand() & 0x1F;
                 switch (t) {
@@ -10666,56 +10671,56 @@ s32 func_8002AE60(void) {
     s16 i = 0;
     s16 n = 0;
     for (; i < 0x2B; i++) {
-        if (func_800291B4(i + 0x63) & 0x40) {
+        if (GetVar(i + 0x63) & 0x40) {
             n++;
         }
     }
     return n > 0x2A;
 }
 
-void func_8002AED0(void) {
-    D_800760C8 = 1;
+void RequestSave(void) {
+    g_SaveRequest = 1;
 }
 
-void func_8002AEE4(void) {
-    D_800760C8 = 2;
+void RequestClearSave(void) {
+    g_SaveRequest = 2;
 }
 
-void func_8002AEF8(void) {
-    D_800760C8 = 0;
+void ClearSaveRequest(void) {
+    g_SaveRequest = 0;
 }
 
-s32 func_8002AF08(void) {
-    return D_800760C8;
+s32 GetSaveRequest(void) {
+    return g_SaveRequest;
 }
 
-void func_8002AF18(void) {
-    D_800760AC = 0;
-    D_8007609C = 0;
+void ResetCardState(void) {
+    g_CardStep = 0;
+    g_CardStatus = 0;
     D_800760A0 = 0;
     D_800760A4 = 0;
     D_800760A8 = 0;
 }
 
-u8 *func_8002AF48(s32 i) {
+u8 *GetCardSlotHeader(s32 i) {
     return D_80075A50 + ((i + 1) << 7);
 }
 
-s32 func_8002AF60(void) {
-    return D_80075A40;
+s32 GetCardDirWord(void) {
+    return g_CardDir;
 }
 
-void func_8002AF70(Blob2DC *src, s32 v) {
-    func_80016714(&D_80075CC0, 0x300);
-    D_80075CC0 = *src;
+void SetCardSaveData(Blob2DC *src, s32 v) {
+    ZeroFill(&g_CardSaveBuf, 0x300);
+    g_CardSaveBuf = *src;
     D_80076040 = v;
 }
 
-void func_8002B00C(Blob2DC *dst) {
-    *dst = D_80075CC0;
+void GetCardSaveData(Blob2DC *dst) {
+    *dst = g_CardSaveBuf;
 }
 
-s32 func_8002B064(u8 *p) {
+s32 ChecksumSlotHeader(u8 *p) {
     s32 sum = 0;
     s32 end = (s32)p + 0x70;
     do {
@@ -10724,7 +10729,7 @@ s32 func_8002B064(u8 *p) {
     return sum & 0xFFFF;
 }
 
-s32 func_8002B08C(u8 *p) {
+s32 ChecksumSaveData(u8 *p) {
     s32 sum = 0;
     s32 end = (s32)p + 0x300;
     do {
@@ -10751,21 +10756,21 @@ extern u8 D_80063AEC[];
 extern char D_80072DFC[];
 extern u8 D_80072E10[];
 extern char D_80072E3C[];
-extern u8 D_80075840[];
+extern u8 g_CardFileBuf[];
 extern u8 D_80075FC0[];
 extern u8 D_80076044[];
 extern s32 D_80076094[];
-extern s32 D_800760B0;
+extern s32 g_CardPort;
 extern s32 D_800760B4;
 extern s32 D_800760B8;
 extern u16 D_800760BC;
 extern u16 D_800760C0;
-extern u32 D_800760C4;
+extern u32 g_CardResult;
 typedef struct { s32 status; s32 info; } CardSlot;
-s32 func_8002C320(void);
-s32 func_8002C3B0(s32 n, u8 *p);
+s32 CheckCardSlots(void);
+s32 CountCardBlocks(s32 n, u8 *p);
 
-u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
+u8 CardStep(s32 mode, s32 slot, u8 *out) {
     s32 cmd;
     u32 rslt;
     s32 n;
@@ -10776,222 +10781,222 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
     case 0:
         break;
     case -1:
-        switch (D_800760AC) {
+        switch (g_CardStep) {
         case 0:
             D_800760B8 = 0;
             if ((mode & 7) == 0) {
-                D_800760AC++;
+                g_CardStep++;
             } else if ((mode & 7) == 1) {
-                D_800760AC = 7;
+                g_CardStep = 7;
                 D_800760B8 = mode & 0x18;
             } else if ((mode & 7) == 2) {
-                D_800760AC = 0x1E;
+                g_CardStep = 0x1E;
                 D_800760B8 = mode & 0x18;
             } else if ((mode & 7) == 3) {
-                D_800760AC = 0x23;
+                g_CardStep = 0x23;
                 D_800760B8 = mode & 0x18;
             }
             break;
         case 1:
-            D_800760B0 = 0;
+            g_CardPort = 0;
             MemCardExist(0);
-            D_800760AC++;
+            g_CardStep++;
             break;
         case 2:
-            D_800760AC++;
+            g_CardStep++;
             break;
         case 3:
-            if (D_8007609C == 7) {
-                D_800760B0 = 0;
-                D_800760AC++;
+            if (g_CardStatus == 7) {
+                g_CardPort = 0;
+                g_CardStep++;
             } else {
-                D_800760AC = 0;
+                g_CardStep = 0;
             }
             break;
         case 4:
-            rslt = MemCardOpen(D_800760B0, D_80072DFC, 1);
+            rslt = MemCardOpen(g_CardPort, D_80072DFC, 1);
             if (rslt != 0) {
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             }
-            D_800760AC++;
+            g_CardStep++;
         case 5:
-            MemCardReadData((u32 *)&D_80075A40, 0x200, 0x280);
-            D_800760AC++;
+            MemCardReadData((u32 *)&g_CardDir, 0x200, 0x280);
+            g_CardStep++;
             break;
         case 6:
-            switch (D_800760C4) {
+            switch (g_CardResult) {
             case 0:
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 8;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->info = func_8002C320();
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 8;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->info = CheckCardSlots();
                 MemCardClose();
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             case 1:
                 MemCardClose();
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                 break;
             case 3:
                 MemCardClose();
-                D_800760AC = 1;
+                g_CardStep = 1;
                 break;
             case 2:
             default:
                 MemCardClose();
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 0;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 0;
                 break;
             }
             break;
         case 7:
-            if (D_8007609C != 0) {
-                D_800760B0 = 0;
+            if (g_CardStatus != 0) {
+                g_CardPort = 0;
                 D_800760B4 = 0;
                 rslt = MemCardOpen(0, D_80072DFC, 2);
                 switch (rslt) {
                 case 0:
-                    D_800760AC = 0xB;
+                    g_CardStep = 0xB;
                     break;
                 case 1:
                     ret = 2;
-                    D_800760AC = 0;
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                    g_CardStep = 0;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                     break;
                 case 2:
                     ret = 2;
-                    D_800760AC = 0;
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                    g_CardStep = 0;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                     break;
                 case 4:
                     ret = 2;
-                    D_800760AC = 0;
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 3;
+                    g_CardStep = 0;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 3;
                     break;
                 case 5:
                     MemCardClose();
-                    D_800760AC++;
+                    g_CardStep++;
                     break;
                 }
             } else {
-                D_800760AC = 1;
+                g_CardStep = 1;
             }
             break;
         case 8:
-            rslt = MemCardCreateFile(D_800760B0, D_80072DFC, 1);
+            rslt = MemCardCreateFile(g_CardPort, D_80072DFC, 1);
             switch (rslt) {
             case 0: {
                 u8 *q;
                 s32 k;
-                D_80075840[0] = 'S';
-                D_80075840[1] = 'C';
-                D_80075840[2] = 0x13;
-                D_80075840[3] = 1;
-                *(B29 *)(D_80075840 + 4) = *(B29 *)D_80072E10;
+                g_CardFileBuf[0] = 'S';
+                g_CardFileBuf[1] = 'C';
+                g_CardFileBuf[2] = 0x13;
+                g_CardFileBuf[3] = 1;
+                *(B29 *)(g_CardFileBuf + 4) = *(B29 *)D_80072E10;
                 k = 0x1B;
-                q = D_80075840 + 0x5F;
+                q = g_CardFileBuf + 0x5F;
                 do {
                     *q-- = 0;
                 } while (--k >= 0);
-                *(B20 *)(D_80075840 + 0x60) = *(B20 *)D_80063AEC;
-                *(B80 *)(D_80075840 + 0x80) = *(B80 *)(D_80063AEC + 0x2C);
-                *(B80 *)(D_80075840 + 0x100) = *(B80 *)(D_80063AEC + 0xEC);
-                *(B80 *)(D_80075840 + 0x180) = *(B80 *)(D_80063AEC + 0x1AC);
-                MemCardWriteFile(D_800760B0, D_80072DFC, (u32 *)D_80075840, 0, 0x200);
-                func_80016714(&D_80075A40, 0x280);
-                D_800760AC++;
+                *(B20 *)(g_CardFileBuf + 0x60) = *(B20 *)D_80063AEC;
+                *(B80 *)(g_CardFileBuf + 0x80) = *(B80 *)(D_80063AEC + 0x2C);
+                *(B80 *)(g_CardFileBuf + 0x100) = *(B80 *)(D_80063AEC + 0xEC);
+                *(B80 *)(g_CardFileBuf + 0x180) = *(B80 *)(D_80063AEC + 0x1AC);
+                MemCardWriteFile(g_CardPort, D_80072DFC, (u32 *)g_CardFileBuf, 0, 0x200);
+                ZeroFill(&g_CardDir, 0x280);
+                g_CardStep++;
                 break;
             }
             case 1:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                 break;
             case 2:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                 break;
             case 4:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 3;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 3;
                 break;
             case 6:
                 MemCardClose();
-                D_800760AC = 7;
+                g_CardStep = 7;
                 break;
             case 7:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 5;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 5;
                 break;
             }
             break;
         case 9:
-            MemCardWriteFile(D_800760B0, D_80072DFC, (u32 *)&D_80075A40, 0x200, 0x280);
-            D_800760AC++;
+            MemCardWriteFile(g_CardPort, D_80072DFC, (u32 *)&g_CardDir, 0x200, 0x280);
+            g_CardStep++;
             break;
         case 10:
-            switch (D_800760C4) {
+            switch (g_CardResult) {
             case 0:
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 8;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->info = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 8;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->info = 0;
                 MemCardClose();
-                D_800760AC = 7;
+                g_CardStep = 7;
                 break;
             case 1:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                 break;
             case 2:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                 break;
             case 3:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 0;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 0;
                 break;
             }
             break;
         case 11: {
             u8 *p;
-            func_80016714(D_80075840 + 0x200, 0x80);
-            p = (u8 *)&D_80075A40 + ((slot + 1) << 7);
-            D_80075A40 = D_80076040;
-            func_80016714(p, 0x80);
+            ZeroFill(g_CardFileBuf + 0x200, 0x80);
+            p = (u8 *)&g_CardDir + ((slot + 1) << 7);
+            g_CardDir = D_80076040;
+            ZeroFill(p, 0x80);
             MemCardWriteData((u32 *)p, (slot + 5) << 7, 0x80);
-            D_800760AC++;
+            g_CardStep++;
             break;
         }
         case 13: {
             u8 *p;
-            func_80016714(D_80075840 + 0x780, 0x80);
+            ZeroFill(g_CardFileBuf + 0x780, 0x80);
             D_80075FC0[0] = 0xFF;
             p = D_80075FC0 + 0x10;
-            *(Blk98 *)p = *(Blk98 *)&D_80075CC0.w[9];
-            D_800760BC = func_8002B064(p);
-            D_800760C0 = func_8002B08C(D_80075840 + 0x480);
+            *(Blk98 *)p = *(Blk98 *)&g_CardSaveBuf.w[9];
+            D_800760BC = ChecksumSlotHeader(p);
+            D_800760C0 = ChecksumSaveData(g_CardFileBuf + 0x480);
             *(u16 *)(D_80075FC0 + 4) = D_800760C0;
             *(u16 *)(D_80075FC0 + 2) = D_800760BC;
-            MemCardWriteData((u32 *)&D_80075CC0, slot * 0x300 + 0x480, 0x300);
-            D_800760AC++;
+            MemCardWriteData((u32 *)&g_CardSaveBuf, slot * 0x300 + 0x480, 0x300);
+            g_CardStep++;
             break;
         }
         case 15:
             MemCardClose();
-            D_800760C4 = MemCardOpen(D_800760B0, D_80072DFC, 1);
-            D_800760AC++;
+            g_CardResult = MemCardOpen(g_CardPort, D_80072DFC, 1);
+            g_CardStep++;
             break;
         case 19: {
             s32 sum;
@@ -10999,38 +11004,38 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
             u8 *p;
             MemCardClose();
             sum = 0;
-            p = (u8 *)&D_80075CC0;
+            p = (u8 *)&g_CardSaveBuf;
             end = (s32)p + 0x300;
             do {
                 sum += *p++;
             } while ((s32)p < end);
             if ((sum & 0xFFFF) != D_800760C0) {
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 8;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 8;
                 ret = 2;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->info = func_8002C320();
-                D_800760AC = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->info = CheckCardSlots();
+                g_CardStep = 0;
             } else {
-                D_800760C4 = MemCardOpen(D_800760B0, D_80072DFC, 2);
-                D_800760AC++;
+                g_CardResult = MemCardOpen(g_CardPort, D_80072DFC, 2);
+                g_CardStep++;
             }
             break;
         }
         case 21:
-            MemCardWriteData((u32 *)&D_80075A40, 0x200, 0x80);
-            D_800760AC++;
+            MemCardWriteData((u32 *)&g_CardDir, 0x200, 0x80);
+            g_CardStep++;
             break;
         case 23:
             MemCardWriteData((u32 *)D_80075FC0, (slot + 5) << 7, 0x80);
-            D_800760AC++;
+            g_CardStep++;
             break;
         case 25:
             MemCardClose();
-            D_800760C4 = MemCardOpen(D_800760B0, D_80072DFC, 1);
-            D_800760AC++;
+            g_CardResult = MemCardOpen(g_CardPort, D_80072DFC, 1);
+            g_CardStep++;
             break;
         case 27:
             MemCardReadData((u32 *)D_80075FC0, (slot + 5) << 7, 0x80);
-            D_800760AC++;
+            g_CardStep++;
             break;
         case 29: {
             s32 sum;
@@ -11055,42 +11060,42 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
                 }
                 ret = 1;
             }
-            ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 8;
-            ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->info = func_8002C320();
-            D_800760AC = 0;
+            ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 8;
+            ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->info = CheckCardSlots();
+            g_CardStep = 0;
             break;
         }
         case 16:
         case 20:
         case 26:
         case 31:
-            switch (D_800760C4) {
+            switch (g_CardResult) {
             case 0:
-                D_800760AC++;
+                g_CardStep++;
                 break;
             case 1:
                 ret = 2;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                 MemCardClose();
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             case 2:
                 ret = 2;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                 MemCardClose();
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             case 4:
                 ret = 2;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 3;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 3;
                 MemCardClose();
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             case 5:
                 ret = 2;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 6;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 6;
                 MemCardClose();
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             }
             break;
@@ -11098,71 +11103,71 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
         case 14:
         case 22:
         case 24:
-            switch (D_800760C4) {
+            switch (g_CardResult) {
             case 0:
-                D_800760AC++;
+                g_CardStep++;
                 break;
             case 1:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                 break;
             case 2:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                 break;
             case 3:
                 MemCardClose();
                 ret = 2;
-                D_800760AC = 0;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 0;
+                g_CardStep = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 0;
                 break;
             }
             break;
         case 18:
         case 28:
         case 33:
-            switch (D_800760C4) {
+            switch (g_CardResult) {
             case 0:
-                D_800760AC++;
+                g_CardStep++;
                 break;
             case 1:
                 ret = 2;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                 MemCardClose();
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             case 3:
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 0;
                 ret = 2;
                 MemCardClose();
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             case 2:
                 ret = 2;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                 MemCardClose();
-                D_800760AC = 0;
+                g_CardStep = 0;
                 break;
             }
             break;
         case 30:
-            if (D_8007609C != 0) {
-                D_800760B0 = 0;
+            if (g_CardStatus != 0) {
+                g_CardPort = 0;
                 D_800760B4 = 0;
-                D_800760C4 = MemCardOpen(0, D_80072DFC, 1);
-                D_800760AC++;
+                g_CardResult = MemCardOpen(0, D_80072DFC, 1);
+                g_CardStep++;
             } else {
-                D_800760AC = 1;
+                g_CardStep = 1;
             }
             break;
         case 17:
         case 32:
-            MemCardReadData((u32 *)&D_80075CC0, slot * 0x300 + 0x480, 0x300);
-            D_800760AC++;
+            MemCardReadData((u32 *)&g_CardSaveBuf, slot * 0x300 + 0x480, 0x300);
+            g_CardStep++;
             break;
         case 34: {
             s32 sum;
@@ -11171,7 +11176,7 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
             MemCardClose();
             D_800760C0 = *(u16 *)(D_80075AC0 + (slot << 7) + 4);
             sum = 0;
-            p = (u8 *)&D_80075CC0;
+            p = (u8 *)&g_CardSaveBuf;
             end = (s32)p + 0x300;
             do {
                 sum += *p++;
@@ -11181,32 +11186,32 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
             } else {
                 ret = 2;
             }
-            D_800760AC = 0;
+            g_CardStep = 0;
             break;
         }
         case 35:
-            if (D_8007609C == 0) {
-                D_800760AC = 1;
+            if (g_CardStatus == 0) {
+                g_CardStep = 1;
             } else {
-                D_800760B0 = 0;
+                g_CardPort = 0;
                 D_800760B4 = 0;
                 rslt = MemCardFormat(0);
                 switch (rslt) {
                 case 0:
                     ret = 1;
-                    D_800760AC = 0;
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 6;
+                    g_CardStep = 0;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 6;
                     break;
                 case 1:
                     ret = 2;
-                    D_800760AC = 0;
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                    g_CardStep = 0;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                     break;
                 case 3:
                 default:
                     ret = 2;
-                    D_800760AC = 0;
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 0;
+                    g_CardStep = 0;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 0;
                     break;
                 }
             }
@@ -11218,20 +11223,20 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
         case 1:
             switch (rslt) {
             case 0:
-                if ((u32)((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status < 3) {
-                    MemCardAccept(D_800760B0);
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 1;
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->info = 0;
+                if ((u32)((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status < 3) {
+                    MemCardAccept(g_CardPort);
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 1;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->info = 0;
                 }
                 break;
             case 3:
-                MemCardAccept(D_800760B0);
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 1;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->info = 0;
+                MemCardAccept(g_CardPort);
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 1;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->info = 0;
                 break;
             default:
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->info = 0;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->info = 0;
                 break;
             }
             break;
@@ -11239,45 +11244,45 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
             switch (rslt) {
             case 0:
             case 3:
-                rslt = MemCardGetDirentry(D_800760B0, D_80072DFC, D_80076044 + (D_800760B0 >> 4) * 0x28,
-                                          &D_80076094[D_800760B0 >> 4], 0, 1);
+                rslt = MemCardGetDirentry(g_CardPort, D_80072DFC, D_80076044 + (g_CardPort >> 4) * 0x28,
+                                          &D_80076094[g_CardPort >> 4], 0, 1);
                 switch (rslt) {
                 case 0:
-                    if (D_80076094[D_800760B0 >> 4] != 0) {
-                        ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 7;
+                    if (D_80076094[g_CardPort >> 4] != 0) {
+                        ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 7;
                     } else {
-                        ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 6;
-                        switch (MemCardGetDirentry(D_800760B0, D_80072E3C, D_80079A70, &n, 0, 15)) {
+                        ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 6;
+                        switch (MemCardGetDirentry(g_CardPort, D_80072E3C, D_80079A70, &n, 0, 15)) {
                         case 0:
-                            if (func_8002C3B0(n, D_80079A70) >= 15) {
-                                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 5;
+                            if (CountCardBlocks(n, D_80079A70) >= 15) {
+                                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 5;
                             }
                             break;
                         case 1:
-                            ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                            ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                             break;
                         default:
-                            ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                            ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                             break;
                         }
                     }
                     break;
                 case 1:
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 2;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 2;
                     break;
                 default:
-                    ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                    ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                     break;
                 }
                 break;
             case 4:
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 3;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 3;
                 break;
             case 1:
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 1;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 1;
                 break;
             default:
-                ((CardSlot *)((u8 *)&D_8007609C + ((D_800760B0 >> 4) << 3)))->status = 4;
+                ((CardSlot *)((u8 *)&g_CardStatus + ((g_CardPort >> 4) << 3)))->status = 4;
                 break;
             }
             break;
@@ -11286,13 +11291,13 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
         case 4:
         case 5:
         case 6:
-            D_800760C4 = rslt;
+            g_CardResult = rslt;
             break;
         }
         break;
     }
     out[0] = 0;
-    out[1] = D_8007609C;
+    out[1] = g_CardStatus;
     out[4] = D_800760A0;
     out[5] = (u32)D_800760A0 >> 8;
     out[6] = (u32)D_800760A0 >> 16;
@@ -11300,7 +11305,7 @@ u8 func_8002B0B4(s32 mode, s32 slot, u8 *out) {
     return ret;
 }
 
-s32 func_8002C320(void) {
+s32 CheckCardSlots(void) {
     s32 result = 0;
     s32 k;
     s32 j;
@@ -11322,7 +11327,7 @@ s32 func_8002C320(void) {
     return result;
 }
 
-s32 func_8002C3B0(s32 n, u8 *p) {
+s32 CountCardBlocks(s32 n, u8 *p) {
     s32 i = 0; s32 sum = 0; s32 v; s32 q;
     s32 pad[2];
     if (n > 0) {

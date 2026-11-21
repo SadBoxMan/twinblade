@@ -7,9 +7,9 @@ cannot.
 ## 1. `make regress`: every byte-identical check in one table
 
 ```
-make regress                       # all 182 images (the commands below run from PowerShell, never Git Bash)
-make regress R="abil"              # one area: main, ovl, abil or stg
-make regress R="stg sc03_005"      # or image names (ovl38, stage, ovl2c, sc02_031, ...)
+make regress                       # all 217 images (r442; the commands below run from PowerShell, never Git Bash)
+make regress R="abil"              # one area: main, ovl, abil, stg or blk
+make regress R="stg sc03_005"      # or image names (ovl38, stage, ovl2c, sc02_031, sc02_009, ...)
 .venv\Scripts\python.exe -I tools/regress.py --no-build    # compare what is already built, no make
 ```
 
@@ -25,6 +25,7 @@ original changed) and the error lines from `build/regress/<area>.log`, and exits
 | ovl | ovl38 (main_01), stage (the engine + the village, SC03_001), the mode overlays ovl39, 36, 37, 3a, 3b | disc/overlays, disc/pac4 |
 | abil | the 35 ability packages ovl13-ovl35 | disc/overlays/code |
 | stg | the 139 other stage images | disc/pac4 |
+| blk | r442: the 34 code blocks loaded behind a stage image and MAIN.CD entry 12 (blk/, tools/gen_block_cfgs.py; docs/type1_blocks.md) | disc/blocks (`make blocks` extracts them) |
 
 Times on 22 Oct (8 jobs): from a fresh `make split`, 103 s; already built, 28 s (about 5 s per area is make reading
 the Makefile).
@@ -33,13 +34,13 @@ Two guards keep a PASS honest:
 * **No stale passes.** Each checked binary is deleted before make runs, so a compile or link that fails leaves it
   missing ("not built") instead of letting the copy from an earlier build pass. Only the objcopy step is redone when
   nothing changed.
-* **The originals are pinned.** `tools/regress_baseline.txt` records the SHA-1 and size of all 182 originals (recorded
-  22 Oct from disc/ as extracted then, every one matched by the build). disc/ is one folder shared by every worktree
+* **The originals are pinned.** `tools/regress_baseline.txt` records the SHA-1 and size of all 217 originals (182 recorded
+  22 Oct, the 35 blk originals added by r442 on 7 Nov from disc/ as extracted then, every one matched by the build). disc/ is one folder shared by every worktree
   through a junction; if a file in it is re-extracted differently or damaged, the check fails as "original changed"
   instead of comparing against the wrong bytes. Re-record only on purpose:
   `.venv\Scripts\python.exe -I tools/regress.py --record-baseline`.
 
-**What it proves:** every matched function, every INCLUDE_ASM block and every data piece of the 182 images assembles
+**What it proves:** every matched function, every INCLUDE_ASM block and every data piece of the 217 images assembles
 and links to the disc's exact bytes. For a function written in C, the C compiles under GCC 2.7.2 + maspsx to the
 original instructions.
 
@@ -49,7 +50,9 @@ original instructions.
   pointer sizes differently. Phase 2 (below) covers this.
 * That the PC port's recompiled or interpreted code is right (Phase 2).
 * Anything about images not in the table: the DATA in MAIN.CD outside the code blocks, the stage images' engine copies
-  in the other 139 images (they are bin pieces taken from the disc, not rebuilt from src/stage: Phase 3).
+  in the other 139 images and in MAIN.CD 12 (they are bin pieces taken from the disc, not rebuilt from src/stage: Phase
+  3), and MAIN.CD 9 (an older prologue nothing loads, left out on purpose: docs/type1_blocks.md). (r406 found 36 code
+  blocks no config named; r442 split and checks 35 of them, area blk.)
 * Progress: a stage or ability file can be byte-identical while still mostly INCLUDE_ASM. `make progress` and
   `make stage-progress` count that; neither is a correctness check.
 
@@ -71,9 +74,10 @@ it follows `GIT_INDEX_FILE`) and rebuilds only the images they can change:
 |---|---|
 | src/abil/ovlNN.c, abil/ovlNN.yaml, abil/symbol_addrs_ovlNN.txt | that ability package |
 | src/stg/scNN_NNN.c, stg/scNN_NNN.yaml, stg/symbol_addrs_scNN_NNN.txt | that stage image |
-| src/stage/*, stg/symbol_addrs_engine.txt | the village and all 139 stage images (r192: the engine is in every image; r161 found only `stage` checked) |
+| src/blk/<name>.c, blk/<name>.yaml, blk/symbol_addrs_<name>.txt | that code block (r442) |
+| src/stage/*, stg/symbol_addrs_engine.txt | the village, all 139 stage images and (r442) the 35 blocks (r192: the engine is in every image; r161 found only `stage` checked; the blocks name the engine's functions through that file) |
 | src/ovlNN/*, ovlNN.yaml, stage.yaml | that overlay (stage = the engine + the village) |
-| src/*.c or .h (the EXE), include/, Makefile, slus_007.26.yaml, the top-level symbol_addrs*.txt, undefined_syms*.txt, reloc_addrs.txt, tools/jtbl_relabel.py, exe_syms.py, gen_ability_ovls.py, gen_stage_cfgs.py, regress.py, maspsx_tw.py, regress_baseline.txt | all 182 (the EXE's symbols are linked into every image) |
+| src/*.c or .h (the EXE), include/, Makefile, slus_007.26.yaml, the top-level symbol_addrs*.txt, undefined_syms*.txt, reloc_addrs.txt, tools/jtbl_relabel.py, exe_syms.py, gen_ability_ovls.py, gen_stage_cfgs.py, gen_block_cfgs.py, regress.py, maspsx_tw.py, regress_baseline.txt | all 217 (the EXE's symbols are linked into every image) |
 | anything else: docs/, pc/, the launcher, other tools, notes | nothing: the hook exits at once |
 
 A one-stage commit costs about 11 s; a commit touching the EXE or a header runs the whole suite (about 30 s built).
@@ -495,27 +499,40 @@ it is byte-checked; the C share is the part that is also readable. On 22 Oct 202
 | abil | 98 KB | 78 KB | 0.2 KB | 20 KB | 0 | 79.8 % |
 | stg (own code) | 4796 KB | 1175 KB | 9 KB | 3612 KB | 0 | 24.5 % |
 
-Every code block on the disc is under a byte check: the EXE, the 140 stage images, main_01 and the 40 code blocks
-`make overlays` extracts from MAIN.CD (35 ability packages, 5 mode overlays). What is not checked is data in MAIN.CD
-outside those blocks (assets).
+Under a byte check: the EXE, the 140 stage images, main_01 and the 40 code blocks `make overlays` extracts from
+MAIN.CD (35 ability packages, 5 mode overlays). **Correction (r406, 7 Nov): that is not every code block on the disc.**
+36 code blocks the game loads are in no yaml and no check: 34 type-1 blocks in the SC archives that load behind a
+stage image (SC02_009, SC07_003, SC07_004, the village event blocks SC03_053 / 054 / 056 and the 28 shop-room blocks;
+1,515 functions, 501 new shapes), MAIN.CD entry 12 (the engine image of the Continue and save screens: the matched
+engine plus 33 own functions) and MAIN.CD entry 9 (an older prologue, never loaded). The census, the port's status
+(it interprets them all) and the plan to split and check them: docs/type1_blocks.md (`tools/type1_census.py`).
+**r442 (7 Nov): 35 of the 36 are now split and checked** (area blk, `make check-blk`, 217 images): the 34 blocks as
+overlays of their host stage (blk/<name>.yaml at the host's load address, outside symbols named as the host names
+them) and MAIN.CD 12 stage-style (blk/main_12.yaml, its engine a bin piece proven below); all 1,548 functions are
+INCLUDE_ASM (68 of them splat's `jr ra` stubs), byte-identical. MAIN.CD 9 stays out (never loaded, cannot link).
+Not checked either: data in MAIN.CD and the SC archives outside the code blocks (assets).
 
 **The shared engine in all 140 images.** The 139 other stage images carry their engine (0x80128158-0x8017BE9C) as a
 binary piece from the disc, not rebuilt from src/stage, so their check does not test the engine's C. The coverage
 step proves every image's engine is the village's word for word once relocated addresses are masked (the masking of
 tools/stage_census.py: lui 0x8017-0x8020 and the offsets off it, jal targets into the own code): PASS, 140 of 140.
+r442: the same proof for MAIN.CD 12 (blk/main_12), its own line (`engine: MAIN.CD 12 ... PASS`), cached in
+build/regress/engine_identity_main12.json; all 85,841 engine words (0x80128158-0x8017BE9C) equal the village's.
 With `check-stage` rebuilding the village's engine from src/stage, the engine's C is thereby checked for every image.
 A failure fails `make regress`. The result is cached in build/regress/engine_identity.json against the originals'
 hashes (tools/regress_baseline.txt).
 
 **`make progress`** now reads the sources only (no build) and counts empty stubs apart from real matches, per unit
-(main EXE, each overlay, the stage engine, the ability packages, then tools/stage_progress.py's stage line). Before,
+(main EXE, each overlay, the stage engine, the ability packages, r442 the code blocks, then tools/stage_progress.py's
+stage line). Before,
 the overlays and ability packages counted a stub as decompiled (the ability packages' "603 / 660" was 582 real
 matches and 21 stubs).
 
 ## 6. Proposal: a golden-frame suite for the PC port (Phase 4, design only, for LuciDin to decide)
 
 Today the port is tested by scripted runs (tools/pc_test_run.ps1: TWINBLADE_TEST_PRESS inputs by frame, screenshots
-every N frames) compared by eye, at 4:3 and widescreen. The proposal turns a fixed set of those runs into an
+every N frames; r828: it starts the game through tools/game_launch.ps1, the console minimized and the game window normal)
+compared by eye, at 4:3 and widescreen. The proposal turns a fixed set of those runs into an
 automatic pass/fail with stored approved results ("goldens").
 
 **It needs deterministic runs first (r129, done 24 Oct: `deterministic` and `as_shipped` in pc_test_run.ps1,
@@ -679,6 +696,7 @@ python -I tools/clean_build.py [--root DIR] [--days N] [--list] [--show-keep] [-
 ## 10. The port accuracy check and the test levels (r247, 4 Nov 2026)
 
 tools/port_accuracy_check.py is every port card's gate (docs/port_accuracy.md section 7 has its areas and history).
+r828: it starts every game through tools/game_launch.py (the console minimized without focus, the game window normal).
 Since r247 it runs three window modes (windowed, borderless, fullscreen) with both renderers (software, the As Shipped
 one; hardware, a logged exception) on three profiles (`console` = As Shipped, `console_card_fast`, `fast`), and each
 run plays a 2.5-minute route LuciDin recorded on that profile (dialogue, map changes, a debug-menu warp on the fast
@@ -734,6 +752,8 @@ the logo movie) are counted but not compared (card F4).
   LuciDin's recorded routes to vblank 8900; the hardware full-screen block hands off, or
   --exclusive skip now and --exclusive only later) ALL PASS, plus the A/B at 4:3 and 16:9 where the picture can
   change."
+
+**Unattended real-time runs (r304, 5 Nov):** Windows turns the monitors off after 15 idle minutes, and a run then fails timing (53.6 Hz, 99 resets; docs/monitor_refresh_r304.md). Keep the display on through any run with the PC idle. `--monitor primary` or `secondary` places a run on that monitor and keeps each run's present.txt (TWINBLADE_PRESENT_STATS); the rule stays the secondary, and the primary needs LuciDin's or the dispatcher's yes.
 
 **Recording a route** (only when the routes have to change; LuciDin plays): `--record-route <profile> --debug-menu`
 starts the game borderless on the secondary monitor in the check's own setup (As Shipped, the window settings fixed,

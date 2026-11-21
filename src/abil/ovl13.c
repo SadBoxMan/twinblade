@@ -2,28 +2,28 @@
 #include "abil.h"
 
 extern void func_80154A74();
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl13_800CC57C[];
 extern u8 D_ovl13_800CC5BC[];
 extern u8 D_ovl13_800CB93C[];
-extern AbilStep D_ovl13_800CB880[];
+extern AbilStep Stun_StepTable[];
 extern s32 func_80161104();
-void func_ovl13_800CAEE0(s32 arg0);
+void Stun_Step1Start(s32 arg0);
 
-void func_ovl13_800CAE0C(void) {
-    func_800183E0(D_ovl13_800CC57C);
-    func_800183E0(D_ovl13_800CC5BC);
-    func_800183E0(D_ovl13_800CB93C);
+void Stun_QueueImages(void) {
+    QueueImage(D_ovl13_800CC57C);
+    QueueImage(D_ovl13_800CC5BC);
+    QueueImage(D_ovl13_800CB93C);
 }
 
-void func_ovl13_800CAE54(u8 *a) {
+void Stun_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
-    D_ovl13_800CB880[AF(a, u8, 0x197)](a);
+    Stun_StepTable[AF(a, u8, 0x197)](a);
 }
 
-void func_ovl13_800CAE98(u8 *a) {
+void Stun_Step0Wait(u8 *a) {
     if (func_80161104() != 0) {
-        func_ovl13_800CAEE0(a);
+        Stun_Step1Start(a);
         AF(a, u8, 0x197)++;
     }
 }
@@ -38,7 +38,7 @@ extern void func_80155FD4();
 extern void func_801599A4();
 extern void func_80159B3C();
 extern s32 func_80161208();
-extern void func_ovl13_800CB05C();
+extern void Stun_RampScale();
 
 extern void func_ovl13_800CB054();
 extern void func_80146A6C();
@@ -49,15 +49,15 @@ extern s32 RotMatrixZ();
 extern s32 rand();
 
 extern u8 D_80062BD0;
-extern u8 D_ovl13_800CB830;
+extern u8 Stun_SwingAnim;
 extern void func_80154274();
 extern void func_80147324();
 extern void func_801655E4();
 extern void func_80156648();
 extern void StartRumbleScript();
 
-void func_ovl13_800CAEE0(s32 arg0) {
-    func_80154274(arg0, (s32) &D_ovl13_800CB830);
+void Stun_Step1Start(s32 arg0) {
+    func_80154274(arg0, (s32) &Stun_SwingAnim);
     func_80154A74(arg0, 0x15);
     func_80147324(0x477);
     func_801655E4(arg0);
@@ -70,7 +70,7 @@ void func_ovl13_800CAEE0(s32 arg0) {
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
-void func_ovl13_800CAF68(u8 *arg0) {
+void Stun_Step2Swing(u8 *arg0) {
     u8 temp_a1;
 
     AF(arg0, s32, 0x44) = (s32) (AF(arg0, s32, 0x44) | 2);
@@ -80,7 +80,7 @@ void func_ovl13_800CAF68(u8 *arg0) {
         }
         temp_a1 = AF(arg0, u8, 0xBF);
         if (temp_a1 != 0) {
-            func_ovl13_800CB05C(arg0, temp_a1);
+            Stun_RampScale(arg0, temp_a1);
         }
         if (AF(arg0, u16, 0xB8) == 0x8000) {
             func_801599A4(arg0);
@@ -102,7 +102,7 @@ void func_ovl13_800CB054(u8 *arg0) {
     AF(arg0, s32, 0xC0) = 0;
 }
 
-void func_ovl13_800CB05C(u8 *arg0, s32 k) {
+void Stun_RampScale(u8 *arg0, s32 k) {
     s32 t;
 
     switch ((u8) k) {
@@ -127,7 +127,7 @@ void func_ovl13_800CB05C(u8 *arg0, s32 k) {
     }
 }
 
-void func_ovl13_800CB0E8(u8 *arg0) {
+void Stun_SpawnOnActor(u8 *arg0) {
     void *temp_v0;
 
     temp_v0 = func_80146994(0x15, arg0, 0, 0);
@@ -143,7 +143,7 @@ extern void func_800D1FC8();
 extern s32 func_800D21C4();
 extern void func_80128EA8();
 
-extern AMtx D_800AE620;
+extern AMtx GsIDMATRIX;
 extern u8 D_ovl13_800CB88C;
 extern void func_800D20C0();
 extern void func_800D23D0();
@@ -158,7 +158,7 @@ static inline void ovl13_place(u8 *arg0, u8 *q) {
     AMtx m;
     s16 ang;
 
-    m = D_800AE620;
+    m = GsIDMATRIX;
     ang = AF(arg0, s16, 0x10);
     RotMatrixZ(ang, &m);
     v.vx = AF(arg0, s32, 0x30) << 2;
@@ -170,7 +170,7 @@ static inline void ovl13_place(u8 *arg0, u8 *q) {
     AF(arg0, u16, 6) = v.vx;
     AF(arg0, u16, 0xA) = v.vy;
     AF(arg0, u16, 0xE) = v.vz;
-    m = D_800AE620;
+    m = GsIDMATRIX;
     RotMatrixZ(ang + 0x200, &m);
     MulMatrix0(q, &m, arg0 + 0x38);
 }
@@ -209,7 +209,7 @@ fail:
     func_80146C3C(arg0);
 }
 
-void func_ovl13_800CB370(u8 *arg0) {
+void Stun_EffectAUpdate(u8 *arg0) {
     if (D_80078EC1 == 7) {
         D_ovl13_800CB908[AF(arg0, u16, 2)]();
         return;
@@ -256,7 +256,7 @@ void func_ovl13_800CB3CC(u8 *arg0) {
     func_80146C3C(arg0);
 }
 
-void func_ovl13_800CB510(u8 *arg0) {
+void Stun_EffectBUpdate(u8 *arg0) {
     if (D_80078EC1 == 7) {
         D_ovl13_800CB914[AF(arg0, u16, 2)]();
         return;
@@ -266,7 +266,7 @@ void func_ovl13_800CB510(u8 *arg0) {
 
 static inline void func_ovl13_800CB56C_body(u8 *arg0) {
     /* the whole body is an inlined helper: its locals' addresses (&m, &v) and the identity matrix's address reach the
-       calls and block moves as constants, so each `la D_800AE620` folds into its copy and &m is recomputed per call */
+       calls and block moves as constants, so each `la GsIDMATRIX` folds into its copy and &m is recomputed per call */
     AVec v;
     AVec w;
     AMtx m;
@@ -276,7 +276,7 @@ static inline void func_ovl13_800CB56C_body(u8 *arg0) {
 
     o = AF(arg0, u8 *, 0x20);
     s = AF(arg0, u8 *, 0x34);
-    m = D_800AE620;
+    m = GsIDMATRIX;
     r = AF(arg0, s16, 0x10);
     RotMatrixZ(r, &m);
     v.vx = AF(arg0, s32, 0x30) * 4;
@@ -287,7 +287,7 @@ static inline void func_ovl13_800CB56C_body(u8 *arg0) {
     AF(arg0, u16, 6) = v.vx;
     AF(arg0, u16, 0xA) = v.vy;
     AF(arg0, u16, 0xE) = v.vz;
-    m = D_800AE620;
+    m = GsIDMATRIX;
     RotMatrixZ(r + 0x200, &m);
     MulMatrix0(s + 0x38, &m, arg0 + 0x38);
     if (func_80128ED8(o, arg0 + 0x24) != 0) {
@@ -299,7 +299,7 @@ void func_ovl13_800CB56C(u8 *arg0) {
     func_ovl13_800CB56C_body(arg0);
 }
 
-void func_ovl13_800CB6E4(u8 *arg0) {
+void Stun_FollowerEmit(u8 *arg0) {
     s16 var_v1;
     s32 temp_v0;
     s32 temp_v1;
@@ -330,7 +330,7 @@ void func_ovl13_800CB6E4(u8 *arg0) {
     func_80146C3C(arg0);
 }
 
-void func_ovl13_800CB7F0(u8 *arg0) {
+void Stun_SpriteAnimStep(u8 *arg0) {
     if (func_80128ED8(AF(arg0, s32, 0x20), arg0 + 0x24) != 0) {
         func_80146C3C(arg0);
     }

@@ -8,17 +8,17 @@ extern void func_80162CCC();
 extern void func_80146CA0();
 extern void func_ovl32_800CE004();
 extern void func_ovl32_800CE134();
-extern void func_80015954();
+extern void SVecToPos();
 extern AbilStep D_ovl32_800CE220[];
 extern AbilStep D_ovl32_800CE24C[];
 extern AbilStep D_ovl32_800CE254[];
 extern AbilStep D_ovl32_800CE25C[];
 extern AbilStep D_ovl32_800CE268[];
 
-extern void func_80015978();
+extern void PosToSVec();
 extern void func_80146C3C();
 extern s32 func_80146E98();
-extern s32 func_80012F74();
+extern s32 EaseValueFrac();
 extern void func_ovl32_800CD758();
 extern s32 func_801619D0();
 extern void func_ovl32_800CD178();
@@ -32,10 +32,10 @@ extern void func_8001C810();
 extern s32 func_8014659C();
 extern void func_ovl32_800CCE68();
 extern s32 D_ovl32_800CEBEC;
-extern void func_800123F0();
-extern void func_80012558();
-extern void func_800126C4();
-extern void func_80013F3C();
+extern void RotateMatrixZ();
+extern void RotateMatrixY();
+extern void RotateMatrixX();
+extern void SetIdentityRot();
 extern s32 MulMatrix();
 extern s32 RotMatrixY();
 extern void func_80020F34();
@@ -51,12 +51,12 @@ extern void func_80159B3C();
 extern u8 D_ovl32_800CEBF4;
 extern void func_80146E90();
 extern s32 func_800D2294();
-extern void func_800233CC();
+extern void SetShapeCircle();
 
 extern u8 D_ovl32_800CE1E8;
 extern u8 D_ovl32_800CE230;
 extern s32 func_80146578();
-extern void func_8001CC3C();
+extern void InitSpriteKind3();
 extern void func_80149374();
 extern void func_ovl32_800CD5EC();
 extern void func_ovl32_800CD834();
@@ -66,7 +66,7 @@ extern void func_ovl32_800CD494();
 extern u8 D_ovl32_800CE240;
 extern s32 func_800D21C4();
 
-extern AbilStep D_ovl32_800CE1E4[];
+extern AbilStep ScrollWater_BarrierStepTable[];
 extern void func_80149020();
 
 void func_ovl32_800CCB28(u8 *arg0) {
@@ -74,10 +74,10 @@ void func_ovl32_800CCB28(u8 *arg0) {
 
     func_80149020(arg0);
     i = AF(arg0, u16, 2) - 2;
-    D_ovl32_800CE1E4[i](arg0);
+    ScrollWater_BarrierStepTable[i](arg0);
 }
 
-void func_ovl32_800CCB78(s32 arg0) {
+void ScrollWater_BarrierStart(s32 arg0) {
     func_8014B5C4(arg0, 3, 0);
     func_801466F0(7, arg0, 0, 0, /* extra? */ 0, /* extra? */ 0, /* extra? */ 0, /* extra? */ 0);
     AF(arg0, s16, 0x1C8) = 0xFF;
@@ -87,7 +87,7 @@ void func_ovl32_800CCB78(s32 arg0) {
 
 extern void func_80169A4C();
 
-extern void func_80015A2C();
+extern void SVecToVecAlt();
 extern void func_8012F14C();
 
 extern void func_80163194();
@@ -110,7 +110,7 @@ extern void func_801632E0();
 extern AbilStep D_ovl32_800CE1F4[];
 extern void func_80146994();
 
-void func_ovl32_800CCBE4(u8 *arg0) {
+void ScrollWater_BarrierObjUpdate(u8 *arg0) {
     void *temp_a1;
     void *temp_s1;
     void *temp_v1;
@@ -175,7 +175,7 @@ void func_ovl32_800CCDB0(u8 *arg0) {
     if (AF(temp_s2, u16, 0x1C8) & 0x10) {
         var_a1 = 0x1400;
     }
-    temp_v0 = func_80012F74(AF(temp_s1, s16, 0x18), var_a1, 0xA, 1);
+    temp_v0 = EaseValueFrac(AF(temp_s1, s16, 0x18), var_a1, 0xA, 1);
     AF(temp_s1, s16, 0x18) = temp_v0;
     func_ovl32_800CCF58(temp_s1, temp_v0);
     if (func_ovl32_800CCF30(arg0) == 0) {
@@ -206,7 +206,7 @@ void func_ovl32_800CCE88(u8 *arg0) {
     temp_s0 = temp_s1 + 0x34;
     AF(arg0, s16, 0xA) = (s16) (AF(temp_a0, s32, 0x4C) - 0x20);
     AF(arg0, s16, 0xE) = (s16) AF(temp_a0, s32, 0x50);
-    func_80013F3C(temp_s0);
+    SetIdentityRot(temp_s0);
     RotMatrixY(AF(temp_s1, s16, 0x12), temp_s0);
     MulMatrix(temp_s0, AF(temp_s2, void *, 0x20) + 0x34);
     func_80020F34(temp_s0, temp_s1 + 0x18);
@@ -227,7 +227,7 @@ void func_ovl32_800CCF58(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     AF(arg0, s16, 0x18) = (s16) arg1;
 }
 
-void func_ovl32_800CCF68(s32 arg0) {
+void ScrollWater_BarrierBreak(s32 arg0) {
     s32 temp_v0;
 
     temp_v0 = func_8014C088(arg0, 7);
@@ -294,7 +294,7 @@ void func_ovl32_800CD178(void) {
     func_80162CCC();
 }
 
-void func_ovl32_800CD198(u8 *a) {
+void ScrollWater_BarrierShotUpdate(u8 *a) {
     D_ovl32_800CE220[AF(a, u16, 2)](a);
 }
 
@@ -307,7 +307,7 @@ void func_ovl32_800CD1D4(u8 *arg0, s32 arg1) {
     temp_v0 = func_80146578((s32) arg0, arg1);
     AF(arg0, s32, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_8001CC3C(temp_v0, (s32) &D_ovl32_800CE1E8, 0x238, 0x180);
+        InitSpriteKind3(temp_v0, (s32) &D_ovl32_800CE1E8, 0x238, 0x180);
         AF(temp_v0, u8, 0x27) = 0x21;
         AF(temp_v0, s32, 4) = (s32) (AF(temp_v0, s32, 4) | 0x40000000);
         func_80149374(temp_s2, (s32) (arg0 + 4));
@@ -438,31 +438,31 @@ void func_ovl32_800CD63C(u8 *arg0, AMtx *arg1) {
     v.vy = r * rcos(AF(arg0, s16, 0x66)) / 4096;
     v.vz = 0;
     m = *arg1;
-    func_80015A2C(arg0 + 0x58, m.t);
+    SVecToVecAlt(arg0 + 0x58, m.t);
     func_8012F14C(&m, &v, &out);
-    func_80015954(&out, arg0 + 4);
+    SVecToPos(&out, arg0 + 4);
     AF(arg0, s16, 0x66) = (AF(arg0, s16, 0x66) + 0xE3) & 0xFFF;
 }
 
 void func_ovl32_800CD758(s32 arg0) {
-    func_80015978(arg0 + 4, arg0 + 0x58);
+    PosToSVec(arg0 + 4, arg0 + 0x58);
 }
 
 void func_ovl32_800CD780(s32 a) {
-    func_80015954((a + 0x58), (a + 0x4));
+    SVecToPos((a + 0x58), (a + 0x4));
 }
 
 void func_ovl32_800CD7A8(u8 *arg0, s32 arg1) {
     void *temp_s2;
 
     temp_s2 = AF(arg0, void *, 0x20);
-    func_80013F3C(arg1);
-    func_800126C4(arg1, AF(arg0, s16, 0x60));
-    func_800123F0(arg1, AF(arg0, s16, 0x64));
-    func_80012558(arg1, AF(arg0, s16, 0x62));
-    func_80012558(arg1, AF(temp_s2, s16, 0x12));
-    func_800126C4(arg1, AF(temp_s2, s16, 0x10));
-    func_800123F0(arg1, AF(temp_s2, s16, 0x14));
+    SetIdentityRot(arg1);
+    RotateMatrixX(arg1, AF(arg0, s16, 0x60));
+    RotateMatrixZ(arg1, AF(arg0, s16, 0x64));
+    RotateMatrixY(arg1, AF(arg0, s16, 0x62));
+    RotateMatrixY(arg1, AF(temp_s2, s16, 0x12));
+    RotateMatrixX(arg1, AF(temp_s2, s16, 0x10));
+    RotateMatrixZ(arg1, AF(temp_s2, s16, 0x14));
 }
 
 void func_ovl32_800CD834(u8 *arg0) {
@@ -477,7 +477,7 @@ void func_ovl32_800CD848(u8 *arg0) {
     s16 temp_v0;
     void *temp_v1;
 
-    temp_v0 = func_80012F74(AF(AF(arg0, void *, 0x20), s16, 0x1A), 0x1000, 4, 1);
+    temp_v0 = EaseValueFrac(AF(AF(arg0, void *, 0x20), s16, 0x1A), 0x1000, 4, 1);
     temp_v1 = AF(arg0, void *, 0x20);
     AF(temp_v1, s16, 0x1A) = temp_v0;
     AF(temp_v1, s16, 0x18) = temp_v0;
@@ -490,7 +490,7 @@ s32 func_ovl32_800CD894(u8 *arg0) {
     u8 *p;
 
     v = AF(arg0, AVec, 0x44);
-    func_80015978(arg0 + 4, &w);
+    PosToSVec(arg0 + 4, &w);
     i = 0;
     p = D_801202A0;
 loop:
@@ -546,7 +546,7 @@ void func_ovl32_800CDA80(u8 *arg0) {
     AF(arg0, s32, 0x20) = temp_v0;
     if (temp_v0 != 0) {
         temp_v0_2 = rand();
-        func_800233CC((s32) temp_s3, (temp_v0_2 & 0x1F) | 0x20);
+        SetShapeCircle((s32) temp_s3, (temp_v0_2 & 0x1F) | 0x20);
         AF(temp_v0, s32, 4) = (s32) (AF(temp_v0, s32, 4) | 0x50000000);
         AF(temp_s3, s32, 0) = (s32) (((temp_v0_2 & 0x3F) + 0x40) << 0x10);
         AF(temp_s3, s32, 4) = 0;
@@ -607,7 +607,7 @@ void func_ovl32_800CDBA8(u8 *arg0) {
         func_80146C3C(arg0);
         return;
     }
-    func_80015978(arg0 + 4, &b);
+    PosToSVec(arg0 + 4, &b);
     func_800D20C0(&b, &q, 1);
     func_800D23D0(&q);
     RotMatrixYXZ(&q, arg0 + 0x38);
@@ -664,7 +664,7 @@ void func_ovl32_800CDE04(u8 *arg0) {
         func_80146C3C(arg0);
         return;
     }
-    func_80015978(arg0 + 4, &b);
+    PosToSVec(arg0 + 4, &b);
     func_800D20C0(&b, &q, 1);
     func_800D23D0(&q);
     RotMatrixYXZ(&q, arg0 + 0x38);
@@ -682,11 +682,11 @@ void func_ovl32_800CE004(u8 *arg0) {
     func_80169A4C(arg0, arg0 + 0x38);
     if (--AF(arg0, s32, 0x1C) != 0) {
         p = arg0 + 4;
-        func_80015978(p, &a);
+        PosToSVec(p, &a);
         func_800D22E4(arg0);
-        func_80015978(p, &b);
+        PosToSVec(p, &b);
         if ((s16) func_80135168(1, &a, &b) != 0) {
-            func_80015954(&b, p);
+            SVecToPos(&b, p);
             if (AF(&b, u8, 6) == 2) {
                 if (AF(arg0, u32, 0x2C) > 0x1E00) {
                     func_80146A6C(0x11, arg0, AF(arg0, s16, 6), (s16) (AF(arg0, u16, 0xA) - 8), AF(arg0, s16, 0xE), 0, 0);

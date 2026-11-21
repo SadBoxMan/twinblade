@@ -18,6 +18,9 @@ Writes, for every stage named (default: every stage in stg/ already):
   stg/symbol_addrs_<name>.txt     the names given by hand (kept), then the outside symbols
   stg/symbol_addrs_engine.txt     the engine's functions, shared by all
 `make check-stg` rebuilds and checks every split stage, `make check-<name>` one (part of `make check`).
+r673: the two raw (not LZSS) stage images, SC02_037 and SC03_107 (`PAYLOAD`), are split and checked against their
+payload, disc/payload/stg/<NAME>.bin (tools/gen_block_cfgs.py --extract: the PAC header size - 0x800, rounded up to a
+word, as StreamReadyCallback loads it); disc/pac4 holds them as the header size from the data start, 0x800 longer.
 
 Usage: gen_stage_cfgs.py [--split] [--all | SC02_031 ...]
   --split    run splat (two passes: the first lists the outside symbols for the symbol file)
@@ -39,6 +42,16 @@ import stage_units as U  # noqa: E402
 
 BASE, ENG_END = C.BASE, C.ENG_END
 NM = os.path.join(ROOT, 'tools', 'toolchain', 'bin', 'mipsel-none-elf-nm')
+PAYLOAD = ('SC02_037', 'SC03_107')   # r673: checked against disc/payload/stg (tools/gen_block_cfgs.py RAW)
+
+
+def target(name):
+    """the image a stage is checked against, relative to the repository"""
+    return f'disc/payload/stg/{name}.bin' if name in PAYLOAD else f'disc/pac4/{name}.bin'
+
+
+def image(name):
+    return os.path.join(ROOT, *target(name).split('/'))
 
 
 def engine_funcs():
@@ -58,9 +71,9 @@ def engine_funcs():
 
 def layout(name):
     """(own code start, own code end, image length, -O0 runs) as offsets (r209: the runs from stage_units.o0_runs)"""
-    ws = C.load(os.path.join(ROOT, 'disc', 'pac4', name + '.bin'))
+    ws = C.load(image(name))
     fs = C.find_funcs(ws, (ENG_END - BASE) // 4)
-    size = os.path.getsize(os.path.join(ROOT, 'disc', 'pac4', name + '.bin'))
+    size = os.path.getsize(image(name))
     runs = [(s - BASE, e - BASE) for s, e in U.o0_runs(ws, fs, BASE)]
     if len(runs) > 1:
         sys.exit(f'{name}: {len(runs)} -O0 runs; stage_units names one per stage (<stage>_o0.c, <stage>_post.c)')
@@ -70,7 +83,7 @@ def layout(name):
 def yaml_text(name):
     lo = name.lower()
     start, end, size, runs = layout(name)
-    data = open(os.path.join(ROOT, 'disc', 'pac4', name + '.bin'), 'rb').read()
+    data = open(image(name), 'rb').read()
     subs = [f'      - {{start: 0x0, type: bin, name: {lo}_engine, linker_section_order: .rodata}}  # the shared '
             'engine, matched in src/stage (placed first: a .data piece would follow the .text)']
     if runs:
@@ -93,7 +106,7 @@ name: Stage image {name}
 sha1: {hashlib.sha1(data).hexdigest()}
 options:
   basename: {lo}
-  target_path: disc/pac4/{name}.bin
+  target_path: {target(name)}
   elf_path: build/stg/{lo}/{lo}.elf
   base_path: ..
   platform: psx

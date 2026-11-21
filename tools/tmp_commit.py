@@ -10,15 +10,15 @@ entries for those paths are reset to the new HEAD, so `git status` shows no stal
 Usage: python -I tools/tmp_commit.py (-m MESSAGE | -F FILE) [--no-verify] PATH ...
   PATH may be a deleted file (its deletion is committed) or a directory (everything changed under it).
 LuciDin's catalogue files (docs/catalog_status.json, docs/model_names.json, docs/song_names.json,
-tools/overlay_configs.py, "Save States BACKUP/") are refused.
+docs/sprite_names.json, docs/stage_names.json, tools/overlay_configs.py, "Save States BACKUP/") are refused.
 """
 import os
 import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROTECTED = ('docs/catalog_status.json', 'docs/model_names.json', 'docs/song_names.json', 'tools/overlay_configs.py',
-             'Save States BACKUP')
+PROTECTED = ('docs/catalog_status.json', 'docs/model_names.json', 'docs/song_names.json', 'docs/sprite_names.json',
+             'docs/stage_names.json', 'docs/debug_flag_names.json', 'tools/overlay_configs.py', 'Save States BACKUP')
 
 
 def git(args, env=None, check=True, capture=True):

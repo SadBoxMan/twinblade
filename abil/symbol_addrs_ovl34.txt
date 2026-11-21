@@ -1,15 +1,13 @@
 // Package 0x34 (MAIN.CD entry 46, abil/ovl34.yaml): a slot-3 package
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+ScrollWind_SpinStart = 0x800CCB78; // type:func
+ScrollWind_SpinEnter = 0x800CCCC0; // type:func
+ScrollWind_SpinDispatch = 0x800CCCF4; // type:func
+ScrollWind_SpinTurn = 0x800CD494; // type:func
+ScrollWind_SpinContactHit = 0x800CD5CC; // type:func
+ScrollWind_SpinStepTable = 0x800CE040;
+ScrollWind_SpinStates = 0x800CE044;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800123F0 = 0x800123F0; // type:func
-func_80012558 = 0x80012558; // type:func
-func_800126C4 = 0x800126C4; // type:func
-func_80012ABC = 0x80012ABC; // type:func
-func_8001382C = 0x8001382C; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80015954 = 0x80015954; // type:func
-func_80015978 = 0x80015978; // type:func
-func_8001C214 = 0x8001C214; // type:func
-func_8001CC3C = 0x8001CC3C; // type:func
 func_80020F34 = 0x80020F34; // type:func
 D_801152B0 = 0x801152B0;
 D_801152B4 = 0x801152B4;

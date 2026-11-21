@@ -222,7 +222,7 @@ extern void MemCardStart(void);
 
 #ifdef PC
 /* The PC build's game-side stack (the one translated and interpreted code use) switches as on the console: the old
-   $sp saved at 0x1F8003FC, the calls run on the scratchpad. Game code relies on it: func_8014F468 switches back to
+   $sp saved at 0x1F8003FC, the calls run on the scratchpad. Game code relies on it: ProbeGroundStill switches back to
    the main stack at the saved value, which was stale while these were empty (the pause menu's Lumina Scroll change
    crashed). pc/recomp_rt.c */
 void pc_set_spad_stack(void);
@@ -247,7 +247,7 @@ void pc_reset_spad_stack(void);
 /*
  * The nested form (r216; LuciDin's ruling 27 Oct): the word at 0x1F8003FC holds the address of the slot for the old
  * $sp, so a call already running on the scratchpad stack can move below it. ResetSpadStack() restores it the same way
- * (func_8014CCB4, func_8014D04C, func_8014D3E0, func_8014F6F4, func_8014FA04, func_8014FBC0, func_8014FCFC).
+ * (ProbePlatformStill, ProbePlatformSlide, ProbePlatformFall, func_8014F6F4, func_8014FA04, SnapToFloor, IsClimbWallAhead).
  */
 #define SetSpadStackNested()                                                   \
     __asm__ volatile("addu $8,%0,$0\n\t"                                       \

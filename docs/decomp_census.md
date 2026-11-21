@@ -48,6 +48,16 @@ Shapes left by size (instructions), r146 -> r147, and the share bulk matched: 1-
 (1 %); 257+ 132 -> 132 (0 %). **What is left is mostly large: 1 726 of the 4 198 shapes (41 %, 250 k of the 341 k
 instructions) are over 64 instructions**, where bulk matches almost nothing.
 
+## 0b. Code outside every count: the type-1 blocks (r406, 7 Nov 2026)
+
+The counts below (and Phase 1's "every function matched" of 4 Nov) cover the images the build has configs for. The
+disc has 36 more code blocks the game runs: 34 type-1 blocks loaded behind stage images (SC02_009, SC07_003,
+SC07_004, SC03_053 / 054 / 056 and 28 shop rooms: 1,515 functions, 55,252 instructions, 501 shapes in no stage
+image), MAIN.CD entry 12 (the Continue / save screens' engine image: 2,370 engine functions with the matched engine's
+shapes plus 33 own, 24 new) and MAIN.CD entry 9 (never loaded). All -O2. Census, port status and the split plan
+(yaml per block linked against its host, a `blk` regress area, pilot SC02_009; about 12-25 weekly points at 5x):
+docs/type1_blocks.md, `tools/type1_census.py`.
+
 ## 1. Live counts (`make BUILD=build/work/census progress`, 21 Oct, own build dir)
 
 | Area | Matched / total | Left |

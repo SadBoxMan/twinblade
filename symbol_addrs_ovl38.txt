@@ -1,0 +1,20 @@
+// Mode overlay ovl38 (ovl38.yaml): its own names (docs/symbol_scheme.md B1; read only by ovl38.yaml, after symbol_addrs.txt)
+// ---- r379 naming batch (ovl38; docs/names_merged/r379_plan.csv)
+LicenceInit = 0x800CEE40; // type:func
+LicenceFadeIn = 0x800CEF04; // type:func
+LicenceHold = 0x800CEF54; // type:func
+LicenceFadeOut = 0x800CEFA8; // type:func
+BootLogoFadeIn = 0x800CEFF4; // type:func
+BootLogoWait = 0x800CF038; // type:func
+BootLogoFadeOut = 0x800CF0C4; // type:func
+LicenceLoadEntry2 = 0x800CF114; // type:func
+DrawBootLogo = 0x800CF180; // type:func
+DrawLicence = 0x800CF290; // type:func
+g_BootLogoSprtA = 0x800CF3F0;
+g_BootLogoSprtB = 0x800CF420;
+g_LicenceSteps = 0x800CF450;
+g_LicenceImageList = 0x800D3ABC;
+g_LicenceSprtLeft = 0x800D3AEC;
+g_LicenceSprtRight = 0x800D3B1C;
+g_LicenceEntry2Loaded = 0x800D3C0C;
+g_LicenceBrightness = 0x800D3C10;

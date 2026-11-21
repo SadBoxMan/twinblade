@@ -1,12 +1,13 @@
 # Overlay 0x38: licence screen, the first overlay loaded after boot.
-# Payload of MAIN.CD entry 1 (tools/extract_overlays.py -> disc/overlays/main_01.bin),
+# Payload of MAIN.CD entry 1: its PAC type-1 code block, 0x4E1C bytes as the game loads them (r673:
+# tools/gen_block_cfgs.py --extract -> disc/payload/ovl38.bin; disc/overlays/main_01.bin is the sector-padded entry),
 # loaded to the mode-overlay slot at 0x800CEDF8 by mode 1 and run by mode 2
 # via 0x800CEDFC (payload + 4).
 name: Overlay 0x38 (licence screen)
-sha1: f0a9e2488c5688300d7218ab734f4b0d116cbe9e
+sha1: ba84f20430689fd7244403455851f5570da9fe7c
 options:
   basename: ovl38
-  target_path: disc/overlays/main_01.bin
+  target_path: disc/payload/ovl38.bin
   elf_path: build/ovl38/ovl38.elf
   base_path: .
   platform: psx
@@ -32,6 +33,7 @@ options:
   symbol_addrs_path:
     - symbol_addrs.txt
     - symbol_addrs_psyq.txt
+    - symbol_addrs_ovl38.txt
   reloc_addrs_path:
     - reloc_addrs.txt
 
@@ -54,4 +56,4 @@ segments:
       - [0x0, rodata, ovl38_id] # u32 overlay ID (0x38); rodata so it links before .text
       - [0x4, c, ovl38]         # code; main function at 0x800CEDFC
       - [0x5F0, data, ovl38_data]
-  - [0x5000]
+  - [0x4E1C]

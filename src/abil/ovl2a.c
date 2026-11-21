@@ -3,19 +3,19 @@
 
 extern void func_80162CCC();
 extern s32 D_ovl2a_800CBFE0;
-extern void func_ovl2a_800CBD54();
-extern void func_800183E0();
+extern void Clone_DrawShard4();
+extern void QueueImage();
 extern u8 D_ovl2a_800CC0CC[];
 extern u8 D_ovl2a_800CC10C[];
 extern u8 D_ovl2a_800CC08C[];
 extern AbilStep D_ovl2a_800CBF94[];
 extern s32 func_80161104();
-void func_ovl2a_800CAEE0(s32 arg0);
+void Clone_StepStart(s32 arg0);
 
 void func_ovl2a_800CAE0C(void) {
-    func_800183E0(D_ovl2a_800CC0CC);
-    func_800183E0(D_ovl2a_800CC10C);
-    func_800183E0(D_ovl2a_800CC08C);
+    QueueImage(D_ovl2a_800CC0CC);
+    QueueImage(D_ovl2a_800CC10C);
+    QueueImage(D_ovl2a_800CC08C);
 }
 
 void func_ovl2a_800CAE54(u8 *a) {
@@ -25,7 +25,7 @@ void func_ovl2a_800CAE54(u8 *a) {
 
 void func_ovl2a_800CAE98(u8 *a) {
     if (func_80161104() != 0) {
-        func_ovl2a_800CAEE0(a);
+        Clone_StepStart(a);
         AF(a, u8, 0x197)++;
     }
 }
@@ -34,7 +34,7 @@ extern void func_80165A20();
 extern s32 D_80126B58;
 extern void func_80146CA0();
 extern s32 func_80146E98();
-extern void func_ovl2a_800CB5A8();
+extern void Clone_DecoyFreeEnd();
 extern u8 D_80078EC1;
 extern AbilStep D_ovl2a_800CBFB8[];
 extern void func_ovl2a_800CB774();
@@ -60,11 +60,11 @@ extern u8 D_ovl2a_800CBFA0;
 extern s32 func_8014659C();
 extern void func_8001CA1C();
 extern void func_80146DE8();
-extern s32 D_ovl2a_800CC12C;
+extern s32 Clone_Lifetime;
 extern s32 D_ovl2a_800CC130;
 extern void func_80149374();
 
-void func_ovl2a_800CAEE0(s32 arg0) {
+void Clone_StepStart(s32 arg0) {
     if (func_8014C088(arg0, 0x22) != 0) {
         func_801599A4(arg0);
         func_80159B3C(arg0);
@@ -75,7 +75,7 @@ void func_ovl2a_800CAEE0(s32 arg0) {
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
-void func_ovl2a_800CAF4C(s32 arg0) {
+void Clone_StepSpawn(s32 arg0) {
     func_801466F0(0x22, arg0, 0, 0, 0, 0, 0, 0);
     func_801466F0(0x22, arg0, 0, 0, 0, 1, 0, 0);
     func_801599A4(arg0);
@@ -85,15 +85,15 @@ void func_ovl2a_800CAF4C(s32 arg0) {
 void func_ovl2a_800CAFCC(void) {
 }
 
-void func_ovl2a_800CAFD4(u8 *arg0) {
+void Clone_DecoyUpdate(u8 *arg0) {
     if (D_80078EC1 == 0x17) {
         D_ovl2a_800CBFB8[AF(arg0, u16, 2)]();
         return;
     }
-    func_ovl2a_800CB5A8();
+    Clone_DecoyFreeEnd();
 }
 
-void func_ovl2a_800CB030(u8 *arg0) {
+void Clone_DecoyInit(u8 *arg0) {
     s32 temp_s2;
     s32 temp_v0;
 
@@ -112,11 +112,11 @@ void func_ovl2a_800CB030(u8 *arg0) {
             D_ovl2a_800CC130 = 0;
         }
         AF(arg0, s16, 0x62) = 0;
-        D_ovl2a_800CC12C = 0x384;
+        Clone_Lifetime = 0x384;
         func_80146CA0((s32) arg0);
         return;
     }
-    func_ovl2a_800CB5A8((s32) arg0);
+    Clone_DecoyFreeEnd((s32) arg0);
 }
 
 extern void func_ovl2a_800CBD2C();
@@ -128,19 +128,19 @@ extern u8 D_ovl2a_800CC011;
 extern u8 D_ovl2a_800CC012;
 extern u8 D_ovl2a_800CC013;
 
-extern void func_80015978();
-extern void func_80017DC4();
-extern void func_80017DF8();
-extern void func_80017E68();
-extern s32 func_80016EF8();
+extern void PosToSVec();
+extern void SetScaleMatrix();
+extern void RotateMatrixBy();
+extern void SetMatrixTrans();
+extern s32 DrawPrimFT4Mtx();
 
 extern void func_80147324();
-extern s16 D_ovl2a_800CC134[];
+extern s16 Clone_GlowColour[];
 extern s16 D_ovl2a_800CC136;
 extern s16 D_ovl2a_800CC138;
 extern void func_801663A4();
 extern void func_80146A6C();
-extern void func_ovl2a_800CB794();
+extern void Clone_BlastHit();
 extern void func_80147364();
 extern void func_801659B8();
 
@@ -188,19 +188,19 @@ extern s32 func_8014C278();
 extern s32 func_8014C3D0();
 
 extern u16 D_800B99DA;
-extern s32 func_80012DBC();
+extern s32 EaseAngleFrac();
 extern s32 func_80148800();
 
-void func_ovl2a_800CB218(u8 *arg0) {
+void Clone_DecoyIdle(u8 *arg0) {
     u8 *m;
     s32 x;
     s32 n;
     s32 c;
 
-    n = D_ovl2a_800CC12C - 1;
+    n = Clone_Lifetime - 1;
     c = D_ovl2a_800CC130;
     m = AF(arg0, u8 *, 0x20);
-    D_ovl2a_800CC12C = n;
+    Clone_Lifetime = n;
     switch (c) {
     case 0:
         x = rsin((D_800B99DA & 0x3F) << 6) / 64;
@@ -211,24 +211,24 @@ void func_ovl2a_800CB218(u8 *arg0) {
         AF(arg0, s16, 0x60) = x;
         break;
     }
-    AF(m, s16, 0x14) = func_80012DBC(AF(m, s16, 0x14), AF(arg0, s16, 0x60), 0xA, 1);
+    AF(m, s16, 0x14) = EaseAngleFrac(AF(m, s16, 0x14), AF(arg0, s16, 0x60), 0xA, 1);
     if (AF(arg0, s32, 0x50) == 0 && func_80146E98(arg0) != 0) {
         func_80146E90(arg0, (rand() & 0x3F) + 0x20);
         D_ovl2a_800CC130 = rand() & 1;
     }
-    if (D_ovl2a_800CC12C < 0x80 || (func_80148800(&D_80126B58) & 0x20)) {
-        AF(m, s16 *, 0x80) = D_ovl2a_800CC134;
+    if (Clone_Lifetime < 0x80 || (func_80148800(&D_80126B58) & 0x20)) {
+        AF(m, s16 *, 0x80) = Clone_GlowColour;
         AF(m, u16, 0x2C) |= 0x80;
         D_ovl2a_800CC138 = 0x80;
         D_ovl2a_800CC136 = 0x80;
-        D_ovl2a_800CC134[0] = 0x80;
+        Clone_GlowColour[0] = 0x80;
         func_80146E90(arg0, 0);
         func_80147324(0x8ED);
         func_80146CA0(arg0);
     }
 }
 
-void func_ovl2a_800CB3B4(u8 *arg0) {
+void Clone_DecoyBurst(u8 *arg0) {
     s16 temp_v0_3;
     s32 temp_v0;
     s32 temp_v0_2;
@@ -245,11 +245,11 @@ void func_ovl2a_800CB3B4(u8 *arg0) {
     temp_v0_3 = D_ovl2a_800CC138 + 1;
     D_ovl2a_800CC138 = (u16) temp_v0_3;
     D_ovl2a_800CC136 = temp_v0_3;
-    D_ovl2a_800CC134[0] = temp_v0_3;
+    Clone_GlowColour[0] = temp_v0_3;
     if (temp_v0_3 >= 0xFF) {
         D_ovl2a_800CC138 = 0xFF;
         D_ovl2a_800CC136 = 0xFF;
-        D_ovl2a_800CC134[0] = 0xFF;
+        Clone_GlowColour[0] = 0xFF;
         func_801663A4((s32) arg0);
         var_s0 = 0;
         do {
@@ -259,7 +259,7 @@ void func_ovl2a_800CB3B4(u8 *arg0) {
             var_s0 += 1;
         } while (var_s0 < 6);
         AF(temp_s3, s32, 4) = (s32) (AF(temp_s3, s32, 4) | 0x80000000);
-        func_ovl2a_800CB794((s32) arg0);
+        Clone_BlastHit((s32) arg0);
         func_80146E90((s32) arg0, 0x1E);
         func_80147364(4, 0x8ED);
         func_80147324(0x8EE);
@@ -274,7 +274,7 @@ void func_ovl2a_800CB570(s32 arg0) {
     }
 }
 
-void func_ovl2a_800CB5A8(void) {
+void Clone_DecoyFreeEnd(void) {
     func_80162CCC();
     func_80165A20(&D_80126B58);
 }
@@ -311,8 +311,8 @@ extern AVec D_ovl2a_800CC028[];
 extern ALVec D_ovl2a_800CC058;
 extern u16 D_ovl2a_800CC068[];
 extern s32 func_801465C0();
-extern void func_8001CF00();
-extern void func_80015954();
+extern void InitNullSprite();
+extern void SVecToPos();
 
 extern void func_80162F08();
 extern void func_80162FC0();
@@ -332,14 +332,14 @@ void func_ovl2a_800CB774(void) {
     func_80162CCC();
 }
 
-void func_ovl2a_800CB794(u8 *arg0) {
+void Clone_BlastHit(u8 *arg0) {
     AVec v;
     u8 *p;
     u8 *o;
 
     for (p = D_801202A0; p < D_801202A0 + 0x6480; p += 0x10C) {
         if (func_8014C308(arg0, p, 0x33, 0x4000) != 0 && func_8014C278(arg0, p, 0xC0) != 0) {
-            func_80015978(p + 4, &v);
+            PosToSVec(p + 4, &v);
             v.pad = 0;
             if (func_8014C3D0(arg0, p, 0x33, &v) != 0 && AF(p, u16, 0) == 0x219) {
                 o = AF(p, u8 *, 0x78);
@@ -351,7 +351,7 @@ void func_ovl2a_800CB794(u8 *arg0) {
     }
 }
 
-void func_ovl2a_800CB8B4(u8 *arg0) {
+void Clone_ShardUpdate(u8 *arg0) {
     if (D_80078EC1 == 0x17) {
         D_ovl2a_800CC01C[AF(arg0, u16, 2)]();
         return;
@@ -359,7 +359,7 @@ void func_ovl2a_800CB8B4(u8 *arg0) {
     func_80146C3C();
 }
 
-void func_ovl2a_800CB910(u8 *arg0) {
+void Clone_ShardInit(u8 *arg0) {
     AVec p;
     AVec r;
     AMtx m;
@@ -377,11 +377,11 @@ void func_ovl2a_800CB910(u8 *arg0) {
     if (o == NULL) {
         goto fail;
     }
-    func_8001CF00(o);
+    InitNullSprite(o);
     AF(o, s32, 4) |= 0x80000000;
-    func_80015978(t + 4, &p);
+    PosToSVec(t + 4, &p);
     p.vy -= 0x40;
-    func_80015954(&p, arg0 + 4);
+    SVecToPos(&p, arg0 + 4);
     if (AF(arg0, s32, 0x2C) == 0) {
         func_ovl2a_800CBF24();
     }
@@ -450,35 +450,35 @@ void func_ovl2a_800CBC90(u8 *arg0) {
 }
 
 void func_ovl2a_800CBD2C(s32 a) {
-    func_ovl2a_800CBD54(a, &D_ovl2a_800CBFE0);
+    Clone_DrawShard4(a, &D_ovl2a_800CBFE0);
 }
 
-void func_ovl2a_800CBD54(u8 *arg0, u8 *arg1) {
+void Clone_DrawShard4(u8 *arg0, u8 *arg1) {
     AMtx m;
     AVec v;
     u8 *s;
 
     s = AF(arg0, u8 *, 0x20);
     AF(arg1, s32, 0x34) = 0x50000000;
-    func_80017DC4(s + 0x18, &m);
-    func_80017DF8(s + 0x10, &m);
-    func_80015978(arg0 + 4, &v);
-    func_80017E68(&v, &m);
-    func_80016EF8(arg1, &m);
+    SetScaleMatrix(s + 0x18, &m);
+    RotateMatrixBy(s + 0x10, &m);
+    PosToSVec(arg0 + 4, &v);
+    SetMatrixTrans(&v, &m);
+    DrawPrimFT4Mtx(arg1, &m);
     m.t[0] += AF(arg0, s16, 0x38);
     m.t[1] += AF(arg0, s16, 0x3A);
     m.t[2] += AF(arg0, s16, 0x3C);
-    func_80016EF8(arg1, &m);
-    func_80017E68(&v, &m);
+    DrawPrimFT4Mtx(arg1, &m);
+    SetMatrixTrans(&v, &m);
     m.t[0] += AF(arg0, s16, 0x3E);
     m.t[1] += AF(arg0, s16, 0x40);
     m.t[2] += AF(arg0, s16, 0x42);
-    func_80016EF8(arg1, &m);
-    func_80017E68(&v, &m);
+    DrawPrimFT4Mtx(arg1, &m);
+    SetMatrixTrans(&v, &m);
     m.t[0] += AF(arg0, s16, 0x44);
     m.t[1] += AF(arg0, s16, 0x46);
     m.t[2] += AF(arg0, s16, 0x48);
-    func_80016EF8(arg1, &m);
+    DrawPrimFT4Mtx(arg1, &m);
 }
 
 void func_ovl2a_800CBEB0(u8 *arg0) {

@@ -7,8 +7,18 @@ written; corrections are marked "r241").
 ## The loader in the C (r241)
 * **Disc files.** InitCdFiles (boot) looks every game file up by name, reads LIST.CD and turns each archive's (sector,
   size) list into absolute positions in `g_ArchiveFileLoc[]` (8 bytes each: CdlLOC + size), numbered globally: MAIN.CD
-  entries 0-48, then SC01 ... SC07. InitCdFilesAtLba (0x800193B8) is an unused development variant that reads a header
-  and the file table from raw sectors instead. IsDebugBinPresent / SetDebugBinPresent hold whether DEBUG.BIN was found.
+  entries 0-48, then SC01 ... SC07. InitCdFilesAtLba (0x800193B8) is the **demo build's file loader** (r640 / r642, kept
+  unused in retail): it reads a header and the file table from raw sectors instead (next bullet).
+  IsDebugBinPresent / SetDebugBinPresent hold whether DEBUG.BIN was found.
+* **InitCdFilesAtLba(lba) in the demo** (r664, read from `src/code_800123F0.c:3562`; the call and the argument from
+  the demo EXE, `docs/proto_vs_retail.md`). The demo's `main` calls it with `argv[3]` = 23, which LAUNCH.EXE passes
+  (argv = {toggle, 300, 2, 23}; 23 = the MUSASHI directory's sector). Steps: `lba++` (24 = USA_DEMO.EXE's first
+  sector), read that header, add 1 + ceil(EXE size at header +0x1C / 2048) sectors (0x65000 bytes = 202 sectors:
+  24 + 1 + 202 = **227**) to land on **ENTRY.CD** (the demo's file table: five offset / size pairs counted from the
+  next sector, LIST.CD at 228), then build `g_FileTable`: entry 0 = LIST.CD, 1 = MAIN.CD, **slots 2-8 all = ENTRY.CD
+  pair 2 (SC02.CD)**, 9 = pair 3 (ST01.STR), 20 = pair 4 (OUT.STR); then it reads LIST.CD (0xE40 bytes) and fills the
+  per-archive entry positions. Retail's boot uses InitCdFiles (file lookup by name) and never calls it. Why the demo
+  maps every stage slot to SC02.CD: the demo disc carries only that one stage archive (`docs/proto_vs_retail.md`).
 * **A load.** `LoadFileStep(file, dest, size, soundTable)` (0x80019A24; the docs' "CdReadQueue") is polled every frame:
   it starts a request when none is in flight (or continues the same file's), refuses while the sound / XA request ring
   is busy, and returns 1 on the frame the request completes. `size` 0 = a PAC archive, parsed block by block; otherwise
@@ -46,6 +56,45 @@ written; corrections are marked "r241").
   pair = {that word's HIGH HALFWORD (the sound bank / music group id), D_800A2E20}, then LoadFileStep; 0x800CFD68 takes a
   MAP ID (not an entry number) and only tests StageImageNeedsLoad; 0x800CFDA4 marks the current map's stage loaded;
   0x800CFDE8 prefetches the next map's header; 0x800D02D0 / 0x800D0488 load ability packages into slots 2 / 3.
+  (r664: the names in this bullet are r241's; the repo's current names are in the next section. r241's `LoadMapStage` for
+  0x800D0214 is now `LoadMapFileAt`; the name `LoadMapStage` went to 0x800CFE60, the real stage-image read.)
+
+## The field overlay's loader functions, by name (r664, 9 Nov 2026)
+
+Unofficial: these are the repo's own names, not Sony's. They are already applied (r379: `symbol_addrs_ovl36.txt`,
+`src/ovl36/ovl36.c`; the proposal table is `docs/mode_overlays.md` section 4.1), so no new name is coined here. The
+overlay shares its slot with the other mode overlays, so a name belongs to ovl36 only. Evidence is the matched C in
+`src/ovl36/ovl36.c` (line numbers below) and `docs/mode_overlays.md` (the load states, "Naming proposals").
+
+| Address | Name | What it does | Evidence |
+|---|---|---|---|
+| 0x800CF47C | FieldLoadExtraFile | load step 0: the pending extra file (flag D_80114E78 set by RequestExtraLoad; file D_800AF218), then the next step | H; mode_overlays.md r536 (D_800D3488[0]) |
+| 0x800CF4D4 | FieldLoadSubSteps | load step 1: runs `D_800D3490[stateSubStep]`, the six substeps below | H; D_800D3488[1] |
+| 0x800CF510 | FieldLoadReset | substep 0: heap reset, drawing off (unkA3E1 = 1), records cleared; goes to substep 1 on a full reload (g_FullReload), else to 3 | H |
+| 0x800CF584 | FieldLoadReloadAbility | substep 1 (full reload only): `FieldLoadAbilityPackage(D_80078EC1)` | H; ovl36.c:392 |
+| 0x800CF5D4 | FieldLoadReloadSlot3 | substep 2 (full reload only): `LoadSlot3Package(D_80078EC0 & 0x7F)` | H; ovl36.c:400 |
+| 0x800CF628 | FieldLoadPickStage | substep 3: sub-room or normal map; a sub-room (GetSubRoomKind != 0) is loaded on its base map's stage (GetSubRoomBaseMap: 0x1010, 0x1052, 0x1077, 0x1094): to substep 4 or 5; a normal map goes to 6 only if `MapNeedsStageLoad` | H; ovl36.c:405-430 |
+| 0x800CF714 | FieldLoadBaseStage | substep 4: ForgetStageImage, read the base map's stage (`LoadMapStage`), `MarkMapStageLoaded`, then substep 5 | H; ovl36.c:432-440 |
+| 0x800CF764 | FieldLoadSubRoom | substep 5: `LoadMapFileAt(func_80128218())`: the sub-room's own file to the stage's extra-load address | H; ovl36.c:441 |
+| 0x800CF7A4 | FieldLoadStage | substep 6: ForgetStageImage, wait for the load queue not busy (`GetLoadQueueState() != 2`), `LoadMapStage`, `MarkMapStageLoaded`, done | H; ovl36.c:448-452 |
+| 0x800CF804 / 0x800CF818 | RequestFullReload / RequestExtraLoad | set g_FullReload / D_80114E78 for the next map load | H |
+| 0x800CF8E4 | PrefetchNextMap | when neither the current nor the destination map is a sub-room and the destination's stage must be read, `PrefetchMapHeader(destination)` | H; ovl36.c:495-500 |
+| 0x800CF94C | FieldLoadStageEngine | states 11 / 13: `LoadFileStep(g_FileLocStageEngine)` = MAIN.CD entry 12 to 0x80128158, then the next state | H; ovl36.c:503 |
+| 0x800CFD68 | MapNeedsStageLoad | `StageImageNeedsLoad(D_800D34AC[mapId & 0xFFF] & 0xFFF)`: takes a MAP ID | H; ovl36.c:751 |
+| 0x800CFDA4 | MarkMapStageLoaded | `SetStageImage(entry of the current map D_800B9A08)` | H; ovl36.c:755 |
+| 0x800CFDE8 | PrefetchMapHeader | queues a header read (`LoadQueue` kind 2) of the map's archive file | H; ovl36.c:759 |
+| 0x800CFE60 | LoadMapStage | reads the current map's stage image to 0x80128158 with its sound bank (D_800D34AC's high halfword), with per-map overrides (0x300B, 0x3001, 0x304E, 0x1077, 0x3021, by flag / story counter); installs the map's sound record afterwards | H; ovl36.c:773 |
+| 0x800D00E4 | SetMapSoundRecord | installs sound record 1-15 (EXE data D_800C8058-D_800CADE8) with func_8002F5C8 | H (call), L (what the record is) |
+| 0x800D0214 | LoadMapFileAt | `LoadFileStep(g_ArchiveFileLoc[entry of the current map], dest, 0, {sound id, D_800A2E20})`; returns 1 at once for an empty entry; the dest is the argument | H; ovl36.c:869 |
+| 0x800D02D0 | FieldLoadAbilityPackage | maps ability n (1-30) through the 29-entry table D_800D3764 and loads it into slot 2 (g_LoadAddr[2], 0x800CAE08) | H; ovl36.c:893 |
+| 0x800D0488 | LoadSlot3Package | maps n (1-6) through D_800D384C and loads it into slot 3 (0x800CCB1C) | H; ovl36.c:944 |
+
+* **Spelling mismatch (Unofficial, for r396):** `symbol_addrs_ovl36.txt` has 0x800D02D0 as `FieldLoadAbilityPackage`,
+  while `docs/mode_overlays.md` table 1364 proposes `LoadAbilityPackage` (the sibling 0x800D0488 is `LoadSlot3Package`,
+  no `Field` prefix). Pick one name for the pair; no src edit made here.
+* **Order of a map load** (the whole chain): load states 5 / 6 / 16 / 18 run FieldLoadExtraFile, then FieldLoadSubSteps:
+  0 Reset -> (full reload: 1 ability, 2 slot 3) -> 3 PickStage -> 4 BaseStage -> 5 SubRoom, or 6 Stage; the stage
+  engine image itself (FieldLoadStageEngine) is read earlier, in states 11 / 13.
 
 ## Disc side
 * `func_80019A24(descriptor, destination, 0, 0)` (main EXE) queues an asynchronous CD read and starts the CD state machine (`func_80019AF8`). Overlays are loaded with it

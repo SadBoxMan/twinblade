@@ -12,7 +12,9 @@ os.makedirs(out_dir, exist_ok=True)
 O0 = ('engine_8013B568.c', 'engine_80144B9C.c')
 AF = '#define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))'
 STG = os.environ.get('TWINBLADE_STG', '').lower()
-SRC_GLOB, ASM_GLOB = (f'src/stg/{STG}.c', f'asm/stg/{STG}/nonmatchings/*/*.s') if STG else \
+# r442: a code block's name works too (blk/<name>.yaml: src/blk/<name>.c, asm/blk/<name>/)
+AREA = 'blk' if STG and os.path.exists(f'blk/{STG}.yaml') else 'stg'
+SRC_GLOB, ASM_GLOB = (f'src/{AREA}/{STG}.c', f'asm/{AREA}/{STG}/nonmatchings/*/*.s') if STG else \
     ('src/stage/*.c', 'asm/stage/nonmatchings/*/*.s')
 src = {f: open(f, encoding='utf-8').read() for f in glob.glob(SRC_GLOB) if os.path.basename(f) not in O0}
 if STG:     # r209: the stage's -O0 unit and the code after it (tools/stage_units.py)
@@ -64,7 +66,7 @@ open(ctx, 'w').write('typedef int s32; typedef unsigned int u32; typedef short s
 
 # r213: m2c gives up on a function with a jump table (the table lives in the data asm, not the function's). Write a copy
 # with a label before each case target and the table as a .word list, as r211's mkjt.py did; plain functions pass through.
-DATA_GLOB = f'asm/stg/{STG}/data/*.s' if STG else 'asm/stage/data/*.s'
+DATA_GLOB = f'asm/{AREA}/{STG}/data/*.s' if STG else 'asm/stage/data/*.s'
 jtbls = {}
 for dp in glob.glob(DATA_GLOB):
     cur = None

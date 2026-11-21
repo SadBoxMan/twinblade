@@ -1,10 +1,19 @@
 // Stage SC02_004 (stg/sc02_004.yaml): names given by hand first
+// ---- r379 naming batch (stage; docs/names_merged/r379_plan.csv)
+EventChangeMap = 0x8017D7B4; // type:func
+RumbleWaitPlayer = 0x8017D8B0; // type:func
+RumbleBurstDust = 0x8017D910; // type:func
+RumbleRearm = 0x8017D99C; // type:func
+SpawnDust = 0x8017D9C4; // type:func
+DustMove = 0x8017DB2C; // type:func
+// r379: engine data names (symbol_addrs_stage.txt has the village's)
+g_CameraProj = 0x80126950;
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
-func_800167B8 = 0x800167B8; // type:func
-func_800167F0 = 0x800167F0; // type:func
-func_8001BFD0 = 0x8001BFD0; // type:func
-func_8001CC3C = 0x8001CC3C; // type:func
-func_8002D4C8 = 0x8002D4C8; // type:func
+StartFade = 0x800167B8; // type:func
+FadeStep = 0x800167F0; // type:func
+ClearTimeChime = 0x8001BFD0; // type:func
+InitSpriteKind3 = 0x8001CC3C; // type:func
+PlaySoundId = 0x8002D4C8; // type:func
 g_PrimNext = 0x800A5E60;
 g_WorldOtTable = 0x800A6610;
 D_800B9A02 = 0x800B9A02;
@@ -14,5 +23,4 @@ func_800D1E28 = 0x800D1E28; // type:func
 func_800D1EBC = 0x800D1EBC; // type:func
 D_800D387C = 0x800D387C;
 D_800D3888 = 0x800D3888;
-D_80126950 = 0x80126950;
 D_80126B66 = 0x80126B66;

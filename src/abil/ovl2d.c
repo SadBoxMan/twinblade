@@ -3,7 +3,7 @@
 #include "gte.h"
 
 extern void func_80162CCC();
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl2d_800CBF60[];
 extern u8 D_ovl2d_800CBF20[];
 extern AbilStep D_ovl2d_800CBE34[];
@@ -11,8 +11,8 @@ extern s32 func_80161104();
 void func_ovl2d_800CAED8(u8 *arg0);
 
 void func_ovl2d_800CAE14(void) {
-    func_800183E0(D_ovl2d_800CBF60);
-    func_800183E0(D_ovl2d_800CBF20);
+    QueueImage(D_ovl2d_800CBF60);
+    QueueImage(D_ovl2d_800CBF20);
 }
 
 void func_ovl2d_800CAE4C(u8 *a) {
@@ -51,13 +51,13 @@ extern s32 RotMatrixZYX();
 extern s32 rand();
 
 extern s32 func_8014C308();
-extern void func_ovl2d_800CB61C();
-extern void func_ovl2d_800CB5CC();
+extern void Homing_SteerToward();
+extern void Homing_SteerIfValid();
 
 extern u8 D_800D387C;
 extern u8 D_800D3888;
 extern s32 func_801465C0();
-extern void func_8001CC3C();
+extern void InitSpriteKind3();
 extern void func_80149374();
 extern void func_80128EA8();
 
@@ -65,7 +65,7 @@ extern void func_80146CA0();
 extern void func_80146E90();
 extern u8 D_ovl2d_800CC444;
 extern s32 func_8014659C();
-extern void func_8001C214();
+extern void InitModel();
 extern void func_80146DE8();
 extern void func_80147324();
 
@@ -124,7 +124,7 @@ void func_ovl2d_800CB040(u8 *arg0) {
     }
 }
 
-void func_ovl2d_800CB0B4(u8 *arg0) {
+void Homing_MissileInit(u8 *arg0) {
     u8 *s;
     u8 *o;
 
@@ -132,7 +132,7 @@ void func_ovl2d_800CB0B4(u8 *arg0) {
     o = (u8 *) func_8014659C();
     AF(arg0, u8 *, 0x20) = o;
     if (o != 0) {
-        func_8001C214(o, &D_ovl2d_800CC444);
+        InitModel(o, &D_ovl2d_800CC444);
         AF(o, u16, 0x10) = AF(AF(s, u8 *, 0x20), u16, 0x10);
         AF(o, s16, 0x12) = (AF(AF(s, u8 *, 0x20), u16, 0x12) + (AF(arg0, s32, 0x50) - 1) * 0x155) & 0xFFF;
         AF(o, u16, 0x14) = AF(AF(s, u8 *, 0x20), u16, 0x14);
@@ -152,32 +152,32 @@ void func_ovl2d_800CB0B4(u8 *arg0) {
 }
 
 extern u8 D_801202A0[];
-extern void func_80015978();
+extern void PosToSVec();
 extern s32 func_8012E778();
-extern s32 func_80013328();
+extern s32 PosDist();
 extern u8 D_80126720[];
 
 extern void func_80146A6C();
 
-extern AVec D_ovl2d_800CAE0C;
-extern s32 func_80012DBC();
+extern AVec Homing_AimOffset;
+extern s32 EaseAngleFrac();
 extern s32 func_8014C59C();
 extern s32 func_8014C5FC();
 
 extern s32 func_ovl2d_800CB6F4();
 extern void func_80146C98();
-extern void func_80013F3C();
-extern void func_80012558();
-extern void func_800126C4();
-extern void func_800123F0();
+extern void SetIdentityRot();
+extern void RotateMatrixY();
+extern void RotateMatrixX();
+extern void RotateMatrixZ();
 extern void func_80163194();
 extern void func_80162FC0();
-extern u8 *func_ovl2d_800CB4D4(u8 *arg0);
+extern u8 *Homing_FindTarget(u8 *arg0);
 extern void func_80163408();
 extern void func_80163328();
 extern u32 func_801632F0();
 
-void func_ovl2d_800CB228(u8 *arg0) {
+void Homing_MissileFly(u8 *arg0) {
     AMtx m;
     s32 pad[2];
     u8 *o;
@@ -188,14 +188,14 @@ void func_ovl2d_800CB228(u8 *arg0) {
         func_80146C98(arg0, 3);
         return;
     }
-    func_ovl2d_800CB5CC(arg0);
-    func_80013F3C(&m);
-    func_80012558(&m, AF(arg0, s16, 0x5A));
-    func_800126C4(&m, AF(arg0, s16, 0x58));
-    func_800123F0(&m, AF(arg0, s16, 0x5C));
-    func_80012558(&m, AF(o, s16, 0x12));
-    func_800126C4(&m, AF(o, s16, 0x10));
-    func_800123F0(&m, AF(o, s16, 0x14));
+    Homing_SteerIfValid(arg0);
+    SetIdentityRot(&m);
+    RotateMatrixY(&m, AF(arg0, s16, 0x5A));
+    RotateMatrixX(&m, AF(arg0, s16, 0x58));
+    RotateMatrixZ(&m, AF(arg0, s16, 0x5C));
+    RotateMatrixY(&m, AF(o, s16, 0x12));
+    RotateMatrixX(&m, AF(o, s16, 0x10));
+    RotateMatrixZ(&m, AF(o, s16, 0x14));
     func_80163194(arg0, 0, 0, -0x3000, &m);
     func_80162FC0(arg0);
     AF(o, AMtx, 0x34) = m;
@@ -204,9 +204,9 @@ void func_ovl2d_800CB228(u8 *arg0) {
         goto end;
     }
     if (AF(arg0, s32, 0x1C) == 0x27) {
-        AF(arg0, u8 *, 0x54) = func_ovl2d_800CB4D4(arg0);
+        AF(arg0, u8 *, 0x54) = Homing_FindTarget(arg0);
     }
-    func_ovl2d_800CB5CC(arg0);
+    Homing_SteerIfValid(arg0);
     func_80163408(arg0, 0x2B, 0, 0x40);
     func_80163328(arg0);
     r = func_801632F0(arg0);
@@ -223,7 +223,7 @@ void func_ovl2d_800CB228(u8 *arg0) {
     }
 }
 
-void func_ovl2d_800CB424(u8 *arg0) {
+void Homing_MissileBurst(u8 *arg0) {
     s32 i;
 
     if (func_80146E98(arg0) != 0) {
@@ -243,7 +243,7 @@ void func_ovl2d_800CB4CC(u8 *arg0) {
     AF(arg0, s32, 0x54) = 0;
 }
 
-u8 *func_ovl2d_800CB4D4(u8 *arg0) {
+u8 *Homing_FindTarget(u8 *arg0) {
     AVec v;
     s32 best;
     s16 d;
@@ -256,9 +256,9 @@ u8 *func_ovl2d_800CB4D4(u8 *arg0) {
     if (p < D_801202A0 + 0x6480) {
 loop:
         if (AF(p, u16, 0) != 0x282) {
-            func_80015978(p + 4, &v);
+            PosToSVec(p + 4, &v);
             if (func_8012E778(p, 0x8C00B4) == 1 && func_8014C308(arg0, p, 0x2B, 0x40) != 0) {
-                d = func_80013328(arg0 + 4, p + 4);
+                d = PosDist(arg0 + 4, p + 4);
                 if (d < best) {
                     best = d;
                     found = p;
@@ -273,26 +273,26 @@ loop:
     return found;
 }
 
-void func_ovl2d_800CB5CC(s32 arg0) {
+void Homing_SteerIfValid(s32 arg0) {
     s32 temp_a1;
 
     temp_a1 = AF(arg0, s32, 0x54);
     if ((temp_a1 != 0) && (func_8014C308(arg0, temp_a1, 0x2B, 0x40) != 0)) {
-        func_ovl2d_800CB61C(arg0, AF(arg0, s32, 0x54));
+        Homing_SteerToward(arg0, AF(arg0, s32, 0x54));
     }
 }
 
-void func_ovl2d_800CB61C(u8 *arg0, u16 *arg1) {
+void Homing_SteerToward(u8 *arg0, u16 *arg1) {
     AVec v;
     u8 *m;
 
     m = AF(arg0, u8 *, 0x20);
-    v = D_ovl2d_800CAE0C;
+    v = Homing_AimOffset;
     if (*arg1 == 0x2CE) {
         v.vy = -0x1AB;
     }
-    AF(m, s16, 0x12) = func_80012DBC(AF(m, s16, 0x12), (s16) func_8014C59C(arg0, arg1), 0x10, 1);
-    AF(m, s16, 0x10) = func_80012DBC(AF(m, s16, 0x10), (s16) func_8014C5FC(arg0, arg1, &v), 0x10, 1);
+    AF(m, s16, 0x12) = EaseAngleFrac(AF(m, s16, 0x12), (s16) func_8014C59C(arg0, arg1), 0x10, 1);
+    AF(m, s16, 0x10) = EaseAngleFrac(AF(m, s16, 0x10), (s16) func_8014C5FC(arg0, arg1, &v), 0x10, 1);
 }
 
 typedef struct { s32 vx, vy, vz, pad; } ALVec;
@@ -345,7 +345,7 @@ void func_ovl2d_800CB860(u8 *arg0) {
         goto fail;
     }
 
-    func_8001CC3C(o, &D_ovl2d_800CBE50, 0, 0);
+    InitSpriteKind3(o, &D_ovl2d_800CBE50, 0, 0);
     AF(o, u8, 0x27) = 0x90;
     AF(o, s16, 0x18) = AF(o, s16, 0x1A) = 0x2000;
     AF(o, s32, 4) |= 0x50000000;
@@ -448,7 +448,7 @@ void func_ovl2d_800CBCBC(u8 *arg0) {
     temp_v0 = func_801465C0();
     AF(arg0, s32, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_8001CC3C(temp_v0, (s32) &D_800D387C, 0, 0);
+        InitSpriteKind3(temp_v0, (s32) &D_800D387C, 0, 0);
         AF(temp_v0, u8, 0x27) = 0x9C;
         AF(temp_v0, s16, 0x1A) = 0x2000;
         AF(temp_v0, s16, 0x18) = 0x2000;

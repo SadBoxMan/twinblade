@@ -1,17 +1,26 @@
 // Package 0x1F (MAIN.CD entry 25, abil/ovl1f.yaml): ability 15, Bowl
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Bowl_QueueImages = 0x800CAE14; // type:func
+Bowl_Update = 0x800CAE5C; // type:func
+Bowl_Start = 0x800CAED8; // type:func
+Bowl_StepCharge = 0x800CAF7C; // type:func
+Bowl_Release = 0x800CB028; // type:func
+Bowl_StepThrow = 0x800CB068; // type:func
+Bowl_StepWaitBall = 0x800CB0E4; // type:func
+Bowl_BallUpdate = 0x800CB1A0; // type:func
+Bowl_BallInit = 0x800CB23C; // type:func
+Bowl_BallDelete = 0x800CB6CC; // type:func
+Bowl_PlaySoundOnce = 0x800CB760; // type:func
+Bowl_IsOffScreen = 0x800CB7B0; // type:func
+Bowl_GaugeUpdate = 0x800CB848; // type:func
+Bowl_SpawnGauge = 0x800CBB70; // type:func
+Bowl_CloseGauge = 0x800CBBA0; // type:func
+Bowl_KillGauges = 0x800CBBF8; // type:func
+Bowl_Steps = 0x800CBE7C;
+Bowl_BallStates = 0x800CBEBC;
+Bowl_GaugeStates = 0x800CBF2C;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800123F0 = 0x800123F0; // type:func
-func_80012558 = 0x80012558; // type:func
-func_800126C4 = 0x800126C4; // type:func
-func_80013E94 = 0x80013E94; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80015978 = 0x80015978; // type:func
-func_80016714 = 0x80016714; // type:func
-func_800183E0 = 0x800183E0; // type:func
 func_8001CA1C = 0x8001CA1C; // type:func
-func_8001CB00 = 0x8001CB00; // type:func
-func_8001CBDC = 0x8001CBDC; // type:func
-func_8001CEC0 = 0x8001CEC0; // type:func
 D_80078EC1 = 0x80078EC1;
 D_800B99DA = 0x800B99DA;
 D_80114EB0 = 0x80114EB0;

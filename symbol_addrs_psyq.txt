@@ -1,5 +1,14 @@
 // PsyQ SDK library functions, identified by tools/psyq_match.py
-// against lab313ru/psx_psyq_signatures. Mostly PsyQ 4.0; LIBPAD is 4.2-4.6.
+// against lab313ru/psx_psyq_signatures. The "(psyq N)" on each object is the
+// community signature set that matched it, not a dating.
+// Dating (r294, against the redump-verified Sony discs; docs/sdk_compare.md):
+// Runtime Library 4.0, except LIBAPI 4.2 (C114 stamp 0x0042 at 0x8005CE48),
+// LIBPAD a 4.2-era build that matches no verified disc whole, and four patched
+// LIBSND objects (CRES, DECRES, SSSTOP, VM_SEQ) found on no disc. LIBPRESS
+// (overlay 0x39) is 4.0.
+// SpuInit (LIBSPU S_I.OBJ, 0x8003A424) is named in symbol_addrs.txt: it is
+// compiled from src/code_8002C8BC.c, and pc/gen.py treats every function in
+// this file as library code (r390).
 // Excluded as likely false positives (matched inside game code, generic code):
 //   LIBSND SSGM.OBJ SsGetMute @ 0x8001BD80 (8-instruction call wrapper)
 //   LIBSND VM_VIB.OBJ SeVibOn/SetVib/SsUtVibrateOn/Off @ 0x80028A28 (empty stubs)
@@ -96,6 +105,9 @@ SpuGetAllKeysStatus = 0x8003D32C; // type:func
 // LIBSPU.LIB S_SVRR.OBJ (psyq 4.00)
 SpuSetVoiceRR = 0x8003D3B4; // type:func
 
+// LIBSPU.LIB S_SRMD.OBJ (psyq 4.00; placed by size and bytes, r294, docs/sdk_compare.md)
+SpuSetReverbModeDepth = 0x8003D3F8; // type:func
+
 // LIBGS.LIB GS_013.OBJ (psyq 4.00)
 GsSetOrign = 0x8003D40C; // type:func
 
@@ -124,8 +136,17 @@ _SsSeqCalledTbyT_1per2 = 0x8003D9CC; // type:func
 // LIBSND.LIB SSCALL.OBJ (psyq 4.00)
 SsSeqCalledTbyT = 0x8003DA1C; // type:func
 
+// LIBSND.LIB CRES.OBJ (psyq 4.00, patched: on no disc; r294, docs/sdk_compare.md)
+_SsSndCrescendo = 0x8003DC90; // type:func
+
+// LIBSND.LIB DECRES.OBJ (psyq 4.00, patched: on no disc; r294, docs/sdk_compare.md)
+_SsSndDecrescendo = 0x8003DF8C; // type:func
+
 // LIBSND.LIB PAUSE.OBJ (psyq 4.00)
 _SsSndPause = 0x8003E248; // type:func
+
+// LIBSND.LIB PLAY.OBJ (psyq 3.30-4.00; placed by size and bytes, r294, docs/sdk_compare.md)
+_SsSndPlay = 0x8003E2E4; // type:func
 
 // LIBSND.LIB MIDIREAD.OBJ (psyq 4.00)
 _SsSeqPlay = 0x8003E310; // type:func
@@ -140,6 +161,11 @@ _SsSndNextSep = 0x8003EAB4; // type:func
 
 // LIBSND.LIB REPLAY.OBJ (psyq 4.00)
 _SsSndReplay = 0x8003EBB0; // type:func
+
+// LIBSND.LIB SSSTOP.OBJ (psyq 4.00, patched: on no disc; r294, docs/sdk_compare.md)
+_SsSndStop = 0x8003EC10; // type:func
+SsSeqStop = 0x8003ED94; // type:func
+SsSepStop = 0x8003EDBC; // type:func
 
 // LIBSND.LIB SSSV.OBJ (psyq 4.00)
 SsSetSerialVol = 0x8003EDE8; // type:func
@@ -191,6 +217,13 @@ _SsVmKeyOffNow = 0x80040868; // type:func
 
 // LIBSND.LIB VM_NOWON.OBJ (psyq 4.00)
 _SsVmKeyOnNow = 0x80040938; // type:func
+
+// LIBSND.LIB VM_SEQ.OBJ (psyq 4.00, patched: on no disc; r294, docs/sdk_compare.md)
+_SsVmSetSeqVol = 0x80040DE8; // type:func
+_SsVmGetSeqVol = 0x80041354; // type:func
+_SsVmGetSeqLVol = 0x800413B8; // type:func
+_SsVmGetSeqRVol = 0x80041400; // type:func
+_SsVmSeqKeyOff = 0x80041448; // type:func
 
 // LIBSND.LIB VM_VSU.OBJ (psyq 4.00)
 _SsVmVSetUp = 0x800414E4; // type:func
@@ -764,6 +797,9 @@ GsGetTimInfo = 0x80053D44; // type:func
 
 // LIBGS.LIB GS_123.OBJ (psyq 4.00)
 Gssub_make_matrix = 0x80053E28; // type:func
+// GS_123.OBJ's first common (32 bytes): the address Gssub_make_matrix copies
+// from, filled by valiable_init, read by GsInitCoordinate2 (r390)
+GsIDMATRIX = 0x800AE620;
 
 // LIBGS.LIB GS_127.OBJ (psyq 4.00)
 GsDefDispBuff2 = 0x80053EEC; // type:func
@@ -982,6 +1018,8 @@ puts = 0x8005CD48; // type:func
 setjmp = 0x8005CD98; // type:func
 longjmp = 0x8005CDD4; // type:func
 
+// LIBAPI is 4.2 as a whole (r294): the 4.00 / 4.10 labels below are objects
+// that did not change between those versions.
 // LIBAPI.LIB C57.OBJ (psyq 4.00)
 InitHeap = 0x8005CE18; // type:func
 
@@ -991,7 +1029,8 @@ FlushCache = 0x8005CE28; // type:func
 // LIBAPI.LIB C73.OBJ (psyq 4.00)
 GPU_cw = 0x8005CE38; // type:func
 
-// LIBAPI.LIB C114.OBJ (psyq 3.50)
+// LIBAPI.LIB C114.OBJ (psyq 4.20: stamp word 0x0042 at 0x8005CE48; the
+// unstamped 3.3 / 3.5 object matched first, r294)
 _96_remove = 0x8005CE50; // type:func
 
 // LIBAPI.LIB A07.OBJ (psyq 4.00)
@@ -1049,6 +1088,10 @@ StartRCnt = 0x8005D03C; // type:func
 StopRCnt = 0x8005D06C; // type:func
 ResetRCnt = 0x8005D0A0; // type:func
 
+// LIBPAD is a 4.2-era build (r294): PADENTRY, PADCMD, PADPORTD exact only in
+// 4.3 of the verified discs, PADSEQD equals the community 4.2 set, and
+// PADMAIN (0x8005D588-0x8005E168) and PADIF (0x8005EAE8-0x8005F0C8) match no
+// disc and no community set: hand-checked asm, follow the game, not the manual.
 // LIBPAD.LIB PADENTRY.OBJ (psyq 4.20)
 PadChkVsync = 0x8005D0D8; // type:func
 PadStartCom = 0x8005D0F8; // type:func

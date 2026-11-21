@@ -1,14 +1,14 @@
 #include "common.h"
 #include "abil.h"
 
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl1a_800CB294[];
 extern AbilStep D_ovl1a_800CB260[];
 extern AbilStep D_ovl1a_800CB26C[];
 void func_ovl1a_800CAEB0(u8 *a);
 
 void func_ovl1a_800CAE0C(void) {
-    func_800183E0(D_ovl1a_800CB294);
+    QueueImage(D_ovl1a_800CB294);
 }
 
 void func_ovl1a_800CAE34(u8 *a) {
@@ -26,12 +26,12 @@ extern void func_ovl1a_800CAFFC();
 extern void func_8012A2F4();
 extern void func_80146CA0();
 extern void func_801474EC();
-extern void func_ovl1a_800CB17C();
+extern void Hop_Jump();
 extern void func_801599A4();
 extern void func_801655E4();
 extern s32 func_80165910();
 extern void func_8016629C();
-extern s32 func_ovl1a_800CAF6C();
+extern s32 Hop_Enter();
 extern void StartRumbleScript();
 extern void func_8012A304();
 extern void func_80147324();
@@ -44,7 +44,7 @@ extern s32 D_ovl1a_800CB1F4;
 
 void func_ovl1a_800CAEB0(u8 *arg0) {
     func_801599A4();
-    func_ovl1a_800CAF6C(arg0);
+    Hop_Enter(arg0);
     if (func_80165910(arg0) == 0) {
         func_801655E4(arg0);
     }
@@ -56,7 +56,7 @@ void func_ovl1a_800CAF10(void) {
 }
 
 extern void func_80147078();
-extern void func_ovl1a_800CAFA0();
+extern void Hop_KindUpdate();
 
 void func_ovl1a_800CAF18(s32 arg0) {
     func_80154A74(arg0, 0x11);
@@ -67,13 +67,13 @@ void func_ovl1a_800CAF38(s32 arg0) {
     func_ovl1a_800CAFFC(arg0);
 }
 
-s32 func_ovl1a_800CAF6C(s32 arg0) {
+s32 Hop_Enter(s32 arg0) {
     func_80147078(arg0, 0x1F);
-    func_ovl1a_800CAFA0(arg0);
+    Hop_KindUpdate(arg0);
     return;
 }
 
-void func_ovl1a_800CAFA0(u8 *a) {
+void Hop_KindUpdate(u8 *a) {
     D_ovl1a_800CB26C[AF(a, u16, 2)](a);
 }
 
@@ -83,7 +83,7 @@ void func_ovl1a_800CAFDC(void) {
 
 void func_ovl1a_800CAFFC(s32 arg0) {
     func_801474EC();
-    func_ovl1a_800CB17C(arg0);
+    Hop_Jump(arg0);
     func_80146CA0(arg0);
 }
 
@@ -101,7 +101,7 @@ extern void func_80147460();
 extern s32 func_8016151C();
 extern void func_801615C4();
 
-void func_ovl1a_800CB034(s32 arg0) {
+void Hop_Air(s32 arg0) {
     s32 var_a3;
 
     if ((func_80148800(arg0) & 0x20) || (D_80078EC8 == 0)) {
@@ -125,7 +125,7 @@ void func_ovl1a_800CB034(s32 arg0) {
     if (func_8016151C(arg0) != 0) {
         AF(arg0, u16, 0xA) = (u16) (AF(arg0, u16, 0xA) + 8);
         func_801615C4(arg0, 0);
-        func_ovl1a_800CB17C(arg0);
+        Hop_Jump(arg0);
     }
 }
 
@@ -134,7 +134,7 @@ void func_ovl1a_800CB148(s32 arg0) {
     func_80154A74(arg0, 0x11);
 }
 
-void func_ovl1a_800CB17C(u8 *arg0) {
+void Hop_Jump(u8 *arg0) {
     func_8012A304(AF(arg0, s16, 0xA), 0x80);
     func_801477E8(arg0, 0xFFE80000);
     func_80154274(arg0, &D_ovl1a_800CB1F4);

@@ -1,24 +1,34 @@
 // Package 0x28 (MAIN.CD entry 34, abil/ovl28.yaml): ability 16, Steel
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Steel_DrawModel = 0x800CAE80; // type:func
+Steel_SortPackets = 0x800CB00C; // type:func
+Steel_SortF3 = 0x800CB1F8; // type:func
+Steel_SortF4 = 0x800CB3C0; // type:func
+Steel_SortG3 = 0x800CB5D0; // type:func
+Steel_SortG4 = 0x800CB7BC; // type:func
+Steel_SortFT4 = 0x800CBA18; // type:func
+Steel_SortGT3 = 0x800CBC2C; // type:func
+Steel_SortGT4 = 0x800CBE28; // type:func
+Steel_InGlintBand = 0x800CC0A0; // type:func
+Steel_AddPrim = 0x800CC110; // type:func
+Steel_Update = 0x800CC16C; // type:func
+Steel_StepStart = 0x800CC1E8; // type:func
+Steel_FlashUpdate = 0x800CC298; // type:func
+Steel_DrawRays = 0x800CC6C4; // type:func
+Steel_DrawRay = 0x800CC7FC; // type:func
+Steel_StepTable = 0x800CCA18;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
 D_80000000 = 0x80000000;
 D_80000004 = 0x80000004;
 D_80000008 = 0x80000008;
-func_800123F0 = 0x800123F0; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80015978 = 0x80015978; // type:func
-func_80017714 = 0x80017714; // type:func
-func_800183E0 = 0x800183E0; // type:func
 func_8001CD9C = 0x8001CD9C; // type:func
 func_80020F34 = 0x80020F34; // type:func
-func_800233CC = 0x800233CC; // type:func
 D_80063880 = 0x80063880;
 D_80063884 = 0x80063884;
 D_80063888 = 0x80063888;
 D_80078EC1 = 0x80078EC1;
 D_80078EC8 = 0x80078EC8;
-D_800A2B78 = 0x800A2B78;
 D_800B99DA = 0x800B99DA;
-D_800C7C74 = 0x800C7C74;
 func_8012EFB8 = 0x8012EFB8; // type:func
 func_8012F14C = 0x8012F14C; // type:func
 func_80146578 = 0x80146578; // type:func

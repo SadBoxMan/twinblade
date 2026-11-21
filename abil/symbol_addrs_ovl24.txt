@@ -1,13 +1,15 @@
 // Package 0x24 (MAIN.CD entry 30, abil/ovl24.yaml): ability 19, Toxin
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Toxin_Update = 0x800CAE44; // type:func
+Toxin_Start = 0x800CAEC0; // type:func
+Toxin_StopSound = 0x800CAF84; // type:func
+Toxin_OrbiterUpdate = 0x800CB1EC; // type:func
+Toxin_EffectUpdate = 0x800CB41C; // type:func
+Toxin_Ring = 0x800CB51C;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80016714 = 0x80016714; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001CC3C = 0x8001CC3C; // type:func
 func_8001CD9C = 0x8001CD9C; // type:func
-func_800233CC = 0x800233CC; // type:func
 D_80078EC1 = 0x80078EC1;
 D_80078EC8 = 0x80078EC8;
-D_800AE620 = 0x800AE620;
 D_80126B5E = 0x80126B5E;
 D_80126B62 = 0x80126B62;
 D_80126B66 = 0x80126B66;

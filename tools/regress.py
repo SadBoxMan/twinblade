@@ -2,7 +2,8 @@
 """The regression suite: every byte-identical check in one PASS/FAIL table (r142, docs/test_infrastructure.md).
 
 Builds each checked image with make (`make regress-targets` lists them: the EXE, the mode overlays and the village
-stage, the 35 ability packages, the 139 other stage images), compares each against the original on the disc, and
+stage, the 35 ability packages, the 139 other stage images, r442: the 34 code blocks loaded behind stage images and
+MAIN.CD 12, area blk), compares each against the original on the disc, and
 checks that the originals themselves still have the hashes recorded in tools/regress_baseline.txt (disc/ is a shared
 junction: a re-extracted or damaged file would otherwise turn every check into a check against the wrong thing).
 Exit status 1 when anything fails. Run it from PowerShell (the compile chain hangs under Git Bash); it puts
@@ -10,7 +11,7 @@ C:\\msys64\\usr\\bin on PATH itself.
 
 Usage: python -I tools/regress.py [AREA|NAME ...] [-j N] [--no-build] [--staged | --paths FILE ...]
        python -I tools/regress.py --record-baseline
-  AREA    main, ovl, abil or stg (default: all four); NAME one image (ovl38, stage, ovl2c, sc03_005, ...)
+  AREA    main, ovl, abil, stg or blk (default: all five); NAME one image (ovl38, stage, ovl2c, sc03_005, sc02_009, ...)
   -j N    make jobs (default 4: the CPU cap while several streams build at once; at most 8)
   --no-build        compare the binaries already in build/ (no make)
   --staged          the commit gate: only the images the staged files can change (git diff --cached, so it follows
@@ -35,15 +36,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MSYS = r'C:\msys64\usr\bin'
 BASELINE = os.path.join(ROOT, 'tools', 'regress_baseline.txt')
 OUT_DIR = os.path.join(ROOT, 'build', 'regress')
-AREAS = ['main', 'ovl', 'abil', 'stg']
+AREAS = ['main', 'ovl', 'abil', 'stg', 'blk']
 
 # Files that feed every image: the EXE's symbols are linked into all of them (build/exe_syms.ld), and the headers,
 # the build rules and the compile chain are shared. A change to anything else outside these and the per-image
 # sources below cannot change a checked binary (docs, pc/, the launcher, analysis tools).
 GLOBAL_INPUTS = re.compile(r'^(include/|Makefile$|slus_007\.26\.yaml$|symbol_addrs[^/]*\.txt$|undefined_syms[^/]*\.txt$|'
-                           r'reloc_addrs\.txt$|tools/(jtbl_relabel|exe_syms|gen_ability_ovls|gen_stage_cfgs|regress|maspsx_tw)\.py$|'
+                           r'reloc_addrs\.txt$|tools/(jtbl_relabel|exe_syms|gen_ability_ovls|gen_stage_cfgs|gen_block_cfgs|regress|maspsx_tw)\.py$|'
                            r'tools/regress_baseline\.txt$|tools/coverage\.py$|src/[^/]+\.c$|src/[^/]+\.h$)')
-BUILD_INPUT = re.compile(GLOBAL_INPUTS.pattern + r'|^(src|abil|stg)/|^[^/]+\.yaml$')
+BUILD_INPUT = re.compile(GLOBAL_INPUTS.pattern + r'|^(src|abil|stg|blk)/|^[^/]+\.yaml$')
 
 
 def env():
@@ -128,10 +129,11 @@ def select_for_paths(rows, paths):
             return set(names)
         # the engine (src/stage, matched in the village) is in every stage image, and its names reach them all through
         # stg/symbol_addrs_engine.txt: the village and every stg image (r192; r161 found only `stage` checked)
+        # r442: the blocks name the engine's functions through that file too, and MAIN.CD 12 carries the engine
         if p.startswith('src/stage/') or p == 'stg/symbol_addrs_engine.txt':
-            want |= {r[1] for r in rows if r[0] == 'stg'} | {'stage'}
+            want |= {r[1] for r in rows if r[0] in ('stg', 'blk')} | {'stage'}
             continue
-        m = (re.match(r'^src/(abil|stg)/(\w+)\.c$', p) or re.match(r'^(abil|stg)/(?:symbol_addrs_)?(\w+)\.(?:yaml|txt)$', p))
+        m = (re.match(r'^src/(abil|stg|blk)/(\w+)\.c$', p) or re.match(r'^(abil|stg|blk)/(?:symbol_addrs_)?(\w+)\.(?:yaml|txt)$', p))
         if m:
             # r209: src/stg/<stage>_o0.c and _post.c are the stage's (tools/stage_units.py)
             want.add(re.sub(r'_(?:o0|post)$', '', m.group(2).lower()) if m.group(1) == 'stg' else m.group(2).lower())
@@ -146,11 +148,14 @@ def resplit(paths):
     """splat again every image whose split inputs are among `paths` (its yaml or symbol file): asm/ is gitignored, so
     a changed stg/symbol_addrs_<name>.txt was otherwise checked against the old split (r192; the stream recipe was
     `make split-stg STG=<stages>` by hand before the gate). Returns the images re-split."""
-    stg, other = set(), set()
+    stg, blk, other = set(), set(), set()
     for p in paths:
         p = p.replace('\\', '/')
         if p == 'stg/symbol_addrs_engine.txt':
             stg.add('*')
+            blk.add('*')
+        elif m := re.match(r'^blk/(?:symbol_addrs_)?(\w+)\.(?:yaml|txt)$', p):
+            blk.add(m.group(1).lower())       # r442: a block's config or symbol file (tools/gen_block_cfgs.py)
         elif re.match(r'^stg/(?:symbol_addrs_)?\w+\.(?:yaml|txt)$', p):
             stg.add(re.match(r'^stg/(?:symbol_addrs_)?(\w+)\.', p).group(1).lower())
         elif m := re.match(r'^abil/(?:symbol_addrs_)?(\w+)\.(?:yaml|txt)$', p):
@@ -162,6 +167,7 @@ def resplit(paths):
             # stage and package config lists it), so all of them are re-split, as `make split` does (r241: renamed
             # EXE functions left the EXE's mode table in the old asm and every link failed)
             stg.add('*')
+            blk.add('*')
             other.update([y for y in os.listdir(ROOT) if y.endswith('.yaml')]
                          + ['abil/' + y for y in os.listdir(os.path.join(ROOT, 'abil')) if y.endswith('.yaml')])
     py = os.path.join(ROOT, '.venv', 'Scripts', 'python.exe')
@@ -176,6 +182,15 @@ def resplit(paths):
             if r.returncode:
                 sys.exit(f'regress: re-split failed:\n{r.stdout[-2000:]}{r.stderr[-2000:]}')
             done += names or ['stg']
+    if blk:
+        names = [] if '*' in blk else sorted(n for n in blk if os.path.exists(os.path.join(ROOT, 'blk', n + '.yaml')))
+        if '*' in blk or names:
+            print('regress: re-splitting', 'every block' if not names else ' '.join(names))
+            r = subprocess.run([py, os.path.join(ROOT, 'tools', 'gen_block_cfgs.py'), '--resplit'] + names,
+                               cwd=ROOT, env=dict(os.environ, TWINBLADE_JOBS='4'), capture_output=True, text=True)
+            if r.returncode:
+                sys.exit(f'regress: block re-split failed:\n{r.stdout[-2000:]}{r.stderr[-2000:]}')
+            done += names or ['blk']
     for y in sorted(other):
         if os.path.exists(os.path.join(ROOT, y)):
             print('regress: re-splitting', y)
@@ -307,6 +322,14 @@ def main():
         if os.path.exists(lp):
             for l in failure_lines(open(lp, encoding='utf-8').read()):
                 print(f'    {area}.log: {l[:200]}')
+    pc_map = os.path.join(ROOT, 'build', 'pc', 'Twinblade.map')
+    if os.path.exists(pc_map):   # r285: every static of a save state's owners classified (the last PC build's map)
+        c = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'state_tool.py'), 'census'], capture_output=True,
+                           text=True, cwd=ROOT)
+        print('census ' + (c.stdout.strip().splitlines() or ['no output'])[-1])
+        if c.returncode:
+            print(c.stdout[-2000:])
+            fails = fails or [('census', 'state_tool', 'FAIL', 'pc/state_census.txt')]
     missing = sum(1 for r in results if r[3] == 'no baseline entry')
     if missing:
         print(f'note: {missing} originals have no baseline entry (tools/regress.py --record-baseline after checking them)')

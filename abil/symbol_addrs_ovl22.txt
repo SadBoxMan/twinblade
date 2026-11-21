@@ -1,13 +1,15 @@
 // Package 0x22 (MAIN.CD entry 28, abil/ovl22.yaml): ability 21, B.O.
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+BO_Update = 0x800CAE44; // type:func
+BO_Start = 0x800CAEC0; // type:func
+BO_StopSound = 0x800CB32C; // type:func
+BO_FlyUpdate = 0x800CB350; // type:func
+BO_FlyOrbitStep = 0x800CB6D4; // type:func
+BO_DrawCloud = 0x800CB8A0; // type:func
+BO_CloudUpdate = 0x800CBA74; // type:func
+BO_CloudEmitter = 0x800CBDD0; // type:func
+BO_CloudVerts = 0x800CBECC;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80012F74 = 0x80012F74; // type:func
-func_80017758 = 0x80017758; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_80017E68 = 0x80017E68; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001CB00 = 0x8001CB00; // type:func
-func_8001CC3C = 0x8001CC3C; // type:func
-D_80078E78 = 0x80078E78;
 D_80078EC1 = 0x80078EC1;
 D_80078EC8 = 0x80078EC8;
 D_800B99DA = 0x800B99DA;

@@ -8,7 +8,7 @@ void func_ovl18_800CAF30(u8 *a);
 extern void func_80165A20();
 extern s32 D_80078EC8;
 
-extern void func_800183E0();
+extern void QueueImage();
 extern s32 D_ovl18_800CB640;
 extern s32 D_ovl18_800CB680;
 extern s32 D_ovl18_800CB6C0;
@@ -20,15 +20,15 @@ extern s32 D_ovl18_800CB800;
 extern s32 D_ovl18_800CB840;
 
 void func_ovl18_800CAE0C(void) {
-    func_800183E0(&D_ovl18_800CB680);
-    func_800183E0(&D_ovl18_800CB6C0);
-    func_800183E0(&D_ovl18_800CB700);
-    func_800183E0(&D_ovl18_800CB740);
-    func_800183E0(&D_ovl18_800CB780);
-    func_800183E0(&D_ovl18_800CB7C0);
-    func_800183E0(&D_ovl18_800CB800);
-    func_800183E0(&D_ovl18_800CB840);
-    func_800183E0(&D_ovl18_800CB640);
+    QueueImage(&D_ovl18_800CB680);
+    QueueImage(&D_ovl18_800CB6C0);
+    QueueImage(&D_ovl18_800CB700);
+    QueueImage(&D_ovl18_800CB740);
+    QueueImage(&D_ovl18_800CB780);
+    QueueImage(&D_ovl18_800CB7C0);
+    QueueImage(&D_ovl18_800CB800);
+    QueueImage(&D_ovl18_800CB840);
+    QueueImage(&D_ovl18_800CB640);
 }
 
 void func_ovl18_800CAEB4(u8 *a) {
@@ -43,7 +43,7 @@ void func_ovl18_800CAEF8(u8 *a) {
 
 extern void func_801655E4();
 extern s32 func_80165910();
-extern void func_ovl18_800CAFB4();
+extern void Satiate_SpawnIcons();
 extern s32 rand();
 extern s32 RotMatrixY();
 
@@ -51,7 +51,7 @@ void func_ovl18_800CAF30(u8 *arg0) {
     if (func_80165910() == 0) {
         func_801655E4(arg0);
     }
-    func_ovl18_800CAFB4(arg0);
+    Satiate_SpawnIcons(arg0);
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
@@ -64,21 +64,21 @@ void func_ovl18_800CAF80(void) {
 void func_ovl18_800CAFAC(void) {
 }
 
-void func_ovl18_800CAFB4(s32 a) {
+void Satiate_SpawnIcons(s32 a) {
     func_80146994(0x23, a, 0x8000, 0);
 }
 
 extern u8 D_800D387C;
-extern s16 D_ovl18_800CB5F4[];
+extern s16 Satiate_IconCoords[];
 extern s16 D_ovl18_800CB5F6[];
 extern u8 D_ovl18_800CB860[];
-extern void func_800233CC();
+extern void SetShapeCircle();
 extern s32 func_801465C0();
-extern void func_8001CC3C();
+extern void InitSpriteKind3();
 extern void func_80146C3C();
 extern void func_8001CD9C();
 
-void func_ovl18_800CAFE0(u8 *arg0) {
+void Satiate_IconStart(u8 *arg0) {
     s32 pad[2];
     s16 i;
     u8 *o;
@@ -88,7 +88,7 @@ void func_ovl18_800CAFE0(u8 *arg0) {
         D_ovl18_800CB860[0] = D_ovl18_800CB860[1] = 0xA0;
         D_ovl18_800CB860[2] = 0x70;
         D_ovl18_800CB860[4] = D_ovl18_800CB860[5] = D_ovl18_800CB860[6] = 0;
-        func_800233CC(D_ovl18_800CB860, 0x1E);
+        SetShapeCircle(D_ovl18_800CB860, 0x1E);
         AF(arg0, s16, 0x12) = 0x1C0;
         AF(arg0, s16, 2) = 1;
         return;
@@ -98,7 +98,7 @@ void func_ovl18_800CAFE0(u8 *arg0) {
     if (o == NULL) {
         goto fail;
     }
-    func_8001CC3C(o, &D_800D387C, D_ovl18_800CB5F4[i], D_ovl18_800CB5F6[i]);
+    InitSpriteKind3(o, &D_800D387C, Satiate_IconCoords[i], D_ovl18_800CB5F6[i]);
     AF(o, s16, 0x1A) = 0x2000;
     AF(o, s16, 0x18) = 0x2000;
     AF(o, u8, 0x27) = (i >> 1) + 0x19;
@@ -127,7 +127,7 @@ extern u16 D_80126BC8;
 extern u16 D_80126BCA;
 extern u16 D_80126BCC;
 extern s32 func_80146AB4();
-extern void func_8002D4C8();
+extern void PlaySoundId();
 
 void func_ovl18_800CB168(u8 *arg0) {
     s32 r;
@@ -176,7 +176,7 @@ void func_ovl18_800CB168(u8 *arg0) {
             D_80126BCA = t;
         }
         if (!(D_800B99DA & 0xF)) {
-            func_8002D4C8(0x5FB, 0);
+            PlaySoundId(0x5FB, 0);
         }
     } else {
         *(s16 *)&D_80126BCC = 0x1000;
@@ -187,7 +187,7 @@ void func_ovl18_800CB168(u8 *arg0) {
 }
 
 extern u8 D_80078EC1;
-extern AMtx D_800AE620;
+extern AMtx GsIDMATRIX;
 extern s16 D_80126B5E;
 extern s16 D_80126B62;
 extern s16 D_80126B66;
@@ -196,7 +196,7 @@ extern u16 D_80126BCA;
 extern u16 D_80126BCC;
 extern s32 func_80146A6C();
 extern void func_8012F14C();
-extern void func_80016714();
+extern void ZeroFill();
 
 void func_ovl18_800CB328(u8 *arg0) {
     AVec v;
@@ -217,7 +217,7 @@ void func_ovl18_800CB328(u8 *arg0) {
             D_80126BC8 = D_80126BCC = D_80126BCC + 0x400;
             D_80126BCA -= 0x100;
             if (o != NULL) {
-                func_80016714(o, 0x38);
+                ZeroFill(o, 0x38);
             }
             func_80146C3C(arg0);
             return;
@@ -228,7 +228,7 @@ void func_ovl18_800CB328(u8 *arg0) {
         AF(mo, u16, 0x1A) = s;
         AF(mo, u16, 0x18) = s;
         AF(arg0, s32, 0x30) += 0xA00000U / (AF(arg0, u32, 0x2C) * 804);
-        m = D_800AE620;
+        m = GsIDMATRIX;
         RotMatrixY(AF(arg0, s32, 0x30), &m);
         v.vx = 0;
         v.vy = -(AF(arg0, u32, 0x2C) >> 1);
@@ -249,7 +249,7 @@ void func_ovl18_800CB328(u8 *arg0) {
         return;
     }
     if (o != NULL) {
-        func_80016714(o, 0x38);
+        ZeroFill(o, 0x38);
     }
     func_80146C3C(arg0);
 }

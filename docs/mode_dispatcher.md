@@ -1,4 +1,4 @@
-# The game mode dispatcher (main EXE), 2026-10-11; rewritten from the matched C in r241 (1 Nov 2026)
+# The game mode dispatcher (main EXE), 2026-10-11; rewritten from the matched C in r241 (1 Nov 2026); tables from the bytes in r536 (8 Nov 2026)
 
 Read from `src/main.c` (all matched C since r224), `include/work.h` and the overlays' C. Names are r241's
 (`docs/names_r241.md` maps them to the old func_ / D_ names used further down and in older docs). The sections from
@@ -16,7 +16,7 @@ loop: g_FrameCount, the double-buffer index, the primitive buffer (g_PrimBuf / g
 the scratchpad stack; while it is nonzero (the field's pause menu, kind + 1) the field overlay's pause-menu update
 (ovl36 func_800D25FC) runs instead and the mode does not advance. After both: FlushImageQueue (the VRAM upload queue),
 DrawSync, VSync(Work.vsyncMode), the env swap, `CatPrim(ot + 0xFFC, &ot[g_OtDepthLimit])` (the OT entries between the
-limit and 0xFFB are skipped: 0x3E0 by default; the stage engine picks 0x3E0, 0x480 or 0xFFB per map), DrawOTag of the
+limit and 0xFFB are skipped: 0x3E0 by default; the stage engine picks the limit per map: 0x3023 0x4E0, 0x3081 0x420, 0x3067 0x480, 0x3093 / 0x30A5 0xFFB, else 0x3E0; draw_code.md 2.3), DrawOTag of the
 world OT then the 4-entry front OT, the sound request ring (func_8003500C), the sound driver's frame update
 (func_8002D034), LoadQueueStep and FrameEndNop. `Work.exitLoop` (set only by QuitMainLoop, which has no caller) leaves
 the inner loop.
@@ -66,15 +66,16 @@ Work holds two control records with the same layout:
 | 9 | ModeNextClearState | NextMode and SetGameState(0); unused |
 | 10, 15 | ModeFieldLoad | load entry 10 (ovl36, the field), NOW LOADING drawn; then NextMode: 10 -> 11 play, 15 -> 16 demo |
 | 11 | ModeFieldRun | demoActive = 0, run the field (0x800CEDFC): the mode while you play |
-| 12 | ModeIdle | empty: the trial version's end screen ends here (ovl3b's last step SetMode(12)), so it halts |
-| 13 | ModeTrialEndLoad | load entry 8 (ovl3b, the trial end screen) -> 14 |
+| 12 | ModeIdle | empty: the trial version's end screen ends here (ovl3b's last step SetMode(12)), so it halts (unreachable on this disc, r536) |
+| 13 | ModeTrialEndLoad | load entry 8 (ovl3b, the trial end screen) -> 14 (unreachable on this disc: field state 17 is never set, r536) |
 | 14 | ModeTrialEndRun | run it |
 | 16 | ModeDemoRun | an attract demo: the recorded pad stream (docs/demos.md) until it times out or is skipped |
 | 17 | ModeDemoEnd | demo flag off, sound 0x29 -> 5 |
 
 Mode changes from outside main.c: ovl36 func_800D1BF8 SetMode(17) (the demo's end); the stage engine ModeGoTitle
 (SetMode(5)) from field states 12 / 14 and ModeGoTrialEnd (SetMode(13)) from field state 17 (engine func_801282EC);
-ovl3b SetMode(12). ModeGoIdle (SetMode(12)) and QuitMainLoop have no callers.
+ovl3b SetMode(12). ModeGoIdle (SetMode(12)) and QuitMainLoop have no callers. (r536: state 17 itself is never set, so
+ModeGoTrialEnd and ovl3b's SetMode(12) never run on this disc; see the r536 section.)
 
 ## The field's game states (ovl36 table D_800D3430, 20 entries)
 0 field init (steps D_800D3480: setup func_800CEE84, package load func_800CEF04); 1 func_800CEF34 -> next; 4 -> 15;
@@ -84,7 +85,62 @@ of the old reading); 11 and 13 load MAIN.CD entry 12 (the stage engine image) to
 (func_80128A28: Continue / load game; func_80128AF4, chosen by func_8002AF08: probably the save screen, low
 confidence); 15 next; 16 frame loop -> 7; 17 stage func_801282EC -> mode 13 (trial end); 18 a frame loop waiting for
 stateFlag -> 8; 19 func_800CF990 loads an archive entry by D_800D3408, fades, counts stateStepTimer to 0x5B -> 6. After a
-map change func_800D1BF8 picks 13, 19, 18, then 6 / 5 / 16 by the area kind (func_800D1DB0: 0 / 1 / 2).
+map change func_800D1BF8 picks 13, 19, 18, then 5 / 16 by the area kind (func_800D1DB0: 1 / 2; r536: it never returns 0,
+so the switch's kind-0 arm to state 6 is dead).
+
+## The two tables from the bytes (r536, 8 Nov 2026)
+
+Read from the disc (EXE disc/files/SLUS_007.26 from offset 0x800 = 0x80010000; ovl36 disc/overlays/code/ovl36.bin at
+0x800CEDF8), with every caller found by a `jal` / data-word / `lui`-pair scan of the EXE, ovl13-ovl3b and the 140
+stage images, and checked on the 1,157 distinct RAM dumps (disc/dumps, build/pc/captures). Full evidence, the other
+step tables and who sets each entry: docs/mode_overlays.md section 6. All H.
+
+**g_ModeTable (0x800629F4), indexed by ModeDispatch with Work.mode, no guard:** 18 words, 0x80010BB4 ModeReset,
+0x80010C7C ModeLicenceLoad, 0x80010CEC ModeLicenceRun, 0x80010D60 ModeLicenceExit, 0x80010DA0 ModeSkip, 0x80010ED4
+ModeTitleLoad, 0x80010F80 ModeTitleRun, 0x80011144 ModeDebugLoad, 0x800111BC ModeDebugRun, 0x80011220
+ModeNextClearState, 0x800110CC ModeFieldLoad, 0x8001125C ModeFieldRun, 0x800112A8 ModeIdle, 0x800112C8
+ModeTrialEndLoad, 0x80011320 ModeTrialEndRun, 0x800110CC ModeFieldLoad (again, for 15), 0x80011380 ModeDemoRun,
+0x80011680 ModeDemoEnd; the 19th word (0x00F00100) is other data. The table above is right entry for entry.
+
+**Reachable in the retail game: modes 0, 1, 2, 3, 5, 6, 10, 11, 15, 16, 17.** Not reachable: 4 and 9 (their handlers'
+only reference is their table word), 7 / 8 (nothing sets 7: the debug menu needs a RAM write, as above), and 12-14:
+ModeGoTrialEnd's only caller is the field's state 17, and state 17's only setter (engine func_801282CC,
+`SetGameState(0x11)`) has no caller anywhere, so the trial-end screen (ovl3b) and its SetMode(12) never run on this
+disc. RAM dumps by mode: 0 (3), 1 (1), 2 (1), 6 (7), 7 (2), 8 (22, the October debug-menu experiments), 10 (3), 11
+(1,096), 16 (22); each with the overlay ID that mode loads or runs.
+
+**The field's state table g_FieldStateTable (ovl36 D_800D3430), indexed by FieldMain (0x800CEDFC) with Work.state,
+guard < 20:**
+
+| State | Word | Name (symbol files) | Set by |
+|---|---|---|---|
+| 0 | 0x800CEE40 | FieldStateInit | ModeTitleRun (new game), ModeDemoRun, ModeReset, the debug menu, engine func_80128A28 (state 12 "load") |
+| 1 | 0x800CEF34 | FieldStateSoundReset | NextGameState from 0 |
+| 2 | 0x800CEF5C | func_800CEF5C | NextGameState from 1 |
+| 3 | 0x800CEFB0 | func_800CEFB0 | NextGameState from 2 |
+| 4 | 0x800CF370 | FieldStateNowLoading | NextGameState from 3; func_80128AF4 after a save |
+| 5 | 0x800CEFD0 | FieldLoadLoopWipeA | FinishMapChange, map-change kind 1 |
+| 6 | 0x800CF104 | FieldLoadLoopWipeB | FieldStatePicture (19) only |
+| 7 | 0x80128158 | StageMain (engine) | the load loops of 5, 6, 16 |
+| 8 | 0x80128178 | engine -> func_801285E4 | func_80128564 (end of the stage start); FieldLoadLoopHidden (18) |
+| 9 | 0x80128198 | engine -> func_80128678 | func_801285E4 (map-enter steps done); PrevGameState in SC04_015 / SC06_000 (from 10, a cancelled leave; mode_overlays.md 7.2) |
+| 10 | 0x801281B8 | engine -> func_80128714 | StartMapChange (ovl36) |
+| 11 | 0x800CF94C | FieldLoadStageEngine | ModeTitleRun (Continue) |
+| 12 | 0x80128228 | engine -> func_80128A28 | NextGameState from 11 |
+| 13 | 0x800CF94C | FieldLoadStageEngine | FinishMapChange (save request) |
+| 14 | 0x80128248 | engine -> func_80128AF4 | NextGameState from 13 |
+| 15 | 0x800CF398 | func_800CF398 | FieldStateNowLoading (4) |
+| 16 | 0x800CF3B8 | FieldLoadLoopPlain | NextGameState from 15; FinishMapChange, kind 2 |
+| 17 | 0x80128268 | engine -> func_801282EC | func_801282CC only, which nothing calls: **unreachable** |
+| 18 | 0x800CF238 | FieldLoadLoopHidden | FinishMapChange (ending pending; r524) |
+| 19 | 0x800CF990 | FieldStatePicture | FinishMapChange (picture request); func_80128AF4 (picture pending after a save) |
+
+The engine words (7-10, 12, 14, 17) are the stage image's fixed stubs at 0x80128158-0x80128268, the same in every
+image; 7 runs StageStep, whose six-entry table (LoadMapExtras, StageStart, ...) is laid out in mode_overlays.md 6.2.
+States seen in the RAM dumps: 0, 3, 5, 6, 7, 8, 9 (1,036 + 22 in the demo), 10, 11, 12, 13, 14, 16, 19, never 17.
+**Correction to the paragraph above:** FinishMapChange's map-change kind is never 0 (func_800D1DB0 returns only 1 or
+2), so after a map change the next state is 13, 19, 18, or else 5 (kind 1) / 16 (kind 2); state 6 follows only the
+picture interlude.
 
 ## What this gives
 * A mode change is only RAM writes: `Work.mode = n` and the seven halfwords zeroed. A DuckStation cheat can do that (a manual, one-time cheat; a continuously applied one would lock the mode).

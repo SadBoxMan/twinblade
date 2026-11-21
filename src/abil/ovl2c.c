@@ -1,7 +1,7 @@
 #include "common.h"
 #include "abil.h"
 
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl2c_800CCA28[];
 extern u8 D_ovl2c_800CBC18[];
 extern AbilStep D_ovl2c_800CBBA8[];
@@ -9,12 +9,12 @@ extern s32 func_80161104();
 void func_ovl2c_800CAED0(s32 arg0);
 extern void func_80162CCC();
 extern void func_80146C3C();
-void func_ovl2c_800CB780(u8 *arg0);
-void func_ovl2c_800CBA0C(u8 *arg0);
+void ThreeWay_DrawFanXZ(u8 *arg0);
+void ThreeWay_DrawFanXY(u8 *arg0);
 
 void func_ovl2c_800CAE0C(void) {
-    func_800183E0(D_ovl2c_800CCA28);
-    func_800183E0(D_ovl2c_800CBC18);
+    QueueImage(D_ovl2c_800CCA28);
+    QueueImage(D_ovl2c_800CBC18);
 }
 
 void func_ovl2c_800CAE44(u8 *a) {
@@ -54,7 +54,7 @@ extern void func_80146A6C();
 extern s32 MulMatrix0();
 extern s32 RotMatrixZ();
 extern s32 rand();
-extern s32 func_80012ABC();
+extern s32 EaseAngle();
 extern void func_801466F0();
 extern void func_80147324();
 extern void func_80148AFC();
@@ -87,7 +87,7 @@ void func_ovl2c_800CAF1C(u8 *arg0) {
     }
 }
 
-void func_ovl2c_800CAFAC(u8 *arg0) {
+void ThreeWay_StepFire(u8 *arg0) {
     s16 temp_v0;
     u8 temp_v1;
     void *temp_s0;
@@ -100,7 +100,7 @@ void func_ovl2c_800CAFAC(u8 *arg0) {
         case 0x41:
             temp_v0 = func_80148E54(arg0);
             if (temp_v0 > 0) {
-                AF(temp_s0, s16, 0x12) = func_80012ABC(AF(temp_s0, s16, 0x12), temp_v0, 4);
+                AF(temp_s0, s16, 0x12) = EaseAngle(AF(temp_s0, s16, 0x12), temp_v0, 4);
             }
             break;
         case 0x53:
@@ -147,7 +147,7 @@ void func_ovl2c_800CB214(u8 *arg0) {
     func_ovl2c_800CB4F8();
 }
 
-void func_ovl2c_800CB270(u8 *arg0) {
+void ThreeWay_ShotInit(u8 *arg0) {
     void *temp_s2;
     void *temp_v0;
 
@@ -174,31 +174,31 @@ extern u8 D_ovl2c_800CCA00;
 extern s32 func_801465E4();
 extern void func_8001C810();
 extern void func_80149350();
-extern void func_80017DC4();
+extern void SetScaleMatrix();
 
 extern void func_800D20C0();
 extern void func_800D23D0();
-extern void func_80017E68();
+extern void SetMatrixTrans();
 
 extern s8 D_ovl2c_800CBBD4[];
-extern void func_80017758();
+extern void DrawPrimG4Mtx();
 
 extern u8 D_80114EB0;
 extern u8 D_80114EC8;
 extern AVec D_80126B18;
 extern s32 func_80146E98();
-extern void func_80013F3C();
-extern void func_800126C4();
-extern void func_800123F0();
-extern void func_80012558();
+extern void SetIdentityRot();
+extern void RotateMatrixX();
+extern void RotateMatrixZ();
+extern void RotateMatrixY();
 extern void func_80163194();
 extern void func_80162FC0();
 extern void func_80163408();
 extern void func_80163328();
 extern s32 func_801632F0();
-extern void func_80013E94();
+extern void PackAngles10();
 
-void func_ovl2c_800CB360(u8 *arg0) {
+void ThreeWay_ShotFly(u8 *arg0) {
     s32 pad[8];
     AMtx m;
     s32 c;
@@ -211,24 +211,24 @@ void func_ovl2c_800CB360(u8 *arg0) {
         func_80146CA0(arg0);
         return;
     }
-    func_80013F3C(&m);
-    func_800126C4(&m, AF(arg0, s16, 0x60));
-    func_800123F0(&m, AF(arg0, s16, 0x62));
-    func_80012558(&m, AF(arg0, s16, 0x64));
+    SetIdentityRot(&m);
+    RotateMatrixX(&m, AF(arg0, s16, 0x60));
+    RotateMatrixZ(&m, AF(arg0, s16, 0x62));
+    RotateMatrixY(&m, AF(arg0, s16, 0x64));
     func_80163194(arg0, 0, 0, 0, &m);
     func_80162FC0(arg0);
     func_80163408(arg0, 0x2D, 0x80, 0x200);
     func_80163328(arg0);
     switch ((u32) func_801632F0(arg0)) {
     case 1:
-        func_80013E94(&D_80114EB0, &c);
+        PackAngles10(&D_80114EB0, &c);
         c |= 0x80000000;
         func_80146A6C(0x1F, arg0, D_80126B18.vx, D_80126B18.vy, D_80126B18.vz, c, 0);
         func_80146CA0(arg0);
         break;
     case 2:
     case 4:
-        func_80013E94(&D_80114EC8, &c);
+        PackAngles10(&D_80114EC8, &c);
         c |= 0x80000000;
         func_80146A6C(7, arg0, D_80126B18.vx, D_80126B18.vy, D_80126B18.vz, c, 0);
         func_80146CA0(arg0);
@@ -248,7 +248,7 @@ void func_ovl2c_800CB518(u8 *arg0) {
     func_80146C3C();
 }
 
-void func_ovl2c_800CB574(u8 *arg0) {
+void ThreeWay_MuzzleInit(u8 *arg0) {
     AVec v;
     AMtx m;
     u8 *s3;
@@ -271,12 +271,12 @@ void func_ovl2c_800CB574(u8 *arg0) {
         AF(arg0, s32, 0x54) = v.vz;
         func_80149374(s3, arg0 + 4);
         v.vx = v.vy = v.vz = 0x1800;
-        func_80017DC4(&v, &m);
+        SetScaleMatrix(&v, &m);
         RotMatrixZ(rand() & 0xFFF, &m);
         MulMatrix0(AF(s3, u8 *, 0x20) + 0x34, &m, o + 0x34);
         func_80146A6C(0x44, arg0, AF(arg0, s16, 6), AF(arg0, s16, 0xA), AF(arg0, s16, 0xE), 0, 0);
         AF(arg0, s32, 0x30) = 0x80;
-        func_ovl2c_800CB780(arg0);
+        ThreeWay_DrawFanXZ(arg0);
         AF(arg0, u16, 2)++;
         return;
     }
@@ -286,13 +286,13 @@ void func_ovl2c_800CB574(u8 *arg0) {
 void func_ovl2c_800CB728(u8 *a) {
     if (++AF(a, s32, 0x1C) < 2) {
         AF(a, u32, 0x30) >>= 1;
-        func_ovl2c_800CB780(a);
+        ThreeWay_DrawFanXZ(a);
     } else {
         func_80146C3C();
     }
 }
 
-void func_ovl2c_800CB780(u8 *arg0) {
+void ThreeWay_DrawFanXZ(u8 *arg0) {
     APrim s;
     s8 *p;
     s16 i;
@@ -315,7 +315,7 @@ void func_ovl2c_800CB780(u8 *arg0) {
         s.v[2].vz = *p++;
         s.v[3].vx = *p++;
         s.v[3].vz = *p--;
-        func_80017758(&s, arg0 + 0x38);
+        DrawPrimG4Mtx(&s, arg0 + 0x38);
         i++;
     } while (i < 4);
 }
@@ -337,23 +337,23 @@ void func_ovl2c_800CB910(u8 *arg0) {
     v.vz = AF(arg0, u16, 0xE);
     func_800D20C0(&v, &r, 7);
     func_800D23D0(&r);
-    func_80017E68(&v, arg0 + 0x38);
+    SetMatrixTrans(&v, arg0 + 0x38);
     RotMatrixYXZ(&r, arg0 + 0x38);
     AF(arg0, s32, 0x30) = 0xC0;
-    func_ovl2c_800CBA0C(arg0);
+    ThreeWay_DrawFanXY(arg0);
     AF(arg0, u16, 2)++;
 }
 
 void func_ovl2c_800CB9B4(u8 *a) {
     if (++AF(a, s32, 0x1C) < 2) {
         AF(a, u32, 0x30) >>= 1;
-        func_ovl2c_800CBA0C(a);
+        ThreeWay_DrawFanXY(a);
     } else {
         func_80146C3C();
     }
 }
 
-void func_ovl2c_800CBA0C(u8 *arg0) {
+void ThreeWay_DrawFanXY(u8 *arg0) {
     APrim s;
     s8 *p;
     s16 i;
@@ -377,7 +377,7 @@ void func_ovl2c_800CBA0C(u8 *arg0) {
         s.v[2].vy = *p++;
         s.v[3].vx = *p++;
         s.v[3].vy = *p--;
-        func_80017758(&s, arg0 + 0x38);
+        DrawPrimG4Mtx(&s, arg0 + 0x38);
         i++;
     } while (i < 4);
 }

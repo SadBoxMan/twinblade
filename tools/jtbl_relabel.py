@@ -37,7 +37,7 @@ def original_tables(asm_dir):
         text = open(f, encoding='utf-8', errors='replace').read()
         # the ability packages name theirs jtbl_ovl28_800CAE0C (r137)
         # and the split stages jtbl_sc05_017_801EB3E8 (r148)
-        for m in re.finditer(r'^dlabel (jtbl_(?:ovl[0-9a-f]{2}_|sc\d\d_\d{3}_)?([0-9A-F]{8}))\n(.*?)^enddlabel', text,
+        for m in re.finditer(r'^dlabel (jtbl_(?:ovl[0-9a-f]{2}_|sc\d\d_\d{3}_|main_\d\d_)?([0-9A-F]{8}))\n(.*?)^enddlabel', text,
                              re.M | re.S):
             entries = [int(w, 16) for w in re.findall(r'\.word 0x([0-9A-Fa-f]+)', m.group(3))]
             out.append((m.group(1), int(m.group(2), 16), entries))
@@ -46,7 +46,7 @@ def original_tables(asm_dir):
 
 def function_address(name, symbol_files):
     # (r148) split stages name their functions func_sc05_017_801808D4
-    m = re.fullmatch(r'func_(?:ovl[0-9a-f]{2}_|sc\d\d_\d{3}_)?([0-9A-Fa-f]{8})', name)
+    m = re.fullmatch(r'func_(?:ovl[0-9a-f]{2}_|sc\d\d_\d{3}_|main_\d\d_)?([0-9A-Fa-f]{8})', name)
     if m:
         return int(m.group(1), 16)
     for f in symbol_files:

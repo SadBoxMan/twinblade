@@ -9,18 +9,18 @@ extern void NextGameStateSubStep(void);
 extern void SetGameStateSubStep(s32 a);
 extern void DemoClearEndRequest(void);
 extern void ResetMallocHeap(void);
-extern void func_80015310(void);
+extern void ClearDebugText(void);
 extern void DrawNowLoading(s32 a);
-extern s32 func_8001ABBC(s32 a, s32 b, void *c, s32 d, s32 e);
-extern void func_8001B324(void);
-extern void func_8001B384(void);
-extern void func_8001C0C8(void);
+extern s32 RequestLoad(s32 a, s32 b, void *c, s32 d, s32 e);
+extern void ResetBgmPacks(void);
+extern void ResetBgmPackStep(void);
+extern void ClearObjectPoolsAlt(void);
 extern void func_80029254(void);
-extern void func_80029344(void);
-extern void func_8002AEF8(void);
-extern void func_800CFBBC(void);
-extern s32 func_800D02D0(s32 a);
-extern s32 func_800D0488(s32 a);
+extern void UpdateClockPhase(void);
+extern void ClearSaveRequest(void);
+extern void ClearPictureRequest(void);
+extern s32 FieldLoadAbilityPackage(s32 a);
+extern s32 LoadSlot3Package(s32 a);
 extern u8 D_80078EC0;
 extern u8 D_80078EC1;
 extern u8 D_800AF218[];
@@ -33,60 +33,60 @@ extern u8 D_800B9A10;
 extern u8 D_800B9A11;
 extern u8 D_800B9A12;
 extern u8 D_800B9A17;
-extern void (*D_800D3430[])(void);
+extern void (*g_FieldStateTable[])(void);
 extern void (*D_800D3480[])(void);
-extern void (*D_800D3490[])(void);
+extern void (*g_FieldLoadSubSteps[])(void);
 extern s32 D_80114E78;
 extern s16 D_801152BA;
-extern s32 D_80127084;
+extern s32 g_FullReload;
 
-void func_800CEDFC(void) {
+void FieldMain(void) {
     if (D_800B99F0 < 20) {
-        D_800D3430[D_800B99F0]();
+        g_FieldStateTable[D_800B99F0]();
     }
 }
 
-void func_800CEE40(void) {
+void FieldStateInit(void) {
     if (D_800B99F6 < 2) {
         D_800D3480[D_800B99F6]();
     }
 }
 
-void func_800CEE84(void) {
-    func_80029344();
-    D_80127084 = 0;
+void FieldInitSetup(void) {
+    UpdateClockPhase();
+    g_FullReload = 0;
     D_80114E78 = 0;
     if (D_800B9A00 != 0) {
-        D_80127084 = 1;
+        g_FullReload = 1;
     }
-    func_8001B324();
-    func_8002AEF8();
+    ResetBgmPacks();
+    ClearSaveRequest();
     func_80029254();
-    func_800CFBBC();
+    ClearPictureRequest();
     DemoClearEndRequest();
     SetOtDepthLimit(0x3E0);
     NextGameStateStep();
 }
 
-void func_800CEF04(void) {
-    if (func_800D0488(1) != 0) {
+void FieldInitLoadSlot3(void) {
+    if (LoadSlot3Package(1) != 0) {
         NextGameState();
     }
 }
 
-void func_800CEF34(void) {
-    func_8001B324();
+void FieldStateSoundReset(void) {
+    ResetBgmPacks();
     NextGameState();
 }
 
 void func_800CEF5C(void) {
     s32 pad[2];
 
-    func_8001B324();
+    ResetBgmPacks();
     D_800B9A12 = 1;
     D_800B9A10 = 0;
     D_800B9A17 = 0;
-    func_8001C0C8();
+    ClearObjectPoolsAlt();
     D_800B9A0E = 0;
     NextGameState();
 }
@@ -99,16 +99,16 @@ extern void ForgetStageImage(void);
 extern void SetStageImage(s32 a);
 extern s32 StageImageNeedsLoad(s32 a);
 extern s32 LoadFileStep(void *a, s32 b, s32 c, s32 d);
-extern s32 func_8001AF04(void);
+extern s32 GetLoadQueueState(void);
 extern s32 func_80128218(void);
-extern s32 func_800CF8B4(void);
-extern s32 func_800CFC5C(s32 a);
-extern s32 func_800CFD68(s32 a);
-extern void func_800CFDA4(void);
-extern void func_800CFDE8(s32 a);
-extern s32 func_800CFE60(void);
-extern s32 func_800D0214(s32 a);
-extern s32 func_800D1714(void);
+extern s32 IsFieldPlaying(void);
+extern s32 GetSubRoomKind(s32 a);
+extern s32 MapNeedsStageLoad(s32 a);
+extern void MarkMapStageLoaded(void);
+extern void PrefetchMapHeader(s32 a);
+extern s32 LoadMapStage(void);
+extern s32 LoadMapFileAt(s32 a);
+extern s32 GetNextMapId(void);
 extern s32 D_80072C74;
 extern u8 D_800AE6BF;
 extern u8 g_FileLocStageEngine[];
@@ -116,7 +116,7 @@ extern s32 g_ArchiveFileLoc[][2];
 extern s16 D_800B9A08;
 /* the field map table: archive file (12 bits), load mode (4) and slot (16) per map */
 typedef struct { unsigned file : 12; unsigned mode : 4; signed slot : 16; } FieldMapEnt;
-extern FieldMapEnt D_800D34AC[];
+extern FieldMapEnt MapIdTable[];
 extern s16 D_80114E70;
 extern s16 D_80114E74;
 extern s32 D_80114E94;
@@ -124,22 +124,22 @@ extern s32 D_80114E98;
 extern u16 D_80126B58;
 
 typedef struct { s32 unk0; s16 unk4; s16 unk6; s32 unk8; } FieldItem;
-extern void func_8001B34C(void);
-extern s32 func_800291A0(s32 i, s32 v);
-extern s32 func_800291B4();
-extern void func_800291C8(s32 a, s16 b);
-extern s32 func_800291DC(s32 a);
-extern u32 func_80029504(void);
-extern void func_8002D4C8(s32 a, s32 b);
-extern s32 func_800D05E8();
-extern void func_800D065C(void);
-extern u32 func_800D0F8C(u8 a);
-extern void func_800D0FE0(s32 i);
-extern s16 func_800D1078(u8 a);
-extern s16 func_800D10C8(u8 a);
-extern s16 D_80078EAC;
-extern s32 D_800A654C;
-extern s32 (*D_800D375C)(s32);
+extern void ForgetBgmPack(void);
+extern void SetVar(s32 i, s32 v);
+extern s32 GetVar();
+extern void SetVar16(s32 a, s16 b);
+extern s32 GetVar16(s32 a);
+extern u32 GetProgress(void);
+extern void PlaySoundId(s32 a, s32 b);
+extern s32 PickMapMusic();
+extern void ClearSoundStates(void);
+extern u32 FindItem(u8 a);
+extern void ClearItemSlot(s32 i);
+extern s16 GetItemPrice(u8 a);
+extern s16 GetItemSellValue(u8 a);
+extern s16 g_Day;
+extern s32 g_BgmPackPlaying;
+extern s32 (*g_MusicPicker)(s32);
 extern FieldItem D_8010EDE8[];
 extern s32 D_801151F8;
 extern s32 D_8011529C;
@@ -157,23 +157,23 @@ typedef struct FieldTask {
     u8 unk15;
 } FieldTask;
 typedef struct { s32 unk0; s32 x, y, z; s32 vx, vy, vz; } FieldMover;
-extern void func_80016714(void *p, s32 n);
-extern s32 func_80029124(u32 bit, s32 on);
+extern void ZeroFill(void *p, s32 n);
+extern s32 SetFlag(u32 bit, s32 on);
 extern void func_80129258(void);
 extern void func_801285D4(void);
 extern void func_801378F0(void);
-extern s32 func_800D17B8(s32 a);
-extern s32 func_800D1984(FieldTask *p);
-extern s32 func_800D19DC(FieldTask *p);
-extern s32 func_800D1BD8(FieldTask *p);
-extern void func_800D1BF8(void);
-extern void func_800D1F58(void);
+extern s32 StartMapChange(s32 a);
+extern s32 MapEnterRun(FieldTask *p);
+extern s32 MapEnterDone(FieldTask *p);
+extern s32 MapLeaveDone(FieldTask *p);
+extern void FinishMapChange(void);
+extern void SaveEntryVitals(void);
 extern u16 D_80078E50;
-extern s32 D_80078E8C;
+extern s32 g_Money;
 extern u16 D_80078EB4;
 extern u16 D_80078EB8;
 typedef struct { s32 next; s32 unk4; s32 cur; } FieldMap;
-extern FieldMap D_800AE6A8;
+extern FieldMap g_EntryPoint;
 extern s32 D_800AE6AC;
 extern s32 D_800AE6B0;
 extern u16 D_800B9A0A;
@@ -199,19 +199,19 @@ typedef struct { s16 vx, vy, vz; } FieldAngle;
 typedef struct { u8 pad0[0x27]; s8 unk27; } FieldObj;
 extern s32 SquareRoot0(s32 a);
 extern s32 ratan2(s32 y, s32 x);
-extern void func_800167B8(s32 a);
-extern s32 func_800167F0(s32 arg0);
-extern void func_8001BFD0(void);
-extern void func_8001CB6C(void *p, s32 a, s32 b, s32 c);
-extern void func_8001CC3C(void *p, s32 a, s32 b, s32 c);
+extern void StartFade(s32 a);
+extern s32 FadeStep(s32 arg0);
+extern void ClearTimeChime(void);
+extern void InitSpriteKind2(void *p, s32 a, s32 b, s32 c);
+extern void InitSpriteKind3(void *p, s32 a, s32 b, s32 c);
 extern void func_8001CD9C(void *p, s32 a);
 extern FieldObj *func_801465C0(s32 a);
 extern void func_8016EDEC(void *fn, s32 flags);
-extern void func_800D0C48(u16 a);
-extern void func_800D1E28(void);
-extern s32 func_800D1EBC(void);
-extern void func_800D3238();
-extern void func_800D3348();
+extern void SoundCmd1(u16 a);
+extern void StartMapChangeFade(void);
+extern s32 StepMapChangeFade(void);
+extern void MessageEvent();
+extern void NullEvent();
 extern void func_800D33B8(void);
 extern void func_800D33E0(void);
 extern s32 (*D_800D3920[])(FieldStep *p);
@@ -246,25 +246,25 @@ extern int DrawSync(int mode);
 extern int VSync(int mode);
 extern void DrawOTag(u32 *p);
 extern void LoadQueueStep(void);
-extern void func_8001B85C(void);
-extern s32 func_8001B86C(s32 a);
+extern void ResetScreenWipe(void);
+extern s32 ScreenWipeStep(s32 a);
 extern void func_80128158(void);
-extern OtInfo D_800A651C[];
+extern OtInfo g_WorldOtOrg[];
 extern void (*D_800D3488[])(void);
 extern s32 D_80114E9C;
 
-void func_800CEFD0(void) {
+void FieldLoadLoopWipeA(void) {
     register Work *w = &D_800AF630;
 
     D_80114E98 = 0;
     D_80114E9C = 0;
-    func_8001B85C();
+    ResetScreenWipe();
 loop:
     if (D_80114E98 == 0) {
         D_800D3488[D_800B99F6]();
     }
     if (D_80114E9C == 0) {
-        D_80114E9C = func_8001B86C(0);
+        D_80114E9C = ScreenWipeStep(0);
     }
     if (D_80114E98 != 0 && D_80114E9C != 0) {
         SetGameState(7);
@@ -272,23 +272,23 @@ loop:
     }
     DrawSync(0);
     VSync(w->vsyncMode);
-    DrawOTag(D_800A651C[w->frame].ot + 1);
+    DrawOTag(g_WorldOtOrg[w->frame].ot + 1);
     LoadQueueStep();
     goto loop;
 }
 
-void func_800CF104(void) {
+void FieldLoadLoopWipeB(void) {
     register Work *w = &D_800AF630;
 
     D_80114E98 = 0;
     D_80114E9C = 0;
-    func_8001B85C();
+    ResetScreenWipe();
 loop:
     if (D_80114E98 == 0) {
         D_800D3488[D_800B99F6]();
     }
     if (D_80114E9C == 0) {
-        D_80114E9C = func_8001B86C(1);
+        D_80114E9C = ScreenWipeStep(1);
     }
     if (D_80114E98 != 0 && D_80114E9C != 0) {
         SetGameState(7);
@@ -296,16 +296,16 @@ loop:
     }
     DrawSync(0);
     VSync(w->vsyncMode);
-    DrawOTag(D_800A651C[w->frame].ot + 1);
+    DrawOTag(g_WorldOtOrg[w->frame].ot + 1);
     LoadQueueStep();
     goto loop;
 }
 
-void func_800CF238(void) {
+void FieldLoadLoopHidden(void) {
     register Work *w = &D_800AF630;
 
     D_80114E98 = 0;
-    func_8001B85C();
+    ResetScreenWipe();
 loop:
     if (D_80114E98 == 0) {
         D_800D3488[D_800B99F6]();
@@ -325,12 +325,12 @@ wait:
 draw:
     DrawSync(0);
     VSync(w->vsyncMode);
-    DrawOTag(D_800A651C[w->frame].ot + 1);
+    DrawOTag(g_WorldOtOrg[w->frame].ot + 1);
     LoadQueueStep();
     goto loop;
 }
 
-void func_800CF370(void) {
+void FieldStateNowLoading(void) {
     DrawNowLoading(0);
     SetGameState(0xF);
 }
@@ -339,14 +339,14 @@ void func_800CF398(void) {
     NextGameState();
 }
 
-extern s32 func_800CFBF8(void);
+extern s32 GetSubRoomBaseMap(void);
 
-void func_800CF3B8(void) {
+void FieldLoadLoopPlain(void) {
     register Work *w = &D_800AF630;
 
     D_80114E98 = 0;
     D_80114E9C = 0;
-    func_8001B85C();
+    ResetScreenWipe();
 loop:
     if (D_80114E98 == 0) {
         D_800D3488[D_800B99F6]();
@@ -356,13 +356,13 @@ loop:
             goto loop;
         }
     }
-    func_80015310();
+    ClearDebugText();
     SetGameState(7);
 }
 
-void func_800CF47C(void) {
+void FieldLoadExtraFile(void) {
     if (D_80114E78 != 0) {
-        if (func_8001ABBC(0, 0, D_800AF218, 0, 0) == 0) {
+        if (RequestLoad(0, 0, D_800AF218, 0, 0) == 0) {
             return;
         }
         D_80114E78 = 0;
@@ -370,95 +370,95 @@ void func_800CF47C(void) {
     NextGameStateStep();
 }
 
-void func_800CF4D4(void) {
-    D_800D3490[D_800B99FC]();
+void FieldLoadSubSteps(void) {
+    g_FieldLoadSubSteps[D_800B99FC]();
 }
 
-void func_800CF510(void) {
+void FieldLoadReset(void) {
     ResetMallocHeap();
     D_800B9A11 = 1;
-    func_8001C0C8();
-    func_80015310();
-    func_8001B384();
+    ClearObjectPoolsAlt();
+    ClearDebugText();
+    ResetBgmPackStep();
     D_801152BA = 0;
-    if (D_80127084 != 0) {
+    if (g_FullReload != 0) {
         NextGameStateSubStep();
     } else {
         SetGameStateSubStep(3);
     }
 }
 
-void func_800CF584(void) {
-    if (D_80127084 != 0 && (D_80078EC1 == 0 || func_800D02D0(D_80078EC1) != 0)) {
+void FieldLoadReloadAbility(void) {
+    if (g_FullReload != 0 && (D_80078EC1 == 0 || FieldLoadAbilityPackage(D_80078EC1) != 0)) {
         NextGameStateSubStep();
     }
 }
 
-void func_800CF5D4(void) {
+void FieldLoadReloadSlot3(void) {
     s32 t;
 
-    if (D_80127084 != 0 && ((t = D_80078EC0 & 0x7F) == 0 || func_800D0488(t) != 0)) {
+    if (g_FullReload != 0 && ((t = D_80078EC0 & 0x7F) == 0 || LoadSlot3Package(t) != 0)) {
         NextGameStateSubStep();
     }
 }
 
-void func_800CF628(void) {
+void FieldLoadPickStage(void) {
     s16 *m = &D_800B9A08;
 
-    if (func_800CFC5C(*m) != 0) {
-        if (D_80127084 != 0) {
+    if (GetSubRoomKind(*m) != 0) {
+        if (g_FullReload != 0) {
             D_80114E94 = *m;
-            *m = func_800CFBF8();
+            *m = GetSubRoomBaseMap();
         cfc:
             NextGameStateSubStep();
             return;
         }
         D_80114E94 = *m;
-        if (func_800CFD68(*m = func_800CFBF8()) != 0) {
+        if (MapNeedsStageLoad(*m = GetSubRoomBaseMap()) != 0) {
             goto cfc;
         }
         *m = D_80114E94;
         SetGameStateSubStep(5);
         return;
     }
-    D_80127084 = 0;
-    if (func_800CFD68(*m) == 0) {
+    g_FullReload = 0;
+    if (MapNeedsStageLoad(*m) == 0) {
         D_80114E98 = 1;
         return;
     }
     SetGameStateSubStep(6);
 }
 
-void func_800CF714(void) {
+void FieldLoadBaseStage(void) {
     ForgetStageImage();
-    if (func_800CFE60() != 0) {
-        func_800CFDA4();
+    if (LoadMapStage() != 0) {
+        MarkMapStageLoaded();
         D_800B9A08 = D_80114E94;
         NextGameStateSubStep();
     }
 }
 
-void func_800CF764(void) {
-    if (func_800D0214(func_80128218()) != 0) {
-        D_80127084 = 0;
+void FieldLoadSubRoom(void) {
+    if (LoadMapFileAt(func_80128218()) != 0) {
+        g_FullReload = 0;
         D_80114E98 = 1;
     }
 }
 
-void func_800CF7A4(void) {
+void FieldLoadStage(void) {
     ForgetStageImage();
-    if (func_8001AF04() != 2 && func_800CFE60() != 0) {
-        func_800CFDA4();
-        D_80127084 = 0;
+    if (GetLoadQueueState() != 2 && LoadMapStage() != 0) {
+        MarkMapStageLoaded();
+        g_FullReload = 0;
         D_80114E98 = 1;
     }
 }
 
-void func_800CF804(void) {
-    D_80127084 = 1;
+void RequestFullReload(void) {
+    g_FullReload = 1;
 }
 
-void func_800CF818(void) {
+void RequestExtraLoad(void) {
     D_80114E78 = 1;
 }
 
@@ -477,59 +477,59 @@ s32 func_800CF854(void) {
 s32 func_800CF864(void) {
     if (D_800B9A08 != 0x3069) {
         if (D_80126B58 != 0x1A) {
-            return func_800CF8B4();
+            return IsFieldPlaying();
         }
         return 1;
     }
     return 1;
 }
 
-s32 func_800CF8B4(void) {
+s32 IsFieldPlaying(void) {
     return D_800B99F0 == 9;
 }
 
-s32 func_800CF8CC(void) {
+s32 IsFieldLeavingMap(void) {
     return D_800B99F0 == 10;
 }
 
-void func_800CF8E4(void) {
-    s32 m = func_800D1714();
+void PrefetchNextMap(void) {
+    s32 m = GetNextMapId();
 
-    if (func_800CFC5C(m) == 0 && func_800CFC5C(D_800B9A08) == 0 && func_800CFD68(m) != 0) {
-        func_800CFDE8(m);
+    if (GetSubRoomKind(m) == 0 && GetSubRoomKind(D_800B9A08) == 0 && MapNeedsStageLoad(m) != 0) {
+        PrefetchMapHeader(m);
     }
 }
 
-void func_800CF94C(void) {
+void FieldLoadStageEngine(void) {
     if (LoadFileStep(g_FileLocStageEngine, D_80072C74, 0, 0) != 0) {
         NextGameState();
     }
 }
 
-extern void func_800CFAD0(void);
-extern s32 D_800C7C60;
+extern void DrawFieldPicture(void);
+extern s32 g_SoundLoadTable;
 extern void *D_800C7C64[];
-extern s32 D_800A2E20;
+extern s32 g_SoundLoadBuf;
 extern s16 D_800D3408[];
 
-void func_800CF990(void) {
+void FieldStatePicture(void) {
     switch (D_800B99F6) {
     case 0:
-        func_8001C0C8();
-        func_80015310();
-        if (func_8001ABBC(0, 0, g_ArchiveFileLoc[D_800D3408[D_80114E74]], 0, 0) != 0) {
-            func_800167B8(0);
+        ClearObjectPoolsAlt();
+        ClearDebugText();
+        if (RequestLoad(0, 0, g_ArchiveFileLoc[D_800D3408[D_80114E74]], 0, 0) != 0) {
+            StartFade(0);
             NextGameStateStep();
         }
         break;
     case 1:
-        func_800CFAD0();
-        if (func_800167F0(0) & 0xFFFF) {
+        DrawFieldPicture();
+        if (FadeStep(0) & 0xFFFF) {
             NextGameStateStep();
         }
         break;
     case 2:
-        func_800CFAD0();
+        DrawFieldPicture();
         if (++D_800B9A00 >= 0x5B && D_800AF630.dispIdx != 0) {
             SetGameState(6);
         }
@@ -537,29 +537,29 @@ void func_800CF990(void) {
     }
 }
 
-extern s32 func_8001AAA0(s32 a);
-extern void func_8002F5C8(void *p);
+extern s32 RequestBgmPack(s32 a);
+extern void SetStageSfxTable(void *p);
 extern s32 D_80072C7C;
 typedef struct { s32 file; s32 arg; } FieldLoad;
-extern FieldLoad D_800D384C[];
+extern FieldLoad g_Slot3PackageTable[];
 extern u8 D_800CA23C[], D_800C8448[], D_800CA84C[], D_800CA3E4[], D_800CA344[], D_800C83AC[], D_800C9A30[];
 extern u8 D_800C9158[], D_800C9310[], D_800C83A0[], D_800C8058[], D_800CADE8[], D_800C8500[], D_800C8514[];
 extern u8 D_800C9140[];
 
-extern s16 func_800D128C(s32 k, s16 v);
+extern s16 ApplyItemEffect(s32 k, s16 v);
 typedef struct { u8 pad0[0x34]; s16 unk34; u8 unk36; u8 unk37; } FieldStats;
-extern FieldStats D_80078E78;
+extern FieldStats g_Status;
 typedef struct { u8 unk0; u8 unk1; u8 pad2[10]; } FieldItemDef;
 extern FieldItemDef D_8010EDF0[];
 
-extern void func_800168B4(s32 a);
+extern void ResetFade(s32 a);
 extern s32 func_800168C4(s32 a);
-extern void func_800D185C(void *p);
+extern void SetNextMap(void *p);
 extern s32 D_800AE6B4;
 extern u8 D_800AE6BC;
 extern s32 D_80114EA8;
 extern s32 D_80159698;
-extern u16 *D_800D38D8[];
+extern u16 *g_DigitGlyphs[];
 typedef struct { s32 unk0; s32 unk4; } FieldDest;
 
 typedef struct { void (*fn[3])(FieldMap *m); } FieldFn3;
@@ -571,16 +571,16 @@ typedef struct { u8 pad0[0x5C]; s32 x, y, z; } FieldCam;
 extern FieldCam *D_801151D4;
 typedef struct { s16 pad0[3]; s16 x; s16 pad8; s16 y; s16 padC; s16 z; } FieldPos;
 
-extern s16 func_800CFBE8(void);
-extern void func_800CF8E4(void);
-extern void func_800D1D24(void);
-extern s32 func_800D1DB0(void);
+extern s32 GetPictureRequest(void);
+extern void PrefetchNextMap(void);
+extern void MapStart(void);
+extern s32 GetMapChangeKind(void);
 extern s32 DemoEndRequested();
 extern void SetMode(s32 a);
-extern s32 func_8002AF08();
+extern s32 GetSaveRequest();
 extern s32 func_80029264();
-extern void func_8001BE20();
-extern s32 func_8001BE30();
+extern void ResetXaCancel();
+extern s32 CancelXaClipStep();
 typedef struct { s32 next, unk4, cur; u8 padC[8]; u8 step; u8 pad15[2]; u8 unk17; } FieldMapS;
 typedef struct { u8 pad0[0x1C]; void (*fn)(void); } FieldDestFn;
 typedef struct { s32 (*fn[3])(FieldMapS *m); } FieldFn3S;
@@ -597,7 +597,7 @@ extern s16 D_80115124;
 extern s16 D_8011512A;
 extern u8 *D_801151C8;
 extern u8 *D_801151CC;
-extern GsOT D_800A6518[];
+extern GsOT g_WorldOt[];
 extern u8 g_PrimBuf[];
 extern u8 D_800856B0[];
 typedef struct { s32 v; } S32R;
@@ -606,9 +606,9 @@ extern S32R D_80115168[];
 extern s32 D_80072C78;
 /* the field's package table: the archive file and a word per package */
 typedef struct { s32 file; s32 unk4; } FieldPkg;
-extern FieldPkg D_800D3764[];
+extern FieldPkg g_AbilityPackageTable[];
 
-extern OtInfo D_800AE7BC[];
+extern OtInfo g_FrontOtOrg[];
 typedef struct { unsigned addr : 24; unsigned len : 8; } OtTag;
 typedef struct {
     u32 tag;
@@ -649,11 +649,11 @@ typedef struct {
 } FieldG4;
 typedef struct { u32 tag; u32 code; } FieldTPage;
 #define ADDPRIM2(p) \
-    ((OtTag *)(p))->addr = ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr; \
-    ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr = (u32)(p)
+    ((OtTag *)(p))->addr = ((OtTag *)(g_FrontOtOrg[D_800AF630.frame].ot + 2))->addr; \
+    ((OtTag *)(g_FrontOtOrg[D_800AF630.frame].ot + 2))->addr = (u32)(p)
 
-extern s32 D_800A2B70;
-extern u32 D_800BA0FC;
+extern s32 g_TimeChime;
+extern u32 g_TimeChimeTimer;
 extern s32 D_80114EA0;
 
 typedef struct {
@@ -670,7 +670,7 @@ extern FieldSprtTp D_80114E7C;
 
 /* Build the field's 256x144 sprite (texture page 0xE1000085, neutral colour) and link it into this frame's ordering
  * table */
-void func_800CFAD0(void) {
+void DrawFieldPicture(void) {
     setlen(&D_80114E7C, 5);
     D_80114E7C.tpage = 0xE1000085;
     D_80114E7C.code = 0x64;
@@ -685,21 +685,21 @@ void func_800CFAD0(void) {
     addPrim(D_800AA60C[D_800B9A02], &D_80114E7C);
 }
 
-void func_800CFBBC(void) {
+void ClearPictureRequest(void) {
     D_80114E70 = 0;
 }
 
-void func_800CFBCC(s16 a) {
+void RequestPicture(s16 a) {
     D_80114E70 = 1;
     D_80114E74 = a;
 }
 
-s16 func_800CFBE8(void) {
+s32 GetPictureRequest(void) {
     return D_80114E70;
 }
 
-s32 func_800CFBF8(void) {
-    s32 r = func_800CFC5C(D_800B9A08);
+s32 GetSubRoomBaseMap(void) {
+    s32 r = GetSubRoomKind(D_800B9A08);
 
     if (r == 1) {
         return 0x1010;
@@ -716,7 +716,7 @@ s32 func_800CFBF8(void) {
     return 0x1010;
 }
 
-s32 func_800CFC5C(s32 a) {
+s32 GetSubRoomKind(s32 a) {
     if (a == 0x2013) return 1;
     if (a == 0x2015) return 1;
     if (a == 0x2016) return 1;
@@ -748,29 +748,29 @@ s32 func_800CFC5C(s32 a) {
     return 0;
 }
 
-s32 func_800CFD68(s32 a) {
-    return StageImageNeedsLoad(D_800D34AC[a & ~0xF000].file);
+s32 MapNeedsStageLoad(s32 a) {
+    return StageImageNeedsLoad(MapIdTable[a & ~0xF000].file);
 }
 
-void func_800CFDA4(void) {
-    SetStageImage(D_800D34AC[D_800B9A08 & ~0xF000].file);
+void MarkMapStageLoaded(void) {
+    SetStageImage(MapIdTable[D_800B9A08 & ~0xF000].file);
 }
 
-void func_800CFDE8(s32 a) {
-    s32 i = D_800D34AC[a & ~0xF000].file;
+void PrefetchMapHeader(s32 a) {
+    s32 i = MapIdTable[a & ~0xF000].file;
 
     if (i >= 0 && g_ArchiveFileLoc[i][0] != 0) {
-        func_8001ABBC(2, 0, g_ArchiveFileLoc[i], 0, 0);
+        RequestLoad(2, 0, g_ArchiveFileLoc[i], 0, 0);
     }
 }
 
-extern s32 func_80029178(s32 n);
-extern void func_8002F620(void);
-extern s32 func_8002F648(void);
+extern s32 GetFlag(s32 n);
+extern void ClearStageSfxTable(void);
+extern s32 GetStageSfxTableId(void);
 extern s32 func_8002F658(void);
-void func_800D00E4(s32 a);
+void SetMapSoundRecord(s32 a);
 
-s32 func_800CFE60(void) {
+s32 LoadMapStage(void) {
     register Work *w = &D_800AF630;
     u32 mask = 0xFFFF0FFF;
     s32 file;
@@ -783,19 +783,19 @@ s32 func_800CFE60(void) {
     s32 k;
     s32 m;
     k = D_800B9A08 & mask;
-    slot = D_800D34AC[k].slot;
-    file = D_800D34AC[k].file;
-    v = func_8002F648();
-    m = D_800D34AC[D_800B9A08 & mask].mode;
+    slot = MapIdTable[k].slot;
+    file = MapIdTable[k].file;
+    v = GetStageSfxTableId();
+    m = MapIdTable[D_800B9A08 & mask].mode;
     if (v == m) {
         mode = -1;
     } else if (v == 0) {
         mode = 0;
     } else {
         mode = 0;
-        func_8002F620();
+        ClearStageSfxTable();
     }
-    t = func_80029504();
+    t = GetProgress();
     if (w->mapId == 0x300B && w->unkA3DE != 0) {
         slot = 8;
         file = 0x8A;
@@ -804,7 +804,7 @@ s32 func_800CFE60(void) {
         file = 0x37;
     }
     if (w->mapId == 0x304E) {
-        if (func_80029178(0x17) & 0xFF) {
+        if (GetFlag(0x17) & 0xFF) {
             file = 0x129;
             slot = 0x2F;
         }
@@ -813,16 +813,16 @@ s32 func_800CFE60(void) {
         file = 0x151;
         slot = 0x34;
     }
-    if (w->mapId == 0x3021 && (func_80029178(0xB9) & 0xFF)) {
+    if (w->mapId == 0x3021 && (GetFlag(0xB9) & 0xFF)) {
         file = 0xC1;
         slot = 0x41;
     }
     v = func_8002F658();
     if (v != slot || mode >= 0) {
-        s32 *q = &D_800C7C60;
+        s32 *q = &g_SoundLoadTable;
         *q = slot;
         p = q;
-        D_800C7C64[0] = &D_800A2E20;
+        D_800C7C64[0] = &g_SoundLoadBuf;
     } else {
         p = NULL;
     }
@@ -836,13 +836,13 @@ s32 func_800CFE60(void) {
     }
     if (mode == 0) {
         if (r & 1) {
-            func_800D00E4(D_800D34AC[w->mapId & 0xFFFF0FFF].mode);
+            SetMapSoundRecord(MapIdTable[w->mapId & 0xFFFF0FFF].mode);
         }
     }
     return r;
 }
 
-void func_800D00E4(s32 a) {
+void SetMapSoundRecord(s32 a) {
     void *p;
 
     switch (a) {
@@ -863,18 +863,18 @@ void func_800D00E4(s32 a) {
     case 15: p = D_800C9140; break;
     default: return;
     }
-    func_8002F5C8(p);
+    SetStageSfxTable(p);
 }
 
-s32 func_800D0214(s32 a) {
-    s32 *p = &D_800C7C60;
+s32 LoadMapFileAt(s32 a) {
+    s32 *p = &g_SoundLoadTable;
     s32 k = D_800B9A08 & ~0xF000;
     s32 i;
     s32 t;
 
-    i = D_800D34AC[k].file;
-    t = D_800D34AC[k].slot;
-    D_800C7C64[0] = &D_800A2E20;
+    i = MapIdTable[k].file;
+    t = MapIdTable[k].slot;
+    D_800C7C64[0] = &g_SoundLoadBuf;
     *p = t;
     if (i >= 0) {
         if (g_ArchiveFileLoc[i][0] != 0) {
@@ -885,12 +885,12 @@ s32 func_800D0214(s32 a) {
     return 1;
 }
 
-void func_800D02C0(s32 (*f)(s32)) {
-    D_800D375C = f;
+void SetMusicPicker(s32 (*f)(s32)) {
+    g_MusicPicker = f;
 }
 
 /* a package number (1 to 30) to its slot and its archive file loaded; 1 when nothing is to load */
-s32 func_800D02D0(s32 n) {
+s32 FieldLoadAbilityPackage(s32 n) {
     s32 r;
     s32 *p;
     s32 t;
@@ -926,22 +926,22 @@ s32 func_800D02D0(s32 n) {
     case 30: n = 0x1C; break;
     default: n = -1; break;
     }
-    t = D_800D3764[n].unk4;
-    p = &D_800C7C60;
-    D_800C7C64[0] = &D_800A2E20;
+    t = g_AbilityPackageTable[n].unk4;
+    p = &g_SoundLoadTable;
+    D_800C7C64[0] = &g_SoundLoadBuf;
     *p = t;
     if (n >= 0) {
-        r = func_8001ABBC(0, 0, g_ArchiveFileLoc[D_800D3764[n].file], D_80072C78, (s32)p);
+        r = RequestLoad(0, 0, g_ArchiveFileLoc[g_AbilityPackageTable[n].file], D_80072C78, (s32)p);
     } else {
         r = 1;
     }
     if (r != 0) {
-        func_8001B384();
+        ResetBgmPackStep();
     }
     return r;
 }
 
-s32 func_800D0488(s32 a) {
+s32 LoadSlot3Package(s32 a) {
     s32 *p;
     s32 i;
     s32 t;
@@ -956,27 +956,27 @@ s32 func_800D0488(s32 a) {
     case 6: i = 5; break;
     default: i = -1; break;
     }
-    t = D_800D384C[i].arg;
-    D_800C7C64[0] = &D_800A2E20;
-    p = &D_800C7C60;
+    t = g_Slot3PackageTable[i].arg;
+    D_800C7C64[0] = &g_SoundLoadBuf;
+    p = &g_SoundLoadTable;
     *p = t;
     if (i >= 0) {
-        r = func_8001ABBC(0, 0, g_ArchiveFileLoc[D_800D384C[i].file], D_80072C7C, (s32)p);
+        r = RequestLoad(0, 0, g_ArchiveFileLoc[g_Slot3PackageTable[i].file], D_80072C7C, (s32)p);
     } else {
         r = 1;
     }
     if (r != 0) {
-        func_8001B384();
+        ResetBgmPackStep();
     }
     return r;
 }
 
-void func_800D0588(void) {
-    s32 r = func_800D05E8(D_800B9A08);
+void LoadMapMusic(void) {
+    s32 r = PickMapMusic(D_800B9A08);
     s32 v;
 
     if (r != 0) {
-        v = func_8001ABBC(1, r, 0, 0, 0);
+        v = RequestLoad(1, r, 0, 0, 0);
     } else {
         v = 1;
     }
@@ -985,22 +985,22 @@ void func_800D0588(void) {
     }
 }
 
-s32 func_800D05E8(void) {
+s32 PickMapMusic(void) {
     s32 r = 0;
-    s32 t = func_80029504();
+    s32 t = GetProgress();
 
-    if (D_800D375C != NULL) {
-        r = D_800D375C(t);
+    if (g_MusicPicker != NULL) {
+        r = g_MusicPicker(t);
     }
     return r;
 }
 
-void func_800D0630(void) {
-    func_800D065C();
+void ResetFieldSound(void) {
+    ClearSoundStates();
     D_8011529C = -1;
 }
 
-void func_800D065C(void) {
+void ClearSoundStates(void) {
     D_801151F8 = 0;
     D_80126AE8 = 0;
     D_80127500 = 0;
@@ -1018,18 +1018,18 @@ void func_800D0694(void) {
     D_80127050 = 0;
 }
 
-void func_800D06CC(void) {
+void ParkSoundStates(void) {
     D_801151F8 = 3;
     D_80127500 = 3;
 }
 
 /* a per-frame sound state pair. D_80127500: in maps 0x1010-0x1011, 0x1077-0x1078 and 0x1094-0x1095, unless
-   func_80029504() is in 0x460-0x491 or 0x64-0x81, sound 0x518 or 0x517 is started by D_80078E78.unk37 (1, or 3-4)
+   GetProgress() is in 0x460-0x491 or 0x64-0x81, sound 0x518 or 0x517 is started by g_Status.unk37 (1, or 3-4)
    and stopped (0xD) after 0x97 frames; in maps 0x3014 / 0x301C, 0x683 starts or stops with unk37 4 / 0.
-   D_801151F8: picks the map's track id (D_80114EA0 when it differs from D_800A654C), waits 0x3C frames after
-   func_8002D4C8(1, 2), then starts it */
-void func_800D06E8(void) {
-    FieldStats *st = &D_80078E78;
+   D_801151F8: picks the map's track id (D_80114EA0 when it differs from g_BgmPackPlaying), waits 0x3C frames after
+   PlaySoundId(1, 2), then starts it */
+void UpdateFieldSound(void) {
+    FieldStats *st = &g_Status;
     s32 k;
     u32 t;
     s32 m;
@@ -1044,7 +1044,7 @@ void func_800D06E8(void) {
         case 0x1078:
         case 0x1094:
         case 0x1095:
-            t = func_80029504();
+            t = GetProgress();
             if (t - 0x460 < 0x32) {
                 m = 0;
             } else {
@@ -1054,7 +1054,7 @@ void func_800D06E8(void) {
                 }
             }
             if (!m) {
-                D_800A2B70 = 0;
+                g_TimeChime = 0;
             }
             k = 0;
             c = st->unk37;
@@ -1063,7 +1063,7 @@ void func_800D06E8(void) {
             } else if (c == 3 || c == 4) {
                 k = 2;
             }
-            if (D_800A2B70 != 0) {
+            if (g_TimeChime != 0) {
                 D_80127500++;
             } else if (m && k != D_8011529C) {
                 D_8011529C = k;
@@ -1072,15 +1072,15 @@ void func_800D06E8(void) {
                 } else {
                     switch (k) {
                     case 1:
-                        func_8002D4C8(0x518, 0);
-                        D_800A2B70 = k;
-                        D_800BA0FC = 0;
+                        PlaySoundId(0x518, 0);
+                        g_TimeChime = k;
+                        g_TimeChimeTimer = 0;
                         D_80127500++;
                         break;
                     case 2:
-                        func_8002D4C8(0x517, 0);
-                        D_800A2B70 = k;
-                        D_800BA0FC = 0;
+                        PlaySoundId(0x517, 0);
+                        g_TimeChime = k;
+                        g_TimeChimeTimer = 0;
                         D_80127500++;
                         break;
                     }
@@ -1092,31 +1092,31 @@ void func_800D06E8(void) {
             if (st->unk37 != D_8011529C) {
                 D_8011529C = st->unk37;
                 if (st->unk37 == 4) {
-                    func_8002D4C8(0x683, 0);
+                    PlaySoundId(0x683, 0);
                 } else if (st->unk37 == 0) {
-                    func_8002D4C8(0xD, 0x683);
+                    PlaySoundId(0xD, 0x683);
                 }
             }
             break;
         }
         break;
     case 1:
-        if (++D_800BA0FC >= 0x97) {
-            switch (D_800A2B70) {
+        if (++g_TimeChimeTimer >= 0x97) {
+            switch (g_TimeChime) {
             case 1:
-                func_8002D4C8(0xD, 0x518);
+                PlaySoundId(0xD, 0x518);
                 break;
             case 2:
-                func_8002D4C8(0xD, 0x517);
+                PlaySoundId(0xD, 0x517);
                 break;
             }
-            D_800A2B70 = 0;
+            g_TimeChime = 0;
             D_80127500 = 0;
         }
         break;
     case 2:
         if (--D_801201F0 == 0) {
-            func_8002D4C8(0xD, 0x683);
+            PlaySoundId(0xD, 0x683);
             D_80127500 = 0;
         }
         break;
@@ -1134,7 +1134,7 @@ void func_800D06E8(void) {
         case 0x1078:
         case 0x1094:
         case 0x1095:
-            t = func_80029504();
+            t = GetProgress();
             if (t - 0x460 < 0x32) {
                 m = 0x89;
             } else if (t - 0x384 < 0x6E) {
@@ -1157,12 +1157,12 @@ void func_800D06E8(void) {
             }
             break;
         }
-        if (m != D_800A654C) {
+        if (m != g_BgmPackPlaying) {
             D_80114EA0 = m;
             D_80126AE8 = 0x3C;
-            D_800A654C = 0;
+            g_BgmPackPlaying = 0;
             D_801151F8++;
-            func_8002D4C8(1, 2);
+            PlaySoundId(1, 2);
         }
         break;
     case 1:
@@ -1173,20 +1173,20 @@ void func_800D06E8(void) {
     case 2:
         switch (D_80114EA0) {
         case 0xF:
-            func_8001AAA0(0xF);
+            RequestBgmPack(0xF);
             break;
         case 0x10:
-            func_8001AAA0(0x10);
+            RequestBgmPack(0x10);
             break;
         case 0xA:
-            func_8002D4C8(0x10C, 0);
+            PlaySoundId(0x10C, 0);
             break;
         case 0x3C:
-            func_8002D4C8(0x13B, 0);
+            PlaySoundId(0x13B, 0);
             break;
         }
         D_801151F8 = 0;
-        D_800A654C = D_80114EA0;
+        g_BgmPackPlaying = D_80114EA0;
         break;
     case 3:
     case 4:
@@ -1194,31 +1194,31 @@ void func_800D06E8(void) {
     }
 }
 
-void func_800D0C48(u16 a) {
-    func_8002D4C8(1, a);
-    D_800A654C = 0;
+void SoundCmd1(u16 a) {
+    PlaySoundId(1, a);
+    g_BgmPackPlaying = 0;
 }
 
 void func_800D0C74(u16 a) {
-    func_8002D4C8(1, a);
-    func_8001B34C();
+    PlaySoundId(1, a);
+    ForgetBgmPack();
 }
 
-void func_800D0CA0(u16 a) {
-    func_8002D4C8(1, a);
-    D_800A654C = 0;
+void MusicCommandPark(u16 a) {
+    PlaySoundId(1, a);
+    g_BgmPackPlaying = 0;
     D_801151F8 = 3;
     D_80127500 = 3;
 }
 
-s32 func_800D0CE0(void) {
+s32 StartMapMusic(void) {
     s32 r = 0;
-    s32 t = func_80029504();
+    s32 t = GetProgress();
 
-    if (D_800D375C != NULL) {
-        r = D_800D375C(t);
+    if (g_MusicPicker != NULL) {
+        r = g_MusicPicker(t);
     }
-    if (func_8001AAA0(r) != 0) {
+    if (RequestBgmPack(r) != 0) {
         D_8012704C = 0;
         D_801151F8 = 0;
         D_80126AE8 = 0;
@@ -1226,20 +1226,20 @@ s32 func_800D0CE0(void) {
         D_8012704C = 0;
         D_801201F0 = 0;
         D_80127050 = 0;
-        D_800A654C = r;
+        g_BgmPackPlaying = r;
         return 1;
     }
     return 0;
 }
 
-extern u8 D_80078EB0;
-extern u8 D_80078EB1;
+extern u8 g_ClockMinute;
+extern u8 g_ClockHour;
 typedef union { s16 w; struct { u8 lo, hi; } b; } ClockDiff;
 
-s16 func_800D0D7C(u8 h, u8 m) {
+s16 ClockSubtract(u8 h, u8 m) {
     ClockDiff r;
-    r.b.lo = D_80078EB0;
-    r.b.hi = D_80078EB1;
+    r.b.lo = g_ClockMinute;
+    r.b.hi = g_ClockHour;
     if (r.b.lo >= m) {
         r.b.lo -= m;
     } else {
@@ -1256,11 +1256,11 @@ s16 func_800D0D7C(u8 h, u8 m) {
 
 typedef struct { u8 lo, hi; } FieldClock;
 
-s16 func_800D0E30(FieldClock *c) {
+s16 GetClockDiff(FieldClock *c) {
     ClockDiff r;
 
-    r.b.hi = c->hi - D_80078EB1;
-    r.b.lo = c->lo - D_80078EB0;
+    r.b.hi = c->hi - g_ClockHour;
+    r.b.lo = c->lo - g_ClockMinute;
     if (r.b.lo >= 60) {
         r.b.lo += 60;
         r.b.hi--;
@@ -1271,103 +1271,103 @@ s16 func_800D0E30(FieldClock *c) {
     return r.w;
 }
 
-u32 func_800D0EC4(void) {
+u32 FindFreeItemSlot(void) {
     u32 i;
 
     for (i = 0x2F; i < 0x3B; i++) {
-        if (!(func_800291B4(i) & 0xFF)) {
+        if (!(GetVar(i) & 0xFF)) {
             return i;
         }
     }
     return 0;
 }
 
-void func_800D0F0C(s32 i, u8 v) {
-    func_800291A0(i, v);
-    func_800291C8(i * 2 - 0x4A, D_80078EAC);
+void SetItemSlot(s32 i, u8 v) {
+    SetVar(i, v);
+    SetVar16(i * 2 - 0x4A, g_Day);
 }
 
-u32 func_800D0F4C(u8 a) {
-    u32 r = func_800D0F8C(a);
+u32 TakeItem(u8 a) {
+    u32 r = FindItem(a);
 
     if (r != 0) {
-        func_800D0FE0(r);
+        ClearItemSlot(r);
         return r;
     }
     return 0;
 }
 
-u32 func_800D0F8C(u8 a) {
+u32 FindItem(u8 a) {
     u32 i;
 
     for (i = 0x2F; i < 0x3B; i++) {
-        if ((u8)func_800291B4(i) == a) {
+        if ((u8)GetVar(i) == a) {
             return i;
         }
     }
     return 0;
 }
 
-void func_800D0FE0(s32 i) {
-    func_800291A0(i, 0);
+void ClearItemSlot(s32 i) {
+    SetVar(i, 0);
 }
 
-s16 func_800D1000(s32 i) {
-    return func_800291DC(i * 2 - 0x4A);
+s16 GetItemSlotDay(s32 i) {
+    return GetVar16(i * 2 - 0x4A);
 }
 
 s16 func_800D1028(void) {
-    return func_800D1078(func_800291B4());
+    return GetItemPrice(GetVar());
 }
 
-s32 func_800D1054(u8 a) {
+s32 GetItemName(u8 a) {
     return D_8010EDE8[a].unk0;
 }
 
-s16 func_800D1078(u8 a) {
+s16 GetItemPrice(u8 a) {
     return D_8010EDE8[a].unk4;
 }
 
 s16 func_800D109C(void) {
-    return func_800D10C8(func_800291B4());
+    return GetItemSellValue(GetVar());
 }
 
-s16 func_800D10C8(u8 a) {
+s16 GetItemSellValue(u8 a) {
     return D_8010EDE8[a].unk6;
 }
 
-void func_800D10EC(void) {
-    FieldStats *st = &D_80078E78;
+void AgeInventoryItems(void) {
+    FieldStats *st = &g_Status;
     s16 i;
 
     for (i = 0; i < 12; i++) {
-        u8 k = func_800291B4(i + 0x2F);
+        u8 k = GetVar(i + 0x2F);
         if (k != 0) {
             u8 n = D_8010EDF0[k].unk0;
             if (n != 0) {
-                s32 t = (s16)func_800291DC(i * 2 + 0x14);
+                s32 t = (s16)GetVar16(i * 2 + 0x14);
                 s32 c = st->unk34;
                 if (c - t >= n) {
-                    func_800291A0(i + 0x2F, D_8010EDF0[k].unk1);
-                    func_800291C8(i * 2 + 0x14, D_80078EAC);
+                    SetVar(i + 0x2F, D_8010EDF0[k].unk1);
+                    SetVar16(i * 2 + 0x14, g_Day);
                 }
             }
         }
     }
 }
 
-s16 func_800D11F0(u8 a) {
-    u8 k = func_800291B4(a + 0x2F);
+s16 UseItemSlot(u8 a) {
+    u8 k = GetVar(a + 0x2F);
     s32 t;
     s16 r;
 
     if (k == 0) {
         return 0;
     }
-    t = (s16)func_800291DC(a * 2 + 0x14);
-    r = func_800D128C(k, D_80078EAC - t);
+    t = (s16)GetVar16(a * 2 + 0x14);
+    r = ApplyItemEffect(k, g_Day - t);
     if (r > 0) {
-        func_800291A0(a + 0x2F, 0);
+        SetVar(a + 0x2F, 0);
     }
     return r;
 }
@@ -1379,7 +1379,7 @@ extern void func_8014B944(u16 *p, s32 n, s32 k);
 extern void func_8014BC0C(u16 *p, s32 n);
 extern void func_8014B2A8(void);
 
-s16 func_800D128C(s32 k, s16 n) {
+s16 ApplyItemEffect(s32 k, s16 n) {
     u8 item = k;
     s16 mode = 3;
     s32 r = 1;
@@ -1578,14 +1578,14 @@ s16 func_800D128C(s32 k, s16 n) {
         break;
     }
     if (snd != 0) {
-        func_8002D4C8(snd, 0);
+        PlaySoundId(snd, 0);
     }
     return r;
 }
 
 s16 func_800D1658(u8 a) {
     s32 j = a + 0x2F;
-    u8 k = func_800291B4(j);
+    u8 k = GetVar(j);
     s32 t;
     s16 r;
 
@@ -1595,50 +1595,50 @@ s16 func_800D1658(u8 a) {
     t = D_8010EDE8[k].unk4;
     r = t;
     if (t > 0 || ((u16)r == 0x8000 && k != 0x27)) {
-        func_800291A0(j, 0);
-        func_8002D4C8(0x462, 0);
+        SetVar(j, 0);
+        PlaySoundId(0x462, 0);
         r = 1;
     } else {
         r = 0;
-        func_8002D4C8(0x45F, 0);
+        PlaySoundId(0x45F, 0);
     }
     return r;
 }
 
-s32 func_800D1714(void) {
+s32 GetNextMapId(void) {
     return D_80078E50;
 }
 
-void func_800D1724(s32 a) {
+void RequestMapChange(s32 a) {
     D_800AE6B0 = a;
 }
 
-void func_800D1734(s32 a) {
-    D_800AE6A8.next = a;
+void QueueMapChange(s32 a) {
+    g_EntryPoint.next = a;
 }
 
 void func_800D1744(s32 a) {
     D_800AE6AC = a;
 }
 
-void func_800D1754(void) {
+void PollMapChange(void) {
     s32 t;
-    s32 *m = &D_800AE6A8.next;
-    if (func_800D17B8(D_800AE6B0) == 0) {
+    s32 *m = &g_EntryPoint.next;
+    if (StartMapChange(D_800AE6B0) == 0) {
         t = m[0];
         if (t != 0) {
             m[0] = 0;
             D_800AE6B0 = t;
-            func_800D17B8(t);
+            StartMapChange(t);
         }
     }
 }
 
-s32 func_800D17B8(s32 a) {
+s32 StartMapChange(s32 a) {
     FieldDest *d = (FieldDest *)(a & 0x80FFFFFF);
 
     if (d != NULL) {
-        func_800D185C(d);
+        SetNextMap(d);
         if (a & 0x1000000) {
             D_800AE6B4 = (s32)&D_80159698;
             D_800AE6BC = 0;
@@ -1654,8 +1654,8 @@ s32 func_800D17B8(s32 a) {
 }
 
 /* the map record copied to D_80078E50 and linked into the field map (r150: byte 3 read before the link store) */
-void func_800D185C(void *p) {
-    FieldMapX *m = (FieldMapX *)&D_800AE6A8;
+void SetNextMap(void *p) {
+    FieldMapX *m = (FieldMapX *)&g_EntryPoint;
     u8 b3;
     *(FieldBlk24 *)&D_80078E50 = *(FieldBlk24 *)p;
     m->unk16 = ((u8 *)p)[2];
@@ -1664,37 +1664,37 @@ void func_800D185C(void *p) {
     m->unk19 = b3;
 }
 
-void func_800D18DC(void) {
+void RunMapEnterStep(void) {
     FieldFn3 t = D_801141BC;
 
-    t.fn[D_800AE6BC](&D_800AE6A8);
+    t.fn[D_800AE6BC](&g_EntryPoint);
 }
 
-s32 func_800D1938(FieldTask *p) {
-    func_800D1F58();
+s32 MapEnterBegin(FieldTask *p) {
+    SaveEntryVitals();
     func_801285D4();
     p->unk15 = 0;
     p->step++;
-    func_800D1984(p);
+    MapEnterRun(p);
     return 0;
 }
 
-s32 func_800D1984(FieldTask *p) {
+s32 MapEnterRun(FieldTask *p) {
     if (p->fn(p) != 0) {
         p->step++;
-        return func_800D19DC(p);
+        return MapEnterDone(p);
     }
     return 0;
 }
 
-s32 func_800D19DC(FieldTask *p) {
+s32 MapEnterDone(FieldTask *p) {
     D_800B9A10 = 1;
     return 1;
 }
 
-s32 func_800D19F0(void) {
+s32 RunMapLeaveStep(void) {
     FieldFn3S t = D_801141C8;
-    FieldMapS *m = (FieldMapS *)&D_800AE6A8;
+    FieldMapS *m = (FieldMapS *)&g_EntryPoint;
 
     if (D_80126BA6 != 0) {
         return 0;
@@ -1702,15 +1702,15 @@ s32 func_800D19F0(void) {
     if (D_800B9A08 != 0x3069) {
         switch (D_80114EA8) {
         case 0:
-            func_8001BE20();
+            ResetXaCancel();
             D_80114EA8++;
         case 1:
-            if (func_8001BE30() == 0) {
+            if (CancelXaClipStep() == 0) {
                 return 0;
             }
             D_80114EA8++;
             if (!(D_800AE6B0 & 0x1000000)) {
-                func_800CF8E4();
+                PrefetchNextMap();
             }
             break;
         case 2:
@@ -1720,49 +1720,49 @@ s32 func_800D19F0(void) {
     return t.fn[m->step](m);
 }
 
-s32 func_800D1B10(FieldTask *p) {
-    func_80029124(0x119, 0);
-    func_8002D4C8(4, 0x448);
-    func_8002D4C8(4, 0x449);
-    func_8002D4C8(4, 0x8ED);
+s32 MapLeaveBegin(FieldTask *p) {
+    SetFlag(0x119, 0);
+    PlaySoundId(4, 0x448);
+    PlaySoundId(4, 0x449);
+    PlaySoundId(4, 0x8ED);
     D_800B9A10 = 0;
     p->step++;
     p->unk15 = 0;
     do { return 0; } while (0); /* MATCH-TRICK: keeps the return 0 in its own block */
 }
 
-s32 func_800D1B80(FieldTask *p) {
+s32 MapLeaveRun(FieldTask *p) {
     if (p->fn(p) != 0) {
         p->step++;
-        return func_800D1BD8(p);
+        return MapLeaveDone(p);
     }
     return 0;
 }
 
-s32 func_800D1BD8(FieldTask *p) {
-    func_800D1BF8();
+s32 MapLeaveDone(FieldTask *p) {
+    FinishMapChange();
     return 1;
 }
 
-void func_800D1BF8(void) {
-    FieldMapS *m = (FieldMapS *)&D_800AE6A8;
+void FinishMapChange(void) {
+    FieldMapS *m = (FieldMapS *)&g_EntryPoint;
 
     D_800B9A0E = 0;
     ((FieldDestFn *)(D_800AE6B0 & 0x80FFFFFF))->fn();
-    func_800D1D24();
+    MapStart();
     if (DemoEndRequested() != 0) {
         DemoClearEndRequest();
         SetMode(0x11);
-    } else if (func_8002AF08() != 0) {
+    } else if (GetSaveRequest() != 0) {
         SetGameState(0xD);
-    } else if (((s32 (*)(void))func_800CFBE8)() != 0) {
-        func_800CFBBC();
+    } else if (GetPictureRequest() != 0) {
+        ClearPictureRequest();
         SetGameState(0x13);
     } else if (func_80029264() != 0) {
         func_80029254();
         SetGameState(0x12);
     } else {
-        switch (func_800D1DB0()) {
+        switch (GetMapChangeKind()) {
         case 0:
             SetGameState(6);
             break;
@@ -1782,50 +1782,50 @@ void func_800D1BF8(void) {
     }
 }
 
-void func_800D1D24(void) {
+void MapStart(void) {
     D_800B9A11 = 1;
     D_800B9A08 = D_80078E50;
     D_800B9A0C = D_800B9A0A;
     D_800B9A0A = D_80078E50 & 0xF000;
-    func_8001C0C8();
-    func_80015310();
+    ClearObjectPoolsAlt();
+    ClearDebugText();
     func_80129258();
     func_801378F0();
 }
 
-s16 func_800D1D94(void) {
+s16 GetNextMapGroup(void) {
     return D_80078E50 & 0xF000;
 }
 
-s32 func_800D1DB0(void) {
+s32 GetMapChangeKind(void) {
     if (D_800B9A08 == 0x3005) {
         return 2;
     }
-    if (func_800CFC5C(D_800B9A08) != 0) {
+    if (GetSubRoomKind(D_800B9A08) != 0) {
         return 2;
     }
-    if (func_800CFD68(D_80078E50) == 0) {
+    if (MapNeedsStageLoad(D_80078E50) == 0) {
         return 2;
     }
-    if (func_800CFC5C(D_80078E50) == 0) {
+    if (GetSubRoomKind(D_80078E50) == 0) {
         return 1;
     }
     return 2;
 }
 
-void func_800D1E20(void) {
+void MapRecordNop(void) {
 }
 
-void func_800D1E28(void) {
+void StartMapChangeFade(void) {
     s32 k;
 
     if (D_800B9A08 == 0x3005) {
         k = 2;
-    } else if (func_800CFC5C(D_800B9A08) != 0) {
+    } else if (GetSubRoomKind(D_800B9A08) != 0) {
         k = 2;
-    } else if (func_800CFD68(D_80078E50) == 0) {
+    } else if (MapNeedsStageLoad(D_80078E50) == 0) {
         k = 2;
-    } else if (func_800CFC5C(D_80078E50) != 0) {
+    } else if (GetSubRoomKind(D_80078E50) != 0) {
         k = 2;
     } else {
         k = 1;
@@ -1833,26 +1833,26 @@ void func_800D1E28(void) {
     switch (k) {
     case 0:
     case 1:
-        func_800168B4(4);
+        ResetFade(4);
         break;
     case 2:
     default:
-        func_800167B8(4);
+        StartFade(4);
         break;
     }
 }
 
-s32 func_800D1EBC(void) {
+s32 StepMapChangeFade(void) {
     s32 k;
     s32 r;
 
     if (D_800B9A08 == 0x3005) {
         k = 2;
-    } else if (func_800CFC5C(D_800B9A08) != 0) {
+    } else if (GetSubRoomKind(D_800B9A08) != 0) {
         k = 2;
-    } else if (func_800CFD68(D_80078E50) == 0) {
+    } else if (MapNeedsStageLoad(D_80078E50) == 0) {
         k = 2;
-    } else if (func_800CFC5C(D_80078E50) != 0) {
+    } else if (GetSubRoomKind(D_80078E50) != 0) {
         k = 2;
     } else {
         k = 1;
@@ -1864,25 +1864,25 @@ s32 func_800D1EBC(void) {
         break;
     case 2:
     default:
-        r = func_800167F0(4) & 0xFFFF;
+        r = FadeStep(4) & 0xFFFF;
         break;
     }
     return r != 0;
 }
 
-void func_800D1F58(void) {
+void SaveEntryVitals(void) {
     D_8011DB14 = D_80078EB4;
     D_8011DB1C = D_80078EB8;
-    D_80128150 = D_80078E8C;
+    D_80128150 = g_Money;
 }
 
-void func_800D1F90(void) {
+void RestoreEntryVitals(void) {
     D_80078EB4 = D_8011DB14;
     D_80078EB8 = D_8011DB1C;
-    D_80078E8C = D_80128150;
+    g_Money = D_80128150;
 }
 
-void func_800D1FC8(FieldPos *p, u16 sh) {
+void PullTowardCamera(FieldPos *p, u16 sh) {
     SVECTOR v;
     FieldCam *c = D_801151D4;
 
@@ -1900,7 +1900,7 @@ void func_800D1FC8(FieldPos *p, u16 sh) {
     p->z += v.vz >> sh;
 }
 
-void func_800D20C0(SVECTOR *p, SVECTOR *out, u16 sh) {
+void PullTowardCameraDir(SVECTOR *p, SVECTOR *out, u16 sh) {
     SVECTOR v;
     FieldCam *c = D_801151D4;
 
@@ -1918,29 +1918,29 @@ void func_800D20C0(SVECTOR *p, SVECTOR *out, u16 sh) {
     p->vz += out->vz >> sh;
 }
 
-FieldObj *func_800D21C4(s32 a, s32 b, s8 c) {
+FieldObj *SpawnSpriteType3(s32 a, s32 b, s8 c) {
     FieldObj *o = func_801465C0(a);
 
     if (o != NULL) {
-        func_8001CC3C(o, b, 0, 0);
+        InitSpriteKind3(o, b, 0, 0);
         o->unk27 = c;
         return o;
     }
     return NULL;
 }
 
-FieldObj *func_800D222C(s32 a, s32 b, s8 c) {
+FieldObj *SpawnSpriteType2(s32 a, s32 b, s8 c) {
     FieldObj *o = func_801465C0(a);
 
     if (o != NULL) {
-        func_8001CB6C(o, b, 0, 0);
+        InitSpriteKind2(o, b, 0, 0);
         o->unk27 = c;
         return o;
     }
     return NULL;
 }
 
-FieldObj *func_800D2294(s32 a, s32 b) {
+FieldObj *SpawnSpriteType6(s32 a, s32 b) {
     FieldObj *o = func_801465C0(a);
 
     if (o != NULL) {
@@ -1950,13 +1950,13 @@ FieldObj *func_800D2294(s32 a, s32 b) {
     return NULL;
 }
 
-void func_800D22E4(FieldMover *m) {
+void MoveByVelocity(FieldMover *m) {
     m->x += m->vx;
     m->y += m->vy;
     m->z += m->vz;
 }
 
-void func_800D2318(FieldDir *p) {
+void AnglesFromPackedDir(FieldDir *p) {
     s32 w = p->unk2C;
     u32 m = w & 0x3FFFFFFF;
     s32 x = (s16)((m >> 14) & 0xFFC0) >> 3;
@@ -1968,7 +1968,7 @@ void func_800D2318(FieldDir *p) {
     p->unk1A = 0;
 }
 
-void func_800D23D0(FieldAngle *v) {
+void AnglesFromVector(FieldAngle *v) {
     s16 x = v->vx;
     s32 z = v->vz;
     s32 y; y = v->vy;
@@ -1981,15 +1981,15 @@ void func_800D23D0(FieldAngle *v) {
 void func_800D2460(void) {
 }
 
-void func_800D2468(void) {
-    func_80016714(D_80115110, 0xC4);
+void ClearSubscreen(void) {
+    ZeroFill(D_80115110, 0xC4);
     D_8012751C = 0;
     D_8011DB20 = 0;
 }
 
 /* the stage mode block reset for a new map: the frame's OT descriptor copied from the other frame's, the mode fields
    cleared, the two sound buffers picked by frame, the two word arrays at +0x58 and +0x78 zeroed */
-void func_800D24A0(s16 mode) {
+void OpenSubscreen(s16 mode) {
     s32 *src;
     s32 *dst;
     s16 j;
@@ -1997,8 +1997,8 @@ void func_800D24A0(s16 mode) {
     StopPadRumble();
     DrawSync(0);
     j = 0;
-    src = (s32 *)&D_800A6518[D_800B9A02 ^ 1];
-    dst = (s32 *)&D_800A6518[D_800B9A02];
+    src = (s32 *)&g_WorldOt[D_800B9A02 ^ 1];
+    dst = (s32 *)&g_WorldOt[D_800B9A02];
     do {
         *dst++ = *src++;
         j++;
@@ -2016,21 +2016,21 @@ void func_800D24A0(s16 mode) {
         p = D_80115110 + j * 4; *(s32 *)(p + 0x78) = 0;
         D_80115168[j].v = 0;
     }
-    func_8002D4C8(0x14, 0);
+    PlaySoundId(0x14, 0);
 }
 
-void func_800D25FC(void) {
+void SubscreenUpdate(void) {
     D_8011DB24();
 }
 
-void func_800D2624(void) {
+void CloseSubscreen(void) {
     D_800B9A13 = 0;
-    func_8002D4C8(0x15, 0);
+    PlaySoundId(0x15, 0);
 }
 
 /* the field's text line: one 8x8 sprite per glyph (two bytes: u, v) into OT slot 2 of the overlay OT; codes 0x3870-0x3872
    are spaces (7, 4, 2 pixels), 0x1850 / 0x1858 are glyphs drawn 4 right and 7 up; a byte >= 0x80 ends the line */
-FieldSprt *func_800D2650(FieldSprt *p, u8 *s, s16 x, s16 y, s16 clut, s32 rgb) {
+FieldSprt *DrawTextLine(FieldSprt *p, u8 *s, s16 x, s16 y, s16 clut, s32 rgb) {
     while (*s < 0x80) {
         switch (*(s16 *)s) {
         case 0x1850:
@@ -2063,8 +2063,8 @@ FieldSprt *func_800D2650(FieldSprt *p, u8 *s, s16 x, s16 y, s16 clut, s32 rgb) {
         p->clut = ((clut + 0x100) << 6) | 0x16;
         p->w = 8;
         p->h = 8;
-        ((OtTag *)p)->addr = ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr;
-        ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr = (u32)p;
+        ((OtTag *)p)->addr = ((OtTag *)(g_FrontOtOrg[D_800AF630.frame].ot + 2))->addr;
+        ((OtTag *)(g_FrontOtOrg[D_800AF630.frame].ot + 2))->addr = (u32)p;
         p++;
     }
     return p;
@@ -2072,7 +2072,7 @@ FieldSprt *func_800D2650(FieldSprt *p, u8 *s, s16 x, s16 y, s16 clut, s32 rgb) {
 
 /* a row of n textured quads from a u16 list (x, y, w, h, u, v, and with flags & 2 clut, tpage, du, dv; otherwise the\n   default page 0x4056 / 0x15 with 8x8 cells, one pixel narrower for i & 7 in 4..5 and shorter in 6..7); flags & 1 dims
    them; each goes into OT slot 2 */
-FieldFt4 *func_800D27DC(u16 flags, FieldFt4 *p, u16 *d, s16 n, u16 dx) {
+FieldFt4 *DrawQuadRow(u16 flags, FieldFt4 *p, u16 *d, s16 n, u16 dx) {
     s32 code;
     s16 i;
     s16 x, y, w, h;
@@ -2113,8 +2113,8 @@ FieldFt4 *func_800D27DC(u16 flags, FieldFt4 *p, u16 *d, s16 n, u16 dx) {
         p->y2 = p->y3 = y + h;
         p->u1 = p->u3 = u + du;
         p->v2 = p->v3 = v + dv;
-        ((OtTag *)p)->addr = ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr;
-        ((OtTag *)(D_800AE7BC[D_800AF630.frame].ot + 2))->addr = (u32)p;
+        ((OtTag *)p)->addr = ((OtTag *)(g_FrontOtOrg[D_800AF630.frame].ot + 2))->addr;
+        ((OtTag *)(g_FrontOtOrg[D_800AF630.frame].ot + 2))->addr = (u32)p;
         p++;
     }
     return p;
@@ -2123,7 +2123,7 @@ FieldFt4 *func_800D27DC(u16 flags, FieldFt4 *p, u16 *d, s16 n, u16 dx) {
 /* a list of bars: a DR_TPAGE, then for each of n records (two colours, x, y, w, h; 0x10 bytes) a gouraud quad whose
    other two corners take the colours with the blue byte 0x28 lower / higher; the selected pair (i >> 1 == sel) and rows 8
    on are opaque, the other odd rows semi-transparent, the other even rows skipped; a closing DR_TPAGE */
-u8 *func_800D29F8(s16 sel, u8 *p, u8 *d, s16 n, u16 dx) {
+u8 *DrawBarList(s16 sel, u8 *p, u8 *d, s16 n, u16 dx) {
     s16 i;
     s32 semi;
     u32 c;
@@ -2175,7 +2175,7 @@ u8 *func_800D29F8(s16 sel, u8 *p, u8 *d, s16 n, u16 dx) {
     return p + 8;
 }
 
-s32 func_800D2CA8(s32 n, s32 shift) {
+s32 FieldToBcd(s32 n, s32 shift) {
     s32 r = 0;
     s32 s = 0;
     s32 m = n;
@@ -2190,7 +2190,7 @@ s32 func_800D2CA8(s32 n, s32 shift) {
     return r << shift;
 }
 
-void func_800D2D10(u32 n, s16 len, u16 *out, s16 pad) {
+void BcdToGlyphs(u32 n, s16 len, u16 *out, s16 pad) {
     s16 i;
 
     for (i = 0; i < len; i++) {
@@ -2210,23 +2210,23 @@ void func_800D2D10(u32 n, s16 len, u16 *out, s16 pad) {
             }
         }
         n <<= 4;
-        *out++ = *D_800D38D8[g];
+        *out++ = *g_DigitGlyphs[g];
     }
 }
 
 s32 func_800D2DAC(FieldStep *p) {
-    func_8016EDEC(func_800D3238, 0x01000000);
-    func_800167B8(0);
+    func_8016EDEC(MessageEvent, 0x01000000);
+    StartFade(0);
     p->step++;
     return 0;
 }
 
 s32 func_800D2DFC(void) {
-    return (func_800167F0(0) & 0xFFFF) != 0;
+    return (FadeStep(0) & 0xFFFF) != 0;
 }
 
 s32 func_800D2E20(FieldStep *p) {
-    func_8016EDEC(func_800D3348, 0x01000000);
+    func_8016EDEC(NullEvent, 0x01000000);
     p->cnt = 10;
     p->step++;
     return 0;
@@ -2234,18 +2234,18 @@ s32 func_800D2E20(FieldStep *p) {
 
 s32 func_800D2E6C(FieldStep *p) {
     if (p->cnt-- == 0) {
-        func_8002D4C8(0x1C, 0);
-        func_8001BFD0();
-        func_8002D4C8(0x1D, 0);
-        func_800D0C48(1);
-        func_800167B8(4);
+        PlaySoundId(0x1C, 0);
+        ClearTimeChime();
+        PlaySoundId(0x1D, 0);
+        SoundCmd1(1);
+        StartFade(4);
         p->step++;
     }
     return 0;
 }
 
 s32 func_800D2EE8(void) {
-    return (func_800167F0(4) & 0xFFFF) != 0;
+    return (FadeStep(4) & 0xFFFF) != 0;
 }
 
 void func_800D2F0C(FieldStep *p) {
@@ -2254,13 +2254,13 @@ void func_800D2F0C(FieldStep *p) {
 
 s32 func_800D2F48(FieldStep *p) {
     func_800D33B8();
-    func_800167B8(0);
+    StartFade(0);
     p->step++;
     return 0;
 }
 
 s32 func_800D2F8C(void) {
-    return (func_800167F0(0) & 0xFFFF) != 0;
+    return (FadeStep(0) & 0xFFFF) != 0;
 }
 
 void func_800D2FB0(FieldStep *p) {
@@ -2276,18 +2276,18 @@ s32 func_800D2FEC(FieldStep *p) {
 
 s32 func_800D302C(FieldStep *p) {
     if (--p->timer == -1) {
-        func_8002D4C8(0x1C, 0);
-        func_8001BFD0();
-        func_8002D4C8(0x1D, 0);
-        func_800D0C48(1);
-        func_800D1E28();
+        PlaySoundId(0x1C, 0);
+        ClearTimeChime();
+        PlaySoundId(0x1D, 0);
+        SoundCmd1(1);
+        StartMapChangeFade();
         p->step++;
     }
     return 0;
 }
 
 void func_800D30A8(void) {
-    func_800D1EBC();
+    StepMapChangeFade();
 }
 
 void func_800D30C8(FieldStep *p) {
@@ -2302,18 +2302,18 @@ s32 func_800D3104(FieldStep *p) {
 
 s32 func_800D3120(FieldStep *p) {
     if (p->cnt-- == 0) {
-        func_8002D4C8(0x1C, 0);
-        func_8001BFD0();
-        func_8002D4C8(0x1D, 0);
-        func_800D0C48(1);
-        func_800167B8(4);
+        PlaySoundId(0x1C, 0);
+        ClearTimeChime();
+        PlaySoundId(0x1D, 0);
+        SoundCmd1(1);
+        StartFade(4);
         p->step++;
     }
     return 0;
 }
 
 s32 func_800D319C(void) {
-    return (func_800167F0(4) & 0xFFFF) != 0;
+    return (FadeStep(4) & 0xFFFF) != 0;
 }
 
 void func_800D31C0(FieldStep *p) {
@@ -2324,11 +2324,11 @@ void func_800D31FC(FieldStep *p) {
     D_800D3928[p->step](p);
 }
 
-void func_800D3238(FieldSeq *p) {
+void MessageEvent(FieldSeq *p) {
     D_800D3A98[p->step](p);
 }
 
-void func_800D3274(FieldSeq *p) {
+void MessageEventOpen(FieldSeq *p) {
     if (p->unk198 != 0) {
         p->unk198 = func_8013767C(p->unk198);
         p->step++;
@@ -2337,7 +2337,7 @@ void func_800D3274(FieldSeq *p) {
     }
 }
 
-void func_800D32D4(FieldSeq *p) {
+void MessageEventWait(FieldSeq *p) {
     if (func_801399F0(p->unk198) != 0) {
         func_80139914(p->unk198);
         p->step++;
@@ -2348,7 +2348,7 @@ void func_800D3328(void) {
     func_8016F0E4();
 }
 
-void func_800D3348(FieldSeq *p) {
+void NullEvent(FieldSeq *p) {
     D_800D3AA4[p->step](p);
 }
 

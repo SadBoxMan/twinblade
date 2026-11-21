@@ -7,8 +7,8 @@ extern s32 func_80161104();
 void func_ovl25_800CAFE4(s32 arg0);
 extern void func_80162CCC();
 
-extern void func_800183E0();
-extern void func_ovl25_800CAE74();
+extern void QueueImage();
+extern void Map_BuildPalette();
 extern u8 D_ovl25_800CBF3C;
 extern u8 D_ovl25_800CBF5C;
 extern s32 D_ovl25_800CBF7C[];
@@ -18,9 +18,9 @@ extern s32 D_ovl25_800CC09C;
 extern s32 D_ovl25_800CC0DC;
 
 void func_ovl25_800CAE0C(void) {
-    func_ovl25_800CAE74(&D_ovl25_800CC09C, &D_ovl25_800CBF3C, &D_ovl25_800CBF7C);
-    func_ovl25_800CAE74(&D_ovl25_800CC0DC, &D_ovl25_800CBF5C, &D_ovl25_800CBFA8);
-    func_800183E0(&D_ovl25_800CC05C);
+    Map_BuildPalette(&D_ovl25_800CC09C, &D_ovl25_800CBF3C, &D_ovl25_800CBF7C);
+    Map_BuildPalette(&D_ovl25_800CC0DC, &D_ovl25_800CBF5C, &D_ovl25_800CBFA8);
+    QueueImage(&D_ovl25_800CC05C);
 }
 
 extern void func_ovl25_800CBEB8();
@@ -32,7 +32,7 @@ extern s16 D_801270C0;
 extern void func_80147324();
 extern u8 D_ovl25_800CC00C;
 extern s32 func_80146578();
-extern void func_8001CB00();
+extern void InitSpriteKind1();
 extern void func_80146DE8();
 extern void func_80146CA0();
 extern void func_80154150();
@@ -40,15 +40,15 @@ extern void func_801655E4();
 extern void func_80146E90();
 
 extern s32 func_80148800();
-extern void func_ovl25_800CB428();
-extern void func_ovl25_800CB6A0();
-extern void func_ovl25_800CB964();
+extern void Map_BlinkCurrentArea();
+extern void Map_DrawLayer();
+extern void Map_DrawBacking();
 
 extern AObj68 D_8011F9D0[];
 
-extern s32 func_80029178();
+extern s32 GetFlag();
 
-void func_ovl25_800CAE74(u8 *arg0, u8 *arg1, s32 *arg2) {
+void Map_BuildPalette(u8 *arg0, u8 *arg1, s32 *arg2) {
     u8 *d;
     u8 *p;
     u8 *s;
@@ -74,7 +74,7 @@ void func_ovl25_800CAE74(u8 *arg0, u8 *arg1, s32 *arg2) {
         q = arg2;
         r = d;
         do {
-            if ((u8) func_80029178(w) == 0) {
+            if ((u8) GetFlag(w) == 0) {
                 r[0] = 0;
                 r[1] = 0;
             }
@@ -83,10 +83,10 @@ void func_ovl25_800CAE74(u8 *arg0, u8 *arg1, s32 *arg2) {
             r += 2;
         } while (w != 0);
     }
-    func_800183E0(arg1);
+    QueueImage(arg1);
 }
 
-void func_ovl25_800CAF58(u8 *a) {
+void Map_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
     D_ovl25_800CBFE4[AF(a, u8, 0x197)](a);
 }
@@ -102,9 +102,9 @@ void func_ovl25_800CAFE4(s32 arg0) {
     D_801270C0 = 2;
     func_80154150(arg0, 3);
     func_801655E4(arg0);
-    func_ovl25_800CAE74((s32) &D_ovl25_800CC09C, (s32) &D_ovl25_800CBF3C, (s32) &D_ovl25_800CBF7C);
-    func_ovl25_800CAE74((s32) &D_ovl25_800CC0DC, (s32) &D_ovl25_800CBF5C, (s32) &D_ovl25_800CBFA8);
-    func_800183E0((s32) &D_ovl25_800CC05C);
+    Map_BuildPalette((s32) &D_ovl25_800CC09C, (s32) &D_ovl25_800CBF3C, (s32) &D_ovl25_800CBF7C);
+    Map_BuildPalette((s32) &D_ovl25_800CC0DC, (s32) &D_ovl25_800CBF5C, (s32) &D_ovl25_800CBFA8);
+    QueueImage((s32) &D_ovl25_800CC05C);
     AF(arg0, s16, 0x234) = 0;
     AF(arg0, s16, 0x236) = 0x10;
     AF(arg0, s32, 0x238) = 0;
@@ -117,30 +117,30 @@ void func_ovl25_800CAFE4(s32 arg0) {
 
 extern u16 D_ovl25_800CC0FC[];
 extern u16 D_ovl25_800CC11C[];
-extern s32 func_80029204();
-extern void func_ovl25_800CB5C8(s16 *a, u8 *b);
+extern s32 GetVar32();
+extern void Map_PulseColour(s16 *a, u8 *b);
 
-extern AVec D_ovl25_800CC13C[];
-extern s32 func_80012ABC();
+extern AVec Map_TrailHistory[];
+extern s32 EaseAngle();
 extern void func_80162F08();
-extern void func_80013B64();
+extern void RotateVectorZ();
 extern void func_80162FC0();
-extern s32 func_ovl25_800CBED8();
+extern s32 Map_ClampToBox();
 
-extern void func_80017DC4();
-extern void func_80017714();
+extern void SetScaleMatrix();
+extern void DrawPrimG4Screen();
 
-extern void func_80016ED4();
+extern void DrawPrimFT4Screen();
 extern u16 D_ovl25_800CBFF8[];
 extern u16 D_ovl25_800CBFFC[][4];
-/* a textured stack primitive for func_80016ED4: four vertices, four UV pairs, a colour, the code, the page */
+/* a textured stack primitive for DrawPrimFT4Screen: four vertices, four UV pairs, a colour, the code, the page */
 typedef struct { AVec v[4]; u16 uv[8]; ACol c; s32 code; u8 tp; } ATPrim;
 
 extern s32 func_80146E98();
 extern void func_80165A78();
 extern void func_80159B3C();
 
-void func_ovl25_800CB0B0(u8 *arg0) {
+void Map_StepOpen(u8 *arg0) {
     AVec v;
     AVec b;
     u16 t;
@@ -151,10 +151,10 @@ void func_ovl25_800CB0B0(u8 *arg0) {
     v.vz = 0;
     b.vx = AF(arg0, s16, 0x234);
     b.vy = b.vz = AF(arg0, s16, 0x236);
-    func_ovl25_800CB428(arg0, &v, &b);
-    func_ovl25_800CB6A0(arg0, &v, &b, 1);
-    func_ovl25_800CB6A0(arg0, &v, &b, 0);
-    func_ovl25_800CB964(arg0, &v, &b);
+    Map_BlinkCurrentArea(arg0, &v, &b);
+    Map_DrawLayer(arg0, &v, &b, 1);
+    Map_DrawLayer(arg0, &v, &b, 0);
+    Map_DrawBacking(arg0, &v, &b);
     if (AF(arg0, s16, 0x234) != 0x2000) {
         t = AF(arg0, u16, 0x238) + 0x100;
         AF(arg0, s16, 0x238) = t;
@@ -176,7 +176,7 @@ void func_ovl25_800CB0B0(u8 *arg0) {
     }
 }
 
-void func_ovl25_800CB1CC(u8 *arg0) {
+void Map_StepShow(u8 *arg0) {
     AVec a;
     AVec b;
 
@@ -190,13 +190,13 @@ void func_ovl25_800CB1CC(u8 *arg0) {
     a.vz = 0;
     b.vx = AF(arg0, u16, 0x234);
     b.vy = b.vz = AF(arg0, u16, 0x236);
-    func_ovl25_800CB428(arg0, &a, &b);
-    func_ovl25_800CB6A0(arg0, &a, &b, 1);
-    func_ovl25_800CB6A0(arg0, &a, &b, 0);
-    func_ovl25_800CB964(arg0, &a, &b);
+    Map_BlinkCurrentArea(arg0, &a, &b);
+    Map_DrawLayer(arg0, &a, &b, 1);
+    Map_DrawLayer(arg0, &a, &b, 0);
+    Map_DrawBacking(arg0, &a, &b);
 }
 
-void func_ovl25_800CB288(u8 *arg0) {
+void Map_StepClose(u8 *arg0) {
     AVec v;
     AVec b;
     u16 t;
@@ -208,10 +208,10 @@ void func_ovl25_800CB288(u8 *arg0) {
         v.vz = 0;
         b.vx = AF(arg0, s16, 0x234);
         b.vy = b.vz = AF(arg0, s16, 0x236);
-        func_ovl25_800CB428(arg0, &v, &b);
-        func_ovl25_800CB6A0(arg0, &v, &b, 1);
-        func_ovl25_800CB6A0(arg0, &v, &b, 0);
-        func_ovl25_800CB964(arg0, &v, &b);
+        Map_BlinkCurrentArea(arg0, &v, &b);
+        Map_DrawLayer(arg0, &v, &b, 1);
+        Map_DrawLayer(arg0, &v, &b, 0);
+        Map_DrawBacking(arg0, &v, &b);
         if (AF(arg0, s16, 0x236) != 0x10) {
             t = AF(arg0, u16, 0x23A) + 0x100;
             AF(arg0, s16, 0x23A) = t;
@@ -237,7 +237,7 @@ end:
     }
 }
 
-void func_ovl25_800CB3B4(void) {
+void Map_Cleanup(void) {
     s32 i;
     AObj68 *p;
 
@@ -250,14 +250,14 @@ void func_ovl25_800CB3B4(void) {
     }
 }
 
-void func_ovl25_800CB428(u8 *arg0) {
+void Map_BlinkCurrentArea(u8 *arg0) {
     AVec v;
     s32 k;
     s32 f;
     s32 *p;
     u16 *c;
 
-    k = func_80029204(4);
+    k = GetVar32(4);
     f = 0;
     c = D_ovl25_800CC0FC;
     p = D_ovl25_800CBF7C;
@@ -267,7 +267,7 @@ loop1:
             v.vx = *c & 0x1F;
             v.vy = (*c >> 5) & 0x1F;
             v.vz = (*c >> 10) & 0x1F;
-            func_ovl25_800CB5C8(&v.vx, arg0 + 0xBE);
+            Map_PulseColour(&v.vx, arg0 + 0xBE);
             f = 1;
             *c = v.vx | ((v.vz << 10) | (v.vy << 5)) | 0x8000;
         }
@@ -284,7 +284,7 @@ loop2:
             v.vx = *c & 0x1F;
             v.vy = (*c >> 5) & 0x1F;
             v.vz = (*c >> 10) & 0x1F;
-            func_ovl25_800CB5C8(&v.vx, arg0 + 0xBF);
+            Map_PulseColour(&v.vx, arg0 + 0xBF);
             f = 1;
             *c = v.vx | ((v.vz << 10) | (v.vy << 5)) | 0x8000;
         }
@@ -292,11 +292,11 @@ loop2:
         p++;
         if (f == 0) goto loop2;
     }
-    func_800183E0(&D_ovl25_800CBF3C);
-    func_800183E0(&D_ovl25_800CBF5C);
+    QueueImage(&D_ovl25_800CBF3C);
+    QueueImage(&D_ovl25_800CBF5C);
 }
 
-void func_ovl25_800CB5C8(s16 *a, u8 *b) {
+void Map_PulseColour(s16 *a, u8 *b) {
     s32 n = 0;
 
     if (*b == 0) {
@@ -317,7 +317,7 @@ void func_ovl25_800CB5C8(s16 *a, u8 *b) {
     if (n != 0) *b ^= 1;
 }
 
-void func_ovl25_800CB6A0(u8 *arg0, u16 *p, AVec *rot, s32 k) {
+void Map_DrawLayer(u8 *arg0, u16 *p, AVec *rot, s32 k) {
     AMtx m;
     AVec v;
     ATPrim s;
@@ -326,7 +326,7 @@ void func_ovl25_800CB6A0(u8 *arg0, u16 *p, AVec *rot, s32 k) {
     u16 tp;
 
     t = D_ovl25_800CBFFC[k];
-    func_80017DC4(rot, &m);
+    SetScaleMatrix(rot, &m);
     ps = &s;
     v.vz = 0;
     v.vx = p[0] - 0x30;
@@ -365,16 +365,16 @@ void func_ovl25_800CB6A0(u8 *arg0, u16 *p, AVec *rot, s32 k) {
     s.c.r = s.c.g = s.c.b = 0x80;
     s.code = 0x40000000;
     s.tp = tp;
-    func_80016ED4(ps);
+    DrawPrimFT4Screen(ps);
 }
 
-void func_ovl25_800CB964(u8 *arg0, u16 *p, AVec *rot) {
+void Map_DrawBacking(u8 *arg0, u16 *p, AVec *rot) {
     AMtx m;
     AVec v;
     APrim s;
     APrim *ps;
 
-    func_80017DC4(rot, &m);
+    SetScaleMatrix(rot, &m);
     ps = &s;
     v.vz = 0;
     v.vx = p[0] - 0x38;
@@ -406,7 +406,7 @@ void func_ovl25_800CB964(u8 *arg0, u16 *p, AVec *rot) {
     s.c[1].r = s.c[1].g = s.c[1].b = 0;
     s.c[2].r = s.c[2].g = s.c[2].b = 0;
     s.code = 0x40000000;
-    func_80017714(ps);
+    DrawPrimG4Screen(ps);
 }
 
 void func_ovl25_800CBBB8(u8 *arg0) {
@@ -423,7 +423,7 @@ void func_ovl25_800CBC14(s32 arg0, s32 arg1) {
     temp_v0 = func_80146578(arg0, arg1);
     AF(arg0, s32, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_8001CB00(temp_v0, (s32) ((AF(arg0, s32, 0x50) * 0xC) + &D_ovl25_800CC00C), 0x200, 0x100);
+        InitSpriteKind1(temp_v0, (s32) ((AF(arg0, s32, 0x50) * 0xC) + &D_ovl25_800CC00C), 0x200, 0x100);
         AF(temp_v0, s16, 0x2C) = 1;
         AF(temp_v0, u8, 0x27) = 8;
         AF(temp_v0, u8, 0x25) = 0x20;
@@ -436,7 +436,7 @@ void func_ovl25_800CBC14(s32 arg0, s32 arg1) {
     func_ovl25_800CBEB8(arg0);
 }
 
-void func_ovl25_800CBCD4(u8 *arg0) {
+void Map_TrailUpdate(u8 *arg0) {
     s32 v[3];
     u8 *m;
     s32 n;
@@ -447,14 +447,14 @@ void func_ovl25_800CBCD4(u8 *arg0) {
     n = AF(arg0, s32, 0x54);
     m = AF(arg0, u8 *, 0x20);
     if (n == 0) {
-        AF(m, s16, 0x14) = func_80012ABC(AF(m, s16, 0x14), AF(arg0, s16, 0x60), 0xA);
+        AF(m, s16, 0x14) = EaseAngle(AF(m, s16, 0x14), AF(arg0, s16, 0x60), 0xA);
         func_80162F08(arg0, 0, 0xC00, 0);
-        func_80013B64(AF(m, s16, 0x14), arg0 + 0x24, v);
+        RotateVectorZ(AF(m, s16, 0x14), arg0 + 0x24, v);
         AF(arg0, s32, 0x10) = v[0];
         AF(arg0, s32, 0x14) = v[1];
         AF(arg0, s32, 0x18) = v[2];
         func_80162FC0(arg0);
-        func_ovl25_800CBED8(arg0);
+        Map_ClampToBox(arg0);
         c = AF(arg0, s32, 0x28) >= -0x20000;
         if (c) {
             func_80146DE8(arg0, 0, -0x40000, 0);
@@ -462,25 +462,25 @@ void func_ovl25_800CBCD4(u8 *arg0) {
             AF(arg0, u16, 0x60) = (AF(arg0, u16, 0x60) - d) & 0xFFF;
         }
         for (i = 15; i > 0; i--) {
-            D_ovl25_800CC13C[i] = D_ovl25_800CC13C[i - 1];
+            Map_TrailHistory[i] = Map_TrailHistory[i - 1];
         }
-        D_ovl25_800CC13C[0].vx = AF(arg0, u16, 6);
-        D_ovl25_800CC13C[0].vy = AF(arg0, u16, 0xA);
-        D_ovl25_800CC13C[0].vz = AF(arg0, u16, 0xE);
-        D_ovl25_800CC13C[0].pad = AF(m, u16, 0x14);
+        Map_TrailHistory[0].vx = AF(arg0, u16, 6);
+        Map_TrailHistory[0].vy = AF(arg0, u16, 0xA);
+        Map_TrailHistory[0].vz = AF(arg0, u16, 0xE);
+        Map_TrailHistory[0].pad = AF(m, u16, 0x14);
         return;
     }
-    AF(arg0, u16, 6) = D_ovl25_800CC13C[(n - 1) * 2].vx;
-    AF(arg0, u16, 0xA) = D_ovl25_800CC13C[(AF(arg0, s32, 0x54) - 1) * 2].vy;
-    AF(arg0, u16, 0xE) = D_ovl25_800CC13C[(AF(arg0, s32, 0x54) - 1) * 2].vz;
-    AF(m, u16, 0x14) = D_ovl25_800CC13C[(AF(arg0, s32, 0x54) - 1) * 2].pad;
+    AF(arg0, u16, 6) = Map_TrailHistory[(n - 1) * 2].vx;
+    AF(arg0, u16, 0xA) = Map_TrailHistory[(AF(arg0, s32, 0x54) - 1) * 2].vy;
+    AF(arg0, u16, 0xE) = Map_TrailHistory[(AF(arg0, s32, 0x54) - 1) * 2].vz;
+    AF(m, u16, 0x14) = Map_TrailHistory[(AF(arg0, s32, 0x54) - 1) * 2].pad;
 }
 
 void func_ovl25_800CBEB8(void) {
     func_80162CCC();
 }
 
-s32 func_ovl25_800CBED8(u8 *arg0) {
+s32 Map_ClampToBox(u8 *arg0) {
     s32 n = 0;
     s16 x;
 

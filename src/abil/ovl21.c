@@ -3,20 +3,20 @@
 #include "gte.h"
 
 extern void func_ovl21_800CC024();
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl21_800CC22C[];
 extern u8 D_ovl21_800CC1EC[];
 extern AbilStep D_ovl21_800CC134[];
-extern AbilStep D_ovl21_800CC140[];
+extern AbilStep Sublime_MusashiStates[];
 void func_ovl21_800CAEC0(u8 *a);
 extern void func_80162CCC();
 
 void func_ovl21_800CAE0C(void) {
-    func_800183E0(D_ovl21_800CC22C);
-    func_800183E0(D_ovl21_800CC1EC);
+    QueueImage(D_ovl21_800CC22C);
+    QueueImage(D_ovl21_800CC1EC);
 }
 
-void func_ovl21_800CAE44(u8 *a) {
+void Sublime_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
     D_ovl21_800CC134[AF(a, u8, 0x197)](a);
 }
@@ -51,7 +51,7 @@ extern void func_80159B3C();
 extern s32 D_80078EC8;
 extern void func_801466F0();
 extern void func_80147324();
-extern void func_800178EC();
+extern void DrawPrimGT4Screen();
 
 void func_ovl21_800CAEC0(u8 *arg0) {
     func_801599A4();
@@ -72,7 +72,7 @@ extern s32 rcos();
 extern s32 rsin();
 
 extern void func_80147078();
-extern void func_ovl21_800CAF90();
+extern void Sublime_MusashiUpdate();
 extern s32 func_ovl21_800CB82C();
 extern s32 func_80146E98();
 extern void func_80146D90();
@@ -84,12 +84,12 @@ void func_ovl21_800CAF28(s32 arg0) {
 
 s32 func_ovl21_800CAF5C(s32 arg0) {
     func_80147078(arg0, 0x20);
-    func_ovl21_800CAF90(arg0);
+    Sublime_MusashiUpdate(arg0);
     return;
 }
 
-void func_ovl21_800CAF90(u8 *a) {
-    D_ovl21_800CC140[AF(a, u16, 2)](a);
+void Sublime_MusashiUpdate(u8 *a) {
+    Sublime_MusashiStates[AF(a, u16, 2)](a);
 }
 
 void func_ovl21_800CAFCC(void) {
@@ -110,7 +110,7 @@ void func_ovl21_800CAFEC(u8 *arg0) {
     func_80146CA0(arg0);
 }
 
-void func_ovl21_800CB06C(u8 *arg0) {
+void Sublime_StateLieDown(u8 *arg0) {
     void *temp_a0;
     void *temp_v1;
 
@@ -143,7 +143,7 @@ void func_ovl21_800CB108(u8 *arg0) {
     }
 }
 
-void func_ovl21_800CB1A0(u8 *arg0) {
+void Sublime_StateWait(u8 *arg0) {
     if (func_80161208() != 0) {
         func_80165A20(arg0);
         return;
@@ -164,7 +164,7 @@ void func_ovl21_800CB234(u8 *arg0) {
     func_80154A74(arg0, 0x11);
 }
 
-void func_ovl21_800CB270(u8 *arg0) {
+void Sublime_SpiritUpdate(u8 *arg0) {
     if (D_80078EC1 != 0x18) {
         func_ovl21_800CB7FC();
         return;
@@ -175,12 +175,12 @@ void func_ovl21_800CB270(u8 *arg0) {
 extern u8 D_ovl21_800CC150;
 extern AVec D_ovl21_800CC298;
 extern s32 func_8014659C();
-extern void func_8001C2C4();
+extern void InitNullModel();
 extern void func_80146E90();
 extern void func_80149374();
 extern void func_801466B4();
 
-void func_ovl21_800CB2CC(u8 *arg0) {
+void Sublime_SpiritInit(u8 *arg0) {
     AModel *m;
     void *temp_s2;
 
@@ -188,7 +188,7 @@ void func_ovl21_800CB2CC(u8 *arg0) {
     m = func_8014659C();
     AF(arg0, AModel *, 0x20) = m;
     if (m != 0) {
-        func_8001C2C4(m);
+        InitNullModel(m);
         m->rot.vy = AF(AF(temp_s2, void *, 0x20), u16, 0x12);
         m->scale.vy = 0;
         m->scale.vx = 0;
@@ -235,18 +235,18 @@ void func_ovl21_800CB3E0(u8 *arg0) {
 }
 
 extern s16 D_800B9A08;
-extern void func_80015978();
-extern void func_80015954();
+extern void PosToSVec();
+extern void SVecToPos();
 
 typedef struct { s32 vx, vy, vz, pad; } ALVec;
 extern s32 func_801488A8();
 extern s32 func_80148D44();
 extern void func_80162FF4();
-extern void func_800134FC();
-extern void func_8001599C();
+extern void RotateVectorX();
+extern void CopyVec();
 extern void func_80162FC0();
-extern s32 func_80012F74();
-extern void func_ovl21_800CBCB4(u8 *arg0);
+extern s32 EaseValueFrac();
+extern void Sublime_ClampToMap(u8 *arg0);
 
 void func_ovl21_800CB4A4(u8 *arg0) {
     ALVec v;
@@ -272,8 +272,8 @@ void func_ovl21_800CB4A4(u8 *arg0) {
         func_80162FF4(arg0, 0, 0, -0x1C000);
         if (D_800B9A08 == 0x3038) {
             v = AF(arg0, ALVec, 0x10);
-            func_800134FC(0x400, &v, &v);
-            func_8001599C(&v, arg0 + 0x10);
+            RotateVectorX(0x400, &v, &v);
+            CopyVec(&v, arg0 + 0x10);
         }
         AF(arg0, s32, 0x10) += w.vx;
         AF(arg0, s32, 0x14) += w.vy;
@@ -339,10 +339,10 @@ void func_ovl21_800CB4A4(u8 *arg0) {
     move:
         func_80162FC0(arg0);
     }
-    func_ovl21_800CBCB4(arg0);
-    D_ovl21_800CC298.vx = func_80012F74(D_ovl21_800CC298.vx, AF(arg0, s16, 6), 0xA, 1);
-    D_ovl21_800CC298.vy = func_80012F74(D_ovl21_800CC298.vy, AF(arg0, s16, 0xA), 0xA, 1);
-    D_ovl21_800CC298.vz = func_80012F74(D_ovl21_800CC298.vz, AF(arg0, s16, 0xE), 0xA, 1);
+    Sublime_ClampToMap(arg0);
+    D_ovl21_800CC298.vx = EaseValueFrac(D_ovl21_800CC298.vx, AF(arg0, s16, 6), 0xA, 1);
+    D_ovl21_800CC298.vy = EaseValueFrac(D_ovl21_800CC298.vy, AF(arg0, s16, 0xA), 0xA, 1);
+    D_ovl21_800CC298.vz = EaseValueFrac(D_ovl21_800CC298.vz, AF(arg0, s16, 0xE), 0xA, 1);
     AF(s, AVec, 0x154) = D_ovl21_800CC298;
 }
 
@@ -357,9 +357,9 @@ extern s32 D_ovl21_800CC1B0[];
 extern u16 D_ovl21_800CC1C0[];
 extern AVec D_ovl21_800CC290;
 extern s32 func_8012EF34();
-extern void func_80017DC4();
+extern void SetScaleMatrix();
 extern void func_ovl21_800CBBF8(u8 *arg0, u8 *arg1);
-extern s32 func_ovl21_800CBA44(AVec *v, u16 *a, u8 *b, u16 *c, u8 *o, s32 *z);
+extern s32 Sublime_ProjectQuad(AVec *v, u16 *a, u8 *b, u16 *c, u8 *o, s32 *z);
 
 s32 func_ovl21_800CB82C(u8 *arg0, u8 *arg1) {
     s32 o[0x12];
@@ -377,13 +377,13 @@ s32 func_ovl21_800CB82C(u8 *arg0, u8 *arg1) {
 
     po = (u8 *) o;
     md = AF(arg0, u8 *, 0x20);
-    func_80015978(arg0 + 4, &p);
+    PosToSVec(arg0 + 4, &p);
     if (func_8012EF34(&p, &D_ovl21_800CC290) & ~0x1000) {
         return;
     }
     k = D_ovl21_800CC290;
     s = AF(arg1, u16, 0x16) + 3;
-    func_80017DC4(md + 0x18, &m);
+    SetScaleMatrix(md + 0x18, &m);
     pk = (u8 *) &k;
     m.t[0] = m.t[1] = m.t[2] = 0;
     gte_SetRotMatrix(&m);
@@ -397,7 +397,7 @@ s32 func_ovl21_800CB82C(u8 *arg0, u8 *arg1) {
     o[0xE] = 0x808080;
     o[0xF] = 0x808080;
     AF(arg0, s16, 0x60) = (i + 1) & 3;
-    if (func_ovl21_800CBA44(v, D_ovl21_800CC190, arg1, D_ovl21_800CC1C0, po, &D_ovl21_800CC1B0[i]) != 0) {
+    if (Sublime_ProjectQuad(v, D_ovl21_800CC190, arg1, D_ovl21_800CC1C0, po, &D_ovl21_800CC1B0[i]) != 0) {
         return;
     }
     AF(po, u16, 4) = s;
@@ -406,13 +406,13 @@ s32 func_ovl21_800CB82C(u8 *arg0, u8 *arg1) {
     r.vx = rcos(AF(arg0, s16, 0x62) << 8) / 1024;
     AF(arg0, u16, 0x62) = (AF(arg0, u16, 0x62) + 1) & 0xF;
     r.vy = 0;
-    if (func_ovl21_800CBA44(v, D_ovl21_800CC1A0, arg1, (u16 *) &r, po, (s32 *) D_ovl21_800CC1C0) != 0) {
+    if (Sublime_ProjectQuad(v, D_ovl21_800CC1A0, arg1, (u16 *) &r, po, (s32 *) D_ovl21_800CC1C0) != 0) {
         return;
     }
     func_ovl21_800CBBF8(po, pk);
 }
 
-s32 func_ovl21_800CBA44(AVec *v, u16 *a, u8 *b, u16 *c, u8 *o, s32 *z) {
+s32 Sublime_ProjectQuad(AVec *v, u16 *a, u8 *b, u16 *c, u8 *o, s32 *z) {
     s32 flag;
 
     v[0].vx = a[0] + AF(b, u16, 0x10);
@@ -453,13 +453,13 @@ void func_ovl21_800CBBF8(u8 *arg0, u8 *arg1) {
     AF(arg0, u16, 0x12) = (u16) (AF(arg0, u16, 0x12) + AF(arg1, u16, 2));
     AF(arg0, u16, 0x18) = (u16) (AF(arg0, u16, 0x18) + AF(arg1, u16, 0));
     AF(arg0, u16, 0x1A) = (u16) (AF(arg0, u16, 0x1A) + AF(arg1, u16, 2));
-    func_800178EC();
+    DrawPrimGT4Screen();
 }
 
-void func_ovl21_800CBCB4(u8 *arg0) {
+void Sublime_ClampToMap(u8 *arg0) {
     AVec v;
 
-    func_80015978(arg0 + 4, &v);
+    PosToSVec(arg0 + 4, &v);
     switch (D_800B9A08) {
     case 0x3035:
         if (v.vx < -0x93E) v.vx = -0x93E;
@@ -486,7 +486,7 @@ void func_ovl21_800CBCB4(u8 *arg0) {
         if (v.vz > 0xFBE) v.vz = 0xFBE;
         break;
     }
-    func_80015954(&v, arg0 + 4);
+    SVecToPos(&v, arg0 + 4);
 }
 
 void func_ovl21_800CBECC(u8 *arg0) {
@@ -501,7 +501,7 @@ extern u8 D_ovl21_800CC250[];
 extern s32 D_ovl21_800CC254;
 extern s32 func_80146578();
 extern void func_8001CD04();
-extern void func_800233CC();
+extern void SetShapeCircle();
 
 void func_ovl21_800CBF28(u8 *arg0) {
     s32 temp_v0;
@@ -515,7 +515,7 @@ void func_ovl21_800CBF28(u8 *arg0) {
     if (temp_v0 != 0) {
         func_8001CD04(temp_v0, p);
         if (AF(arg0, s32, 0x50) == 0) {
-            func_800233CC(p, 0x20);
+            SetShapeCircle(p, 0x20);
             D_ovl21_800CC254 = 0;
             temp_v0 = 0x202000;
             *(s32 *) p = temp_v0;
@@ -551,7 +551,7 @@ void func_ovl21_800CC024(u8 *arg0) {
     s = AF(arg0, u8 *, 0x4C);
     m = AF(arg0, u8 *, 0x20);
     if (s != NULL) {
-        func_80015954(&D_ovl21_800CC290, arg0 + 4);
+        SVecToPos(&D_ovl21_800CC290, arg0 + 4);
         t = AF(arg0, u16, 0x60);
         a = t & 0x1F;
         b = a << 7;

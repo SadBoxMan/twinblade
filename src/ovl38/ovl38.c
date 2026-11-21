@@ -20,23 +20,23 @@ typedef struct {
 
 extern u32 g_WorldOtTable[2][0x1000];
 extern s32 D_800AE840[];
-/* Parameters for an archive read (func_8001ABBC / LoadFileStep) */
+/* Parameters for an archive read (RequestLoad / LoadFileStep) */
 typedef struct {
     /* 0x0 */ s32 unk0;
     /* 0x4 */ u8 *unk4;
 } LoadParam;
 
-extern LoadParam D_800C7C60;
-extern u8 D_800A2E20[];
+extern LoadParam g_SoundLoadTable;
+extern u8 g_SoundLoadBuf[];
 
-extern SprtTpage D_800CF3F0[2];
-extern SprtTpage D_800CF420[2];
-extern void (*D_800CF450[8])(void);
-extern u8 D_800D3ABC[];
-extern SprtTpage D_800D3AEC[2];
-extern SprtTpage D_800D3B1C[2];
-extern s32 D_800D3C0C;
-extern s32 D_800D3C10;
+extern SprtTpage g_BootLogoSprtA[2];
+extern SprtTpage g_BootLogoSprtB[2];
+extern void (*g_LicenceSteps[8])(void);
+extern u8 g_LicenceImageList[];
+extern SprtTpage g_LicenceSprtLeft[2];
+extern SprtTpage g_LicenceSprtRight[2];
+extern s32 g_LicenceEntry2Loaded;
+extern s32 g_LicenceBrightness;
 
 
 extern void ApplySoundOptions(void);
@@ -44,113 +44,113 @@ extern void NextStep(void);
 extern void SetStep(s32 arg0);
 extern void SetScreenMode2(s32 arg0);
 extern s32 GetPadPressedDir(s32 arg0);
-extern void func_80015310(void);
-extern void func_800167B8(s32 arg0);
-extern s32 func_800167F0(s32 arg0);
-extern void func_800183E0(void *arg0);
-extern s32 func_8001ABBC(s32 arg0, s32 arg1, s32 *arg2, s32 arg3, LoadParam *arg4);
-extern s32 func_8001BFE8(void);
-extern void func_8001BFF8(void);
-extern void func_8001C044(void);
+extern void ClearDebugText(void);
+extern void StartFade(s32 arg0);
+extern s32 FadeStep(s32 arg0);
+extern void QueueImage(void *arg0);
+extern s32 RequestLoad(s32 arg0, s32 arg1, s32 *arg2, s32 arg3, LoadParam *arg4);
+extern s32 LicenceShown(void);
+extern void SetLicenceShown(void);
+extern void ClearObjectPools(void);
 
-void func_800CF114(void);
-void func_800CF180(void);
-void func_800CF290(void);
+void LicenceLoadEntry2(void);
+void DrawBootLogo(void);
+void DrawLicence(void);
 
 /* Overlay main (0x800CEDFC): run the current step of the licence screen */
 void func_800CEDFC(void)
 {
     if (WORK->step < 8) {
-        PS1_FN(D_800CF450[WORK->step])();
+        PS1_FN(g_LicenceSteps[WORK->step])();
     }
 }
 
 /* Step 0: reset display state, decide whether to skip straight to the next mode */
-void func_800CEE40(void)
+void LicenceInit(void)
 {
     WORK->unkA3E1 = 1;
-    func_8001C044();
-    func_80015310();
+    ClearObjectPools();
+    ClearDebugText();
     SetScreenMode2(7);
     SetDispMask(0);
     VSync(0);
     SetDispMask(1);
     WORK->vsyncMode = 0;
-    func_800167B8(0);
-    func_800183E0(D_800D3ABC);
-    D_800D3C0C = 0;
-    D_800D3C10 = 0;
+    StartFade(0);
+    QueueImage(g_LicenceImageList);
+    g_LicenceEntry2Loaded = 0;
+    g_LicenceBrightness = 0;
     ApplySoundOptions();
     WORK->timer = 0;
-    if (func_8001BFE8() != 0) {
+    if (LicenceShown() != 0) {
         SetStep(3);
         return;
     }
-    func_8001BFF8();
+    SetLicenceShown();
     NextStep();
 }
 
 /* Step 1: fade the licence image in */
-void func_800CEF04(void)
+void LicenceFadeIn(void)
 {
-    D_800D3C10 += 16;
-    if (D_800D3C10 >= 0x80) {
-        D_800D3C10 = 0x80;
+    g_LicenceBrightness += 16;
+    if (g_LicenceBrightness >= 0x80) {
+        g_LicenceBrightness = 0x80;
         NextStep();
     }
-    func_800CF290();
+    DrawLicence();
 }
 
 /* Step 2: hold the licence image for 0x105 frames */
-void func_800CEF54(void)
+void LicenceHold(void)
 {
-    func_800CF290();
+    DrawLicence();
     if (++WORK->stepTimer >= 0x105) {
         NextStep();
     }
 }
 
 /* Step 3: fade the licence image out */
-void func_800CEFA8(void)
+void LicenceFadeOut(void)
 {
-    D_800D3C10 -= 4;
-    if (D_800D3C10 <= 0) {
-        D_800D3C10 = 0;
+    g_LicenceBrightness -= 4;
+    if (g_LicenceBrightness <= 0) {
+        g_LicenceBrightness = 0;
         NextStep();
     }
-    func_800CF290();
+    DrawLicence();
 }
 
 /* Step 4: wait for the screen fade, preloading the next data */
-void func_800CEFF4(void)
+void BootLogoFadeIn(void)
 {
-    func_800CF180();
-    func_800CF114();
-    if (func_800167F0(0) & 0xFFFF) {
+    DrawBootLogo();
+    LicenceLoadEntry2();
+    if (FadeStep(0) & 0xFFFF) {
         NextStep();
     }
 }
 
 /* Step 5: wait for the preload and a timeout or button press */
-void func_800CF038(void)
+void BootLogoWait(void)
 {
     s32 pad;
 
-    func_800CF180();
-    func_800CF114();
+    DrawBootLogo();
+    LicenceLoadEntry2();
     WORK->timer++;
     pad = GetPadPressedDir(0);
-    if (D_800D3C0C != 0 && (WORK->timer >= 0x81 || (pad & 0x840))) {
-        func_800167B8(4);
+    if (g_LicenceEntry2Loaded != 0 && (WORK->timer >= 0x81 || (pad & 0x840))) {
+        StartFade(4);
         NextStep();
     }
 }
 
 /* Step 6: wait for the fade to finish, then hand over to the next mode */
-void func_800CF0C4(void)
+void BootLogoFadeOut(void)
 {
-    func_800CF180();
-    if (func_800167F0(4) & 0xFFFF) {
+    DrawBootLogo();
+    if (FadeStep(4) & 0xFFFF) {
         WORK->done = 1;
         SetScreenMode2(1);
         WORK->vsyncMode = 2;
@@ -158,27 +158,27 @@ void func_800CF0C4(void)
 }
 
 /* Start the background read of MAIN.CD entry 2 once */
-void func_800CF114(void)
+void LicenceLoadEntry2(void)
 {
-    if (D_800D3C0C == 0) {
-        D_800C7C60.unk0 = 0;
-        D_800C7C60.unk4 = D_800A2E20;
-        if (func_8001ABBC(0, 0, D_800AE840, 0, &D_800C7C60) != 0) {
-            D_800D3C0C = 1;
+    if (g_LicenceEntry2Loaded == 0) {
+        g_SoundLoadTable.unk0 = 0;
+        g_SoundLoadTable.unk4 = g_SoundLoadBuf;
+        if (RequestLoad(0, 0, D_800AE840, 0, &g_SoundLoadTable) != 0) {
+            g_LicenceEntry2Loaded = 1;
         }
     }
 }
 
 /* Link the SQUARESOFT logo's two sprites into this frame's ordering table (shown in steps 4 to 6) */
-void func_800CF180(void)
+void DrawBootLogo(void)
 {
-    addPrim(&g_WorldOtTable[WORK->frame][0xFFF], &D_800CF3F0[WORK->frame]);
-    addPrim(&g_WorldOtTable[WORK->frame][0xFFF], &D_800CF420[WORK->frame]);
+    addPrim(&g_WorldOtTable[WORK->frame][0xFFF], &g_BootLogoSprtA[WORK->frame]);
+    addPrim(&g_WorldOtTable[WORK->frame][0xFFF], &g_BootLogoSprtB[WORK->frame]);
 }
 
 /* Steps 1 to 3: build the licence image's two sprites (texture page, colour = the fade level) and link them into
  * the last entry of this frame's ordering table */
-void func_800CF290(void)
+void DrawLicence(void)
 {
     SprtTpage *p;
     SprtTpage *q;
@@ -186,12 +186,12 @@ void func_800CF290(void)
     u32 *u;
     s32 f = WORK->frame;
 
-    p = &D_800D3AEC[f];
-    t = &D_800D3AEC[f].tpage;
+    p = &g_LicenceSprtLeft[f];
+    t = &g_LicenceSprtLeft[f].tpage;
     setlen(p, 5);
     *t = 0xE100008A;
     p->code = 0x64;
-    p->r0 = p->g0 = p->b0 = D_800D3C10;
+    p->r0 = p->g0 = p->b0 = g_LicenceBrightness;
     p->clut = 0x7840;
     p->x0 = -0x100;
     p->y0 = -0x1C;
@@ -199,12 +199,12 @@ void func_800CF290(void)
     p->v0 = 0x38;
     p->w = 0x100;
     p->h = 0x60;
-    q = &D_800D3B1C[f];
-    u = &D_800D3B1C[f].tpage;
+    q = &g_LicenceSprtRight[f];
+    u = &g_LicenceSprtRight[f].tpage;
     setlen(q, 5);
     *u = 0xE100008C;
     q->code = 0x64;
-    q->r0 = q->g0 = q->b0 = D_800D3C10;
+    q->r0 = q->g0 = q->b0 = g_LicenceBrightness;
     q->clut = 0x7840;
     q->x0 = 0;
     q->y0 = -0x1C;

@@ -15,7 +15,7 @@ typedef struct { s16 vx, vy, vz, pad; } AVec;
 /* a CVECTOR's layout (r, g, b, cd); copied whole, its 1-byte alignment gives one lwl/lwr + swl/swr pair (r131) */
 typedef struct { u8 r, g, b, cd; } ACol;
 
-/* a primitive built on the stack (four SVECTORs, four CVECTORs, a code word) and handed to func_80017758 with a
+/* a primitive built on the stack (four SVECTORs, four CVECTORs, a code word) and handed to DrawPrimG4Mtx with a
    model's matrix; written field by field with chained stores, `s.v[1].vx = s.v[1].vy = s.v[1].vz = 0` (r131) */
 typedef struct { AVec v[4]; ACol c[4]; s32 code; } APrim;
 

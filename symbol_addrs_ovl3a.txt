@@ -1,0 +1,30 @@
+// Mode overlay ovl3a (ovl3a.yaml): its own names (docs/symbol_scheme.md B1; read only by ovl3a.yaml, after symbol_addrs.txt)
+// ---- r379 naming batch (ovl; docs/names_merged/r379_plan.csv)
+g_CutPic1Path = 0x800CEDFC;
+g_CutPic2Path = 0x800CEE14;
+CutDebugMain = 0x800CEE2C; // type:func
+CutDebugInit = 0x800CEEFC; // type:func
+CutDebugFadeIn = 0x800CEF60; // type:func
+CutDebugHold = 0x800CEF94; // type:func
+CutDebugFadeOut = 0x800CEFF8; // type:func
+CutPrologueMain = 0x800CF02C; // type:func
+CutPrologueInit = 0x800CF068; // type:func
+CutPrologueRun = 0x800CF0B8; // type:func
+CutPic1FadeIn = 0x800CF0F4; // type:func
+CutPic1Scroll = 0x800CF148; // type:func
+CutPic1FadeOut = 0x800CF1CC; // type:func
+CutPic2Load = 0x800CF220; // type:func
+CutPic2FadeIn = 0x800CF268; // type:func
+CutPic2Scroll = 0x800CF2BC; // type:func
+CutPic2FadeOut = 0x800CF33C; // type:func
+CutPrologueWaitEnd = 0x800CF390; // type:func
+CutCheckSkip = 0x800CF3B0; // type:func
+CutDrawPic1 = 0x800CF408; // type:func
+CutDrawPic2 = 0x800CF6D0; // type:func
+g_CutDebugSteps = 0x800CFADC;
+g_CutDebugFontUpload = 0x800D130C;
+g_CutPrologueSteps = 0x800D133C;
+g_CutPrologueSubSteps = 0x800D1344;
+g_CutPic1Y = 0x800D1368;
+g_CutPic2X = 0x800D136C;
+g_CutSubStep = 0x800D1374;

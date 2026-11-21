@@ -2,9 +2,9 @@
 #include "abil.h"
 
 extern s32 D_ovl1b_800CB538;
-extern void func_800183E0();
+extern void QueueImage();
 void func_ovl1b_800CAE0C(void) {
-    func_800183E0(&D_ovl1b_800CB538);
+    QueueImage(&D_ovl1b_800CB538);
 }
 
 extern AbilStep D_ovl1b_800CB4FC[];
@@ -50,7 +50,7 @@ extern s32 RotMatrixYXZ();
 extern s32 ApplyMatrixSV();
 extern s32 RotMatrixZ();
 
-void func_ovl1b_800CAF38(s32 arg0) {
+void Mint_Step2Hold(s32 arg0) {
     if (D_80078EC8 == 0) {
         func_80165840();
         func_80165A20(arg0);
@@ -63,12 +63,12 @@ void func_ovl1b_800CAF8C(void) {
 }
 
 extern u8 D_ovl1b_800CB558[];
-extern void func_800233CC();
+extern void SetShapeCircle();
 extern u8 *func_801465C0();
 extern void func_8001CD50();
 
 extern u16 D_800B99DA;
-extern void func_80017DC4();
+extern void SetScaleMatrix();
 extern void func_8012F14C();
 extern void func_800D20C0();
 extern void func_800D23D0();
@@ -102,7 +102,7 @@ void func_ovl1b_800CAF94(u8 *arg0) {
         AF(mdl, u16, 0x18) = t;
         o = AF(arg0, void *, 0x34);
         v.vx = v.vy = v.vz = 0x1000;
-        func_80017DC4(&v, mat);
+        SetScaleMatrix(&v, mat);
         v.vz = 0;
         v.vx = 0;
         v.vy = -0x2C;
@@ -116,7 +116,7 @@ void func_ovl1b_800CAF94(u8 *arg0) {
     }
 }
 
-extern AMtx D_800AE620;
+extern AMtx GsIDMATRIX;
 
 static inline void func_ovl1b_800CB0C8_inl(u8 *arg0) {
     AVec v;
@@ -128,7 +128,7 @@ static inline void func_ovl1b_800CB0C8_inl(u8 *arg0) {
     p = AF(arg0, u8 *, 0x34);
     pv = &v;
     pv->vx = pv->vy = pv->vz = 0x1000;
-    func_80017DC4(pv, arg0 + 0x38);
+    SetScaleMatrix(pv, arg0 + 0x38);
     pv->vx = pv->vz = 0;
     pv->vy = -0x2C;
     func_8012F14C(AF(p, u8 *, 0x20) + 0x34, pv, pv);
@@ -165,7 +165,7 @@ void func_ovl1b_800CB0C8(u8 *arg0) {
             }
             w.vx = 0x48;
             w.vy = w.vz = 0;
-            n = D_800AE620;
+            n = GsIDMATRIX;
             RotMatrixZ(i, &n);
             ApplyMatrixSV(&n, &w, &w);
             func_8012F14C(arg0 + 0x38, &w, &w);
@@ -192,7 +192,7 @@ void func_ovl1b_800CB378(u8 *arg0) {
     if (!(AF(arg0, s32, 0x2C) & 0x8000)) {
         D_ovl1b_800CB558[1] = D_ovl1b_800CB558[2] = 0xA0;
         D_ovl1b_800CB558[0] = D_ovl1b_800CB558[4] = D_ovl1b_800CB558[5] = D_ovl1b_800CB558[6] = 0;
-        func_800233CC(D_ovl1b_800CB558, 0x60);
+        SetShapeCircle(D_ovl1b_800CB558, 0x60);
         AF(arg0, u16, 2) = 3;
         return;
     }
@@ -209,7 +209,7 @@ void func_ovl1b_800CB378(u8 *arg0) {
     }
 }
 
-void func_ovl1b_800CB478(u8 *arg0) {
+void Mint_RingEmit(u8 *arg0) {
     s32 temp_a1;
     s32 temp_v0;
 

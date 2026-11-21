@@ -1,6 +1,11 @@
 // Package 0x26 (MAIN.CD entry 32, abil/ovl26.yaml): ability 9, D-Kick
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+DKick_Update = 0x800CAE34; // type:func
+DKick_Start = 0x800CAEC0; // type:func
+DKick_StepAir = 0x800CAF60; // type:func
+DKick_Cleanup = 0x800CAFD0; // type:func
+DKick_AfterImageUpdate = 0x800CB054; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800183E0 = 0x800183E0; // type:func
 func_8001C810 = 0x8001C810; // type:func
 D_80078EC1 = 0x80078EC1;
 D_800B99DA = 0x800B99DA;

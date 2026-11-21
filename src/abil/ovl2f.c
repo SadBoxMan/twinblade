@@ -1,7 +1,7 @@
 #include "common.h"
 #include "abil.h"
 
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl2f_800CB85C[];
 extern AbilStep D_ovl2f_800CB7D4[];
 extern s32 func_80161104();
@@ -12,7 +12,7 @@ extern u8 D_800D57F4[];
 extern void func_80162CCC();
 
 void func_ovl2f_800CAE0C(void) {
-    func_800183E0(D_ovl2f_800CB85C);
+    QueueImage(D_ovl2f_800CB85C);
 }
 
 void func_ovl2f_800CAE34(u8 *a) {
@@ -42,7 +42,7 @@ extern void func_80162D28();
 extern void func_ovl2f_800CB338();
 extern u8 D_80078EC1;
 extern AbilStep D_ovl2f_800CB7EC[];
-extern void func_8001C214();
+extern void InitModel();
 extern s32 func_8014659C();
 extern s32 func_80146A6C();
 extern void func_80146DE8();
@@ -70,7 +70,7 @@ void func_ovl2f_800CAF88(u8 *a) {
     *(s32 *)(a + 0x44) = (*(s32 *)(a + 0x44) & -3);
 }
 
-void func_ovl2f_800CAF9C(u8 *arg0) {
+void Javelin_ObjUpdate(u8 *arg0) {
     if (D_80078EC1 == 0x1E) {
         D_ovl2f_800CB7EC[AF(arg0, u16, 2)]();
         if (AF(arg0, s32, 0x20) != 0) {
@@ -93,7 +93,7 @@ void func_ovl2f_800CB028(u8 *arg0) {
     temp_v0 = func_8014659C();
     AF(arg0, void *, 0x20) = temp_v0;
     if (temp_v0 != NULL) {
-        func_8001C214(temp_v0, &D_ovl2f_800CBE04);
+        InitModel(temp_v0, &D_ovl2f_800CBE04);
         AF(temp_v0, s16, 0x1C) = 0x2000;
         AF(temp_v0, s16, 0x1A) = 0x2000;
         AF(temp_v0, s16, 0x18) = 0x2000;
@@ -126,9 +126,9 @@ extern s32 func_801638A0();
 extern void func_80163408();
 extern void func_80163328();
 extern s32 func_801632F0();
-extern void func_80013E94();
+extern void PackAngles10();
 
-void func_ovl2f_800CB118(u8 *arg0) {
+void Javelin_ObjFly(u8 *arg0) {
     AVec v;
     s32 c;
     u32 t;
@@ -154,14 +154,14 @@ void func_ovl2f_800CB118(u8 *arg0) {
     t = func_801632F0(arg0);
     switch (t) {
     case 1:
-        func_80013E94(&D_80114EB0, &c);
+        PackAngles10(&D_80114EB0, &c);
         c |= 0x80000000;
         func_80146A6C(0x1F, arg0, D_80126B18.vx, D_80126B18.vy, D_80126B18.vz, c, 0);
         func_80147324(0x8E6);
         break;
     case 2:
     case 4:
-        func_80013E94(&D_80114EC8, &c);
+        PackAngles10(&D_80114EC8, &c);
         c |= 0x80000000;
         func_80146A6C(7, arg0, D_80126B18.vx, D_80126B18.vy, D_80126B18.vz, c, 0);
         break;
@@ -188,7 +188,7 @@ void func_ovl2f_800CB338(void) {
     func_80162CCC();
 }
 
-void func_ovl2f_800CB358(u8 *arg0) {
+void Javelin_GlowUpdate(u8 *arg0) {
     if (*AF(arg0, u16 *, 0x34) == 0x26) {
         D_ovl2f_800CB834[AF(arg0, u16, 2)]();
         return;
@@ -202,9 +202,9 @@ extern s8 D_ovl2f_800CB820[];
 extern s16 D_ovl2f_800CB7FC[];
 extern void func_80149350();
 extern void func_800D20C0();
-extern void func_80017E68();
+extern void SetMatrixTrans();
 extern void func_800D23D0();
-extern void func_80017758();
+extern void DrawPrimG4Mtx();
 
 s32 func_ovl2f_800CB3BC(u8 *arg0, s32 x, s32 y, s32 z) {
     AVec pos;
@@ -241,7 +241,7 @@ s32 func_ovl2f_800CB3BC(u8 *arg0, s32 x, s32 y, s32 z) {
     AF(arg0, s16, 0xE) = w = pos.vz;
     AF(arg0, s32, 0x54) = w;
     func_800D20C0(&pos, &ang, 8);
-    func_80017E68(&pos, &m);
+    SetMatrixTrans(&pos, &m);
     func_800D23D0(&ang);
     RotMatrixYXZ(&ang, &m);
     p = D_ovl2f_800CB820;
@@ -253,7 +253,7 @@ s32 func_ovl2f_800CB3BC(u8 *arg0, s32 x, s32 y, s32 z) {
         s.v[2].vy = *p++;
         s.v[3].vx = *p++;
         s.v[3].vy = *p--;
-        func_80017758(&s, &m);
+        DrawPrimG4Mtx(&s, &m);
     } while (++i < 4);
     s.v[1].vz = 0x50;
     s.c[1].b = 0xA0;
@@ -268,7 +268,7 @@ s32 func_ovl2f_800CB3BC(u8 *arg0, s32 x, s32 y, s32 z) {
         s.v[2].vz = *q++;
         s.v[3].vx = *q++;
         s.v[3].vz = *q--;
-        func_80017758(&s, arg0 + 0x38);
+        DrawPrimG4Mtx(&s, arg0 + 0x38);
     } while (++i < 4);
 }
 

@@ -1,6 +1,10 @@
 // Package 0x1A (MAIN.CD entry 20, abil/ovl1a.yaml): ability 12, Hop
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Hop_Enter = 0x800CAF6C; // type:func
+Hop_KindUpdate = 0x800CAFA0; // type:func
+Hop_Air = 0x800CB034; // type:func
+Hop_Jump = 0x800CB17C; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800183E0 = 0x800183E0; // type:func
 D_80062BD0 = 0x80062BD0;
 D_80078EC8 = 0x80078EC8;
 func_8012A2F4 = 0x8012A2F4; // type:func

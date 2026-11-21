@@ -6,7 +6,7 @@ void func_ovl34_800CCB20(void) {
 
 extern void func_ovl34_800CCD50();
 extern void func_80162CCC();
-extern AbilStep D_ovl34_800CE044[];
+extern AbilStep ScrollWind_SpinStates[];
 
 extern void func_ovl34_800CDBF4();
 extern s32 func_ovl34_800CDCA8();
@@ -20,14 +20,14 @@ extern AbilStep D_ovl34_800CE0AC[];
 extern void func_ovl34_800CDF64();
 extern AbilStep D_ovl34_800CE0C0[];
 extern s32 rand();
-extern void func_800123F0();
-extern void func_80012558();
-extern void func_800126C4();
-extern void func_80013F3C();
+extern void RotateMatrixZ();
+extern void RotateMatrixY();
+extern void RotateMatrixX();
+extern void SetIdentityRot();
 extern s32 MulMatrix();
 extern s32 RotMatrixY();
 extern void func_80020F34();
-extern void func_8001C214();
+extern void InitModel();
 extern s32 func_8014659C();
 extern void func_80146CA0();
 extern void func_ovl34_800CD94C();
@@ -43,8 +43,8 @@ extern s32 func_8016151C();
 extern void func_ovl34_800CCFA8();
 extern s32 func_ovl34_800CD240();
 extern void func_ovl34_800CD288();
-s32 func_ovl34_800CD494(s32 arg0);
-extern u8 * func_ovl34_800CD5CC();
+s32 ScrollWind_SpinTurn(s32 arg0);
+extern u8 * ScrollWind_SpinContactHit();
 extern void func_ovl34_800CD6A4();
 extern void func_801483E8();
 extern s32 func_801496D4();
@@ -58,7 +58,7 @@ extern void func_801466F0();
 extern void func_8014B5C4();
 
 extern void func_80147078();
-extern void func_ovl34_800CCCF4();
+extern void ScrollWind_SpinDispatch();
 extern s32 func_80146E98();
 extern void func_80146E90();
 
@@ -66,7 +66,7 @@ extern s32 func_8014C088();
 extern void func_ovl34_800CDA14();
 
 extern AbilStep D_ovl34_800CE080[];
-extern s32 func_80012ABC();
+extern s32 EaseAngle();
 extern void func_8014ACC0();
 
 extern s32 func_80148800();
@@ -74,11 +74,11 @@ extern s32 func_801487F4();
 
 extern u8 D_ovl34_800CE068;
 extern s32 func_80146578();
-extern void func_8001CC3C();
+extern void InitSpriteKind3();
 extern s32 func_80146DE8();
 extern void func_80149374();
 
-extern AbilStep D_ovl34_800CE040[];
+extern AbilStep ScrollWind_SpinStepTable[];
 extern void func_80149020();
 
 void func_ovl34_800CCB28(u8 *arg0) {
@@ -86,10 +86,10 @@ void func_ovl34_800CCB28(u8 *arg0) {
 
     func_80149020(arg0);
     i = AF(arg0, u16, 2) - 2;
-    D_ovl34_800CE040[i](arg0);
+    ScrollWind_SpinStepTable[i](arg0);
 }
 
-void func_ovl34_800CCB78(u8 *arg0) {
+void ScrollWind_SpinStart(u8 *arg0) {
     func_80147324(0x8E3);
     func_8014B5C4(arg0, 5, 0);
     func_801466F0(0x13, arg0, 0, 0, 0, 0, 0, 0);
@@ -107,13 +107,13 @@ void func_ovl34_800CCC8C(s32 arg0) {
     func_ovl34_800CCD50(arg0);
 }
 
-void func_ovl34_800CCCC0(s32 arg0) {
+void ScrollWind_SpinEnter(s32 arg0) {
     func_80147078(arg0, 0x21);
-    func_ovl34_800CCCF4(arg0);
+    ScrollWind_SpinDispatch(arg0);
 }
 
-void func_ovl34_800CCCF4(u8 *a) {
-    D_ovl34_800CE044[AF(a, u16, 2)](a);
+void ScrollWind_SpinDispatch(u8 *a) {
+    ScrollWind_SpinStates[AF(a, u16, 2)](a);
 }
 
 void func_ovl34_800CCD30(void) {
@@ -152,8 +152,8 @@ void func_ovl34_800CCDC8(u8 *arg0) {
     s32 temp_v0;
     s32 temp_v0_2;
 
-    if ((func_ovl34_800CD240() == 0) && (func_ovl34_800CD288(arg0), (func_ovl34_800CD494(arg0) == 0))) {
-        temp_v0 = func_ovl34_800CD5CC(arg0);
+    if ((func_ovl34_800CD240() == 0) && (func_ovl34_800CD288(arg0), (ScrollWind_SpinTurn(arg0) == 0))) {
+        temp_v0 = ScrollWind_SpinContactHit(arg0);
         if (temp_v0 != 0) {
             func_ovl34_800CD6A4(arg0, temp_v0);
         }
@@ -185,10 +185,10 @@ void func_ovl34_800CCEEC(u8 *arg0) {
     s32 temp_v0;
     s32 temp_v0_2;
 
-    if ((func_ovl34_800CD240() == 0) && (func_ovl34_800CD288(arg0), (func_ovl34_800CD494(arg0) == 0))) {
+    if ((func_ovl34_800CD240() == 0) && (func_ovl34_800CD288(arg0), (ScrollWind_SpinTurn(arg0) == 0))) {
         func_80148038(arg0, 0x1A000);
         func_80147460(arg0);
-        temp_v0 = func_ovl34_800CD5CC(arg0);
+        temp_v0 = ScrollWind_SpinContactHit(arg0);
         if (temp_v0 != 0) {
             func_ovl34_800CD6A4(arg0, temp_v0);
         }
@@ -206,7 +206,7 @@ void func_ovl34_800CCEEC(u8 *arg0) {
 }
 
 extern u8 D_ovl34_800CE058;
-extern void func_8001382C();
+extern void RotateVectorY();
 extern s32 func_8014C59C();
 
 extern AVec D_ovl34_800CE08C[];
@@ -223,7 +223,7 @@ void func_ovl34_800CCFA8(Act *arg0) {
 
 extern void func_80147F50();
 extern s32 func_801473EC();
-extern s32 func_ovl34_800CD494();
+extern s32 ScrollWind_SpinTurn();
 
 void func_ovl34_800CCFDC(u8 *arg0) {
     s32 v;
@@ -236,10 +236,10 @@ void func_ovl34_800CCFDC(u8 *arg0) {
     func_801473EC(arg0);
     func_80148038(arg0, 0x1A000);
     func_80147460(arg0);
-    if (func_ovl34_800CD494(arg0) != 0) {
+    if (ScrollWind_SpinTurn(arg0) != 0) {
         return;
     }
-    func_ovl34_800CD5CC(arg0);
+    ScrollWind_SpinContactHit(arg0);
     v = func_8016151C(arg0);
     if (v & 0x4000) {
         AF(arg0, s32, 0x234) = D_801152B0.vx << 6;
@@ -263,10 +263,10 @@ void func_ovl34_800CD0DC(u8 *arg0) {
     func_80146DE8(arg0, AF(arg0, s32, 0x234), AF(arg0, s32, 0x238), AF(arg0, s32, 0x23C));
     func_80147F50(arg0);
     func_801473EC(arg0);
-    if (func_ovl34_800CD494(arg0) != 0) {
+    if (ScrollWind_SpinTurn(arg0) != 0) {
         return;
     }
-    func_ovl34_800CD5CC(arg0);
+    ScrollWind_SpinContactHit(arg0);
     v = func_801612B8(arg0, 0);
     if (func_80146E98(arg0) != 0) {
         if (v & 0x4000) {
@@ -302,11 +302,11 @@ extern void func_80147AD4();
 extern u8 D_801202A0[];
 extern s32 func_8014C308();
 extern s32 func_8014C278();
-extern void func_80015978();
+extern void PosToSVec();
 extern void func_8014C3A4();
 
 extern u8 D_ovl34_800CE0B8;
-extern s32 func_80015954();
+extern s32 SVecToPos();
 
 s32 func_ovl34_800CD240(u8 *arg0) {
     if (AF(arg0, s16, 0x1C8) == 0) {
@@ -407,7 +407,7 @@ copy:
     }
 }
 
-s32 func_ovl34_800CD494(s32 arg0) {
+s32 ScrollWind_SpinTurn(s32 arg0) {
     s32 var_v0;
     u16 temp_v0;
     u16 temp_v0_2;
@@ -452,7 +452,7 @@ s32 func_ovl34_800CD494(s32 arg0) {
     return 1;
 }
 
-u8 *func_ovl34_800CD5CC(u8 *arg0) {
+u8 *ScrollWind_SpinContactHit(u8 *arg0) {
     AVec v;
     u8 *p;
     u8 *found;
@@ -463,7 +463,7 @@ u8 *func_ovl34_800CD5CC(u8 *arg0) {
     AF(arg0, u8, 0x1AB) ^= 1;
     for (p = D_801202A0; p < D_801202A0 + 0x6480; p += 0x10C) {
         if (func_8014C308(arg0, p, k, 0x10) != 0 && func_8014C278(arg0, p, 0x40) != 0) {
-            func_80015978(p + 4, &v);
+            PosToSVec(p + 4, &v);
             v.pad = 0;
             func_8014C3A4(arg0, p, k, &v);
             found = p;
@@ -475,7 +475,7 @@ u8 *func_ovl34_800CD5CC(u8 *arg0) {
 void func_ovl34_800CD6A4(u8 *arg0) {
     s32 sp10[3];
 
-    func_8001382C((func_8014C59C(arg0) + 0x800) & 0xFFF, &D_ovl34_800CE058, sp10);
+    RotateVectorY((func_8014C59C(arg0) + 0x800) & 0xFFF, &D_ovl34_800CE058, sp10);
     AF(arg0, s32, 0x234) = sp10[0];
     AF(arg0, s32, 0x238) = sp10[1];
     AF(arg0, s32, 0x23C) = sp10[2];
@@ -493,7 +493,7 @@ void func_ovl34_800CD708(u8 *arg0) {
     temp_a0_2 = AF(arg0, void *, 0x20);
     AF(temp_a0_2, s32, 4) = (s32) (AF(temp_a0_2, s32, 4) | (AF(AF(temp_s0, void *, 0x20), s32, 4) & 0x80000000));
     AF(arg0, s16, 0x60) = 0;
-    D_ovl34_800CE8D4 = func_80012ABC((s32) D_ovl34_800CE8D4, (s32) AF(AF(temp_s0, void *, 0x20), s16, 0x12), 0xA);
+    D_ovl34_800CE8D4 = EaseAngle((s32) D_ovl34_800CE8D4, (s32) AF(AF(temp_s0, void *, 0x20), s16, 0x12), 0xA);
     func_8014ACC0((s32) temp_s0, 1);
     if (func_80161A30((s32) temp_s0) == 0) {
         func_ovl34_800CD94C((s32) arg0);
@@ -508,7 +508,7 @@ void func_ovl34_800CD7D8(u8 *arg0) {
     temp_v0 = func_8014659C();
     AF(arg0, void *, 0x20) = temp_v0;
     if (temp_v0 != NULL) {
-        func_8001C214(temp_v0, &D_ovl34_800CE8CC);
+        InitModel(temp_v0, &D_ovl34_800CE8CC);
         AF(temp_v0, s16, 0x1C) = 0;
         AF(temp_v0, s16, 0x1A) = 0;
         AF(temp_v0, s16, 0x18) = 0;
@@ -569,7 +569,7 @@ void func_ovl34_800CD96C(u8 *arg0) {
     temp_s0 = temp_s1 + 0x34;
     AF(arg0, s16, 0xA) = (s16) (AF(temp_a0, s32, 0x4C) - 0x20);
     AF(arg0, s16, 0xE) = (s16) AF(temp_a0, s32, 0x50);
-    func_80013F3C(temp_s0);
+    SetIdentityRot(temp_s0);
     RotMatrixY(AF(temp_s1, s16, 0x12), temp_s0);
     MulMatrix(temp_s0, AF(temp_s2, void *, 0x20) + 0x34);
     func_80020F34(temp_s0, temp_s1 + 0x18);
@@ -605,7 +605,7 @@ void func_ovl34_800CDAB4(u8 *arg0) {
     temp_v0 = func_80146578(arg0);
     AF(arg0, void *, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_8001CC3C(temp_v0, &D_ovl34_800CE068, 0x234, 0x1C0);
+        InitSpriteKind3(temp_v0, &D_ovl34_800CE068, 0x234, 0x1C0);
         AF(temp_v0, u8, 0x27) = 0x26;
         AF(temp_v0, s16, 0x1A) = 0x2000;
         AF(temp_v0, s16, 0x18) = 0x2000;
@@ -642,7 +642,7 @@ void func_ovl34_800CDBF4(u8 *arg0) {
     v.vx += AF(o, s32, 0x48);
     v.vy += AF(o, s32, 0x4C) - 0x20;
     v.vz += AF(o, s32, 0x50);
-    func_80015954(&v, arg0 + 4);
+    SVecToPos(&v, arg0 + 4);
 }
 
 s32 func_ovl34_800CDCA8(s32 arg0) {
@@ -682,7 +682,7 @@ void func_ovl34_800CDD9C(u8 *arg0, s32 arg1) {
     temp_v0 = (AModel *) func_80146578((s32) arg0, arg1);
     AF(arg0, AModel *, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_8001CC3C(temp_v0, (s32) &D_ovl34_800CE068, 0x200, 0x100);
+        InitSpriteKind3(temp_v0, (s32) &D_ovl34_800CE068, 0x200, 0x100);
         AF(temp_v0, u8, 0x27) = 8;
         AF(temp_v0, s32, 4) = (s32) (AF(temp_v0, s32, 4) | 0x50000000);
         func_80149374(temp_s2, (s32) (arg0 + 4));
@@ -732,11 +732,11 @@ void func_ovl34_800CDF84(u8 *arg0, s32 arg1) {
     void *temp_s2;
 
     temp_s2 = AF(arg0, void *, 0x20);
-    func_80013F3C(arg1);
-    func_800126C4(arg1, AF(arg0, s16, 0x60));
-    func_800123F0(arg1, AF(arg0, s16, 0x64));
-    func_80012558(arg1, AF(arg0, s16, 0x62));
-    func_80012558(arg1, AF(temp_s2, s16, 0x12));
-    func_800126C4(arg1, AF(temp_s2, s16, 0x10));
-    func_800123F0(arg1, AF(temp_s2, s16, 0x14));
+    SetIdentityRot(arg1);
+    RotateMatrixX(arg1, AF(arg0, s16, 0x60));
+    RotateMatrixZ(arg1, AF(arg0, s16, 0x64));
+    RotateMatrixY(arg1, AF(arg0, s16, 0x62));
+    RotateMatrixY(arg1, AF(temp_s2, s16, 0x12));
+    RotateMatrixX(arg1, AF(temp_s2, s16, 0x10));
+    RotateMatrixZ(arg1, AF(temp_s2, s16, 0x14));
 }

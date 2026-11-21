@@ -13,13 +13,13 @@ extern u8 D_800BA118[];
 extern s32 g_OtDepthLimit;
 extern s32 D_800A2B7C;
 extern s32 g_FrameCount;
-extern s16 D_800C7C74;
+extern s16 g_BufferIndex;
 extern u8 g_PrimBuf[2][0x13880];
 extern u8 *g_PrimNext;
 extern u8 D_800A4F48[2][0x640];
-extern OtInfo D_800A651C[2];
+extern OtInfo g_WorldOtOrg[2];
 extern u32 g_WorldOtTable[2][0x1000];
-extern OtInfo D_800AE7BC[2];
+extern OtInfo g_FrontOtOrg[2];
 extern u32 D_800BA0D8[2][4];
 
 extern void InitGraph(void);
@@ -33,11 +33,11 @@ extern void UpdatePads(void);
 extern void CheckPauseStart(void);
 extern void ModeDispatch(void);
 extern void DrawDebugText(void);
-extern void func_8001C00C(void);
+extern void DrawModelsAndSprites(void);
 extern void func_800D25FC(void);
 extern void FlushImageQueue(void);
-extern void func_8003500C(void);
-extern void func_8002D034(void);
+extern void RunCdAudioRequests(void);
+extern void UpdateSound(void);
 extern void LoadQueueStep(void);
 extern void FrameEndNop(void);
 
@@ -85,8 +85,8 @@ int main(void)
         while (!w->exitLoop) {
             g_FrameCount++;
             g_FrameCount = g_FrameCount ? g_FrameCount : 1;
-            D_800C7C74 = !D_800C7C74;
-            w->frame = D_800C7C74;
+            g_BufferIndex = !g_BufferIndex;
+            w->frame = g_BufferIndex;
 
             g_PrimNext = g_PrimBuf[w->frame];
             w->pool[w->frame].buf = D_800A4F48[w->frame];
@@ -99,23 +99,23 @@ int main(void)
             if (!w->pauseMenu) {
                 w->tick++;
                 w->tickSum += w->tick;
-                D_800A651C[w->frame].ot = g_WorldOtTable[w->frame];
-                D_800A651C[w->frame].otLast = &g_WorldOtTable[w->frame][0xFFF];
-                ClearOTagR(D_800A651C[w->frame].ot, 0x1000);
-                D_800AE7BC[w->frame].ot = D_800BA0D8[w->frame];
-                D_800AE7BC[w->frame].otLast = &D_800BA0D8[w->frame][3];
-                ClearOTagR(D_800AE7BC[w->frame].ot, 4);
+                g_WorldOtOrg[w->frame].ot = g_WorldOtTable[w->frame];
+                g_WorldOtOrg[w->frame].otLast = &g_WorldOtTable[w->frame][0xFFF];
+                ClearOTagR(g_WorldOtOrg[w->frame].ot, 0x1000);
+                g_FrontOtOrg[w->frame].ot = D_800BA0D8[w->frame];
+                g_FrontOtOrg[w->frame].otLast = &D_800BA0D8[w->frame][3];
+                ClearOTagR(g_FrontOtOrg[w->frame].ot, 4);
                 ModeDispatch();
                 SetSpadStack();
                 DrawDebugText();
                 ResetSpadStack();
                 SetSpadStack();
-                func_8001C00C();
+                DrawModelsAndSprites();
                 ResetSpadStack();
             } else {
-                D_800AE7BC[w->frame].ot = D_800BA0D8[w->frame];
-                D_800AE7BC[w->frame].otLast = &D_800BA0D8[w->frame][3];
-                ClearOTagR(D_800AE7BC[w->frame].ot, 4);
+                g_FrontOtOrg[w->frame].ot = D_800BA0D8[w->frame];
+                g_FrontOtOrg[w->frame].otLast = &D_800BA0D8[w->frame][3];
+                ClearOTagR(g_FrontOtOrg[w->frame].ot, 4);
                 SetSpadStack();
                 func_800D25FC();
                 ResetSpadStack();
@@ -132,12 +132,12 @@ int main(void)
             }
             PutDispEnv(&w->disp[w->dispIdx]);
             PutDrawEnv(&w->draw[w->drawIdx]);
-            CatPrim(D_800A651C[w->frame].ot + 0xFFC, &D_800A651C[w->frame].ot[g_OtDepthLimit]);
-            DrawOTag(D_800A651C[w->frame].ot + 0xFFF);
-            DrawOTag(D_800AE7BC[w->frame].ot + 3);
+            CatPrim(g_WorldOtOrg[w->frame].ot + 0xFFC, &g_WorldOtOrg[w->frame].ot[g_OtDepthLimit]);
+            DrawOTag(g_WorldOtOrg[w->frame].ot + 0xFFF);
+            DrawOTag(g_FrontOtOrg[w->frame].ot + 3);
 
-            func_8003500C();
-            func_8002D034();
+            RunCdAudioRequests();
+            UpdateSound();
             LoadQueueStep();
             FrameEndNop();
         }
@@ -153,13 +153,13 @@ extern void func_800CEDFC(void);
 extern u8 g_FileLocDebug[];
 extern s32 g_LoadAddr;
 extern s32 g_DemoEndRequest;
-extern void func_8001C044(void);
-extern void func_80015310(void);
+extern void ClearObjectPools(void);
+extern void ClearDebugText(void);
 extern void SetOtDepthLimit(s32 n);
 extern void DrawNowLoading(s32 n);
 extern s32 LoadFileStep(u8 *p, s32 a, s32 b, s32 c);
 
-extern void func_8002D4C8(s32 a, s32 b);
+extern void PlaySoundId(s32 a, s32 b);
 
 extern void (*g_ModeTable[])(void);
 extern u8 g_FileLocLicence[];
@@ -170,30 +170,30 @@ extern s32 g_DemoStream;
 extern u8 g_FileLocTrialEnd[];
 
 extern s16 D_801150D4;
-extern void func_80029690(void);
+extern void ClearStateSlots(void);
 extern void StopPadRumble(void);
 extern void ClearRumbleScript(void);
-extern void func_80029274(void);
-extern void func_8002941C(void);
-extern void func_8002CDD8(void);
+extern void LoadDefaultStatus(void);
+extern void ClearItemValue0(void);
+extern void SoundVSync(void);
 extern void func_800CEE74(void);
 extern u16 GetPadHeldDir(s32 port);
 extern u16 GetPadPressedDir(u8 port);
 extern void func_800CEEC8();
-extern void func_80029514(s32 a);
+extern void SetProgress(s32 a);
 extern s32 D_800629C8;
-extern u8 D_80078E78[];
+extern u8 g_Status[];
 extern void ResetGameProgress(void);
 extern u8 g_FileLocField[];
 extern u8 g_FileLocTitle[];
-extern s32 D_800C7C60;
+extern s32 g_SoundLoadTable;
 extern u8 *D_800C7C64;
-extern u8 D_800A2E20[];
+extern u8 g_SoundLoadBuf[];
 extern s16 D_800B99DA;
 
 /* VSync callback: run the sound driver's per-vblank tick */
 void VSyncHandler(void) {
-    func_8002CDD8();
+    SoundVSync();
 }
 
 /* DrawSync callback: records the VSync counter for the current frame */
@@ -246,15 +246,15 @@ void ModeReset(void) {
     w->mapLive = 0;
     w->unkA3E1 = 1;
     w->demoActive = 0;
-    func_8001C044();
-    func_80015310();
-    func_80029690();
+    ClearObjectPools();
+    ClearDebugText();
+    ClearStateSlots();
     D_801150D4 = 0;
     g_DemoIndex = 0;
     StopPadRumble();
     ClearRumbleScript();
-    func_80029274();
-    func_8002941C();
+    LoadDefaultStatus();
+    ClearItemValue0();
     SetOtDepthLimit(0x3E0);
     SetGameState(0);
     NextMode();
@@ -275,8 +275,8 @@ void ModeLicenceRun(void) {
     register Work *w = &D_800AF630;
     func_800CEDFC();
     if (w->done != 0) {
-        func_8001C044();
-        func_80015310();
+        ClearObjectPools();
+        ClearDebugText();
         SetMode(3);
     }
 }
@@ -311,16 +311,16 @@ void ModeGoIdle(void) {
 /* Send sound command 2 and set Work.exitLoop so main() leaves its frame loop; no callers found */
 void QuitMainLoop(void) {
     register Work *w = &D_800AF630;
-    func_8002D4C8(2, 0);
+    PlaySoundId(2, 0);
     w->exitLoop = 1;
 }
 
 /* Mode 5: load the title overlay (MAIN.CD entry 3, ovl39) with sound bank 0x57, reset progress and sound, then mode 6 */
 void ModeTitleLoad(void) {
-    D_800C7C60 = 0x57;
-    D_800C7C64 = D_800A2E20;
-    if (LoadFileStep(g_FileLocTitle, g_LoadAddr, 0, (s32)&D_800C7C60) != 0) {
-        func_8002D4C8(2, 0);
+    g_SoundLoadTable = 0x57;
+    D_800C7C64 = g_SoundLoadBuf;
+    if (LoadFileStep(g_FileLocTitle, g_LoadAddr, 0, (s32)&g_SoundLoadTable) != 0) {
+        PlaySoundId(2, 0);
         SetOtDepthLimit(0x3E0);
         ResetGameProgress();
         ApplySoundOptions();
@@ -332,19 +332,19 @@ void ModeTitleLoad(void) {
 /* Mode 6: run the title; on its choice start a new game, Continue (field state 11) or a demo */
 void ModeTitleRun(void) {
     register Work *w = &D_800AF630;
-    u8 *p = D_80078E78;
+    u8 *p = g_Status;
     func_800CEEC8();
     if (w->done != 0) {
         SetGameState(0);
-        func_8001C044();
-        func_80015310();
+        ClearObjectPools();
+        ClearDebugText();
         if (w->timer == 4) {
             w->demoActive = 1;
             SetMode(0xF);
         } else if (w->timer < 2) {
             w->mapId = 0x3005;
             w->mapGroup = 0x3000;
-            func_80029514(D_800629C8);
+            SetProgress(D_800629C8);
             if (w->timer == 1) {
                 SetMode(0xA);
                 SetGameState(0xB);
@@ -362,7 +362,7 @@ void ModeFieldLoad(void) {
     if (LoadFileStep(g_FileLocField, g_LoadAddr, 0, 0) != 0) {
         SetOtDepthLimit(0x3E0);
         NextMode();
-        func_80015310();
+        ClearDebugText();
     }
 }
 
@@ -374,7 +374,7 @@ void ModeDebugLoad(void) {
     if (LoadFileStep(g_FileLocDebug, g_LoadAddr, 0, 0) != 0) {
         SetOtDepthLimit(0x3E0);
         NextMode();
-        func_80015310();
+        ClearDebugText();
     }
 }
 
@@ -426,8 +426,8 @@ extern u16 g_DemoLengths[];
 extern s32 g_DemoLength;
 extern u16 D_800B99E8;
 extern u8 D_800D3A68[];
-extern void func_800295D4(void);
-extern void func_80029664(void);
+extern void SetupDemoStatus(void);
+extern void SetClockNight(void);
 extern s32 TestPadsAny(u8 which, s32 mask);
 extern void func_800D1724(u8 *p);
 extern void srand(u32 seed);
@@ -437,16 +437,16 @@ void NextStep(void);
 void DemoReadPad(void);
 void DemoRequestEnd(void);
 typedef struct { u8 pad[0x16]; u8 unk16; } Obj6A8;
-extern Obj6A8 D_800AE6A8;
+extern Obj6A8 g_EntryPoint;
 
 /* Mode 16: set up and run an attract demo (recorded pad stream) until it times out or is skipped */
 void ModeDemoRun(void) {
     register Work *w = &D_800AF630;
-    Obj6A8 *mapState = &D_800AE6A8;
+    Obj6A8 *mapState = &g_EntryPoint;
     switch (w->step) {
     case 0:
         D_800B99E8 = 0;
-        func_800295D4();
+        SetupDemoStatus();
         if (g_DemoIndex >= 5) {
             g_DemoIndex = 0;
         }
@@ -455,7 +455,7 @@ void ModeDemoRun(void) {
         mapState->unk16 = g_DemoMaps[g_DemoIndex * 2 + 1];
         g_DemoLength = g_DemoLengths[g_DemoIndex];
         if (g_DemoIndex == 0) {
-            func_80029664();
+            SetClockNight();
         }
         DemoClearEndRequest();
         DemoReset();
@@ -463,7 +463,7 @@ void ModeDemoRun(void) {
         w->demoActive = 1;
         w->mapLive = 0;
         g_DemoIndex++;
-        func_8002D4C8(0x28, 0);
+        PlaySoundId(0x28, 0);
         SetGameState(0);
         NextStep();
         break;
@@ -488,22 +488,22 @@ void ModeDemoRun(void) {
 void ModeDemoEnd(void) {
     register Work *w = &D_800AF630;
     w->demoActive = 0;
-    func_8002D4C8(0x29, 0);
+    PlaySoundId(0x29, 0);
     SetMode(5);
 }
 
 /* Send the saved sound options (two volume levels and a mode flag) to the sound driver */
-extern s32 func_80028FBC();
-extern s32 func_80029000();
-extern s32 func_80028D9C();
+extern s32 GetMusicVolume();
+extern s32 GetEffectsVolume();
+extern s32 GetSoundMode();
 
 void ApplySoundOptions(void) {
-    func_8002D4C8(0x21, (u16)func_80028FBC());
-    func_8002D4C8(0x22, (u16)func_80029000());
-    if (func_80028D9C() == 0) {
-        func_8002D4C8(0xC, 0);
+    PlaySoundId(0x21, (u16)GetMusicVolume());
+    PlaySoundId(0x22, (u16)GetEffectsVolume());
+    if (GetSoundMode() == 0) {
+        PlaySoundId(0xC, 0);
     } else {
-        func_8002D4C8(0xB, 0);
+        PlaySoundId(0xB, 0);
     }
 }
 

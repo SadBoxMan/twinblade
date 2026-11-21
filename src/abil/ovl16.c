@@ -1,25 +1,25 @@
 #include "common.h"
 #include "abil.h"
 
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl16_800CB570[];
-extern AbilStep D_ovl16_800CB51C[];
+extern AbilStep Depress_StepTable[];
 extern void func_80165A20();
 extern s32 D_80078EC8;
 
 void func_ovl16_800CAE0C(void) {
-    func_800183E0(D_ovl16_800CB570);
+    QueueImage(D_ovl16_800CB570);
 }
 
 void func_ovl16_800CAE34(u8 *a) {
     AF(a, s32, 0x44) |= 8;
-    D_ovl16_800CB51C[AF(a, u8, 0x197)](a);
+    Depress_StepTable[AF(a, u8, 0x197)](a);
 }
 
 extern void func_80146C3C();
-extern s32 func_ovl16_800CAF84();
+extern s32 Depress_DrawCloud();
 extern u8 D_80078EC1;
-extern AbilStep D_ovl16_800CB53C[];
+extern AbilStep Depress_CloudStates[];
 extern void func_80146A6C();
 extern void func_801655E4();
 extern s32 func_80165910();
@@ -32,7 +32,7 @@ void func_ovl16_800CAE78(u8 *arg0) {
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
-void func_ovl16_800CAE8C(u8 *arg0) {
+void Depress_Step1Start(u8 *arg0) {
     if (func_80165910() == 0) {
         func_801655E4(arg0);
     }
@@ -40,7 +40,7 @@ void func_ovl16_800CAE8C(u8 *arg0) {
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
-void func_ovl16_800CAEF4(void) {
+void Depress_Step2WaitTimer(void) {
     if (D_80078EC8 == 0) {
         func_80165A20();
     }
@@ -49,23 +49,23 @@ void func_ovl16_800CAEF4(void) {
 void func_ovl16_800CAF20(void) {
 }
 
-void func_ovl16_800CAF28(u8 *arg0) {
+void Depress_CloudUpdate(u8 *arg0) {
     if (D_80078EC1 == 1) {
-        D_ovl16_800CB53C[AF(arg0, u16, 2)]();
+        Depress_CloudStates[AF(arg0, u16, 2)]();
         return;
     }
     func_80146C3C();
 }
 
-extern s8 D_ovl16_800CB528[];
-extern void func_80017DC4();
+extern s8 Depress_FanVerts[];
+extern void SetScaleMatrix();
 extern void func_8012F14C();
 extern void func_800D20C0();
 extern void func_800D23D0();
-extern void func_80017E68();
-extern void func_80017758();
+extern void SetMatrixTrans();
+extern void DrawPrimG4Mtx();
 
-s32 func_ovl16_800CAF84(arg0) u8 *arg0; {
+s32 Depress_DrawCloud(arg0) u8 *arg0; {
     s8 *p;
     s16 i;
     AVec v;
@@ -75,7 +75,7 @@ s32 func_ovl16_800CAF84(arg0) u8 *arg0; {
     AMtx b;
 
     v.vx = v.vy = v.vz = AF(arg0, u16, 0x28);
-    func_80017DC4(&v, &a);
+    SetScaleMatrix(&v, &a);
     v.vx = v.vz = 0;
     v.vy = -0x2C;
     func_8012F14C(arg0 + 0x38, &v, &v);
@@ -89,10 +89,10 @@ s32 func_ovl16_800CAF84(arg0) u8 *arg0; {
     s.c[2].r = s.c[2].g = s.c[2].b = 0;
     s.c[3].r = s.c[3].g = s.c[3].b = 0;
     s.code = 0x50000000;
-    func_80017E68(&v, &a);
+    SetMatrixTrans(&v, &a);
     RotMatrixYXZ(&r, &b);
     MulMatrix(&a, &b);
-    p = D_ovl16_800CB528;
+    p = Depress_FanVerts;
     i = 0;
     do {
         s.v[0].vx = *p++;
@@ -101,12 +101,12 @@ s32 func_ovl16_800CAF84(arg0) u8 *arg0; {
         s.v[2].vy = *p++;
         s.v[3].vx = *p++;
         s.v[3].vy = *p--;
-        func_80017758(&s, &a);
+        DrawPrimG4Mtx(&s, &a);
         i++;
     } while (i < 4);
 }
 
-void func_ovl16_800CB158(u8 *arg0) {
+void Depress_CloudStart(u8 *arg0) {
     u8 *s;
     s32 n;
 
@@ -121,13 +121,13 @@ void func_ovl16_800CB158(u8 *arg0) {
             AF(arg0, u16, 2) = 4;
         }
         AF(arg0, AMtx, 0x38) = AF(AF(s, u8 *, 0x20), AMtx, 0x34);
-        func_ovl16_800CAF84(arg0);
+        Depress_DrawCloud(arg0);
         return;
     }
     AF(arg0, u16, 2)++;
 }
 
-void func_ovl16_800CB228(u8 *arg0) {
+void Depress_PuffGrow(u8 *arg0) {
     u8 *s;
     s32 n;
 
@@ -145,11 +145,11 @@ void func_ovl16_800CB228(u8 *arg0) {
             AF(arg0, s16, 0x2A) = 0x500;
             AF(arg0, u16, 2)++;
         }
-        AF(arg0, AMtx, 0x38) = AF(AF(s, u8 *, 0x20), AMtx, 0x34);        func_ovl16_800CAF84(arg0);
+        AF(arg0, AMtx, 0x38) = AF(AF(s, u8 *, 0x20), AMtx, 0x34);        Depress_DrawCloud(arg0);
     }
 }
 
-void func_ovl16_800CB304(u8 *arg0) {
+void Depress_PuffDrift(u8 *arg0) {
     s32 r;
     s32 t;
 
@@ -167,7 +167,7 @@ void func_ovl16_800CB304(u8 *arg0) {
     AF(arg0, s32, 0x4C) += r;
     AF(arg0, s32, 0x50) -= 2;
     AF(arg0, s32, 0x54) += AF(arg0, s16, 0x1A);
-    func_ovl16_800CAF84(arg0, r);
+    Depress_DrawCloud(arg0, r);
     t = AF(arg0, s32, 0x30);
     AF(arg0, s32, 0x30) = t - 1;
     if (t == 0) {
@@ -175,20 +175,20 @@ void func_ovl16_800CB304(u8 *arg0) {
     }
 }
 
-void func_ovl16_800CB400(u8 *arg0) {
+void Depress_PuffFade(u8 *arg0) {
     u16 temp_v0;
 
     temp_v0 = AF(arg0, u16, 0x28) - 0x100;
     AF(arg0, u16, 0x28) = temp_v0;
     if ((temp_v0 << 0x10) > 0) {
         AF(arg0, s32, 0x50) = (s32) (AF(arg0, s32, 0x50) - 2);
-        func_ovl16_800CAF84();
+        Depress_DrawCloud();
         return;
     }
     func_80146C3C();
 }
 
-void func_ovl16_800CB458(u8 *arg0) {
+void Depress_CloudEmit(u8 *arg0) {
     s32 temp_a1;
     s32 temp_a2;
     s32 temp_a3;
@@ -198,7 +198,7 @@ void func_ovl16_800CB458(u8 *arg0) {
 
     temp_s1 = AF(arg0, void *, 0x34);
     AF(arg0, AMtx, 0x38) = AF(AF(temp_s1, void *, 0x20), AMtx, 0x34);
-    func_ovl16_800CAF84(arg0);
+    Depress_DrawCloud(arg0);
     temp_v0_2 = AF(arg0, s32, 0x1C) - 1;
     AF(arg0, s32, 0x1C) = temp_v0_2;
     if (temp_v0_2 == -1) {

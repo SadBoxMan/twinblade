@@ -1,9 +1,9 @@
 #include "common.h"
 #include "abil.h"
 
-extern void func_ovl30_800CCD60();
+extern void ScrollLumina_SetBladeScale();
 
-extern AbilStep D_ovl30_800CCD94[];
+extern AbilStep ScrollLumina_StepTable[];
 extern void func_80149020();
 
 extern u8 D_800D5360;
@@ -12,7 +12,7 @@ extern void func_80146994();
 extern void func_80156648();
 extern void func_80147324();
 
-void func_ovl30_800CCB20(u8 *arg0) {
+void ScrollLumina_Setup(u8 *arg0) {
     func_80154274(arg0, &D_800D5360);
     AF(arg0, s32, 0x234) = 0;
     AF(arg0, s32, 0x238) = 0;
@@ -26,37 +26,37 @@ void func_ovl30_800CCB20(u8 *arg0) {
     func_80149020(arg0);
 }
 
-void func_ovl30_800CCBA0(u8 *arg0) {
+void ScrollLumina_Step(u8 *arg0) {
     s32 i;
 
     func_80149020(arg0);
     i = AF(arg0, u16, 2) - 2;
-    D_ovl30_800CCD94[i](arg0);
+    ScrollLumina_StepTable[i](arg0);
 }
 
-extern u8 D_80078E78;
+extern u8 g_Status;
 extern void func_80155FB0();
 extern void func_80161208();
 extern void func_801599A4();
 extern void func_80159B3C();
 
-void func_ovl30_800CCBF0(u8 *arg0) {
+void ScrollLumina_Spin(u8 *arg0) {
     s32 pad[12];
     u8 *g;
     s32 t;
     u16 s;
 
-    g = &D_80078E78;
+    g = &g_Status;
     t = AF(arg0, s32, 0x23C);
     if (t == 0) {
         if (AF(arg0, u16, 0xB8) & 0x4000) {
             AF(arg0, s32, 0x23C) = 1;
-            func_ovl30_800CCD60(arg0);
+            ScrollLumina_SetBladeScale(arg0);
         }
     } else if (t >= 0) {
         if (t < 7) {
             AF(arg0, s32, 0x23C) = t + 1;
-            func_ovl30_800CCD60(arg0);
+            ScrollLumina_SetBladeScale(arg0);
         }
     }
     switch (AF(arg0, s32, 0x234)) {
@@ -87,6 +87,6 @@ void func_ovl30_800CCBF0(u8 *arg0) {
     func_80161208(arg0);
 }
 
-void func_ovl30_800CCD60(u8 *arg0) {
+void ScrollLumina_SetBladeScale(u8 *arg0) {
     AF(arg0, s16, 0xF6) = (s16) (((AF(arg0, s32, 0x23C) << 0xA) / 7) + 0x1000);
 }

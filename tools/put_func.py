@@ -331,7 +331,8 @@ def retype_guess(t, n, body):
 def target_of(path):
     """(make target, its success line) for a source file: src/<overlay>/x.c -> check-<overlay>, src/x.c -> check-main"""
     rel = os.path.relpath(path, os.path.join(ROOT, 'src')).replace(os.sep, '/')
-    if rel.startswith(('abil/', 'stg/')):      # an ability package or a split stage: src/abil/ovlNN.c -> check-ovlNN
+    # an ability package, a split stage or (r442) a code block: src/abil/ovlNN.c -> check-ovlNN, src/blk/x.c -> check-x
+    if rel.startswith(('abil/', 'stg/', 'blk/')):
         o = rel.split('/')[1][:-2]
         if rel.startswith('stg/'):             # r209: sc03_014_o0.c / sc03_014_post.c -> check-sc03_014
             import stage_units

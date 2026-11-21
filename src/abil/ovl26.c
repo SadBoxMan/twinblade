@@ -2,24 +2,24 @@
 #include "abil.h"
 
 extern void func_80162CCC();
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl26_800CB2D4[];
 extern AbilStep D_ovl26_800CB29C[];
 extern s32 func_80161104();
-void func_ovl26_800CAEC0(s32 arg0);
+void DKick_Start(s32 arg0);
 
 void func_ovl26_800CAE0C(void) {
-    func_800183E0(D_ovl26_800CB2D4);
+    QueueImage(D_ovl26_800CB2D4);
 }
 
-void func_ovl26_800CAE34(u8 *a) {
+void DKick_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
     D_ovl26_800CB29C[AF(a, u8, 0x197)](a);
 }
 
 void func_ovl26_800CAE78(u8 *a) {
     if (func_80161104() != 0) {
-        func_ovl26_800CAEC0(a);
+        DKick_Start(a);
         AF(a, u8, 0x197)++;
     }
 }
@@ -43,7 +43,7 @@ extern void func_801655E4();
 extern void func_80156648();
 extern void func_801466F0();
 
-void func_ovl26_800CAEC0(s32 arg0) {
+void DKick_Start(s32 arg0) {
     func_80154274(arg0, (s32) &D_ovl26_800CB26C);
     func_80146DE8(arg0, 0, 0, -0x120000);
     func_801477E8(arg0, -0xC0000);
@@ -54,7 +54,7 @@ void func_ovl26_800CAEC0(s32 arg0) {
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
-void func_ovl26_800CAF60(u8 *arg0) {
+void DKick_StepAir(u8 *arg0) {
     AF(arg0, s32, 0x44) = (s32) (AF(arg0, s32, 0x44) | 2);
     func_80147A84();
     func_801473EC(arg0);
@@ -72,7 +72,7 @@ extern void func_8001C810();
 extern void func_80146CA0();
 extern AObj68 D_8011F9D0[];
 
-void func_ovl26_800CAFD0(u8 *arg0) {
+void DKick_Cleanup(u8 *arg0) {
     s32 i;
     AObj68 *p;
 
@@ -85,7 +85,7 @@ void func_ovl26_800CAFD0(u8 *arg0) {
     AF(arg0, s32, 0x44) &= ~2;
 }
 
-void func_ovl26_800CB054(u8 *arg0) {
+void DKick_AfterImageUpdate(u8 *arg0) {
     if (D_80078EC1 == 9) {
         D_ovl26_800CB2A8[AF(arg0, u16, 2)]();
         return;

@@ -1,11 +1,11 @@
 // Package 0x23 (MAIN.CD entry 29, abil/ovl23.yaml): ability 20, Rip-off
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+RipOff_Update = 0x800CAE64; // type:func
+RipOff_PieceInit = 0x800CAF90; // type:func
+RipOff_EffectUpdate = 0x800CB460; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800183E0 = 0x800183E0; // type:func
-func_8001CC3C = 0x8001CC3C; // type:func
-func_8002D4C8 = 0x8002D4C8; // type:func
 D_80078EC1 = 0x80078EC1;
 D_80078EC8 = 0x80078EC8;
-D_800AE620 = 0x800AE620;
 D_800B99DA = 0x800B99DA;
 D_800D387C = 0x800D387C;
 D_80126B5E = 0x80126B5E;

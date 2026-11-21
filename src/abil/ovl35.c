@@ -14,38 +14,38 @@ extern void func_80159B3C();
 extern s32 RotTransSV();
 extern s32 VectorNormalSS();
 
-void func_ovl35_800CCB28(u8 *arg0) {
+void ScrollSky_GlideStart(u8 *arg0) {
     func_80146994(0x3B, arg0, 0, 0);
     AF(arg0, s16, 0x1C8) = 0xBA;
     func_801599A4(arg0);
     func_80159B3C(arg0);
 }
 
-void func_ovl35_800CCB78(u8 *a) {
+void ScrollSky_GlideMarkTrail(u8 *a) {
     *(s32 *)(a + 0x2c) = 1;
 }
 
-void func_ovl35_800CCB84(u8 *a) {
+void ScrollSky_GlideTrailUpdate(u8 *a) {
     D_ovl35_800CD6C8[AF(a, u16, 2)](a);
 }
 
 extern u8 D_ovl35_800CD6E0[];
 extern s32 func_ovl35_800CCDE8();
-extern void func_80016714();
+extern void ZeroFill();
 extern u8 D_8011D030[];
 extern s32 func_80146C3C();
 
-s16 func_ovl35_800CCBC0(void);
+s16 ScrollSky_GlideTrailDraw(void);
 
 extern u8 D_ovl35_800CD7A4[];
 extern s32 func_801465C0();
 extern void func_8001CD50();
 extern void func_ovl35_800CD314();
 
-extern AMtx D_800AE620;
-extern void func_80017758();
+extern AMtx GsIDMATRIX;
+extern void DrawPrimG4Mtx();
 
-s16 func_ovl35_800CCBC0(void) {
+s16 ScrollSky_GlideTrailDraw(void) {
     APrim s;
     AMtx m;
     s16 (*p)[6];
@@ -56,7 +56,7 @@ s16 func_ovl35_800CCBC0(void) {
     s32 b;
     s16 h;
 
-    m = D_800AE620;
+    m = GsIDMATRIX;
     s.code = 0x50000000;
     if (D_ovl35_800CD6E0[0] == 0) {
         return 0;
@@ -96,7 +96,7 @@ s16 func_ovl35_800CCBC0(void) {
         }
         s.c[2].r = s.c[3].r = b;
         s.c[2].g = s.c[3].g = s.c[2].b = s.c[3].b = h;
-        func_80017758(&s, &m);
+        DrawPrimG4Mtx(&s, &m);
     }
     return n;
 }
@@ -195,7 +195,7 @@ s16 n;
 
 extern AMtx D_8011F75C;
 extern void func_80147324();
-extern void func_800233CC();
+extern void SetShapeCircle();
 extern AModel *D_8011F758[];
 
 void func_ovl35_800CD314(u8 *arg0) {
@@ -217,7 +217,7 @@ void func_ovl35_800CD314(u8 *arg0) {
             func_80147324(0x8E2);
         }
         AF(arg0, s32, 0x30) += 0x10;
-        func_800233CC(D_ovl35_800CD7A4, AF(arg0, s32, 0x30) & 0xFFFF);
+        SetShapeCircle(D_ovl35_800CD7A4, AF(arg0, s32, 0x30) & 0xFFFF);
         AF(arg0, s32, 0x1C)++;
         return;
     }
@@ -242,7 +242,7 @@ void func_ovl35_800CD4D0(u8 *arg0) {
             func_80146C3C(p);
         }
     }
-    func_80016714(&D_ovl35_800CD6E0, 0xC4);
+    ZeroFill(&D_ovl35_800CD6E0, 0xC4);
     func_ovl35_800CCDE8(arg0, 0, 0);
     AF(arg0, u16, 2)++;
 }
@@ -250,11 +250,11 @@ void func_ovl35_800CD4D0(u8 *arg0) {
 void func_ovl35_800CD58C(u8 *arg0) {
     if (AF(arg0, s32, 0x2C) != 0) {
         func_ovl35_800CCDE8((s32) arg0, 1, 0x37);
-        func_ovl35_800CCBC0();
+        ScrollSky_GlideTrailDraw();
         AF(arg0, s32, 0x2C) = 0;
         return;
     }
-    func_80016714((s32) &D_ovl35_800CD6E0, 0xC4);
+    ZeroFill((s32) &D_ovl35_800CD6E0, 0xC4);
     func_ovl35_800CCDE8((s32) arg0, 0, 0);
 }
 

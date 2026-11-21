@@ -1,7 +1,7 @@
 # tools/regress.py --record-baseline: SHA-1 and size of every original a check compares against
 # sha1 size area name original
 143dbb89f34491258bbc27810d0a12ec8b43a8dd 413696 main main disc/files/SLUS_007.26
-f0a9e2488c5688300d7218ab734f4b0d116cbe9e 20480 ovl ovl38 disc/overlays/main_01.bin
+ba84f20430689fd7244403455851f5570da9fe7c 19996 ovl ovl38 disc/payload/ovl38.bin
 f8fd92f59c6871577c61cb626cb9ddb0db5ba884 815887 ovl stage disc/pac4/SC03_001.bin
 dd1b32ecf1103c6f7cf1943d25546a3046e17b14 121884 ovl ovl39 disc/overlays/code/ovl39.bin
 8e17e02ff8954d07c979449198f7e1645046b353 365404 ovl ovl36 disc/overlays/code/ovl36.bin
@@ -68,7 +68,7 @@ ba27da383229d216a3fb0217fbd11132fe4eab39 688487 stg sc02_026 disc/pac4/SC02_026.
 b5b3b294c5098e9cbd42c271a4906bf0ad71a1f9 701671 stg sc02_028 disc/pac4/SC02_028.bin
 d0f547e0e7fb1225d29a1b2d880245666dd9476c 588215 stg sc02_031 disc/pac4/SC02_031.bin
 1b59124d3f3bcc7573aaad338999b61ae3822dcf 616687 stg sc02_035 disc/pac4/SC02_035.bin
-c49d10b3a2736d8c9f343cc3811cf08658d5b6fd 663951 stg sc02_037 disc/pac4/SC02_037.bin
+5fcf53b400aa3a56d9340c04e76b50a802bb569e 661904 stg sc02_037 disc/payload/stg/SC02_037.bin
 8696727ea3b38ca914ad303194b5989f79ba12cc 494759 stg sc02_039 disc/pac4/SC02_039.bin
 8d76ff32e771c2f5fecf6af2b9c92ed780c18610 595327 stg sc02_041 disc/pac4/SC02_041.bin
 0000b179c92f1f57856c6f98601ae7a9b8f47570 670199 stg sc03_002 disc/pac4/SC03_002.bin
@@ -104,7 +104,7 @@ c148cf9ae4233581803be401ab4c174b67caff66 596687 stg sc03_102 disc/pac4/SC03_102.
 789127c9fe4c76babe62b8ccd865a68a68c3b08f 642175 stg sc03_103 disc/pac4/SC03_103.bin
 b437f37e7e9bed6048de3a6fc00fdd106783e1c9 623423 stg sc03_104 disc/pac4/SC03_104.bin
 d305ff6da199b52d0d44023766643a8b661ed524 609223 stg sc03_105 disc/pac4/SC03_105.bin
-288eef24400db594994a9929f569deaf370b7c41 476135 stg sc03_107 disc/pac4/SC03_107.bin
+702d5ad36510208176c646c838cfcbd03a167e8d 474088 stg sc03_107 disc/payload/stg/SC03_107.bin
 dc1b24eb089646fe61fb73cb682321cd3937a47f 497999 stg sc03_108 disc/pac4/SC03_108.bin
 8d5618de4268883ab1d4920c273cd8f3a33d96aa 467799 stg sc03_109 disc/pac4/SC03_109.bin
 e25fc57c738635753dfcfafe40478c8882e9df86 500615 stg sc03_110 disc/pac4/SC03_110.bin
@@ -182,3 +182,39 @@ b3b95547ed6830302ae27375b463947b4999dc5e 653791 stg sc07_007 disc/pac4/SC07_007.
 2a6499b6a1d41ddab6aeed5870a313a413cbb99d 507007 stg sc07_009 disc/pac4/SC07_009.bin
 d7b5875d60ea6224d204ca5c4a53c561fdab8200 529391 stg sc07_010 disc/pac4/SC07_010.bin
 9885af7447b5f40e28f2b9e4c114e6a408172fd0 426919 stg sc07_011 disc/pac4/SC07_011.bin
+d270f695b793b5c03db159b7aabcc066daa87eda 2544 blk main_09 disc/payload/blk/main_09.bin
+40274fd794d6bb80bda6b7f560e0da2236f2b9d8 383784 blk main_12 disc/payload/blk/main_12.bin
+8d901b7c4f8692ae9ed9a3ea05ef50ce4544db46 70784 blk sc02_009 disc/payload/blk/sc02_009.bin
+c0848f308342e499e2bd8c2db86f6225a29e1592 6616 blk sc03_053 disc/payload/blk/sc03_053.bin
+06bd73dfbdb10748adcbac7093ead5d76131206a 8220 blk sc03_054 disc/payload/blk/sc03_054.bin
+bc768a6b7baa911e0a0cb9175b33550851d6c1eb 3680 blk sc03_056 disc/payload/blk/sc03_056.bin
+a93e1103ab92da538492e30aec6b7a5424dddeb0 29112 blk sc03_073 disc/payload/blk/sc03_073.bin
+79239e6d7790707896be5ef4a0d52dd76c8d5352 27296 blk sc03_074 disc/payload/blk/sc03_074.bin
+81e1ed0845219f4dcfdbcf6ec86c7c5075ff1097 30792 blk sc03_075 disc/payload/blk/sc03_075.bin
+9a165e368009a79bcc2ebb06bcb13e6da20d460e 43760 blk sc03_076 disc/payload/blk/sc03_076.bin
+0defd06117e72ed2b37d374b570f8ceeb8bb3602 32768 blk sc03_077 disc/payload/blk/sc03_077.bin
+826d524ac558319ee92a3bcb0aef678671fa5cd8 15676 blk sc03_078 disc/payload/blk/sc03_078.bin
+7abdc7d8473fea9426d5516847ab0256a2a6d70c 39340 blk sc03_079 disc/payload/blk/sc03_079.bin
+0b935937df72528c64e4fac893e4df22bd2d9524 29080 blk sc03_132 disc/payload/blk/sc03_132.bin
+c2321d8d19240a2491b985d8e32867978bf19666 27272 blk sc03_133 disc/payload/blk/sc03_133.bin
+20c7aaf833426820b996ca2185124600d95d2cd2 30808 blk sc03_134 disc/payload/blk/sc03_134.bin
+b901fda523c83376bd8b7f1c57104d8e13aef5e4 34828 blk sc03_135 disc/payload/blk/sc03_135.bin
+6983d10467323dfdc3d07e38dd2dc7615eafab32 32712 blk sc03_136 disc/payload/blk/sc03_136.bin
+5f3ee7beec133d3ccd603a1d03dd672c027afd58 15652 blk sc03_137 disc/payload/blk/sc03_137.bin
+05531456ddde6092b6cd309cdd0941ce3b5db5f1 40164 blk sc03_138 disc/payload/blk/sc03_138.bin
+969bfb116ae3a6f2a4d40f5a9459e45f25695314 29120 blk sc04_024 disc/payload/blk/sc04_024.bin
+bcb2a8255f7c503e48a42694afba84ac1b143a72 27312 blk sc04_025 disc/payload/blk/sc04_025.bin
+130bdd7072aeb707478ca59bd9e344e8df374678 30808 blk sc04_026 disc/payload/blk/sc04_026.bin
+5186fd1bba8f70985ba09c708effa36a7856496f 43776 blk sc04_027 disc/payload/blk/sc04_027.bin
+d1b637149e7980537cb673c0bce932e360782cb2 32752 blk sc04_028 disc/payload/blk/sc04_028.bin
+d0d087f7b572fea92d7df891352db904a451d263 15692 blk sc04_029 disc/payload/blk/sc04_029.bin
+991ab24b7d986491b3e4b76b4ad2d08b1c000b35 39356 blk sc04_030 disc/payload/blk/sc04_030.bin
+4feee5f441962f90b626a1836029ecccdbd3ca14 29168 blk sc05_023 disc/payload/blk/sc05_023.bin
+2d4788a75d3ca7e56c69486c98d2c4e84f6e5293 27352 blk sc05_024 disc/payload/blk/sc05_024.bin
+5da3626c2cfcd124b897fe961ea664ae830363fd 30848 blk sc05_025 disc/payload/blk/sc05_025.bin
+806980a45d3fbba57068bf99df72aaca48c32ca5 43816 blk sc05_026 disc/payload/blk/sc05_026.bin
+a509fd1a19d314a2c25f9b4bb520fa657ea35a87 32792 blk sc05_027 disc/payload/blk/sc05_027.bin
+7f89457938ac622a416dea69633ad78e17634591 15732 blk sc05_028 disc/payload/blk/sc05_028.bin
+54715b4f405d283d75276939ace0c6b526e7e3ed 39396 blk sc05_029 disc/payload/blk/sc05_029.bin
+46af79a1ee365a15ea8fdce8b5c9fb4abd355290 345132 blk sc07_003 disc/payload/blk/sc07_003.bin
+87ac0de39029789300e15b7031f54b6ab1dea83c 365152 blk sc07_004 disc/payload/blk/sc07_004.bin

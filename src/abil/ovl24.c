@@ -2,25 +2,25 @@
 #include "abil.h"
 
 extern void func_80147364();
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl24_800CB4FC[];
 extern u8 D_ovl24_800CB4BC[];
 extern AbilStep D_ovl24_800CB458[];
 extern AbilStep D_ovl24_800CB490[];
-void func_ovl24_800CAEC0(u8 *a);
+void Toxin_Start(u8 *a);
 
 void func_ovl24_800CAE0C(void) {
-    func_800183E0(D_ovl24_800CB4FC);
-    func_800183E0(D_ovl24_800CB4BC);
+    QueueImage(D_ovl24_800CB4FC);
+    QueueImage(D_ovl24_800CB4BC);
 }
 
-void func_ovl24_800CAE44(u8 *a) {
+void Toxin_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
     D_ovl24_800CB458[AF(a, u8, 0x197)](a);
 }
 
 void func_ovl24_800CAE88(u8 *a) {
-    func_ovl24_800CAEC0(a);
+    Toxin_Start(a);
     AF(a, u8, 0x197)++;
 }
 
@@ -31,7 +31,7 @@ extern void func_801655E4();
 extern void func_801657A0();
 extern s32 func_80165910();
 
-void func_ovl24_800CAEC0(u8 *arg0) {
+void Toxin_Start(u8 *arg0) {
     func_801657A0();
     if (func_80165910(arg0) == 0) {
         func_801655E4(arg0);
@@ -57,11 +57,11 @@ void func_ovl24_800CAF44(s32 arg0) {
     }
 }
 
-void func_ovl24_800CAF84(void) {
+void Toxin_StopSound(void) {
     func_80147364(4, 0x83f);
 }
 
-extern u8 D_ovl24_800CB51C[];
+extern u8 Toxin_Ring[];
 extern u8 D_ovl24_800CB51D;
 extern u8 D_ovl24_800CB51E;
 extern s32 func_80146C3C();
@@ -73,7 +73,7 @@ extern s8 D_ovl24_800CB522;
 extern void func_ovl24_800CB158();
 extern void func_80146AB4();
 extern s32 func_801465C0();
-extern void func_8001CC3C();
+extern void InitSpriteKind3();
 extern void func_80128EA8();
 extern void func_8001CD9C();
 
@@ -86,7 +86,7 @@ void func_ovl24_800CAFA8(u8 *arg0) {
     if (AF(arg0, s32, 0x2C) & 0x8000) {
         D_ovl24_800CB51E = 0;
         D_ovl24_800CB51D = 0;
-        D_ovl24_800CB51C[0] = 0;
+        Toxin_Ring[0] = 0;
         D_ovl24_800CB522 = 0;
         D_ovl24_800CB521 = 0;
         D_ovl24_800CB520 = 0;
@@ -103,7 +103,7 @@ void func_ovl24_800CAFA8(u8 *arg0) {
         if (o == 0) {
             goto fail;
         }
-        func_8001CC3C(o, &D_ovl24_800CB464, 0, 0);
+        InitSpriteKind3(o, &D_ovl24_800CB464, 0, 0);
         AF(o, s16, 0x18) = 0x6000;
         AF(o, s16, 0x1A) = 0x6000;
         AF(o, u8, 0x27) = 0x19;
@@ -124,14 +124,14 @@ fail:
             return;
         }
         AF(arg0, u8 *, 0x34) = o;
-        func_8001CD9C(o, D_ovl24_800CB51C);
+        func_8001CD9C(o, Toxin_Ring);
         AF(o, u16, 0x2C) = 0x8001;
         AF(o, s32, 4) |= 0xE0000000;
     }
 }
 
 extern u8 D_80078EC1;
-extern void func_800233CC();
+extern void SetShapeCircle();
 
 void func_ovl24_800CB158(u8 *arg0) {
     u8 v;
@@ -141,8 +141,8 @@ void func_ovl24_800CB158(u8 *arg0) {
             v = D_ovl24_800CB51E + 8;
             D_ovl24_800CB51E = v;
             D_ovl24_800CB51D = v;
-            D_ovl24_800CB51C[0] = v;
-            func_800233CC(D_ovl24_800CB51C, 0x24);
+            Toxin_Ring[0] = v;
+            SetShapeCircle(Toxin_Ring, 0x24);
         }
         AF(arg0, s32, 0x1C)++;
     } else {
@@ -150,15 +150,15 @@ void func_ovl24_800CB158(u8 *arg0) {
     }
 }
 
-extern AMtx D_800AE620;
+extern AMtx GsIDMATRIX;
 extern s16 D_80126B5E;
 extern s16 D_80126B62;
 extern s16 D_80126B66;
 extern void func_80128ED8();
 extern void func_8012F14C();
-extern void func_80016714();
+extern void ZeroFill();
 
-void func_ovl24_800CB1EC(u8 *arg0) {
+void Toxin_OrbiterUpdate(u8 *arg0) {
     AVec v;
     AMtx m;
     u8 *mo;
@@ -184,7 +184,7 @@ void func_ovl24_800CB1EC(u8 *arg0) {
         }
         msk = 0x7FFFFFFF;
         AF(mo, s32, 4) &= msk;
-        m = D_800AE620;
+        m = GsIDMATRIX;
         RotMatrixY((k << 5) + AF(arg0, s32, 0x2C), &m);
         v.vx = 0;
         m.t[0] = D_80126B5E;
@@ -206,11 +206,11 @@ void func_ovl24_800CB1EC(u8 *arg0) {
         return;
     }
     if (o != NULL) {
-        func_80016714(o, 0x38);
+        ZeroFill(o, 0x38);
     }
     func_80146C3C(arg0);
 }
 
-void func_ovl24_800CB41C(u8 *a) {
+void Toxin_EffectUpdate(u8 *a) {
     D_ovl24_800CB490[AF(a, u16, 2)](a);
 }

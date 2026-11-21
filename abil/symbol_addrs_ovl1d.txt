@@ -1,6 +1,7 @@
 // Package 0x1D (MAIN.CD entry 23, abil/ovl1d.yaml): ability 6, (6), the cut heal
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+CutHeal_Step2Heal = 0x800CAEF8; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800183E0 = 0x800183E0; // type:func
 func_8014BB24 = 0x8014BB24; // type:func
 func_801599A4 = 0x801599A4; // type:func
 func_80159B3C = 0x80159B3C; // type:func

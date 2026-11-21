@@ -3,9 +3,9 @@
 
 extern s32 func_ovl1c_800CB008();
 extern s32 D_ovl1c_800CBD48;
-extern void func_800183E0();
+extern void QueueImage();
 void func_ovl1c_800CAE0C(void) {
-    func_800183E0(&D_ovl1c_800CBD48);
+    QueueImage(&D_ovl1c_800CBD48);
 }
 
 extern AbilStep D_ovl1c_800CBC90[];
@@ -36,7 +36,7 @@ extern AbilStep D_ovl1c_800CBD0C[];
 extern AbilStep D_ovl1c_800CBD14[];
 extern void func_ovl1c_800CBAA4();
 extern void func_800D22E4();
-extern void func_ovl1c_800CBB38();
+extern void Antidote_DrawSparkle();
 extern void func_ovl1c_800CB3D0();
 extern void func_ovl1c_800CB3F0();
 extern void func_ovl1c_800CB4AC();
@@ -48,7 +48,7 @@ void func_ovl1c_800CAEB0(u8 *arg0) {
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
-void func_ovl1c_800CAEE8(s32 arg0) {
+void Antidote_Cure(s32 arg0) {
     func_8014B2F8();
     func_80146994(0x41, arg0, 0, 0);
     func_80147324(0x836);
@@ -60,7 +60,7 @@ void func_ovl1c_800CAF3C(void) {
 }
 
 extern void func_80147078();
-extern void func_ovl1c_800CAFAC();
+extern void Antidote_KindUpdate();
 extern void func_80154150();
 extern s32 func_80146CA0();
 extern void func_80146E90();
@@ -68,7 +68,7 @@ extern s32 func_8014C050();
 extern void func_80165A20();
 extern s32 D_ovl1c_800CBCCC;
 extern s32 func_800D2294();
-extern void func_800233CC();
+extern void SetShapeCircle();
 
 void func_ovl1c_800CAF44(s32 arg0) {
     func_80147078(arg0, 0x22);
@@ -77,10 +77,10 @@ void func_ovl1c_800CAF44(s32 arg0) {
 
 void func_ovl1c_800CAF78(s32 arg0) {
     func_80147078(arg0, 0x22);
-    func_ovl1c_800CAFAC(arg0);
+    Antidote_KindUpdate(arg0);
 }
 
-void func_ovl1c_800CAFAC(u8 *a) {
+void Antidote_KindUpdate(u8 *a) {
     D_ovl1c_800CBC9C[AF(a, u16, 2)](a);
 }
 
@@ -113,13 +113,13 @@ extern void func_800D23D0();
 
 extern u8 D_ovl1c_800CBCBC;
 extern u8 D_ovl1c_800CBCC4;
-extern void func_80017DC4();
-extern void func_80017DF8();
+extern void SetScaleMatrix();
+extern void RotateMatrixBy();
 extern void func_80149350();
 extern void func_8012F14C();
-extern s32 func_80015954();
+extern s32 SVecToPos();
 
-extern AMtx D_800AE620;
+extern AMtx GsIDMATRIX;
 extern u16 D_80126B5E;
 extern u16 D_80126B62;
 extern u16 D_80126B66;
@@ -132,7 +132,7 @@ extern u8 D_ovl1c_800CBDB6;
 extern s32 func_801465C0();
 extern void func_8001CD50();
 
-extern void func_80017758();
+extern void DrawPrimG4Mtx();
 extern void MulMatrix2();
 
 extern s32 func_8014C088();
@@ -164,7 +164,7 @@ void func_ovl1c_800CB0B8(s32 arg0) {
 void func_ovl1c_800CB104(void) {
 }
 
-void func_ovl1c_800CB10C(u8 *arg0) {
+void Antidote_RingUpdate(u8 *arg0) {
     if (D_80078EC1 != 4) {
         func_ovl1c_800CB3D0();
         return;
@@ -187,7 +187,7 @@ void func_ovl1c_800CB1BC(u8 *arg0) {
         AF(arg0, u8 *, 0x20) = o;
         if (o != 0) {
             func_8001CD9C(o, D_ovl1c_800CBD68);
-            func_800233CC(D_ovl1c_800CBD68, 0x20);
+            SetShapeCircle(D_ovl1c_800CBD68, 0x20);
             AF(o, s16, 0x1A) = 0;
             AF(o, s16, 0x18) = 0;
             AF(o, s32, 4) |= 0x50000000;
@@ -254,14 +254,14 @@ void func_ovl1c_800CB3F0(u8 *arg0) {
     s = AF(arg0, u8 *, 0x4C);
     o = AF(arg0, u8 *, 0x20);
     v.vx = v.vy = v.vz = AF(arg0, u16, 0x62);
-    func_80017DC4(&v, &m);
-    func_80017DF8(o + 0x10, &m);
+    SetScaleMatrix(&v, &m);
+    RotateMatrixBy(o + 0x10, &m);
     func_80149350(s, &D_ovl1c_800CBCBC, &v);
     m.t[0] = v.vx;
     m.t[1] = v.vy;
     m.t[2] = v.vz;
     func_8012F14C(&m, &D_ovl1c_800CBCC4, &v);
-    func_80015954(&v, arg0 + 4);
+    SVecToPos(&v, arg0 + 4);
 }
 
 void func_ovl1c_800CB4AC() {
@@ -294,7 +294,7 @@ void func_ovl1c_800CB550(s32 arg0) {
     temp_v0 = func_800D2294(arg0, (s32) &D_ovl1c_800CBCCC);
     AF(arg0, s32, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_800233CC((s32) &D_ovl1c_800CBCCC, 0x20);
+        SetShapeCircle((s32) &D_ovl1c_800CBCCC, 0x20);
         AF(temp_v0, s32, 4) = (s32) (AF(temp_v0, s32, 4) | 0x50000000);
         func_80146E90(arg0, 8);
         AF(arg0, u16, 2) = (u16) (AF(arg0, u16, 2) + 1);
@@ -342,7 +342,7 @@ void func_ovl1c_800CB68C(u8 *arg0) {
             D_ovl1c_800CBDB6 = 0;
             D_ovl1c_800CBDB5 = 0;
             D_ovl1c_800CBDB4 = 0;
-            func_800233CC(D_ovl1c_800CBDB0, 0x40);
+            SetShapeCircle(D_ovl1c_800CBDB0, 0x40);
             func_8001CD50(o, D_ovl1c_800CBDB0);
             AF(o, u8 *, 0x34) = arg0 + 0x38;
             AF(o, s16, 0x1A) = 0;
@@ -357,7 +357,7 @@ void func_ovl1c_800CB68C(u8 *arg0) {
         v.vx = 0;
         v.vy = 0;
         v.vz = 0x20;
-        m = D_800AE620;
+        m = GsIDMATRIX;
         r = rand();
         RotMatrixY((u32) (r & 0x7F00) >> 3, &m);
         ApplyMatrixSV(&m, &v, &v);
@@ -421,7 +421,7 @@ void func_ovl1c_800CBA30(u8 *arg0) {
         func_800D22E4();
         AF(arg0, u16, 0x16) = (u16) (AF(arg0, u16, 0x16) - 3);
         AF(arg0, s32, 0x30) = (s32) (AF(arg0, s32, 0x30) - 0xE);
-        func_ovl1c_800CBB38(arg0, arg0 + 0x38);
+        Antidote_DrawSparkle(arg0, arg0 + 0x38);
         return;
     }
     func_80146C3C(arg0);
@@ -444,7 +444,7 @@ void func_ovl1c_800CBAA4(u8 *arg0) {
     RotMatrixYXZ(&r, arg0 + 0x38);
 }
 
-void func_ovl1c_800CBB38(u8 *arg0, AMtx *arg1) {
+void Antidote_DrawSparkle(u8 *arg0, AMtx *arg1) {
     APrim s;
     AMtx m;
     AVec r;
@@ -475,17 +475,17 @@ void func_ovl1c_800CBB38(u8 *arg0, AMtx *arg1) {
     s.c[1].g = s.c[2].g = u;
     s.c[0].g = s.c[3].g = s.c[0].b = s.c[3].b = s.c[0].r = s.c[3].r = w;
     r.vx = r.vy = AF(arg0, u16, 0x2C);
-    func_80017DC4(&r, &m);
+    SetScaleMatrix(&r, &m);
     MulMatrix2(arg1, &m);
     m.t[0] = AF(arg0, s16, 6);
     m.t[1] = AF(arg0, s16, 0xA);
     m.t[2] = AF(arg0, s16, 0xE);
-    func_80017758(&s, &m);
+    DrawPrimG4Mtx(&s, &m);
     s.v[0].vx = c;
     s.v[1].vx = s.v[2].vx = 0;
     s.v[3].vx = d;
     s.v[1].vy = a;
     s.v[0].vy = s.v[3].vy = 0;
     s.v[2].vy = b;
-    func_80017758(&s, &m);
+    DrawPrimG4Mtx(&s, &m);
 }

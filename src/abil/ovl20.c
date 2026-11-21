@@ -5,21 +5,21 @@
 extern s32 D_ovl20_800CBB40;
 extern s32 D_ovl20_800CBB38;
 extern void func_80146EC0();
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl20_800CBBB8[];
 extern u8 D_ovl20_800CBB78[];
-extern AbilStep D_ovl20_800CBB10[];
+extern AbilStep Firefly_Steps[];
 void func_ovl20_800CAEC0(u8 *a);
 extern void func_80162CCC();
 
 void func_ovl20_800CAE0C(void) {
-    func_800183E0(D_ovl20_800CBBB8);
-    func_800183E0(D_ovl20_800CBB78);
+    QueueImage(D_ovl20_800CBBB8);
+    QueueImage(D_ovl20_800CBB78);
 }
 
-void func_ovl20_800CAE44(u8 *a) {
+void Firefly_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
-    D_ovl20_800CBB10[AF(a, u8, 0x197)](a);
+    Firefly_Steps[AF(a, u8, 0x197)](a);
 }
 
 void func_ovl20_800CAE88(u8 *a) {
@@ -52,32 +52,32 @@ void func_ovl20_800CAF10(u8 *arg0) {
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
-extern s32 func_ovl20_800CB108();
+extern s32 Firefly_ClearLightTarget();
 extern s32 RotMatrixZ();
 extern s32 SetRotMatrix();
 extern s32 SetTransMatrix();
 
 extern s32 func_8014C168();
-extern void func_80015978();
+extern void PosToSVec();
 extern s32 func_8012EFB8();
 extern s32 func_8014C088();
 extern void func_80165A20();
 extern s32 func_ovl20_800CB8C4();
 
-extern void func_ovl20_800CB098();
+extern void Firefly_SetLightTarget();
 
 extern void func_80146CA0();
-extern void func_ovl20_800CB900();
-extern s32 func_80012F74();
+extern void Firefly_DrawRay();
+extern s32 EaseValueFrac();
 
-extern u8 D_80078E78;
+extern u8 g_Status;
 
-void func_ovl20_800CAF68(u8 *arg0) {
+void Firefly_StepActive(u8 *arg0) {
     u8 *p;
 
-    p = &D_80078E78;
+    p = &g_Status;
     if (func_8014C088(arg0, 0xB) == 0 || AF(arg0, u8, 0xBE) != 0) {
-        func_ovl20_800CB098(arg0);
+        Firefly_SetLightTarget(arg0);
     }
     if (AF(p, s32, 0x50) == 0) {
         func_801466F0(0xB, arg0, 0, 0, 0, 1, 0, 0);
@@ -87,22 +87,22 @@ void func_ovl20_800CAF68(u8 *arg0) {
     }
 }
 
-void func_ovl20_800CB010(s32 arg0) {
+void Firefly_StepEnd(s32 arg0) {
     if (func_8014C088(arg0, 0xB) == 0) {
         AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
         func_80165A20(arg0);
         return;
     }
     if (AF(arg0, u8, 0xBE) != 0) {
-        func_ovl20_800CB108(arg0);
+        Firefly_ClearLightTarget(arg0);
     }
 }
 
 void func_ovl20_800CB078(void) {
-    func_ovl20_800CB108();
+    Firefly_ClearLightTarget();
 }
 
-void func_ovl20_800CB098(s32 arg0) {
+void Firefly_SetLightTarget(s32 arg0) {
     s32 temp_v0;
     s32 temp_v0_2;
 
@@ -117,7 +117,7 @@ void func_ovl20_800CB098(s32 arg0) {
     }
 }
 
-s32 func_ovl20_800CB108(s32 arg0) {
+s32 Firefly_ClearLightTarget(s32 arg0) {
     s32 temp_v0;
 
     temp_v0 = func_8014C168(arg0, 0x15C);
@@ -127,7 +127,7 @@ s32 func_ovl20_800CB108(s32 arg0) {
     return temp_v0;
 }
 
-void func_ovl20_800CB134(u8 *arg0) {
+void Firefly_GlowUpdate(u8 *arg0) {
     if (D_80078EC1 == 0x16) {
         D_ovl20_800CBB24[AF(arg0, u16, 2)]();
         return;
@@ -136,12 +136,12 @@ void func_ovl20_800CB134(u8 *arg0) {
 }
 
 extern u16 D_800B99DA;
-extern void func_80013F3C();
-extern void func_800174DC();
-/* a textured triangle on the stack for func_800174DC: three points, three UV pairs, three colours, the code, the page */
+extern void SetIdentityRot();
+extern void DrawPrimGT3Screen();
+/* a textured triangle on the stack for DrawPrimGT3Screen: three points, three UV pairs, three colours, the code, the page */
 typedef struct { AVec p[3]; u16 uv[6]; s32 c[3]; s32 code; u8 tp; } AFT3;
 
-extern void func_ovl20_800CB5F4();
+extern void Firefly_FollowMusashi();
 
 extern void func_80146E90();
 
@@ -149,7 +149,7 @@ void func_ovl20_800CB190(u8 *arg0) {
     s32 temp_s0;
     s32 t;
 
-    func_ovl20_800CB5F4();
+    Firefly_FollowMusashi();
     if (AF(arg0, s32, 0x50) == 0) {
         temp_s0 = (rand() & 0xF) << 8;
         func_801466F0(0xC, arg0, 0, 0, 0, temp_s0, 0, 0);
@@ -175,47 +175,47 @@ extern u8 D_ovl20_800CBBDF;
 extern s32 func_80146E98();
 extern s32 func_80146578();
 extern void func_8001CD9C();
-extern void func_800233CC();
+extern void SetShapeCircle();
+
+static inline void func_ovl20_800CB278_inline(u8 *arg0, u8 *p, u8 *m) {
+    if (AF(arg0, s32, 0x50) == 0) {
+        p[0] = 0xFF;
+        D_ovl20_800CBBD9 = 0xFF;
+        D_ovl20_800CBBDA = 0xFF;
+        D_ovl20_800CBBDC = 0;
+        D_ovl20_800CBBDD = 0;
+        D_ovl20_800CBBDE = 0xFF;
+        AF(m, s32, 4) |= 0x50000000;
+        return;
+    }
+    p[0] = 0;
+    D_ovl20_800CBBDA = 0xC0;
+    D_ovl20_800CBBD9 = 0;
+    D_ovl20_800CBBDC = 0;
+    D_ovl20_800CBBDD = 0;
+    D_ovl20_800CBBDE = 0x80;
+    AF(m, s32, 4) |= 0x50000000;
+}
 
 void func_ovl20_800CB278(u8 *arg0) {
     u8 *p;
     u8 *o;
-    u8 *m;
     u8 *t;
 
     p = D_ovl20_800CBBD8;
     if (func_80146E98(arg0) != 0) {
         t = (u8 *) func_80146578();
         o = t;
-        m = t;
         AF(arg0, u8 *, 0x20) = t;
         if (o != 0) {
             func_8001CD9C(o, p);
-            func_800233CC(p, 0x80);
-            do { /* MATCH-TRICK: the loop-end note stops cse1 here, so the else arm keeps its own copy m */
-                AF(o, s16, 0x18) = 0;
-                AF(o, s16, 0x1A) = 0;
-            } while (0);
+            SetShapeCircle(p, 0x80);
+            AF(o, s16, 0x18) = 0;
+            AF(o, s16, 0x1A) = 0;
             AF(arg0, s16, 0x60) = 0;
             D_ovl20_800CBBDB = 0;
             D_ovl20_800CBBDF = 0;
-            if (AF(arg0, s32, 0x50) == 0) {
-                p[0] = 0xFF;
-                D_ovl20_800CBBD9 = 0xFF;
-                D_ovl20_800CBBDA = 0xFF;
-                D_ovl20_800CBBDC = 0;
-                D_ovl20_800CBBDD = 0;
-                D_ovl20_800CBBDE = 0xFF;
-                AF(o, s32, 4) |= 0x50000000;
-            } else {
-                p[0] = 0;
-                D_ovl20_800CBBDA = 0xC0;
-                D_ovl20_800CBBD9 = 0;
-                D_ovl20_800CBBDC = 0;
-                D_ovl20_800CBBDD = 0;
-                D_ovl20_800CBBDE = 0x80;
-                AF(m, s32, 4) |= 0x50000000;
-            }
+            func_ovl20_800CB278_inline(arg0, p, o);
             func_80146CA0(arg0);
             return;
         }
@@ -230,7 +230,7 @@ void func_ovl20_800CB3C0(u8 *arg0) {
     u8 *p;
 
     temp_s0 = AF(arg0, void *, 0x20);
-    func_ovl20_800CB5F4(arg0);
+    Firefly_FollowMusashi(arg0);
     if (AF(arg0, s32, 0x50) != 0) {
         AF(temp_s0, u16, 0x1E) = (u16) (AF(temp_s0, u16, 0x1E) + 0x100);
     }
@@ -255,13 +255,13 @@ void func_ovl20_800CB470(u8 *arg0) {
 
     p = D_ovl20_800CBBD8;
     m = AF(arg0, u8 *, 0x20);
-    func_ovl20_800CB5F4(arg0);
-    p[0] = func_80012F74(p[0], 0, 0xA, 1);
-    D_ovl20_800CBBD9 = func_80012F74(D_ovl20_800CBBD9, 0, 0xA, 1);
-    D_ovl20_800CBBDA = func_80012F74(D_ovl20_800CBBDA, 0, 0xA, 1);
-    D_ovl20_800CBBDC = func_80012F74(D_ovl20_800CBBDC, 0, 0xA, 1);
-    D_ovl20_800CBBDD = func_80012F74(D_ovl20_800CBBDD, 0, 0xA, 1);
-    D_ovl20_800CBBDE = func_80012F74(D_ovl20_800CBBDE, 0, 0xA, 1);
+    Firefly_FollowMusashi(arg0);
+    p[0] = EaseValueFrac(p[0], 0, 0xA, 1);
+    D_ovl20_800CBBD9 = EaseValueFrac(D_ovl20_800CBBD9, 0, 0xA, 1);
+    D_ovl20_800CBBDA = EaseValueFrac(D_ovl20_800CBBDA, 0, 0xA, 1);
+    D_ovl20_800CBBDC = EaseValueFrac(D_ovl20_800CBBDC, 0, 0xA, 1);
+    D_ovl20_800CBBDD = EaseValueFrac(D_ovl20_800CBBDD, 0, 0xA, 1);
+    D_ovl20_800CBBDE = EaseValueFrac(D_ovl20_800CBBDE, 0, 0xA, 1);
     if (AF(arg0, s32, 0x50) != 0) {
         t = AF(m, u16, 0x1E) + 0x20;
         AF(m, u16, 0x1E) = t;
@@ -278,11 +278,11 @@ void func_ovl20_800CB5D4(void) {
     func_80162CCC();
 }
 
-void func_ovl20_800CB5F4(u8 *a) {
+void Firefly_FollowMusashi(u8 *a) {
     func_80146EC0(*(s32 *)(a + 0x4c), (a + 0x4), &D_ovl20_800CBB40, &D_ovl20_800CBB38);
 }
 
-void func_ovl20_800CB62C(u8 *arg0) {
+void Firefly_RayUpdate(u8 *arg0) {
     if (D_80078EC1 == 0x16) {
         D_ovl20_800CBB48[AF(arg0, u16, 2)]();
         return;
@@ -323,19 +323,19 @@ void func_ovl20_800CB6E8(u8 *arg0) {
     }
     AF(arg0, u16, 0x18) += 0xB;
     func_ovl20_800CB8C4(arg0, &sp20);
-    func_ovl20_800CB900(arg0, &sp20, arg0 + 0x10, arg0 + 0x14, arg0 + 0x58, arg0 + 0x5C, arg0 + 0x18);
+    Firefly_DrawRay(arg0, &sp20, arg0 + 0x10, arg0 + 0x14, arg0 + 0x58, arg0 + 0x5C, arg0 + 0x18);
 }
 
 void func_ovl20_800CB77C(u8 *arg0) {
     s32 sp20;
 
     AF(arg0, u16, 0x14) = (u16) (AF(arg0, u16, 0x14) + 8);
-    AF(arg0, u8, 0x58) = func_80012F74((s32) AF(arg0, u8, 0x58), 0, 0xA, 1);
-    AF(arg0, u8, 0x59) = func_80012F74((s32) AF(arg0, u8, 0x59), 0, 0xA, 1);
-    AF(arg0, u8, 0x5A) = func_80012F74((s32) AF(arg0, u8, 0x5A), 0, 0xA, 1);
-    AF(arg0, u8, 0x5C) = func_80012F74((s32) AF(arg0, u8, 0x5C), 0, 0xA, 1);
-    AF(arg0, u8, 0x5D) = func_80012F74((s32) AF(arg0, u8, 0x5D), 0, 0xA, 1);
-    AF(arg0, u8, 0x5E) = func_80012F74((s32) AF(arg0, u8, 0x5E), 0, 0xA, 1);
+    AF(arg0, u8, 0x58) = EaseValueFrac((s32) AF(arg0, u8, 0x58), 0, 0xA, 1);
+    AF(arg0, u8, 0x59) = EaseValueFrac((s32) AF(arg0, u8, 0x59), 0, 0xA, 1);
+    AF(arg0, u8, 0x5A) = EaseValueFrac((s32) AF(arg0, u8, 0x5A), 0, 0xA, 1);
+    AF(arg0, u8, 0x5C) = EaseValueFrac((s32) AF(arg0, u8, 0x5C), 0, 0xA, 1);
+    AF(arg0, u8, 0x5D) = EaseValueFrac((s32) AF(arg0, u8, 0x5D), 0, 0xA, 1);
+    AF(arg0, u8, 0x5E) = EaseValueFrac((s32) AF(arg0, u8, 0x5E), 0, 0xA, 1);
     if (AF(arg0, s32, 0x58) == 0) {
         if (AF(arg0, s32, 0x5C) == 0) {
             func_80146CA0((s32) arg0);
@@ -343,7 +343,7 @@ void func_ovl20_800CB77C(u8 *arg0) {
     }
     AF(arg0, u16, 0x18) = (u16) (AF(arg0, u16, 0x18) + 0x2D);
     func_ovl20_800CB8C4((s32) arg0, (s32) &sp20);
-    func_ovl20_800CB900((s32) arg0, (s32) &sp20, (s32) (arg0 + 0x10), (s32) (arg0 + 0x14), /* extra? */ (arg0 + 0x58), /* extra? */ (arg0 + 0x5C), /* extra? */ (arg0 + 0x18));
+    Firefly_DrawRay((s32) arg0, (s32) &sp20, (s32) (arg0 + 0x10), (s32) (arg0 + 0x14), /* extra? */ (arg0 + 0x58), /* extra? */ (arg0 + 0x5C), /* extra? */ (arg0 + 0x18));
 }
 
 void func_ovl20_800CB8A4(void) {
@@ -351,11 +351,11 @@ void func_ovl20_800CB8A4(void) {
 }
 
 s32 func_ovl20_800CB8C4(s32 arg0, s32 arg1) {
-    func_80015978(AF(arg0, s32, 0x4C) + 4, arg1);
+    PosToSVec(AF(arg0, s32, 0x4C) + 4, arg1);
     return func_8012EFB8(arg1, arg1);
 }
 
-void func_ovl20_800CB900(u8 *arg0, s16 *pos, u16 *a, u16 *b, s32 *c1, s32 *c2, s16 *ang) {
+void Firefly_DrawRay(u8 *arg0, s16 *pos, u16 *a, u16 *b, s32 *c1, s32 *c2, s16 *ang) {
     AFT3 s;
     AVec v[3];
     AMtx m;
@@ -364,7 +364,7 @@ void func_ovl20_800CB900(u8 *arg0, s16 *pos, u16 *a, u16 *b, s32 *c1, s32 *c2, s
     s32 w;
     s32 y;
 
-    func_80013F3C(&m);
+    SetIdentityRot(&m);
     RotMatrixZ(*ang, &m);
     m.t[0] = pos[0];
     m.t[1] = pos[1];
@@ -405,5 +405,5 @@ void func_ovl20_800CB900(u8 *arg0, s16 *pos, u16 *a, u16 *b, s32 *c1, s32 *c2, s
     y = x + 0x6BF;
     s.uv[2] = y;
     s.uv[4] = y;
-    func_800174DC(ps);
+    DrawPrimGT3Screen(ps);
 }

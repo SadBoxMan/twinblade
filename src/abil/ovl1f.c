@@ -2,27 +2,27 @@
 #include "abil.h"
 
 extern u8 D_80126C16;
-extern void func_ovl1f_800CBBF8();
-extern void func_800183E0();
+extern void Bowl_KillGauges();
+extern void QueueImage();
 extern u8 D_ovl1f_800CC6A4[];
 extern u8 D_ovl1f_800CC6E4[];
 extern u8 D_ovl1f_800CBF64[];
-extern AbilStep D_ovl1f_800CBE7C[];
-void func_ovl1f_800CAED8(u8 *arg0);
+extern AbilStep Bowl_Steps[];
+void Bowl_Start(u8 *arg0);
 
-void func_ovl1f_800CAE14(void) {
-    func_800183E0(D_ovl1f_800CC6A4);
-    func_800183E0(D_ovl1f_800CC6E4);
-    func_800183E0(D_ovl1f_800CBF64);
+void Bowl_QueueImages(void) {
+    QueueImage(D_ovl1f_800CC6A4);
+    QueueImage(D_ovl1f_800CC6E4);
+    QueueImage(D_ovl1f_800CBF64);
 }
 
-void func_ovl1f_800CAE5C(u8 *a) {
+void Bowl_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
-    D_ovl1f_800CBE7C[AF(a, u8, 0x197)](a);
+    Bowl_Steps[AF(a, u8, 0x197)](a);
 }
 
 void func_ovl1f_800CAEA0(u8 *a) {
-    func_ovl1f_800CAED8(a);
+    Bowl_Start(a);
     AF(a, u8, 0x197)++;
 }
 
@@ -32,31 +32,31 @@ extern void func_80147364();
 extern void func_80162CCC();
 extern void func_8016634C();
 extern s32 func_80146E98();
-extern void func_ovl1f_800CBBA0();
+extern void Bowl_CloseGauge();
 extern void func_801599A4();
 extern void func_80159B3C();
 extern void func_80147324();
 extern u8 D_80078EC1;
-extern AbilStep D_ovl1f_800CBF2C[];
+extern AbilStep Bowl_GaugeStates[];
 extern void func_801466F0();
-extern void func_8001CB00();
+extern void InitSpriteKind1();
 extern void func_ovl1f_800CBB50();
 extern s32 D_ovl1f_800CBF20;
-extern void func_ovl1f_800CB6CC();
-extern void func_ovl1f_800CB028();
-extern void func_8001CBDC();
+extern void Bowl_BallDelete();
+extern void Bowl_Release();
+extern void InitSpriteKind0();
 extern void func_8001CA1C();
 extern s32 func_8014659C();
 extern void func_80146DE8();
 extern void func_80149374();
 extern void func_ovl1f_800CB758();
 extern s32 D_ovl1f_800CBE98;
-extern void func_8001CEC0();
+extern void InitSpriteKindA();
 extern s32 func_80146578();
 extern s32 D_ovl1f_800CBECC;
 
 extern void func_801466B4();
-extern void func_ovl1f_800CBB70();
+extern void Bowl_SpawnGauge();
 
 extern s32 func_80148800();
 
@@ -65,15 +65,15 @@ extern u8 D_8011F9D0[];
 extern s32 func_8014C088();
 extern void func_80146C98();
 
-extern void func_80016714();
+extern void ZeroFill();
 
 extern u8 D_ovl1f_800CBD2C;
 extern void func_80154274();
 extern void func_801655E4();
 
-void func_ovl1f_800CAED8(u8 *arg0) {
+void Bowl_Start(u8 *arg0) {
     func_80154274(arg0, &D_ovl1f_800CBD2C);
-    func_ovl1f_800CBB70(arg0);
+    Bowl_SpawnGauge(arg0);
     AF(arg0, u8, 0xBF) = 0;
     AF(arg0, u8, 0xBE) = 0;
     func_801655E4(arg0);
@@ -87,7 +87,7 @@ void func_ovl1f_800CAF3C(u8 *arg0) {
     }
 }
 
-void func_ovl1f_800CAF7C(u8 *arg0) {
+void Bowl_StepCharge(u8 *arg0) {
     if (func_80148800(arg0) & 0x20) {
         goto call;
     }
@@ -101,7 +101,7 @@ void func_ovl1f_800CAF7C(u8 *arg0) {
     case 1:
         if (AF(arg0, u8, 0xBE) == 0) {
     call:
-            func_ovl1f_800CB028(arg0);
+            Bowl_Release(arg0);
         } else {
             AF(arg0, u8, 0xBE) -= 4;
         }
@@ -109,13 +109,13 @@ void func_ovl1f_800CAF7C(u8 *arg0) {
     }
 }
 
-void func_ovl1f_800CB028(u8 *arg0) {
+void Bowl_Release(u8 *arg0) {
     AF(arg0, u16, 0xB8) = (u16) AF(arg0, u16, 0xBA);
-    func_ovl1f_800CBBA0();
+    Bowl_CloseGauge();
     AF(arg0, u8, 0x197) = (u8) (AF(arg0, u8, 0x197) + 1);
 }
 
-void func_ovl1f_800CB068(u8 *arg0) {
+void Bowl_StepThrow(u8 *arg0) {
     u16 temp_v1;
 
     temp_v1 = AF(arg0, u16, 0xB8);
@@ -129,7 +129,7 @@ void func_ovl1f_800CB068(u8 *arg0) {
     }
 }
 
-void func_ovl1f_800CB0E4(u8 *arg0) {
+void Bowl_StepWaitBall(u8 *arg0) {
     u8 *p;
 
     for (p = D_8011F9D0; p < D_8011F9D0 + 0x820; p += 0x68) {
@@ -149,29 +149,29 @@ void func_ovl1f_800CB138(u8 *arg0) {
 }
 
 void func_ovl1f_800CB180(void) {
-    func_ovl1f_800CBBF8();
+    Bowl_KillGauges();
 }
 
-extern AbilStep D_ovl1f_800CBEBC[];
-extern s32 func_ovl1f_800CB7B0();
+extern AbilStep Bowl_BallStates[];
+extern s32 Bowl_IsOffScreen();
 
-void func_ovl1f_800CB1A0(u8 *arg0) {
+void Bowl_BallUpdate(u8 *arg0) {
     s32 pad[2];
 
     if (D_80078EC1 != 0xF) {
-        func_ovl1f_800CB6CC(arg0);
+        Bowl_BallDelete(arg0);
         return;
     }
-    D_ovl1f_800CBEBC[AF(arg0, u16, 2)](arg0);
-    if ((AF(arg0, u16, 0) != 0) && (func_ovl1f_800CB7B0(arg0) != 0)) {
+    Bowl_BallStates[AF(arg0, u16, 2)](arg0);
+    if ((AF(arg0, u16, 0) != 0) && (Bowl_IsOffScreen(arg0) != 0)) {
         func_80147364(4, 0x649);
     }
     if (AF(arg0, s16, 0xA) > 0x400) {
-        func_ovl1f_800CB6CC(arg0);
+        Bowl_BallDelete(arg0);
     }
 }
 
-void func_ovl1f_800CB23C(u8 *arg0) {
+void Bowl_BallInit(u8 *arg0) {
     void *temp_s1;
     void *temp_v0;
 
@@ -190,10 +190,10 @@ void func_ovl1f_800CB23C(u8 *arg0) {
         func_80146CA0(arg0);
         return;
     }
-    func_ovl1f_800CB6CC(arg0);
+    Bowl_BallDelete(arg0);
 }
 
-extern void func_80015978();
+extern void PosToSVec();
 extern s32 func_8012EFB8();
 
 extern AVec D_ovl1f_800CAE0C;
@@ -207,10 +207,10 @@ extern s16 D_80126B18;
 extern s16 D_80126B1A;
 extern s16 D_80126B1C;
 extern s32 D_801151D8;
-extern void func_80013F3C();
-extern void func_800126C4();
-extern void func_800123F0();
-extern void func_80012558();
+extern void SetIdentityRot();
+extern void RotateMatrixX();
+extern void RotateMatrixZ();
+extern void RotateMatrixY();
 extern void func_80163194();
 extern void func_80162FC0();
 extern s32 func_80163950();
@@ -218,10 +218,10 @@ extern void func_8016345C();
 extern void func_80163328();
 extern s32 func_801633A8();
 extern void StartRumbleScript();
-extern void func_80013E94();
+extern void PackAngles10();
 extern s32 func_80146A6C();
 extern s32 func_801632E0();
-extern void func_ovl1f_800CB760();
+extern void Bowl_PlaySoundOnce();
 extern s32 func_8016380C();
 
 void func_ovl1f_800CB300(u8 *arg0) {
@@ -243,10 +243,10 @@ void func_ovl1f_800CB300(u8 *arg0) {
     if (func_80146E98(arg0) != 0) {
         goto kill;
     }
-    func_80013F3C(&m);
-    func_800126C4(&m, AF(mo, s16, 0x10));
-    func_800123F0(&m, AF(mo, s16, 0x14));
-    func_80012558(&m, AF(mo, s16, 0x12));
+    SetIdentityRot(&m);
+    RotateMatrixX(&m, AF(mo, s16, 0x10));
+    RotateMatrixZ(&m, AF(mo, s16, 0x14));
+    RotateMatrixY(&m, AF(mo, s16, 0x12));
     AF(mo, AMtx, 0x34) = m;
     AF(mo, u16, 0x2C) |= 1;
     func_80163194(arg0, -(((AF(arg0, s32, 0x50) - 0x28) << 14) / 40), 0, 0, &m);
@@ -267,26 +267,26 @@ void func_ovl1f_800CB300(u8 *arg0) {
     switch (u) {
     case 1:
         StartRumbleScript(&D_ovl1f_800CBEB0);
-        func_80013E94(&D_80114EB0, &w);
+        PackAngles10(&D_80114EB0, &w);
         w |= 0x80000000;
         func_80146A6C(0x1F, arg0, D_80126B18, D_80126B1A, D_80126B1C, w, 0);
         o = (u16 *) func_801632E0(arg0);
         if (o == NULL) {
             break;
         }
-        if (func_ovl1f_800CB7B0(arg0) != 0) {
+        if (Bowl_IsOffScreen(arg0) != 0) {
             break;
         }
         if (*o == 0x151) {
-            func_ovl1f_800CB760(arg0, 0x7B3);
+            Bowl_PlaySoundOnce(arg0, 0x7B3);
         } else {
-            func_ovl1f_800CB760(arg0, 0x648);
+            Bowl_PlaySoundOnce(arg0, 0x648);
         }
         break;
     case 2:
         break;
     case 4:
-        func_80013E94(&D_80114EC8, &w);
+        PackAngles10(&D_80114EC8, &w);
         w |= 0x80000000;
         func_80146A6C(7, arg0, D_80126B18, D_80126B1A, D_80126B1C, w, 0);
         goto kill;
@@ -299,8 +299,8 @@ void func_ovl1f_800CB300(u8 *arg0) {
         return;
     }
     if (AF(&b, u8, 6) == 0x19) {
-        if (D_801151D8 != 0 && func_ovl1f_800CB7B0(arg0) == 0) {
-            func_ovl1f_800CB760(arg0, 0x6DE);
+        if (D_801151D8 != 0 && Bowl_IsOffScreen(arg0) == 0) {
+            Bowl_PlaySoundOnce(arg0, 0x6DE);
         }
         goto kill;
     }
@@ -316,7 +316,7 @@ kill:
     func_80146CA0(arg0);
 }
 
-void func_ovl1f_800CB6CC(s32 arg0) {
+void Bowl_BallDelete(s32 arg0) {
     func_8016634C();
     func_80147364(4, 0x649);
     func_80162CCC(arg0);
@@ -334,7 +334,7 @@ void func_ovl1f_800CB758(u8 *a) {
     *(s16 *)(a + 0x60) = 0;
 }
 
-void func_ovl1f_800CB760(u8 *arg0, s32 arg1) {
+void Bowl_PlaySoundOnce(u8 *arg0, s32 arg1) {
     s16 t = arg1;
 
     if (AF(arg0, s16, 0x60) != t) {
@@ -343,11 +343,11 @@ void func_ovl1f_800CB760(u8 *arg0, s32 arg1) {
     }
 }
 
-s32 func_ovl1f_800CB7B0(u8 *arg0) {
+s32 Bowl_IsOffScreen(u8 *arg0) {
     s16 v[4];
     s32 x;
 
-    func_80015978(arg0 + 4, v);
+    PosToSVec(arg0 + 4, v);
     if (func_8012EFB8(v, v) & ~0x1000) {
         return 1;
     }
@@ -373,12 +373,12 @@ s32 func_ovl1f_800CB7B0(u8 *arg0) {
     return x;
 }
 
-void func_ovl1f_800CB848(u8 *arg0) {
+void Bowl_GaugeUpdate(u8 *arg0) {
     if (D_80078EC1 != 0xF) {
-        func_ovl1f_800CBBF8();
+        Bowl_KillGauges();
         return;
     }
-    D_ovl1f_800CBF2C[AF(arg0, u16, 2)]();
+    Bowl_GaugeStates[AF(arg0, u16, 2)]();
 }
 
 void func_ovl1f_800CB8A4(u8 *arg0) {
@@ -390,7 +390,7 @@ void func_ovl1f_800CB8A4(u8 *arg0) {
     temp_v0 = func_80146578();
     if (temp_v0 != NULL) {
         AF(arg0, void *, 0x20) = temp_v0;
-        func_8001CEC0(temp_v0, &D_ovl1f_800CBECC);
+        InitSpriteKindA(temp_v0, &D_ovl1f_800CBECC);
         AF(temp_v0, s16, 0x2C) = 1;
         AF(temp_v0, s32, 4) = (s32) (AF(temp_v0, s32, 4) | 0x80000000);
         AF(arg0, s16, 6) = -0x28;
@@ -398,7 +398,7 @@ void func_ovl1f_800CB8A4(u8 *arg0) {
         temp_v0_2 = func_80146578();
         if (temp_v0_2 != NULL) {
             AF(arg0, void *, 0x10) = temp_v0_2;
-            func_8001CB00(temp_v0_2, &D_ovl1f_800CBF20, 0x1A0, 0x170);
+            InitSpriteKind1(temp_v0_2, &D_ovl1f_800CBF20, 0x1A0, 0x170);
             func_ovl1f_800CBB50(temp_v0_2);
             AF(temp_v0_2, s16, 0x18) = 0;
             func_80146E90(arg0, 6);
@@ -415,7 +415,7 @@ void func_ovl1f_800CB968(u8 *arg0) {
     temp_s0 = AF(arg0, void *, 0x10);
     if (func_80146E98() != 0) {
         if (temp_s0 != NULL) {
-            func_8001CBDC(temp_s0, &D_ovl1f_800CBF20, 0x1A0, 0x170);
+            InitSpriteKind0(temp_s0, &D_ovl1f_800CBF20, 0x1A0, 0x170);
             func_ovl1f_800CBB50(temp_s0);
             AF(temp_s2, s32, 4) = (s32) (AF(temp_s2, s32, 4) & 0x7FFFFFFF);
         }
@@ -444,7 +444,7 @@ void func_ovl1f_800CBA60(u8 *arg0) {
     temp_s0 = AF(arg0, s32, 0x10);
     if (func_80146E98() != 0) {
         if (temp_s0 != 0) {
-            func_8001CB00(temp_s0, &D_ovl1f_800CBF20, 0x1A0, 0x170);
+            InitSpriteKind1(temp_s0, &D_ovl1f_800CBF20, 0x1A0, 0x170);
             func_ovl1f_800CBB50(temp_s0);
         }
         AF(temp_s2, s32, 4) = (s32) (AF(temp_s2, s32, 4) | 0x80000000);
@@ -458,7 +458,7 @@ void func_ovl1f_800CBAF4(u8 *arg0) {
 
     temp_s0 = AF(arg0, void *, 0x10);
     if (func_80146E98() != 0) {
-        func_ovl1f_800CBBF8();
+        Bowl_KillGauges();
         return;
     }
     if (temp_s0 != NULL) {
@@ -473,11 +473,11 @@ void func_ovl1f_800CBB50(u8 *a) {
     *(s16 *)(a + 0xa) = 0xffffffc0;
 }
 
-void func_ovl1f_800CBB70(s32 arg0) {
+void Bowl_SpawnGauge(s32 arg0) {
     func_801466B4(0x27, arg0, 0, 0, 0);
 }
 
-void func_ovl1f_800CBBA0(u8 *arg0) {
+void Bowl_CloseGauge(u8 *arg0) {
     u8 *v;
 
     v = func_8014C088(arg0, 0x27);
@@ -485,18 +485,18 @@ void func_ovl1f_800CBBA0(u8 *arg0) {
         if (AF(v, u16, 2) >= 2) {
             func_80146C98(v, 3);
         } else {
-            func_ovl1f_800CBBF8(v);
+            Bowl_KillGauges(v);
         }
     }
 }
 
-void func_ovl1f_800CBBF8() {
+void Bowl_KillGauges() {
     u8 *p;
 
     for (p = D_8011F9D0; p < D_8011F9D0 + 0x820; p += 0x68) {
         if (AF(p, u16, 0) == 0x27) {
             if (AF(p, s32, 0x10) != 0) {
-                func_80016714(AF(p, s32, 0x10), 0x38);
+                ZeroFill(AF(p, s32, 0x10), 0x38);
             }
             func_80162CCC(p);
         }

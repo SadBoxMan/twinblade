@@ -1,16 +1,24 @@
 // Stage SC03_012 (stg/sc03_012.yaml): names given by hand first
+// ---- r379 naming batch (stage; docs/names_merged/r379_plan.csv)
+RoomEntrySetProgress = 0x8017D548; // type:func
+QuakeSceneInit = 0x8017D8CC; // type:func
+QuakeSceneShake1 = 0x8017DA80; // type:func
+QuakeSceneShake2 = 0x8017DB28; // type:func
+QuakeSceneEnd = 0x8017DE18; // type:func
+// r379: engine data names (symbol_addrs_stage.txt has the village's)
+g_CameraProj = 0x80126950;
 // Outside symbols (the EXE and its bss: from the first splat pass, plain names)
-func_800167B8 = 0x800167B8; // type:func
-func_800167F0 = 0x800167F0; // type:func
-func_8001BFD0 = 0x8001BFD0; // type:func
-func_8001C214 = 0x8001C214; // type:func
-func_8001D0E8 = 0x8001D0E8; // type:func
-func_80029124 = 0x80029124; // type:func
-func_800291A0 = 0x800291A0; // type:func
-func_800291B4 = 0x800291B4; // type:func
-func_80029504 = 0x80029504; // type:func
-func_80029514 = 0x80029514; // type:func
-func_8002D4C8 = 0x8002D4C8; // type:func
+StartFade = 0x800167B8; // type:func
+FadeStep = 0x800167F0; // type:func
+ClearTimeChime = 0x8001BFD0; // type:func
+InitModel = 0x8001C214; // type:func
+SetModelCullBox = 0x8001D0E8; // type:func
+SetFlag = 0x80029124; // type:func
+SetVar = 0x800291A0; // type:func
+GetVar = 0x800291B4; // type:func
+GetProgress = 0x80029504; // type:func
+SetProgress = 0x80029514; // type:func
+PlaySoundId = 0x8002D4C8; // type:func
 g_PrimNext = 0x800A5E60;
 g_WorldOtTable = 0x800A6610;
 D_800B99D8 = 0x800B99D8;
@@ -21,7 +29,6 @@ func_800D1E28 = 0x800D1E28; // type:func
 func_800D1EBC = 0x800D1EBC; // type:func
 D_800D387C = 0x800D387C;
 D_800D3888 = 0x800D3888;
-D_80126950 = 0x80126950;
 D_80126984 = 0x80126984;
 D_80126988 = 0x80126988;
 D_8012698C = 0x8012698C;

@@ -5,31 +5,31 @@
 #include "gte.h"
 #define AF(p, T, off) (*(T *)((u8 *)(p) + (off)))
 
-extern s32 func_80029178(s32 n);
+extern s32 GetFlag(s32 n);
 #define PARTS(a) (*(s32 *)(*(u8 **)((a) + 0x20) + 0x24))
 
 extern s16 D_80078E96;
 extern s16 D_80078E9E;
 extern s16 D_80078EA6;
 extern u8 D_800D8D10[];
-extern void func_800183E0(s32 w);
+extern void QueueImage(s32 w);
 
-void func_80128288(void);
+void StageStep(void);
 
-void func_80128158(void) {
-    func_80128288();
+void StageMain(void) {
+    StageStep();
 }
 
 typedef struct { s32 unk0; u8 *unk4; } LoadParam;   /* the loader's fifth argument (as ovl38's) */
-extern LoadParam D_800C7C60;
-extern u8 D_800A2E20[];
+extern LoadParam g_SoundLoadTable;
+extern u8 g_SoundLoadBuf[];
 extern s32 D_801EBC68;          /* where the stage's extra loads go */
 extern s32 D_800AF558[];        /* archive file locations (g_ArchiveFileLoc entries) */
 extern s32 D_800AF560[];
 extern s32 D_800AECB0[];
 extern s32 D_800AECB8[];
 extern s32 D_800AEFD0[];
-extern s32 func_8001ABBC(s32 kind, s32 id, s32 *file, s32 dest, LoadParam *param);
+extern s32 RequestLoad(s32 kind, s32 id, s32 *file, s32 dest, LoadParam *param);
 extern u16 D_800B99F6;          /* Work +0xA3C6: the stage step */
 extern s16 D_800B9A08;          /* Work +0xA3D8: the map id */
 extern u8 D_800B9A10;
@@ -43,12 +43,12 @@ extern void NextGameStateStep(void);
 extern void DemoReset(void);
 extern void NextGameState(void);
 extern void ModeGoTrialEnd(void);
-extern void func_80015310(void);
-extern void func_8001C0C8(void);
-extern void func_800285AC(void);
-extern void func_8002AEF8(void);
-extern s32 func_80029504(void);
-extern void func_8002D4C8(s32 a, s32 b);
+extern void ClearDebugText(void);
+extern void ClearObjectPoolsAlt(void);
+extern void DisableFog(void);
+extern void ClearSaveRequest(void);
+extern s32 GetProgress(void);
+extern void PlaySoundId(s32 a, s32 b);
 extern s32 func_800CF854(void);
 extern void func_800CFBBC(void);
 extern s32 func_800D0588(void);
@@ -59,20 +59,20 @@ void func_80128678(void);
 void func_80128714(void);
 void func_80128A28(void);
 void func_80128AF4(void);
-void func_80128C14(void);
-void func_80129220(void);
-void func_80129258(void);
-void func_80129C40(s32 a);
-void func_8013C98C(void);
+void SetMapOtDepth(void);
+void InitProps(void);
+void ClearProps(void);
+void InitCameras(s32 a);
+void InitCameraShake(void);
 void func_8013E558(void);
 void func_8013E67C(void);
-void func_80144B9C(void);
+void LoadRoom(void);
 void func_80145CEC(void);
 void func_80146074(void);
-void func_8016E8F0(void);
+void ClearHudSlots(void);
 void func_80175308(void);
 void func_80175494(void);
-void func_801378F0(void);
+void InitMessages(void);
 void func_80178608(void);
 s32 func_801288B0(void);
 s32 func_801288E8(void);
@@ -100,7 +100,7 @@ void func_801281F8(void) {
     func_8013E558();
 }
 
-s32 func_80128218(void) {
+s32 GetStageLoadAddr(void) {
     return D_801EBC68;
 }
 
@@ -117,7 +117,7 @@ void func_80128268(void) {
 }
 
 /* the stage's step: one handler per stage step (0-8) */
-void func_80128288(void) {
+void StageStep(void) {
     if (D_800B99F6 < 9) {
         D_8018D7A4[D_800B99F6]();
     }
@@ -128,16 +128,16 @@ void func_801282CC(void) {
 }
 
 void func_801282EC(void) {
-    func_8001C0C8();
-    func_80015310();
-    func_80129258();
-    func_801378F0();
+    ClearObjectPoolsAlt();
+    ClearDebugText();
+    ClearProps();
+    InitMessages();
     ModeGoTrialEnd();
 }
 
 /* a few maps load an extra file before the stage goes on */
-void func_8012832C(void) {
-    s32 t = func_80029504();
+void LoadMapExtras(void) {
+    s32 t = GetProgress();
     s32 r;
     switch (D_800B9A08) {
     case 0x300E:
@@ -155,7 +155,7 @@ void func_8012832C(void) {
         }
         break;
     case 0x3014:
-        if (t != 0x4B0 || (func_80029178(0x138) & 0xFF) != 0) {
+        if (t != 0x4B0 || (GetFlag(0x138) & 0xFF) != 0) {
             r = 1;
         } else {
             r = func_801288B0();
@@ -170,35 +170,35 @@ void func_8012832C(void) {
     }
 }
 
-void func_80128420(void) {
-    func_80129220();
-    func_801378F0();
+void StageStart(void) {
+    InitProps();
+    InitMessages();
     DemoReset();
-    func_80128C14();
-    func_8002AEF8();
+    SetMapOtDepth();
+    ClearSaveRequest();
     func_800CFBBC();
-    func_80015310();
-    func_800285AC();
+    ClearDebugText();
+    DisableFog();
     D_800B9A17 = 0;
     D_800B9A10 = 0;
-    func_8013C98C();
-    func_80129C40(0);
+    InitCameraShake();
+    InitCameras(0);
     func_800D0630();
     func_80145CEC();
-    func_80144B9C();
+    LoadRoom();
     NextGameStateStep();
 }
 
 void func_801284B8(void) {
     if (func_800D0588() != 0) {
-        func_80015310();
+        ClearDebugText();
         NextGameStateStep();
     }
 }
 
 void func_801284F0(void) {
     func_80175308();
-    func_8016E8F0();
+    ClearHudSlots();
     if (D_800B9A64 != 0) {
         func_80175494();
     }
@@ -215,13 +215,13 @@ void func_80128564(void) {
     func_80178608();
     ResetSpadStack();
     if (D_800B9A08 == 0x300A) {
-        func_8002D4C8(6, 0);
+        PlaySoundId(6, 0);
     }
     NextGameState();
     D_800B99F2 = 1;
 }
 
-void func_801285D4(void) {
+void ClearWorkA3E1(void) {
     D_800B9A11 = 0;
 }
 
@@ -264,48 +264,48 @@ typedef struct {
     /* 0x24 */ u8 pad24[0x14];
 } Prop;
 
-extern s16 D_8011DB2C;
-extern Prop D_8011DB30[];
-extern void (**D_80126AEC)(Prop *e);
+extern s16 g_PropsActive;
+extern Prop g_Props[];
+extern void (**g_PropHandlers)(Prop *e);
 extern s32 func_800D18DC(void);
 extern s32 func_800D19F0(void);
 extern void func_800D1754(void);
-extern void func_80029444(void);
+extern void TickPlayTime(void);
 extern void func_8014607C(void);
 extern void ClearRumbleScript(void);
 extern void StopPadRumble(void);
 extern void ModeGoTitle(void);
-extern s32 func_8002AF08(void);
+extern s32 GetSaveRequest(void);
 extern s32 func_800CFBE8(void);
 extern void SetOtDepthLimit(s32 n);
-extern void func_80018450(s32 mode, s32 w);
-extern void func_8001534C(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
-extern void func_800153CC(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
-extern void func_80016714(void *p, s32 size);
-extern u8 *func_8001D074(s32 a, s32 b);
-extern void func_8001CC3C(u8 *o, void *p, s16 x, s16 y);
+extern void QueueImageAt(s32 mode, s32 w);
+extern void SetDebugText(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
+extern void SetDebugNumber(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
+extern void ZeroFill(void *p, s32 size);
+extern u8 *AllocSpriteInRange(s32 a, s32 b);
+extern void InitSpriteKind3(u8 *o, void *p, s16 x, s16 y);
 extern void DrawDemoLogo(void);
 extern void StepRumbleScript(void);
 void func_801287B8(void);
-void func_80129010(void);
-void func_80129CF8(void);
-void func_8012956C(void);
+void UpdateProps(void);
+void UpdateCamera(void);
+void DrawBgLayers(void);
 void func_8013BC7C(s32 *p);
-void func_8013BCDC(void);
-void func_8013CA14(void);
-void func_801379FC(void);
-void func_8014FDF4(Player *p);
-void func_801505FC(Player *p);
-void func_801508B4(Player *p);
-void func_801627E8(void);
-void func_80162B1C(void);
-void func_80165CA0(void);
-void func_80165E90(void);
-void func_8016E95C(void);
+void RunSeqHook(void);
+void UpdateCameraShake(void);
+void UpdateMessages(void);
+void FindFloorBelowPlayer(Player *p);
+void CollectPickups(Player *p);
+void StrikeTouchedActor(Player *p);
+void UpdateShadow(void);
+void UpdateObj68s(void);
+void UpdateEffects(void);
+void UpdateSwordTrails(void);
+void UpdateHudSlots(void);
 void func_801754A8(void);
-void func_8017849C(void);
-Prop *func_8012913C(u16 kind);
-Prop *func_801291C0(void);
+void UpdateActors(void);
+Prop *SpawnProp(u16 kind);
+Prop *AllocProp(void);
 
 void func_801285E4(void) {
     SetSpadStack();
@@ -322,7 +322,7 @@ void func_801285E4(void) {
 
 void func_80128678(void) {
     SetSpadStack();
-    func_80029444();
+    TickPlayTime();
     ResetSpadStack();
     func_8014607C();
     SetSpadStack();
@@ -349,20 +349,20 @@ void func_80128714(void) {
 }
 
 void func_801287B8(void) {
-    func_80129CF8();
-    func_8017849C();
-    func_8014FDF4(&D_80126B58);
-    func_801505FC(&D_80126B58);
-    func_801508B4(&D_80126B58);
-    func_80165E90();
-    func_801627E8();
-    func_80162B1C();
-    func_80165CA0();
-    func_80129010();
-    func_8013CA14();
+    UpdateCamera();
+    UpdateActors();
+    FindFloorBelowPlayer(&g_Player);
+    CollectPickups(&g_Player);
+    StrikeTouchedActor(&g_Player);
+    UpdateSwordTrails();
+    UpdateShadow();
+    UpdateObj68s();
+    UpdateEffects();
+    UpdateProps();
+    UpdateCameraShake();
     StepRumbleScript();
-    func_8012956C();
-    func_8016E95C();
+    DrawBgLayers();
+    UpdateHudSlots();
     func_801754A8();
     {
         s32 *p = &D_801EF3F8;
@@ -370,8 +370,8 @@ void func_801287B8(void) {
             func_8013BC7C(p);
         }
     }
-    func_8013BCDC();
-    func_801379FC();
+    RunSeqHook();
+    UpdateMessages();
     D_800B99DA++;
     if (D_800B9A64 != 0) {
         DrawDemoLogo();
@@ -379,29 +379,29 @@ void func_801287B8(void) {
 }
 
 s32 func_801288B0(void) {
-    return func_8001ABBC(0, 0, D_800AEFD0, D_801EBC68, NULL);
+    return RequestLoad(0, 0, D_800AEFD0, D_801EBC68, NULL);
 }
 
 s32 func_801288E8(void) {
-    D_800C7C60.unk0 = 0x60;
-    D_800C7C60.unk4 = D_800A2E20;
-    return func_8001ABBC(0, 0, D_800AF558, D_801EBC68, &D_800C7C60);
+    g_SoundLoadTable.unk0 = 0x60;
+    g_SoundLoadTable.unk4 = g_SoundLoadBuf;
+    return RequestLoad(0, 0, D_800AF558, D_801EBC68, &g_SoundLoadTable);
 }
 
 s32 func_80128940(void) {
-    D_800C7C60.unk0 = 0x5E;
-    D_800C7C60.unk4 = D_800A2E20;
-    return func_8001ABBC(0, 0, D_800AF560, D_801EBC68, &D_800C7C60);
+    g_SoundLoadTable.unk0 = 0x5E;
+    g_SoundLoadTable.unk4 = g_SoundLoadBuf;
+    return RequestLoad(0, 0, D_800AF560, D_801EBC68, &g_SoundLoadTable);
 }
 
 s32 func_80128998(void) {
-    D_800C7C60.unk0 = 0xD;
-    D_800C7C60.unk4 = D_800A2E20;
-    return func_8001ABBC(0, 0, D_800AECB0, D_801EBC68, &D_800C7C60);
+    g_SoundLoadTable.unk0 = 0xD;
+    g_SoundLoadTable.unk4 = g_SoundLoadBuf;
+    return RequestLoad(0, 0, D_800AECB0, D_801EBC68, &g_SoundLoadTable);
 }
 
 s32 func_801289F0(void) {
-    return func_8001ABBC(0, 0, D_800AECB8, D_801EBC68, NULL);
+    return RequestLoad(0, 0, D_800AECB8, D_801EBC68, NULL);
 }
 
 void func_80128A28(void) {
@@ -429,7 +429,7 @@ void func_80128A28(void) {
 void func_80128AF4(void) {
     switch (D_800B99F6) {
     case 0:
-        D_801ED340 = func_8002AF08();
+        D_801ED340 = GetSaveRequest();
         NextGameStateStep();
         break;
     case 1:
@@ -448,13 +448,13 @@ void func_80128AF4(void) {
             } else {
                 ModeGoTitle();
             }
-            func_8002AEF8();
+            ClearSaveRequest();
         }
         break;
     }
 }
 
-void func_80128C14(void) {
+void SetMapOtDepth(void) {
     s32 n;
     switch (D_800B9A08) {
     case 0x3023:
@@ -482,7 +482,7 @@ s32 func_80128C98(s32 i) {
     if (n < 0) {
         return 1;
     }
-    return func_8001ABBC(0, 0, g_ArchiveFileLoc[n], D_801EBC68, NULL);
+    return RequestLoad(0, 0, g_ArchiveFileLoc[n], D_801EBC68, NULL);
 }
 
 s32 func_80128CFC(s32 i) {
@@ -490,21 +490,21 @@ s32 func_80128CFC(s32 i) {
     if (n < 0) {
         return 1;
     }
-    return func_8001ABBC(0, 0, g_ArchiveFileLoc[n], D_801EBC68, NULL);
+    return RequestLoad(0, 0, g_ArchiveFileLoc[n], D_801EBC68, NULL);
 }
 
-void func_80128D60(s32 mode, AnimPlayer *p, AnimFrame *f) {
+void StartImageAnim(s32 mode, AnimPlayer *p, AnimFrame *f) {
     p->frames = f;
     p->index = 0;
     p->timer = f->flags & 0x3F;
     if (mode != 0) {
-        func_80018450(mode, f->v.tex);
+        QueueImageAt(mode, f->v.tex);
     } else {
-        func_800183E0(f->v.tex);
+        QueueImage(f->v.tex);
     }
 }
 
-s32 func_80128DB4(s32 mode, AnimPlayer *p) {
+s32 StepImageAnim(s32 mode, AnimPlayer *p) {
     AnimFrame *frames = p->frames;
     s32 flags;
     if (p->timer == 0) {
@@ -525,14 +525,14 @@ s32 func_80128DB4(s32 mode, AnimPlayer *p) {
     }
     p->timer = frames[p->index].flags & 0x3F;
     if (mode != 0) {
-        func_80018450(mode, frames[p->index].v.tex);
+        QueueImageAt(mode, frames[p->index].v.tex);
     } else {
-        func_800183E0(frames[p->index].v.tex);
+        QueueImage(frames[p->index].v.tex);
     }
     return 0;
 }
 
-void func_80128EA8(u8 *o, AnimPlayer *p, AnimFrame *f) {
+void StartSpriteAnim(u8 *o, AnimPlayer *p, AnimFrame *f) {
     p->frames = f;
     p->index = 0;
     p->timer = f->flags & 0x3F;
@@ -540,7 +540,7 @@ void func_80128EA8(u8 *o, AnimPlayer *p, AnimFrame *f) {
     *(u16 *)(o + 0x2A) = f->v.ofs.y;
 }
 
-s32 func_80128ED8(u8 *o, AnimPlayer *p) {
+s32 StepSpriteAnim(u8 *o, AnimPlayer *p) {
     AnimFrame *frames = p->frames;
     s32 flags;
     if (p->timer == 0) {
@@ -565,17 +565,17 @@ s32 func_80128ED8(u8 *o, AnimPlayer *p) {
 }
 
 void func_80128FAC(u16 *n) {
-    func_8001534C(4, (s32)D_801EBC6C, 0x80, 0x90, 0, 0);
-    func_800153CC(5, *n, 0xA8, 0x90, 0x40, 0);
+    SetDebugText(4, (s32)D_801EBC6C, 0x80, 0x90, 0, 0);
+    SetDebugNumber(5, *n, 0xA8, 0x90, 0x40, 0);
 }
 
-void func_80129010(void) {
-    Prop *e = D_8011DB30;
+void UpdateProps(void) {
+    Prop *e = g_Props;
     s32 i;
-    if (D_8011DB2C != 0) {
+    if (g_PropsActive != 0) {
         for (i = 0; i < 0x80; i++, e++) {
             if (e->kind != 0) {
-                D_80126AEC[e->kind](e);
+                g_PropHandlers[e->kind](e);
                 if (e->model != NULL) {
                     *(u16 *)(e->model + 8) = e->pos[0].h.i;
                     *(u16 *)(e->model + 0xA) = e->pos[1].h.i;
@@ -586,8 +586,8 @@ void func_80129010(void) {
     }
 }
 
-Prop *func_801290DC(u16 kind, u16 *pos) {
-    Prop *e = func_8012913C(kind);
+Prop *SpawnPropAt(u16 kind, u16 *pos) {
+    Prop *e = SpawnProp(kind);
     if (e != NULL) {
         e->pos[0].h.i = pos[0];
         e->pos[1].h.i = pos[1];
@@ -596,28 +596,28 @@ Prop *func_801290DC(u16 kind, u16 *pos) {
     return e;
 }
 
-Prop *func_8012913C(u16 kind) {
-    u8 *m = func_8001D074(0x7E, 0x100);
+Prop *SpawnProp(u16 kind) {
+    u8 *m = AllocSpriteInRange(0x7E, 0x100);
     Prop *e;
     if (m == NULL) {
         return NULL;
     }
-    e = func_801291C0();
+    e = AllocProp();
     if (e == NULL) {
         return NULL;
     }
     e->kind = kind;
     e->model = m;
-    func_8001CC3C(m, 0, 0, 0);
+    InitSpriteKind3(m, 0, 0, 0);
     return e;
 }
 
-Prop *func_801291C0(void) {
-    Prop *e = D_8011DB30;
+Prop *AllocProp(void) {
+    Prop *e = g_Props;
     s32 i;
     for (i = 0; i < 0x80; i++, e++) {
         if (e->kind == 0) {
-            func_80016714(e, sizeof(Prop));
+            ZeroFill(e, sizeof(Prop));
             return e;
         }
     }
@@ -636,77 +636,77 @@ typedef struct {
     /* 0x3C */ u16 w;
     /* 0x3E */ s16 h;
     /* 0x40 */ s16 scrollx, scrolly;
-    /* 0x44 */ u8 fade[6];          /* a gradient's two colours, scaled by the stage's fade (func_801299C8) */
+    /* 0x44 */ u8 fade[6];          /* a gradient's two colours, scaled by the stage's fade (FadeBgLayerColours) */
     /* 0x4A */ u8 pad4A[2];
     /* 0x4C */ u8 *cells;           /* the cell file: GsCELLs from +8 */
     /* 0x50 */ u8 *mapfile;         /* the map file: ncellw, ncellh, cellw, cellh at +4, the cell index from +8 */
 } BgLayer; /* size 0x54 */
 extern BgLayer D_800B9A78[2];
-extern s16 D_80114EE0;          /* the layers are on */
+extern s16 g_BgLayersOn;          /* the layers are on */
 extern s32 D_8005128C;
 extern u8 D_801ED348[4][4];     /* the gradients' colours (r, g, b) */
 extern u8 D_801EF3F2;           /* the stage's fade: red, green, blue */
 extern u8 D_801EF2F2;
 extern u8 D_801EF2C8;
 extern u8 D_801EF3C0;
-extern GsOT D_800A6518[2];
-extern void func_80015B6C(s16 x, s16 y, s16 w, s16 h, u8 r0, u8 g0, u8 b0, u8 r1, u8 g1, u8 b1);
-void func_80129248(s16 on);
-void func_801292C8(Prop *e);
-void func_801298F4(BgLayer *l);
-void func_801299C8(s16 on, s16 kind, BgLayer *l);
+extern GsOT g_WorldOt[2];
+extern void DrawGradientRect(s16 x, s16 y, s16 w, s16 h, u8 r0, u8 g0, u8 b0, u8 r1, u8 g1, u8 b1);
+void SetPropsActive(s16 on);
+void FreeProp(Prop *e);
+void InitBgLayerMap(BgLayer *l);
+void FadeBgLayerColours(s16 on, s16 kind, BgLayer *l);
 
-void func_80129220(void) {
-    func_80129258();
-    func_80129248(1);
+void InitProps(void) {
+    ClearProps();
+    SetPropsActive(1);
 }
 
-void func_80129248(s16 on) {
-    D_8011DB2C = on;
+void SetPropsActive(s16 on) {
+    g_PropsActive = on;
 }
 
-void func_80129258(void) {
-    Prop *e = D_8011DB30;
+void ClearProps(void) {
+    Prop *e = g_Props;
     s32 i;
     for (i = 0; i < 0x80; i++, e++) {
         e->kind = 0;
     }
 }
 
-void func_8012927C(void) {
-    Prop *e = D_8011DB30;
+void FreeAllProps(void) {
+    Prop *e = g_Props;
     s32 i;
     for (i = 0; i < 0x80; i++, e++) {
-        func_801292C8(e);
+        FreeProp(e);
     }
 }
 
-void func_801292C8(Prop *e) {
+void FreeProp(Prop *e) {
     if (e->model != NULL) {
-        func_80016714(e->model, *(u16 *)e->model == 1 ? 0x84 : 0x38);
+        ZeroFill(e->model, *(u16 *)e->model == 1 ? 0x84 : 0x38);
     }
     e->kind = 0;
 }
 
-void func_8012931C(Prop *e) {
+void MoveProp(Prop *e) {
     e->pos[0].w += e->vel[0];
     e->pos[1].w += e->vel[1];
     e->pos[2].w += e->vel[2];
 }
 
-void func_80129350(Prop *e, Prop *from) {
+void CopyPropPos(Prop *e, Prop *from) {
     e->pos[0].w = from->pos[0].w;
     e->pos[1].w = from->pos[1].w;
     e->pos[2].w = from->pos[2].w;
 }
 
-void func_80129374(Prop *e, Prop *from) {
+void CopyPropVel(Prop *e, Prop *from) {
     e->vel[0] = from->vel[0];
     e->vel[1] = from->vel[1];
     e->vel[2] = from->vel[2];
 }
 
-void func_80129398(void) {
+void ResetBgLayers(void) {
     s32 i;
     for (i = 0; i < 2; i++) {
         D_800B9A78[i].pri = 0x7FFF;
@@ -720,81 +720,81 @@ void func_80129398(void) {
     }
 }
 
-void func_80129428(void) {
-    D_80114EE0 = 1;
+void EnableBgLayers(void) {
+    g_BgLayersOn = 1;
 }
 
-void func_8012943C(void) {
-    D_80114EE0 = 0;
+void DisableBgLayers(void) {
+    g_BgLayersOn = 0;
 }
 
-void func_8012944C(void) {
+void SetupBgLayers(void) {
     BgLayer *l;
     s32 i;
     s32 *p = &D_8005128C;
     if (*p == 0x34420200) {
         *p = 0;
     }
-    D_80114EE0 = 1;
+    g_BgLayersOn = 1;
     for (l = D_800B9A78, i = 0; i < 2; l++, i++) {
         switch (l->pri) {
         case 0x7FFF:
             break;
         case 0x7FFD:
             if (i == 0) {
-                func_801299C8(1, 1, l);
+                FadeBgLayerColours(1, 1, l);
             }
             break;
         case 0x7FFE:
-            func_801299C8(1, i * 2, l);
+            FadeBgLayerColours(1, i * 2, l);
             break;
         default:
-            func_801298F4(l);
+            InitBgLayerMap(l);
             l->bg.scrolly = l->scrolly + l->y;
-            func_801299C8(1, i + 3, l);
+            FadeBgLayerColours(1, i + 3, l);
             break;
         }
     }
 }
 
-void func_8012956C(void) {
+void DrawBgLayers(void) {
     GsMAP *map = (GsMAP *)0x1F800000;
     GsBG *bg = (GsBG *)0x1F800010;
     register Work *w = &D_800AF630;
     BgLayer *l;
     s32 i;
-    if (D_80114EE0 != 0) {
+    if (g_BgLayersOn != 0) {
         for (l = D_800B9A78, i = 0; i < 2; l++, i++) {
             switch (l->pri) {
             case 0x7FFF:
                 break;
             case 0x7FFD:
                 if (i == 0) {
-                    func_801299C8(D_801EF3C0, 1, l);
+                    FadeBgLayerColours(D_801EF3C0, 1, l);
                 }
-                func_80015B6C(-0xA0, -0x74, 0x140, 0x8C, D_801ED348[0][0], D_801ED348[0][1], D_801ED348[0][2],
+                DrawGradientRect(-0xA0, -0x74, 0x140, 0x8C, D_801ED348[0][0], D_801ED348[0][1], D_801ED348[0][2],
                               D_801ED348[1][0], D_801ED348[1][1], D_801ED348[1][2]);
-                func_80015B6C(-0xA0, 0x18, 0x140, 0x3C, D_801ED348[1][0], D_801ED348[1][1], D_801ED348[1][2],
+                DrawGradientRect(-0xA0, 0x18, 0x140, 0x3C, D_801ED348[1][0], D_801ED348[1][1], D_801ED348[1][2],
                               D_801ED348[2][0], D_801ED348[2][1], D_801ED348[2][2]);
-                func_80015B6C(-0xA0, 0x54, 0x140, 0x28, D_801ED348[2][0], D_801ED348[2][1], D_801ED348[2][2],
+                DrawGradientRect(-0xA0, 0x54, 0x140, 0x28, D_801ED348[2][0], D_801ED348[2][1], D_801ED348[2][2],
                               D_801ED348[3][0], D_801ED348[3][1], D_801ED348[3][2]);
                 break;
             case 0x7FFE:
-                func_801299C8(D_801EF3C0, i * 2, l);
-                func_80015B6C(-0xA0, l->y, 0x140, l->h, D_801ED348[i * 2][0], D_801ED348[i * 2][1], D_801ED348[i * 2][2],
+                FadeBgLayerColours(D_801EF3C0, i * 2, l);
+                DrawGradientRect(-0xA0, l->y, 0x140, l->h, D_801ED348[i * 2][0], D_801ED348[i * 2][1], D_801ED348[i * 2][2],
                               D_801ED348[i * 2 + 1][0], D_801ED348[i * 2 + 1][1], D_801ED348[i * 2 + 1][2]);
                 break;
             default:
                 l->bg.scrollx = l->scrollx + l->x;
                 l->bg.scrolly = l->scrolly + l->y;
-                func_801299C8(D_801EF3C0, i + 3, l);
+                FadeBgLayerColours(D_801EF3C0, i + 3, l);
                 *map = l->map;
                 *bg = l->bg;
                 bg->map = map;
                 if (l->rotating == 0) {
-                    GsSortFastBg(bg, &D_800A6518[w->frame], l->pri);
+                    GsSortFastBg(bg, &g_WorldOt[w->frame], l->pri);
                 } else {
-                    GsSortBg(bg, &D_800A6518[w->frame], l->pri);
+                    GsSortBg(bg, &g_WorldOt[w->frame], l->pri);
                 }
                 break;
             }
@@ -802,7 +802,7 @@ void func_8012956C(void) {
     }
 }
 
-void func_801298F4(BgLayer *l) {
+void InitBgLayerMap(BgLayer *l) {
     u8 *cells;
     u8 *p;
     u8 c;
@@ -838,7 +838,7 @@ void func_801298F4(BgLayer *l) {
 
 /* the layers' colours under the stage's fade: kind 1 the sky's four, 0 and 2 a gradient's two (from the layer),
    3 and 4 a map layer's tint */
-void func_801299C8(s16 on, s16 kind, BgLayer *l) {
+void FadeBgLayerColours(s16 on, s16 kind, BgLayer *l) {
     s32 r, g, b;
     if (on != 0) {
         switch (kind) {
@@ -878,99 +878,75 @@ void func_801299C8(s16 on, s16 kind, BgLayer *l) {
     }
 }
 
-typedef struct { s16 x, y, z; } Vec3s;
-/* a camera (0xA4 bytes): the main one at 0x80126948, three alternates from 0x80126E60 (D_801150D6 1-3 picks one),
-   three saved from 0x80114EE8, one kept across a map change at 0x801201F8, and the blend at 0x80126DB8 that eases
-   toward the picked one. The pairs from +0x08 are (current, target); func_8012A094 snaps current to target. */
-typedef struct Camera {
-    /* 0x00 */ void (*update)(struct Camera *c);
-    /* 0x04 */ u8 mode;
-    /* 0x05 */ u8 pad05[3];
-    /* 0x08 */ s32 proj;            /* passed to GsSetProjection every frame (0x12C at boot) */
-    /* 0x0C */ s32 projTo;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ SVECTOR unk18;
-    /* 0x20 */ SVECTOR unk20;
-    /* 0x28 */ Vec3s unk28;
-    /* 0x2E */ Vec3s unk2E;
-    /* 0x34 */ u8 pad34[8];
-    /* 0x3C */ GsRVIEW2 base;       /* the view before the offsets */
-    /* 0x5C */ GsRVIEW2 rview;      /* base + offset, given to GsSetRefView2L */
-    /* 0x7C */ s32 offset[7];
-    /* 0x98 */ u8 pad98[4];
-    /* 0x9C */ s32 unk9C;
-    /* 0xA0 */ s16 unkA0;
-    /* 0xA2 */ s16 unkA2;
-} Camera; /* size 0xA4 */
-extern Camera D_80126948;
-extern Camera D_80126DB8;
-extern Camera D_80126E60[3];
-extern Camera D_80114EE8[3];
-extern Camera D_801201F8;
-extern Camera *D_801151D4;      /* the camera used this frame */
-extern u8 D_801150D6;           /* 0 the main camera, 1-3 an alternate */
-extern u8 D_80127504;           /* frames left of easing the blend */
-extern u8 D_801152C0;           /* the height follow is limited (func_8012A304) */
-extern s16 D_801152C2;
-extern s16 D_80127080;
-extern s16 D_80126940;          /* the point the camera follows */
+/* a camera: Camera (include/game.h) */
+extern Camera g_Camera;
+extern Camera g_CameraBlend;
+extern Camera g_AltCameras[3];
+extern Camera g_SavedCameras[3];
+extern Camera g_KeptCamera;
+extern Camera *g_ActiveCamera;      /* the camera used this frame */
+extern u8 g_CameraIndex;           /* 0 the main camera, 1-3 an alternate */
+extern u8 g_CameraBlendFrames;           /* frames left of easing the blend */
+extern u8 g_CameraHeightLimitOn;           /* the height follow is limited (SetCameraHeightLimit) */
+extern s16 g_CameraHeightLimitRange;
+extern s16 g_CameraHeightLimitY;
+extern s16 g_CameraFocus;          /* the point the camera follows */
 extern s16 D_80126942;
 extern s16 D_80126944;
-extern MATRIX D_800AE688;       /* the world-to-screen matrix GsSetRefView2L sets */
+extern MATRIX g_ViewMatrix;       /* the world-to-screen matrix GsSetRefView2L sets */
 extern void InitDefaultView(void);
 extern void GsSetProjection(s32 proj);
-extern s16 func_80012F74(s16 a, s16 b, s16 c, s16 d);
-void func_8012A018(void (*update)(Camera *c), u8 mode);
-void func_8012A048(Camera *c, void (*update)(Camera *c), u8 mode);
-void func_8012A100(u8 n);
-void func_8012A328(void);
+extern s16 EaseValueFrac(s16 a, s16 b, s16 c, s16 d);
+void SetCameraUpdate(void (*update)(Camera *c), u8 mode);
+void SetCameraUpdateOf(Camera *c, void (*update)(Camera *c), u8 mode);
+void SelectCamera(u8 n);
+void UpdateCameraFocus(void);
 
-void func_80129C40(s32 a) {
-    func_80016714(&D_80126DB8, sizeof(Camera));
-    func_80016714(&D_80126948, sizeof(Camera));
-    func_80016714(&D_80114EE8[0], sizeof(Camera));
-    func_80016714(&D_80114EE8[1], sizeof(Camera));
-    func_80016714(&D_80114EE8[2], sizeof(Camera));
-    func_80016714(&D_80126E60[0], sizeof(Camera));
-    func_80016714(&D_80126E60[1], sizeof(Camera));
-    func_80016714(&D_80126E60[2], sizeof(Camera));
-    D_801150D6 = 0;
-    D_801152C0 = 0;
-    D_80127504 = 0;
+void InitCameras(s32 a) {
+    ZeroFill(&g_CameraBlend, sizeof(Camera));
+    ZeroFill(&g_Camera, sizeof(Camera));
+    ZeroFill(&g_SavedCameras[0], sizeof(Camera));
+    ZeroFill(&g_SavedCameras[1], sizeof(Camera));
+    ZeroFill(&g_SavedCameras[2], sizeof(Camera));
+    ZeroFill(&g_AltCameras[0], sizeof(Camera));
+    ZeroFill(&g_AltCameras[1], sizeof(Camera));
+    ZeroFill(&g_AltCameras[2], sizeof(Camera));
+    g_CameraIndex = 0;
+    g_CameraHeightLimitOn = 0;
+    g_CameraBlendFrames = 0;
     InitDefaultView();
 }
 
-void func_80129CF8(void) {
+void UpdateCamera(void) {
     register Work *w;
     Camera *b;
     Camera *c;
     MATRIX unused;                  /* the original's frame has room for one */
-    func_8012A328();
+    UpdateCameraFocus();
     w = &D_800AF630;
-    b = &D_80126DB8;
-    if (D_801150D6 == 1) {
-        c = &D_80126E60[0];
-    } else if (D_801150D6 == 2) {
-        c = &D_80126E60[1];
-    } else if (D_801150D6 == 3) {
-        c = &D_80126E60[2];
+    b = &g_CameraBlend;
+    if (g_CameraIndex == 1) {
+        c = &g_AltCameras[0];
+    } else if (g_CameraIndex == 2) {
+        c = &g_AltCameras[1];
+    } else if (g_CameraIndex == 3) {
+        c = &g_AltCameras[2];
     } else {
-        c = &D_80126948;
+        c = &g_Camera;
     }
     if (c->update != NULL) {
         c->update(c);
     }
     GsSetProjection(c->proj);
-    if (D_80127504 != 0) {
-        b->base.vpx = func_80012F74(b->base.vpx, c->base.vpx, 2, 1);
-        b->base.vpy = func_80012F74(b->base.vpy, c->base.vpy, 2, 1);
-        b->base.vpz = func_80012F74(b->base.vpz, c->base.vpz, 2, 1);
-        b->base.vrx = func_80012F74(b->base.vrx, c->base.vrx, 2, 1);
-        b->base.vry = func_80012F74(b->base.vry, c->base.vry, 2, 1);
-        b->base.vrz = func_80012F74(b->base.vrz, c->base.vrz, 2, 1);
-        b->base.rz = func_80012F74(b->base.rz, c->base.rz, 2, 1);
-        D_80127504--;
+    if (g_CameraBlendFrames != 0) {
+        b->base.vpx = EaseValueFrac(b->base.vpx, c->base.vpx, 2, 1);
+        b->base.vpy = EaseValueFrac(b->base.vpy, c->base.vpy, 2, 1);
+        b->base.vpz = EaseValueFrac(b->base.vpz, c->base.vpz, 2, 1);
+        b->base.vrx = EaseValueFrac(b->base.vrx, c->base.vrx, 2, 1);
+        b->base.vry = EaseValueFrac(b->base.vry, c->base.vry, 2, 1);
+        b->base.vrz = EaseValueFrac(b->base.vrz, c->base.vrz, 2, 1);
+        b->base.rz = EaseValueFrac(b->base.rz, c->base.rz, 2, 1);
+        g_CameraBlendFrames--;
     } else {
         b->base.vpx = c->base.vpx;
         b->base.vpy = c->base.vpy;
@@ -989,168 +965,168 @@ void func_80129CF8(void) {
     c->rview.rz = b->base.rz + c->offset[6];
     c->rview.super = c->base.super;
     GsSetRefView2L(&c->rview);
-    w->wsm = D_800AE688;
-    D_801151D4 = c;
+    w->wsm = g_ViewMatrix;
+    g_ActiveCamera = c;
 }
 
-void func_80129FF4(void) {
-    func_8012A018(0, 0);
+void ClearCameraUpdate(void) {
+    SetCameraUpdate(0, 0);
 }
 
-void func_8012A018(void (*update)(Camera *c), u8 mode) {
-    func_8012A048(&D_80126948, update, mode);
+void SetCameraUpdate(void (*update)(Camera *c), u8 mode) {
+    SetCameraUpdateOf(&g_Camera, update, mode);
 }
 
-void func_8012A048(Camera *c, void (*update)(Camera *c), u8 mode) {
+void SetCameraUpdateOf(Camera *c, void (*update)(Camera *c), u8 mode) {
     c->update = update;
     c->mode = mode;
     c->unk9C = 0;
     c->unkA0 = 0;
     c->unkA2 = 0;
-    D_80126940 = D_80126B58.pos[0].h.i;
-    D_80126942 = D_80126B58.pos[1].h.i;
-    D_80126944 = D_80126B58.pos[2].h.i;
+    g_CameraFocus = g_Player.pos[0].h.i;
+    D_80126942 = g_Player.pos[1].h.i;
+    D_80126944 = g_Player.pos[2].h.i;
 }
 
-void func_8012A094(Camera *c) {
+void SnapCamera(Camera *c) {
     c->proj = c->projTo;
-    c->unk10 = c->unk14;
-    c->unk18 = c->unk20;
-    c->unk28.x = c->unk2E.x;
-    c->unk28.y = c->unk2E.y;
-    c->unk28.z = c->unk2E.z;
+    c->dist = c->distTo;
+    c->angle = c->angleTo;
+    c->ofs.x = c->ofsTo.x;
+    c->ofs.y = c->ofsTo.y;
+    c->ofs.z = c->ofsTo.z;
 }
 
-void func_8012A0E0(void) {
-    func_8012A100(0);
+void SelectMainCamera(void) {
+    SelectCamera(0);
 }
 
-void func_8012A100(u8 n) {
-    D_801150D6 = n;
+void SelectCamera(u8 n) {
+    g_CameraIndex = n;
 }
 
-void func_8012A110(void) {
-    D_801201F8.proj = D_801201F8.projTo = 0x1F4;
-    D_801201F8.unk10 = D_801201F8.unk14 = 0x5DC;
-    D_801201F8.unk18.vx = D_801201F8.unk20.vx = 0x238;
-    D_801201F8.unk18.vy = D_801201F8.unk20.vy = 0;
-    D_801201F8.unk18.vz = D_801201F8.unk20.vz = 0;
-    D_801201F8.unk28.x = D_801201F8.unk2E.x = 0;
-    D_801201F8.unk28.y = D_801201F8.unk2E.y = 0;
-    D_801201F8.unk28.z = D_801201F8.unk2E.z = 0;
-    D_801201F8.unk9C = 0;
-    D_801201F8.unkA0 = 0;
-    D_801201F8.unkA2 = 0;
+void ResetKeptCamera(void) {
+    g_KeptCamera.proj = g_KeptCamera.projTo = 0x1F4;
+    g_KeptCamera.dist = g_KeptCamera.distTo = 0x5DC;
+    g_KeptCamera.angle.vx = g_KeptCamera.angleTo.vx = 0x238;
+    g_KeptCamera.angle.vy = g_KeptCamera.angleTo.vy = 0;
+    g_KeptCamera.angle.vz = g_KeptCamera.angleTo.vz = 0;
+    g_KeptCamera.ofs.x = g_KeptCamera.ofsTo.x = 0;
+    g_KeptCamera.ofs.y = g_KeptCamera.ofsTo.y = 0;
+    g_KeptCamera.ofs.z = g_KeptCamera.ofsTo.z = 0;
+    g_KeptCamera.unk9C = 0;
+    g_KeptCamera.unkA0 = 0;
+    g_KeptCamera.unkA2 = 0;
 }
 
-void func_8012A1BC(void) {
-    D_80126948.proj = D_801201F8.proj;
-    D_80126948.projTo = D_801201F8.projTo;
-    D_80126948.unk10 = D_801201F8.unk10;
-    D_80126948.unk14 = D_801201F8.unk14;
-    D_80126948.unk18 = D_801201F8.unk18;
-    D_80126948.unk20 = D_801201F8.unk20;
-    D_80126948.unk28.x = D_801201F8.unk28.x;
-    D_80126948.unk28.y = D_801201F8.unk28.y;
-    D_80126948.unk28.z = D_801201F8.unk28.z;
-    D_80126948.unk2E.x = D_801201F8.unk2E.x;
-    D_80126948.unk2E.y = D_801201F8.unk2E.y;
-    D_80126948.unk2E.z = D_801201F8.unk2E.z;
-    D_80126948.unk9C = D_801201F8.unk9C;
-    D_80126948.unkA0 = D_801201F8.unkA0;
-    D_80126948.unkA2 = D_801201F8.unkA2;
+void RestoreKeptCamera(void) {
+    g_Camera.proj = g_KeptCamera.proj;
+    g_Camera.projTo = g_KeptCamera.projTo;
+    g_Camera.dist = g_KeptCamera.dist;
+    g_Camera.distTo = g_KeptCamera.distTo;
+    g_Camera.angle = g_KeptCamera.angle;
+    g_Camera.angleTo = g_KeptCamera.angleTo;
+    g_Camera.ofs.x = g_KeptCamera.ofs.x;
+    g_Camera.ofs.y = g_KeptCamera.ofs.y;
+    g_Camera.ofs.z = g_KeptCamera.ofs.z;
+    g_Camera.ofsTo.x = g_KeptCamera.ofsTo.x;
+    g_Camera.ofsTo.y = g_KeptCamera.ofsTo.y;
+    g_Camera.ofsTo.z = g_KeptCamera.ofsTo.z;
+    g_Camera.unk9C = g_KeptCamera.unk9C;
+    g_Camera.unkA0 = g_KeptCamera.unkA0;
+    g_Camera.unkA2 = g_KeptCamera.unkA2;
 }
 
-void func_8012A2F4(void) {
-    D_801152C0 = 0;
+void ClearCameraHeightLimit(void) {
+    g_CameraHeightLimitOn = 0;
 }
 
-void func_8012A304(s16 y, s16 range) {
-    D_801152C0 = 1;
-    D_80127080 = y;
-    D_801152C2 = range;
+void SetCameraHeightLimit(s16 y, s16 range) {
+    g_CameraHeightLimitOn = 1;
+    g_CameraHeightLimitY = y;
+    g_CameraHeightLimitRange = range;
 }
 
-/* the followed point: Musashi's, its height eased; with a limit set (func_8012A304) the height stays at the given
+/* the followed point: Musashi's, its height eased; with a limit set (SetCameraHeightLimit) the height stays at the given
    one while Musashi is within range of it */
-void func_8012A328(void) {
-    Player *m = &D_80126B58;
+void UpdateCameraFocus(void) {
+    Player *m = &g_Player;
     s32 d;
-    if (D_801152C0 != 0) {
-        d = D_80127080 - D_80126B58.focus[1];
-        if ((d < 0 ? D_80126B58.focus[1] - D_80127080 : d) > D_801152C2) {
+    if (g_CameraHeightLimitOn != 0) {
+        d = g_CameraHeightLimitY - g_Player.focus[1];
+        if ((d < 0 ? g_Player.focus[1] - g_CameraHeightLimitY : d) > g_CameraHeightLimitRange) {
             s16 *v = &D_80126942;
-            *v = func_80012F74(*v, m->focus[1], 4, 1);
+            *v = EaseValueFrac(*v, m->focus[1], 4, 1);
         } else {
             s16 *v = &D_80126942;
-            *v = func_80012F74(*v, D_80127080, 4, 1);
+            *v = EaseValueFrac(*v, g_CameraHeightLimitY, 4, 1);
         }
     } else {
         s16 *v = &D_80126942;
-        *v = func_80012F74(*v, D_80126B58.focus[1], 4, 1);
+        *v = EaseValueFrac(*v, g_Player.focus[1], 4, 1);
     }
-    D_80126940 = m->focus[0];
+    g_CameraFocus = m->focus[0];
     D_80126944 = m->focus[2];
 }
 
-void func_8012A418(void) {
-    D_80114EE8[0] = *D_801151D4;
+void SaveCamera(void) {
+    g_SavedCameras[0] = *g_ActiveCamera;
 }
 
 extern s32 SquareRoot0(s32 a);
 extern s32 ratan2(s32 y, s32 x);
-extern StageActor D_801202A0[]; /* the stage's actors (96) */
+extern StageActor g_Actors[]; /* the stage's actors (96) */
 extern s16 D_801270C0;          /* 1: step every actor's animation */
-void func_8012A598(void);
-void func_8012A62C(u8 frames);
-s16 func_8012A6D0(SVECTOR *a, SVECTOR *b);
-s16 func_8012A79C(SVECTOR *a, SVECTOR *b);
-void func_8012A7D4(SVECTOR *vp, SVECTOR *vr);
-void func_8012A988(StageActor *a);
-void func_8012AAAC(StageActor *a);
-s32 func_8012ACE0(StageActor *obj);
+void StartCameraBlend(void);
+void StartCameraBlendFrames(u8 frames);
+s16 PitchBetween(SVECTOR *a, SVECTOR *b);
+s16 HeadingBetween(SVECTOR *a, SVECTOR *b);
+void GetCameraView(SVECTOR *vp, SVECTOR *vr);
+void AnimTick(StageActor *a);
+void AnimStep(StageActor *a);
+s32 AnimScriptLength(StageActor *obj);
 
-void func_8012A464(void) {
-    D_80114EE8[0].base = D_801151D4->base;
+void SaveCameraView(void) {
+    g_SavedCameras[0].base = g_ActiveCamera->base;
 }
 
 /* back to the saved camera, eased from the current one over 48 frames */
-void func_8012A4BC(void) {
-    D_80126DB8 = *D_801151D4;
-    *D_801151D4 = D_80114EE8[0];
-    D_80127504 = 0x30;
+void RestoreSavedCamera(void) {
+    g_CameraBlend = *g_ActiveCamera;
+    *g_ActiveCamera = g_SavedCameras[0];
+    g_CameraBlendFrames = 0x30;
 }
 
-void func_8012A568(void (*f)(void)) {
-    func_8012A598();
+void BlendCameraThen(void (*f)(void)) {
+    StartCameraBlend();
     f();
 }
 
 /* start easing from the current camera, over 48 frames */
-void func_8012A598(void) {
-    D_80126DB8 = *D_801151D4;
-    D_80127504 = 0x30;
+void StartCameraBlend(void) {
+    g_CameraBlend = *g_ActiveCamera;
+    g_CameraBlendFrames = 0x30;
 }
 
-void func_8012A5F8(void (*f)(void), u8 frames) {
-    func_8012A62C(frames);
+void BlendCameraFramesThen(void (*f)(void), u8 frames) {
+    StartCameraBlendFrames(frames);
     f();
 }
 
-void func_8012A62C(u8 frames) {
-    D_80126DB8 = *D_801151D4;
-    D_80127504 = frames;
+void StartCameraBlendFrames(u8 frames) {
+    g_CameraBlend = *g_ActiveCamera;
+    g_CameraBlendFrames = frames;
 }
 
 /* the camera's pitch */
-s16 func_8012A68C(void) {
+s16 GetCameraPitch(void) {
     SVECTOR vp;
     SVECTOR vr;
-    func_8012A7D4(&vp, &vr);
-    return func_8012A6D0(&vp, &vr);
+    GetCameraView(&vp, &vr);
+    return PitchBetween(&vp, &vr);
 }
 
-s16 func_8012A6D0(SVECTOR *a, SVECTOR *b) {
+s16 PitchBetween(SVECTOR *a, SVECTOR *b) {
     s32 dz = a->vz - b->vz;
     s32 dx = a->vx - b->vx;
     s16 d = SquareRoot0(dz * dz + dx * dx);
@@ -1158,24 +1134,24 @@ s16 func_8012A6D0(SVECTOR *a, SVECTOR *b) {
 }
 
 /* the camera's heading */
-s16 func_8012A758(void) {
+s16 GetCameraHeading(void) {
     SVECTOR vp;
     SVECTOR vr;
-    func_8012A7D4(&vp, &vr);
-    return func_8012A79C(&vp, &vr);
+    GetCameraView(&vp, &vr);
+    return HeadingBetween(&vp, &vr);
 }
 
-s16 func_8012A79C(SVECTOR *a, SVECTOR *b) {
+s16 HeadingBetween(SVECTOR *a, SVECTOR *b) {
     return ratan2(a->vx - b->vx, a->vz - b->vz);
 }
 
-void func_8012A7D4(SVECTOR *vp, SVECTOR *vr) {
-    vp->vx = D_801151D4->base.vpx;
-    vp->vy = D_801151D4->base.vpy;
-    vp->vz = D_801151D4->base.vpz;
-    vr->vx = D_801151D4->base.vrx;
-    vr->vy = D_801151D4->base.vry;
-    vr->vz = D_801151D4->base.vrz;
+void GetCameraView(SVECTOR *vp, SVECTOR *vr) {
+    vp->vx = g_ActiveCamera->base.vpx;
+    vp->vy = g_ActiveCamera->base.vpy;
+    vp->vz = g_ActiveCamera->base.vpz;
+    vr->vx = g_ActiveCamera->base.vrx;
+    vr->vy = g_ActiveCamera->base.vry;
+    vr->vz = g_ActiveCamera->base.vrz;
 }
 
 void SetScript(StageActor *a, AnimEntry *script) {
@@ -1184,58 +1160,58 @@ void SetScript(StageActor *a, AnimEntry *script) {
     a->retScript = NULL;
     a->retIndex = 0;
     a->animFlags &= 0xF9FF;
-    func_8012AAAC(a);
+    AnimStep(a);
 }
 
 /* SetScriptAtEnd: the same, from the last entry, playing backwards (0x200) */
-void func_8012A860(StageActor *a, AnimEntry *script) {
+void SetScriptAtEnd(StageActor *a, AnimEntry *script) {
     a->script = script;
-    a->index = func_8012ACE0(a) - 1;
+    a->index = AnimScriptLength(a) - 1;
     a->retScript = NULL;
     a->retIndex = 0;
     a->animFlags |= 0x200;
-    func_8012AAAC(a);
+    AnimStep(a);
 }
 
-void func_8012A8B0(StageActor *a, AnimEntry *script) {
+void SetScriptCopy(StageActor *a, AnimEntry *script) {
     a->script = script;
     a->index = 0;
     a->retScript = NULL;
     a->retIndex = 0;
     a->animFlags &= 0xF9FF;
-    func_8012AAAC(a);
+    AnimStep(a);
 }
 
-void func_8012A8E8(StageActor *a) {
-    func_8012AAAC(a);
+void AnimStepNow(StageActor *a) {
+    AnimStep(a);
 }
 
 /* every actor's animation, once a frame: those with flag 0x1000, or all of them while D_801270C0 is 1 */
-void func_8012A908(void) {
-    StageActor *a = D_801202A0;
+void AnimateActors(void) {
+    StageActor *a = g_Actors;
     s32 i;
     for (i = 0; i < 0x60; i++, a++) {
         if (D_801270C0 == 1 || (a->animFlags & 0x1000)) {
-            func_8012A988(a);
+            AnimTick(a);
         }
     }
 }
 
 /* one actor's animation frame: count down the pose, then move to the next entry (forwards, backwards for 0x200, or
    back to the start for 0x400) and show it */
-void func_8012A988(StageActor *a) {
+void AnimTick(StageActor *a) {
     s32 n;
     a->animFlags &= 0x9FFF;
-    if (a->state == 0) {
+    if (a->kind == 0) {
         return;
     }
-    if (a->unkC1 == 0x11) {
+    if (a->react == 0x11) {
         return;
     }
-    if (a->timer == 0) {
+    if (a->animTimer == 0) {
         return;
     }
-    if (--a->timer > 0) {
+    if (--a->animTimer > 0) {
         return;
     }
     if (a->script == NULL) {
@@ -1248,10 +1224,10 @@ void func_8012A988(StageActor *a) {
         }
     } else if (a->animFlags & 0x200) {
         if (--a->index < 0) {
-            n = func_8012ACE0(a);
+            n = AnimScriptLength(a);
             if (a->script[n].value != -1) {
                 a->index = 0;
-                a->timer = 0;
+                a->animTimer = 0;
                 return;
             }
             a->index = n - 1;
@@ -1259,14 +1235,14 @@ void func_8012A988(StageActor *a) {
     } else {
         a->index++;
     }
-    func_8012AAAC(a);
+    AnimStep(a);
 }
 
 extern AnimEntry D_8018D838[];  /* the default script (an idle) */
 
 /* one step of an actor's animation script: show the entry's pose for its frames, or run its command
    (docs/animation_controller.md) */
-void func_8012AAAC(StageActor *a) {
+void AnimStep(StageActor *a) {
     AnimEntry *e;
     AnimEntry *old;
     AnimEntry *r;
@@ -1278,7 +1254,7 @@ void func_8012AAAC(StageActor *a) {
         case -2:
             r = a->retScript;
             if (r == NULL) {
-                a->timer = 0;
+                a->animTimer = 0;
                 break;
             }
             goto ret;
@@ -1290,10 +1266,10 @@ void func_8012AAAC(StageActor *a) {
                 a->index = a->retIndex;
                 a->retScript = NULL;
                 a->retIndex = 0;
-                func_8012AAAC(a);
+                AnimStep(a);
             } else {
                 a->index = 0;
-                func_8012AAAC(a);
+                AnimStep(a);
                 a->animFlags |= 0x4000;
             }
             break;
@@ -1303,12 +1279,12 @@ void func_8012AAAC(StageActor *a) {
             a->retScript = NULL;
             a->retIndex = 0;
             a->animFlags &= 0xF9FF;
-            func_8012AAAC(a);
+            AnimStep(a);
             break;
         case -3:
             n = ++a->index;
             if (a->retScript != NULL) {
-                func_8012AAAC(a);
+                AnimStep(a);
             } else {
                 old = a->script;
                 a->script = e->pose;
@@ -1316,40 +1292,40 @@ void func_8012AAAC(StageActor *a) {
                 a->retScript = NULL;
                 a->retIndex = 0;
                 a->animFlags &= 0xF9FF;
-                func_8012AAAC(a);
+                AnimStep(a);
                 a->retScript = old;
                 a->retIndex = n;
             }
             break;
         case -50:
             a->index++;
-            func_8012AAAC(a);
+            AnimStep(a);
             a->animFlags |= 0x2000;
             break;
         case -5:
             a->animFlags |= 0x400;
             a->index--;
-            func_8012AAAC(a);
+            AnimStep(a);
             break;
         }
     } else {
         a->model->pose = e->pose;
-        a->timer = e->value;
+        a->animTimer = e->value;
     }
 }
 
 /* back to the default script */
-void func_8012ACA0(StageActor *a) {
+void AnimStartDefault(StageActor *a) {
     a->script = D_8018D838;
     a->index = 0;
     a->retScript = NULL;
     a->retIndex = 0;
     a->animFlags &= 0xF9FF;
-    func_8012AAAC(a);
+    AnimStep(a);
 }
 
 /* The number of entries in the actor's animation script before its first stop (-2), end (-1) or 0 */
-s32 func_8012ACE0(StageActor *obj) {
+s32 AnimScriptLength(StageActor *obj) {
     s32 i;
     i = 0;
     while (1) {
@@ -1367,25 +1343,25 @@ s32 func_8012ACE0(StageActor *obj) {
     }
 }
 
-void func_8012AD44(StageActor *a, u16 sub) {
-    a->sub = sub;
-    a->subTime = 0;
+void SetState(StageActor *a, u16 sub) {
+    a->state = sub;
+    a->stateCount = 0;
 }
 
-void func_8012AD50(StageActor *a) {
-    a->subTime = 0;
-    a->sub++;
+void NextState(StageActor *a) {
+    a->stateCount = 0;
+    a->state++;
 }
 
-void func_8012AD64(StageActor *a, u16 n) {
-    a->subTime = n;
+void SetCounter(StageActor *a, u16 n) {
+    a->stateCount = n;
 }
 
-void func_8012AD6C(StageActor *a) {
-    a->subTime++;
+void IncCounter(StageActor *a) {
+    a->stateCount++;
 }
 
-inline void func_8012AD80(Mover *m) {
+inline void MoveObject(Mover *m) {
     m->vel[0] += m->accel[0];
     m->vel[1] += m->accel[1];
     m->vel[2] += m->accel[2];
@@ -1394,7 +1370,7 @@ inline void func_8012AD80(Mover *m) {
     m->pos[2].w += m->vel[2];
 }
 
-void func_8012ADE4(Mover *m) {
+void RestorePrevPos(Mover *m) {
     m->pos[0].w = m->prev[0].w;
     m->pos[1].w = m->prev[1].w;
     m->pos[2].w = m->prev[2].w;
@@ -1405,17 +1381,17 @@ typedef union {
     s32 w;
     struct { s16 x, y; } v;
 } XY;
-extern s32 func_80135888(ModelObj *model, void *hitData, SVECTOR *from, SVECTOR *to);
-extern s32 func_80134510(SVECTOR *p);
-extern s32 func_80013478(s16 *a, s16 *b);
-extern s32 func_800132BC(s16 *a, s16 *b);
+extern s32 PathHitsModel(ModelObj *model, void *hitData, SVECTOR *from, SVECTOR *to);
+extern s32 FindGround(SVECTOR *p);
+extern s32 PosSVecDistSq(s16 *a, s16 *b);
+extern s32 SVecDistSq(s16 *a, s16 *b);
 extern s32 rsin(s32 a);
 extern s32 rcos(s32 a);
 extern void ApplyMatrixLV(MATRIX *m, VECTOR *v0, VECTOR *v1);
 
 /* undo the move if the way from the last position to here crosses Musashi's model and he is nearer the last position */
-s32 func_8012AE00(Mover *m) {
-    Player *p = &D_80126B58;
+s32 UndoMoveIntoPlayer(Mover *m) {
+    Player *p = &g_Player;
     SVECTOR from;
     SVECTOR to;
     SVECTOR hit;
@@ -1426,10 +1402,10 @@ s32 func_8012AE00(Mover *m) {
     to.vy = m->pos[1].h.i;
     to.vz = m->pos[2].h.i;
     hit = to;
-    if (func_80135888(p->model, p->hitData, &from, &hit) == 0) {
+    if (PathHitsModel(p->model, p->hitData, &from, &hit) == 0) {
         return 0;
     }
-    if (func_80013478((s16 *)&p->pos, &from.vx) < func_80013478((s16 *)&p->pos, &to.vx)) {
+    if (PosSVecDistSq((s16 *)&p->pos, &from.vx) < PosSVecDistSq((s16 *)&p->pos, &to.vx)) {
         return 0;
     }
     m->pos[0].w = m->prev[0].w;
@@ -1439,7 +1415,7 @@ s32 func_8012AE00(Mover *m) {
 }
 
 /* the same against another object's model */
-s32 func_8012AF0C(Mover *m, Mover *o) {
+s32 UndoMoveIntoObject(Mover *m, Mover *o) {
     SVECTOR from;
     SVECTOR to;
     SVECTOR hit;
@@ -1451,13 +1427,13 @@ s32 func_8012AF0C(Mover *m, Mover *o) {
     to.vy = m->pos[1].h.i;
     to.vz = m->pos[2].h.i;
     hit = to;
-    if (func_80135888(o->model, o->hitData, &from, &hit) == 0) {
+    if (PathHitsModel(o->model, o->hitData, &from, &hit) == 0) {
         return 0;
     }
     at.vx = o->pos[0].h.i;
     at.vy = o->pos[1].h.i;
     at.vz = o->pos[2].h.i;
-    if (func_800132BC(&at.vx, &from.vx) < func_800132BC(&at.vx, &to.vx)) {
+    if (SVecDistSq(&at.vx, &from.vx) < SVecDistSq(&at.vx, &to.vx)) {
         return 0;
     }
     m->pos[0].w = m->prev[0].w;
@@ -1466,12 +1442,12 @@ s32 func_8012AF0C(Mover *m, Mover *o) {
     return 1;
 }
 
-s32 func_8012B030(Mover *m) {
+s32 SnapToGround(Mover *m) {
     SVECTOR p;
     p.vx = m->pos[0].h.i;
     p.vy = m->pos[1].h.i;
     p.vz = m->pos[2].h.i;
-    if (func_80134510(&p) == 0) {
+    if (FindGround(&p) == 0) {
         return 0;
     }
     m->pos[0].h.i = p.vx;
@@ -1482,7 +1458,7 @@ s32 func_8012B030(Mover *m) {
 }
 
 /* a 2D vector of length len at an angle (4096 a turn) */
-XY *func_8012B0B4(XY *out, s32 angle, s32 len) {
+XY *AngleToVec2(XY *out, s32 angle, s32 len) {
     XY v;
     angle = (angle - 0x400) & 0xFFF;
     v.v.x = (rcos(angle) * len) >> 12;
@@ -1492,12 +1468,12 @@ XY *func_8012B0B4(XY *out, s32 angle, s32 len) {
 }
 
 /* velocity from a vector in the model's frame */
-void func_8012B14C(Mover *m, VECTOR *v) {
+void SetLocalVelocity(Mover *m, VECTOR *v) {
     ApplyMatrixLV((MATRIX *)&m->model->coord.coord, v, (VECTOR *)m->vel);
 }
 
 /* velocity: straight ahead in the model's frame */
-void func_8012B178(Mover *m, s32 speed) {
+void SetForwardVelocity(Mover *m, s32 speed) {
     VECTOR v;
     v.vz = speed;
     v.vx = v.vy = 0;
@@ -1505,34 +1481,34 @@ void func_8012B178(Mover *m, s32 speed) {
 }
 
 /* the horizontal velocity from a vector in the model's frame */
-void func_8012B1B4(Mover *m, VECTOR *v) {
+void SetLocalVelocityXZ(Mover *m, VECTOR *v) {
     VECTOR w;
     ApplyMatrixLV((MATRIX *)&m->model->coord.coord, v, &w);
     m->vel[0] = w.vx;
     m->vel[2] = w.vz;
 }
 
-void func_8012B200(Mover *m) {
+void StopMotion(Mover *m) {
     m->vel[0] = m->vel[1] = m->vel[2] = 0;
     m->accel[0] = m->accel[1] = m->accel[2] = 0;
 }
 
 /* stop, with gravity 0.75 */
-void func_8012B21C(Mover *m) {
+void StopWithHalfGravity(Mover *m) {
     m->vel[0] = m->vel[1] = m->vel[2] = 0;
     m->accel[0] = m->accel[2] = 0;
     m->accel[1] = 0xC000;
 }
 
 /* stop, with gravity 1.5 */
-void func_8012B23C(Mover *m) {
+void StopWithGravity(Mover *m) {
     m->vel[0] = m->vel[1] = m->vel[2] = 0;
     m->accel[0] = m->accel[2] = 0;
     m->accel[1] = 0x18000;
 }
 
 /* the model follows: position plus offset */
-void func_8012B260(Mover *m) {
+void SyncModelPos(Mover *m) {
     ModelObj *o = m->model;
     o->coord.coord.t[0] = o->pos[0] = m->pos[0].h.i + m->ofs[0];
     o->coord.coord.t[1] = o->pos[1] = m->pos[1].h.i + m->ofs[1];
@@ -1544,8 +1520,8 @@ extern MATRIX *RotMatrix(SVECTOR *r, MATRIX *m);
 extern MATRIX *RotMatrixZYX(SVECTOR *r, MATRIX *m);
 extern MATRIX *RotMatrixYXZ(SVECTOR *r, MATRIX *m);
 
-/* the model's matrix from its rotation (ZYX), then the model follows (as func_8012B260) */
-inline void func_8012B2CC(Mover *m) {
+/* the model's matrix from its rotation (ZYX), then the model follows (as SyncModelPos) */
+inline void UpdateModelZYX(Mover *m) {
     ModelObj *o;
     if (m->model != NULL) {
         RotMatrixZYX(&m->model->rot, (MATRIX *)&m->model->coord.coord);
@@ -1557,8 +1533,8 @@ inline void func_8012B2CC(Mover *m) {
     }
 }
 
-/* the same in YXZ order, then the model follows (as func_8012B260) */
-void func_8012B370(Mover *m) {
+/* the same in YXZ order, then the model follows (as SyncModelPos) */
+void UpdateModelYXZ(Mover *m) {
     ModelObj *o;
     if (m->model != NULL) {
         RotMatrixYXZ(&m->model->rot, (MATRIX *)&m->model->coord.coord);
@@ -1570,8 +1546,8 @@ void func_8012B370(Mover *m) {
     }
 }
 
-/* the same with RotMatrix, then the model follows (as func_8012B260) */
-void func_8012B414(Mover *m) {
+/* the same with RotMatrix, then the model follows (as SyncModelPos) */
+void UpdateModelRot(Mover *m) {
     ModelObj *o;
     if (m->model != NULL) {
         RotMatrix(&m->model->rot, (MATRIX *)&m->model->coord.coord);
@@ -1584,52 +1560,44 @@ void func_8012B414(Mover *m) {
 }
 
 extern void Square0(VECTOR *in, VECTOR *out);
-extern s32 func_80013350(s16 *a, s16 *b);
-extern s32 (*D_801274D4)(Mover *m);    /* replaces the range test below when set */
-extern s32 D_801274E0;
-s32 func_8012B608(s32 a, s32 b, s32 n);
-s32 func_8012B6D4(Fixed *a, Fixed *b);
-s32 func_8012B864(Mover *m);
-s32 func_8012B8A4(Mover *m);
-s32 func_8012BDBC(Mover *m, s16 range);
-s32 func_8012BE98(Mover *m, SVECTOR *p);
+extern s32 PosDistSq(s16 *a, s16 *b);
+extern s32 (*g_FarTest)(Mover *m);    /* replaces the range test below when set */
+extern s32 g_FarDistSq;
+s32 TurnStep(s32 a, s32 b, s32 n);
+s32 HeadingTo(Fixed *a, Fixed *b);
+s32 HeadingToTarget(Mover *m);
+s32 HeadingToPlayer(Mover *m);
+s32 TargetInFront(Mover *m, s16 range);
+s32 GroundDistSqTo(Mover *m, SVECTOR *p);
 
-extern StageActor D_80120194[97];   /* the actor table; slot 0 is never handed out */
+extern StageActor g_ActorSlots[97];   /* the actor table; slot 0 is never handed out */
 extern ModelObj D_800B3DF0[];       /* the end of the model pool */
-extern u8 *func_8001CFDC(s32 a, s32 b);
-void func_8012C218(StageActor *a);
+extern u8 *AllocModelInRange(s32 a, s32 b);
+void FreeActor(StageActor *a);
 
-extern u8 D_80078EAE[];         /* nonzero: init values taken as they are (else x1.5) */
-extern void func_8001C214(u8 *o, void *data);
+extern u8 g_Daytime[];         /* nonzero: init values taken as they are (else x1.5) */
+extern void InitModel(u8 *o, void *data);
 extern void func_8001C810(u8 *o, void *data);
-void func_8012CAE4(StageActor *a);
-StageActor *func_8012C284(StageActor *a);
-StageActor *func_8012C890(SpawnDef *d, StageActor *a, StageActor *parent);
-/* an actor's set-up record */
-typedef struct {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ u16 flags5C;
-    /* 0x4 */ void *model;          /* the model's data (none: no model) */
-    /* 0x8 */ u32 hitData;
-    /* 0xC */ u8 pad0C[0x24];
-    /* 0x30 */ s16 damageScale;     /* 0x1000 = damage as dealt (func_8012E9C0) */
-} ActorInit;
+void RejectSpawn(StageActor *a);
+StageActor *FindFreeActorAfter(StageActor *a);
+StageActor *InitSpawnedActor(SpawnDef *d, StageActor *a, StageActor *parent);
+/* an actor's set-up record: ActorInit (include/game.h) */
 
-StageActor *func_8012C31C(void);
-StageActor *func_8012C51C(SpawnDef *d, StageActor *parent);
-StageActor *func_8012C724(SpawnDef *d, StageActor *a);
+StageActor *FindLastFreeActor(void);
+StageActor *SpawnActorFromDef(SpawnDef *d, StageActor *parent);
+StageActor *SpawnActorFromDefAt(SpawnDef *d, StageActor *a);
 
 extern u8 D_80190D1C[];         /* the default init record */
-extern s16 D_801270C4[];        /* the next actor id */
-extern u16 D_801274E4[];        /* bit 0: the kind's set-up turned the actor down */
-extern void (**D_8011DB08)(StageActor *a);   /* the set-up handler of each kind */
+extern s16 g_NextActorId[];        /* the next actor id */
+extern u16 g_SpawnRejected[];        /* bit 0: the kind's set-up turned the actor down */
+extern void (**g_ActorHandlers)(StageActor *a);   /* the set-up handler of each kind */
 
 extern SVECTOR D_800D3918;      /* no offset */
-s32 func_8012CC88(Mover *m, s32 mode, SVECTOR *ofs);
+s32 MoveCollideOfs(Mover *m, s32 mode, SVECTOR *ofs);
 
-void func_8012AD80(Mover *m);
-s32 func_8012CEB0(SVECTOR *from, SVECTOR *to, s32 mode);
-extern s32 func_80133784(s16 mode, SVECTOR *from, SVECTOR *to);
+void MoveObject(Mover *m);
+s32 CollidePath(SVECTOR *from, SVECTOR *to, s32 mode);
+extern s32 TraceMap(s16 mode, SVECTOR *from, SVECTOR *to);
 extern u8 *AllocPrim(s32 n);
 extern void SetPolyF3(POLY_F3 *p);
 extern void SetRotMatrix(MATRIX *m);
@@ -1641,70 +1609,70 @@ extern void SetLineF2(LINE_F2 *p);
 extern void RotTransSV(SVECTOR *in, SVECTOR *out, s32 *flag);
 extern u8 D_8018D848[];
 void func_8012D098(StageActor *a, s32 n);
-s32 func_8012D664(SVECTOR *p, s32 r, s32 x);
-s32 func_8012DEB8(StageActor *a, SVECTOR *p0, SVECTOR *p1);
-s32 func_8012DF34(StageActor *a, SVECTOR *w0, SVECTOR *w1);
-void func_8012F568(s32 flags, s32 b, s32 facing, s32 v, SVECTOR *p0, void *p1);
+s32 PointHitsPlayer(SVECTOR *p, s32 r, s32 x);
+s32 ActorSegmentHitsPlayer(StageActor *a, SVECTOR *p0, SVECTOR *p1);
+s32 SegmentHitsPlayer(StageActor *a, SVECTOR *w0, SVECTOR *w1);
+void HitPlayer(s32 flags, s32 b, s32 facing, s32 v, SVECTOR *p0, void *p1);
 void FaceHelper(StageActor *a, SVECTOR *in, SVECTOR *out);
 
 extern StageActor *D_801ED364;  /* the actor iterator's cursor */
 extern StageActor *D_801ED360;  /* the actor it skips */
-extern u8 D_801152A8[];
-void func_8012E014(StageActor *a);
-void func_8012E138(StageActor *a);
+extern u8 g_GroundNormal[];
+void CarryPlayerExact(StageActor *a);
+void CarryPlayerClipped(StageActor *a);
 
 extern u16 GetTPage(s32 tp, s32 abr, s32 x, s32 y);
 extern void SetDrawMode(void *p, s32 dfe, s32 dtd, s32 tpage, RECT *tw);
-void func_8012E32C(void);
+void LoadWorldScreenMatrix(void);
 
-extern s32 D_80126B5C;          /* his position words (read on their own here: as the struct, CSE folds them to one base) */
+extern s32 g_PlayerPosX;          /* his position words (read on their own here: as the struct, CSE folds them to one base) */
 extern s32 D_80126B60;
 extern s32 D_80126B64;
-extern s16 D_80126B5E;          /* and their whole-unit halves */
+extern s16 g_PlayerX;          /* and their whole-unit halves */
 extern s16 D_80126B62;
 extern s16 D_80126B66;
-void func_8012B2CC(Mover *m);
-void func_8012F0BC(MATRIX *m, VECTOR *in, VECTOR *out);
-void func_8012F1A4(MATRIX *m, VECTOR *in, VECTOR *out);
-void func_8012F038(MATRIX *m, SVECTOR *in, SVECTOR *out);
-void func_8012F14C(MATRIX *m, SVECTOR *in, SVECTOR *out);
+void UpdateModelZYX(Mover *m);
+void WorldToLocal16(MATRIX *m, VECTOR *in, VECTOR *out);
+void LocalToWorld16(MATRIX *m, VECTOR *in, VECTOR *out);
+void WorldToLocal(MATRIX *m, SVECTOR *in, SVECTOR *out);
+void LocalToWorld(MATRIX *m, SVECTOR *in, SVECTOR *out);
 
 extern s32 D_801ED358;          /* the squash scale (0x1000 = 1.0) */
 extern s32 D_801ED35C;
-void func_8012E5CC(SVECTOR *v, u16 a, u16 b);
+void PlaySoundAtPoint(SVECTOR *v, u16 a, u16 b);
 
 extern u8 D_8018D860[];
 extern void StartRumbleScript(u8 *p);
-void func_8016AA50(StageActor *a, s32 n);
-void func_8016B428(StageActor *a);
+void ShowDamage(StageActor *a, s32 n);
+void ShowDefeat(StageActor *a);
 
-extern s32 func_8002A4FC(void);
+extern s32 GetStat1Value(void);
 extern void ApplyTransposeMatrixLV(MATRIX *m, VECTOR *v0, VECTOR *v1);
-s32 func_8012EFB8(SVECTOR *v, s32 *sxy);
+s32 ProjectPoint(SVECTOR *v, s32 *sxy);
 
-extern void func_80015978(Fixed *pos, SVECTOR *out);
-extern void func_80015954(SVECTOR *in, Fixed *pos);
+extern void PosToSVec(Fixed *pos, SVECTOR *out);
+extern void SVecToPos(SVECTOR *in, Fixed *pos);
 
-s32 *func_8012F40C(s32 *out, SVECTOR *v);
+s32 *ScreenPos(s32 *out, SVECTOR *v);
 
 extern SVECTOR D_8018D850;
 extern u8 D_8018D858[];
-extern void func_8014C978();
+extern void SetFatalHit();
 
 extern MATRIX *RotMatrixX(s32 r, MATRIX *m);
 extern MATRIX *RotMatrixY(s32 r, MATRIX *m);
 extern MATRIX *RotMatrixZ(s32 r, MATRIX *m);
-extern MATRIX D_800AE620;       /* an identity matrix (BSS, filled at boot) */
+extern MATRIX GsIDMATRIX;       /* an identity matrix (BSS, filled at boot) */
 
 /* the model matrix from the rotation (X, Z, Y) and the position from the 16.16 position plus the offset.
    Matched 17 Oct: the identity copy inside `do { } while (0)` (a macro in the original, docs/decomp_recipes.md) */
-void func_8012B4B8(Mover *m) {
+void UpdateModelXZY(Mover *m) {
     ModelObj *o;
     ModelObj *p;
     MATRIX mat;
     o = m->model;
     if (o != NULL) {
-        do { mat = D_800AE620; } while (0);  /* a loop's end note ends cse's block: each RotMatrix call recomputes &mat */
+        do { mat = GsIDMATRIX; } while (0);  /* a loop's end note ends cse's block: each RotMatrix call recomputes &mat */
         RotMatrixX(o->rot.vx, &mat);
         RotMatrixZ(o->rot.vz, &mat);
         RotMatrixY(o->rot.vy, &mat);
@@ -1719,8 +1687,8 @@ void func_8012B4B8(Mover *m) {
 
 /* a step from angle a toward angle b (4096 a turn, the short way round): the difference over n, at least 1.
    b is never assigned (the masked heading is a local): the inliner then keeps the parameter read-only and does not copy
-   the argument, which func_8012BB3C needs (docs/decomp_recipes.md) */
-inline s32 func_8012B608(s32 a, s32 b, s32 n) {
+   the argument, which TurnStepToward needs (docs/decomp_recipes.md) */
+inline s32 TurnStep(s32 a, s32 b, s32 n) {
     s32 d;
     s32 t;
     s32 h;
@@ -1753,20 +1721,20 @@ inline s32 func_8012B608(s32 a, s32 b, s32 n) {
 }
 
 /* headings (4096 a turn) from one point to another on the ground */
-inline s32 func_8012B6D4(Fixed *a, Fixed *b) {
+inline s32 HeadingTo(Fixed *a, Fixed *b) {
     return (ratan2(a[2].h.i - b[2].h.i, b[0].h.i - a[0].h.i) - 0x400) & 0xFFF;
 }
 
-s32 func_8012B70C(SVECTOR *a, SVECTOR *b) {
+s32 HeadingToSV(SVECTOR *a, SVECTOR *b) {
     return (ratan2(a->vz - b->vz, b->vx - a->vx) - 0x400) & 0xFFF;
 }
 
-s32 func_8012B744(Fixed *a, SVECTOR *b) {
+s32 HeadingToPoint(Fixed *a, SVECTOR *b) {
     return (ratan2(a[2].h.i - b->vz, b->vx - a[0].h.i) - 0x400) & 0xFFF;
 }
 
 /* the heading (high half) and pitch (low half) from a to b */
-XY *func_8012B77C(XY *out, Fixed *a, Fixed *b) {
+XY *HeadingPitchTo(XY *out, Fixed *a, Fixed *b) {
     XY v;
     s32 dz = b[2].h.i - a[2].h.i;
     s32 dx = b[0].h.i - a[0].h.i;
@@ -1783,37 +1751,37 @@ XY *func_8012B77C(XY *out, Fixed *a, Fixed *b) {
 }
 
 /* the heading from an object to Musashi's other point */
-inline s32 func_8012B864(Mover *m) {
-    return (ratan2(m->pos[2].h.i - D_80126B58.unk15C[2], D_80126B58.unk15C[0] - m->pos[0].h.i) - 0x400) & 0xFFF;
+inline s32 HeadingToTarget(Mover *m) {
+    return (ratan2(m->pos[2].h.i - g_Player.point[2], g_Player.point[0] - m->pos[0].h.i) - 0x400) & 0xFFF;
 }
 
 /* the heading from an object to Musashi */
-inline s32 func_8012B8A4(Mover *m) {
-    return (ratan2(m->pos[2].h.i - D_80126B58.pos[2].h.i, D_80126B58.pos[0].h.i - m->pos[0].h.i) - 0x400) & 0xFFF;
+inline s32 HeadingToPlayer(Mover *m) {
+    return (ratan2(m->pos[2].h.i - g_Player.pos[2].h.i, g_Player.pos[0].h.i - m->pos[0].h.i) - 0x400) & 0xFFF;
 }
 
 /* a turn step for the model toward Musashi's other point */
-s32 func_8012B8E4(Mover *m, s16 n) {
-    return func_8012B608(m->model->rot.vy, func_8012B864(m), n);
+s32 TurnStepToTarget(Mover *m, s16 n) {
+    return TurnStep(m->model->rot.vy, HeadingToTarget(m), n);
 }
 
 /* a turn step for the model toward Musashi */
-s32 func_8012BA10(Mover *m, s16 n) {
-    return func_8012B608(m->model->rot.vy, func_8012B8A4(m), n);
+s32 TurnStepToPlayer(Mover *m, s16 n) {
+    return TurnStep(m->model->rot.vy, HeadingToPlayer(m), n);
 }
 
-extern StageActor D_801202A0[];     /* the actor table from slot 1 (its own symbol: func_8012C2D0) */
+extern StageActor g_Actors[];     /* the actor table from slot 1 (its own symbol: FindFreeActor) */
 
 /* a turn step from an angle toward the heading from a to b. Matched 17 Oct, night: the heading in a local before the call (its
-   `- 0x400` is then emitted at once, not deferred to the inline's parameter copy) and func_8012B608's b never assigned
+   `- 0x400` is then emitted at once, not deferred to the inline's parameter copy) and TurnStep's b never assigned
    (docs/decomp_recipes.md) */
-s16 func_8012BB3C(Fixed *a, Fixed *b, s32 cur, s16 n) {
+s16 TurnStepToward(Fixed *a, Fixed *b, s32 cur, s16 n) {
     s32 h = ratan2(a[2].h.i - b[2].h.i, b[0].h.i - a[0].h.i) - 0x400;
-    return func_8012B608(cur, h, n);
+    return TurnStep(cur, h, n);
 }
 
 /* squared distance between two 16.16 points (integer parts) */
-s32 func_8012BC60(Fixed *a, Fixed *b) {
+s32 DistSq(Fixed *a, Fixed *b) {
     VECTOR d;
     d.vx = a[0].h.i - b[0].h.i;
     d.vy = a[1].h.i - b[1].h.i;
@@ -1823,38 +1791,38 @@ s32 func_8012BC60(Fixed *a, Fixed *b) {
 }
 
 /* squared distance to Musashi's other point, or the most there is when it is not set */
-s32 func_8012BCCC(Mover *m) {
-    Player *p = &D_80126B58;
-    if (p->unk162 != 0) {
+s32 DistSqToTarget(Mover *m) {
+    Player *p = &g_Player;
+    if (p->pointUnset != 0) {
         return 0x7FFFFFFF;
     }
-    return func_80013478((s16 *)m->pos, p->unk15C);
+    return PosSVecDistSq((s16 *)m->pos, p->point);
 }
 
 /* squared distance to Musashi */
-s32 func_8012BD14(Mover *m) {
-    return func_80013350((s16 *)m->pos, (s16 *)D_80126B58.pos);
+s32 DistSqToPlayer(Mover *m) {
+    return PosDistSq((s16 *)m->pos, (s16 *)g_Player.pos);
 }
 
-/* func_8012BCCC's test as func_8012BD3C has it inlined (its own copy: the address is not taken through a pointer) */
+/* DistSqToTarget's test as TargetInSight has it inlined (its own copy: the address is not taken through a pointer) */
 static inline s32 point2_dist(Mover *m) {
-    if (D_80126B58.unk162 != 0) {
+    if (g_Player.pointUnset != 0) {
         return 0x7FFFFFFF;
     }
-    return func_80013478((s16 *)m->pos, D_80126B58.unk15C);
+    return PosSVecDistSq((s16 *)m->pos, g_Player.point);
 }
 
 /* Musashi's other point is within dist (squared) and within range of the model's facing */
-s32 func_8012BD3C(Mover *m, s16 range, s32 dist) {
+s32 TargetInSight(Mover *m, s16 range, s32 dist) {
     if (point2_dist(m) > dist) {
         return 0;
     }
-    return func_8012BDBC(m, range);
+    return TargetInFront(m, range);
 }
 
 /* Musashi's other point is within range of the model's facing */
-s32 func_8012BDBC(Mover *m, s16 range) {
-    s32 d = (func_8012B864(m) - m->model->rot.vy) & 0xFFF;
+s32 TargetInFront(Mover *m, s16 range) {
+    s32 d = (HeadingToTarget(m) - m->model->rot.vy) & 0xFFF;
     if (d < 0x800) {
         return d < range;
     }
@@ -1862,16 +1830,16 @@ s32 func_8012BDBC(Mover *m, s16 range) {
 }
 
 /* squared distance to Musashi on the ground */
-s32 func_8012BE54(Mover *m) {
+s32 GroundDistSqToPlayer(Mover *m) {
     SVECTOR p;
-    p.vx = D_80126B58.pos[0].h.i;
-    p.vy = D_80126B58.pos[1].h.i;
-    p.vz = D_80126B58.pos[2].h.i;
-    return func_8012BE98(m, &p);
+    p.vx = g_Player.pos[0].h.i;
+    p.vy = g_Player.pos[1].h.i;
+    p.vz = g_Player.pos[2].h.i;
+    return GroundDistSqTo(m, &p);
 }
 
 /* squared distance to a point on the ground (heights left out) */
-s32 func_8012BE98(Mover *m, SVECTOR *p) {
+s32 GroundDistSqTo(Mover *m, SVECTOR *p) {
     SVECTOR a;
     SVECTOR b;
     a.vx = m->pos[0].h.i;
@@ -1880,11 +1848,11 @@ s32 func_8012BE98(Mover *m, SVECTOR *p) {
     b.vx = p->vx;
     b.vy = 0;
     b.vz = p->vz;
-    return func_800132BC(&a.vx, &b.vx);
+    return SVecDistSq(&a.vx, &b.vx);
 }
 
 /* count the timer down: 1 when it is (or reaches) 0 */
-s32 func_8012BEE8(Mover *m) {
+s32 TickTimer(Mover *m) {
     if (m->timer != 0) {
         return --m->timer == 0;
     }
@@ -1892,7 +1860,7 @@ s32 func_8012BEE8(Mover *m) {
 }
 
 /* the same, restarting it at n when it runs out */
-s32 func_8012BF10(Mover *m, s32 n) {
+s32 TickTimerReload(Mover *m, s32 n) {
     s32 r;
     if (m->timer == 0) {
         r = 1;
@@ -1906,83 +1874,83 @@ s32 func_8012BF10(Mover *m, s32 n) {
     return 0;
 }
 
-void func_8012BF4C(Mover *m, s32 n) {
+void SetMoverTimer(Mover *m, s32 n) {
     m->timer = n;
 }
 
-void func_8012BF54(Mover *m) {
-    m->flags5C |= 0x8000;
+void SetHittable(Mover *m) {
+    m->hitState |= 0x8000;
 }
 
-void func_8012BF68(Mover *m) {
-    m->flags5C &= 0x7FFF;
+void ClearHittable(Mover *m) {
+    m->hitState &= 0x7FFF;
 }
 
 /* far from Musashi's focus in depth (0x360 or more) */
-s32 func_8012BF7C(Mover *m) {
+s32 IsFarInDepth(Mover *m) {
     s32 d;
-    if ((d = m->pos[2].h.i - D_80126B58.focus[2]) < 0) {
+    if ((d = m->pos[2].h.i - g_Player.focus[2]) < 0) {
         d = -d;
     }
     return d >= 0x360;
 }
 
 /* far from Musashi's focus (squared distance over 0xFFFFF) */
-s32 func_8012BFA8(Mover *m) {
+s32 IsFarFromFocus(Mover *m) {
     s32 v[3];
     s32 r[3];
-    v[0] = D_80126B58.focus[0] - m->pos[0].h.i;
-    v[1] = D_80126B58.focus[1] - m->pos[1].h.i;
-    v[2] = D_80126B58.focus[2] - m->pos[2].h.i;
+    v[0] = g_Player.focus[0] - m->pos[0].h.i;
+    v[1] = g_Player.focus[1] - m->pos[1].h.i;
+    v[2] = g_Player.focus[2] - m->pos[2].h.i;
     gte_ldlvl(v);
     gte_sqr0();
     gte_stlvnl(r);
     return r[0] + r[1] + r[2] > 0xFFFFF;
 }
 
-/* in range of Musashi's focus: at least D_801274E0 (squared), or the stage's own test when it set one */
-s32 func_8012C044(Mover *m) {
-    if (D_801274D4 != NULL) {
-        return D_801274D4(m);
+/* in range of Musashi's focus: at least g_FarDistSq (squared), or the stage's own test when it set one */
+s32 IsActorFar(Mover *m) {
+    if (g_FarTest != NULL) {
+        return g_FarTest(m);
     }
-    return func_80013478((s16 *)m->pos, D_80126B58.focus) >= D_801274E0;
+    return PosSVecDistSq((s16 *)m->pos, g_Player.focus) >= g_FarDistSq;
 }
 
 /* free an actor; one marked 0x8000 also marks its spawn definition as free again */
-inline void func_8012C098(StageActor *a) {
+inline void DespawnActor(StageActor *a) {
     if (a->def != NULL && ((s16)a->animFlags & 0x8000)) {
         a->def->flags &= 0x7FFF;
     }
-    func_8012C218(a);
+    FreeActor(a);
 }
 
-/* func_8012C044's test as func_8012C0EC has it inlined (its own copy, the test the other way round) */
+/* IsActorFar's test as DespawnIfFar has it inlined (its own copy, the test the other way round) */
 static inline s32 in_range(Mover *m) {
-    if (D_801274D4 == NULL) {
-        return func_80013478((s16 *)m->pos, D_80126B58.focus) >= D_801274E0;
+    if (g_FarTest == NULL) {
+        return PosSVecDistSq((s16 *)m->pos, g_Player.focus) >= g_FarDistSq;
     }
-    return D_801274D4(m);
+    return g_FarTest(m);
 }
 
 /* free the actor if it is in range of Musashi's focus */
-s32 func_8012C0EC(StageActor *a) {
+s32 DespawnIfFar(StageActor *a) {
     if (!in_range((Mover *)a)) {
         return 0;
     }
-    func_8012C098(a);
+    DespawnActor(a);
     return 1;
 }
 
-u8 *func_8012C194(void) {
-    return func_8001D074(0x3E, 0x7D);
+u8 *AllocActorSprite(void) {
+    return AllocSpriteInRange(0x3E, 0x7D);
 }
 
-u8 *func_8012C1B8(void) {
-    return func_8001CFDC(0x26, 0x85);
+u8 *AllocActorModel(void) {
+    return AllocModelInRange(0x26, 0x85);
 }
 
 /* the next free model after this actor's */
-ModelObj *func_8012C1DC(StageActor *a) {
+ModelObj *NextFreeModel(StageActor *a) {
     ModelObj *o;
     ModelObj *end = D_800B3DF0;
     for (o = a->model + 1; o != end; o++) {
@@ -1994,31 +1962,31 @@ ModelObj *func_8012C1DC(StageActor *a) {
 }
 
 /* clear an actor and its model */
-inline void func_8012C218(StageActor *a) {
+inline void FreeActor(StageActor *a) {
     ModelObj *o = a->model;
     if (o != NULL) {
         switch (o->type) {
         case 2:
-            func_80016714(o, 0x38);
+            ZeroFill(o, 0x38);
             break;
         case 1:
-            func_80016714(o, 0x84);
+            ZeroFill(o, 0x84);
             break;
         }
     }
-    func_80016714(a, sizeof(StageActor));
+    ZeroFill(a, sizeof(StageActor));
 }
 
 /* the next free actor after a (from the first when a is NULL) */
-inline StageActor *func_8012C284(StageActor *a) {
-    StageActor *end = &D_80120194[97];
+inline StageActor *FindFreeActorAfter(StageActor *a) {
+    StageActor *end = &g_ActorSlots[97];
     if (a == NULL) {
-        a = &D_80120194[1];
+        a = &g_ActorSlots[1];
     } else {
         a++;
     }
     for (; a != end; a++) {
-        if (a->state == 0) {
+        if (a->kind == 0) {
             return a;
         }
     }
@@ -2027,9 +1995,9 @@ inline StageActor *func_8012C284(StageActor *a) {
 
 /* the first free actor slot (slot 0 is never handed out). Matched 17 Oct: the start of the search as a separate
    single-use pointer to its own symbol and the base as the loop variable itself (docs/decomp_recipes.md) */
-inline StageActor *func_8012C2D0(void) {
-    StageActor *first = D_801202A0;
-    StageActor *a = D_80120194;
+inline StageActor *FindFreeActor(void) {
+    StageActor *first = g_Actors;
+    StageActor *a = g_ActorSlots;
     StageActor *end;
     goto test;
 found:
@@ -2037,7 +2005,7 @@ found:
 test:
     end = a + 97;
     for (a = first; a != end; a++) {
-        if (a->state == 0) {
+        if (a->kind == 0) {
             goto found;
         }
     }
@@ -2045,35 +2013,35 @@ test:
 }
 
 /* the last free actor */
-inline StageActor *func_8012C31C(void) {
+inline StageActor *FindLastFreeActor(void) {
     StageActor *a;
-    StageActor *end = D_80120194;
+    StageActor *end = g_ActorSlots;
     for (a = end + 96; a != end; a--) {
-        if (a->state == 0) {
+        if (a->kind == 0) {
             return a;
         }
     }
     return NULL;
 }
 
-/* set an actor up from its init record, with a model (func_8001C214's kind); 0 when no model is free */
-s32 func_8012C354(StageActor *a, ActorInit *init) {
-    u8 *o;
+/* set an actor up from its init record, with a model (InitModel's kind); 0 when no model is free */
+s32 SetupActor(StageActor *a, ActorInit *init) {
+    ModelObj *o;
     a->init = init;
-    if (D_80078EAE[0] == 0) {
-        a->unk76 = init->unk0 * 24 / 16;
+    if (g_Daytime[0] == 0) {
+        a->hp = init->hp * 24 / 16;
     } else {
-        a->unk76 = init->unk0;
+        a->hp = init->hp;
     }
-    a->flags5C = init->flags5C;
+    a->hitState = init->hitState;
     if (init->model != NULL) {
-        o = func_8001CFDC(0x26, 0x85);
+        o = AllocModelInRange(0x26, 0x85);
         a->model = (ModelObj *)o;
         if (o == NULL) {
-            func_8012CAE4(a);
+            RejectSpawn(a);
             return 0;
         }
-        func_8001C214(o, init->model);
+        InitModel(o, init->model);
     }
     if (init->hitData != 0) {
         a->hitData = init->hitData | 0x60000000;
@@ -2082,20 +2050,20 @@ s32 func_8012C354(StageActor *a, ActorInit *init) {
 }
 
 /* the same with func_8001C810's kind of model */
-s32 func_8012C438(StageActor *a, ActorInit *init) {
-    u8 *o;
+s32 SetupActorTrans(StageActor *a, ActorInit *init) {
+    ModelObj *o;
     a->init = init;
-    if (D_80078EAE[0] == 0) {
-        a->unk76 = init->unk0 * 24 / 16;
+    if (g_Daytime[0] == 0) {
+        a->hp = init->hp * 24 / 16;
     } else {
-        a->unk76 = init->unk0;
+        a->hp = init->hp;
     }
-    a->flags5C = init->flags5C;
+    a->hitState = init->hitState;
     if (init->model != NULL) {
-        o = func_8001CFDC(0x26, 0x85);
+        o = AllocModelInRange(0x26, 0x85);
         a->model = (ModelObj *)o;
         if (o == NULL) {
-            func_8012CAE4(a);
+            RejectSpawn(a);
             return 0;
         }
         func_8001C810(o, init->model);
@@ -2107,18 +2075,18 @@ s32 func_8012C438(StageActor *a, ActorInit *init) {
 }
 
 /* spawn from a definition into the next free actor after parent */
-inline StageActor *func_8012C51C(SpawnDef *d, StageActor *parent) {
-    StageActor *a = func_8012C284(parent);
+inline StageActor *SpawnActorFromDef(SpawnDef *d, StageActor *parent) {
+    StageActor *a = FindFreeActorAfter(parent);
     if (a == NULL) {
         return 0;
     }
-    return func_8012C890(d, a, parent);
+    return InitSpawnedActor(d, a, parent);
 }
 
 /* spawn an actor of a kind at the parent's position (or the origin) */
-StageActor *func_8012C588(s16 kind, StageActor *parent) {
+StageActor *SpawnActor(s16 kind, StageActor *parent) {
     SpawnDef d;
-    if (parent != NULL && parent->state != 0) {
+    if (parent != NULL && parent->kind != 0) {
         d.x = parent->pos[0].h.i;
         d.y = parent->pos[1].h.i;
         d.z = parent->pos[2].h.i;
@@ -2129,13 +2097,13 @@ StageActor *func_8012C588(s16 kind, StageActor *parent) {
     d.unk8 = d.flags = 0;
     d.unkE = d.unk10 = 0;
     d.unkC = 0x7FFF;
-    return func_8012C51C(&d, parent);
+    return SpawnActorFromDef(&d, parent);
 }
 
 /* spawn an actor of a kind (with its second value) at the parent's position (or the origin) */
-StageActor *func_8012C658(s16 kind, s16 unk8, StageActor *parent) {
+StageActor *SpawnActorArg(s16 kind, s16 unk8, StageActor *parent) {
     SpawnDef d;
-    if (parent != NULL && parent->state != 0) {
+    if (parent != NULL && parent->kind != 0) {
         d.x = parent->pos[0].h.i;
         d.y = parent->pos[1].h.i;
         d.z = parent->pos[2].h.i;
@@ -2147,26 +2115,26 @@ StageActor *func_8012C658(s16 kind, s16 unk8, StageActor *parent) {
     d.flags = 0;
     d.unkE = d.unk10 = 0;
     d.unkC = 0x7FFF;
-    return func_8012C51C(&d, parent);
+    return SpawnActorFromDef(&d, parent);
 }
 
 /* spawn from a definition, marking it as out */
-inline StageActor *func_8012C724(SpawnDef *d, StageActor *a) {
+inline StageActor *SpawnActorFromDefAt(SpawnDef *d, StageActor *a) {
     d->flags |= 0x8000;
-    return func_8012C890(d, a, NULL);
+    return InitSpawnedActor(d, a, NULL);
 }
 
 /* spawn from a definition into the last free actor (flag 0x800) or the first. Matched 17 Oct, night: the result doubles as the
    first-free search's end (`a = p + 97`, so the loop pointer conflicts with it and cannot inherit its a1 preference), and
-   the call arm is written first with func_8012C724's body (jump.c swaps the arms of an if/else whose arms both end in a
+   the call arm is written first with SpawnActorFromDefAt's body (jump.c swaps the arms of an if/else whose arms both end in a
    jump to the same place, docs/decomp_recipes.md) */
-StageActor *func_8012C750(SpawnDef *d) {
+StageActor *SpawnFromDef(SpawnDef *d) {
     StageActor *a;
     if (d->flags & 0x800) {
-        a = func_8012C31C();
+        a = FindLastFreeActor();
     } else {
-        StageActor *first = D_801202A0;
-        StageActor *p = D_80120194;
+        StageActor *first = g_Actors;
+        StageActor *p = g_ActorSlots;
         goto test;
 found:
         a = p;
@@ -2174,7 +2142,7 @@ found:
 test:
         a = p + 97;
         for (p = first; p != a; p++) {
-            if (p->state == 0) {
+            if (p->kind == 0) {
                 goto found;
             }
         }
@@ -2183,37 +2151,37 @@ test:
 done:
     if (a != NULL) {
         d->flags |= 0x8000;
-        return func_8012C890(d, a, NULL);
+        return InitSpawnedActor(d, a, NULL);
     }
     return 0;
 }
 
 /* spawn from a definition into the last free actor */
 StageActor *func_8012C820(SpawnDef *d) {
-    StageActor *a = func_8012C31C();
+    StageActor *a = FindLastFreeActor();
     if (a == NULL) {
         return 0;
     }
-    return func_8012C724(d, a);
+    return SpawnActorFromDefAt(d, a);
 }
 
 /* make an actor from a spawn definition: position, flags and message from it, a serial id, the parent or the definition
    linked, then the kind's set-up handler. NULL (and the actor cleared, the definition free again) when that turns it down */
-StageActor *func_8012C890(SpawnDef *d, StageActor *a, StageActor *parent) {
+StageActor *InitSpawnedActor(SpawnDef *d, StageActor *a, StageActor *parent) {
     u16 *flg;
-    a->state = d->kind;
+    a->kind = d->kind;
     a->origin[0] = a->pos[0].h.i = d->x;
     a->origin[1] = a->pos[1].h.i = d->y;
     a->origin[2] = a->pos[2].h.i = d->z;
     a->pos[0].h.frac = a->pos[1].h.frac = a->pos[2].h.frac = 0;
-    a->unk70 = d->unk8;
+    a->param = d->unk8;
     a->animFlags = d->flags & 0xF7FF;
     a->unkFC = d->unkE;
-    a->messages[0] = (void *)d->unk10;
+    a->message = (void *)d->unk10;
     a->init = D_80190D1C;
-    a->id = D_801270C4[0];
-    if (++D_801270C4[0] == 0) {
-        D_801270C4[0] = 1;
+    a->id = g_NextActorId[0];
+    if (++g_NextActorId[0] == 0) {
+        g_NextActorId[0] = 1;
     }
     if (parent != NULL) {
         a->parent = parent;
@@ -2223,12 +2191,12 @@ StageActor *func_8012C890(SpawnDef *d, StageActor *a, StageActor *parent) {
         a->def = d;
     }
     d->flags |= 0x8000;
-    a->sub = 0;
-    flg = D_801274E4;
+    a->state = 0;
+    flg = g_SpawnRejected;
     *flg &= 0xFFFE;
-    D_8011DB08[a->state](a);
+    g_ActorHandlers[a->kind](a);
     if (*flg & 1) {
-        func_8012C218(a);
+        FreeActor(a);
         d->flags &= 0x7FFF;
         return NULL;
     }
@@ -2244,9 +2212,9 @@ StageActor *func_8012C890(SpawnDef *d, StageActor *a, StageActor *parent) {
 }
 
 /* a kind's set-up turns its actor down: flag it for the spawner and clear the actor */
-void func_8012CAE4(StageActor *a) {
-    D_801274E4[0] |= 1;
-    func_8012C218(a);
+void RejectSpawn(StageActor *a) {
+    g_SpawnRejected[0] |= 1;
+    FreeActor(a);
 }
 
 s32 func_8012CB64(SVECTOR *p, s32 x0, s32 x1, s32 z0, s32 z1) {
@@ -2254,33 +2222,33 @@ s32 func_8012CB64(SVECTOR *p, s32 x0, s32 x1, s32 z0, s32 z1) {
     return 0;
 }
 
-s32 func_8012CBA4(Mover *m) {
-    return func_8012CC88(m, 0, &D_800D3918);
+s32 MoveOnGround(Mover *m) {
+    return MoveCollideOfs(m, 0, &D_800D3918);
 }
 
-s32 func_8012CBCC(Mover *m) {
-    return func_8012CC88(m, 1, &D_800D3918);
+s32 MoveCollide(Mover *m) {
+    return MoveCollideOfs(m, 1, &D_800D3918);
 }
 
-s32 func_8012CBF4(Mover *m) {
-    return func_8012CC88(m, 0x11, &D_800D3918);
+s32 MoveCollidePassable(Mover *m) {
+    return MoveCollideOfs(m, 0x11, &D_800D3918);
 }
 
-s32 func_8012CC1C(Mover *m, SVECTOR *ofs) {
-    return func_8012CC88(m, 0, ofs);
+s32 MoveOnGroundOfs(Mover *m, SVECTOR *ofs) {
+    return MoveCollideOfs(m, 0, ofs);
 }
 
-s32 func_8012CC40(Mover *m, SVECTOR *ofs) {
-    return func_8012CC88(m, 1, ofs);
+s32 MoveCollideAt(Mover *m, SVECTOR *ofs) {
+    return MoveCollideOfs(m, 1, ofs);
 }
 
-s32 func_8012CC64(Mover *m, SVECTOR *ofs) {
-    return func_8012CC88(m, 0x11, ofs);
+s32 MoveCollidePassableAt(Mover *m, SVECTOR *ofs) {
+    return MoveCollideOfs(m, 0x11, ofs);
 }
 
 /* one move: velocity and position stepped, then the way from the last position (both plus ofs) resolved by
-   func_8012CEB0; the result's 0x6000 bits stop the fall */
-s32 func_8012CC88(Mover *m, s32 mode, SVECTOR *ofs) {
+   CollidePath; the result's 0x6000 bits stop the fall */
+s32 MoveCollideOfs(Mover *m, s32 mode, SVECTOR *ofs) {
     SVECTOR from;
     SVECTOR to;
     s32 r;
@@ -2290,14 +2258,14 @@ s32 func_8012CC88(Mover *m, s32 mode, SVECTOR *ofs) {
     from.vx += ofs->vx;
     from.vy += ofs->vy;
     from.vz += ofs->vz;
-    func_8012AD80(m);
+    MoveObject(m);
     to.vx = m->pos[0].h.i;
     to.vy = m->pos[1].h.i;
     to.vz = m->pos[2].h.i;
     to.vx += ofs->vx;
     to.vy += ofs->vy;
     to.vz += ofs->vz;
-    r = func_8012CEB0(&from, &to, mode);
+    r = CollidePath(&from, &to, mode);
     to.vx -= ofs->vx;
     to.vy -= ofs->vy;
     to.vz -= ofs->vz;
@@ -2311,7 +2279,7 @@ s32 func_8012CC88(Mover *m, s32 mode, SVECTOR *ofs) {
 }
 
 /* standing on something: a short ray down from the position (8 units) leaves the height where it was */
-s32 func_8012CE2C(Mover *m) {
+s32 IsOnGround(Mover *m) {
     SVECTOR p;
     SVECTOR q;
     p.vx = m->pos[0].h.i;
@@ -2319,29 +2287,29 @@ s32 func_8012CE2C(Mover *m) {
     p.vz = m->pos[2].h.i;
     q = p;
     q.vy += 8;
-    func_80133784(1, &p, &q);
+    TraceMap(1, &p, &q);
     return p.vy == q.vy;
 }
 
 /* the move resolve: the first query's result, or a second query from the resolved point with the first's
    ground bit kept. Matched 17 Oct: `r2 &= 0xFFFF7FFF; r2 |= r & 0x8000;` as two statements (docs/decomp_recipes.md) */
-s32 func_8012CEB0(SVECTOR *from, SVECTOR *to, s32 mode) {
+s32 CollidePath(SVECTOR *from, SVECTOR *to, s32 mode) {
     s32 r;
     s32 r2;
     s32 type;
     SVECTOR hit;
     if (mode & 1) {
-        r = func_80133784(mode, from, to) | ((u8 *)to)[6];
+        r = TraceMap(mode, from, to) | ((u8 *)to)[6];
         if (((u8 *)to)[6] == 2 || ((u8 *)to)[6] == 0x1B) {
             r |= 0x1000;
         }
         return r;
     }
-    r = func_80133784(0, from, to);
+    r = TraceMap(0, from, to);
     if (r == 0) {
         return 0;
     }
-    r2 = func_80133784(2, to, &hit);
+    r2 = TraceMap(2, to, &hit);
     if (!(r2 & 0x6000)) {
         return 0;
     }
@@ -2375,11 +2343,11 @@ void func_8012CFA8(SVECTOR *v) {
         p->y1 = p->y0;
         p->x2 = p->x0;
         p->y2 = p->y0 + 8;
-        AddPrim(D_800A6518[D_800AF630.frame].org + z, p);
+        AddPrim(g_WorldOt[D_800AF630.frame].org + z, p);
     }
 }
 
-extern void func_8012D3B4();
+extern void DebugDrawLine();
 
 /* the actor's hit box (or the box n points at) drawn as 12 white lines (debug drawing)
    PORT NOTE: void, as the original (the return-delay slot holds lui v0): the file's s32 prototype becomes void and
@@ -2388,7 +2356,7 @@ void func_8012D098(StageActor *a, s32 n) {
     SVECTOR v[8];
     SVECTOR in;
 
-    if (a != NULL && a->state != 0) {
+    if (a != NULL && a->kind != 0) {
         if (n == 0) {
             if (a->hitData == 0) {
                 return;
@@ -2411,18 +2379,18 @@ void func_8012D098(StageActor *a, s32 n) {
         FaceHelper(a, &in, &v[6]);
         in.vx = AF(n, u16, 6); in.vy = AF(n, u16, 0xA); in.vz = AF(n, u16, 0xE);
         FaceHelper(a, &in, &v[7]);
-        func_8012D3B4(&v[0], &v[1], 0xFFFFFF);
-        func_8012D3B4(&v[1], &v[3], 0xFFFFFF);
-        func_8012D3B4(&v[3], &v[2], 0xFFFFFF);
-        func_8012D3B4(&v[2], &v[0], 0xFFFFFF);
-        func_8012D3B4(&v[4], &v[5], 0xFFFFFF);
-        func_8012D3B4(&v[5], &v[7], 0xFFFFFF);
-        func_8012D3B4(&v[7], &v[6], 0xFFFFFF);
-        func_8012D3B4(&v[6], &v[4], 0xFFFFFF);
-        func_8012D3B4(&v[0], &v[4], 0xFFFFFF);
-        func_8012D3B4(&v[1], &v[5], 0xFFFFFF);
-        func_8012D3B4(&v[2], &v[6], 0xFFFFFF);
-        func_8012D3B4(&v[3], &v[7], 0xFFFFFF);
+        DebugDrawLine(&v[0], &v[1], 0xFFFFFF);
+        DebugDrawLine(&v[1], &v[3], 0xFFFFFF);
+        DebugDrawLine(&v[3], &v[2], 0xFFFFFF);
+        DebugDrawLine(&v[2], &v[0], 0xFFFFFF);
+        DebugDrawLine(&v[4], &v[5], 0xFFFFFF);
+        DebugDrawLine(&v[5], &v[7], 0xFFFFFF);
+        DebugDrawLine(&v[7], &v[6], 0xFFFFFF);
+        DebugDrawLine(&v[6], &v[4], 0xFFFFFF);
+        DebugDrawLine(&v[0], &v[4], 0xFFFFFF);
+        DebugDrawLine(&v[1], &v[5], 0xFFFFFF);
+        DebugDrawLine(&v[2], &v[6], 0xFFFFFF);
+        DebugDrawLine(&v[3], &v[7], 0xFFFFFF);
     }
 }
 
@@ -2434,7 +2402,7 @@ void func_8012D3AC(void) {
 }
 
 /* a line between two world points, in the colour given (debug drawing) */
-void func_8012D3B4(SVECTOR *a, SVECTOR *b, u32 colour) {
+void DebugDrawLine(SVECTOR *a, SVECTOR *b, u32 colour) {
     LINE_F2 *p;
     s32 dummy;
     s32 flag;
@@ -2446,12 +2414,12 @@ void func_8012D3B4(SVECTOR *a, SVECTOR *b, u32 colour) {
     SetTransMatrix(&D_800AF630.wsm);
     z = RotTransPers(a, (s32 *)&p->x0, &dummy, &flag);
     if (z > 0 && flag >= 0 && RotTransPers(b, (s32 *)&p->x1, &dummy, &flag) > 0 && flag >= 0) {
-        AddPrim(D_800A6518[D_800AF630.frame].org + z, p);
+        AddPrim(g_WorldOt[D_800AF630.frame].org + z, p);
     }
 }
 
 /* a line between two points of an actor's model frame */
-void func_8012D4B4(StageActor *a, SVECTOR *p0, SVECTOR *p1, u32 colour) {
+void DebugDrawActorLine(StageActor *a, SVECTOR *p0, SVECTOR *p1, u32 colour) {
     SVECTOR w0;
     SVECTOR w1;
     LINE_F2 *p;
@@ -2467,45 +2435,45 @@ void func_8012D4B4(StageActor *a, SVECTOR *p0, SVECTOR *p1, u32 colour) {
     SetTransMatrix(&D_800AF630.wsm);
     z = RotTransPers(&w0, (s32 *)&p->x0, &dummy, &flag);
     if (z > 0 && flag >= 0 && RotTransPers(&w1, (s32 *)&p->x1, &dummy, &flag) > 0 && flag >= 0) {
-        AddPrim(D_800A6518[D_800AF630.frame].org + z, p);
+        AddPrim(g_WorldOt[D_800AF630.frame].org + z, p);
     }
 }
 
 void func_8012D5DC(void) {
 }
 
-/* the hit test of func_8012DEB8, also leaving v in Musashi's +0x40 */
-s32 func_8012D5E4(StageActor *a, SVECTOR *p0, SVECTOR *p1, s16 v) {
-    if (func_8012DEB8(a, p0, p1) != 0) {
-        D_80126B58.unk40 = v;
+/* the hit test of ActorSegmentHitsPlayer, also leaving v in Musashi's +0x40 */
+s32 ActorSegmentDamagesPlayer(StageActor *a, SVECTOR *p0, SVECTOR *p1, s16 v) {
+    if (ActorSegmentHitsPlayer(a, p0, p1) != 0) {
+        g_Player.hitDamage = v;
         return 1;
     }
     return 0;
 }
 
-s32 func_8012D624(Mover *m, s32 r, s32 x) {
+s32 ActorTouchesPlayer(Mover *m, s32 r, s32 x) {
     SVECTOR p;
     p.vx = m->pos[0].h.i;
     p.vy = m->pos[1].h.i;
     p.vz = m->pos[2].h.i;
-    return func_8012D664(&p, r, x);
+    return PointHitsPlayer(&p, r, x);
 }
 
-/* within r (plus 0x20) of Musashi's chest (0x40 above his position): then func_8012F568 */
-s32 func_8012D664(SVECTOR *p, s32 r, s32 x) {
+/* within r (plus 0x20) of Musashi's chest (0x40 above his position): then HitPlayer */
+s32 PointHitsPlayer(SVECTOR *p, s32 r, s32 x) {
     SVECTOR m;
-    m.vx = D_80126B58.pos[0].h.i;
-    m.vy = D_80126B58.pos[1].h.i - 0x40;
-    m.vz = D_80126B58.pos[2].h.i;
-    if (func_800132BC(&p->vx, &m.vx) < (r + 0x20) * (r + 0x20)) {
-        func_8012F568(1, 1, 0, x, p, D_8018D848);
+    m.vx = g_Player.pos[0].h.i;
+    m.vy = g_Player.pos[1].h.i - 0x40;
+    m.vz = g_Player.pos[2].h.i;
+    if (SVecDistSq(&p->vx, &m.vx) < (r + 0x20) * (r + 0x20)) {
+        HitPlayer(1, 1, 0, x, p, D_8018D848);
         return 1;
     }
     return 0;
 }
 
 /* the actor's collision box (x0 x1 y0 y1 z0 z1 at +4) edges hit Musashi: bit 1 the four x edges, 2 the y, 4 the z */
-s32 func_8012D714(StageActor *a, s32 edges) {
+s32 HitBoxEdgesHitPlayer(StageActor *a, s32 edges) {
     SVECTOR p0;
     SVECTOR p1;
     s16 *h = (s16 *)((a->hitData & 0x0FFFFFFF) | 0x80000000);
@@ -2513,66 +2481,66 @@ s32 func_8012D714(StageActor *a, s32 edges) {
     if (edges & 1) {
         p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[6];
         p1.vx = h[3]; p1.vy = h[4]; p1.vz = h[6];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[2]; p0.vy = h[5]; p0.vz = h[6];
         p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[6];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[7];
         p1.vx = h[3]; p1.vy = h[4]; p1.vz = h[7];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[2]; p0.vy = h[5]; p0.vz = h[7];
         p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[7];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
     }
     if (edges & 2) {
         p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[6];
         p1.vx = h[2]; p1.vy = h[5]; p1.vz = h[6];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[7];
         p1.vx = h[2]; p1.vy = h[5]; p1.vz = h[7];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[3]; p0.vy = h[4]; p0.vz = h[6];
         p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[6];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[3]; p0.vy = h[4]; p0.vz = h[7];
         p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[7];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
     }
     if (edges & 4) {
         p0.vx = h[2]; p0.vy = h[4]; p0.vz = h[6];
         p1.vx = h[2]; p1.vy = h[4]; p1.vz = h[7];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[2]; p0.vy = h[5]; p0.vz = h[6];
         p1.vx = h[2]; p1.vy = h[5]; p1.vz = h[7];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[3]; p0.vy = h[4]; p0.vz = h[6];
         p1.vx = h[3]; p1.vy = h[4]; p1.vz = h[7];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
         p0.vx = h[3]; p0.vy = h[5]; p0.vz = h[6];
         p1.vx = h[3]; p1.vy = h[5]; p1.vz = h[7];
-        if (func_8012DEB8(a, &p0, &p1) != 0) return 1;
+        if (ActorSegmentHitsPlayer(a, &p0, &p1) != 0) return 1;
     }
     return 0;
 }
 
 /* Matched 17 Oct: the first call written without its argument (the callee reads this function's a0, as the
-   pass-through row of docs/decomp_recipes.md); with `func_8014C978(a)` the `a0 = 1` of the second call depends on the
+   pass-through row of docs/decomp_recipes.md); with `SetFatalHit(a)` the `a0 = 1` of the second call depends on the
    first and sched1 places it ahead of the stack arguments' addresses */
-void func_8012DB84(StageActor *a) {
-    func_8014C978();
-    func_8012F568(1, 0xC001, 0, 1000, &D_8018D850, D_8018D858);
+void HitPlayerFatal(StageActor *a) {
+    SetFatalHit();
+    HitPlayer(1, 0xC001, 0, 1000, &D_8018D850, D_8018D858);
 }
 
-StageActor *func_8012DE2C(StageActor *skip);
-StageActor *func_8012DDA4(void);
+StageActor *FirstActor(StageActor *skip);
+StageActor *NextActor(void);
 
-s32 func_8012DBD0(StageActor *a, s32 speed, s32 angle, s32 n) {
+s32 DamageActorsNear(StageActor *a, s32 speed, s32 angle, s32 n) {
     StageActor *o;
     s32 r;
     s32 v;
     s16 *h;
 
-    o = func_8012DE2C(a);
+    o = FirstActor(a);
     if (o != NULL) {
         if (a->hitData == 0) {
             r = 0x80;
@@ -2592,31 +2560,31 @@ s32 func_8012DBD0(StageActor *a, s32 speed, s32 angle, s32 n) {
         }
         r = r * r;
         do {
-            if (o->flags5C & 0x8000) {
-                if (!(o->flags5C & 0x4000) && (u16)o->unk5E != n
-                    && !(*(u16 *)o->pad0AE & 1) && func_80013350((s16 *)a->pos, (s16 *)o->pos) < r) {
-                    o->unk60 = speed;
-                    o->unk62 = angle;
-                    o->unk5E = n;
-                    o->flags5C |= 1;
+            if (o->hitState & 0x8000) {
+                if (!(o->hitState & 0x4000) && (u16)o->hitCode != n
+                    && !(o->hitMask & 1) && PosDistSq((s16 *)a->pos, (s16 *)o->pos) < r) {
+                    o->hitDamage = speed;
+                    o->hitAngle = angle;
+                    o->hitCode = n;
+                    o->hitState |= 1;
                 }
             }
-            o = func_8012DDA4();
+            o = NextActor();
         } while (o != NULL);
     }
     return 0;
 }
 
 /* the actor iterator: the next live actor that is not the one skipped */
-StageActor *func_8012DDA4(void) {
+StageActor *NextActor(void) {
     StageActor *a;
-    StageActor *end = &D_80120194[97];
+    StageActor *end = &g_ActorSlots[97];
     StageActor *skip;
     if (D_801ED364 != end) {
         skip = D_801ED360;
         do {
             a = D_801ED364;
-            if (a->state != 0 && a != skip) {
+            if (a->kind != 0 && a != skip) {
                 D_801ED364 = a + 1;
                 return a;
             }
@@ -2628,15 +2596,15 @@ StageActor *func_8012DDA4(void) {
 }
 
 /* start the iterator, skipping one actor (or none), and return the first */
-StageActor *func_8012DE2C(StageActor *skip) {
+StageActor *FirstActor(StageActor *skip) {
     StageActor *a;
-    StageActor *start = &D_80120194[1];
+    StageActor *start = &g_ActorSlots[1];
     StageActor *end = start + 96;
     D_801ED364 = start;
     D_801ED360 = skip;
     for (; D_801ED364 != end; D_801ED364++) {
         a = D_801ED364;
-        if (a->state != 0 && a != skip) {
+        if (a->kind != 0 && a != skip) {
             D_801ED364 = a + 1;
             return a;
         }
@@ -2645,27 +2613,27 @@ StageActor *func_8012DE2C(StageActor *skip) {
     return NULL;
 }
 
-/* the segment between two points of an actor's model frame hits Musashi (func_8012DF34): note its facing */
-s32 func_8012DEB8(StageActor *a, SVECTOR *p0, SVECTOR *p1) {
+/* the segment between two points of an actor's model frame hits Musashi (SegmentHitsPlayer): note its facing */
+s32 ActorSegmentHitsPlayer(StageActor *a, SVECTOR *p0, SVECTOR *p1) {
     SVECTOR w0;
     SVECTOR w1;
     FaceHelper(a, p0, &w0);
     FaceHelper(a, p1, &w1);
-    if (func_8012DF34(a, &w0, &w1) != 0) {
-        D_80126B58.unk42 = a->model->rot.vy;
+    if (SegmentHitsPlayer(a, &w0, &w1) != 0) {
+        g_Player.hitAngle = a->model->rot.vy;
         return 1;
     }
     return 0;
 }
 
-/* the segment between two world points hits Musashi's model (unless the actor is marked not to), then func_8012F568 */
-s32 func_8012DF34(StageActor *a, SVECTOR *w0, SVECTOR *w1) {
-    Player *p = &D_80126B58;
-    if (a != NULL && a->unkAA != 0) {
+/* the segment between two world points hits Musashi's model (unless the actor is marked not to), then HitPlayer */
+s32 SegmentHitsPlayer(StageActor *a, SVECTOR *w0, SVECTOR *w1) {
+    Player *p = &g_Player;
+    if (a != NULL && a->shrinkTimer != 0) {
         return 0;
     }
-    if (func_80135888(p->model, p->hitData, w0, w1) != 0) {
-        func_8012F568(1, 1, 0, 10, w1, D_801152A8);
+    if (PathHitsModel(p->model, p->hitData, w0, w1) != 0) {
+        HitPlayer(1, 1, 0, 10, w1, g_GroundNormal);
         return 1;
     }
     return 0;
@@ -2678,43 +2646,43 @@ void func_8012DFBC(void) {
 void func_8012DFCC(void) {
 }
 
-void func_8012DFD4(StageActor *a) {
+void CarryPlayer(StageActor *a) {
     if (a->unk74 != 0) {
-        func_8012E014(a);
+        CarryPlayerExact(a);
     } else {
-        func_8012E138(a);
+        CarryPlayerClipped(a);
     }
 }
 
 /* Musashi rides the actor's model: his position into its frame, the model turned and moved, and back out */
-void func_8012E014(StageActor *a) {
+void CarryPlayerExact(StageActor *a) {
     VECTOR wp;
     VECTOR out;
     VECTOR local;
-    wp.vx = D_80126B5C;
+    wp.vx = g_PlayerPosX;
     wp.vy = D_80126B60;
     wp.vz = D_80126B64;
-    func_8012F0BC((MATRIX *)&a->model->coord.coord, &wp, &local);
-    func_8012B2CC((Mover *)a);
-    func_8012F1A4((MATRIX *)&a->model->coord.coord, &local, &out);
-    D_80126B5C = out.vx;
+    WorldToLocal16((MATRIX *)&a->model->coord.coord, &wp, &local);
+    UpdateModelZYX((Mover *)a);
+    LocalToWorld16((MATRIX *)&a->model->coord.coord, &local, &out);
+    g_PlayerPosX = out.vx;
     D_80126B60 = out.vy;
     D_80126B64 = out.vz;
 }
 
-/* the same with whole units, Musashi moved only where the way is clear of the model (func_80135888) */
-void func_8012E138(StageActor *a) {
+/* the same with whole units, Musashi moved only where the way is clear of the model (PathHitsModel) */
+void CarryPlayerClipped(StageActor *a) {
     SVECTOR p;
     SVECTOR np;
     SVECTOR local;
-    p.vx = D_80126B5E;
+    p.vx = g_PlayerX;
     p.vy = D_80126B62;
     p.vz = D_80126B66;
-    func_8012F038((MATRIX *)&a->model->coord.coord, &p, &local);
-    func_8012B2CC((Mover *)a);
-    func_8012F14C((MATRIX *)&a->model->coord.coord, &local, &np);
-    if (func_80135888(a->model, (void *)a->hitData, &np, &p) != 0) {
-        D_80126B5E = p.vx;
+    WorldToLocal((MATRIX *)&a->model->coord.coord, &p, &local);
+    UpdateModelZYX((Mover *)a);
+    LocalToWorld((MATRIX *)&a->model->coord.coord, &local, &np);
+    if (PathHitsModel(a->model, (void *)a->hitData, &np, &p) != 0) {
+        g_PlayerX = p.vx;
         D_80126B62 = p.vy;
         D_80126B66 = p.vz;
     }
@@ -2728,11 +2696,11 @@ void func_8012E284(void) {
 }
 
 /* a draw-mode primitive at a depth: semi-transparency mode abr from there on */
-void func_8012E28C(s32 z, s32 abr) {
+void AddDrawModeAt(s32 z, s32 abr) {
     u32 *ot;
     u8 *p;
     if (z > 0) {
-        ot = D_800A6518[D_800AF630.frame].org + z;
+        ot = g_WorldOt[D_800AF630.frame].org + z;
         p = AllocPrim(0xC);
         SetDrawMode(p, 0, 0, GetTPage(0, abr, 0, 0), NULL);
         AddPrim(ot, p);
@@ -2740,7 +2708,7 @@ void func_8012E28C(s32 z, s32 abr) {
 }
 
 /* the GTE's matrices: world to screen */
-inline void func_8012E32C(void) {
+inline void LoadWorldScreenMatrix(void) {
     SetRotMatrix(&D_800AF630.wsm);
     SetTransMatrix(&D_800AF630.wsm);
 }
@@ -2757,8 +2725,8 @@ void func_8012E364(Mover *m) {
     s32 k;
     ModelObj *o;
     ModelObj *o1;
-    m->flags5C = 0;
-    t = D_80126B58.unk188;
+    m->hitState = 0;
+    t = g_Player.absorbCount;
     if (t == 0) {
         D_801ED358 = 0x1000;
         D_801ED35C = 0x1000;
@@ -2784,7 +2752,7 @@ void func_8012E364(Mover *m) {
 }
 
 /* ease the model's scale (x and z) a quarter of the way to 1.0, and count the timer down */
-s32 func_8012E470(Mover *m) {
+s32 EaseScaleNormal(Mover *m) {
     ModelObj *o;
     s32 v;
     o = m->model;
@@ -2799,18 +2767,18 @@ s32 func_8012E470(Mover *m) {
 
 void func_8012E4C8(StageActor *a) {
     a->model->scale.vx = a->model->scale.vz = 0x1000;
-    a->unk60 = 0;
-    a->flags5C |= 1;
-    a->unk62 = a->model->rot.vy + 0x800;
-    a->unk5E = 1;
+    a->hitDamage = 0;
+    a->hitState |= 1;
+    a->hitAngle = a->model->rot.vy + 0x800;
+    a->hitCode = 1;
 }
 
 /* the first live actor of a kind other than skip */
-StageActor *func_8012E504(StageActor *skip, s32 kind) {
-    StageActor *a = &D_80120194[1];
+StageActor *FindOtherActorByKind(StageActor *skip, s32 kind) {
+    StageActor *a = &g_ActorSlots[1];
     StageActor *end = a + 96;
     for (; a != end; a++) {
-        if (a != skip && a->state == kind) {
+        if (a != skip && a->kind == kind) {
             return a;
         }
     }
@@ -2818,11 +2786,11 @@ StageActor *func_8012E504(StageActor *skip, s32 kind) {
 }
 
 /* the first actor of a kind */
-StageActor *func_8012E544(s32 kind) {
-    StageActor *a = &D_80120194[1];
+StageActor *FindActorByKind(s32 kind) {
+    StageActor *a = &g_ActorSlots[1];
     StageActor *end = a + 96;
     for (; a != end; a++) {
-        if (a->state == kind) {
+        if (a->kind == kind) {
             return a;
         }
     }
@@ -2830,44 +2798,44 @@ StageActor *func_8012E544(s32 kind) {
 }
 
 /* the first actor of a kind with a given +0x70 */
-StageActor *func_8012E57C(s32 kind, s16 n) {
-    StageActor *a = &D_80120194[1];
+StageActor *FindActorByKindArg(s32 kind, s16 n) {
+    StageActor *a = &g_ActorSlots[1];
     StageActor *end = a + 96;
     for (; a != end; a++) {
-        if (a->state == kind && a->unk70 == n) {
+        if (a->kind == kind && a->param == n) {
             return a;
         }
     }
     return NULL;
 }
 
-/* func_8002D4C8(a, b) when the point is on screen (within 199 by 169 of the centre) */
-inline void func_8012E5CC(SVECTOR *v, u16 a, u16 b) {
+/* PlaySoundId(a, b) when the point is on screen (within 199 by 169 of the centre) */
+inline void PlaySoundAtPoint(SVECTOR *v, u16 a, u16 b) {
     s32 sxy;
     s32 p;
     s32 flag;
-    func_8012E32C();
+    LoadWorldScreenMatrix();
     RotTransPers(v, &sxy, &p, &flag);
     if (flag >= 0 && (u16)(((s16 *)&sxy)[0] + 199) < 399 && (u16)(((s16 *)&sxy)[1] + 169) < 339) {
-        func_8002D4C8(a, b);
+        PlaySoundId(a, b);
     }
 }
 
-/* func_8002D4C8(a, b), from the actor's model position when it is on screen (always, without a model) */
-void func_8012E688(StageActor *a, u16 x, u16 y) {
+/* PlaySoundId(a, b), from the actor's model position when it is on screen (always, without a model) */
+void PlaySoundAtActor(StageActor *a, u16 x, u16 y) {
     SVECTOR v;
     if (a->model == NULL) {
-        func_8002D4C8(x, y);
+        PlaySoundId(x, y);
         return;
     }
     v.vx = a->model->coord.coord.t[0];
     v.vy = a->model->coord.coord.t[1];
     v.vz = a->model->coord.coord.t[2];
-    func_8012E5CC(&v, x, y);
+    PlaySoundAtPoint(&v, x, y);
 }
 
 /* the object is on screen within a box: x limit in the low half of lim, y limit in the high half */
-s32 func_8012E778(Mover *m, s32 lim) {
+s32 IsOnScreen(Mover *m, s32 lim) {
     s32 v[3];
     s32 sxy;
     s32 lx;
@@ -2909,20 +2877,20 @@ s32 func_8012E778(Mover *m, s32 lim) {
     return 1;
 }
 
-void func_8012E88C(StageActor *a) {
+void ShowModel(StageActor *a) {
     a->model->unk04 &= 0x7FFFFFFF;
 }
 
-void func_8012E8A8(StageActor *a) {
+void HideModel(StageActor *a) {
     a->model->unk04 |= 0x80000000;
 }
 
-void func_8012E8C4(StageActor *a) {
+void ToggleModel(StageActor *a) {
     a->model->unk04 ^= 0x80000000;
 }
 
 /* put an object at a point, facing its pad (heading), and update its model */
-void func_8012E8E0(Mover *m, SVECTOR *p) {
+void PlaceObject(Mover *m, SVECTOR *p) {
     ModelObj *o = m->model;
     m->pos[0].h.i = p->vx;
     m->pos[1].h.i = p->vy;
@@ -2930,38 +2898,38 @@ void func_8012E8E0(Mover *m, SVECTOR *p) {
     m->pos[0].h.frac = m->pos[1].h.frac = m->pos[2].h.frac = 0;
     if (o != NULL) {
         o->rot.vy = p->pad;
-        func_8012B2CC(m);
+        UpdateModelZYX(m);
     }
 }
 
 /* take pending damage (+0x60), scaled by the init record's damageScale (at least 1); a type 0x1D hit notes the position */
-void func_8012E9C0(StageActor *a) {
+void TakeDamage(StageActor *a) {
     s32 n;
-    if (a->unk60 != 0) {
-        if (*(u8 *)&a->unk5E == 0x1D) {
+    if (a->hitDamage != 0) {
+        if (*(u8 *)&a->hitCode == 0x1D) {
             a->hitFlags = 0;
             a->hitPos[0] = a->pos[0].h.i;
             a->hitPos[1] = a->pos[1].h.i;
             a->hitPos[2] = a->pos[2].h.i;
         }
         if (a->init != NULL) {
-            n = (a->unk60 * ((ActorInit *)a->init)->damageScale) >> 12;
+            n = (a->hitDamage * ((ActorInit *)a->init)->damageScale) >> 12;
             if (n <= 0) {
                 n = 1;
             }
         } else {
-            n = a->unk60;
+            n = a->hitDamage;
         }
-        func_8016AA50(a, n);
+        ShowDamage(a, n);
         if (a->hitFlags & 1) {
-            func_8016B428(a);
+            ShowDefeat(a);
             StartRumbleScript(D_8018D860);
         }
     }
 }
 
 /* a part's local matrix from the model's current pose (8- or 12-byte records; none: the model's own matrix) */
-void func_8012EA90(StageActor *a, s32 part, MATRIX *out) {
+void GetPartLocalMatrix(StageActor *a, s32 part, MATRIX *out) {
     ModelObj *o = a->model;
     PoseRec12 *p = o->pose;
     SVECTOR r;
@@ -2991,7 +2959,7 @@ void func_8012EA90(StageActor *a, s32 part, MATRIX *out) {
     }
 }
 
-void func_8012EC04(StageActor *a, s32 part, MATRIX *out) {
+void GetPartWorldMatrix(StageActor *a, s32 part, MATRIX *out) {
     ModelObj *o = a->model;
     PoseRec12 *p = o->pose;
     SVECTOR r;
@@ -3035,31 +3003,31 @@ void func_8012EC04(StageActor *a, s32 part, MATRIX *out) {
     gte_stlvnl(out->t);
 }
 
-/* x less x * func_8002A4FC() * 100 / 7680 */
-s32 func_8012EECC(s32 x) {
-    return x - x * func_8002A4FC() * 100 / 7680;
+/* x less x * GetStat1Value() * 100 / 7680 */
+s32 ScaleDownByStat1(s32 x) {
+    return x - x * GetStat1Value() * 100 / 7680;
 }
 
 /* a point to the screen: xy and depth (SZ) */
-s32 func_8012EF34(SVECTOR *v, SVECTOR *out) {
+s32 ProjectPointZ(SVECTOR *v, SVECTOR *out) {
     s32 z;
-    s32 flag = func_8012EFB8(v, (s32 *)out);
+    s32 flag = ProjectPoint(v, (s32 *)out);
     gte_stsz(&z);
     out->vz = z;
     return flag;
 }
 
 /* the same with the depth over 4 (an OT index) */
-s32 func_8012EF70(SVECTOR *v, SVECTOR *out) {
+s32 ProjectPointOtz(SVECTOR *v, SVECTOR *out) {
     s32 z;
-    s32 flag = func_8012EFB8(v, (s32 *)out);
+    s32 flag = ProjectPoint(v, (s32 *)out);
     gte_stszotz(&z);
     out->vz = z;
     return flag;
 }
 
 /* a point through the world-to-screen matrix; returns the GTE flag */
-s32 func_8012EFB8(SVECTOR *v, s32 *sxy) {
+s32 ProjectPoint(SVECTOR *v, s32 *sxy) {
     MATRIX *mt;
     s32 flag;
     mt = &D_800AF630.wsm;
@@ -3073,7 +3041,7 @@ s32 func_8012EFB8(SVECTOR *v, s32 *sxy) {
 }
 
 /* a world point (whole units) into a matrix's frame */
-inline void func_8012F038(MATRIX *m, SVECTOR *in, SVECTOR *out) {
+inline void WorldToLocal(MATRIX *m, SVECTOR *in, SVECTOR *out) {
     VECTOR d;
     VECTOR r;
     d.vx = in->vx - m->t[0];
@@ -3086,7 +3054,7 @@ inline void func_8012F038(MATRIX *m, SVECTOR *in, SVECTOR *out) {
 }
 
 /* the same for a 16.16 point */
-void func_8012F0BC(MATRIX *m, VECTOR *in, VECTOR *out) {
+void WorldToLocal16(MATRIX *m, VECTOR *in, VECTOR *out) {
     VECTOR d;
     VECTOR r;
     d.vx = in->vx - (m->t[0] << 16);
@@ -3099,7 +3067,7 @@ void func_8012F0BC(MATRIX *m, VECTOR *in, VECTOR *out) {
 }
 
 /* a point of a matrix's frame into the world (whole units) */
-void func_8012F14C(MATRIX *m, SVECTOR *in, SVECTOR *out) {
+void LocalToWorld(MATRIX *m, SVECTOR *in, SVECTOR *out) {
     s32 flag;
     SetRotMatrix(m);
     SetTransMatrix(m);
@@ -3107,7 +3075,7 @@ void func_8012F14C(MATRIX *m, SVECTOR *in, SVECTOR *out) {
 }
 
 /* the same for a 16.16 point */
-void func_8012F1A4(MATRIX *m, VECTOR *in, VECTOR *out) {
+void LocalToWorld16(MATRIX *m, VECTOR *in, VECTOR *out) {
     ApplyMatrixLV(m, in, out);
     out->vx += m->t[0] << 16;
     out->vy += m->t[1] << 16;
@@ -3124,30 +3092,30 @@ inline void FaceHelper(StageActor *a, SVECTOR *in, SVECTOR *out) {
 }
 
 /* a 16.16 point from the actor's model frame into the world (whole units) */
-void func_8012F274(StageActor *a, Fixed *p) {
+void ActorLocalToWorld16(StageActor *a, Fixed *p) {
     SVECTOR in;
     SVECTOR out;
-    func_80015978(p, &in);
+    PosToSVec(p, &in);
     FaceHelper(a, &in, &out);
-    func_80015954(&out, p);
+    SVecToPos(&out, p);
 }
 
 /* a world point into the actor's model frame */
-void func_8012F2E8(StageActor *a, SVECTOR *in, SVECTOR *out) {
-    func_8012F038((MATRIX *)&a->model->coord.coord, in, out);
+void WorldToActorLocal(StageActor *a, SVECTOR *in, SVECTOR *out) {
+    WorldToLocal((MATRIX *)&a->model->coord.coord, in, out);
 }
 
 /* Musashi's other point in the actor's model frame */
-void func_8012F374(StageActor *a, SVECTOR *out) {
-    func_8012F038((MATRIX *)&a->model->coord.coord, (SVECTOR *)D_80126B58.unk15C, out);
+void TargetToActorLocal(StageActor *a, SVECTOR *out) {
+    WorldToLocal((MATRIX *)&a->model->coord.coord, (SVECTOR *)g_Player.point, out);
 }
 
 /* a point on the screen (0 when the GTE flags an error) */
-inline s32 *func_8012F40C(s32 *out, SVECTOR *v) {
+inline s32 *ScreenPos(s32 *out, SVECTOR *v) {
     s32 sxy = 0;
     s32 p;
     s32 flag;
-    func_8012E32C();
+    LoadWorldScreenMatrix();
     RotTransPers(v, &sxy, &p, &flag);
     if (flag < 0) {
         *out = sxy = 0;
@@ -3159,7 +3127,7 @@ inline s32 *func_8012F40C(s32 *out, SVECTOR *v) {
 
 /* Matched 17 Oct: &w through a pointer variable, so its pseudo has two uses and stays in s0 across the inlined call
    (docs/decomp_recipes.md). A point of the actor's model frame on the screen (0 when the GTE flags an error) */
-s32 *func_8012F49C(s32 *out, StageActor *a, SVECTOR *v) {
+s32 *ActorPointScreenPos(s32 *out, StageActor *a, SVECTOR *v) {
     SVECTOR w;
     s32 r;
     SVECTOR *wp = &w;
@@ -3167,16 +3135,16 @@ s32 *func_8012F49C(s32 *out, StageActor *a, SVECTOR *v) {
     SetRotMatrix(m);
     SetTransMatrix(m);
     RotTransSV(v, wp, &r);
-    *out = *func_8012F40C(&r, wp);
+    *out = *ScreenPos(&r, wp);
     return out;
 }
 
 /* note a hit on Musashi: flags, three values and the two points */
-void func_8012F568(s32 flags, s32 b, s32 facing, s32 v, SVECTOR *p0, void *p1) {
-    D_80126B58.hitP0 = *p0;
-    D_80126B58.hitP1 = *(SVECTOR *)p1;
-    D_80126B58.unk3E = b;
-    D_80126B58.unk42 = facing;
-    D_80126B58.unk40 = v;
-    D_80126B58.hitFlags |= flags;
+void HitPlayer(s32 flags, s32 b, s32 facing, s32 v, SVECTOR *p0, void *p1) {
+    g_Player.hitP0 = *p0;
+    g_Player.hitP1 = *(SVECTOR *)p1;
+    g_Player.hitCode = b;
+    g_Player.hitAngle = facing;
+    g_Player.hitDamage = v;
+    g_Player.hitState |= flags;
 }

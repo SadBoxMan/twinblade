@@ -10,17 +10,17 @@ extern u8 D_800D57F4[];
 extern void func_80162CCC();
 
 extern void func_ovl2b_800CB358();
-extern void func_800183E0();
+extern void QueueImage();
 extern s32 D_ovl2b_800CB6BC;
 extern s32 D_ovl2b_800CB6FC;
 extern s32 D_ovl2b_800CB73C;
-extern s32 D_ovl2b_800CB95C;
+extern s32 Acid_ImageCycleIndex;
 extern void func_80146C3C();
 extern u8 D_80078EC1;
 extern AbilStep D_ovl2b_800CB654[];
 extern void func_80146CA0();
 extern s32 func_80146E98();
-extern void func_ovl2b_800CB378();
+extern void Acid_PuddleHit();
 extern AbilStep D_ovl2b_800CB634[];
 extern void func_801466F0();
 extern void func_801599A4();
@@ -34,26 +34,26 @@ extern void func_80147324();
 extern void func_80149374();
 extern s32 D_ovl2b_800CB61C;
 
-extern s32 D_ovl2b_800CB5D4[];
+extern s32 Acid_ImageCycle[];
 
-void func_ovl2b_800CAE0C(void) {
+void Acid_CycleImage(void) {
     s32 pad;
     s32 v;
 
-    v = D_ovl2b_800CB5D4[D_ovl2b_800CB95C];
-    D_ovl2b_800CB95C++;
+    v = Acid_ImageCycle[Acid_ImageCycleIndex];
+    Acid_ImageCycleIndex++;
     if (v == 0) {
-        v = D_ovl2b_800CB5D4[0];
-        D_ovl2b_800CB95C = 1;
+        v = Acid_ImageCycle[0];
+        Acid_ImageCycleIndex = 1;
     }
-    func_800183E0(v);
+    QueueImage(v);
 }
 
-void func_ovl2b_800CAE70(void) {
-    func_800183E0(&D_ovl2b_800CB6FC);
-    func_800183E0(&D_ovl2b_800CB73C);
-    D_ovl2b_800CB95C = 0;
-    func_800183E0(&D_ovl2b_800CB6BC);
+void Acid_QueueImages(void) {
+    QueueImage(&D_ovl2b_800CB6FC);
+    QueueImage(&D_ovl2b_800CB73C);
+    Acid_ImageCycleIndex = 0;
+    QueueImage(&D_ovl2b_800CB6BC);
 }
 
 void func_ovl2b_800CAEC0(u8 *a) {
@@ -93,13 +93,13 @@ void func_ovl2b_800CB014(u8 *a) {
     AF(a, s32, 0x44) &= ~2;
 }
 
-void func_ovl2b_800CB028(u8 *arg0) {
+void Acid_BlobUpdate(u8 *arg0) {
     if ((D_80078EC1 != 0x19) || (D_ovl2b_800CB634[AF(arg0, u16, 2)](), ((AF(arg0, s16, 0xA) < 0x401) == 0))) {
         func_ovl2b_800CB358(arg0);
     }
 }
 
-void func_ovl2b_800CB09C(u8 *arg0) {
+void Acid_BlobInit(u8 *arg0) {
     void *temp_s2;
     void *temp_v0;
 
@@ -122,7 +122,7 @@ void func_ovl2b_800CB09C(u8 *arg0) {
 extern u8 D_801202A0[];
 extern s32 func_8014C308();
 extern s32 func_8014C278();
-extern void func_80015978();
+extern void PosToSVec();
 extern void func_8014C3A4();
 
 extern u8 D_ovl2b_800CB628;
@@ -130,14 +130,14 @@ extern void func_80162FF4();
 extern void func_80162FC0();
 extern s32 func_80163950();
 extern s32 func_8016380C();
-extern void func_80016714();
+extern void ZeroFill();
 extern u8 *func_80146578();
-extern void func_8001CB6C();
+extern void InitSpriteKind2();
 extern void func_80146A6C();
 extern void func_80163408();
 extern void func_80163328();
 
-void func_ovl2b_800CB150(u8 *arg0) {
+void Acid_BlobFly(u8 *arg0) {
     AVec v;
     s32 f;
     u8 *o;
@@ -155,12 +155,12 @@ void func_ovl2b_800CB150(u8 *arg0) {
             AF(arg0, s32, 0x2C) = 0;
             AF(arg0, s32, 0x24) = 0;
         } else {
-            func_80016714(AF(arg0, u8 *, 0x20), 0x84);
+            ZeroFill(AF(arg0, u8 *, 0x20), 0x84);
             AF(arg0, u8 *, 0x20) = 0;
             o = func_80146578();
             AF(arg0, u8 *, 0x20) = o;
             if (o != NULL) {
-                func_8001CB6C(o, &D_ovl2b_800CB628, 0x1A0, 0x100);
+                InitSpriteKind2(o, &D_ovl2b_800CB628, 0x1A0, 0x100);
                 AF(o, u8, 0x27) = 0x1B;
                 AF(o, s16, 0x10) = 0x400;
                 func_80146E90(arg0, 0x20);
@@ -181,7 +181,7 @@ void func_ovl2b_800CB150(u8 *arg0) {
     func_80163328(arg0);
 }
 
-void func_ovl2b_800CB2A8(u8 *arg0) {
+void Acid_PuddleSpread(u8 *arg0) {
     u16 temp_v0;
     void *temp_v1;
 
@@ -193,7 +193,7 @@ void func_ovl2b_800CB2A8(u8 *arg0) {
         func_80146CA0(arg0);
         return;
     }
-    func_ovl2b_800CB378(arg0);
+    Acid_PuddleHit(arg0);
 }
 
 void func_ovl2b_800CB30C(u8 *arg0) {
@@ -213,20 +213,20 @@ void func_ovl2b_800CB358(void) {
     func_80162CCC();
 }
 
-void func_ovl2b_800CB378(u8 *arg0) {
+void Acid_PuddleHit(u8 *arg0) {
     AVec v;
     u8 *p;
 
     for (p = D_801202A0; p < D_801202A0 + 0x6480; p += 0x10C) {
         if (func_8014C308(arg0, p, 0x27, 0x80) != 0 && func_8014C278(arg0, p, 0x60) != 0) {
-            func_80015978(p + 4, &v);
+            PosToSVec(p + 4, &v);
             v.pad = 0;
             func_8014C3A4(arg0, p, 0x27, &v);
         }
     }
 }
 
-void func_ovl2b_800CB424(u8 *arg0) {
+void Acid_DropUpdate(u8 *arg0) {
     if (D_80078EC1 == 0x19) {
         D_ovl2b_800CB654[AF(arg0, u16, 2)]();
         return;
@@ -239,7 +239,7 @@ extern s32 D_ovl2b_800CB65C[];
 extern s32 D_ovl2b_800CB660[];
 extern s32 D_ovl2b_800CB664[];
 extern s32 func_801465C0();
-extern void func_8001CC3C();
+extern void InitSpriteKind3();
 
 void func_ovl2b_800CB480(s32 arg0) {
     s32 temp_v0;
@@ -251,7 +251,7 @@ void func_ovl2b_800CB480(s32 arg0) {
         return;
     }
     AF(arg0, s32, 0x20) = temp_v0;
-    func_8001CC3C(temp_v0, (s32) &D_ovl2b_800CB648, 0x1B8, 0x100);
+    InitSpriteKind3(temp_v0, (s32) &D_ovl2b_800CB648, 0x1B8, 0x100);
     AF(temp_v0, u8, 0x27) = 0x1A;
     AF(temp_v0, s16, 0x1A) = 0x2000;
     AF(temp_v0, s16, 0x18) = 0x2000;

@@ -1,13 +1,17 @@
 // Package 0x20 (MAIN.CD entry 26, abil/ovl20.yaml): ability 22, Firefly
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Firefly_Update = 0x800CAE44; // type:func
+Firefly_StepActive = 0x800CAF68; // type:func
+Firefly_StepEnd = 0x800CB010; // type:func
+Firefly_SetLightTarget = 0x800CB098; // type:func
+Firefly_ClearLightTarget = 0x800CB108; // type:func
+Firefly_GlowUpdate = 0x800CB134; // type:func
+Firefly_FollowMusashi = 0x800CB5F4; // type:func
+Firefly_RayUpdate = 0x800CB62C; // type:func
+Firefly_DrawRay = 0x800CB900; // type:func
+Firefly_Steps = 0x800CBB10;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80012F74 = 0x80012F74; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80015978 = 0x80015978; // type:func
-func_800174DC = 0x800174DC; // type:func
-func_800183E0 = 0x800183E0; // type:func
 func_8001CD9C = 0x8001CD9C; // type:func
-func_800233CC = 0x800233CC; // type:func
-D_80078E78 = 0x80078E78;
 D_80078EC1 = 0x80078EC1;
 D_800B99DA = 0x800B99DA;
 func_8012EFB8 = 0x8012EFB8; // type:func

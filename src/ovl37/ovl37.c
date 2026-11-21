@@ -4,35 +4,35 @@
 typedef struct { void (*fn)(void); } MenuFn;
 extern void NextStep(void);
 extern void SetGameState(u16 n);
-extern void func_80015310(void);
-extern s32 func_800167F0(s32 arg0);
-extern void func_8001C044(void);
-extern void func_8001534C(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
+extern void ClearDebugText(void);
+extern s32 FadeStep(s32 arg0);
+extern void ClearObjectPools(void);
+extern void SetDebugText(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
 extern s16 GetPadPressedDir(s32 a);
 extern u16 GetPadHeldDir(s32 a);
 extern void func_80136EC4(void);
-extern void func_800D0964(void);
-extern void func_800D0BDC(void);
-extern void func_800D1254(void);
-extern void func_800D1B00(void);
-extern void func_800D235C(void);
-extern void func_800D2BC4(void);
-extern MenuFn D_800D4C54[];
-extern MenuFn D_800D4C68[];
-extern s16 D_800D4C80;
-extern s32 D_800D32F8[];
-extern s32 D_800D3314[];
-extern s32 D_800D4C90;
-extern s32 D_800D4C94;
-extern u16 D_800D4C98;
-extern u16 D_800D4C9C;
-extern u16 D_800D4CA0;
-extern u16 D_800D4CA4;
+extern void DebugPresetBase(void);
+extern void DebugPreset1(void);
+extern void DebugPreset2(void);
+extern void DebugPreset3(void);
+extern void DebugPreset4(void);
+extern void DebugPreset5(void);
+extern MenuFn g_DebugStepTable[];
+extern MenuFn g_DebugRowTable[];
+extern s16 g_DebugCursor;
+extern s32 g_DebugWeekdayNames[];
+extern s32 g_DebugPresetNames[];
+extern s32 g_DebugWeekday;
+extern s32 g_DebugPresetLevel;
+extern u16 g_DebugPadHeld;
+extern u16 g_DebugPadPressed;
+extern u16 g_DebugPadLastHeld;
+extern u16 g_DebugPadRepeat;
 
-void func_800CEE74(void) {
+void DebugMenuMain(void) {
     register Work *w = &D_800AF630;
     if (w->step < 5) {
-        D_800D4C54[w->step].fn();
+        g_DebugStepTable[w->step].fn();
     }
 }
 
@@ -90,26 +90,26 @@ typedef struct {
     s32 unk90;
     s32 unk94;
 } DbgStats;
-extern DbgStats D_80078E78;
+extern DbgStats g_Status;
 
 typedef struct { char name[4]; s16 flag; } DbgEnt;
-extern void func_800153CC(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
-extern s32 func_80029178(s32 n);
-extern u32 func_80029504(void);
+extern void SetDebugNumber(s16 n, s32 x, s16 a, s16 b, u8 c, u8 d);
+extern s32 GetFlag(s32 n);
+extern u32 GetProgress(void);
 extern char D_800CEE3C[];
 extern char D_800CEE40[];
 extern char D_800CEE44[];
 extern char D_800CEE50[];
 extern char D_800CEE54[];
 extern char D_800CEE60[];
-extern s32 D_800D3344;
-extern s16 D_800D3348;
-extern s16 D_800D334A;
-extern DbgEnt D_800D4A5C[];
+extern s32 g_DebugProgress;
+extern s16 g_DebugEventIndex;
+extern s16 g_DebugClock;
+extern DbgEnt g_DebugEventFlags[];
 
 typedef struct { char name[0x20]; s32 id; } DbgItem;
 typedef struct { char name[12]; DbgItem *items; s32 count; } DbgCat;
-extern void func_80029514(s32 a);
+extern void SetProgress(s32 a);
 extern char D_800D31F8[];
 extern char D_800D31FC[];
 extern char D_800D3208[];
@@ -124,52 +124,52 @@ extern char D_800D3258[];
 extern char D_800D3264[];
 extern char D_800D3278[];
 extern char D_800D3284[];
-extern DbgCat D_800D4B64[];
-extern s16 D_800D4C84;
-extern s32 D_800D4C88;
-extern s32 D_800D4C8C;
+extern DbgCat g_DebugAreaTable[];
+extern s16 g_DebugSelectRow;
+extern s32 g_DebugArea;
+extern s32 g_DebugScene;
 
-void func_800CEF00(void) {
+void DebugMenuInit(void) {
     register Work *w = &D_800AF630;
 
     w->unkA3E1 = 1;
-    func_8001C044();
-    func_80015310();
+    ClearObjectPools();
+    ClearDebugText();
     SetGameState(0);
-    func_8001534C(0, (s32)D_800D31FC, 0x40, 0x1E, 0, 0);
-    func_8001534C(1, (s32)D_800D31F8, 0x34, 0x46, 0, 0);
-    func_8001534C(9, (s32)D_800D3248, 0x40, 0x46, 0, 0);
-    func_8001534C(2, (s32)D_800D3208, 0x40, 0x5E, 0, 0);
-    func_8001534C(3, (s32)D_800D3214, 0x40, 0x6A, 0, 0);
-    func_8001534C(4, (s32)D_800D3220, 0x40, 0x76, 0, 0);
-    func_8001534C(5, (s32)D_800D3228, 0x40, 0x82, 0, 0);
-    func_8001534C(6, (s32)D_800D3230, 0x40, 0x8E, 0, 0);
-    func_8001534C(7, (s32)D_800D3238, 0x40, 0x9A, 0, 0);
-    func_8001534C(0xA, (s32)D_800D3250, 0x74, 0x46, 0, 0);
-    func_8001534C(0xB, (s32)D_800D3258, 0x74, 0x52, 0, 0);
-    func_8001534C(0xE, (s32)D_800D3264, 0x40, 0xA6, 0, 0);
-    func_8001534C(0xF, (s32)D_800D3278, 0x40, 0xB2, 0, 0);
-    func_8001534C(0x10, (s32)D_800D3284, 0x40, 0xBE, 0, 0);
-    D_800D4C88 = 0;
-    D_800D4C8C = 0;
-    D_800D4C90 = 0;
-    D_800D4C94 = 0;
+    SetDebugText(0, (s32)D_800D31FC, 0x40, 0x1E, 0, 0);
+    SetDebugText(1, (s32)D_800D31F8, 0x34, 0x46, 0, 0);
+    SetDebugText(9, (s32)D_800D3248, 0x40, 0x46, 0, 0);
+    SetDebugText(2, (s32)D_800D3208, 0x40, 0x5E, 0, 0);
+    SetDebugText(3, (s32)D_800D3214, 0x40, 0x6A, 0, 0);
+    SetDebugText(4, (s32)D_800D3220, 0x40, 0x76, 0, 0);
+    SetDebugText(5, (s32)D_800D3228, 0x40, 0x82, 0, 0);
+    SetDebugText(6, (s32)D_800D3230, 0x40, 0x8E, 0, 0);
+    SetDebugText(7, (s32)D_800D3238, 0x40, 0x9A, 0, 0);
+    SetDebugText(0xA, (s32)D_800D3250, 0x74, 0x46, 0, 0);
+    SetDebugText(0xB, (s32)D_800D3258, 0x74, 0x52, 0, 0);
+    SetDebugText(0xE, (s32)D_800D3264, 0x40, 0xA6, 0, 0);
+    SetDebugText(0xF, (s32)D_800D3278, 0x40, 0xB2, 0, 0);
+    SetDebugText(0x10, (s32)D_800D3284, 0x40, 0xBE, 0, 0);
+    g_DebugArea = 0;
+    g_DebugScene = 0;
+    g_DebugWeekday = 0;
+    g_DebugPresetLevel = 0;
     w->unkA3DE = 0;
-    func_8001534C(0xC, (s32)D_800D4B64[D_800D4C88].name, 0xA4, 0x46, 0x44, 0);
-    func_8001534C(0xD, (s32)D_800D4B64[D_800D4C88].items[D_800D4C8C].name, 0xA4, 0x52, 0x44, 0);
-    D_800D4C80 = 0;
-    D_800D4C84 = 0;
-    D_800D4CA4 = 0;
-    D_800D4CA0 = 0;
-    D_800D4C9C = 0;
-    D_800D4C98 = 0;
-    func_80029514(D_800D3344);
+    SetDebugText(0xC, (s32)g_DebugAreaTable[g_DebugArea].name, 0xA4, 0x46, 0x44, 0);
+    SetDebugText(0xD, (s32)g_DebugAreaTable[g_DebugArea].items[g_DebugScene].name, 0xA4, 0x52, 0x44, 0);
+    g_DebugCursor = 0;
+    g_DebugSelectRow = 0;
+    g_DebugPadRepeat = 0;
+    g_DebugPadLastHeld = 0;
+    g_DebugPadPressed = 0;
+    g_DebugPadHeld = 0;
+    SetProgress(g_DebugProgress);
     NextStep();
 }
 
-extern s32 func_80029124(u32 bit, s32 on);
-extern s32 func_800291A0(s32 i, s32 v);
-extern u16 D_800A6588;
+extern s32 SetFlag(u32 bit, s32 on);
+extern void SetVar(s32 i, s32 v);
+extern u16 g_ItemValues;
 extern u16 D_800A658A;
 extern u16 D_800A658C;
 extern u16 D_800A658E;
@@ -253,41 +253,41 @@ extern u8 D_8010F536;
 
 typedef struct { s32 unk0[6]; s16 unk18; s16 unk1A; } DbgClock;
 extern void SetStep(u16 step);
-extern void func_800152F4(s32 a);
-extern void func_800167B8(s32 a);
-extern void func_800CFCBC(void);
-extern s32 func_800D0828(s32 a);
-extern void func_800D0858(void);
+extern void ClearDebugTextLine(s32 a);
+extern void StartFade(s32 a);
+extern void DebugApplyPresets(void);
+extern s32 DebugSceneSelectable(s32 a);
+extern void DebugReadPad(void);
 extern char D_800CEE30[];
 
-extern void func_800CFB88(void);
-extern void func_800CFBF0(void);
-extern void func_800D04F4(void);
-extern u8 D_800D3334[];
+extern void DebugDrawWeekday(void);
+extern void DebugDrawPresetName(void);
+extern void DebugDrawStatus(void);
+extern u8 g_DebugRowY[];
 
-void func_800CF28C(void) {
+void DebugMenuOptions(void) {
     register Work *w = &D_800AF630;
     DbgClock *c;
     s32 id;
 
-    c = (DbgClock *)&D_80078E78;
+    c = (DbgClock *)&g_Status;
     w->unkA3E1 = 0;
-    func_800D0858();
-    if (D_800D4C9C & 0x4000) {
-        D_800D4C80++;
-        if (D_800D4C80 >= 13) {
-            D_800D4C80 = 0;
+    DebugReadPad();
+    if (g_DebugPadPressed & 0x4000) {
+        g_DebugCursor++;
+        if (g_DebugCursor >= 13) {
+            g_DebugCursor = 0;
         }
-    } else if (D_800D4C9C & 0x1000) {
-        D_800D4C80--;
-        if (D_800D4C80 < 0) {
-            D_800D4C80 = 12;
+    } else if (g_DebugPadPressed & 0x1000) {
+        g_DebugCursor--;
+        if (g_DebugCursor < 0) {
+            g_DebugCursor = 12;
         }
     }
-    func_8001534C(1, (s32)D_800D31F8, 0x34, D_800D3334[D_800D4C80], 0, 0);
-    switch (D_800D4C80) {
+    SetDebugText(1, (s32)D_800D31F8, 0x34, g_DebugRowY[g_DebugCursor], 0, 0);
+    switch (g_DebugCursor) {
     case 0:
-        if (D_800D4C9C & 0x820) {
+        if (g_DebugPadPressed & 0x820) {
             SetStep(4);
         }
         break;
@@ -295,247 +295,247 @@ void func_800CF28C(void) {
     case 2:
     case 3:
     case 5:
-        if (D_800D4C9C & 0x820) {
+        if (g_DebugPadPressed & 0x820) {
             SetStep(2);
-            func_800167B8(4);
+            StartFade(4);
         }
         break;
     case 4:
-        if (D_800D4C9C & 0x8000) {
-            D_800D4C90--;
-            if (D_800D4C90 < 0) {
-                D_800D4C90 = 6;
+        if (g_DebugPadPressed & 0x8000) {
+            g_DebugWeekday--;
+            if (g_DebugWeekday < 0) {
+                g_DebugWeekday = 6;
             }
         }
-        if (D_800D4C9C & 0x2000) {
-            D_800D4C90++;
-            if (D_800D4C90++ >= 7) {
-                D_800D4C90 = 0;
+        if (g_DebugPadPressed & 0x2000) {
+            g_DebugWeekday++;
+            if (g_DebugWeekday++ >= 7) {
+                g_DebugWeekday = 0;
             }
         }
         break;
     case 6:
-        if (D_800D4C9C & 0x8000) {
-            D_800D4C94--;
-            if (D_800D4C94 < 0) {
-                D_800D4C94 = 7;
+        if (g_DebugPadPressed & 0x8000) {
+            g_DebugPresetLevel--;
+            if (g_DebugPresetLevel < 0) {
+                g_DebugPresetLevel = 7;
             }
         }
-        if (D_800D4C9C & 0x2000) {
-            D_800D4C94++;
-            if (D_800D4C94 >= 8) {
-                D_800D4C94 = 0;
+        if (g_DebugPadPressed & 0x2000) {
+            g_DebugPresetLevel++;
+            if (g_DebugPresetLevel >= 8) {
+                g_DebugPresetLevel = 0;
             }
         }
         break;
     case 7:
-        if (D_800D4C9C & 0x8000) {
-            if ((D_800D3344 -= 10) < 0) {
-                D_800D3344 = 0;
+        if (g_DebugPadPressed & 0x8000) {
+            if ((g_DebugProgress -= 10) < 0) {
+                g_DebugProgress = 0;
             }
         }
-        if (D_800D4C9C & 0x2000) {
-            if ((D_800D3344 += 10) >= 0x6A5) {
-                D_800D3344 = 0x6A4;
+        if (g_DebugPadPressed & 0x2000) {
+            if ((g_DebugProgress += 10) >= 0x6A5) {
+                g_DebugProgress = 0x6A4;
             }
         }
-        if (D_800D4C9C & 0x20) {
-            if ((D_800D3344 += 1) >= 0x6A5) {
-                D_800D3344 = 0x6A4;
+        if (g_DebugPadPressed & 0x20) {
+            if ((g_DebugProgress += 1) >= 0x6A5) {
+                g_DebugProgress = 0x6A4;
             }
         }
-        if (D_800D4C9C & 0x40) {
-            if ((D_800D3344 -= 1) < 0) {
-                D_800D3344 = 0;
+        if (g_DebugPadPressed & 0x40) {
+            if ((g_DebugProgress -= 1) < 0) {
+                g_DebugProgress = 0;
             }
         }
-        if (D_800D4C9C & 0x10) {
-            if ((D_800D3344 += 100) >= 0x6A5) {
-                D_800D3344 = 0x6A4;
+        if (g_DebugPadPressed & 0x10) {
+            if ((g_DebugProgress += 100) >= 0x6A5) {
+                g_DebugProgress = 0x6A4;
             }
         }
-        if (D_800D4C9C & 0x80) {
-            if ((D_800D3344 -= 100) < 0) {
-                D_800D3344 = 0;
+        if (g_DebugPadPressed & 0x80) {
+            if ((g_DebugProgress -= 100) < 0) {
+                g_DebugProgress = 0;
             }
         }
-        func_80029514(D_800D3344);
+        SetProgress(g_DebugProgress);
         break;
     case 8:
-        if (D_800D4C9C & 0x8000) {
-            if (--D_800D3348 < 0) {
-                D_800D3348 = 0x2B;
+        if (g_DebugPadPressed & 0x8000) {
+            if (--g_DebugEventIndex < 0) {
+                g_DebugEventIndex = 0x2B;
             }
         }
-        if (D_800D4C9C & 0x2000) {
-            if (++D_800D3348 >= 0x2C) {
-                D_800D3348 = 0;
+        if (g_DebugPadPressed & 0x2000) {
+            if (++g_DebugEventIndex >= 0x2C) {
+                g_DebugEventIndex = 0;
             }
         }
-        if (D_800D4C9C & 0x20) {
-            id = D_800D4A5C[D_800D3348].flag;
-            func_80029124(id, (func_80029178(id) & 0xFF) == 0);
+        if (g_DebugPadPressed & 0x20) {
+            id = g_DebugEventFlags[g_DebugEventIndex].flag;
+            SetFlag(id, (GetFlag(id) & 0xFF) == 0);
         }
         break;
     case 9:
-        if (D_800D4C9C & 0x2000) {
-            D_800D334A += 60;
+        if (g_DebugPadPressed & 0x2000) {
+            g_DebugClock += 60;
         }
-        if (D_800D4C9C & 0x8000) {
-            D_800D334A -= 60;
+        if (g_DebugPadPressed & 0x8000) {
+            g_DebugClock -= 60;
         }
-        if (D_800D4C9C & 0xA0) {
-            D_800D334A += 15;
+        if (g_DebugPadPressed & 0xA0) {
+            g_DebugClock += 15;
         }
-        if (D_800D4C9C & 0x40) {
-            D_800D334A -= 15;
+        if (g_DebugPadPressed & 0x40) {
+            g_DebugClock -= 15;
         }
-        if (D_800D334A < 0) {
-            D_800D334A = 0x59F;
+        if (g_DebugClock < 0) {
+            g_DebugClock = 0x59F;
         }
-        if (D_800D334A >= 0x5A0) {
-            D_800D334A = 0;
+        if (g_DebugClock >= 0x5A0) {
+            g_DebugClock = 0;
         }
-        c->unk1A = D_800D334A;
+        c->unk1A = g_DebugClock;
         break;
     case 10:
-        if (D_800D4C9C & 0x2000) {
-            func_80029124(0, (func_80029178(0) & 0xFF) == 0);
+        if (g_DebugPadPressed & 0x2000) {
+            SetFlag(0, (GetFlag(0) & 0xFF) == 0);
         }
         break;
     case 11:
-        if (D_800D4C9C & 0x2000) {
-            func_80029124(1, (func_80029178(1) & 0xFF) == 0);
+        if (g_DebugPadPressed & 0x2000) {
+            SetFlag(1, (GetFlag(1) & 0xFF) == 0);
         }
         break;
     case 12:
-        if (D_800D4C9C & 0x2000) {
-            func_80029124(2, (func_80029178(2) & 0xFF) == 0);
+        if (g_DebugPadPressed & 0x2000) {
+            SetFlag(2, (GetFlag(2) & 0xFF) == 0);
         }
         break;
     }
-    if (D_800D4C80 >= 6 && (D_800D4C9C & 0x800)) {
-        D_800D4C80 = 0;
+    if (g_DebugCursor >= 6 && (g_DebugPadPressed & 0x800)) {
+        g_DebugCursor = 0;
         SetStep(4);
     }
-    c->unk1A = D_800D334A;
-    func_800D04F4();
-    func_800CFBF0();
-    func_800CFB88();
+    c->unk1A = g_DebugClock;
+    DebugDrawStatus();
+    DebugDrawPresetName();
+    DebugDrawWeekday();
 }
 
-void func_800CFB88(void) {
-    func_8001534C(0x1C, D_800D32F8[D_800D4C90], 0x78, 0x82, 0, 0);
+void DebugDrawWeekday(void) {
+    SetDebugText(0x1C, g_DebugWeekdayNames[g_DebugWeekday], 0x78, 0x82, 0, 0);
 }
 
-void func_800CFBF0(void) {
-    func_8001534C(0x1A, D_800D3314[D_800D4C94], 0x90, 0x9A, 0, 0);
+void DebugDrawPresetName(void) {
+    SetDebugText(0x1A, g_DebugPresetNames[g_DebugPresetLevel], 0x90, 0x9A, 0, 0);
 }
 
-void func_800CFC58(void) {
-    if (func_800167F0(4) & 0xFFFF) {
+void DebugMenuWaitFadeOut(void) {
+    if (FadeStep(4) & 0xFFFF) {
         NextStep();
         SetGameState(0);
-        func_8001C044();
-        func_80015310();
+        ClearObjectPools();
+        ClearDebugText();
     }
 }
 
-void func_800CFCBC(void) {
-    if (D_800D4C94 != 0) {
-        if (D_800D4C94 > 0) {
-            func_800D0964();
+void DebugApplyPresets(void) {
+    if (g_DebugPresetLevel != 0) {
+        if (g_DebugPresetLevel > 0) {
+            DebugPresetBase();
         }
-        if (D_800D4C94 >= 2) {
-            func_800D0BDC();
+        if (g_DebugPresetLevel >= 2) {
+            DebugPreset1();
         }
-        if (D_800D4C94 >= 3) {
-            func_800D1254();
+        if (g_DebugPresetLevel >= 3) {
+            DebugPreset2();
         }
-        if (D_800D4C94 >= 4) {
-            func_800D1B00();
+        if (g_DebugPresetLevel >= 4) {
+            DebugPreset3();
         }
-        if (D_800D4C94 >= 5) {
-            func_800D235C();
+        if (g_DebugPresetLevel >= 5) {
+            DebugPreset4();
         }
-        if (D_800D4C94 >= 6) {
-            func_800D2BC4();
+        if (g_DebugPresetLevel >= 6) {
+            DebugPreset5();
         }
     }
 }
 
-void func_800CFDB4(void) {
+void DebugSceneSelect(void) {
     register Work *w = &D_800AF630;
     DbgClock *c;
     u8 ok;
 
-    c = (DbgClock *)&D_80078E78;
-    ok = func_800D0828(D_800D4B64[D_800D4C88].items[D_800D4C8C].id);
-    func_800D0858();
-    func_800152F4(0x11);
-    if (D_800D4C9C & 0x820) {
-        func_800167B8(4);
-        w->mapId = D_800D4B64[D_800D4C88].items[D_800D4C8C].id;
+    c = (DbgClock *)&g_Status;
+    ok = DebugSceneSelectable(g_DebugAreaTable[g_DebugArea].items[g_DebugScene].id);
+    DebugReadPad();
+    ClearDebugTextLine(0x11);
+    if (g_DebugPadPressed & 0x820) {
+        StartFade(4);
+        w->mapId = g_DebugAreaTable[g_DebugArea].items[g_DebugScene].id;
         w->mapGroup = w->mapId & 0xF000;
         if (ok) {
-            func_800CFCBC();
+            DebugApplyPresets();
             if (GetPadHeldDir(0) & 0x10) {
-                func_80029514(D_800D3344);
-                c->unk1A = D_800D334A;
+                SetProgress(g_DebugProgress);
+                c->unk1A = g_DebugClock;
             }
             SetStep(2);
         }
     }
-    if (D_800D4C9C & 0x40) {
+    if (g_DebugPadPressed & 0x40) {
         SetStep(1);
     }
-    if (D_800D4C9C & 0x5000) {
-        D_800D4C84 = (D_800D4C84 + 1) & 1;
+    if (g_DebugPadPressed & 0x5000) {
+        g_DebugSelectRow = (g_DebugSelectRow + 1) & 1;
     }
-    if (D_800D4C84 == 0) {
-        if (D_800D4C9C & 0x2000) {
-            D_800D4C88++;
-            if ((u32)D_800D4C88 >= 12) {
-                D_800D4C88 = 0;
+    if (g_DebugSelectRow == 0) {
+        if (g_DebugPadPressed & 0x2000) {
+            g_DebugArea++;
+            if ((u32)g_DebugArea >= 12) {
+                g_DebugArea = 0;
             }
-            D_800D4C8C = 0;
+            g_DebugScene = 0;
         }
-        if (D_800D4C9C & 0x8000) {
-            D_800D4C88--;
-            if (D_800D4C88 < 0) {
-                D_800D4C88 = 11;
+        if (g_DebugPadPressed & 0x8000) {
+            g_DebugArea--;
+            if (g_DebugArea < 0) {
+                g_DebugArea = 11;
             }
-            D_800D4C8C = 0;
+            g_DebugScene = 0;
         }
-        func_8001534C(0xC, (s32)D_800D4B64[D_800D4C88].name, 0xA4, 0x46, 0x44, 0);
-        func_8001534C(0xD, (s32)D_800D4B64[D_800D4C88].items[D_800D4C8C].name, 0xA4, 0x52, 0x44, 0);
+        SetDebugText(0xC, (s32)g_DebugAreaTable[g_DebugArea].name, 0xA4, 0x46, 0x44, 0);
+        SetDebugText(0xD, (s32)g_DebugAreaTable[g_DebugArea].items[g_DebugScene].name, 0xA4, 0x52, 0x44, 0);
         if (!ok) {
-            func_8001534C(0x11, (s32)D_800CEE30, 0xA4, 0x5E, 0x44, 0);
+            SetDebugText(0x11, (s32)D_800CEE30, 0xA4, 0x5E, 0x44, 0);
         }
     }
-    if (D_800D4C84 == 1) {
-        if (D_800D4C9C & 0x2000) {
-            D_800D4C8C++;
-            if (D_800D4C8C >= D_800D4B64[D_800D4C88].count) {
-                D_800D4C8C = 0;
+    if (g_DebugSelectRow == 1) {
+        if (g_DebugPadPressed & 0x2000) {
+            g_DebugScene++;
+            if (g_DebugScene >= g_DebugAreaTable[g_DebugArea].count) {
+                g_DebugScene = 0;
             }
         }
-        if (D_800D4C9C & 0x8000) {
-            D_800D4C8C--;
-            if (D_800D4C8C < 0) {
-                D_800D4C8C = D_800D4B64[D_800D4C88].count - 1;
+        if (g_DebugPadPressed & 0x8000) {
+            g_DebugScene--;
+            if (g_DebugScene < 0) {
+                g_DebugScene = g_DebugAreaTable[g_DebugArea].count - 1;
             }
         }
-        func_8001534C(0xC, (s32)D_800D4B64[D_800D4C88].name, 0xA4, 0x46, 0x44, 0);
-        func_8001534C(0xD, (s32)D_800D4B64[D_800D4C88].items[D_800D4C8C].name, 0xA4, 0x52, 0x44, 0);
+        SetDebugText(0xC, (s32)g_DebugAreaTable[g_DebugArea].name, 0xA4, 0x46, 0x44, 0);
+        SetDebugText(0xD, (s32)g_DebugAreaTable[g_DebugArea].items[g_DebugScene].name, 0xA4, 0x52, 0x44, 0);
         if (!ok) {
-            func_8001534C(0x11, (s32)D_800CEE30, 0xA4, 0x5E, 0x44, 0);
+            SetDebugText(0x11, (s32)D_800CEE30, 0xA4, 0x5E, 0x44, 0);
         }
     }
-    func_8001534C(1, (s32)D_800D31F8, 0x68, D_800D4C84 * 12 + 0x46, 0, 0);
+    SetDebugText(1, (s32)D_800D31F8, 0x68, g_DebugSelectRow * 12 + 0x46, 0, 0);
 }
 
-void func_800D03F8(void) {
+void DebugRowFinish(void) {
     register Work *w = &D_800AF630;
     w->done = 1;
 }
@@ -543,9 +543,9 @@ void func_800D03F8(void) {
 void func_800D0430(void) {
 }
 
-void func_800D0450(void) {
-    if (D_800D4C80 < 5) {
-        D_800D4C68[D_800D4C80].fn();
+void DebugRowDispatch(void) {
+    if (g_DebugCursor < 5) {
+        g_DebugRowTable[g_DebugCursor].fn();
     }
 }
 
@@ -553,49 +553,49 @@ void func_800D04C4(void) {
     func_80136EC4();
 }
 
-void func_800D04F4(void) {
+void DebugDrawStatus(void) {
     DbgEnt *e;
 
-    D_800D3344 = func_80029504();
-    func_800153CC(0x11, D_800D3344, 0xC8, 0xA6, 0x44, 0);
-    e = &D_800D4A5C[D_800D3348];
-    func_8001534C(0x12, (s32)e, 0x98, 0xB2, 0x43, 0);
-    func_8001534C(0x13, (func_80029178(e->flag) & 0xFF) ? (s32)D_800CEE3C : (s32)D_800CEE40, 0xC8, 0xB2, 0, 0);
-    func_800153CC(0x14, (s16)(D_800D334A / 60), 0x68, 0xBE, 0x42, 0);
-    func_800153CC(0x15, (s16)(D_800D334A % 60), 0x80, 0xBE, 0x42, 0);
-    func_8001534C(0x16, (s32)D_800CEE44, 0x40, 0xCA, 0x43, 0);
-    func_8001534C(0x17, (func_80029178(0) & 0xFF) ? (s32)D_800CEE40 : (s32)D_800CEE50, 0xA8, 0xCA, 0, 0);
-    func_8001534C(0x18, (s32)D_800CEE54, 0x40, 0xD2, 0x43, 0);
-    func_8001534C(0x19, (func_80029178(1) & 0xFF) ? (s32)D_800CEE50 : (s32)D_800CEE40, 0xA8, 0xD2, 0, 0);
-    func_8001534C(0x1B, (s32)D_800CEE60, 0x40, 0xDA, 0x43, 0);
-    func_8001534C(0x1D, (func_80029178(2) & 0xFF) ? (s32)D_800CEE50 : (s32)D_800CEE40, 0xE0, 0xDA, 0, 0);
+    g_DebugProgress = GetProgress();
+    SetDebugNumber(0x11, g_DebugProgress, 0xC8, 0xA6, 0x44, 0);
+    e = &g_DebugEventFlags[g_DebugEventIndex];
+    SetDebugText(0x12, (s32)e, 0x98, 0xB2, 0x43, 0);
+    SetDebugText(0x13, (GetFlag(e->flag) & 0xFF) ? (s32)D_800CEE3C : (s32)D_800CEE40, 0xC8, 0xB2, 0, 0);
+    SetDebugNumber(0x14, (s16)(g_DebugClock / 60), 0x68, 0xBE, 0x42, 0);
+    SetDebugNumber(0x15, (s16)(g_DebugClock % 60), 0x80, 0xBE, 0x42, 0);
+    SetDebugText(0x16, (s32)D_800CEE44, 0x40, 0xCA, 0x43, 0);
+    SetDebugText(0x17, (GetFlag(0) & 0xFF) ? (s32)D_800CEE40 : (s32)D_800CEE50, 0xA8, 0xCA, 0, 0);
+    SetDebugText(0x18, (s32)D_800CEE54, 0x40, 0xD2, 0x43, 0);
+    SetDebugText(0x19, (GetFlag(1) & 0xFF) ? (s32)D_800CEE50 : (s32)D_800CEE40, 0xA8, 0xD2, 0, 0);
+    SetDebugText(0x1B, (s32)D_800CEE60, 0x40, 0xDA, 0x43, 0);
+    SetDebugText(0x1D, (GetFlag(2) & 0xFF) ? (s32)D_800CEE50 : (s32)D_800CEE40, 0xE0, 0xDA, 0, 0);
 }
 
-s32 func_800D0828(s32 a) {
+s32 DebugSceneSelectable(s32 a) {
     return 1;
 }
 
-void func_800D0858(void) {
-    D_800D4C9C = GetPadPressedDir(0);
-    D_800D4C98 = GetPadHeldDir(0);
-    if (D_800D4C98 != 0) {
-        if (D_800D4C98 == D_800D4CA0) {
-            if (--D_800D4CA4 == 0) {
-                D_800D4C9C = D_800D4C98 & 0xF000;
-                D_800D4CA4 = 3;
+void DebugReadPad(void) {
+    g_DebugPadPressed = GetPadPressedDir(0);
+    g_DebugPadHeld = GetPadHeldDir(0);
+    if (g_DebugPadHeld != 0) {
+        if (g_DebugPadHeld == g_DebugPadLastHeld) {
+            if (--g_DebugPadRepeat == 0) {
+                g_DebugPadPressed = g_DebugPadHeld & 0xF000;
+                g_DebugPadRepeat = 3;
             }
         } else {
-            D_800D4CA0 = D_800D4C98;
-            D_800D4CA4 = 6;
+            g_DebugPadLastHeld = g_DebugPadHeld;
+            g_DebugPadRepeat = 6;
         }
         return;
     }
-    D_800D4CA0 = 0;
-    D_800D4CA4 = 0xC;
+    g_DebugPadLastHeld = 0;
+    g_DebugPadRepeat = 0xC;
 }
 
-void func_800D0964(void) {
-    DbgStats *s = &D_80078E78;
+void DebugPresetBase(void) {
+    DbgStats *s = &g_Status;
     s->unk4 = 0x0;
     s->unk8 = 0x0;
     s->unkC = 0x0;
@@ -647,10 +647,10 @@ void func_800D0964(void) {
     s->unk94 = 0x0;
 }
 
-void func_800D0BDC(void) {
+void DebugPreset1(void) {
     DbgStats *s;
 
-    s = &D_80078E78;
+    s = &g_Status;
     s->unk4 = 0;
     s->unk8 = 0xA;
     s->unkC = 0;
@@ -700,57 +700,57 @@ void func_800D0BDC(void) {
     s->unk8C = 0;
     s->unk90 = 0x6D6;
     s->unk94 = 0x6D6;
-    func_80029124(0x7F, 1);
-    func_80029124(0x80, 1);
-    func_80029124(0x84, 1);
-    func_800291A0(0x3B, 3);
-    func_800291A0(0x3C, 3);
-    func_800291A0(0x3D, 3);
-    func_800291A0(0x3E, 3);
-    func_800291A0(0x3F, 3);
-    func_800291A0(0x40, 0);
-    func_800291A0(0x41, 0);
-    func_800291A0(0x42, 0);
-    func_800291A0(0x43, 0);
-    func_800291A0(0x44, 0);
-    func_800291A0(0x45, 0);
-    func_800291A0(0x46, 0);
-    func_800291A0(0x47, 0);
-    func_800291A0(0x48, 0);
-    func_800291A0(0x49, 0);
-    func_800291A0(0x4A, 0);
-    func_800291A0(0x4B, 0);
-    func_800291A0(0x4C, 0);
-    func_800291A0(0x4D, 0);
-    func_800291A0(0x4E, 0);
-    func_800291A0(0x4F, 0);
-    func_800291A0(0x50, 0);
-    func_800291A0(0x51, 0);
-    func_800291A0(0x52, 0);
-    func_800291A0(0x53, 0);
-    func_800291A0(0x54, 0);
-    func_800291A0(0x55, 0);
-    func_800291A0(0x56, 0);
-    func_800291A0(0x57, 0);
-    func_800291A0(0x58, 0);
-    func_800291A0(0x59, 0);
-    func_800291A0(0x5A, 0);
-    func_800291A0(0x5B, 0);
-    func_800291A0(0x5C, 0);
-    func_800291A0(0x5D, 0);
-    func_800291A0(0x5E, 0);
-    func_800291A0(0x5F, 0);
-    func_800291A0(0x60, 0);
-    func_800291A0(0x61, 0);
-    func_800291A0(0x62, 0);
-    func_800291A0(0x2E, 1);
-    func_800291A0(0x63, (u8)(D_8010F476 | 0x80));
-    func_800291A0(0x65, (u8)(D_8010F47E | 0x80));
-    func_800291A0(0x66, (u8)(D_8010F486 | 0x80));
-    func_800291A0(0x67, (u8)(D_8010F48E | 0x80));
-    func_800291A0(0x68, (u8)(D_8010F496 | 0x80));
-    func_800291A0(0x69, (u8)(D_8010F49E | 0x80));
-    D_800A6588 = D_8010F474;
+    SetFlag(0x7F, 1);
+    SetFlag(0x80, 1);
+    SetFlag(0x84, 1);
+    SetVar(0x3B, 3);
+    SetVar(0x3C, 3);
+    SetVar(0x3D, 3);
+    SetVar(0x3E, 3);
+    SetVar(0x3F, 3);
+    SetVar(0x40, 0);
+    SetVar(0x41, 0);
+    SetVar(0x42, 0);
+    SetVar(0x43, 0);
+    SetVar(0x44, 0);
+    SetVar(0x45, 0);
+    SetVar(0x46, 0);
+    SetVar(0x47, 0);
+    SetVar(0x48, 0);
+    SetVar(0x49, 0);
+    SetVar(0x4A, 0);
+    SetVar(0x4B, 0);
+    SetVar(0x4C, 0);
+    SetVar(0x4D, 0);
+    SetVar(0x4E, 0);
+    SetVar(0x4F, 0);
+    SetVar(0x50, 0);
+    SetVar(0x51, 0);
+    SetVar(0x52, 0);
+    SetVar(0x53, 0);
+    SetVar(0x54, 0);
+    SetVar(0x55, 0);
+    SetVar(0x56, 0);
+    SetVar(0x57, 0);
+    SetVar(0x58, 0);
+    SetVar(0x59, 0);
+    SetVar(0x5A, 0);
+    SetVar(0x5B, 0);
+    SetVar(0x5C, 0);
+    SetVar(0x5D, 0);
+    SetVar(0x5E, 0);
+    SetVar(0x5F, 0);
+    SetVar(0x60, 0);
+    SetVar(0x61, 0);
+    SetVar(0x62, 0);
+    SetVar(0x2E, 1);
+    SetVar(0x63, (u8)(D_8010F476 | 0x80));
+    SetVar(0x65, (u8)(D_8010F47E | 0x80));
+    SetVar(0x66, (u8)(D_8010F486 | 0x80));
+    SetVar(0x67, (u8)(D_8010F48E | 0x80));
+    SetVar(0x68, (u8)(D_8010F496 | 0x80));
+    SetVar(0x69, (u8)(D_8010F49E | 0x80));
+    g_ItemValues = D_8010F474;
     D_800A658A = D_8010F47C;
     D_800A658C = D_8010F484;
     D_800A658E = D_8010F48C;
@@ -758,10 +758,10 @@ void func_800D0BDC(void) {
     D_800A6592 = D_8010F49C;
 }
 
-void func_800D1254(void) {
+void DebugPreset2(void) {
     DbgStats *s;
 
-    s = &D_80078E78;
+    s = &g_Status;
     s->unk4 = 0;
     s->unk8 = 0xC8;
     s->unkC = 0xD;
@@ -811,88 +811,88 @@ void func_800D1254(void) {
     s->unk8C = 0;
     s->unk90 = 0x31C4;
     s->unk94 = 0x31C4;
-    func_80029124(0x96, 1);
-    func_80029124(0xE5, 1);
-    func_80029124(0xE7, 1);
-    func_80029124(0xDE, 1);
-    func_80029124(0xEC, 1);
-    func_80029124(0xEF, 1);
-    func_80029124(0xE3, 1);
-    func_80029124(0xDF, 1);
-    func_80029124(0xF2, 1);
-    func_80029124(0xED, 1);
-    func_80029124(0x10B, 1);
-    func_80029124(0x16, 1);
-    func_80029124(0x1F, 1);
-    func_80029124(0x82, 1);
-    func_80029124(0x8A, 1);
-    func_80029124(0x8F, 1);
-    func_80029124(0x90, 1);
-    func_80029124(0x91, 1);
-    func_80029124(0x92, 1);
-    func_80029124(0x93, 1);
-    func_80029124(0x94, 1);
-    func_80029124(0x97, 1);
-    func_80029124(0x98, 1);
-    func_80029124(0xB5, 1);
-    func_800291A0(0xCD, 1);
-    func_80029124(0xF0, 1);
-    func_80029124(0x40, 1);
-    func_80029124(0x41, 1);
-    func_80029124(0x42, 1);
-    func_80029124(0x43, 1);
-    func_80029124(0x44, 1);
-    func_80029124(0x45, 1);
-    func_80029124(0x46, 1);
-    func_80029124(0x47, 1);
-    func_800291A0(0x3B, 5);
-    func_800291A0(0x3C, 3);
-    func_800291A0(0x3D, 3);
-    func_800291A0(0x3E, 3);
-    func_800291A0(0x3F, 3);
-    func_800291A0(0x40, 2);
-    func_800291A0(0x41, 2);
-    func_800291A0(0x42, 2);
-    func_800291A0(0x43, 3);
-    func_800291A0(0x44, 2);
-    func_800291A0(0x45, 2);
-    func_800291A0(0x46, 3);
-    func_800291A0(0x47, 3);
-    func_800291A0(0x48, 2);
-    func_800291A0(0x49, 2);
-    func_800291A0(0x4A, 0);
-    func_800291A0(0x4B, 0);
-    func_800291A0(0x4C, 0);
-    func_800291A0(0x4D, 0);
-    func_800291A0(0x4E, 0);
-    func_800291A0(0x4F, 0);
-    func_800291A0(0x50, 0);
-    func_800291A0(0x51, 2);
-    func_800291A0(0x52, 0);
-    func_800291A0(0x53, 0);
-    func_800291A0(0x54, 0);
-    func_800291A0(0x55, 0);
-    func_800291A0(0x56, 0);
-    func_800291A0(0x57, 2);
-    func_800291A0(0x58, 0);
-    func_800291A0(0x59, 0);
-    func_800291A0(0x5A, 0);
-    func_800291A0(0x5B, 0);
-    func_800291A0(0x5C, 0);
-    func_800291A0(0x5D, 0);
-    func_800291A0(0x5E, 0);
-    func_800291A0(0x5F, 2);
-    func_800291A0(0x60, 0);
-    func_800291A0(0x61, 0);
-    func_800291A0(0x62, 0);
-    func_800291A0(0x2E, 2);
-    func_800291A0(0x6A, (u8)(D_8010F4A6 | 0x80));
-    func_800291A0(0x6B, (u8)(D_8010F4AE | 0x80));
-    func_800291A0(0x6C, (u8)(D_8010F4B6 | 0x80));
-    func_800291A0(0x6D, (u8)(D_8010F4BE | 0x80));
-    func_800291A0(0x6E, (u8)(D_8010F4C6 | 0x80));
-    func_800291A0(0x6F, (u8)(D_8010F59E | 0x80));
-    func_800291A0(0x70, (u8)(D_8010F4CE | 0x80));
+    SetFlag(0x96, 1);
+    SetFlag(0xE5, 1);
+    SetFlag(0xE7, 1);
+    SetFlag(0xDE, 1);
+    SetFlag(0xEC, 1);
+    SetFlag(0xEF, 1);
+    SetFlag(0xE3, 1);
+    SetFlag(0xDF, 1);
+    SetFlag(0xF2, 1);
+    SetFlag(0xED, 1);
+    SetFlag(0x10B, 1);
+    SetFlag(0x16, 1);
+    SetFlag(0x1F, 1);
+    SetFlag(0x82, 1);
+    SetFlag(0x8A, 1);
+    SetFlag(0x8F, 1);
+    SetFlag(0x90, 1);
+    SetFlag(0x91, 1);
+    SetFlag(0x92, 1);
+    SetFlag(0x93, 1);
+    SetFlag(0x94, 1);
+    SetFlag(0x97, 1);
+    SetFlag(0x98, 1);
+    SetFlag(0xB5, 1);
+    SetVar(0xCD, 1);
+    SetFlag(0xF0, 1);
+    SetFlag(0x40, 1);
+    SetFlag(0x41, 1);
+    SetFlag(0x42, 1);
+    SetFlag(0x43, 1);
+    SetFlag(0x44, 1);
+    SetFlag(0x45, 1);
+    SetFlag(0x46, 1);
+    SetFlag(0x47, 1);
+    SetVar(0x3B, 5);
+    SetVar(0x3C, 3);
+    SetVar(0x3D, 3);
+    SetVar(0x3E, 3);
+    SetVar(0x3F, 3);
+    SetVar(0x40, 2);
+    SetVar(0x41, 2);
+    SetVar(0x42, 2);
+    SetVar(0x43, 3);
+    SetVar(0x44, 2);
+    SetVar(0x45, 2);
+    SetVar(0x46, 3);
+    SetVar(0x47, 3);
+    SetVar(0x48, 2);
+    SetVar(0x49, 2);
+    SetVar(0x4A, 0);
+    SetVar(0x4B, 0);
+    SetVar(0x4C, 0);
+    SetVar(0x4D, 0);
+    SetVar(0x4E, 0);
+    SetVar(0x4F, 0);
+    SetVar(0x50, 0);
+    SetVar(0x51, 2);
+    SetVar(0x52, 0);
+    SetVar(0x53, 0);
+    SetVar(0x54, 0);
+    SetVar(0x55, 0);
+    SetVar(0x56, 0);
+    SetVar(0x57, 2);
+    SetVar(0x58, 0);
+    SetVar(0x59, 0);
+    SetVar(0x5A, 0);
+    SetVar(0x5B, 0);
+    SetVar(0x5C, 0);
+    SetVar(0x5D, 0);
+    SetVar(0x5E, 0);
+    SetVar(0x5F, 2);
+    SetVar(0x60, 0);
+    SetVar(0x61, 0);
+    SetVar(0x62, 0);
+    SetVar(0x2E, 2);
+    SetVar(0x6A, (u8)(D_8010F4A6 | 0x80));
+    SetVar(0x6B, (u8)(D_8010F4AE | 0x80));
+    SetVar(0x6C, (u8)(D_8010F4B6 | 0x80));
+    SetVar(0x6D, (u8)(D_8010F4BE | 0x80));
+    SetVar(0x6E, (u8)(D_8010F4C6 | 0x80));
+    SetVar(0x6F, (u8)(D_8010F59E | 0x80));
+    SetVar(0x70, (u8)(D_8010F4CE | 0x80));
     D_800A6594 = D_8010F4A4;
     D_800A6596 = D_8010F4AC;
     D_800A6598 = D_8010F4B4;
@@ -900,13 +900,13 @@ void func_800D1254(void) {
     D_800A659C = D_8010F4C4;
     D_800A65D2 = D_8010F59C;
     D_800A659E = D_8010F4CC;
-    func_80029124(0x9E, 1);
+    SetFlag(0x9E, 1);
 }
 
-void func_800D1B00(void) {
+void DebugPreset3(void) {
     DbgStats *s;
 
-    s = &D_80078E78;
+    s = &g_Status;
     s->unk4 = 0;
     s->unk8 = 0x258;
     s->unkC = 0x1A;
@@ -956,79 +956,79 @@ void func_800D1B00(void) {
     s->unk8C = 0;
     s->unk90 = 0x5C44;
     s->unk94 = 0x5C44;
-    func_80029124(0xF5, 1);
-    func_80029124(0x106, 1);
-    func_80029124(0xF8, 1);
-    func_80029124(0xFF, 1);
-    func_80029124(0xF9, 1);
-    func_80029124(0x105, 1);
-    func_80029124(0x100, 1);
-    func_80029124(0xFD, 1);
-    func_80029124(0xFE, 1);
-    func_80029124(0xFB, 1);
-    func_80029124(0xF4, 1);
-    func_80029124(0xF6, 1);
-    func_80029124(0x17, 1);
-    func_80029124(0x20, 1);
-    func_80029124(0x1E, 1);
-    func_80029124(0x83, 1);
-    func_80029124(0x85, 1);
-    func_80029124(0x86, 1);
-    func_80029124(0x87, 1);
-    func_80029124(0x8B, 1);
-    func_80029124(0xB6, 1);
-    func_80029124(0x1B, 1);
-    func_80029124(0x48, 1);
-    func_80029124(0x49, 1);
-    func_80029124(0x4B, 1);
-    func_800291A0(0x3B, 5);
-    func_800291A0(0x3C, 3);
-    func_800291A0(0x3D, 4);
-    func_800291A0(0x3E, 3);
-    func_800291A0(0x3F, 3);
-    func_800291A0(0x40, 2);
-    func_800291A0(0x41, 2);
-    func_800291A0(0x42, 2);
-    func_800291A0(0x43, 3);
-    func_800291A0(0x44, 2);
-    func_800291A0(0x45, 2);
-    func_800291A0(0x46, 3);
-    func_800291A0(0x47, 3);
-    func_800291A0(0x48, 3);
-    func_800291A0(0x49, 2);
-    func_800291A0(0x4A, 3);
-    func_800291A0(0x4B, 2);
-    func_800291A0(0x4C, 3);
-    func_800291A0(0x4D, 5);
-    func_800291A0(0x4E, 2);
-    func_800291A0(0x4F, 3);
-    func_800291A0(0x50, 3);
-    func_800291A0(0x51, 2);
-    func_800291A0(0x52, 2);
-    func_800291A0(0x53, 0);
-    func_800291A0(0x54, 0);
-    func_800291A0(0x55, 2);
-    func_800291A0(0x56, 0);
-    func_800291A0(0x57, 2);
-    func_800291A0(0x58, 0);
-    func_800291A0(0x59, 2);
-    func_800291A0(0x5A, 3);
-    func_800291A0(0x5B, 0);
-    func_800291A0(0x5C, 0);
-    func_800291A0(0x5D, 0);
-    func_800291A0(0x5E, 3);
-    func_800291A0(0x5F, 2);
-    func_800291A0(0x60, 0);
-    func_800291A0(0x61, 0);
-    func_800291A0(0x62, 3);
-    func_800291A0(0x2E, 3);
-    func_800291A0(0x71, (u8)(D_8010F4D6 | 0x80));
-    func_800291A0(0x72, (u8)(D_8010F4DE | 0x80));
-    func_800291A0(0x73, (u8)(D_8010F4EE | 0x80));
-    func_800291A0(0x74, (u8)(D_8010F4E6 | 0x80));
-    func_800291A0(0x75, (u8)(D_8010F5AE | 0x80));
-    func_800291A0(0x76, (u8)(D_8010F4F6 | 0x80));
-    func_800291A0(0x6D, (u8)(D_8010F4FE | 0x80));
+    SetFlag(0xF5, 1);
+    SetFlag(0x106, 1);
+    SetFlag(0xF8, 1);
+    SetFlag(0xFF, 1);
+    SetFlag(0xF9, 1);
+    SetFlag(0x105, 1);
+    SetFlag(0x100, 1);
+    SetFlag(0xFD, 1);
+    SetFlag(0xFE, 1);
+    SetFlag(0xFB, 1);
+    SetFlag(0xF4, 1);
+    SetFlag(0xF6, 1);
+    SetFlag(0x17, 1);
+    SetFlag(0x20, 1);
+    SetFlag(0x1E, 1);
+    SetFlag(0x83, 1);
+    SetFlag(0x85, 1);
+    SetFlag(0x86, 1);
+    SetFlag(0x87, 1);
+    SetFlag(0x8B, 1);
+    SetFlag(0xB6, 1);
+    SetFlag(0x1B, 1);
+    SetFlag(0x48, 1);
+    SetFlag(0x49, 1);
+    SetFlag(0x4B, 1);
+    SetVar(0x3B, 5);
+    SetVar(0x3C, 3);
+    SetVar(0x3D, 4);
+    SetVar(0x3E, 3);
+    SetVar(0x3F, 3);
+    SetVar(0x40, 2);
+    SetVar(0x41, 2);
+    SetVar(0x42, 2);
+    SetVar(0x43, 3);
+    SetVar(0x44, 2);
+    SetVar(0x45, 2);
+    SetVar(0x46, 3);
+    SetVar(0x47, 3);
+    SetVar(0x48, 3);
+    SetVar(0x49, 2);
+    SetVar(0x4A, 3);
+    SetVar(0x4B, 2);
+    SetVar(0x4C, 3);
+    SetVar(0x4D, 5);
+    SetVar(0x4E, 2);
+    SetVar(0x4F, 3);
+    SetVar(0x50, 3);
+    SetVar(0x51, 2);
+    SetVar(0x52, 2);
+    SetVar(0x53, 0);
+    SetVar(0x54, 0);
+    SetVar(0x55, 2);
+    SetVar(0x56, 0);
+    SetVar(0x57, 2);
+    SetVar(0x58, 0);
+    SetVar(0x59, 2);
+    SetVar(0x5A, 3);
+    SetVar(0x5B, 0);
+    SetVar(0x5C, 0);
+    SetVar(0x5D, 0);
+    SetVar(0x5E, 3);
+    SetVar(0x5F, 2);
+    SetVar(0x60, 0);
+    SetVar(0x61, 0);
+    SetVar(0x62, 3);
+    SetVar(0x2E, 3);
+    SetVar(0x71, (u8)(D_8010F4D6 | 0x80));
+    SetVar(0x72, (u8)(D_8010F4DE | 0x80));
+    SetVar(0x73, (u8)(D_8010F4EE | 0x80));
+    SetVar(0x74, (u8)(D_8010F4E6 | 0x80));
+    SetVar(0x75, (u8)(D_8010F5AE | 0x80));
+    SetVar(0x76, (u8)(D_8010F4F6 | 0x80));
+    SetVar(0x6D, (u8)(D_8010F4FE | 0x80));
     D_800A65A0 = D_8010F4D4;
     D_800A65A2 = D_8010F4DC;
     D_800A65A6 = D_8010F4EC;
@@ -1036,17 +1036,17 @@ void func_800D1B00(void) {
     D_800A65D6 = D_8010F5AC;
     D_800A65A8 = D_8010F4F4;
     D_800A65AA = D_8010F4FC;
-    func_80029124(0x101, 1);
-    func_80029124(0x102, 1);
-    func_80029124(0x103, 1);
-    func_80029124(0x104, 1);
-    func_80029124(0xB3, 1);
+    SetFlag(0x101, 1);
+    SetFlag(0x102, 1);
+    SetFlag(0x103, 1);
+    SetFlag(0x104, 1);
+    SetFlag(0xB3, 1);
 }
 
-void func_800D235C(void) {
+void DebugPreset4(void) {
     DbgStats *s;
 
-    s = &D_80078E78;
+    s = &g_Status;
     s->unk4 = 0;
     s->unk8 = 0x384;
     s->unkC = 0x20;
@@ -1096,99 +1096,99 @@ void func_800D235C(void) {
     s->unk60 = 0;
     s->unk64 = 0;
     s->unk68 = 0;
-    func_80029124(0x10D, 1);
-    func_80029124(0x107, 1);
-    func_80029124(0x18, 1);
-    func_80029124(0x1D, 1);
-    func_80029124(0x21, 1);
-    func_80029124(0x81, 1);
-    func_80029124(0x8C, 1);
-    func_80029124(0xC7, 1);
-    func_80029124(0xC8, 1);
-    func_80029124(0xC9, 1);
-    func_80029124(0xCA, 1);
-    func_80029124(0xCB, 1);
-    func_80029124(0xCC, 1);
-    func_80029124(0xCD, 1);
-    func_80029124(0xCE, 1);
-    func_80029124(0xCF, 1);
-    func_80029124(0xD0, 1);
-    func_80029124(0xD1, 1);
-    func_80029124(0xD2, 1);
-    func_80029124(0xD3, 1);
-    func_80029124(0xD4, 1);
-    func_80029124(0xD5, 1);
-    func_80029124(0xD6, 1);
-    func_80029124(0xD7, 1);
-    func_80029124(0xD8, 1);
-    func_80029124(0xD9, 1);
-    func_80029124(0x9B, 1);
-    func_80029124(0x81, 1);
-    func_800291A0(0x3B, 9);
-    func_800291A0(0x3C, 3);
-    func_800291A0(0x3D, 4);
-    func_800291A0(0x3E, 3);
-    func_800291A0(0x3F, 3);
-    func_800291A0(0x40, 2);
-    func_800291A0(0x41, 2);
-    func_800291A0(0x42, 2);
-    func_800291A0(0x43, 3);
-    func_800291A0(0x44, 2);
-    func_800291A0(0x45, 2);
-    func_800291A0(0x46, 3);
-    func_800291A0(0x47, 3);
-    func_800291A0(0x48, 3);
-    func_800291A0(0x49, 2);
-    func_800291A0(0x4A, 4);
-    func_800291A0(0x4B, 2);
-    func_800291A0(0x4C, 3);
-    func_800291A0(0x4D, 5);
-    func_800291A0(0x4E, 2);
-    func_800291A0(0x4F, 3);
-    func_800291A0(0x50, 4);
-    func_800291A0(0x51, 2);
-    func_800291A0(0x52, 3);
-    func_800291A0(0x53, 2);
-    func_800291A0(0x54, 3);
-    func_800291A0(0x55, 3);
-    func_800291A0(0x56, 2);
-    func_800291A0(0x57, 2);
-    func_800291A0(0x58, 2);
-    func_800291A0(0x59, 3);
-    func_800291A0(0x5A, 3);
-    func_800291A0(0x5B, 0);
-    func_800291A0(0x5C, 0);
-    func_800291A0(0x5D, 2);
-    func_800291A0(0x5E, 3);
-    func_800291A0(0x5F, 2);
-    func_800291A0(0x60, 2);
-    func_800291A0(0x61, 0);
-    func_800291A0(0x62, 3);
-    func_800291A0(0x2E, 4);
-    func_800291A0(0x78, (u8)(D_8010F506 | 0x80));
-    func_800291A0(0x79, (u8)(D_8010F50E | 0x80));
-    func_800291A0(0x7A, (u8)(D_8010F516 | 0x80));
-    func_800291A0(0x7C, (u8)(D_8010F51E | 0x80));
-    func_800291A0(0x7D, (u8)(D_8010F526 | 0x80));
-    func_800291A0(0x7E, (u8)(D_8010F52E | 0x80));
+    SetFlag(0x10D, 1);
+    SetFlag(0x107, 1);
+    SetFlag(0x18, 1);
+    SetFlag(0x1D, 1);
+    SetFlag(0x21, 1);
+    SetFlag(0x81, 1);
+    SetFlag(0x8C, 1);
+    SetFlag(0xC7, 1);
+    SetFlag(0xC8, 1);
+    SetFlag(0xC9, 1);
+    SetFlag(0xCA, 1);
+    SetFlag(0xCB, 1);
+    SetFlag(0xCC, 1);
+    SetFlag(0xCD, 1);
+    SetFlag(0xCE, 1);
+    SetFlag(0xCF, 1);
+    SetFlag(0xD0, 1);
+    SetFlag(0xD1, 1);
+    SetFlag(0xD2, 1);
+    SetFlag(0xD3, 1);
+    SetFlag(0xD4, 1);
+    SetFlag(0xD5, 1);
+    SetFlag(0xD6, 1);
+    SetFlag(0xD7, 1);
+    SetFlag(0xD8, 1);
+    SetFlag(0xD9, 1);
+    SetFlag(0x9B, 1);
+    SetFlag(0x81, 1);
+    SetVar(0x3B, 9);
+    SetVar(0x3C, 3);
+    SetVar(0x3D, 4);
+    SetVar(0x3E, 3);
+    SetVar(0x3F, 3);
+    SetVar(0x40, 2);
+    SetVar(0x41, 2);
+    SetVar(0x42, 2);
+    SetVar(0x43, 3);
+    SetVar(0x44, 2);
+    SetVar(0x45, 2);
+    SetVar(0x46, 3);
+    SetVar(0x47, 3);
+    SetVar(0x48, 3);
+    SetVar(0x49, 2);
+    SetVar(0x4A, 4);
+    SetVar(0x4B, 2);
+    SetVar(0x4C, 3);
+    SetVar(0x4D, 5);
+    SetVar(0x4E, 2);
+    SetVar(0x4F, 3);
+    SetVar(0x50, 4);
+    SetVar(0x51, 2);
+    SetVar(0x52, 3);
+    SetVar(0x53, 2);
+    SetVar(0x54, 3);
+    SetVar(0x55, 3);
+    SetVar(0x56, 2);
+    SetVar(0x57, 2);
+    SetVar(0x58, 2);
+    SetVar(0x59, 3);
+    SetVar(0x5A, 3);
+    SetVar(0x5B, 0);
+    SetVar(0x5C, 0);
+    SetVar(0x5D, 2);
+    SetVar(0x5E, 3);
+    SetVar(0x5F, 2);
+    SetVar(0x60, 2);
+    SetVar(0x61, 0);
+    SetVar(0x62, 3);
+    SetVar(0x2E, 4);
+    SetVar(0x78, (u8)(D_8010F506 | 0x80));
+    SetVar(0x79, (u8)(D_8010F50E | 0x80));
+    SetVar(0x7A, (u8)(D_8010F516 | 0x80));
+    SetVar(0x7C, (u8)(D_8010F51E | 0x80));
+    SetVar(0x7D, (u8)(D_8010F526 | 0x80));
+    SetVar(0x7E, (u8)(D_8010F52E | 0x80));
     D_800A65AC = D_8010F504;
     D_800A65AE = D_8010F50C;
     D_800A65B0 = D_8010F514;
     D_800A65B2 = D_8010F51C;
     D_800A65B4 = D_8010F524;
     D_800A65B6 = D_8010F52C;
-    func_80029124(0xC4, 1);
-    func_80029124(0xC5, 1);
-    func_80029124(0xC6, 1);
-    func_80029124(0x56, 1);
-    func_80029124(0x57, 1);
-    func_80029124(0x58, 1);
+    SetFlag(0xC4, 1);
+    SetFlag(0xC5, 1);
+    SetFlag(0xC6, 1);
+    SetFlag(0x56, 1);
+    SetFlag(0x57, 1);
+    SetFlag(0x58, 1);
 }
 
-void func_800D2BC4(void) {
+void DebugPreset5(void) {
     DbgStats *s;
 
-    s = &D_80078E78;
+    s = &g_Status;
     s->unk4 = 0;
     s->unk8 = 0x4B0;
     s->unkC = 0x23;
@@ -1238,62 +1238,62 @@ void func_800D2BC4(void) {
     s->unk8C = 0;
     s->unk90 = 0x9C72;
     s->unk94 = 0x9C72;
-    func_80029124(0x19, 1);
-    func_80029124(0x1D, 1);
-    func_80029124(0x21, 1);
-    func_80029124(0x8D, 1);
-    func_80029124(0x89, 1);
-    func_80029124(0xBD, 1);
-    func_80029124(0xBE, 1);
-    func_80029124(0xBF, 1);
-    func_80029124(0xC0, 1);
-    func_80029124(0xC1, 1);
-    func_80029124(0xC2, 1);
-    func_80029124(0xC3, 1);
-    func_80029124(0x4A, 1);
-    func_80029124(0x4C, 1);
-    func_800291A0(0x3B, 0xD);
-    func_800291A0(0x3C, 3);
-    func_800291A0(0x3D, 4);
-    func_800291A0(0x3E, 3);
-    func_800291A0(0x3F, 3);
-    func_800291A0(0x40, 2);
-    func_800291A0(0x41, 2);
-    func_800291A0(0x42, 2);
-    func_800291A0(0x43, 3);
-    func_800291A0(0x44, 2);
-    func_800291A0(0x45, 2);
-    func_800291A0(0x46, 3);
-    func_800291A0(0x47, 3);
-    func_800291A0(0x48, 3);
-    func_800291A0(0x49, 2);
-    func_800291A0(0x4A, 4);
-    func_800291A0(0x4B, 2);
-    func_800291A0(0x4C, 3);
-    func_800291A0(0x4D, 5);
-    func_800291A0(0x4E, 2);
-    func_800291A0(0x4F, 3);
-    func_800291A0(0x50, 4);
-    func_800291A0(0x51, 2);
-    func_800291A0(0x52, 3);
-    func_800291A0(0x53, 2);
-    func_800291A0(0x54, 3);
-    func_800291A0(0x55, 3);
-    func_800291A0(0x56, 2);
-    func_800291A0(0x57, 2);
-    func_800291A0(0x58, 2);
-    func_800291A0(0x59, 3);
-    func_800291A0(0x5A, 3);
-    func_800291A0(0x5B, 3);
-    func_800291A0(0x5C, 2);
-    func_800291A0(0x5D, 2);
-    func_800291A0(0x5E, 3);
-    func_800291A0(0x5F, 2);
-    func_800291A0(0x60, 3);
-    func_800291A0(0x61, 2);
-    func_800291A0(0x62, 3);
-    func_800291A0(0x2E, 5);
-    func_800291A0(0x7F, (u8)(D_8010F536 | 0x80));
+    SetFlag(0x19, 1);
+    SetFlag(0x1D, 1);
+    SetFlag(0x21, 1);
+    SetFlag(0x8D, 1);
+    SetFlag(0x89, 1);
+    SetFlag(0xBD, 1);
+    SetFlag(0xBE, 1);
+    SetFlag(0xBF, 1);
+    SetFlag(0xC0, 1);
+    SetFlag(0xC1, 1);
+    SetFlag(0xC2, 1);
+    SetFlag(0xC3, 1);
+    SetFlag(0x4A, 1);
+    SetFlag(0x4C, 1);
+    SetVar(0x3B, 0xD);
+    SetVar(0x3C, 3);
+    SetVar(0x3D, 4);
+    SetVar(0x3E, 3);
+    SetVar(0x3F, 3);
+    SetVar(0x40, 2);
+    SetVar(0x41, 2);
+    SetVar(0x42, 2);
+    SetVar(0x43, 3);
+    SetVar(0x44, 2);
+    SetVar(0x45, 2);
+    SetVar(0x46, 3);
+    SetVar(0x47, 3);
+    SetVar(0x48, 3);
+    SetVar(0x49, 2);
+    SetVar(0x4A, 4);
+    SetVar(0x4B, 2);
+    SetVar(0x4C, 3);
+    SetVar(0x4D, 5);
+    SetVar(0x4E, 2);
+    SetVar(0x4F, 3);
+    SetVar(0x50, 4);
+    SetVar(0x51, 2);
+    SetVar(0x52, 3);
+    SetVar(0x53, 2);
+    SetVar(0x54, 3);
+    SetVar(0x55, 3);
+    SetVar(0x56, 2);
+    SetVar(0x57, 2);
+    SetVar(0x58, 2);
+    SetVar(0x59, 3);
+    SetVar(0x5A, 3);
+    SetVar(0x5B, 3);
+    SetVar(0x5C, 2);
+    SetVar(0x5D, 2);
+    SetVar(0x5E, 3);
+    SetVar(0x5F, 2);
+    SetVar(0x60, 3);
+    SetVar(0x61, 2);
+    SetVar(0x62, 3);
+    SetVar(0x2E, 5);
+    SetVar(0x7F, (u8)(D_8010F536 | 0x80));
     D_800A65B8 = D_8010F534;
-    func_80029124(0xBB, 1);
+    SetFlag(0xBB, 1);
 }

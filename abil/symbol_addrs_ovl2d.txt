@@ -1,15 +1,13 @@
 // Package 0x2D (MAIN.CD entry 39, abil/ovl2d.yaml): ability 28, Homing
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Homing_AimOffset = 0x800CAE0C;
+Homing_MissileInit = 0x800CB0B4; // type:func
+Homing_MissileFly = 0x800CB228; // type:func
+Homing_MissileBurst = 0x800CB424; // type:func
+Homing_FindTarget = 0x800CB4D4; // type:func
+Homing_SteerIfValid = 0x800CB5CC; // type:func
+Homing_SteerToward = 0x800CB61C; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800123F0 = 0x800123F0; // type:func
-func_80012558 = 0x80012558; // type:func
-func_800126C4 = 0x800126C4; // type:func
-func_80012DBC = 0x80012DBC; // type:func
-func_80013328 = 0x80013328; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80015978 = 0x80015978; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001C214 = 0x8001C214; // type:func
-func_8001CC3C = 0x8001CC3C; // type:func
 D_80062BE8 = 0x80062BE8;
 D_80078EC1 = 0x80078EC1;
 D_800AF648 = 0x800AF648;

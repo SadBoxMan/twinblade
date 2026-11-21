@@ -1,15 +1,12 @@
 // Package 0x2C (MAIN.CD entry 38, abil/ovl2c.yaml): ability 27, 3-Way
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+ThreeWay_StepFire = 0x800CAFAC; // type:func
+ThreeWay_ShotInit = 0x800CB270; // type:func
+ThreeWay_ShotFly = 0x800CB360; // type:func
+ThreeWay_MuzzleInit = 0x800CB574; // type:func
+ThreeWay_DrawFanXZ = 0x800CB780; // type:func
+ThreeWay_DrawFanXY = 0x800CBA0C; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800123F0 = 0x800123F0; // type:func
-func_80012558 = 0x80012558; // type:func
-func_800126C4 = 0x800126C4; // type:func
-func_80012ABC = 0x80012ABC; // type:func
-func_80013E94 = 0x80013E94; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80017758 = 0x80017758; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_80017E68 = 0x80017E68; // type:func
-func_800183E0 = 0x800183E0; // type:func
 func_8001C810 = 0x8001C810; // type:func
 func_8001CA1C = 0x8001CA1C; // type:func
 D_800636C8 = 0x800636C8;

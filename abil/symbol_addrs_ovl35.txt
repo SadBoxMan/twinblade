@@ -1,10 +1,11 @@
 // Package 0x35 (MAIN.CD entry 47, abil/ovl35.yaml): a slot-3 package
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+ScrollSky_GlideStart = 0x800CCB28; // type:func
+ScrollSky_GlideMarkTrail = 0x800CCB78; // type:func
+ScrollSky_GlideTrailUpdate = 0x800CCB84; // type:func
+ScrollSky_GlideTrailDraw = 0x800CCBC0; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80016714 = 0x80016714; // type:func
-func_80017758 = 0x80017758; // type:func
 func_8001CD50 = 0x8001CD50; // type:func
-func_800233CC = 0x800233CC; // type:func
-D_800AE620 = 0x800AE620;
 D_8011D030 = 0x8011D030;
 D_8011F758 = 0x8011F758;
 D_8011F75C = 0x8011F75C;

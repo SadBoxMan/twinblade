@@ -1,10 +1,9 @@
 // Package 0x2F (MAIN.CD entry 41, abil/ovl2f.yaml): ability 30, Javelin
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Javelin_ObjUpdate = 0x800CAF9C; // type:func
+Javelin_ObjFly = 0x800CB118; // type:func
+Javelin_GlowUpdate = 0x800CB358; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80013E94 = 0x80013E94; // type:func
-func_80017758 = 0x80017758; // type:func
-func_80017E68 = 0x80017E68; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001C214 = 0x8001C214; // type:func
 D_80078EC1 = 0x80078EC1;
 func_800D20C0 = 0x800D20C0; // type:func
 func_800D23D0 = 0x800D23D0; // type:func

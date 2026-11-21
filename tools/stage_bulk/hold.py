@@ -22,8 +22,8 @@ def asm_folder(path, text):
         return f'asm/nonmatchings/{x}'
     if parts[0] == 'stg':
         return f'asm/stg/{U.stage_of(x)}/nonmatchings/{x}'
-    if parts[0] == 'abil':
-        return f'asm/abil/{x}/nonmatchings/{x}'
+    if parts[0] in ('abil', 'blk'):      # r442: src/blk/<block>.c -> asm/blk/<block>/nonmatchings/<block>
+        return f'asm/{parts[0]}/{x}/nonmatchings/{x}'
     return f'asm/{parts[0]}/nonmatchings/{x}'
 
 

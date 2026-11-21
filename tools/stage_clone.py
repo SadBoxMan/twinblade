@@ -96,14 +96,21 @@ class Image:
             self.own = re.compile(r'(func|D)_([0-9A-F]{8})$')
         else:
             # r209: an image with an -O0 run has three C files (tools/stage_units.py), each its asm folder and object
+            # r442: a code block (blk/, tools/gen_block_cfgs.py) is one file in src/blk, asm/blk/<name>, build/src/blk
+            ar = U.area(self.lo, ROOT)
             self.srcs = U.files(self.lo, ROOT)
-            self.asms = [os.path.join(ROOT, 'asm', 'stg', self.lo, 'nonmatchings', U.unit_of(p)) for p in self.srcs]
-            self.objs = [os.path.join(ROOT, 'build', 'src', 'stg', U.unit_of(p) + '.o') for p in self.srcs]
-            self.syms = read_syms(['symbol_addrs_stage.txt', f'stg/symbol_addrs_{self.lo}.txt'])
+            self.asms = [os.path.join(ROOT, 'asm', ar, self.lo, 'nonmatchings', U.unit_of(p)) for p in self.srcs]
+            self.objs = [os.path.join(ROOT, 'build', 'src', ar, U.unit_of(p) + '.o') for p in self.srcs]
+            # (a block's own file names every outside address it uses with its host's names; the village's file would
+            # name other addresses than the host's)
+            self.syms = read_syms((['symbol_addrs_stage.txt'] if ar == 'stg' else []) + [f'{ar}/symbol_addrs_{self.lo}.txt'])
             self.own = re.compile(rf'(func|D)_{self.lo}_([0-9A-F]{{8}})$')
-        ws = C.load(os.path.join(ROOT, 'disc', 'pac4', name + '.bin'))
-        ee = (C.ENG_END - C.BASE) // 4
-        self.funcs = [(C.BASE + a * 4, C.norm(ws, a, b)) for a, b in C.find_funcs(ws, ee)]
+        path, self.base, self.own_start = U.image(self.lo, ROOT) if name != VILLAGE else \
+            (os.path.join(ROOT, 'disc', 'pac4', name + '.bin'), C.BASE, C.ENG_END)
+        ws = C.load(path)
+        # the shapes with the image's own base (a block loads behind its host; the jal and lui masks are the census's)
+        self.funcs = [(self.base + a * 4, norm_at(ws, a, b, self.base))
+                      for a, b in C.find_funcs(ws, (self.own_start - self.base) // 4)]
         self.text = ''.join(open(p, encoding='utf-8').read() for p in self.srcs)
         self.todo = set(re.findall(r'INCLUDE_ASM\("[^"]+",\s*(\w+)\);', self.text))
         self._asm = None
@@ -129,7 +136,13 @@ class Image:
         return self.obj_tokens(name)
 
     def sym_name(self, a, kind):
-        """the name splat gives an address of this image (an own-range function or datum, else D_<address>)"""
+        """the name splat gives an address of this image (an own-range function or datum, else D_<address>; r442: a
+        block's own range starts at its load address, and below it the host's names are in its symbol file)"""
+        if self.base != C.BASE:
+            if a >= self.base:
+                return f'{kind}_{self.lo}_{a:08X}'
+            host = {v: k for k, v in self.syms.items()}.get(a)
+            return host or f'{kind}_{a:08X}'
         own = a >= C.ENG_END
         if self.name == VILLAGE or not own:
             return f'{kind}_{a:08X}'
@@ -233,8 +246,17 @@ def extern_sym(line):
 
 
 def all_images():
-    names = [VILLAGE] + [lo.upper() for lo in U.stages(ROOT)]
+    # r442: the code blocks are targets and sources like the stages (a room function matched once copies to its twins)
+    names = [VILLAGE] + [lo.upper() for lo in U.stages(ROOT)] + [lo.upper() for lo in U.blocks(ROOT)]
     return {n: Image(n) for n in names}
+
+
+def norm_at(ws, a, b, base):
+    """stage_census.norm with the image's own base (the census's norm is norm_at(..., BASE))"""
+    if base == C.BASE:
+        return C.norm(ws, a, b)
+    import type1_census
+    return type1_census.norm_at(ws, a, b, base)
 
 
 def source_index(images):

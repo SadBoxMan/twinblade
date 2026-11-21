@@ -1,14 +1,14 @@
 #include "common.h"
 #include "abil.h"
 
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl1d_800CAF6C[];
 extern AbilStep D_ovl1d_800CAF40[];
 extern s32 func_80161104();
 void func_ovl1d_800CAEC0(u8 *a);
 
 void func_ovl1d_800CAE0C(void) {
-    func_800183E0(D_ovl1d_800CAF6C);
+    QueueImage(D_ovl1d_800CAF6C);
 }
 
 void func_ovl1d_800CAE34(u8 *a) {
@@ -34,7 +34,7 @@ extern void func_8014BB24();
 extern void func_801599A4();
 extern void func_80159B3C();
 
-void func_ovl1d_800CAEF8(s32 arg0) {
+void CutHeal_Step2Heal(s32 arg0) {
     func_8014BB24(arg0, 0xA, 1);
     func_801599A4(arg0);
     func_80159B3C(arg0);

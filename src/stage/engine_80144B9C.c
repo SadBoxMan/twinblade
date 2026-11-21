@@ -9,9 +9,9 @@
 /* the stage's room records (docs/demos.md); word 0 is the default */
 extern s32 D_8018D220[];
 
-/* a map's room record (func_801457A4) */
+/* a map's room record (GetRoomRecord) */
 typedef struct {
-    /* 0x00 */ s16 x, y, z;          /* func_8002850C */
+    /* 0x00 */ s16 x, y, z;          /* SetAmbientColor */
     /* 0x06 */ s16 l0x, l0y, l0z;    /* the three lights' directions and colours */
     /* 0x0C */ u8 l0r, l0g, l0b;
     /* 0x0F */ u8 padF;
@@ -28,7 +28,7 @@ typedef struct {
     /* 0x4C */ s32 unk4C, unk50, unk54, unk58;
     /* 0x5C */ s32 unk5C, unk60, unk64;
     /* 0x68 */ u8 unk68[0x20];
-    /* 0x88 */ s32 unk88, unk8C, unk90;     /* func_801336E8 */
+    /* 0x88 */ s32 unk88, unk8C, unk90;     /* SetCollisionMaps */
     /* 0x94 */ u8 *unk94, *unk98;           /* func_8013B83C */
     /* 0x9C */ s32 unk9C, unkA0, unkA4;
     /* 0xA8 */ void (*unkA8)(void);         /* func_8013B568 */
@@ -51,7 +51,7 @@ typedef struct {
     /* 0x1C */ s32 unk1C;
     /* 0x20 */ void (*start)(void);
 } StageEntry;
-/* the stage request at D_800AE6A8 (which entry, where to place Musashi) */
+/* the stage request at g_EntryPoint (which entry, where to place Musashi) */
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ StageEntry *entry;
@@ -72,7 +72,7 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x12];
     /* 0x12 */ u16 dir;
 } ModelLoad;
-/* Musashi (game.h's Player at D_80126B58) as the loader sets him up */
+/* Musashi (game.h's Player at g_Player) as the loader sets him up */
 typedef struct {
     /* 0x000 */ u8 pad0[4];
     /* 0x004 */ u16 xf;
@@ -111,7 +111,7 @@ typedef struct {
     /* 0x3C */ u16 pad3C;
     /* 0x3E */ u16 unk3E;
 } StatsLoad;
-/* the camera (engine.c's Camera at D_80126948); the loader writes +0xA0 as a byte */
+/* the camera (engine.c's Camera at g_Camera); the loader writes +0xA0 as a byte */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA0];
     /* 0xA0 */ u8 mode;
@@ -124,10 +124,10 @@ typedef struct {
     /* 0xD */ u8 g;
     /* 0xE */ u8 b;
 } LightDir; /* GsF_LIGHT */
-extern PlayerLoad D_80126B58;
-extern StatsLoad D_80078E78;
-extern StageReq D_800AE6A8;
-extern CameraLoad D_80126948;
+extern PlayerLoad g_Player;
+extern StatsLoad g_Status;
+extern StageReq g_EntryPoint;
+extern CameraLoad g_Camera;
 extern StageEntry D_80078E50;
 extern u8 D_8010F5C8;
 extern s32 D_8011DB14;
@@ -135,45 +135,45 @@ extern s32 D_8011DB1C;
 extern s32 D_80128150;
 extern u8 D_80126DB0[];
 extern u16 D_80126DB6;
-extern CameraLoad *D_801151D4;
-extern LightDir D_800A5E88[3];
+extern CameraLoad *g_ActiveCamera;
+extern LightDir g_Lights[3];
 extern u16 D_800B9AAC, D_800B9B00, D_800B9AB2, D_800B9B06, D_800B9AB6, D_800B9B0A;
 extern s32 D_800B9AC4, D_800B9B18, D_800B9AC8, D_800B9B1C;
 extern u8 D_800B9ABC, D_800B9ABD, D_800B9ABE, D_800B9B10, D_800B9B11, D_800B9B12;
 extern u8 D_800B9ABF, D_800B9AC0, D_800B9AC1, D_800B9B13, D_800B9B14, D_800B9B15;
-extern s32 D_80126728, D_8011DB08, D_80126AEC;
+extern s32 g_EffectHandlers, g_ActorHandlers, g_PropHandlers;
 extern u8 D_801151F0[8];
-extern s32 D_801274C8, D_801274CC, D_801274D0, D_801274D4, D_801270B8, D_80127520;
+extern s32 g_SpawnListFixed, g_SpawnListRanged, D_801274D0, g_FarTest, D_801270B8, D_80127520;
 extern s32 D_801151D8, D_8011DB28;
 extern void EnableRumbleScripts(void);
 extern void ResetSelectHold(void);
 extern void func_8002AB64(void);
-extern void func_80015978(void *a, void *b);
-extern void func_8012A1BC(void);
-extern void func_8002850C(s32 x, s32 y, s32 z);
-extern void func_80028620(s32 n, LightDir *l);
-extern void func_80129398(void);
-extern void func_8012944C(void);
-extern void func_801336E8(s32 a, s32 b, s32 c);
+extern void PosToSVec(void *a, void *b);
+extern void RestoreKeptCamera(void);
+extern void SetAmbientColor(s32 x, s32 y, s32 z);
+extern void ApplyLight(s32 n, LightDir *l);
+extern void ResetBgLayers(void);
+extern void SetupBgLayers(void);
+extern void SetCollisionMaps(s32 a, s32 b, s32 c);
 void func_8013B83C(u8 *a, u8 *b, s32 c);
 void func_8013B568(void (*f)(void));
 extern void func_800D02C0(s32 a);
 extern void SetDemoStream(s32 a);
-extern void func_8013D3D4(s32 a, s32 b);
-extern void func_8002D4C8(s32 a, s32 b);
+extern void SetupClockTint(s32 a, s32 b);
+extern void PlaySoundId(s32 a, s32 b);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern s32 func_800CF854(void);
 extern void func_8001C14C(void);
-extern void func_8012A110(void);
-s32 func_801457A4(s32 id);
+extern void ResetKeptCamera(void);
+s32 GetRoomRecord(s32 id);
 
 /* the stage loader: the room record of the map, the entry, Musashi's place, lights, the stage's code blocks */
-void func_80144B9C(void) {
-    PlayerLoad *g = &D_80126B58;
-    StatsLoad *q = &D_80078E78;
+void LoadRoom(void) {
+    PlayerLoad *g = &g_Player;
+    StatsLoad *q = &g_Status;
     register Work *w = &D_800AF630;
-    StageReq *cd = &D_800AE6A8;
-    CameraLoad *h = &D_80126948;
+    StageReq *cd = &g_EntryPoint;
+    CameraLoad *h = &g_Camera;
     RoomRec *room;
     StageEntry *entry;
     s32 *tbl;
@@ -184,7 +184,7 @@ void func_80144B9C(void) {
     EnableRumbleScripts();
     ResetSelectHold();
     if (cd->flags == 0) {
-        room = (RoomRec *)func_801457A4(w->mapId);
+        room = (RoomRec *)GetRoomRecord(w->mapId);
         cd->entryIdx = 0;
         first = 1;
         D_8011DB14 = q->unk3A;
@@ -192,7 +192,7 @@ void func_80144B9C(void) {
         D_80128150 = 100;
         func_8002AB64();
     } else {
-        room = (RoomRec *)func_801457A4(w->mapId);
+        room = (RoomRec *)GetRoomRecord(w->mapId);
         first = 0;
     }
     cd->entries = room->entries;
@@ -223,11 +223,11 @@ void func_80144B9C(void) {
     g->focus[0] = g->unk15C[0] = g->x;
     g->focus[1] = g->unk15C[1] = g->y;
     g->focus[2] = g->unk15C[2] = g->z;
-    func_80015978(&g->xf, D_80126DB0);
+    PosToSVec(&g->xf, D_80126DB0);
     D_80126DB6 = g->model->dir;
     if (w->mapGroup == 0x1000 && (w->unkA3DC == 0x1000 || w->unkA3DC == 0x2000) && first == 0) {
         entry->init();
-        func_8012A1BC();
+        RestoreKeptCamera();
     } else {
         if (w->mapGroup == 0x1000 && w->unkA3DC == 0x3000) {
             h->mode = entry->unk3;
@@ -239,30 +239,30 @@ void func_80144B9C(void) {
     if (w->mapId == 0x3069) {
         h->mode = entry->unk3;
     }
-    D_801151D4 = h;
-    func_8002850C(room->x, room->y, room->z);
-    D_800A5E88[0].vx = room->l0x;
-    D_800A5E88[0].vy = room->l0y;
-    D_800A5E88[0].vz = room->l0z;
-    D_800A5E88[0].r = room->l0r;
-    D_800A5E88[0].g = room->l0g;
-    D_800A5E88[0].b = room->l0b;
-    func_80028620(0, &D_800A5E88[0]);
-    D_800A5E88[1].vx = room->l1x;
-    D_800A5E88[1].vy = room->l1y;
-    D_800A5E88[1].vz = room->l1z;
-    D_800A5E88[1].r = room->l1r;
-    D_800A5E88[1].g = room->l1g;
-    D_800A5E88[1].b = room->l1b;
-    func_80028620(1, &D_800A5E88[1]);
-    D_800A5E88[2].vx = room->l2x;
-    D_800A5E88[2].vy = room->l2y;
-    D_800A5E88[2].vz = room->l2z;
-    D_800A5E88[2].r = room->l2r;
-    D_800A5E88[2].g = room->l2g;
-    D_800A5E88[2].b = room->l2b;
-    func_80028620(2, &D_800A5E88[2]);
-    func_80129398();
+    g_ActiveCamera = h;
+    SetAmbientColor(room->x, room->y, room->z);
+    g_Lights[0].vx = room->l0x;
+    g_Lights[0].vy = room->l0y;
+    g_Lights[0].vz = room->l0z;
+    g_Lights[0].r = room->l0r;
+    g_Lights[0].g = room->l0g;
+    g_Lights[0].b = room->l0b;
+    ApplyLight(0, &g_Lights[0]);
+    g_Lights[1].vx = room->l1x;
+    g_Lights[1].vy = room->l1y;
+    g_Lights[1].vz = room->l1z;
+    g_Lights[1].r = room->l1r;
+    g_Lights[1].g = room->l1g;
+    g_Lights[1].b = room->l1b;
+    ApplyLight(1, &g_Lights[1]);
+    g_Lights[2].vx = room->l2x;
+    g_Lights[2].vy = room->l2y;
+    g_Lights[2].vz = room->l2z;
+    g_Lights[2].r = room->l2r;
+    g_Lights[2].g = room->l2g;
+    g_Lights[2].b = room->l2b;
+    ApplyLight(2, &g_Lights[2]);
+    ResetBgLayers();
     D_800B9AAC = room->unk24;
     D_800B9B00 = room->unk26;
     D_800B9AC4 = room->unk28;
@@ -285,16 +285,16 @@ void func_80144B9C(void) {
     D_800B9B13 = room->unk40[9];
     D_800B9B14 = room->unk40[10];
     D_800B9B15 = room->unk40[11];
-    func_8012944C();
+    SetupBgLayers();
     g->unkB0 = room->unk4C;
     g->unkCC = room->unk50;
     g->unk1E8 = room->unk54;
     g->unk1F0 = room->unk58;
-    D_80126728 = room->unk5C;
-    D_8011DB08 = room->unk60;
-    D_80126AEC = room->unk64;
+    g_EffectHandlers = room->unk5C;
+    g_ActorHandlers = room->unk60;
+    g_PropHandlers = room->unk64;
     g->unk19C = room->unk68;
-    func_801336E8(room->unk88, room->unk8C, room->unk90);
+    SetCollisionMaps(room->unk88, room->unk8C, room->unk90);
     func_8013B83C(room->unk94, room->unk98, room->unk9C);
     func_8013B568(room->unkA8);
     func_800D02C0(room->unkD4);
@@ -302,18 +302,18 @@ void func_80144B9C(void) {
     for (i = 0; i < 8; i++) {
         D_801151F0[i] = *(i + (u8 *)room + 0xAC);  /* not room->unkAC[i]: -O0 adds i to room first */
     }
-    D_801274C8 = room->unkB4;
-    D_801274CC = room->unkB8;
+    g_SpawnListFixed = room->unkB4;
+    g_SpawnListRanged = room->unkB8;
     D_801274D0 = room->unkBC;
-    D_801274D4 = room->unkC0;
+    g_FarTest = room->unkC0;
     D_801270B8 = room->unkC4;
     D_80127520 = room->unkC4;
     D_801151D8 = 0;
     D_8011DB28 = 0;
     fn = entry->start;
     fn();
-    func_8013D3D4(room->unkA0, room->unkA4);
-    func_8002D4C8(0x1E, 0);
+    SetupClockTint(room->unkA0, room->unkA4);
+    PlaySoundId(0x1E, 0);
     if (cd->flags == 0) {
         D_80078E50 = *entry;
     }
@@ -321,12 +321,12 @@ void func_80144B9C(void) {
     cd->flags = cd->flags & 0x7F000000;
     if (func_800CF854() != 0) {
         func_8001C14C();
-        func_8012A110();
+        ResetKeptCamera();
     }
 }
 
 /* the room record of a map id; the -O0 `break` after the default's return still emits its jump */
-s32 func_801457A4(s32 id) {
+s32 GetRoomRecord(s32 id) {
     switch (id) {
     case 0x1010: case 0x1052: case 0x1077: case 0x1094: case 0x2013:
     case 0x2015: case 0x2016: case 0x2017: case 0x2018: case 0x2019: case 0x201A:

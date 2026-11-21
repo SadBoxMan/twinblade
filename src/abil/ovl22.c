@@ -3,36 +3,36 @@
 
 extern void func_80162CCC();
 extern void func_80147364();
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl22_800CBF54[];
 extern u8 D_ovl22_800CBF14[];
 extern AbilStep D_ovl22_800CBE94[];
-void func_ovl22_800CAEC0(u8 *a);
+void BO_Start(u8 *a);
 
 void func_ovl22_800CAE0C(void) {
-    func_800183E0(D_ovl22_800CBF54);
-    func_800183E0(D_ovl22_800CBF14);
+    QueueImage(D_ovl22_800CBF54);
+    QueueImage(D_ovl22_800CBF14);
 }
 
-void func_ovl22_800CAE44(u8 *a) {
+void BO_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
     D_ovl22_800CBE94[AF(a, u8, 0x197)](a);
 }
 
 void func_ovl22_800CAE88(u8 *a) {
-    func_ovl22_800CAEC0(a);
+    BO_Start(a);
     AF(a, u8, 0x197)++;
 }
 
 extern void func_ovl22_800CB600();
 extern s32 rand();
 extern void func_80146C3C();
-extern s32 func_ovl22_800CB8A0();
+extern s32 BO_DrawCloud();
 extern u8 D_80078EC1;
 extern AbilStep D_ovl22_800CBEE0[];
 extern void func_ovl22_800CB684();
-extern void func_8001CB00();
-extern void func_8001CC3C();
+extern void InitSpriteKind1();
+extern void InitSpriteKind3();
 extern s32 func_80146578();
 extern void func_80146CA0();
 extern void func_80149374();
@@ -41,7 +41,7 @@ extern void func_ovl22_800CB620();
 extern s32 D_ovl22_800CBEA0;
 extern s32 D_ovl22_800CBEAC;
 
-extern s32 func_ovl22_800CB6D4();
+extern s32 BO_FlyOrbitStep();
 extern s32 ratan2();
 extern s32 rcos();
 extern s32 rsin();
@@ -53,7 +53,7 @@ extern void func_80147324();
 extern void func_801655E4();
 extern s32 func_80165910();
 
-void func_ovl22_800CAEC0(u8 *arg0) {
+void BO_Start(u8 *arg0) {
     s32 temp_v0;
     s32 temp_v0_2;
     s32 temp_v0_3;
@@ -99,16 +99,16 @@ extern AbilStep D_ovl22_800CBEB8[];
 
 extern void func_80146A6C();
 
-extern s32 func_80012F74();
+extern s32 EaseValueFrac();
 
 extern s32 D_80078EC8;
-extern u8 D_80078E78;
+extern u8 g_Status;
 extern void func_80165A20();
 
 void func_ovl22_800CB0D8(u8 *arg0) {
     u8 *g;
 
-    g = &D_80078E78;
+    g = &g_Status;
     if (!(D_80078EC8 & 0x1F)) {
         func_801466F0(0xE, arg0, 0, 0, 0, (((rand() % 16) + 16) << 12) / 360, 0, 1);
         func_801466F0(0xE, arg0, 0, 0, 0, -((((rand() % 16) + 16) << 12) / 360), 0, 1);
@@ -125,11 +125,11 @@ void func_ovl22_800CB0D8(u8 *arg0) {
     }
 }
 
-void func_ovl22_800CB32C(void) {
+void BO_StopSound(void) {
     func_80147364(4, 0x838);
 }
 
-void func_ovl22_800CB350(s32 arg0) {
+void BO_FlyUpdate(s32 arg0) {
     s32 pad[2];
     if (D_80078EC1 != 0x15) {
         func_ovl22_800CB600(arg0);
@@ -147,10 +147,10 @@ void func_ovl22_800CB3AC(u8 *arg0) {
     AF(arg0, void *, 0x20) = temp_v0;
     if (temp_v0 != NULL) {
         if (AF(arg0, s32, 0x54) == 0) {
-            func_8001CC3C(temp_v0, &D_ovl22_800CBEA0, 0x1A8, 0x100);
+            InitSpriteKind3(temp_v0, &D_ovl22_800CBEA0, 0x1A8, 0x100);
             func_80149374(temp_s2, arg0 + 4);
         } else {
-            func_8001CB00(temp_v0, &D_ovl22_800CBEAC, 0x1A0, 0x100);
+            InitSpriteKind1(temp_v0, &D_ovl22_800CBEAC, 0x1A0, 0x100);
             AF(temp_v0, s16, 0x2C) = 1;
             func_8014964C(temp_s2, arg0 + 4);
         }
@@ -183,7 +183,7 @@ void func_ovl22_800CB484(u8 *arg0) {
         }
         AF(m, s16, 0x2A) = v;
     }
-    if (func_ovl22_800CB6D4(arg0) != 0) {
+    if (BO_FlyOrbitStep(arg0) != 0) {
         n = AF(arg0, u16, 0x18);
         AF(arg0, u16, 0x18) = n + 1;
         if ((s16) n >= 4) {
@@ -201,7 +201,7 @@ void func_ovl22_800CB484(u8 *arg0) {
 }
 
 void func_ovl22_800CB564(s32 arg0) {
-    if (func_ovl22_800CB6D4() != 0) {
+    if (BO_FlyOrbitStep() != 0) {
         func_ovl22_800CB600(arg0);
     }
 }
@@ -237,7 +237,7 @@ void func_ovl22_800CB620(u8 *arg0) {
     AF(arg0, s16, 0x64) = v;
     AF(arg0, s16, 0x66) = v;
     func_ovl22_800CB684(arg0, 0x200);
-    func_ovl22_800CB6D4(arg0);
+    BO_FlyOrbitStep(arg0);
 }
 
 void func_ovl22_800CB684(u8 *arg0, s32 arg1) {
@@ -245,7 +245,7 @@ void func_ovl22_800CB684(u8 *arg0, s32 arg1) {
     AF(arg0, s16, 0x62) = (s16) (arg1 + (rand() & 0x7F));
 }
 
-s32 func_ovl22_800CB6D4(u8 *arg0) {
+s32 BO_FlyOrbitStep(u8 *arg0) {
     AVec v;
     u8 *m;
     s16 t;
@@ -260,9 +260,9 @@ s32 func_ovl22_800CB6D4(u8 *arg0) {
         v.vy = AF(arg0, s16, 0x62) * rsin(AF(arg0, s16, 0x64)) / 4096;
         v.vz = 0;
     }
-    AF(arg0, s16, 6) = func_80012F74(AF(arg0, s16, 6), (s16) (AF(arg0, u16, 0x10) + v.vx), 0xA, 1);
-    AF(arg0, s16, 0xA) = func_80012F74(AF(arg0, s16, 0xA), (s16) (AF(arg0, u16, 0x12) + v.vy), 0xA, 1);
-    AF(arg0, s16, 0xE) = func_80012F74(AF(arg0, s16, 0xE), (s16) (AF(arg0, u16, 0x14) + v.vz), 0xA, 1);
+    AF(arg0, s16, 6) = EaseValueFrac(AF(arg0, s16, 6), (s16) (AF(arg0, u16, 0x10) + v.vx), 0xA, 1);
+    AF(arg0, s16, 0xA) = EaseValueFrac(AF(arg0, s16, 0xA), (s16) (AF(arg0, u16, 0x12) + v.vy), 0xA, 1);
+    AF(arg0, s16, 0xE) = EaseValueFrac(AF(arg0, s16, 0xE), (s16) (AF(arg0, u16, 0x14) + v.vz), 0xA, 1);
     AF(m, s16, 0x14) = (ratan2(AF(arg0, s16, 6) - AF(arg0, s16, 0x44), AF(arg0, s16, 0x46) - AF(arg0, s16, 0xA)) - 0x200) & 0xFFF;
     t = AF(arg0, u16, 0x64) + AF(arg0, s32, 0x50);
     AF(arg0, s16, 0x64) = t;
@@ -278,15 +278,15 @@ s32 func_ovl22_800CB6D4(u8 *arg0) {
     return 0;
 }
 
-extern s8 D_ovl22_800CBECC[];
-extern void func_80017DC4();
+extern s8 BO_CloudVerts[];
+extern void SetScaleMatrix();
 extern void func_8012F14C();
 extern void func_800D20C0();
 extern void func_800D23D0();
-extern void func_80017E68();
-extern void func_80017758();
+extern void SetMatrixTrans();
+extern void DrawPrimG4Mtx();
 
-s32 func_ovl22_800CB8A0(arg0) u8 *arg0; {
+s32 BO_DrawCloud(arg0) u8 *arg0; {
     s8 *p;
     s16 i;
     AVec v;
@@ -296,7 +296,7 @@ s32 func_ovl22_800CB8A0(arg0) u8 *arg0; {
     AMtx b;
 
     v.vx = v.vy = v.vz = AF(arg0, u16, 0x28);
-    func_80017DC4(&v, &a);
+    SetScaleMatrix(&v, &a);
     v.vx = v.vz = 0;
     v.vy = -0x2C;
     func_8012F14C(arg0 + 0x38, &v, &v);
@@ -310,10 +310,10 @@ s32 func_ovl22_800CB8A0(arg0) u8 *arg0; {
     s.c[2].r = s.c[2].g = s.c[2].b = 0;
     s.c[3].r = s.c[3].g = s.c[3].b = 0;
     s.code = 0x50000000;
-    func_80017E68(&v, &a);
+    SetMatrixTrans(&v, &a);
     RotMatrixYXZ(&r, &b);
     MulMatrix(&a, &b);
-    p = D_ovl22_800CBECC;
+    p = BO_CloudVerts;
     i = 0;
     do {
         s.v[0].vx = *p++;
@@ -322,12 +322,12 @@ s32 func_ovl22_800CB8A0(arg0) u8 *arg0; {
         s.v[2].vy = *p++;
         s.v[3].vx = *p++;
         s.v[3].vy = *p--;
-        func_80017758(&s, &a);
+        DrawPrimG4Mtx(&s, &a);
         i++;
     } while (i < 4);
 }
 
-void func_ovl22_800CBA74(u8 *arg0) {
+void BO_CloudUpdate(u8 *arg0) {
     if (D_80078EC1 != 0x15) {
         func_80146C3C();
         return;
@@ -350,7 +350,7 @@ void func_ovl22_800CBAD0(u8 *arg0) {
             AF(arg0, u16, 2) = 4;
         }
         AF(arg0, AMtx, 0x38) = AF(AF(s, u8 *, 0x20), AMtx, 0x34);
-        func_ovl22_800CB8A0(arg0);
+        BO_DrawCloud(arg0);
         return;
     }
     AF(arg0, u16, 2)++;
@@ -374,7 +374,7 @@ void func_ovl22_800CBBA0(u8 *arg0) {
             AF(arg0, s16, 0x2A) = 0x500;
             AF(arg0, u16, 2)++;
         }
-        AF(arg0, AMtx, 0x38) = AF(AF(s, u8 *, 0x20), AMtx, 0x34);        func_ovl22_800CB8A0(arg0);
+        AF(arg0, AMtx, 0x38) = AF(AF(s, u8 *, 0x20), AMtx, 0x34);        BO_DrawCloud(arg0);
     }
 }
 
@@ -396,7 +396,7 @@ void func_ovl22_800CBC7C(u8 *arg0) {
     AF(arg0, s32, 0x4C) += r;
     AF(arg0, s32, 0x50) -= 3;
     AF(arg0, s32, 0x54) += AF(arg0, s16, 0x1A);
-    func_ovl22_800CB8A0(arg0, r);
+    BO_DrawCloud(arg0, r);
     t = AF(arg0, s32, 0x30);
     AF(arg0, s32, 0x30) = t - 1;
     if (t == 0) {
@@ -411,13 +411,13 @@ void func_ovl22_800CBD78(u8 *arg0) {
     AF(arg0, u16, 0x28) = temp_v0;
     if ((temp_v0 << 0x10) > 0) {
         AF(arg0, s32, 0x50) = (s32) (AF(arg0, s32, 0x50) - 3);
-        func_ovl22_800CB8A0();
+        BO_DrawCloud();
         return;
     }
     func_80146C3C();
 }
 
-void func_ovl22_800CBDD0(u8 *arg0) {
+void BO_CloudEmitter(u8 *arg0) {
     s32 temp_a1;
     s32 temp_a2;
     s32 temp_a3;
@@ -427,7 +427,7 @@ void func_ovl22_800CBDD0(u8 *arg0) {
 
     temp_s1 = AF(arg0, void *, 0x34);
     AF(arg0, AMtx, 0x38) = AF(AF(temp_s1, void *, 0x20), AMtx, 0x34);
-    func_ovl22_800CB8A0(arg0);
+    BO_DrawCloud(arg0);
     temp_v0_2 = AF(arg0, s32, 0x1C) - 1;
     AF(arg0, s32, 0x1C) = temp_v0_2;
     if (temp_v0_2 == -1) {

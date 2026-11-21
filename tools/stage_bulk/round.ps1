@@ -4,6 +4,7 @@
 # places the matches (place_stage.py: compile-screen, check-stage, bisect), then tries tools/abil_bulk/rewrite.py's
 # levers on the misses (AVec as psyq.h's SVECTOR) and places those. Prints the stage count at the end.
 # A split stage (r143): set $env:TWINBLADE_STG = "sc02_031" first (m2c_stage.py and place_stage.py read it).
+# A code block (r442, blk/): the same with its name, $env:TWINBLADE_STG = "sc02_009".
 param([string]$name)
 $T = "tools/stage_bulk"; $py = ".venv/Scripts/python.exe"
 $env:PATH = "C:\msys64\usr\bin;" + $env:PATH
@@ -38,7 +39,8 @@ foreach ($d in $w, "${w}v") {
 }
 if ($env:TWINBLADE_STG) {           # a split stage (r143): its own check and count
   make "check-$($env:TWINBLADE_STG)" 2>&1 | Select-Object -Last 1
-  $t = Get-Content "src/stg/$($env:TWINBLADE_STG).c"
+  $area = if (Test-Path "blk/$($env:TWINBLADE_STG).yaml") { "blk" } else { "stg" }   # r442: a code block's name too
+  $t = Get-Content "src/$area/$($env:TWINBLADE_STG).c"
   "$($env:TWINBLADE_STG): " + ($t | Select-String '^INCLUDE_ASM').Count + " still asm"
 } else {
   make check-stage 2>&1 | Select-Object -Last 1

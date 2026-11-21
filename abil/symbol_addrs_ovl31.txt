@@ -1,13 +1,11 @@
 // Package 0x31 (MAIN.CD entry 43, abil/ovl31.yaml): a slot-3 package
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+ScrollEarth_SlamQuake = 0x800CCE24; // type:func
+ScrollEarth_ShockwaveUpdate = 0x800CCF14; // type:func
+ScrollEarth_ShockwaveRippleUpdate = 0x800CD3C8; // type:func
+ScrollEarth_SlamStepTable = 0x800CD6DC;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800123F0 = 0x800123F0; // type:func
-func_80012558 = 0x80012558; // type:func
-func_800126C4 = 0x800126C4; // type:func
-func_80012FC8 = 0x80012FC8; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80015978 = 0x80015978; // type:func
 func_8001CD50 = 0x8001CD50; // type:func
-func_800233CC = 0x800233CC; // type:func
 D_800B9A08 = 0x800B9A08;
 D_800D3414 = 0x800D3414;
 D_800D3428 = 0x800D3428;

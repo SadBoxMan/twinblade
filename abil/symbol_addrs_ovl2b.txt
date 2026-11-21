@@ -1,11 +1,17 @@
 // Package 0x2B (MAIN.CD entry 37, abil/ovl2b.yaml): ability 25, Acid
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Acid_CycleImage = 0x800CAE0C; // type:func
+Acid_QueueImages = 0x800CAE70; // type:func
+Acid_BlobUpdate = 0x800CB028; // type:func
+Acid_BlobInit = 0x800CB09C; // type:func
+Acid_BlobFly = 0x800CB150; // type:func
+Acid_PuddleSpread = 0x800CB2A8; // type:func
+Acid_PuddleHit = 0x800CB378; // type:func
+Acid_DropUpdate = 0x800CB424; // type:func
+Acid_ImageCycle = 0x800CB5D4;
+Acid_ImageCycleIndex = 0x800CB95C;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80015978 = 0x80015978; // type:func
-func_80016714 = 0x80016714; // type:func
-func_800183E0 = 0x800183E0; // type:func
 func_8001CA1C = 0x8001CA1C; // type:func
-func_8001CB6C = 0x8001CB6C; // type:func
-func_8001CC3C = 0x8001CC3C; // type:func
 D_80078EC1 = 0x80078EC1;
 D_800D57F4 = 0x800D57F4;
 D_801202A0 = 0x801202A0;

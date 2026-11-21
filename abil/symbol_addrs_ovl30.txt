@@ -1,6 +1,11 @@
 // Package 0x30 (MAIN.CD entry 42, abil/ovl30.yaml): a slot-3 package
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+ScrollLumina_Setup = 0x800CCB20; // type:func
+ScrollLumina_Step = 0x800CCBA0; // type:func
+ScrollLumina_Spin = 0x800CCBF0; // type:func
+ScrollLumina_SetBladeScale = 0x800CCD60; // type:func
+ScrollLumina_StepTable = 0x800CCD94;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-D_80078E78 = 0x80078E78;
 D_800D5360 = 0x800D5360;
 func_80146994 = 0x80146994; // type:func
 func_80147324 = 0x80147324; // type:func

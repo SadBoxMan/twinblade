@@ -1,15 +1,15 @@
 // Package 0x19 (MAIN.CD entry 19, abil/ovl19.yaml): ability 13, Shrink
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Shrink_Step2Fire = 0x800CAF08; // type:func
+Shrink_Step3Flash = 0x800CB0C8; // type:func
+Shrink_UpdateLights = 0x800CB1A0; // type:func
+Shrink_ShotUpdate = 0x800CB2C8; // type:func
+Shrink_TrailInit = 0x800CB4C8; // type:func
+Shrink_ShotHit = 0x800CBC0C; // type:func
+Shrink_RingUpdate = 0x800CBD0C; // type:func
+Shrink_TrailPoints = 0x800CC5B0;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800130D0 = 0x800130D0; // type:func
-func_80013F3C = 0x80013F3C; // type:func
-func_80015954 = 0x80015954; // type:func
-func_80015978 = 0x80015978; // type:func
-func_80017758 = 0x80017758; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_800183E0 = 0x800183E0; // type:func
-func_8001C2C4 = 0x8001C2C4; // type:func
 func_8001CD9C = 0x8001CD9C; // type:func
-func_800233CC = 0x800233CC; // type:func
 D_80078EC1 = 0x80078EC1;
 D_800B99DA = 0x800B99DA;
 func_800D1FC8 = 0x800D1FC8; // type:func

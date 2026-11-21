@@ -2,7 +2,7 @@
 #include "abil.h"
 
 extern void func_80162CCC();
-extern void func_800183E0();
+extern void QueueImage();
 extern u8 D_ovl2e_800CB9F4[];
 extern u8 D_ovl2e_800CB9B4[];
 extern AbilStep D_ovl2e_800CB8C8[];
@@ -13,11 +13,11 @@ extern void func_801655E4();
 extern u8 D_800D57F4[];
 
 void func_ovl2e_800CAE0C(void) {
-    func_800183E0(D_ovl2e_800CB9F4);
-    func_800183E0(D_ovl2e_800CB9B4);
+    QueueImage(D_ovl2e_800CB9F4);
+    QueueImage(D_ovl2e_800CB9B4);
 }
 
-void func_ovl2e_800CAE44(u8 *a) {
+void Grenade_Update(u8 *a) {
     AF(a, s32, 0x44) |= 8;
     D_ovl2e_800CB8C8[AF(a, u8, 0x197)](a);
 }
@@ -71,7 +71,7 @@ void func_ovl2e_800CAFB0(u8 *a) {
     AF(a, s32, 0x44) &= ~2;
 }
 
-void func_ovl2e_800CAFC4(u8 *arg0) {
+void Grenade_ObjUpdate(u8 *arg0) {
     if ((D_80078EC1 != 0x1D) || (D_ovl2e_800CB8D4[AF(arg0, u16, 2)](), ((AF(arg0, s16, 0xA) < 0x401) == 0))) {
         func_ovl2e_800CB3BC(arg0);
     }
@@ -85,7 +85,7 @@ extern void func_80146E90();
 extern void func_80146CA0();
 extern u8 D_ovl2e_800CBD74;
 extern s32 func_8014659C();
-extern void func_8001C214();
+extern void InitModel();
 extern void func_80149374();
 extern void func_80146DE8();
 extern void func_80147324();
@@ -98,7 +98,7 @@ void func_ovl2e_800CB038(u8 *arg0) {
     temp_v0 = func_8014659C();
     AF(arg0, s32, 0x20) = temp_v0;
     if (temp_v0 != 0) {
-        func_8001C214(temp_v0, (s32) &D_ovl2e_800CBD74);
+        InitModel(temp_v0, (s32) &D_ovl2e_800CBD74);
         AF(temp_v0, u16, 0x12) = (u16) AF(AF(temp_s2, void *, 0x20), u16, 0x12);
         func_80149374((s32) temp_s2, (s32) (arg0 + 4));
         func_80146DE8((s32) arg0, 0, -0xC0000, -0x100000);
@@ -115,7 +115,7 @@ void func_ovl2e_800CB038(u8 *arg0) {
 extern u8 D_801202A0[];
 extern s32 func_8014C308();
 extern s32 func_8014C278();
-extern void func_80015978();
+extern void PosToSVec();
 extern void func_8014C3A4();
 
 extern void func_80146A6C();
@@ -130,7 +130,7 @@ extern void func_80163328();
 extern s32 func_801632F0();
 extern void func_80162D28();
 
-void func_ovl2e_800CB114(u8 *arg0) {
+void Grenade_ObjFly(u8 *arg0) {
     AVec b;
     AVec s;
     u8 *m;
@@ -179,7 +179,7 @@ tail:
     func_80162D28(arg0);
 }
 
-void func_ovl2e_800CB304(u8 *arg0) {
+void Grenade_ObjExplode(u8 *arg0) {
     s32 pad[2];
     s32 i;
     u8 *m;
@@ -210,14 +210,14 @@ void func_ovl2e_800CB3DC(u8 *arg0) {
 
     for (p = D_801202A0; p < D_801202A0 + 0x6480; p += 0x10C) {
         if (func_8014C308(arg0, p, 0x2A, 0x20) != 0 && func_8014C278(arg0, p, 0x80) != 0) {
-            func_80015978(p + 4, &v);
+            PosToSVec(p + 4, &v);
             v.pad = 0;
             func_8014C3A4(arg0, p, 0x2A, &v);
         }
     }
 }
 
-void func_ovl2e_800CB488(u8 *arg0) {
+void Grenade_FlameUpdate(u8 *arg0) {
     if (D_80078EC1 == 0x1D) {
         D_ovl2e_800CB948[AF(arg0, u16, 2)]();
         return;
@@ -231,7 +231,7 @@ extern u8 D_ovl2e_800CB8F8;
 extern AVec D_ovl2e_800CB954[];
 extern ALVec D_ovl2e_800CB984;
 extern s32 func_801465C0();
-extern void func_8001CC3C();
+extern void InitSpriteKind3();
 extern void func_80128EA8();
 
 void func_ovl2e_800CB4E4(u8 *arg0) {
@@ -246,7 +246,7 @@ void func_ovl2e_800CB4E4(u8 *arg0) {
     if (o == NULL) {
         goto fail;
     }
-    func_8001CC3C(o, &D_ovl2e_800CB8EC, 0, 0);
+    InitSpriteKind3(o, &D_ovl2e_800CB8EC, 0, 0);
     AF(o, u8, 0x27) = 0x90;
     AF(o, s16, 0x18) = AF(o, s16, 0x1A) = 0x3000;
     AF(o, s32, 4) |= 0x50000000;

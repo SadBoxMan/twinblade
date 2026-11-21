@@ -1,0 +1,42 @@
+// Mode overlay ovl37 (ovl37.yaml): its own names (docs/symbol_scheme.md B1; read only by ovl37.yaml, after symbol_addrs.txt)
+// ---- r379 naming batch (ovl; docs/names_merged/r379_plan.csv)
+DebugMenuMain = 0x800CEE74; // type:func
+DebugMenuInit = 0x800CEF00; // type:func
+DebugMenuOptions = 0x800CF28C; // type:func
+DebugDrawWeekday = 0x800CFB88; // type:func
+DebugDrawPresetName = 0x800CFBF0; // type:func
+DebugMenuWaitFadeOut = 0x800CFC58; // type:func
+DebugApplyPresets = 0x800CFCBC; // type:func
+DebugSceneSelect = 0x800CFDB4; // type:func
+DebugRowFinish = 0x800D03F8; // type:func
+DebugRowDispatch = 0x800D0450; // type:func
+DebugDrawStatus = 0x800D04F4; // type:func
+DebugSceneSelectable = 0x800D0828; // type:func
+DebugReadPad = 0x800D0858; // type:func
+DebugPresetBase = 0x800D0964; // type:func
+DebugPreset1 = 0x800D0BDC; // type:func
+DebugPreset2 = 0x800D1254; // type:func
+DebugPreset3 = 0x800D1B00; // type:func
+DebugPreset4 = 0x800D235C; // type:func
+DebugPreset5 = 0x800D2BC4; // type:func
+g_DebugWeekdayNames = 0x800D32F8;
+g_DebugPresetNames = 0x800D3314;
+g_DebugRowY = 0x800D3334;
+g_DebugProgress = 0x800D3344;
+g_DebugEventIndex = 0x800D3348;
+g_DebugClock = 0x800D334A;
+g_DebugEventFlags = 0x800D4A5C;
+g_DebugAreaTable = 0x800D4B64;
+g_DebugStepTable = 0x800D4C54;
+g_DebugCursor = 0x800D4C80;
+g_DebugSelectRow = 0x800D4C84;
+g_DebugArea = 0x800D4C88;
+g_DebugScene = 0x800D4C8C;
+g_DebugWeekday = 0x800D4C90;
+g_DebugPresetLevel = 0x800D4C94;
+g_DebugPadHeld = 0x800D4C98;
+g_DebugPadPressed = 0x800D4C9C;
+g_DebugPadLastHeld = 0x800D4CA0;
+g_DebugPadRepeat = 0x800D4CA4;
+// ---- r401 naming batch (ovl; docs/names_merged/r401_plan.csv)
+g_DebugRowTable = 0x800D4C68;

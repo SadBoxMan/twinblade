@@ -1,13 +1,12 @@
 // Package 0x1B (MAIN.CD entry 21, abil/ovl1b.yaml): ability 2, Mint
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Mint_Step2Hold = 0x800CAF38; // type:func
+Mint_RingEmit = 0x800CB478; // type:func
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80017DC4 = 0x80017DC4; // type:func
-func_800183E0 = 0x800183E0; // type:func
 func_8001CD50 = 0x8001CD50; // type:func
-func_800233CC = 0x800233CC; // type:func
 D_80078EA4 = 0x80078EA4;
 D_80078EC1 = 0x80078EC1;
 D_80078EC8 = 0x80078EC8;
-D_800AE620 = 0x800AE620;
 D_800B99DA = 0x800B99DA;
 func_800D20C0 = 0x800D20C0; // type:func
 func_800D23D0 = 0x800D23D0; // type:func

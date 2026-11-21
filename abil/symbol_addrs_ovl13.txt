@@ -1,9 +1,21 @@
 // Package 0x13 (MAIN.CD entry 13, abil/ovl13.yaml): ability 7, Stun
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Stun_QueueImages = 0x800CAE0C; // type:func
+Stun_Update = 0x800CAE54; // type:func
+Stun_Step0Wait = 0x800CAE98; // type:func
+Stun_Step1Start = 0x800CAEE0; // type:func
+Stun_Step2Swing = 0x800CAF68; // type:func
+Stun_RampScale = 0x800CB05C; // type:func
+Stun_SpawnOnActor = 0x800CB0E8; // type:func
+Stun_EffectAUpdate = 0x800CB370; // type:func
+Stun_EffectBUpdate = 0x800CB510; // type:func
+Stun_FollowerEmit = 0x800CB6E4; // type:func
+Stun_SpriteAnimStep = 0x800CB7F0; // type:func
+Stun_SwingAnim = 0x800CB830;
+Stun_StepTable = 0x800CB880;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_800183E0 = 0x800183E0; // type:func
 D_80062BD0 = 0x80062BD0;
 D_80078EC1 = 0x80078EC1;
-D_800AE620 = 0x800AE620;
 func_800D1FC8 = 0x800D1FC8; // type:func
 func_800D20C0 = 0x800D20C0; // type:func
 func_800D21C4 = 0x800D21C4; // type:func

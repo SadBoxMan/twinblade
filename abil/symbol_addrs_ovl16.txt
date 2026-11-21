@@ -1,9 +1,18 @@
 // Package 0x16 (MAIN.CD entry 16, abil/ovl16.yaml): ability 1, Depress
+// ---- r379 naming batch (abil; docs/names_merged/r379_plan.csv)
+Depress_Step1Start = 0x800CAE8C; // type:func
+Depress_Step2WaitTimer = 0x800CAEF4; // type:func
+Depress_CloudUpdate = 0x800CAF28; // type:func
+Depress_DrawCloud = 0x800CAF84; // type:func
+Depress_CloudStart = 0x800CB158; // type:func
+Depress_PuffGrow = 0x800CB228; // type:func
+Depress_PuffDrift = 0x800CB304; // type:func
+Depress_PuffFade = 0x800CB400; // type:func
+Depress_CloudEmit = 0x800CB458; // type:func
+Depress_StepTable = 0x800CB51C;
+Depress_FanVerts = 0x800CB528;
+Depress_CloudStates = 0x800CB53C;
 // Outside symbols (written by tools/gen_ability_ovls.py --split from the first splat pass)
-func_80017758 = 0x80017758; // type:func
-func_80017DC4 = 0x80017DC4; // type:func
-func_80017E68 = 0x80017E68; // type:func
-func_800183E0 = 0x800183E0; // type:func
 D_80078EC1 = 0x80078EC1;
 D_80078EC8 = 0x80078EC8;
 func_800D20C0 = 0x800D20C0; // type:func
